@@ -2,9 +2,8 @@
 
 namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
 {
-    public interface IUserRepository
+    public interface IActionLogRepository
     {
-        Task<User> GetUserByUsername(string username);
-        Task RegisterUser(User newUser);
+        Task CreateActionLog(ActionLog actionLog);
     }
 }

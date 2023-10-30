@@ -1,5 +1,5 @@
 ﻿using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
-using SriLankanParadise.ERP.UserManagement.Models;
+using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Business_Service
@@ -14,6 +14,11 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         public async Task<User> GetUserByUsername(string username)
         {
             return await _userRepository.GetUserByUsername(username);
+        }
+
+        public async Task RegisterUser(User newUser)
+        {
+            await _userRepository.RegisterUser(newUser);
         }
 
         public bool VerifyExpiryDate(DateTime? subscriptionExpiredDate)

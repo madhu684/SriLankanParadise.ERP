@@ -21,7 +21,15 @@ public partial class User
 
     public int CompanyId { get; set; }
 
+    public bool Status { get; set; }
+
+    public virtual ICollection<ActionLog> ActionLogs { get; set; } = new List<ActionLog>();
+
+    public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
+
     public virtual Company Company { get; set; } = null!;
+
+    public virtual ICollection<UserPermission> UserPermissions { get; set; } = new List<UserPermission>();
 
     public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
 }

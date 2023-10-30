@@ -1,9 +1,9 @@
 ﻿namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels
 {
-    public class UserRequestModel
+    public class ModuleRequestModel
     {
-        public string Username { get; set; }
-        public string Password { get; set; }
+        public string ModuleName { get; set; } = null!;
+        public bool Status { get; set; }
         public int PermissionId { get; set; }
     }
 }

@@ -1,12 +1,10 @@
-﻿namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
+﻿namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels
 {
-    public class UserDto
+    public class UserRegistrationModel
     {
-        public int UserId { get; set; }
-
         public string Username { get; set; } = null!;
 
-        public string PasswordHash { get; set; } = null!;
+        public string Password { get; set; } = null!;
 
         public string Email { get; set; } = null!;
 
@@ -17,7 +15,6 @@
         public string? Lastname { get; set; }
 
         public int CompanyId { get; set; }
-
-        public virtual CompanyDto Company { get; set; } = null!;
+        public int PermissionId { get; set; }
     }
 }
