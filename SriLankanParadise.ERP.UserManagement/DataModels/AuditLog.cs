@@ -3,15 +3,19 @@ using System.Collections.Generic;
 
 namespace SriLankanParadise.ERP.UserManagement.DataModels;
 
-public partial class UserRole
+public partial class AuditLog
 {
     public int Id { get; set; }
 
     public int UserId { get; set; }
 
-    public int RoleId { get; set; }
+    public string AccessedPath { get; set; } = null!;
 
-    public virtual Role Role { get; set; } = null!;
+    public string AccessedMethod { get; set; } = null!;
+
+    public DateTime Timestamp { get; set; }
+
+    public string Ipaddress { get; set; } = null!;
 
     public virtual User User { get; set; } = null!;
 }

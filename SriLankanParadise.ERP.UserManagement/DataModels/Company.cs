@@ -15,6 +15,8 @@ public partial class Company
 
     public int? MaxUserCount { get; set; }
 
+    public virtual ICollection<CompanySubscriptionModule> CompanySubscriptionModules { get; set; } = new List<CompanySubscriptionModule>();
+
     public virtual Subscription? SubscriptionPlan { get; set; }
 
     public virtual ICollection<User> Users { get; set; } = new List<User>();

@@ -15,7 +15,17 @@ public partial class ErpSystemContext : DbContext
     {
     }
 
+    public virtual DbSet<ActionLog> ActionLogs { get; set; }
+
+    public virtual DbSet<AuditLog> AuditLogs { get; set; }
+
     public virtual DbSet<Company> Companies { get; set; }
+
+    public virtual DbSet<CompanySubscriptionModule> CompanySubscriptionModules { get; set; }
+
+    public virtual DbSet<CompanySubscriptionModuleUser> CompanySubscriptionModuleUsers { get; set; }
+
+    public virtual DbSet<Module> Modules { get; set; }
 
     public virtual DbSet<Permission> Permissions { get; set; }
 
@@ -25,7 +35,11 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<Subscription> Subscriptions { get; set; }
 
+    public virtual DbSet<SubscriptionModule> SubscriptionModules { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
+
+    public virtual DbSet<UserPermission> UserPermissions { get; set; }
 
     public virtual DbSet<UserRole> UserRoles { get; set; }
 
@@ -35,6 +49,43 @@ public partial class ErpSystemContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<ActionLog>(entity =>
+        {
+            entity.ToTable("ActionLog");
+
+            entity.Property(e => e.Ipaddress)
+                .HasMaxLength(50)
+                .HasColumnName("IPAddress");
+            entity.Property(e => e.Timestamp).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Action).WithMany(p => p.ActionLogs)
+                .HasForeignKey(d => d.ActionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ActionLog_Permission");
+
+            entity.HasOne(d => d.User).WithMany(p => p.ActionLogs)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ActionLog_User");
+        });
+
+        modelBuilder.Entity<AuditLog>(entity =>
+        {
+            entity.ToTable("AuditLog");
+
+            entity.Property(e => e.AccessedMethod).HasMaxLength(50);
+            entity.Property(e => e.AccessedPath).HasMaxLength(200);
+            entity.Property(e => e.Ipaddress)
+                .HasMaxLength(50)
+                .HasColumnName("IPAddress");
+            entity.Property(e => e.Timestamp).HasColumnType("datetime");
+
+            entity.HasOne(d => d.User).WithMany(p => p.AuditLogs)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_AuditLog_AuditLog");
+        });
+
         modelBuilder.Entity<Company>(entity =>
         {
             entity.ToTable("Company");
@@ -47,11 +98,47 @@ public partial class ErpSystemContext : DbContext
                 .HasConstraintName("FK_Company_Subscription");
         });
 
+        modelBuilder.Entity<CompanySubscriptionModule>(entity =>
+        {
+            entity.ToTable("CompanySubscriptionModule");
+
+            entity.Property(e => e.Price).HasColumnType("decimal(18, 2)");
+
+            entity.HasOne(d => d.Company).WithMany(p => p.CompanySubscriptionModules)
+                .HasForeignKey(d => d.CompanyId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_CompanySubscriptionModule_Company");
+
+            entity.HasOne(d => d.SubscriptionModule).WithMany(p => p.CompanySubscriptionModules)
+                .HasForeignKey(d => d.SubscriptionModuleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_CompanySubscriptionModule_SubscriptionModule");
+        });
+
+        modelBuilder.Entity<CompanySubscriptionModuleUser>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToTable("CompanySubscriptionModuleUser");
+        });
+
+        modelBuilder.Entity<Module>(entity =>
+        {
+            entity.ToTable("Module");
+
+            entity.Property(e => e.ModuleName).HasMaxLength(50);
+        });
+
         modelBuilder.Entity<Permission>(entity =>
         {
             entity.ToTable("Permission");
 
             entity.Property(e => e.PermissionName).HasMaxLength(100);
+
+            entity.HasOne(d => d.Module).WithMany(p => p.Permissions)
+                .HasForeignKey(d => d.ModuleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Permission_Module");
         });
 
         modelBuilder.Entity<Role>(entity =>
@@ -61,6 +148,11 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.RoleName)
                 .HasMaxLength(10)
                 .IsFixedLength();
+
+            entity.HasOne(d => d.Module).WithMany(p => p.Roles)
+                .HasForeignKey(d => d.ModuleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Role_Module");
         });
 
         modelBuilder.Entity<RolePermission>(entity =>
@@ -87,6 +179,23 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.Price).HasColumnType("decimal(18, 2)");
         });
 
+        modelBuilder.Entity<SubscriptionModule>(entity =>
+        {
+            entity.ToTable("SubscriptionModule");
+
+            entity.Property(e => e.ModulePricePerPlan).HasColumnType("decimal(18, 2)");
+
+            entity.HasOne(d => d.Module).WithMany(p => p.SubscriptionModules)
+                .HasForeignKey(d => d.ModuleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_SubscriptionModule_Module");
+
+            entity.HasOne(d => d.Subscription).WithMany(p => p.SubscriptionModules)
+                .HasForeignKey(d => d.SubscriptionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_SubscriptionModule_Subscription");
+        });
+
         modelBuilder.Entity<User>(entity =>
         {
             entity.ToTable("User");
@@ -104,10 +213,23 @@ public partial class ErpSystemContext : DbContext
                 .HasConstraintName("FK_User_Company");
         });
 
+        modelBuilder.Entity<UserPermission>(entity =>
+        {
+            entity.ToTable("UserPermission");
+
+            entity.HasOne(d => d.Permission).WithMany(p => p.UserPermissions)
+                .HasForeignKey(d => d.PermissionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_UserPermission_Permission");
+
+            entity.HasOne(d => d.User).WithMany(p => p.UserPermissions)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_UserPermission_User");
+        });
+
         modelBuilder.Entity<UserRole>(entity =>
         {
-            entity.HasKey(e => e.UserRoleId).HasName("PK_UserRole_1");
-
             entity.ToTable("UserRole");
 
             entity.HasOne(d => d.Role).WithMany(p => p.UserRoles)

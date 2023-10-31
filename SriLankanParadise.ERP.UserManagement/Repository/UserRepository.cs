@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SriLankanParadise.ERP.UserManagement.Models;
+using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
@@ -17,16 +17,32 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             try
             {
-                return Task.FromResult(_dbContext.Users
+                var user = Task.FromResult(_dbContext.Users
                 .Where(u => u.Username == username)
-                .Include(u => u.Company) // Ensure Company is included in the query
+                .Where(u => u.Status == true)
+                .Include(u => u.Company)
                 .FirstOrDefault());
+                return user;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
 
+        }
+
+        public async Task RegisterUser(User newUser)
+        {
+            try
+            {
+                _dbContext.Users.Add(newUser);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
     }
 }

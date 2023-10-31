@@ -1,0 +1,13 @@
+﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+
+namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
+{
+    public interface ICompanySubscriptionModuleRepository
+    {
+        Task<CompanySubscriptionModule> GetCompanySubscriptionModuleByCompanySubscriptionModuleId(int companySubscriptionModuleId);
+        Task<IEnumerable<CompanySubscriptionModule>> GetAll();
+        Task AddCompanySubscriptionModule(CompanySubscriptionModule companySubscriptionModule);
+        Task DeleteCompanySubscriptionModule(int companySubscriptionModuleId);
+        Task UpdateCompanySubscriptionModule(int companySubscriptionModuleId, CompanySubscriptionModule companySubscriptionModule);
+    }
+}

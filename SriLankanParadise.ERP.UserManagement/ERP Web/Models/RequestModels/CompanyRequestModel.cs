@@ -1,13 +1,12 @@
-﻿namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
+﻿namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels
 {
-    public class CompanyDto
+    public class CompanyRequestModel
     {
         public string? CompanyName { get; set; }
 
         public int? SubscriptionPlanId { get; set; }
 
         public DateTime? SubscriptionExpiredDate { get; set; }
-
-        public virtual SubscriptionDto? SubscriptionPlan { get; set; }
+        public int PermissionId { get; set; }
     }
 }
