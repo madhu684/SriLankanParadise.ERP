@@ -11,7 +11,7 @@ using System.Net;
 namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 {
     [ApiController]
-    [Route("api/companyCompanyModule")]
+    [Route("api/companySubscriptionModule")]
     public class CompanySubscriptionModuleController : BaseApiController
     {
         private readonly ICompanySubscriptionModuleService _companySubscriptionModuleService;
