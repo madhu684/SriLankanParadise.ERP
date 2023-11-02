@@ -6,4 +6,4 @@ To scaffold the database, follow these steps:
 2. Run the following `Scaffold-DbContext` command, replacing the connection string with your own:
 
    ```bash
-   Scaffold-DbContext "Server=(local);Database=erp-system;User Id=sa;Password=local__pass@#;TrustServerCertificate=True;" Microsoft.EntityFrameworkCore.SqlServer -OutputDir DataModels -Force
+   Scaffold-DbContext "Name=ConnectionStrings:LocalSqlServerConnection" Microsoft.EntityFrameworkCore.SqlServer -OutputDir DataModels -Force
