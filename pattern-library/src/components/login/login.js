@@ -13,6 +13,8 @@ class login extends React.Component {
       error: null,
       showErrorToast: false,
       showSuccessToast: false,
+      errorMessageToast: "",
+      successMessageToast: ""
     };
   }
 
@@ -35,15 +37,20 @@ class login extends React.Component {
       };
 
       const response = await login_api(formData);
-
-      // Handle the successful login response here, e.g.,
-      // Redirect to dashboard or update user state in your application
-      this.setState({
-        showSuccessToast : true
-      });
+      if(response.data.result == null){
+        
+      console.log(response.message)
+        this.setState({
+          showErrorToast : true,
+          errorMessageToast : response.message
+        });
+      }else{
+        this.setState({
+          showSuccessToast : true,
+          successMessageToast : response.message
+        });
+      }
       console.log("Login successful:", response);
-
-      // You can add logic here to redirect to another page after successful login
     } catch (error) {
       // Handle login error
       this.setState({
