@@ -18,6 +18,17 @@ builder.Services.AddControllers();
 // Register HttpContextAccessor
 builder.Services.AddHttpContextAccessor();
 
+// CORS configuration
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin", builder =>
+    {
+        builder.WithOrigins("http://localhost:3000") // Allow requests from this origin
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -79,6 +90,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseMiddleware<AuditMiddleware>();
+
+
+// CORS middleware
+app.UseCors("AllowSpecificOrigin");
 
 app.MapControllers();
 
