@@ -47,9 +47,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Middlewares
 
                     dbContext.AuditLogs.Add(logEntry);
                     await dbContext.SaveChangesAsync();
-
-                    await _next(context);
                 }
+                await _next(context);
             }
             catch (Exception ex)
             {
