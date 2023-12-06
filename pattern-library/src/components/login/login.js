@@ -1,9 +1,8 @@
-import React, { useState }    from "react";
+import React, { useState } from "react";
 import template from "./login.jsx";
 import { login_api } from "../../services/userManagementApi.js";
 
 class login extends React.Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -14,7 +13,7 @@ class login extends React.Component {
       showErrorToast: false,
       showSuccessToast: false,
       errorMessageToast: "",
-      successMessageToast: ""
+      successMessageToast: "",
     };
   }
 
@@ -33,21 +32,20 @@ class login extends React.Component {
       const formData = {
         username: username,
         password: password,
-        permissionId: permissionId
+        permissionId: permissionId,
       };
 
       const response = await login_api(formData);
-      if(response.data.result == null){
-        
-      console.log(response.message)
+      if (response.data.result == null) {
+        console.log(response.message);
         this.setState({
-          showErrorToast : true,
-          errorMessageToast : response.message
+          showErrorToast: true,
+          errorMessageToast: response.message,
         });
-      }else{
+      } else {
         this.setState({
-          showSuccessToast : true,
-          successMessageToast : response.message
+          showSuccessToast: true,
+          successMessageToast: response.message,
         });
       }
       console.log("Login successful:", response);
@@ -55,11 +53,11 @@ class login extends React.Component {
       // Handle login error
       this.setState({
         error: "Invalid username or password. Please try again.",
-        showErrorToast : true
+        showErrorToast: true,
       });
     }
   };
-  
+
   render() {
     return template.call(this);
   }
