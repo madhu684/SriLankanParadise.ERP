@@ -69,6 +69,18 @@ builder.Services.AddScoped<IModuleService, ModuleService>();
 builder.Services.AddScoped<IModuleRepository, ModuleRepository>();
 builder.Services.AddScoped<ICompanySubscriptionModuleService, CompanySubscriptionModuleService>();
 builder.Services.AddScoped<ICompanySubscriptionModuleRepository, CompanySubscriptionModuleRepository>();
+builder.Services.AddScoped<IRoleService, RoleService>();
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IPermissionService, PermissionService>();
+builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
+builder.Services.AddScoped<IUserRoleService, UserRoleService>();
+builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+builder.Services.AddScoped<IUserPermissionService, UserPermissionService>();
+builder.Services.AddScoped<IUserPermissionRepository, UserPermissionRepository>();
+builder.Services.AddScoped<IRolePermissionService, RolePermissionService>();
+builder.Services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
+builder.Services.AddScoped<ICompanySubscriptionModuleUserService, CompanySubscriptionModuleUserService>();
+builder.Services.AddScoped<ICompanySubscriptionModuleUserRepository, CompanySubscriptionModuleUserRepository>();
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

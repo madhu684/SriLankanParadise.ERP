@@ -7,6 +7,7 @@ using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Shared.Resources;
 using System.Net;
+using System.Reflection;
 
 namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 {
@@ -207,5 +208,30 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         //    string base64String = Convert.ToBase64String(bytes);
         //    return "Basic " + base64String;
         //}
+
+        [HttpGet("modules/company/{companyId}")]
+        public async Task<ApiResponseModel> GetCompanySubscriptionModulesByCompanyId(int companyId)
+        {
+            try
+            {
+                var modules = await _companySubscriptionModuleService.GetCompanySubscriptionModulesByCompanyId(companyId);
+                if (modules != null)
+                {
+                    var ModuleWithIdDto = _mapper.Map<IEnumerable<ModuleWithIdDto>>(modules);
+                    AddResponseMessage(Response, LogMessages.ModulesRetrieved, ModuleWithIdDto, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.ModulesNotFound);
+                    AddResponseMessage(Response, LogMessages.ModulesNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

@@ -139,10 +139,13 @@
     <value>Company subscription module retrieved</value>
   </data>
   <data name="CompanySubscriptionModulesRetrieved" xml:space="preserve">
-    <value>Company subscription module retrieved</value>
+    <value>Company subscription modules retrieved</value>
   </data>
   <data name="CompanySubscriptionModuleUpdated" xml:space="preserve">
     <value>Company subscription module updated successfully</value>
+  </data>
+  <data name="CompanySubscriptionModuleUserCreated" xml:space="preserve">
+    <value>Company subscription module user created successfully</value>
   </data>
   <data name="CompanyUpdated" xml:space="preserve">
     <value>Company updated successfully</value>
@@ -159,11 +162,29 @@
   <data name="ModuleRetrieved" xml:space="preserve">
     <value>Module retrieved</value>
   </data>
+  <data name="ModulesNotFound" xml:space="preserve">
+    <value>Modules not found</value>
+  </data>
   <data name="ModulesRetrieved" xml:space="preserve">
     <value>Modules retrieved</value>
   </data>
   <data name="ModuleUpdated" xml:space="preserve">
     <value>Module updated successfully</value>
+  </data>
+  <data name="PermissionsNotFound" xml:space="preserve">
+    <value>Permissions Not Found</value>
+  </data>
+  <data name="PermissionsRetrieved" xml:space="preserve">
+    <value>Permissions Retrieved</value>
+  </data>
+  <data name="RolePermissionCreated" xml:space="preserve">
+    <value>Role Permission created successfully</value>
+  </data>
+  <data name="RolesNotFound" xml:space="preserve">
+    <value>Roles Not Found</value>
+  </data>
+  <data name="RolesRetrieved" xml:space="preserve">
+    <value>Roles Retrieved</value>
   </data>
   <data name="SubscriptionCreated" xml:space="preserve">
     <value>Subscription created successfully</value>
@@ -188,6 +209,12 @@
   </data>
   <data name="UserAuthenticated" xml:space="preserve">
     <value>User authenticated successfully</value>
+  </data>
+  <data name="UseRoleCreated" xml:space="preserve">
+    <value>User Role created successfully</value>
+  </data>
+  <data name="UserPermissionCreated" xml:space="preserve">
+    <value>User Permission created successfully</value>
   </data>
   <data name="UserRegistered" xml:space="preserve">
     <value>User registered successfully</value>
