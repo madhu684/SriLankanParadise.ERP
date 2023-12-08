@@ -164,5 +164,30 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         //        return ApiResponse.Error(ex.Message, HttpStatusCode.InternalServerError);
         //    }
         //}
+
+        [HttpGet("GetModulesByUserId")]
+        public async Task<ApiResponseModel> GetModuleByUserId(int userId)
+        {
+            try
+            {
+                var modules = await _moduleService.GetModulesByUserId(userId);
+                if (modules != null)
+                {
+                    var moduleWithDto = _mapper.Map<IEnumerable<ModuleWithIdDto>>(modules);
+                    AddResponseMessage(Response, LogMessages.ModulesRetrieved, moduleWithDto, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.ModulesNotFound);
+                    AddResponseMessage(Response, LogMessages.ModulesNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

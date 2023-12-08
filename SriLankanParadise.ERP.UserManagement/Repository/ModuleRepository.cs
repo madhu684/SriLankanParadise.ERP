@@ -94,6 +94,31 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
+        public async Task<IEnumerable<Module>> GetModulesByUserId(int userId)
+        {
+            try
+            {
+                var modules = await _dbContext.CompanySubscriptionModuleUsers
+                    .Where(csmu => csmu.UserId == userId)
+                    .Join(
+                        _dbContext.Modules,
+                        csmu => csmu.CompanySubscriptionModuleId,
+                        module => module.ModuleId,
+                        (csmu, module) => module
+                    )
+                    .ToListAsync();
+                if (modules.Any())
+                {
+                    return modules;
+                }
+                return null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
 
 
     }

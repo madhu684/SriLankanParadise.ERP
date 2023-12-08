@@ -37,6 +37,8 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<RolePermission> RolePermissions { get; set; }
 
+    public virtual DbSet<SubModule> SubModules { get; set; }
+
     public virtual DbSet<Subscription> Subscriptions { get; set; }
 
     public virtual DbSet<SubscriptionModule> SubscriptionModules { get; set; }
@@ -189,6 +191,17 @@ public partial class ErpSystemContext : DbContext
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_RolePermission_Role");
+        });
+
+        modelBuilder.Entity<SubModule>(entity =>
+        {
+            entity.ToTable("SubModule");
+
+            entity.Property(e => e.SubModuleName).HasMaxLength(50);
+
+            entity.HasOne(d => d.Module).WithMany(p => p.SubModules)
+                .HasForeignKey(d => d.ModuleId)
+                .HasConstraintName("FK_SubModule_Module");
         });
 
         modelBuilder.Entity<Subscription>(entity =>

@@ -120,8 +120,10 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 {
                     // Create a new user and save it to the database
                     var newUser = _mapper.Map<User>(userRegistrationModel);
+
                     // Hash the password using BCrypt
                     newUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(userRegistrationModel.Password);
+                    newUser.Status = true;
                     await _userService.RegisterUser(newUser);
 
                     // Create action log

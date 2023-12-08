@@ -186,6 +186,15 @@
   <data name="RolesRetrieved" xml:space="preserve">
     <value>Roles Retrieved</value>
   </data>
+  <data name="SubModuleCreated" xml:space="preserve">
+    <value>Sub Module created successfully</value>
+  </data>
+  <data name="SubModulesNotFound" xml:space="preserve">
+    <value>Sub Modules not found</value>
+  </data>
+  <data name="SubModulesRetrieved" xml:space="preserve">
+    <value>Sub Modules retrieved</value>
+  </data>
   <data name="SubscriptionCreated" xml:space="preserve">
     <value>Subscription created successfully</value>
   </data>

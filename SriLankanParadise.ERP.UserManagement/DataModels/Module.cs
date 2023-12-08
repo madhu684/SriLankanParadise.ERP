@@ -15,5 +15,7 @@ public partial class Module
 
     public virtual ICollection<Role> Roles { get; set; } = new List<Role>();
 
+    public virtual ICollection<SubModule> SubModules { get; set; } = new List<SubModule>();
+
     public virtual ICollection<SubscriptionModule> SubscriptionModules { get; set; } = new List<SubscriptionModule>();
 }
