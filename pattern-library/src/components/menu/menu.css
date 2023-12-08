@@ -1,0 +1,12 @@
+.width {
+  width: 280px;
+}
+
+.dropup-position {
+  top: auto !important; /* Use !important to override inline styles */
+  bottom: 100% !important;
+}
+/* 
+.nav-link:hover {
+  color: #5f5f61 !important; 
+} */

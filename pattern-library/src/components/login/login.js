@@ -14,6 +14,7 @@ class login extends React.Component {
       showSuccessToast: false,
       errorMessageToast: "",
       successMessageToast: "",
+      redirectToMenu: false, // Flag to trigger the redirection
     };
   }
 
@@ -48,6 +49,14 @@ class login extends React.Component {
           successMessageToast: response.message,
         });
       }
+
+      // Store userId and username in sessionStorage
+      sessionStorage.setItem("userId", response.data.result.userId.toString());
+      sessionStorage.setItem("username", response.data.result.username);
+
+      // Set redirectToMenu to true upon successful login
+      this.setState({ redirectToMenu: true });
+
       console.log("Login successful:", response);
     } catch (error) {
       // Handle login error

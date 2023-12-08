@@ -16,6 +16,16 @@ export const login_api = async (formData) => {
   }
 };
 
+export const logout_api = async () => {
+  try {
+    const response = await api.post("/user/logout");
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const company_modules_api = async (companyId) => {
   try {
     const response = await api.get(
@@ -109,6 +119,28 @@ export const company_subscription_module_user_api = async (
       "/companySubscriptionModuleUser",
       userModulesFromData
     );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const user_modules_api = async (userId) => {
+  try {
+    const response = await api.get("/module/GetModulesByUserId", {
+      params: { userId: userId },
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const submodules_api = async (moduleId) => {
+  try {
+    const response = await api.get(`/submodule/${moduleId}`);
     return response.data;
   } catch (error) {
     console.log(error);
