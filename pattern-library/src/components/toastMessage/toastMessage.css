@@ -1,12 +1,11 @@
 .fade {
-    transition: opacity 0.5s ease-out; /* Adjust the animation duration here */
+  transition: opacity 0.5s ease-out; /* Adjust the animation duration here */
 }
-  
+
 /* toastMessage.css */
 .toast {
-    position: fixed;
-    top: 0;
-    right: 0;
-    margin: 20px; /* Adjust the margin as needed */
-  }
-  
+  position: fixed;
+  top: 0;
+  right: 0;
+  margin: 20px; /* Adjust the margin as needed */
+}
