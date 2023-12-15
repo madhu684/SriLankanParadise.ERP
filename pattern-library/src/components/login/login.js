@@ -50,9 +50,17 @@ class login extends React.Component {
         });
       }
 
-      // Store userId and username in sessionStorage
+      // Store user information in sessionStorage
       sessionStorage.setItem("userId", response.data.result.userId.toString());
       sessionStorage.setItem("username", response.data.result.username);
+      sessionStorage.setItem(
+        "companyId",
+        response.data.result.companyId.toString()
+      );
+      sessionStorage.setItem(
+        "companyName",
+        response.data.result.company.companyName
+      );
 
       // Set redirectToMenu to true upon successful login
       this.setState({ redirectToMenu: true });

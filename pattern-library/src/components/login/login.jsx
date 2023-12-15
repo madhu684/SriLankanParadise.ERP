@@ -102,10 +102,6 @@ function template() {
                 >
                   Login
                 </button>
-                {/* Sign Up link */}
-                <div className="mt-3">
-                  Don't have an account? <a href="/signup">Sign Up</a>
-                </div>
               </form>
             </div>
           </div>

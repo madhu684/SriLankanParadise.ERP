@@ -3,12 +3,14 @@ import template from "./menu.jsx";
 import { logout_api } from "../../services/userManagementApi.js";
 import { user_modules_api } from "../../services/userManagementApi.js";
 import { submodules_api } from "../../services/userManagementApi.js";
+import Registration from "../registration/registration.js";
 
 class menu extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      activeModule: null,
+      activeModules: [],
+      selectedSubmodule: null,
       modules: [
         // {
         //   id: 1,
@@ -21,13 +23,17 @@ class menu extends React.Component {
         // {
         //   id: 2,
         //   name: "Sales management",
-        //   submodules: [{ id: 1, name: "submodule 1" }],
+        //   submodules: [{ id: 1, name: "submodule 3" }],
         // },
       ],
       isDropdownOpen: false,
-      userId: sessionStorage.getItem("id"),
+      userId: sessionStorage.getItem("userId"),
       username: sessionStorage.getItem("username"),
+      companyId: sessionStorage.getItem("companyId"),
+      companyName: sessionStorage.getItem("companyName"),
       isLogout: false, // Flag to trigger the redirection
+      showRegistration: false,
+      isSidebarOpen: true,
     };
   }
 
@@ -83,6 +89,21 @@ class menu extends React.Component {
     }
   };
 
+  renderDetail = (option) => {
+    switch (option) {
+      case "User Registration":
+        return <Registration />;
+      default:
+        return null;
+    }
+  };
+
+  toggleSidebar = () => {
+    this.setState((prevState) => ({
+      isSidebarOpen: !prevState.isSidebarOpen,
+    }));
+  };
+
   handleLogout = async () => {
     try {
       const response = await logout_api();
@@ -98,17 +119,34 @@ class menu extends React.Component {
   };
 
   handleModuleClick = (moduleId) => {
-    this.setState((prevState) => ({
-      activeModule: prevState.activeModule === moduleId ? null : moduleId,
-    }));
+    this.setState((prevState) => {
+      const isModuleActive = prevState.activeModules.includes(moduleId);
+
+      return {
+        activeModules: isModuleActive
+          ? prevState.activeModules.filter((id) => id !== moduleId)
+          : [...prevState.activeModules, moduleId],
+      };
+    });
   };
-  //   handleModuleClick = (moduleId) => {
-  //     this.setState({ activeModule: moduleId });
-  //   };
+
+  handleSubmoduleClick = (moduleId, submodule) => {
+    this.setState((prevState) => {
+      const isModuleActive = prevState.activeModules.includes(moduleId);
+
+      return {
+        activeModules: isModuleActive
+          ? prevState.activeModules
+          : [...prevState.activeModules, moduleId],
+        selectedSubmodule: submodule,
+      };
+    });
+  };
 
   handleDropdownToggle = () => {
     this.setState((prevState) => ({ dropdownOpen: !prevState.dropdownOpen }));
   };
+
   toggleDropdown = () => {
     this.setState((prevState) => ({
       isDropdownOpen: !prevState.isDropdownOpen,

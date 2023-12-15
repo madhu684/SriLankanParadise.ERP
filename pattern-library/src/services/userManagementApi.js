@@ -147,3 +147,126 @@ export const submodules_api = async (moduleId) => {
     throw error;
   }
 };
+
+//company apis
+export const get_companies_api = async () => {
+  try {
+    const response = await api.get("/company");
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_company_api = async (companyId) => {
+  try {
+    const response = await api.get(`/company/${companyId}`);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const post_company_api = async (companyData) => {
+  try {
+    const response = await api.post("/company", companyData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const put_company_api = async (companyId, companyData) => {
+  try {
+    const response = await api.put(`/company/${companyId}`, companyData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+//subscription apis
+export const get_subscriptions_api = async () => {
+  try {
+    const response = await api.get("/subscription");
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_subscription_api = async (subscriptionId) => {
+  try {
+    const response = await api.get(`/subscription/${subscriptionId}`);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const post_subscription_api = async (subscriptionData) => {
+  try {
+    const response = await api.post("/subscription", subscriptionData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const put_subscription_api = async (
+  subscriptionId,
+  subscriptionData
+) => {
+  try {
+    const response = await api.put(
+      `/subscription/${subscriptionId}`,
+      subscriptionData
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+//modules apis
+export const get_modules_api = async () => {
+  try {
+    const response = await api.get("/module");
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_module_api = async (moduleId) => {
+  try {
+    const response = await api.get(`/module/${moduleId}`);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const post_module_api = async (moduleData) => {
+  try {
+    const response = await api.post("/module", moduleData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const put_module_api = async (moduleId, moduleData) => {
+  try {
+    const response = await api.put(`/module/${moduleId}`, moduleData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

@@ -1,3 +1,7 @@
 .btn-width {
   width: 100px; /* width for the primary buttons */
 }
+
+.card-height {
+  max-height: 75vh !important;
+}

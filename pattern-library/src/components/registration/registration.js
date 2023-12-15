@@ -22,7 +22,7 @@ class registration extends React.Component {
           contactNo: "",
           firstname: "",
           lastname: "",
-          companyId: 0,
+          companyId: sessionStorage.getItem("companyId"),
         },
         "user-module": {
           assignedModules: [], // Array to store assigned modules
@@ -557,6 +557,7 @@ class registration extends React.Component {
 
     return true;
   };
+
   render() {
     return template.call(this);
   }

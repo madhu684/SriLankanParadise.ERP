@@ -3,10 +3,29 @@
 }
 
 .dropup-position {
-  top: auto !important; /* Use !important to override inline styles */
+  top: auto !important;
   bottom: 100% !important;
 }
-/* 
-.nav-link:hover {
-  color: #5f5f61 !important; 
-} */
+
+.smaller-text {
+  font-size: 0.875rem !important;
+}
+
+.nav-link-active-small {
+  background-color: #e9e9e9 !important;
+}
+
+.container-fluid.toggled .sidebar {
+  display: none;
+}
+
+.container-fluid.toggled .main-content {
+  margin-left: 300px;
+}
+
+.toggle-btn {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+}

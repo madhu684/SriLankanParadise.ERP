@@ -4,20 +4,18 @@ import AssignItems from "../assignItems/assignItems.js";
 
 function template() {
   return (
-    <div className="container mt-3">
+    <div className="container mt-4">
       <div className="row justify-content-center">
-        <div className="col-md-8">
+        <div className="col-md-11">
           <h4 className="mb-3 fw-semibold">User Registration</h4>
           <div className="card border-secondary">
             <div className="card-header">
               <ul className="nav nav-tabs card-header-tabs">
                 <li className="nav-item">
                   <a
-                    href="#"
-                    className={`nav-link ${
+                    className={`nav-link disabled ${
                       this.state.activeTab === "basic" ? "active" : ""
                     }`}
-                    onClick={() => this.setState({ activeTab: "basic" })}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -34,11 +32,9 @@ function template() {
                 </li>
                 <li className="nav-item">
                   <a
-                    href="#"
-                    className={`nav-link ${
+                    className={`nav-link disabled ${
                       this.state.activeTab === "user-module" ? "active" : ""
                     }`}
-                    onClick={() => this.setState({ activeTab: "user-module" })}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -55,11 +51,9 @@ function template() {
                 </li>
                 <li className="nav-item">
                   <a
-                    href="#"
-                    className={`nav-link ${
+                    className={`nav-link disabled ${
                       this.state.activeTab === "user-role" ? "active" : ""
                     }`}
-                    onClick={() => this.setState({ activeTab: "user-role" })}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -77,13 +71,9 @@ function template() {
                 </li>
                 <li className="nav-item">
                   <a
-                    href="#"
-                    className={`nav-link ${
+                    className={`nav-link disabled ${
                       this.state.activeTab === "role-permission" ? "active" : ""
                     }`}
-                    onClick={() =>
-                      this.setState({ activeTab: "role-permission" })
-                    }
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -101,7 +91,7 @@ function template() {
                 </li>
               </ul>
             </div>
-            <div className="card-body">
+            <div className="card-body card-height overflow-y-auto">
               <form>
                 <div className="tab-content">
                   {/* Basic Tab */}
@@ -131,6 +121,7 @@ function template() {
                               e.target.value
                             )
                           }
+                          required
                         />
                       </div>
                       <div className="form-group col-md-6">
@@ -167,6 +158,7 @@ function template() {
                               e.target.value
                             )
                           }
+                          required
                         />
                       </div>
                       <div className="form-group col-md-6">
@@ -185,6 +177,7 @@ function template() {
                               e.target.value
                             )
                           }
+                          required
                         />
                       </div>
                       <div className="form-group col-md-12">
@@ -203,6 +196,7 @@ function template() {
                               e.target.value
                             )
                           }
+                          required
                         />
                       </div>
                       <div className="form-group col-md-6">
@@ -210,7 +204,7 @@ function template() {
                           Password
                         </label>
                         <input
-                          type="text"
+                          type="password"
                           className="form-control"
                           id="password"
                           value={this.state.formData.basic.password}
@@ -221,6 +215,7 @@ function template() {
                               e.target.value
                             )
                           }
+                          required
                         />
                       </div>
                       <div className="form-group col-md-6">
@@ -228,7 +223,7 @@ function template() {
                           Confirm Password
                         </label>
                         <input
-                          type="text"
+                          type="password"
                           className="form-control"
                           id="confirmPassword"
                           value={this.state.formData.basic.confirmPassword}
@@ -239,24 +234,7 @@ function template() {
                               e.target.value
                             )
                           }
-                        />
-                      </div>
-                      <div className="form-group col-md-12">
-                        <label htmlFor="companyId" className="form-label">
-                          Company Id
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          id="companyId"
-                          value={this.state.formData.basic.companyId}
-                          onChange={(e) =>
-                            this.handleInputChange(
-                              "basic",
-                              "companyId",
-                              e.target.value
-                            )
-                          }
+                          required
                         />
                       </div>
                     </div>
