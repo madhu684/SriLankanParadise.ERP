@@ -1,7 +1,9 @@
-.width {
-  width: 280px;
+.menu {
+  width: 250px;
+  position: fixed;
+  margin-left: 0;
+  z-index: 1040 !important;
 }
-
 .dropup-position {
   top: auto !important;
   bottom: 100% !important;

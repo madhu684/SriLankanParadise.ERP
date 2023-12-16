@@ -14,7 +14,7 @@ class login extends React.Component {
       showSuccessToast: false,
       errorMessageToast: "",
       successMessageToast: "",
-      redirectToMenu: false, // Flag to trigger the redirection
+      redirectToMain: false, // Flag to trigger the redirection
     };
   }
 
@@ -62,8 +62,8 @@ class login extends React.Component {
         response.data.result.company.companyName
       );
 
-      // Set redirectToMenu to true upon successful login
-      this.setState({ redirectToMenu: true });
+      // Set redirectToMain to true upon successful login
+      this.setState({ redirectToMain: true });
 
       console.log("Login successful:", response);
     } catch (error) {

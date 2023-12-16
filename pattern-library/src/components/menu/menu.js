@@ -3,7 +3,6 @@ import template from "./menu.jsx";
 import { logout_api } from "../../services/userManagementApi.js";
 import { user_modules_api } from "../../services/userManagementApi.js";
 import { submodules_api } from "../../services/userManagementApi.js";
-import Registration from "../registration/registration.js";
 
 class menu extends React.Component {
   constructor(props) {
@@ -32,7 +31,6 @@ class menu extends React.Component {
       companyId: sessionStorage.getItem("companyId"),
       companyName: sessionStorage.getItem("companyName"),
       isLogout: false, // Flag to trigger the redirection
-      showRegistration: false,
       isSidebarOpen: true,
     };
   }
@@ -89,21 +87,6 @@ class menu extends React.Component {
     }
   };
 
-  renderDetail = (option) => {
-    switch (option) {
-      case "User Registration":
-        return <Registration />;
-      default:
-        return null;
-    }
-  };
-
-  toggleSidebar = () => {
-    this.setState((prevState) => ({
-      isSidebarOpen: !prevState.isSidebarOpen,
-    }));
-  };
-
   handleLogout = async () => {
     try {
       const response = await logout_api();
@@ -133,7 +116,9 @@ class menu extends React.Component {
   handleSubmoduleClick = (moduleId, submodule) => {
     this.setState((prevState) => {
       const isModuleActive = prevState.activeModules.includes(moduleId);
-
+      if (this.props.onSubmoduleClick) {
+        this.props.onSubmoduleClick(submodule);
+      }
       return {
         activeModules: isModuleActive
           ? prevState.activeModules

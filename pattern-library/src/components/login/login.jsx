@@ -22,7 +22,7 @@ function template() {
         message={this.state.successMessageToast}
       />
       {/* Redirect to the /menu route */}
-      {this.state.redirectToMenu && <Navigate to="/menu" replace={true} />}
+      {this.state.redirectToMain && <Navigate to="/main" replace={true} />}
       <div className="container container-main">
         <div className="row">
           <div className="col-lg-8">
