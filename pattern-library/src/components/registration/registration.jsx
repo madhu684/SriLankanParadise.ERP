@@ -3,6 +3,7 @@ import React from "react";
 import AssignItems from "../assignItems/assignItems.js";
 
 function template() {
+  const { showSuccessAlert, showFailureAlert } = this.state;
   return (
     <div className="container mt-4">
       <div className="row justify-content-center">
@@ -105,13 +106,21 @@ function template() {
                       Please enter the user information
                     </h5>
                     <div className="row g-3">
-                      <div className="form-group col-md-6">
+                      <div className="form-group col-md-4">
                         <label htmlFor="firstname" className="form-label">
                           First Name
                         </label>
                         <input
                           type="text"
-                          className="form-control"
+                          className={`form-control ${
+                            this.state.validFields.basic?.firstname
+                              ? "is-valid"
+                              : ""
+                          } ${
+                            this.state.validationErrors.basic?.firstname
+                              ? "is-invalid"
+                              : ""
+                          }`}
                           id="firstname"
                           value={this.state.formData.basic.firstname}
                           onChange={(e) =>
@@ -123,8 +132,13 @@ function template() {
                           }
                           required
                         />
+                        {this.state.validationErrors.basic?.firstname && (
+                          <div className="invalid-feedback">
+                            {this.state.validationErrors.basic.firstname}
+                          </div>
+                        )}
                       </div>
-                      <div className="form-group col-md-6">
+                      <div className="form-group col-md-4">
                         <label htmlFor="lastname" className="form-label">
                           Last Name
                         </label>
@@ -142,13 +156,61 @@ function template() {
                           }
                         />
                       </div>
+                      <div className="form-group col-md-4">
+                        <label htmlFor="username" className="form-label">
+                          User Name
+                        </label>
+                        <div className="input-group has-validation">
+                          <span
+                            className="input-group-text"
+                            id="inputGroupPrepend"
+                          >
+                            @
+                          </span>
+                          <input
+                            type="text"
+                            className={`form-control ${
+                              this.state.validFields.basic?.username
+                                ? "is-valid"
+                                : ""
+                            } ${
+                              this.state.validationErrors.basic?.username
+                                ? "is-invalid"
+                                : ""
+                            }`}
+                            id="username"
+                            value={this.state.formData.basic.username}
+                            onChange={(e) =>
+                              this.handleInputChange(
+                                "basic",
+                                "username",
+                                e.target.value
+                              )
+                            }
+                            required
+                          />
+                          {this.state.validationErrors.basic?.username && (
+                            <div className="invalid-feedback">
+                              {this.state.validationErrors.basic.username}
+                            </div>
+                          )}
+                        </div>
+                      </div>
                       <div className="form-group col-md-6">
                         <label htmlFor="email" className="form-label">
                           Email
                         </label>
                         <input
                           type="email"
-                          className="form-control"
+                          className={`form-control ${
+                            this.state.validFields.basic?.email
+                              ? "is-valid"
+                              : ""
+                          } ${
+                            this.state.validationErrors.basic?.email
+                              ? "is-invalid"
+                              : ""
+                          }`}
                           id="email"
                           value={this.state.formData.basic.email}
                           onChange={(e) =>
@@ -160,6 +222,11 @@ function template() {
                           }
                           required
                         />
+                        {this.state.validationErrors.basic?.email && (
+                          <div className="invalid-feedback">
+                            {this.state.validationErrors.basic.email}
+                          </div>
+                        )}
                       </div>
                       <div className="form-group col-md-6">
                         <label htmlFor="contactNo" className="form-label">
@@ -167,7 +234,15 @@ function template() {
                         </label>
                         <input
                           type="text"
-                          className="form-control"
+                          className={`form-control ${
+                            this.state.validFields.basic?.contactNo
+                              ? "is-valid"
+                              : ""
+                          } ${
+                            this.state.validationErrors.basic?.contactNo
+                              ? "is-invalid"
+                              : ""
+                          }`}
                           id="contactNo"
                           value={this.state.formData.basic.contactNo}
                           onChange={(e) =>
@@ -179,25 +254,11 @@ function template() {
                           }
                           required
                         />
-                      </div>
-                      <div className="form-group col-md-12">
-                        <label htmlFor="username" className="form-label">
-                          User Name
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          id="username"
-                          value={this.state.formData.basic.username}
-                          onChange={(e) =>
-                            this.handleInputChange(
-                              "basic",
-                              "username",
-                              e.target.value
-                            )
-                          }
-                          required
-                        />
+                        {this.state.validationErrors.basic?.contactNo && (
+                          <div className="invalid-feedback">
+                            {this.state.validationErrors.basic.contactNo}
+                          </div>
+                        )}
                       </div>
                       <div className="form-group col-md-6">
                         <label htmlFor="password" className="form-label">
@@ -205,7 +266,15 @@ function template() {
                         </label>
                         <input
                           type="password"
-                          className="form-control"
+                          className={`form-control ${
+                            this.state.validFields.basic?.password
+                              ? "is-valid"
+                              : ""
+                          } ${
+                            this.state.validationErrors.basic?.password
+                              ? "is-invalid"
+                              : ""
+                          }`}
                           id="password"
                           value={this.state.formData.basic.password}
                           onChange={(e) =>
@@ -217,6 +286,11 @@ function template() {
                           }
                           required
                         />
+                        {this.state.validationErrors.basic?.password && (
+                          <div className="invalid-feedback">
+                            {this.state.validationErrors.basic.password}
+                          </div>
+                        )}
                       </div>
                       <div className="form-group col-md-6">
                         <label htmlFor="confirmPassword" className="form-label">
@@ -224,7 +298,15 @@ function template() {
                         </label>
                         <input
                           type="password"
-                          className="form-control"
+                          className={`form-control ${
+                            this.state.validFields.basic?.confirmPassword
+                              ? "is-valid"
+                              : ""
+                          } ${
+                            this.state.validationErrors.basic?.confirmPassword
+                              ? "is-invalid"
+                              : ""
+                          }`}
                           id="confirmPassword"
                           value={this.state.formData.basic.confirmPassword}
                           onChange={(e) =>
@@ -236,6 +318,11 @@ function template() {
                           }
                           required
                         />
+                        {this.state.validationErrors.basic?.confirmPassword && (
+                          <div className="invalid-feedback">
+                            {this.state.validationErrors.basic.confirmPassword}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -266,6 +353,11 @@ function template() {
                       handleSelect={this.handleModuleSelect}
                       handleRemove={this.handleRemoveModule}
                     />
+                    {this.state.validationErrors["user-module"].modules && (
+                      <div className="invalid-feedback d-block">
+                        {this.state.validationErrors["user-module"].modules}
+                      </div>
+                    )}
                   </div>
                   {/* User Role Assign Tab */}
                   <div
@@ -297,6 +389,17 @@ function template() {
                               this.handleRemoveRole(itemId, module.id)
                             }
                           />
+                          {this.state.validationErrors["user-role"][
+                            module.id
+                          ] && (
+                            <div className="invalid-feedback d-block">
+                              {
+                                this.state.validationErrors["user-role"][
+                                  module.id
+                                ]
+                              }
+                            </div>
+                          )}
                           <br />
                         </>
                       )
@@ -338,10 +441,33 @@ function template() {
                               this.handleRemoveRolePermission(itemId, module.id)
                             }
                           />
+                          {this.state.validationErrors["role-permission"][
+                            module.id
+                          ] && (
+                            <div className="invalid-feedback d-block">
+                              {
+                                this.state.validationErrors["role-permission"][
+                                  module.id
+                                ]
+                              }
+                            </div>
+                          )}
                           <br />
                         </>
                       )
                     )}
+                    <div>
+                      {showSuccessAlert && (
+                        <div className="alert alert-success" role="alert">
+                          Registration successful! Your data have been saved.
+                        </div>
+                      )}
+                      {showFailureAlert && (
+                        <div className="alert alert-danger" role="alert">
+                          Registration failed! Please try again.
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </form>
