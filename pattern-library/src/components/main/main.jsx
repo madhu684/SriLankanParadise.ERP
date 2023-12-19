@@ -3,6 +3,7 @@ import "./main.css";
 import useMain from "./useMain";
 import TopNav from "../topNav/topNav";
 import Menu from "../menu";
+import DiscardConfirmationModal from "../discardConfirmationModal/discardConfirmationModal";
 
 const Main = () => {
   const {
@@ -11,6 +12,9 @@ const Main = () => {
     renderDetail,
     selectedSubmodule,
     handleSubmoduleClick,
+    showDiscardConfirmation,
+    setShowDiscardConfirmation,
+    handleDiscard,
   } = useMain();
   return (
     <>
@@ -18,6 +22,7 @@ const Main = () => {
       <Menu
         isSidebarOpen={isSidebarOpen}
         onSubmoduleClick={handleSubmoduleClick}
+        activeSubmodule={selectedSubmodule}
       />
       <div className={`container-main-wraper ${isSidebarOpen ? "open" : ""}`}>
         <div className="container-fluid">
@@ -26,7 +31,18 @@ const Main = () => {
             <TopNav onToggleSidebar={toggleSidebar} />
             <div className="col">
               {/* Main content */}
-              <main>{renderDetail(selectedSubmodule)}</main>
+              <main>
+                {renderDetail(selectedSubmodule)}
+                {/* Render Discard Confirmation Modal */}
+                {showDiscardConfirmation && (
+                  <DiscardConfirmationModal
+                    show={showDiscardConfirmation}
+                    onHide={() => setShowDiscardConfirmation(false)}
+                    onDiscard={handleDiscard}
+                    title="Registration"
+                  />
+                )}
+              </main>
             </div>
           </div>
         </div>

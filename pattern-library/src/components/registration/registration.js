@@ -155,7 +155,7 @@ class registration extends React.Component {
       if (module.roles.assignedRoles.length === 0) {
         errors[
           module.id
-        ] = `Please assign at least one role for module "${module.name}".`;
+        ] = `Please assign at least one role for module ${module.name.toLowerCase()}.`;
       }
     });
 
@@ -175,7 +175,7 @@ class registration extends React.Component {
       if (module.permissions.assignedPermissions.length === 0) {
         errors[
           module.id
-        ] = `Please assign at least one permission for module "${module.name}".`;
+        ] = `Please assign at least one permission for module ${module.name.toLowerCase()}.`;
       }
     });
 

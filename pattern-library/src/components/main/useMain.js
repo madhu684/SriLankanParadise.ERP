@@ -1,12 +1,31 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Registration from "../registration/registration.js";
 
 const useMain = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [selectedSubmodule, setSelectedSubmodule] = useState(null);
+  const [showDiscardConfirmation, setShowDiscardConfirmation] = useState(false);
+  const discardedSubmoduleRef = useRef(null);
 
   const handleSubmoduleClick = (submodule) => {
-    setSelectedSubmodule(submodule);
+    if (submodule === selectedSubmodule) {
+    } else {
+      if (selectedSubmodule === "User Registration") {
+        discardedSubmoduleRef.current = submodule;
+        setShowDiscardConfirmation(true);
+      } else {
+        setSelectedSubmodule(submodule);
+      }
+    }
+  };
+
+  const handleDiscard = () => {
+    const discardedSubmodule = discardedSubmoduleRef.current;
+    if (discardedSubmodule) {
+      setSelectedSubmodule(discardedSubmodule);
+    }
+    discardedSubmoduleRef.current = null;
+    setShowDiscardConfirmation(false);
   };
 
   const toggleSidebar = () => {
@@ -28,6 +47,9 @@ const useMain = () => {
     renderDetail,
     selectedSubmodule,
     handleSubmoduleClick,
+    showDiscardConfirmation,
+    setShowDiscardConfirmation,
+    handleDiscard,
   };
 };
 

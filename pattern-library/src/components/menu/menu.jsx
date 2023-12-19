@@ -3,14 +3,9 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 
 function template() {
-  const {
-    activeModules,
-    modules,
-    isDropdownOpen,
-    username,
-    selectedSubmodule,
-    companyName,
-  } = this.state;
+  const { activeModules, modules, isDropdownOpen, username, companyName } =
+    this.state;
+  const { activeSubmodule } = this.props;
   const { isSidebarOpen } = this.props;
   return (
     <nav
@@ -55,7 +50,11 @@ function template() {
                     {module.submodules.map((submodule) => (
                       <li key={submodule.id}>
                         <a
-                          href={`#${submodule.name.toLowerCase()}`}
+                          href={`#${
+                            activeSubmodule === submodule.name
+                              ? activeSubmodule.toLowerCase()
+                              : submodule.name.toLowerCase()
+                          }`}
                           className="nav-link link-dark smaller-text"
                           onClick={() =>
                             this.handleSubmoduleClick(module.id, submodule.name)
@@ -63,7 +62,7 @@ function template() {
                         >
                           <span
                             className={`p-1 nav-link-hover-lite rounded ${
-                              selectedSubmodule === submodule.name
+                              activeSubmodule === submodule.name
                                 ? "nav-link-active-small"
                                 : ""
                             }`}
