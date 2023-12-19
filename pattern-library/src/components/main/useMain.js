@@ -1,11 +1,32 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Registration from "../registration/registration.js";
 
 const useMain = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const [isSmallScreen, setIsSmallScreen] = useState(window.innerWidth < 992);
   const [selectedSubmodule, setSelectedSubmodule] = useState(null);
   const [showDiscardConfirmation, setShowDiscardConfirmation] = useState(false);
   const discardedSubmoduleRef = useRef(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSmallScreen(window.innerWidth < 992);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isSmallScreen) {
+      setSidebarOpen(false);
+    } else {
+      setSidebarOpen(true);
+    }
+  }, [isSmallScreen]);
 
   const handleSubmoduleClick = (submodule) => {
     if (submodule === selectedSubmodule) {
@@ -32,6 +53,7 @@ const useMain = () => {
     setSidebarOpen(!isSidebarOpen);
   };
 
+  // Add other content as needed.
   const renderDetail = (option) => {
     switch (option) {
       case "User Registration":
@@ -50,6 +72,7 @@ const useMain = () => {
     showDiscardConfirmation,
     setShowDiscardConfirmation,
     handleDiscard,
+    isSmallScreen,
   };
 };
 

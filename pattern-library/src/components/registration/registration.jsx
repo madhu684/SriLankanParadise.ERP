@@ -5,7 +5,7 @@ import AssignItems from "../assignItems/assignItems.js";
 function template() {
   const { showSuccessAlert, showFailureAlert } = this.state;
   return (
-    <div className="container mt-4">
+    <div className="container mt-4 mb-4">
       <div className="row justify-content-center">
         <div className="col-md-11">
           <h4 className="mb-3 fw-semibold">User Registration</h4>

@@ -15,6 +15,7 @@ const Main = () => {
     showDiscardConfirmation,
     setShowDiscardConfirmation,
     handleDiscard,
+    isSmallScreen,
   } = useMain();
   return (
     <>
@@ -23,8 +24,14 @@ const Main = () => {
         isSidebarOpen={isSidebarOpen}
         onSubmoduleClick={handleSubmoduleClick}
         activeSubmodule={selectedSubmodule}
+        isSmallScreen={isSmallScreen}
+        onToggleSidebar={toggleSidebar}
       />
-      <div className={`container-main-wraper ${isSidebarOpen ? "open" : ""}`}>
+      <div
+        className={`container-main-wraper ${
+          isSidebarOpen && !isSmallScreen ? "open" : ""
+        }`}
+      >
         <div className="container-fluid">
           <div className="row">
             {/* Top navigation */}
