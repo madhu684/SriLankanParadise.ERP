@@ -3,7 +3,7 @@ import "./main.css";
 import useMain from "./useMain";
 import TopNav from "../topNav/topNav";
 import Menu from "../menu";
-import DiscardConfirmationModal from "../discardConfirmationModal/discardConfirmationModal";
+import DiscardConfirmationModal from "../confirmationModals/discardConfirmationModal/discardConfirmationModal";
 
 const Main = () => {
   const {

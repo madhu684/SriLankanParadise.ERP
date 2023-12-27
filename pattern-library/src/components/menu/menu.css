@@ -46,3 +46,8 @@
   ); /* Adjust the alpha value for transparency */
   z-index: 1030; /* Make sure it's above other content */
 }
+
+.company-logo {
+  width: 60px;
+  height: 30px;
+}

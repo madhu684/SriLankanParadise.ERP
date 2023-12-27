@@ -3,8 +3,14 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 
 function template() {
-  const { activeModules, modules, isDropdownOpen, username, companyName } =
-    this.state;
+  const {
+    activeModules,
+    modules,
+    isDropdownOpen,
+    username,
+    companyName,
+    companyLogoUrl,
+  } = this.state;
   const { activeSubmodule, isSidebarOpen, isSmallScreen, onToggleSidebar } =
     this.props;
   return (
@@ -23,9 +29,11 @@ function template() {
                 isSmallScreen ? "justify-content-between" : ""
               } mb-0 mb-md-0 me-md-auto link-dark text-decoration-none`}
             >
-              <svg className="bi " width="40" height="20">
-                <use xlinkHref="#bootstrap" />
-              </svg>
+              <img
+                className="company-logo"
+                src={companyLogoUrl}
+                alt="Company Logo"
+              />
               <span className="fs-4">{companyName}</span>
               {isSmallScreen && (
                 <button

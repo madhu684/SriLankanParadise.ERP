@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "https://localhost:7287/api";
+export const API_BASE_URL = "https://localhost:7287/api";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -8,7 +8,9 @@ const api = axios.create({
 
 export const login_api = async (formData) => {
   try {
-    const response = await api.post("/user/login", formData);
+    const response = await api.post("/user/login", formData, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);
@@ -18,7 +20,9 @@ export const login_api = async (formData) => {
 
 export const logout_api = async () => {
   try {
-    const response = await api.post("/user/logout");
+    const response = await api.post("/user/logout", null, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);
@@ -171,7 +175,9 @@ export const get_company_api = async (companyId) => {
 
 export const post_company_api = async (companyData) => {
   try {
-    const response = await api.post("/company", companyData);
+    const response = await api.post("/company", companyData, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     throw error;
@@ -181,6 +187,36 @@ export const post_company_api = async (companyData) => {
 export const put_company_api = async (companyId, companyData) => {
   try {
     const response = await api.put(`/company/${companyId}`, companyData);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const post_company_logo_api = async (uploadData) => {
+  try {
+    const formData = new FormData();
+    formData.append("permissionId", uploadData.permissionId);
+    formData.append("logoFile", uploadData.logoFile);
+
+    const response = await api.post("/company/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      withCredentials: true,
+    });
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const delete_company_api = async (companyId) => {
+  try {
+    const response = await api.delete(`/company/${companyId}`, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     throw error;

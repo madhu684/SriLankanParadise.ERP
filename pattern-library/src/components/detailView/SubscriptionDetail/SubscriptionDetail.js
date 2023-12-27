@@ -1,6 +1,6 @@
 import React from "react";
 import template from "./SubscriptionDetail.jsx";
-import { get_subscriptions_api } from "../../services/userManagementApi.js";
+import { get_subscriptions_api } from "../../../services/userManagementApi.js";
 
 class subscriptionDetail extends React.Component {
   constructor(props) {

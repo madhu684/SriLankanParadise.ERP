@@ -1,8 +1,8 @@
 import React from "react";
 import template from "./admin.jsx";
-import CompanyDetail from "../companyDetail/companyDetail.js";
-import SubscriptionDetail from "../SubscriptionDetail/SubscriptionDetail.js";
-import ModulesDetail from "../moduleDetail/moduleDetail.js";
+import CompanyDetail from "../detailView/companyDetail/companyDetail.js";
+import SubscriptionDetail from "../detailView/SubscriptionDetail/SubscriptionDetail.js";
+import ModulesDetail from "../detailView/moduleDetail/moduleDetail.js";
 // import RolesDetail from "../rolesDetail";
 
 class admin extends React.Component {

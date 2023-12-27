@@ -1,8 +1,11 @@
 import React from "react";
 import template from "./menu.jsx";
-import { logout_api } from "../../services/userManagementApi.js";
-import { user_modules_api } from "../../services/userManagementApi.js";
-import { submodules_api } from "../../services/userManagementApi.js";
+import {
+  logout_api,
+  user_modules_api,
+  submodules_api,
+  API_BASE_URL,
+} from "../../services/userManagementApi.js";
 
 class menu extends React.Component {
   constructor(props) {
@@ -30,14 +33,17 @@ class menu extends React.Component {
       username: sessionStorage.getItem("username"),
       companyId: sessionStorage.getItem("companyId"),
       companyName: sessionStorage.getItem("companyName"),
+      companyLogoPath: sessionStorage.getItem("companyLogoPath"),
       isLogout: false, // Flag to trigger the redirection
       isSidebarOpen: true,
+      companyLogoUrl: null,
     };
   }
 
   componentDidMount() {
     // Fetch user modules when the component mounts
     this.fetchUserModules();
+    this.generateCompanyLogoUrl();
   }
 
   fetchUserModules = async () => {
@@ -84,6 +90,21 @@ class menu extends React.Component {
     } catch (error) {
       console.error("Error fetching user modules:", error);
       // Handle error if needed
+    }
+  };
+
+  generateCompanyLogoUrl = () => {
+    try {
+      const baseApiUrl = API_BASE_URL.replace("/api", "");
+
+      const adjustedRelativePath = this.state.companyLogoPath
+        .replace(/\\/g, "/")
+        .replace("wwwroot/", "");
+
+      const companyLogoUrl = `${baseApiUrl}/${adjustedRelativePath}`;
+      this.setState({ companyLogoUrl: companyLogoUrl });
+    } catch (error) {
+      console.error("Error generating company logo url:", error);
     }
   };
 

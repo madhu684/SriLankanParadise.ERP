@@ -1,6 +1,6 @@
 import React from "react";
 import template from "./moduleDetail.jsx";
-import { get_modules_api } from "../../services/userManagementApi.js";
+import { get_modules_api } from "../../../services/userManagementApi.js";
 
 class moduleDetail extends React.Component {
   constructor(props) {
