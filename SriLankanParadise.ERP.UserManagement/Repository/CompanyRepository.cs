@@ -50,7 +50,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             try
             {
-                return await _dbContext.Companies.ToListAsync();
+                return await _dbContext.Companies.Include(c=>c.SubscriptionPlan).ToListAsync();
             }
             catch (Exception)
             {
@@ -65,7 +65,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var company = await _dbContext.Companies
                 .Where(c => c.CompanyId == companyId)
-                .Where(c => c.SubscriptionExpiredDate.HasValue && c.SubscriptionExpiredDate > DateTime.UtcNow)
+                //.Where(c => c.SubscriptionExpiredDate.HasValue && c.SubscriptionExpiredDate > DateTime.UtcNow)
                 .FirstOrDefaultAsync();
                 
                 return company;
@@ -96,6 +96,30 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             catch (Exception)
             {
 
+                throw;
+            }
+        }
+
+        public async Task<string> SaveCompanyLogo(IFormFile file, string fileName)
+        {
+            try
+            {
+                // Ensure the wwwroot/images/companylogos directory exists
+                var directoryPath = Path.Combine("wwwroot", "images", "companylogos");
+                Directory.CreateDirectory(directoryPath);
+
+                var filePath = Path.Combine(directoryPath, fileName);
+
+                // Save the file to the server
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(fileStream);
+                }
+
+                return filePath;
+            }
+            catch (Exception ex)
+            {
                 throw;
             }
         }

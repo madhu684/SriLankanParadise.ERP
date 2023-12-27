@@ -79,6 +79,24 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Company deleted successfully.
+        /// </summary>
+        public static string CompanyDeleted {
+            get {
+                return ResourceManager.GetString("CompanyDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Company logo uploaded successfully.
+        /// </summary>
+        public static string CompanyLogoUploaded {
+            get {
+                return ResourceManager.GetString("CompanyLogoUploaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Company not found.
         /// </summary>
         public static string CompanyNotFound {

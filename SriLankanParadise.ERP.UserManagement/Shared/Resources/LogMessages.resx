@@ -123,6 +123,12 @@
   <data name="CompanyCreated" xml:space="preserve">
     <value>Company created successfully</value>
   </data>
+  <data name="CompanyDeleted" xml:space="preserve">
+    <value>Company deleted successfully</value>
+  </data>
+  <data name="CompanyLogoUploaded" xml:space="preserve">
+    <value>Company logo uploaded successfully</value>
+  </data>
   <data name="CompanyNotFound" xml:space="preserve">
     <value>Company not found</value>
   </data>

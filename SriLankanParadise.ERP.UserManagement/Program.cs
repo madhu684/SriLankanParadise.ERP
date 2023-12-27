@@ -25,7 +25,8 @@ builder.Services.AddCors(options =>
     {
         builder.WithOrigins("http://localhost:3000") // Allow requests from this origin
                .AllowAnyMethod()
-               .AllowAnyHeader();
+               .AllowAnyHeader()
+               .AllowCredentials(); // Allow cookies
     });
 });
 
@@ -98,6 +99,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();

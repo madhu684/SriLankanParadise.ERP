@@ -36,5 +36,15 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             await _companyRepository.UpdateCompany(companyId, company);
         }
+
+        public async Task<string> UploadCompanyLogo(IFormFile file)
+        {
+          
+                // Validate and process the file if needed
+                // Generate a unique filename
+                var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                return await _companyRepository.SaveCompanyLogo(file, uniqueFileName);
+  
+        }
     }
 }

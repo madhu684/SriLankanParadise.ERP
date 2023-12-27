@@ -9,5 +9,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task AddCompany(Company company);
         Task DeleteCompany(int companyId);
         Task UpdateCompany(int companyId, Company company);
+
+        Task<string> UploadCompanyLogo(IFormFile file);
     }
 }

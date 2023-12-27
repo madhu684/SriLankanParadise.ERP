@@ -15,6 +15,10 @@ public partial class Company
 
     public int? MaxUserCount { get; set; }
 
+    public bool Status { get; set; }
+
+    public string? LogoPath { get; set; }
+
     public virtual ICollection<CompanySubscriptionModule> CompanySubscriptionModules { get; set; } = new List<CompanySubscriptionModule>();
 
     public virtual Subscription? SubscriptionPlan { get; set; }

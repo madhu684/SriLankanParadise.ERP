@@ -8,5 +8,7 @@
 
         public DateTime? SubscriptionExpiredDate { get; set; }
         public int PermissionId { get; set; }
+
+        public string? LogoPath { get; set; }
     }
 }
