@@ -80,6 +80,7 @@ const useAddCompanyForm = (onFormSubmit) => {
           subscriptionExpiredDate: null,
           permissionId: 6,
           logoPath: logoPath,
+          maxUserCount: null,
         };
 
         const companyResponse = await post_company_api(companyData);

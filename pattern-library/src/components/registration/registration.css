@@ -1,5 +1,9 @@
-.btn-width {
-  width: 100px; /* width for the primary buttons */
+.btn-width-reg {
+  width: 100px !important;
+}
+
+.btn-width-reg .btn-primary {
+  width: 100% !important;
 }
 
 .card-height {

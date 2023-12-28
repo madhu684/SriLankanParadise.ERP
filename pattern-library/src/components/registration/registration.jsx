@@ -489,7 +489,7 @@ function template() {
                   </div>
                 )}
                 {this.state.activeTab !== "role-permission" ? (
-                  <div className="btn-width">
+                  <div className="btn-width-reg">
                     <button
                       className="btn btn-primary btn-block"
                       onClick={this.handleNext}
@@ -498,7 +498,7 @@ function template() {
                     </button>
                   </div>
                 ) : (
-                  <div className="btn-width">
+                  <div className="btn-width-reg">
                     <button
                       className="btn btn-primary btn-block"
                       onClick={this.handleSave}

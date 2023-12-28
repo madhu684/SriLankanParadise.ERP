@@ -2,17 +2,25 @@ import "./companyDetail.css";
 import React from "react";
 import AddCompanyForm from "./addCompanyForm/addCompanyForm";
 import DeleteConfirmationModal from "../../confirmationModals/deleteConfirmationModal/deleteConfirmationModal";
+import UpdateCompanyForm from "./updateCompanyForm/updateCompanyForm";
 
 function template() {
-  const { data, showModal, showDeleteConfirmation, showModalInParent } =
-    this.state;
+  const {
+    data,
+    showAddCompanyModal,
+    showAddCompanyModalInParent,
+    showUpdateCompanyModal,
+    showUpdateCompanyModalInParent,
+    showDeleteConfirmation,
+    companyToUpdateData,
+  } = this.state;
   return (
     <div className="p-3">
       <h2 className="mb-4">Companies</h2>
       <div className="mb-3">
         <button
-          className="btn btn-primary btn-width"
-          onClick={this.handleShowModal}
+          className="btn btn-primary"
+          onClick={this.handleShowAddCompanyModal}
         >
           Add New Company
         </button>
@@ -45,7 +53,7 @@ function template() {
               <td>
                 <button
                   className="btn btn-outline-secondary btn-sm me-2"
-                  //   onClick={()}
+                  onClick={() => this.handleUpdateCompany(item.companyId)}
                 >
                   Update
                 </button>
@@ -60,11 +68,19 @@ function template() {
           ))}
         </tbody>
       </table>
-      {showModalInParent && (
+      {showAddCompanyModalInParent && (
         <AddCompanyForm
-          show={showModal}
-          handleClose={this.handleCloseModal}
+          show={showAddCompanyModal}
+          handleClose={this.handleCloseAddCompanyModal}
           handleCompanyAdded={this.handleCompanyAdded}
+        />
+      )}
+      {showUpdateCompanyModalInParent && (
+        <UpdateCompanyForm
+          show={showUpdateCompanyModal}
+          handleClose={this.handleCloseUpdateCompanyModal}
+          handleCompanyUpdated={this.handleCompanyUpdated}
+          companyData={companyToUpdateData}
         />
       )}
       <DeleteConfirmationModal

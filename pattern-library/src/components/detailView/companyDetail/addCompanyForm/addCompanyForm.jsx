@@ -72,6 +72,9 @@ const AddCompanyForm = ({ show, handleClose, handleCompanyAdded }) => {
         )}
       </Modal.Body>
       <Modal.Footer>
+        <Button variant="secondary" onClick={handleClose}>
+          Close
+        </Button>
         <Button variant="primary" onClick={handleFormSubmit}>
           Save
         </Button>

@@ -10,10 +10,14 @@ class companyDetail extends React.Component {
     super(props);
     this.state = {
       data: [],
-      showModal: false,
-      showModalInParent: false,
+      showAddCompanyModal: false,
+      showAddCompanyModalInParent: false,
+      showUpdateCompanyModal: false,
+      showUpdateCompanyModalInParent: false,
       showDeleteConfirmation: false,
       companyToDeleteId: null,
+      companyToUpdateId: null,
+      companyToUpdateData: null,
     };
   }
 
@@ -56,25 +60,59 @@ class companyDetail extends React.Component {
     }
   };
 
-  handleShowModal = () => {
-    this.setState({ showModal: true });
-    this.setState({ showModalInParent: true });
+  handleShowAddCompanyModal = () => {
+    this.setState({ showAddCompanyModal: true });
+    this.setState({ showAddCompanyModalInParent: true });
   };
 
-  handleCloseModal = () => {
-    this.setState({ showModal: false });
-    this.handleCloseModalInParent();
+  handleCloseAddCompanyModal = () => {
+    this.setState({ showAddCompanyModal: false });
+    this.handleCloseAddCompanyModalInParent();
   };
 
-  handleCloseModalInParent = () => {
+  handleCloseAddCompanyModalInParent = () => {
     const delay = 300;
     setTimeout(() => {
-      this.setState({ showModalInParent: false });
+      this.setState({ showAddCompanyModalInParent: false });
     }, delay);
   };
 
   handleCompanyAdded = async () => {
     await this.fetchCompanies();
+  };
+
+  handleCompanyUpdated = async () => {
+    await this.fetchCompanies();
+  };
+
+  handleUpdateCompany = (companyId) => {
+    this.handleShowUpdateCompanyModal();
+
+    const companyToUpdate = this.state.data.find(
+      (company) => company.companyId === companyId
+    );
+
+    this.setState({
+      companyToUpdateId: companyId,
+      companyToUpdateData: companyToUpdate,
+    });
+  };
+
+  handleShowUpdateCompanyModal = () => {
+    this.setState({ showUpdateCompanyModal: true });
+    this.setState({ showUpdateCompanyModalInParent: true });
+  };
+
+  handleCloseUpdateCompanyModal = () => {
+    this.setState({ showUpdateCompanyModal: false });
+    this.handleCloseUpdateCompanyModalInParent();
+  };
+
+  handleCloseUpdateCompanyModalInParent = () => {
+    const delay = 300;
+    setTimeout(() => {
+      this.setState({ showUpdateCompanyModalInParent: false });
+    }, delay);
   };
 
   render() {

@@ -186,7 +186,9 @@ export const post_company_api = async (companyData) => {
 
 export const put_company_api = async (companyId, companyData) => {
   try {
-    const response = await api.put(`/company/${companyId}`, companyData);
+    const response = await api.put(`/company/${companyId}`, companyData, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     throw error;
