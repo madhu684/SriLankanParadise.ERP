@@ -15,5 +15,8 @@
         public bool Status { get; set; }
 
         public string? LogoPath { get; set; }
+
+        public int? MaxUserCount { get; set; }
+
     }
 }

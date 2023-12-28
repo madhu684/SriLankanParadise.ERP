@@ -63,7 +63,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             try
             {
-                var company = await _dbContext.Companies
+                var company = await _dbContext.Companies.Include(c => c.SubscriptionPlan)
                 .Where(c => c.CompanyId == companyId)
                 //.Where(c => c.SubscriptionExpiredDate.HasValue && c.SubscriptionExpiredDate > DateTime.UtcNow)
                 .FirstOrDefaultAsync();
