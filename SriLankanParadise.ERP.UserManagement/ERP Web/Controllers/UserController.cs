@@ -64,23 +64,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                         }
                         else
                         {
-                            var claims = new List<Claim>
-                            {
-                                new Claim(ClaimTypes.Name, user.UserId.ToString()),
-                                // Add other claims if necessary
-                            };
-
-                            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
-
-                            // Create action log
-                            var actionLog = new ActionLogModel()
-                            {
-                                ActionId = userRequestModel.PermissionId,
-                                UserId = user.UserId,
-                                Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                                Timestamp = DateTime.UtcNow
-                            };
+                            var actionLog = await UserAuthentication(userRequestModel, user);
                             await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                             // Send response
@@ -98,6 +82,29 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
                 return Response;
             }
+        }
+
+        private async Task<ActionLogModel> UserAuthentication(UserRequestModel userRequestModel, User user)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, user.UserId.ToString()),
+                // Add other claims if necessary
+            };
+
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity));
+
+            // Create action log
+            var actionLog = new ActionLogModel()
+            {
+                ActionId = userRequestModel.PermissionId,
+                UserId = user.UserId,
+                Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                Timestamp = DateTime.UtcNow
+            };
+            return actionLog;
         }
 
         [HttpPost("register")]
@@ -120,6 +127,10 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 {
                     // Create a new user and save it to the database
                     var newUser = _mapper.Map<User>(userRegistrationModel);
+
+                    // Hash the password using BCrypt
+                    newUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(userRegistrationModel.Password);
+                    newUser.Status = true;
                     await _userService.RegisterUser(newUser);
 
                     // Create action log

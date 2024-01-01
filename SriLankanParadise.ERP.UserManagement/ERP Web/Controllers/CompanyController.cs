@@ -142,28 +142,67 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
         }
 
-        //[HttpDelete("{companyId}")]
-        //public async Task<ApiResponseModel> DeleteCompany(int companyId)
-        //{
-        //    try
-        //    {
-        //        var existingCompany = await _companyService.GetCompanyByCompanyId(companyId);
-        //        if (existingCompany == null)
-        //        {
-        //            _logger.LogWarning(LogMessages.CompanyNotFound);
-        //            return ApiResponse.Error("Company not found", HttpStatusCode.NotFound);
-        //        }
+        [HttpDelete("{companyId}")]
+        public async Task<ApiResponseModel> DeleteCompany(int companyId)
+        {
+            try
+            {
+                var existingCompany = await _companyService.GetCompanyByCompanyId(companyId);
+                if (existingCompany == null)
+                {
+                    _logger.LogWarning(LogMessages.CompanyNotFound);
+                    return AddResponseMessage(Response, LogMessages.CompanyNotFound, null, true, HttpStatusCode.NotFound);
+                }
 
-        //        await _companyService.DeleteCompany(companyId);
-        //        _logger.LogInformation(LogMessages.CompanyDeleted);
-        //        return ApiResponse.Success("Company deleted successfully", HttpStatusCode.NoContent);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, ErrorMessages.InternalServerError);
-        //        return ApiResponse.Error(ex.Message, HttpStatusCode.InternalServerError);
-        //    }
-        //}
+                await _companyService.DeleteCompany(companyId);
+
+                // Create action log
+                var actionLog = new ActionLogModel()
+                {
+                    ActionId = 8,
+                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                    Timestamp = DateTime.UtcNow
+                };
+                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+
+                _logger.LogInformation(LogMessages.CompanyDeleted);
+                return AddResponseMessage(Response, LogMessages.CompanyDeleted, null, true, HttpStatusCode.NoContent);
+            }
+            catch (Exception ex)
+            {
+               _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
+
+        [HttpPost("upload")]
+        public async Task<ApiResponseModel> UploadCompanyLogo([FromForm] CompanyLogoRequestModel companyLogoRequest)
+        {
+            try
+            {
+                var companyLogo = companyLogoRequest.LogoFile;
+                var filePath = await _companyService.UploadCompanyLogo(companyLogo);
+
+                // Create action log
+                var actionLog = new ActionLogModel()
+                {
+                    ActionId = companyLogoRequest.PermissionId,
+                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                    Timestamp = DateTime.UtcNow
+                };
+                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+
+                _logger.LogInformation(LogMessages.CompanyLogoUploaded);
+                return AddResponseMessage(Response, LogMessages.CompanyLogoUploaded, filePath, true, HttpStatusCode.Created);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
     }
 
 }

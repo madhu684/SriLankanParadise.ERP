@@ -1,0 +1,11 @@
+.btn-width-reg {
+  width: 100px !important;
+}
+
+.btn-width-reg .btn-primary {
+  width: 100% !important;
+}
+
+.card-height {
+  max-height: 75vh !important;
+}

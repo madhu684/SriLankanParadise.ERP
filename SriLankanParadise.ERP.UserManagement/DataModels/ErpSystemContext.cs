@@ -17,7 +17,11 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<ActionLog> ActionLogs { get; set; }
 
+    public virtual DbSet<ActionLog1> ActionLogs1 { get; set; }
+
     public virtual DbSet<AuditLog> AuditLogs { get; set; }
+
+    public virtual DbSet<AuditLog1> AuditLogs1 { get; set; }
 
     public virtual DbSet<Company> Companies { get; set; }
 
@@ -32,6 +36,8 @@ public partial class ErpSystemContext : DbContext
     public virtual DbSet<Role> Roles { get; set; }
 
     public virtual DbSet<RolePermission> RolePermissions { get; set; }
+
+    public virtual DbSet<SubModule> SubModules { get; set; }
 
     public virtual DbSet<Subscription> Subscriptions { get; set; }
 
@@ -68,6 +74,16 @@ public partial class ErpSystemContext : DbContext
                 .HasConstraintName("FK_ActionLog_User");
         });
 
+        modelBuilder.Entity<ActionLog1>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToTable("ActionLog$");
+
+            entity.Property(e => e.Ipaddress).HasColumnName("IPAddress");
+            entity.Property(e => e.Timestamp).HasColumnType("datetime");
+        });
+
         modelBuilder.Entity<AuditLog>(entity =>
         {
             entity.ToTable("AuditLog");
@@ -83,6 +99,16 @@ public partial class ErpSystemContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_AuditLog_AuditLog");
+        });
+
+        modelBuilder.Entity<AuditLog1>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToTable("AuditLog$");
+
+            entity.Property(e => e.Ipaddress).HasColumnName("IPAddress");
+            entity.Property(e => e.Timestamp).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<Company>(entity =>
@@ -116,9 +142,9 @@ public partial class ErpSystemContext : DbContext
 
         modelBuilder.Entity<CompanySubscriptionModuleUser>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("CompanySubscriptionModuleUser");
+            entity.HasKey(e => e.CompanySubscriptionModuleIdUserId);
+
+            entity.ToTable("CompanySubscriptionModuleUser");
         });
 
         modelBuilder.Entity<Module>(entity =>
@@ -144,9 +170,7 @@ public partial class ErpSystemContext : DbContext
         {
             entity.ToTable("Role");
 
-            entity.Property(e => e.RoleName)
-                .HasMaxLength(10)
-                .IsFixedLength();
+            entity.Property(e => e.RoleName).HasMaxLength(200);
 
             entity.HasOne(d => d.Module).WithMany(p => p.Roles)
                 .HasForeignKey(d => d.ModuleId)
@@ -167,6 +191,17 @@ public partial class ErpSystemContext : DbContext
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_RolePermission_Role");
+        });
+
+        modelBuilder.Entity<SubModule>(entity =>
+        {
+            entity.ToTable("SubModule");
+
+            entity.Property(e => e.SubModuleName).HasMaxLength(50);
+
+            entity.HasOne(d => d.Module).WithMany(p => p.SubModules)
+                .HasForeignKey(d => d.ModuleId)
+                .HasConstraintName("FK_SubModule_Module");
         });
 
         modelBuilder.Entity<Subscription>(entity =>

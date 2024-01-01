@@ -1,9 +1,8 @@
-import React, { useState }    from "react";
+import React, { useState } from "react";
 import template from "./login.jsx";
 import { login_api } from "../../services/userManagementApi.js";
 
 class login extends React.Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -13,6 +12,9 @@ class login extends React.Component {
       error: null,
       showErrorToast: false,
       showSuccessToast: false,
+      errorMessageToast: "",
+      successMessageToast: "",
+      redirectToMain: false, // Flag to trigger the redirection
     };
   }
 
@@ -31,28 +33,51 @@ class login extends React.Component {
       const formData = {
         username: username,
         password: password,
-        permissionId: permissionId
+        permissionId: permissionId,
       };
 
       const response = await login_api(formData);
+      if (response.data.result == null) {
+        console.log(response.message);
+        this.setState({
+          showErrorToast: true,
+          errorMessageToast: response.message,
+        });
+      } else {
+        this.setState({
+          showSuccessToast: true,
+          successMessageToast: response.message,
+        });
+      }
 
-      // Handle the successful login response here, e.g.,
-      // Redirect to dashboard or update user state in your application
-      this.setState({
-        showSuccessToast : true
-      });
+      // Store user information in sessionStorage
+      sessionStorage.setItem("userId", response.data.result.userId.toString());
+      sessionStorage.setItem("username", response.data.result.username);
+      sessionStorage.setItem(
+        "companyId",
+        response.data.result.companyId.toString()
+      );
+      sessionStorage.setItem(
+        "companyName",
+        response.data.result.company.companyName
+      );
+      sessionStorage.setItem(
+        "companyLogoPath",
+        response.data.result.company.logoPath
+      );
+      // Set redirectToMain to true upon successful login
+      this.setState({ redirectToMain: true });
+
       console.log("Login successful:", response);
-
-      // You can add logic here to redirect to another page after successful login
     } catch (error) {
       // Handle login error
       this.setState({
         error: "Invalid username or password. Please try again.",
-        showErrorToast : true
+        showErrorToast: true,
       });
     }
   };
-  
+
   render() {
     return template.call(this);
   }

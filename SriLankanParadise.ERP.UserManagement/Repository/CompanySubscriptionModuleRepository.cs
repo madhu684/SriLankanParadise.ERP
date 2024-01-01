@@ -93,5 +93,35 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task<IEnumerable<Module>> GetCompanySubscriptionModulesByCompanyId(int companyId)
+        {
+            try
+            {
+                var modules = await _dbContext.CompanySubscriptionModules
+                    .Where(csm => csm.CompanyId == companyId)
+                    .Join(_dbContext.SubscriptionModules,
+                        csm => csm.SubscriptionModuleId,
+                        sm => sm.SubscriptionModuleId,
+                        (csm, sm) => new { SubscriptionModule = sm, csm.SubscriptionModuleId })
+                    .Join(_dbContext.Modules,
+                        sm => sm.SubscriptionModule.ModuleId,
+                        m => m.ModuleId,
+                        (sm, m) => new Module { ModuleId = m.ModuleId, ModuleName = m.ModuleName, Status = m.Status})
+                    .ToListAsync();
+                
+                if (modules.Any())
+                {
+                    return modules;
+                }
+                return null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }
+

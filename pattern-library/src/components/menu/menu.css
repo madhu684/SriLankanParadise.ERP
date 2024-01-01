@@ -1,0 +1,53 @@
+.menu {
+  width: 250px;
+  position: fixed;
+  margin-left: 0;
+  z-index: 1040 !important;
+}
+.dropup-position {
+  top: auto !important;
+  bottom: 100% !important;
+}
+
+.smaller-text {
+  font-size: 0.875rem !important;
+}
+
+.nav-link-active-small {
+  background-color: #e9e9e9 !important;
+}
+
+.container-fluid.toggled .sidebar {
+  display: none;
+}
+
+.container-fluid.toggled .main-content {
+  margin-left: 300px;
+}
+
+.toggle-btn {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(
+    0,
+    0,
+    0,
+    0.5
+  ); /* Adjust the alpha value for transparency */
+  z-index: 1030; /* Make sure it's above other content */
+}
+
+.company-logo {
+  width: 60px;
+  height: 30px;
+}

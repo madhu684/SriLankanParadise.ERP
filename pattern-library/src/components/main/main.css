@@ -1,0 +1,7 @@
+.container-main-wraper {
+  padding-left: 0px;
+}
+
+.container-main-wraper.open {
+  padding-left: 250px;
+}

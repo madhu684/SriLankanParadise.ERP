@@ -9,5 +9,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task AddCompanySubscriptionModule(CompanySubscriptionModule companySubscriptionModule);
         Task DeleteCompanySubscriptionModule(int companySubscriptionModuleId);
         Task UpdateCompanySubscriptionModule(int companySubscriptionModuleId, CompanySubscriptionModule companySubscriptionModule);
+
+        Task<IEnumerable<Module>> GetCompanySubscriptionModulesByCompanyId(int companyId);
     }
 }

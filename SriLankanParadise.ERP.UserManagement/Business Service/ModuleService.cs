@@ -36,5 +36,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             await _moduleRepository.UpdateModule(moduleId, module);
         }
+
+        public async Task<IEnumerable<Module>> GetModulesByUserId(int userId)
+        {
+            return await _moduleRepository.GetModulesByUserId(userId);
+        }
     }
 }
