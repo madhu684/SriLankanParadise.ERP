@@ -5,6 +5,10 @@ import Home from "./components/home";
 import Login from "./components/login";
 import Main from "./components/main";
 import Admin from "./components/admin";
+import PurchaseRequisition from "./components/purchaseRequisition/purchaseRequisition";
+import PurchaseOrder from "./components/purchaseOrder/purchaseOrder";
+import Grn from "./components/grn/grn";
+import PurchaseRequisitionList from "./components/purchaseRequisition/PurchaseRequisitionList/PurchaseRequisitionList";
 
 const Routers = () => {
   return (
@@ -14,6 +18,10 @@ const Routers = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/main" element={<Main />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/purchase" element={<PurchaseRequisition />} />
+        <Route path="/purchaseorder" element={<PurchaseOrder />} />
+        <Route path="/grn" element={<Grn />} />
+        <Route path="/purchaselist" element={<PurchaseRequisitionList />} />
       </Routes>
     </Router>
   );

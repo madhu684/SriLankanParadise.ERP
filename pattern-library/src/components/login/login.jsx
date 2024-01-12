@@ -1,5 +1,5 @@
 import React from "react";
-import logoImage from "../../assets/images/erp_logo_final.PNG";
+import logoImage from "../../assets/images/erp_system_logo.jpg";
 import "./login.css";
 import ToastMessage from "../toastMessage/toastMessage.js";
 import { Navigate } from "react-router-dom";

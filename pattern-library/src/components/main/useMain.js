@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import Registration from "../registration/registration.js";
+import PurchaseRequisitionList from "../purchaseRequisition/PurchaseRequisitionList/PurchaseRequisitionList.jsx";
 
 const useMain = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -58,6 +59,8 @@ const useMain = () => {
     switch (option) {
       case "User Registration":
         return <Registration />;
+      case "Purchase Requisitions":
+        return <PurchaseRequisitionList />;
       default:
         return null;
     }
