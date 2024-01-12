@@ -84,6 +84,21 @@ builder.Services.AddScoped<ICompanySubscriptionModuleUserService, CompanySubscri
 builder.Services.AddScoped<ICompanySubscriptionModuleUserRepository, CompanySubscriptionModuleUserRepository>();
 builder.Services.AddScoped<ISubModuleService, SubModuleService>();
 builder.Services.AddScoped<ISubModuleRepository, SubModuleRepository>();
+builder.Services.AddScoped<IPurchaseRequisitionService, PurchaseRequisitionService>();
+builder.Services.AddScoped<IPurchaseRequisitionRepository, PurchaseRequisitionRepository>();
+builder.Services.AddScoped<IPurchaseRequisitionDetailService, PurchaseRequisitionDetailService>();
+builder.Services.AddScoped<IPurchaseRequisitionDetailRepository, PurchaseRequisitionDetailRepository>();
+builder.Services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
+builder.Services.AddScoped<IPurchaseOrderRepository, PurchaseOrderRepository>();
+builder.Services.AddScoped<IGrnMasterService, GrnMasterService>();
+builder.Services.AddScoped<IGrnMasterRepository, GrnMasterRepository>();
+builder.Services.AddScoped<IGrnDetailService, GrnDetailService>();
+builder.Services.AddScoped<IGrnDetailRepository, GrnDetailRepository>();
+builder.Services.AddScoped<ILocationService, LocationService>();
+builder.Services.AddScoped<ILocationRepository, LocationRepository>();
+builder.Services.AddScoped<ISupplierService, SupplierService>();
+builder.Services.AddScoped<ISupplierRepository, SupplierRepository>();
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

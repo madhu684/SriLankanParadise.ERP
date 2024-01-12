@@ -10,4 +10,6 @@ public partial class CompanySubscriptionModuleUser
     public int CompanySubscriptionModuleId { get; set; }
 
     public int UserId { get; set; }
+
+    public virtual Module CompanySubscriptionModule { get; set; } = null!;
 }

@@ -21,7 +21,11 @@ public partial class Company
 
     public virtual ICollection<CompanySubscriptionModule> CompanySubscriptionModules { get; set; } = new List<CompanySubscriptionModule>();
 
+    public virtual ICollection<Location> Locations { get; set; } = new List<Location>();
+
     public virtual Subscription? SubscriptionPlan { get; set; }
+
+    public virtual ICollection<Supplier> Suppliers { get; set; } = new List<Supplier>();
 
     public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

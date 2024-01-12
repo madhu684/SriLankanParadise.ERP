@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using SriLankanParadise.ERP.UserManagement.Business_Service;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Shared.Resources;
@@ -53,6 +55,31 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                 _logger.LogInformation(LogMessages.UserPermissionCreated);
                 AddResponseMessage(Response, LogMessages.UserPermissionCreated, null, true, HttpStatusCode.Created);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("GetUserPermissionsByUserId")]
+        public async Task<ApiResponseModel> GetUserPermissionByUserId(int userId)
+        {
+            try
+            {
+                var userPermissions = await _userPermissionService.GetUserPermissionsByUserId(userId);
+                if (userPermissions != null)
+                {
+                    var userPermissionDtos = _mapper.Map<IEnumerable<UserPermissionDto>>(userPermissions);
+                    AddResponseMessage(Response, LogMessages.UserPermissionsRetrieved, userPermissionDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.UserPermissionsNotFound);
+                    AddResponseMessage(Response, LogMessages.UserPermissionsNotFound, null, true, HttpStatusCode.NotFound);
+                }
             }
             catch (Exception ex)
             {

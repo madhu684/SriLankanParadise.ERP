@@ -1,4 +1,5 @@
-﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+﻿using Microsoft.EntityFrameworkCore;
+using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
@@ -22,6 +23,27 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             catch (Exception)
             {
 
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<UserPermission>> GetUserPermissionsByUserId(int userId)
+        {
+            try
+            {
+                var userPermissions = await _dbContext.UserPermissions
+                    .Where(up => up.UserId == userId)
+                    .Include(up => up.Permission)
+                    .ToListAsync();
+
+                if (userPermissions.Any())
+                {
+                    return userPermissions;
+                }
+                return null;
+            }
+            catch (Exception)
+            {
                 throw;
             }
         }
