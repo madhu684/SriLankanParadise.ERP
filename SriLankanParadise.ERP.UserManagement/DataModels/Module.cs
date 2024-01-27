@@ -11,6 +11,8 @@ public partial class Module
 
     public bool Status { get; set; }
 
+    public virtual ICollection<CompanySubscriptionModuleUser> CompanySubscriptionModuleUsers { get; set; } = new List<CompanySubscriptionModuleUser>();
+
     public virtual ICollection<Permission> Permissions { get; set; } = new List<Permission>();
 
     public virtual ICollection<Role> Roles { get; set; } = new List<Role>();

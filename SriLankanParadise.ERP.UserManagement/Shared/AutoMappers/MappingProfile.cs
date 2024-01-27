@@ -25,11 +25,25 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<Permission, PermissionDto>();
             CreateMap<UserRoleRequestModel, UserRole>();
             CreateMap<UserPermissionRequestModel, UserPermission>();
+            CreateMap<UserPermission, UserPermissionDto>();
             CreateMap<RolePermissionRequestModel, RolePermission>();
             CreateMap<CompanySubscriptionModuleUserRequestModel, CompanySubscriptionModuleUser>();
             CreateMap<SubModule, SubModuleDto>();
             CreateMap<SubModule, SubModuleWithIdDto>();
             CreateMap<SubModuleRequestModel, SubModule>();
+            CreateMap<PurchaseRequisitionRequestModel, PurchaseRequisition>();
+            CreateMap<ApprovePurchaseRequisitionRequestModel, PurchaseRequisition>();
+            CreateMap<PurchaseRequisition, PurchaseRequisitionDto>();
+            CreateMap<PurchaseRequisitionDetailRequestModel, PurchaseRequisitionDetail>();
+            CreateMap<PurchaseRequisitionDetail, PurchaseRequisitionDetailDto>();
+            CreateMap<PurchaseOrderRequestModel, PurchaseOrder>();
+            CreateMap<PurchaseOrder, PurchaseOrderDto>();
+            CreateMap<GrnMasterRequestModel, GrnMaster>();
+            CreateMap<GrnMaster, GrnMasterDto>();
+            CreateMap<GrnDetailRequestModel, GrnDetail>();
+            CreateMap<GrnDetail, GrnDetailDto>();
+            CreateMap<Location, LocationDto>();
+            CreateMap<Supplier, SupplierDto>();
             // Add more mapping configurations if needed
         }
     }

@@ -1,0 +1,21 @@
+﻿--- Purchase Requisition ---
+
+Status 0: Draft (Default)
+	   1: Pending Approval
+	   2: Approved
+	   3: Rejected
+	   4: In Progress
+	   5: Completed
+	   6: Cancelled
+	   7: On Hold
+	   
+--- Purchase Order ---
+
+Status 0: Draft (Default)
+	   1: Pending Approval
+	   2: Approved
+	   3: Rejected
+	   4: In Progress
+	   5: Completed
+	   6: Cancelled
+	   7: On Hold

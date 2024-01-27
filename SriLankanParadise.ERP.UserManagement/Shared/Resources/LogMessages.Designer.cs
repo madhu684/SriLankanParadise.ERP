@@ -178,11 +178,56 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Grn detail created successfully.
+        /// </summary>
+        public static string GrnDetailCreated {
+            get {
+                return ResourceManager.GetString("GrnDetailCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Grn master created successfully.
+        /// </summary>
+        public static string GrnMasterCreated {
+            get {
+                return ResourceManager.GetString("GrnMasterCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Grn masters retrieved.
+        /// </summary>
+        public static string GrnMastersRetrieved {
+            get {
+                return ResourceManager.GetString("GrnMastersRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid username or password.
         /// </summary>
         public static string InvalidUsernameOrPassword {
             get {
                 return ResourceManager.GetString("InvalidUsernameOrPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Locations not found.
+        /// </summary>
+        public static string LocationsNotFound {
+            get {
+                return ResourceManager.GetString("LocationsNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Locations retrieved.
+        /// </summary>
+        public static string LocationsRetrieved {
+            get {
+                return ResourceManager.GetString("LocationsRetrieved", resourceCulture);
             }
         }
         
@@ -241,7 +286,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Permissions Not Found.
+        ///   Looks up a localized string similar to Permissions not found.
         /// </summary>
         public static string PermissionsNotFound {
             get {
@@ -250,7 +295,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Permissions Retrieved.
+        ///   Looks up a localized string similar to Permissions retrieved.
         /// </summary>
         public static string PermissionsRetrieved {
             get {
@@ -259,7 +304,97 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Role Permission created successfully.
+        ///   Looks up a localized string similar to Purchase order created successfully.
+        /// </summary>
+        public static string PurchaseOrderCreated {
+            get {
+                return ResourceManager.GetString("PurchaseOrderCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Purchase order detail created successfully.
+        /// </summary>
+        public static string PurchaseOrderDetailCreated {
+            get {
+                return ResourceManager.GetString("PurchaseOrderDetailCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Purchase orders retrieved.
+        /// </summary>
+        public static string PurchaseOrdersRetrieved {
+            get {
+                return ResourceManager.GetString("PurchaseOrdersRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Purchase requisition approved.
+        /// </summary>
+        public static string PurchaseRequisitionApproved {
+            get {
+                return ResourceManager.GetString("PurchaseRequisitionApproved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Purchase requisition created successfully.
+        /// </summary>
+        public static string PurchaseRequisitionCreated {
+            get {
+                return ResourceManager.GetString("PurchaseRequisitionCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Purchase requisition detail created successfully.
+        /// </summary>
+        public static string PurchaseRequisitionDetailCreated {
+            get {
+                return ResourceManager.GetString("PurchaseRequisitionDetailCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Purchase requisition not found.
+        /// </summary>
+        public static string PurchaseRequisitionNotFound {
+            get {
+                return ResourceManager.GetString("PurchaseRequisitionNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Purchase requisition retrieved.
+        /// </summary>
+        public static string PurchaseRequisitionRetrieved {
+            get {
+                return ResourceManager.GetString("PurchaseRequisitionRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Purchase requisitions not found.
+        /// </summary>
+        public static string PurchaseRequisitionsNotFound {
+            get {
+                return ResourceManager.GetString("PurchaseRequisitionsNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Purchase requisitions retrieved.
+        /// </summary>
+        public static string PurchaseRequisitionsRetrieved {
+            get {
+                return ResourceManager.GetString("PurchaseRequisitionsRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Role permission created successfully.
         /// </summary>
         public static string RolePermissionCreated {
             get {
@@ -268,7 +403,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Roles Not Found.
+        ///   Looks up a localized string similar to Roles not found.
         /// </summary>
         public static string RolesNotFound {
             get {
@@ -277,7 +412,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Roles Retrieved.
+        ///   Looks up a localized string similar to Roles retrieved.
         /// </summary>
         public static string RolesRetrieved {
             get {
@@ -286,7 +421,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Sub Module created successfully.
+        ///   Looks up a localized string similar to Sub module created successfully.
         /// </summary>
         public static string SubModuleCreated {
             get {
@@ -295,7 +430,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Sub Modules not found.
+        ///   Looks up a localized string similar to Sub modules not found.
         /// </summary>
         public static string SubModulesNotFound {
             get {
@@ -304,7 +439,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Sub Modules retrieved.
+        ///   Looks up a localized string similar to Sub modules retrieved.
         /// </summary>
         public static string SubModulesRetrieved {
             get {
@@ -367,6 +502,24 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Suppliers not found.
+        /// </summary>
+        public static string SuppliersNotFound {
+            get {
+                return ResourceManager.GetString("SuppliersNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Suppliers retrieved.
+        /// </summary>
+        public static string SuppliersRetrieved {
+            get {
+                return ResourceManager.GetString("SuppliersRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to User already exists.
         /// </summary>
         public static string UserAlreadyExists {
@@ -385,7 +538,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to User Role created successfully.
+        ///   Looks up a localized string similar to User role created successfully.
         /// </summary>
         public static string UseRoleCreated {
             get {
@@ -394,11 +547,29 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to User Permission created successfully.
+        ///   Looks up a localized string similar to User permission created successfully.
         /// </summary>
         public static string UserPermissionCreated {
             get {
                 return ResourceManager.GetString("UserPermissionCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User permissions not found.
+        /// </summary>
+        public static string UserPermissionsNotFound {
+            get {
+                return ResourceManager.GetString("UserPermissionsNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User permissions retrieved.
+        /// </summary>
+        public static string UserPermissionsRetrieved {
+            get {
+                return ResourceManager.GetString("UserPermissionsRetrieved", resourceCulture);
             }
         }
         
