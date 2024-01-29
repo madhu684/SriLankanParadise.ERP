@@ -14,6 +14,9 @@
 
         public decimal? TotalPrice { get; set; }
 
+
+        public string? ItemId { get; set; }
+
         public int PermissionId { get; set; }
     }
 }

@@ -31,7 +31,109 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             try
             {
-                return await _dbContext.PurchaseOrders.Include(po => po.PurchaseOrderDetails).ToListAsync();
+                return await _dbContext.PurchaseOrders
+                    .Include(po => po.PurchaseOrderDetails)
+                    .Include(po => po.Supplier)
+                    .ToListAsync();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<PurchaseOrder>> GetPurchaseOrdersWithoutDraftsByCompanyId(int companyId)
+        {
+            try
+            {
+                var purchaseOrders= await _dbContext.PurchaseOrders
+                    .Where(po => po.Status != 0 && po.CompanyId == companyId)
+                    .Include(po => po.PurchaseOrderDetails)
+                    .Include(po => po.Supplier)
+                    .ToListAsync();
+
+                return purchaseOrders.Any() ? purchaseOrders : null;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<PurchaseOrder>> GetPurchaseOrdersByUserId(int userId)
+        {
+            try
+            {
+                var purchaseOrders = await _dbContext.PurchaseOrders
+                    .Where(po => po.OrderedUserId == userId)
+                    .Include(po => po.PurchaseOrderDetails)
+                    .Include(po => po.Supplier)
+                    .ToListAsync();
+
+
+                return purchaseOrders.Any() ? purchaseOrders : null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task ApprovePurchaseOrder(int purchaseOrderId, PurchaseOrder purchaseOrder)
+        {
+            try
+            {
+                var existPurchaseOrder = await _dbContext.PurchaseOrders.FindAsync(purchaseOrderId);
+
+                if (existPurchaseOrder != null)
+                {
+                    existPurchaseOrder.Status = purchaseOrder.Status;
+                    existPurchaseOrder.ApprovedBy = purchaseOrder.ApprovedBy;
+                    existPurchaseOrder.ApprovedUserId = purchaseOrder.ApprovedUserId;
+                    existPurchaseOrder.ApprovedDate = purchaseOrder.ApprovedDate;
+
+                    
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<PurchaseOrder> GetPurchaseOrderByPurchaseOrderId(int purchaseOrderId)
+        {
+            try
+            {
+                var purchaseOrder = await _dbContext.PurchaseOrders
+                    .Where(po => po.PurchaseOrderId == purchaseOrderId)
+                    .Include(po => po.PurchaseOrderDetails)
+                    .Include(po => po.Supplier)
+                    .FirstOrDefaultAsync();
+
+                return purchaseOrder;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task UpdatePurchaseOrder(int purchaseOrderId, PurchaseOrder purchaseOrder)
+        {
+            try
+            {
+                var existPurchaseOrder = await _dbContext.PurchaseOrders.FindAsync(purchaseOrderId);
+
+                if (existPurchaseOrder != null)
+                {
+                    _dbContext.Entry(existPurchaseOrder).CurrentValues.SetValues(purchaseOrder);
+                    await _dbContext.SaveChangesAsync();
+                }
             }
             catch (Exception)
             {

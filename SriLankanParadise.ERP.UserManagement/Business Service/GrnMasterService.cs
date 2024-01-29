@@ -22,5 +22,30 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             return await _grnMasterRepository.GetAll();
         }
+
+        public async Task<IEnumerable<GrnMaster>> GetGrnMastersWithoutDraftsByCompanyId(int companyId)
+        {
+            return await _grnMasterRepository.GetGrnMastersWithoutDraftsByCompanyId(companyId);
+        }
+
+        public async Task<IEnumerable<GrnMaster>> GetGrnMastersByUserId(int userId)
+        {
+            return await _grnMasterRepository.GetGrnMastersByUserId(userId);
+        }
+
+        public async Task<GrnMaster> GetGrnMasterByGrnMasterId(int grnMasterId)
+        {
+            return await _grnMasterRepository.GetGrnMasterByGrnMasterId(grnMasterId);
+        }
+
+        public async Task ApproveGrnMaster(int grnMasterId, GrnMaster grnMaster)
+        {
+            await _grnMasterRepository.ApproveGrnMaster(grnMasterId, grnMaster);
+        }
+
+        public async Task UpdateGrnMaster(int grnMasterId, GrnMaster grnMaster)
+        {
+            await _grnMasterRepository.UpdateGrnMaster(grnMasterId, grnMaster);
+        }
     }
 }

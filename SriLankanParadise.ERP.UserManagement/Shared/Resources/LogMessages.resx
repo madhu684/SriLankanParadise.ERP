@@ -159,11 +159,35 @@
   <data name="GrnDetailCreated" xml:space="preserve">
     <value>Grn detail created successfully</value>
   </data>
+  <data name="GrnDetailDeleted" xml:space="preserve">
+    <value>Grn detail deleted successfully</value>
+  </data>
+  <data name="GrnDetailNotFound" xml:space="preserve">
+    <value>Grn detail not found</value>
+  </data>
+  <data name="GrnDetailUpdated" xml:space="preserve">
+    <value>Grn detail updated successfully</value>
+  </data>
+  <data name="GrnMasterApproved" xml:space="preserve">
+    <value>Grn master approved</value>
+  </data>
   <data name="GrnMasterCreated" xml:space="preserve">
     <value>Grn master created successfully</value>
   </data>
+  <data name="GrnMasterNotFound" xml:space="preserve">
+    <value>Grn master not found</value>
+  </data>
+  <data name="GrnMasterRetrieved" xml:space="preserve">
+    <value>Grn master retrieved</value>
+  </data>
+  <data name="GrnMastersNotFound" xml:space="preserve">
+    <value>Grn masters not found</value>
+  </data>
   <data name="GrnMastersRetrieved" xml:space="preserve">
     <value>Grn masters retrieved</value>
+  </data>
+  <data name="GrnMasterUpdated" xml:space="preserve">
+    <value>Grn master updated successfully</value>
   </data>
   <data name="InvalidUsernameOrPassword" xml:space="preserve">
     <value>Invalid username or password</value>
@@ -198,14 +222,38 @@
   <data name="PermissionsRetrieved" xml:space="preserve">
     <value>Permissions retrieved</value>
   </data>
+  <data name="PurchaseOrderApproved" xml:space="preserve">
+    <value>Purchase order approved</value>
+  </data>
   <data name="PurchaseOrderCreated" xml:space="preserve">
     <value>Purchase order created successfully</value>
   </data>
   <data name="PurchaseOrderDetailCreated" xml:space="preserve">
     <value>Purchase order detail created successfully</value>
   </data>
+  <data name="PurchaseOrderDetailDeleted" xml:space="preserve">
+    <value>Purchase order detail deleted</value>
+  </data>
+  <data name="PurchaseOrderDetailNotFound" xml:space="preserve">
+    <value>Purchase order detail not found</value>
+  </data>
+  <data name="PurchaseOrderDetailUpdated" xml:space="preserve">
+    <value>Purchase order detail updated successfully</value>
+  </data>
+  <data name="PurchaseOrderNotFound" xml:space="preserve">
+    <value>Purchase order not found</value>
+  </data>
+  <data name="PurchaseOrderRetrieved" xml:space="preserve">
+    <value>Purchase order retrieved</value>
+  </data>
+  <data name="PurchaseOrdersNotFound" xml:space="preserve">
+    <value>Purchase orders not found</value>
+  </data>
   <data name="PurchaseOrdersRetrieved" xml:space="preserve">
     <value>Purchase orders retrieved</value>
+  </data>
+  <data name="PurchaseOrderUpdated" xml:space="preserve">
+    <value>Purchase order updated successfully</value>
   </data>
   <data name="PurchaseRequisitionApproved" xml:space="preserve">
     <value>Purchase requisition approved</value>
@@ -215,6 +263,15 @@
   </data>
   <data name="PurchaseRequisitionDetailCreated" xml:space="preserve">
     <value>Purchase requisition detail created successfully</value>
+  </data>
+  <data name="PurchaseRequisitionDetailDeleted" xml:space="preserve">
+    <value>Purchase requisition detail deleted successfully</value>
+  </data>
+  <data name="PurchaseRequisitionDetailNotFound" xml:space="preserve">
+    <value>Purchase requisition detail not found</value>
+  </data>
+  <data name="PurchaseRequisitionDetailUpdated" xml:space="preserve">
+    <value>Purchase requisition detail updated successfully</value>
   </data>
   <data name="PurchaseRequisitionNotFound" xml:space="preserve">
     <value>Purchase requisition not found</value>
@@ -227,6 +284,9 @@
   </data>
   <data name="PurchaseRequisitionsRetrieved" xml:space="preserve">
     <value>Purchase requisitions retrieved</value>
+  </data>
+  <data name="PurchaseRequisitionUpdated" xml:space="preserve">
+    <value>Purchase requisition updated successfully</value>
   </data>
   <data name="RolePermissionCreated" xml:space="preserve">
     <value>Role permission created successfully</value>

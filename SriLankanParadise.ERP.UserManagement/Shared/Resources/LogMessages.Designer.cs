@@ -187,6 +187,42 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Grn detail deleted successfully.
+        /// </summary>
+        public static string GrnDetailDeleted {
+            get {
+                return ResourceManager.GetString("GrnDetailDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Grn detail not found.
+        /// </summary>
+        public static string GrnDetailNotFound {
+            get {
+                return ResourceManager.GetString("GrnDetailNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Grn detail updated successfully.
+        /// </summary>
+        public static string GrnDetailUpdated {
+            get {
+                return ResourceManager.GetString("GrnDetailUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Grn master approved.
+        /// </summary>
+        public static string GrnMasterApproved {
+            get {
+                return ResourceManager.GetString("GrnMasterApproved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Grn master created successfully.
         /// </summary>
         public static string GrnMasterCreated {
@@ -196,11 +232,47 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Grn master not found.
+        /// </summary>
+        public static string GrnMasterNotFound {
+            get {
+                return ResourceManager.GetString("GrnMasterNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Grn master retrieved.
+        /// </summary>
+        public static string GrnMasterRetrieved {
+            get {
+                return ResourceManager.GetString("GrnMasterRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Grn masters not found.
+        /// </summary>
+        public static string GrnMastersNotFound {
+            get {
+                return ResourceManager.GetString("GrnMastersNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Grn masters retrieved.
         /// </summary>
         public static string GrnMastersRetrieved {
             get {
                 return ResourceManager.GetString("GrnMastersRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Grn master updated successfully.
+        /// </summary>
+        public static string GrnMasterUpdated {
+            get {
+                return ResourceManager.GetString("GrnMasterUpdated", resourceCulture);
             }
         }
         
@@ -304,6 +376,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Purchase order approved.
+        /// </summary>
+        public static string PurchaseOrderApproved {
+            get {
+                return ResourceManager.GetString("PurchaseOrderApproved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Purchase order created successfully.
         /// </summary>
         public static string PurchaseOrderCreated {
@@ -322,11 +403,74 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Purchase order detail deleted.
+        /// </summary>
+        public static string PurchaseOrderDetailDeleted {
+            get {
+                return ResourceManager.GetString("PurchaseOrderDetailDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Purchase order detail not found.
+        /// </summary>
+        public static string PurchaseOrderDetailNotFound {
+            get {
+                return ResourceManager.GetString("PurchaseOrderDetailNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Purchase order detail updated successfully.
+        /// </summary>
+        public static string PurchaseOrderDetailUpdated {
+            get {
+                return ResourceManager.GetString("PurchaseOrderDetailUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Purchase order not found.
+        /// </summary>
+        public static string PurchaseOrderNotFound {
+            get {
+                return ResourceManager.GetString("PurchaseOrderNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Purchase order retrieved.
+        /// </summary>
+        public static string PurchaseOrderRetrieved {
+            get {
+                return ResourceManager.GetString("PurchaseOrderRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Purchase orders not found.
+        /// </summary>
+        public static string PurchaseOrdersNotFound {
+            get {
+                return ResourceManager.GetString("PurchaseOrdersNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Purchase orders retrieved.
         /// </summary>
         public static string PurchaseOrdersRetrieved {
             get {
                 return ResourceManager.GetString("PurchaseOrdersRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Purchase order updated successfully.
+        /// </summary>
+        public static string PurchaseOrderUpdated {
+            get {
+                return ResourceManager.GetString("PurchaseOrderUpdated", resourceCulture);
             }
         }
         
@@ -354,6 +498,33 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string PurchaseRequisitionDetailCreated {
             get {
                 return ResourceManager.GetString("PurchaseRequisitionDetailCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Purchase requisition detail deleted successfully.
+        /// </summary>
+        public static string PurchaseRequisitionDetailDeleted {
+            get {
+                return ResourceManager.GetString("PurchaseRequisitionDetailDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Purchase requisition detail not found.
+        /// </summary>
+        public static string PurchaseRequisitionDetailNotFound {
+            get {
+                return ResourceManager.GetString("PurchaseRequisitionDetailNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Purchase requisition detail updated successfully.
+        /// </summary>
+        public static string PurchaseRequisitionDetailUpdated {
+            get {
+                return ResourceManager.GetString("PurchaseRequisitionDetailUpdated", resourceCulture);
             }
         }
         
@@ -390,6 +561,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string PurchaseRequisitionsRetrieved {
             get {
                 return ResourceManager.GetString("PurchaseRequisitionsRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Purchase requisition updated successfully.
+        /// </summary>
+        public static string PurchaseRequisitionUpdated {
+            get {
+                return ResourceManager.GetString("PurchaseRequisitionUpdated", resourceCulture);
             }
         }
         

@@ -38,8 +38,12 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<PurchaseRequisitionDetail, PurchaseRequisitionDetailDto>();
             CreateMap<PurchaseOrderRequestModel, PurchaseOrder>();
             CreateMap<PurchaseOrder, PurchaseOrderDto>();
+            CreateMap<PurchaseOrderDetailRequestModel, PurchaseOrderDetail>();
+            CreateMap<PurchaseOrderDetail, PurchaseOrderDetailDto>();
+            CreateMap<ApprovePurchaseOrderRequestModel, PurchaseOrder>();
             CreateMap<GrnMasterRequestModel, GrnMaster>();
             CreateMap<GrnMaster, GrnMasterDto>();
+            CreateMap<ApproveGrnMasterRequestModel, GrnMaster>();
             CreateMap<GrnDetailRequestModel, GrnDetail>();
             CreateMap<GrnDetail, GrnDetailDto>();
             CreateMap<Location, LocationDto>();

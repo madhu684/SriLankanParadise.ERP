@@ -260,6 +260,7 @@ public partial class ErpSystemContext : DbContext
 
             entity.ToTable("GrnDetail");
 
+            entity.Property(e => e.ItemId).HasMaxLength(50);
             entity.Property(e => e.TotalPrice).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
 
@@ -275,9 +276,17 @@ public partial class ErpSystemContext : DbContext
 
             entity.ToTable("GrnMaster");
 
-            entity.Property(e => e.GrnDate).HasColumnType("datetime");
+            entity.Property(e => e.ApprovedBy).HasMaxLength(50);
+            entity.Property(e => e.ApprovedDate).HasColumnType("date");
+            entity.Property(e => e.GrnDate).HasColumnType("date");
             entity.Property(e => e.ReceivedBy).HasMaxLength(50);
-            entity.Property(e => e.ReceivedDate).HasColumnType("datetime");
+            entity.Property(e => e.ReceivedDate).HasColumnType("date");
+            entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
+
+            entity.HasOne(d => d.PurchaseOrder).WithMany(p => p.GrnMasters)
+                .HasForeignKey(d => d.PurchaseOrderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_GrnMaster_PurchaseOrder");
         });
 
         modelBuilder.Entity<ItemBatch>(entity =>
@@ -413,15 +422,16 @@ public partial class ErpSystemContext : DbContext
 
             entity.ToTable("PurchaseOrder");
 
-            entity.Property(e => e.DeliveryDate).HasColumnType("datetime");
-            entity.Property(e => e.OrderDate).HasColumnType("datetime");
+            entity.Property(e => e.ApprovedBy).HasMaxLength(50);
+            entity.Property(e => e.ApprovedDate).HasColumnType("date");
+            entity.Property(e => e.DeliveryDate).HasColumnType("date");
+            entity.Property(e => e.OrderDate).HasColumnType("date");
+            entity.Property(e => e.OrderedBy).HasMaxLength(50);
+            entity.Property(e => e.ReferenceNo)
+                .HasMaxLength(20)
+                .HasDefaultValueSql("('PO'+CONVERT([nvarchar](20),NEXT VALUE FOR [dbo].[PurchaseOrderReferenceNoSeq]))");
             entity.Property(e => e.Remark).HasMaxLength(50);
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
-
-            entity.HasOne(d => d.GrnMaster).WithMany(p => p.PurchaseOrders)
-                .HasForeignKey(d => d.GrnMasterId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__PurchaseO__GrnMa__10216507");
 
             entity.HasOne(d => d.Supplier).WithMany(p => p.PurchaseOrders)
                 .HasForeignKey(d => d.SupplierId)
@@ -703,6 +713,7 @@ public partial class ErpSystemContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_UserRole_User");
         });
+        modelBuilder.HasSequence("PurchaseOrderReferenceNoSeq").StartsAt(1000L);
 
         OnModelCreatingPartial(modelBuilder);
     }

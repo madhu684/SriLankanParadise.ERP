@@ -90,6 +90,8 @@ builder.Services.AddScoped<IPurchaseRequisitionDetailService, PurchaseRequisitio
 builder.Services.AddScoped<IPurchaseRequisitionDetailRepository, PurchaseRequisitionDetailRepository>();
 builder.Services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
 builder.Services.AddScoped<IPurchaseOrderRepository, PurchaseOrderRepository>();
+builder.Services.AddScoped<IPurchaseOrderDetailService, PurchaseOrderDetailService>();
+builder.Services.AddScoped<IPurchaseOrderDetailRepository, PurchaseOrderDetailRepository>();
 builder.Services.AddScoped<IGrnMasterService, GrnMasterService>();
 builder.Services.AddScoped<IGrnMasterRepository, GrnMasterRepository>();
 builder.Services.AddScoped<IGrnDetailService, GrnDetailService>();

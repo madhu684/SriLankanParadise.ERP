@@ -36,6 +36,8 @@
 
         public DateTime? ApprovedDate { get; set; }
 
+        public int? CompanyId { get; set; }
+
         public virtual IEnumerable<PurchaseRequisitionDetailDto>? PurchaseRequisitionDetails { get; set;}
     }
 }
