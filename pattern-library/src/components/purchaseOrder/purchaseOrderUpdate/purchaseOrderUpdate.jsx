@@ -1,11 +1,11 @@
 import React from "react";
-import usePurchaseRequisition from "./usePurchaseRequisition";
-import CurrentDateTime from "../currentDateTime/currentDateTime";
+import usePurchaseOrderUpdate from "./usePurchaseOrderUpdate";
+import CurrentDateTime from "../../currentDateTime/currentDateTime";
 
-const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
+const PurchaseOrderUpdate = ({ handleClose, purchaseOrder, handleUpdated }) => {
   const {
     formData,
-    locations,
+    suppliers,
     submissionStatus,
     validFields,
     validationErrors,
@@ -17,8 +17,10 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
     handleRemoveItem,
     handlePrint,
     handleAttachmentChange,
-    calculateTotalPrice,
-  } = usePurchaseRequisition({
+    calculateTotalAmount,
+    handleSupplierChange,
+  } = usePurchaseOrderUpdate({
+    purchaseOrder,
     onFormSubmit: () => {
       handleClose();
       handleUpdated();
@@ -40,168 +42,90 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
             Date and Time: <CurrentDateTime />
           </p>
         </div>
-        <h1 className="mt-2 text-center">Purchase Requisition</h1>
+        <h1 className="mt-2 text-center">Purchase Order</h1>
         <hr />
       </div>
 
       {/* Display success or error messages */}
       {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
-          Purchase requisition submitted successfully!
+          Purchase order submitted successfully!
         </div>
       )}
       {submissionStatus === "successSavedAsDraft" && (
         <div className="alert alert-success mb-3" role="alert">
-          Purchase requisition saved as draft, you can edit and submit it later!
+          Purchase order updated and saved as draft, you can edit and submit it
+          later!
         </div>
       )}
       {submissionStatus === "error" && (
         <div className="alert alert-danger mb-3" role="alert">
-          Error submitting purchase requisition. Please try again.
+          Error submitting purchase Order. Please try again.
         </div>
       )}
-
       <form>
         <div className="row g-3 mb-3 d-flex justify-content-between">
           <div className="col-md-5">
-            {/* Requestor Information */}
-            <h4>1. Requestor Information</h4>
+            {/* Supplier Information */}
+            <h4>1. Supplier Information</h4>
             <div className="mb-3 mt-3">
-              <label htmlFor="requestorName" className="form-label">
-                Requestor Name
+              <label htmlFor="supplierId" className="form-label">
+                Supplier Name
               </label>
-              <input
-                type="text"
-                className={`form-control ${
-                  validFields.requestorName ? "is-valid" : ""
-                } ${validationErrors.requestorName ? "is-invalid" : ""}`}
-                id="requestorName"
-                placeholder="Enter requestor name"
-                value={formData.requestorName}
-                onChange={(e) =>
-                  handleInputChange("requestorName", e.target.value)
-                }
+              <select
+                className={`form-select ${
+                  validFields.supplierId ? "is-valid" : ""
+                } ${validationErrors.supplierId ? "is-invalid" : ""}`}
+                id="supplierId"
+                value={formData?.supplierId ?? ""}
+                onChange={(e) => handleSupplierChange(e.target.value)}
                 required
-              />
-              {validationErrors.requestorName && (
+              >
+                <option value="">Select Supplier</option>
+                {suppliers.map((supplier) => (
+                  <option key={supplier.supplierId} value={supplier.supplierId}>
+                    {supplier.supplierName}
+                  </option>
+                ))}
+              </select>
+              {validationErrors.supplierId && (
                 <div className="invalid-feedback">
-                  {validationErrors.requestorName}
+                  {validationErrors.supplierId}
                 </div>
               )}
             </div>
-            <div className="mb-3">
-              <label htmlFor="department" className="form-label">
-                Department
-              </label>
-              <input
-                type="text"
-                className={`form-control ${
-                  validFields.department ? "is-valid" : ""
-                } ${validationErrors.department ? "is-invalid" : ""}`}
-                id="department"
-                placeholder="Enter department"
-                value={formData.department}
-                onChange={(e) =>
-                  handleInputChange("department", e.target.value)
-                }
-                required
-              />
-              {validationErrors.department && (
-                <div className="invalid-feedback">
-                  {validationErrors.department}
-                </div>
-              )}
-            </div>
-            <div className="mb-3">
-              <label htmlFor="email" className="form-label">
-                Email
-              </label>
-              <input
-                type="email"
-                className={`form-control ${
-                  validFields.email ? "is-valid" : ""
-                } ${validationErrors.email ? "is-invalid" : ""}`}
-                id="email"
-                placeholder="Enter email address"
-                value={formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
-                required
-              />
-              {validationErrors.email && (
-                <div className="invalid-feedback">{validationErrors.email}</div>
-              )}
-            </div>
-            <div className="mb-3">
-              <label htmlFor="contactNumber" className="form-label">
-                Contact number
-              </label>
-              <input
-                type="text"
-                className={`form-control ${
-                  validFields.contactNumber ? "is-valid" : ""
-                } ${validationErrors.contactNumber ? "is-invalid" : ""}`}
-                id="contactNumber"
-                placeholder="Enter contact number"
-                value={formData.contactNumber}
-                onChange={(e) =>
-                  handleInputChange("contactNumber", e.target.value)
-                }
-                required
-              />
-              {validationErrors.contactNumber && (
-                <div className="invalid-feedback">
-                  {validationErrors.contactNumber}
-                </div>
-              )}
-            </div>
+
+            {/* Additional Supplier Information */}
+            {formData.selectedSupplier && (
+              <div className="mb-3">
+                <p>Contact Person: {formData.selectedSupplier.contactPerson}</p>
+                <p>Phone: {formData.selectedSupplier.phone}</p>
+                <p>Email: {formData.selectedSupplier.email}</p>
+              </div>
+            )}
           </div>
+
           <div className="col-md-5">
-            {/* Request Information */}
-            <h4>2. Request Information</h4>
+            {/* Order Information */}
+            <h4>2. Order Information</h4>
             <div className="mb-3 mt-3">
-              <label htmlFor="requisitionDate" className="form-label">
-                Requisition Date
+              <label htmlFor="orderDate" className="form-label">
+                Order Date
               </label>
               <input
                 type="date"
                 className={`form-control ${
-                  validFields.requisitionDate ? "is-valid" : ""
-                } ${validationErrors.requisitionDate ? "is-invalid" : ""}`}
-                id="requisitionDate"
-                placeholder="Enter requisition date"
-                value={formData.requisitionDate}
-                onChange={(e) =>
-                  handleInputChange("requisitionDate", e.target.value)
-                }
+                  validFields.orderDate ? "is-valid" : ""
+                } ${validationErrors.orderDate ? "is-invalid" : ""}`}
+                id="orderDate"
+                placeholder="Enter order date"
+                value={formData.orderDate}
+                onChange={(e) => handleInputChange("orderDate", e.target.value)}
                 required
               />
-              {validationErrors.requisitionDate && (
+              {validationErrors.orderDate && (
                 <div className="invalid-feedback">
-                  {validationErrors.requisitionDate}
-                </div>
-              )}
-            </div>
-            <div className="mb-3">
-              <label htmlFor="purposeOfRequest" className="form-label">
-                Purpose of Request
-              </label>
-              <textarea
-                className={`form-control ${
-                  validFields.purposeOfRequest ? "is-valid" : ""
-                } ${validationErrors.purposeOfRequest ? "is-invalid" : ""}`}
-                placeholder="Enter purpose of request"
-                id="purposeOfRequest"
-                value={formData.purposeOfRequest}
-                onChange={(e) =>
-                  handleInputChange("purposeOfRequest", e.target.value)
-                }
-                rows="2"
-                maxLength="200"
-                required
-              ></textarea>
-              {validationErrors.purposeOfRequest && (
-                <div className="invalid-feedback">
-                  {validationErrors.purposeOfRequest}
+                  {validationErrors.orderDate}
                 </div>
               )}
             </div>
@@ -227,48 +151,6 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
                   {validationErrors.deliveryDate}
                 </div>
               )}
-            </div>
-            <div className="mb-3">
-              <label htmlFor="deliveryLocation" className="form-label">
-                Delivery Location
-              </label>
-              <select
-                className={`form-select ${
-                  validFields.deliveryLocation ? "is-valid" : ""
-                } ${validationErrors.deliveryLocation ? "is-invalid" : ""}`}
-                id="deliveryLocation"
-                value={formData?.deliveryLocation ?? ""}
-                onChange={(e) =>
-                  handleInputChange("deliveryLocation", e.target.value)
-                }
-              >
-                <option value="">Select Location</option>
-                {locations.map((location) => (
-                  <option key={location.locationId} value={location.locationId}>
-                    {location.locationName}
-                  </option>
-                ))}
-              </select>
-              {validationErrors.deliveryLocation && (
-                <div className="invalid-feedback">
-                  {validationErrors.deliveryLocation}
-                </div>
-              )}
-            </div>
-            <div className="mb-3">
-              <label htmlFor="referenceNumber" className="form-label">
-                Reference Number (if applicable)
-              </label>
-              <input
-                type="text"
-                className="form-control"
-                id="referenceNumber"
-                placeholder="Enter reference number"
-                value={formData.referenceNumber}
-                onChange={(e) =>
-                  handleInputChange("referenceNumber", e.target.value)
-                }
-              />
             </div>
           </div>
         </div>
@@ -296,11 +178,11 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
                       <input
                         type="text"
                         className="form-control"
-                        value={item.category}
+                        value={item.itemCategory}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            "category",
+                            "itemCategory",
                             e.target.value
                           )
                         }
@@ -310,9 +192,13 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
                       <input
                         type="text"
                         className="form-control"
-                        value={item.id}
+                        value={item.itemId}
                         onChange={(e) =>
-                          handleItemDetailsChange(index, "id", e.target.value)
+                          handleItemDetailsChange(
+                            index,
+                            "itemId",
+                            e.target.value
+                          )
                         }
                       />
                     </td>
@@ -359,7 +245,9 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
                       <button
                         type="button"
                         className="btn btn-outline-danger"
-                        onClick={() => handleRemoveItem(index)}
+                        onClick={() =>
+                          handleRemoveItem(index, item?.purchaseOrderDetailId)
+                        }
                       >
                         Delete
                       </button>
@@ -371,7 +259,7 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
                 <tr>
                   <td colSpan="4"></td>
                   <th>Total Amount</th>
-                  <td colSpan="2">{calculateTotalPrice().toFixed(2)}</td>
+                  <td colSpan="2">{calculateTotalAmount().toFixed(2)}</td>
                 </tr>
               </tfoot>
             </table>
@@ -444,4 +332,4 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
   );
 };
 
-export default PurchaseRequisition;
+export default PurchaseOrderUpdate;

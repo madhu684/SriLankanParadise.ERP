@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { approve_purchase_order_api } from "../../../services/purchaseApi";
+import { approve_grn_master_api } from "../../../services/purchaseApi";
 
-const usePurchaseOrderApproval = ({ onFormSubmit }) => {
+const useGrnApproval = ({ grn, onFormSubmit }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
 
   useEffect(() => {
@@ -12,25 +12,31 @@ const usePurchaseOrderApproval = ({ onFormSubmit }) => {
     }
   }, [approvalStatus, onFormSubmit]);
 
-  const handleApprove = async (purchaseOrderId) => {
+  const handleApprove = async (GrnId) => {
     try {
+      const firstDigit = parseInt(grn.status.toString().charAt(0), 10); // Extract the first digit
+      const combinedStatus = parseInt(`${firstDigit}2`, 10);
       const currentDate = new Date();
       const formattedDate = currentDate.toISOString();
+
       const approvalData = {
-        status: 2,
+        status: combinedStatus,
         approvedBy: sessionStorage.getItem("username"), //username
         approvedUserId: sessionStorage.getItem("userId"), //userid
         approvedDate: formattedDate,
         permissionId: 14,
       };
-      const approvalResponse = await approve_purchase_order_api(
-        purchaseOrderId,
+      const approvalResponse = await approve_grn_master_api(
+        GrnId,
         approvalData
       );
 
       if (approvalResponse.status === 200) {
         setApprovalStatus("approved");
-        console.log("Purchase Order approved successfully:", approvalResponse);
+        console.log(
+          "Goods received note approved successfully:",
+          approvalResponse
+        );
       } else {
         setApprovalStatus("error");
       }
@@ -40,7 +46,7 @@ const usePurchaseOrderApproval = ({ onFormSubmit }) => {
       }, 2000);
     } catch (error) {
       setApprovalStatus("error");
-      console.error("Error approving purchase Order:", error);
+      console.error("Error approving goods received note:", error);
       setTimeout(() => {
         setApprovalStatus(null);
       }, 2000);
@@ -53,4 +59,4 @@ const usePurchaseOrderApproval = ({ onFormSubmit }) => {
   };
 };
 
-export default usePurchaseOrderApproval;
+export default useGrnApproval;

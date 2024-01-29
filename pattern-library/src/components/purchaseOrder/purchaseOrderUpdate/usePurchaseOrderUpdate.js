@@ -1,43 +1,58 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  get_company_locations_api,
-  post_purchase_requisition_api,
-  post_purchase_requisition_detail_api,
-} from "../../services/purchaseApi";
+  get_company_suppliers_api,
+  put_purchase_order_api,
+  put_purchase_order_detail_api,
+  post_purchase_order_detail_api,
+  delete_purchase_order_detail_api,
+} from "../../../services/purchaseApi";
 
-const usePurchaseRequisition = ({ onFormSubmit }) => {
+const usePurchaseOrderUpdate = ({ purchaseOrder, onFormSubmit }) => {
   const [formData, setFormData] = useState({
-    requestorName: "",
-    department: "",
-    email: "",
-    contactNumber: "",
-    deliveryLocation: null,
-    requisitionDate: "",
-    purposeOfRequest: "",
+    supplierId: "",
+    orderDate: "",
     deliveryDate: "",
-    referenceNumber: "",
     itemDetails: [],
+    status: 0,
+    remark: "",
     attachments: [],
     totalAmount: 0,
+    selectedSupplier: "",
   });
-  const [locations, setLocations] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
+  const [itemIdsToBeDeleted, setItemIdsToBeDeleted] = useState([]);
   const alertRef = useRef(null);
 
   useEffect(() => {
-    const fetchLocations = async () => {
+    const fetchSuppliers = async () => {
       try {
-        const response = await get_company_locations_api(1);
-        setLocations(response.data.result);
+        const response = await get_company_suppliers_api(1);
+        setSuppliers(response.data.result);
       } catch (error) {
-        console.error("Error fetching locations:", error);
+        console.error("Error fetching suppliers:", error);
       }
     };
 
-    fetchLocations();
+    fetchSuppliers();
   }, []);
+
+  useEffect(() => {
+    const deepCopyPurchaseOrder = JSON.parse(JSON.stringify(purchaseOrder));
+    setFormData({
+      purchaseOrderId: deepCopyPurchaseOrder?.purchaseOrderId ?? "",
+      supplierId: deepCopyPurchaseOrder?.supplierId ?? "",
+      orderDate: deepCopyPurchaseOrder?.orderDate?.split("T")[0] ?? "",
+      deliveryDate: deepCopyPurchaseOrder?.deliveryDate?.split("T")[0] ?? "",
+      itemDetails: deepCopyPurchaseOrder?.purchaseOrderDetails ?? [],
+      remark: deepCopyPurchaseOrder?.remark ?? "",
+      attachments: deepCopyPurchaseOrder?.attachments ?? [],
+      totalAmount: deepCopyPurchaseOrder?.totalAmount ?? "",
+      selectedSupplier: deepCopyPurchaseOrder?.supplier ?? "",
+    });
+  }, [purchaseOrder]);
 
   useEffect(() => {
     if (submissionStatus != null) {
@@ -113,95 +128,17 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     return isAttachmentsValid;
   };
 
-  const validateForm = (isSaveAsDraft) => {
-    if (isSaveAsDraft) {
-      setValidFields({});
-      setValidationErrors({});
-      const isRequestorNameValid = validateField(
-        "requestorName",
-        "Requestor name",
-        formData.requestorName
-      );
-
-      const isDepartmentValid = validateField(
-        "department",
-        "Department",
-        formData.department
-      );
-
-      const isDeliveryLocationValid = validateField(
-        "deliveryLocation",
-        "Delivery location",
-        formData.deliveryLocation
-      );
-
-      const isDeliveryDateValid = validateField(
-        "deliveryDate",
-        "Delivery date",
-        formData.deliveryDate
-      );
-
-      const isRequisitionDateValid = validateField(
-        "requisitionDate",
-        "Requisition date",
-        formData.requisitionDate
-      );
-
-      const isAttachmentsValid = validateAttachments(formData.attachments);
-      return (
-        isRequestorNameValid &&
-        isDepartmentValid &&
-        isDeliveryLocationValid &&
-        isAttachmentsValid &&
-        isDeliveryDateValid &&
-        isRequisitionDateValid
-      );
-    }
-    const isRequestorNameValid = validateField(
-      "requestorName",
-      "Requestor name",
-      formData.requestorName
+  const validateForm = () => {
+    const isSupplierValid = validateField(
+      "supplierId",
+      "Supplier",
+      formData.supplierId
     );
 
-    const isDeliveryLocationValid = validateField(
-      "deliveryLocation",
-      "Delivery location",
-      formData.deliveryLocation
-    );
-
-    const isAttachmentsValid = validateAttachments(formData.attachments);
-
-    const isDepartmentValid = validateField(
-      "department",
-      "Department",
-      formData.department
-    );
-
-    const isEmailValid = validateField("email", "Email", formData.email, {
-      validationFunction: (value) => /\S+@\S+\.\S+/.test(value),
-      errorMessage: "Please enter a valid email address",
-    });
-
-    const isContactNumberValid = validateField(
-      "contactNumber",
-      "Contact number",
-      formData.contactNumber,
-      {
-        validationFunction: (value) => /^\d+$/.test(value),
-        errorMessage: "Please enter a valid contact number",
-      }
-    );
-
-    const isRequisitionDateValid = validateField(
-      "requisitionDate",
-      "Requisition date",
-      formData.requisitionDate
-    );
-
-    const isPurposeOfRequestValid = validateField(
-      "purposeOfRequest",
-      "Purpose of request",
-      formData.purposeOfRequest
+    const isOrderDateValid = validateField(
+      "orderDate",
+      "Order date",
+      formData.orderDate
     );
 
     const isDeliveryDateValid = validateField(
@@ -210,14 +147,11 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
       formData.deliveryDate
     );
 
+    const isAttachmentsValid = validateAttachments(formData.attachments);
+
     return (
-      isRequestorNameValid &&
-      isDepartmentValid &&
-      isEmailValid &&
-      isContactNumberValid &&
-      isDeliveryLocationValid &&
-      isRequisitionDateValid &&
-      isPurposeOfRequestValid &&
+      isSupplierValid &&
+      isOrderDateValid &&
       isDeliveryDateValid &&
       isAttachmentsValid
     );
@@ -229,70 +163,80 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
 
       const isFormValid = validateForm(isSaveAsDraft);
       if (isFormValid) {
-        const purchaseRequisitionData = {
-          requestedBy: formData.requestorName,
-          RequestedUserId: sessionStorage.getItem("userId"),
-          department: formData.department,
-          email: formData.email,
-          contactNo: formData.contactNumber,
-          requisitionDate: formData.requisitionDate,
-          purposeOfRequest: formData.purposeOfRequest,
+        const purchaseOrderData = {
+          supplierId: formData.supplierId,
+          orderDate: formData.orderDate,
           deliveryDate: formData.deliveryDate,
-          deliveryLocation: formData.deliveryLocation,
-          referenceNo: formData.referenceNumber,
           totalAmount: formData.totalAmount,
           status: status,
+          remark: formData.remark,
+          orderedBy: sessionStorage?.getItem("username") ?? null,
           approvedBy: null,
-          approvedUserId: null,
           approvedDate: null,
-          companyId: sessionStorage.getItem("companyId"),
-          permissionId: 9,
+          orderedUserId: sessionStorage?.getItem("userId") ?? null,
+          approvedUserId: null,
+          companyId: sessionStorage?.getItem("companyId") ?? null,
+          permissionId: 18,
         };
 
-        const response = await post_purchase_requisition_api(
-          purchaseRequisitionData
+        const response = await put_purchase_order_api(
+          purchaseOrder.purchaseOrderId,
+          purchaseOrderData
         );
-
-        const purchaseRequisitionId =
-          response.data.result.purchaseRequisitionId;
 
         // Extract itemDetails from formData
         const itemDetailsData = formData.itemDetails.map(async (item) => {
+          let detailsApiResponse;
           const detailsData = {
-            purchaseRequisitionId,
-            itemCategory: item.category,
-            itemId: item.id,
+            purchaseOrderId: purchaseOrder.purchaseOrderId,
+            itemCategory: item.itemCategory,
+            itemId: item.itemId,
             name: item.name,
             quantity: item.quantity,
             unitPrice: item.unitPrice,
             totalPrice: item.totalPrice,
-            permissionId: 9,
+            permissionId: 18,
           };
 
-          // Call post_purchase_requisition_detail_api for each item
-          const detailsApiResponse = await post_purchase_requisition_detail_api(
-            detailsData
-          );
-
+          if (item.purchaseOrderDetailId != null) {
+            // Call put_purchase_Order_detail_api for each item
+            detailsApiResponse = await put_purchase_order_detail_api(
+              item.purchaseOrderDetailId,
+              detailsData
+            );
+          } else {
+            // Call post_purchase_Order_detail_api for each item
+            detailsApiResponse = await post_purchase_order_detail_api(
+              detailsData
+            );
+          }
           return detailsApiResponse;
         });
 
         const detailsResponses = await Promise.all(itemDetailsData);
 
         const allDetailsSuccessful = detailsResponses.every(
-          (detailsResponse) => detailsResponse.status === 201
+          (detailsResponse) => detailsResponse.status === 201 || 200
         );
+
+        for (const itemIdToBeDeleted of itemIdsToBeDeleted) {
+          const response = await delete_purchase_order_detail_api(
+            itemIdToBeDeleted
+          );
+          console.log(
+            `Successfully deleted item with ID: ${itemIdToBeDeleted}`
+          );
+        }
+        // Clear the itmeIdsToBeDeleted array after deletion
+        setItemIdsToBeDeleted([]);
 
         if (allDetailsSuccessful) {
           if (isSaveAsDraft) {
             setSubmissionStatus("successSavedAsDraft");
-            console.log("Purchase requisition saved as draft!", formData);
+            console.log("Purchase order updated and saved as draft!", formData);
           } else {
             setSubmissionStatus("successSubmitted");
-            console.log(
-              "Purchase requisition submitted successfully!",
-              formData
-            );
+            console.log("Purchase order submitted successfully!", formData);
           }
 
           setTimeout(() => {
@@ -319,6 +263,20 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     }));
   };
 
+  const handleSupplierChange = (supplierId) => {
+    const SelectedSupplierId = parseInt(supplierId, 10);
+
+    const selectedSupplier = suppliers.find(
+      (supplier) => supplier.supplierId === SelectedSupplierId
+    );
+
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      supplierId,
+      selectedSupplier,
+    }));
+  };
+
   const handleItemDetailsChange = (index, field, value) => {
     setFormData((prevFormData) => {
       const updatedItemDetails = [...prevFormData.itemDetails];
@@ -342,7 +300,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
       return {
         ...prevFormData,
         itemDetails: updatedItemDetails,
-        totalAmount: calculateTotalPrice(),
+        totalAmount: calculateTotalAmount(),
       };
     });
   };
@@ -353,8 +311,8 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
       itemDetails: [
         ...prevFormData.itemDetails,
         {
-          category: "",
-          id: "",
+          itemCategory: "",
+          itemId: "",
           name: "",
           quantity: 0,
           unitPrice: 0.0,
@@ -364,7 +322,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     }));
   };
 
-  const handleRemoveItem = (index) => {
+  const handleRemoveItem = (index, purchaseOrderDetailId) => {
     setFormData((prevFormData) => {
       const updatedItemDetails = [...prevFormData.itemDetails];
       updatedItemDetails.splice(index, 1);
@@ -373,6 +331,10 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
         itemDetails: updatedItemDetails,
       };
     });
+
+    if (purchaseOrderDetailId !== null && purchaseOrderDetailId !== undefined) {
+      setItemIdsToBeDeleted((prevIds) => [...prevIds, purchaseOrderDetailId]);
+    }
   };
 
   const handlePrint = () => {
@@ -386,7 +348,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     }));
   };
 
-  const calculateTotalPrice = () => {
+  const calculateTotalAmount = () => {
     return formData.itemDetails.reduce(
       (total, item) => total + item.quantity * item.unitPrice,
       0
@@ -395,7 +357,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
 
   return {
     formData,
-    locations,
+    suppliers,
     submissionStatus,
     validFields,
     validationErrors,
@@ -407,8 +369,9 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     handleRemoveItem,
     handlePrint,
     handleAttachmentChange,
-    calculateTotalPrice,
+    calculateTotalAmount,
+    handleSupplierChange,
   };
 };
 
-export default usePurchaseRequisition;
+export default usePurchaseOrderUpdate;

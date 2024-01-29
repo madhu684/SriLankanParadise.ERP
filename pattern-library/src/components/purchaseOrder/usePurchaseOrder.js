@@ -1,17 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   get_company_suppliers_api,
   post_purchase_order_api,
   post_purchase_order_detail_api,
 } from "../../services/purchaseApi";
 
-const usePurchaseOrder = () => {
+const usePurchaseOrder = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
     supplierId: "",
     orderDate: "",
     deliveryDate: "",
     itemDetails: [],
-    status: "",
+    status: 0,
     remark: "",
     attachments: [],
     totalAmount: 0,
@@ -21,6 +21,8 @@ const usePurchaseOrder = () => {
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
+  const [referenceNo, setReferenceNo] = useState(null);
+  const alertRef = useRef(null);
 
   useEffect(() => {
     const fetchSuppliers = async () => {
@@ -34,6 +36,13 @@ const usePurchaseOrder = () => {
 
     fetchSuppliers();
   }, []);
+
+  useEffect(() => {
+    if (submissionStatus != null) {
+      // Scroll to the success alert when it becomes visible
+      alertRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [submissionStatus]);
 
   const validateField = (
     fieldName,
@@ -136,21 +145,25 @@ const usePurchaseOrder = () => {
       const status = isSaveAsDraft ? 0 : 1;
       const isFormValid = validateForm();
       if (isFormValid) {
-        console.log("Inside the API call for PurchaseOrder");
         const purchaseOrderData = {
-          grnMasterId: 0,
           supplierId: formData.supplierId,
           orderDate: formData.orderDate,
           deliveryDate: formData.deliveryDate,
           totalAmount: formData.totalAmount,
           status: status,
           remark: formData.remark,
+          orderedBy: sessionStorage?.getItem("username") ?? null,
           approvedBy: null,
           approvedDate: null,
-          permissionId: 9,
+          orderedUserId: sessionStorage?.getItem("userId") ?? null,
+          approvedUserId: null,
+          companyId: sessionStorage?.getItem("companyId") ?? null,
+          permissionId: 11,
         };
 
         const response = await post_purchase_order_api(purchaseOrderData);
+
+        setReferenceNo(response.data.result.referenceNo);
 
         const purchaseOrderId = response.data.result.purchaseOrderId;
 
@@ -164,7 +177,7 @@ const usePurchaseOrder = () => {
             quantity: item.quantity,
             unitPrice: item.unitPrice,
             totalPrice: item.totalPrice,
-            permissionId: 9,
+            permissionId: 11,
           };
 
           // Call post_purchase_requisition_detail_api for each item
@@ -192,6 +205,7 @@ const usePurchaseOrder = () => {
 
           setTimeout(() => {
             setSubmissionStatus(null);
+            onFormSubmit();
           }, 3000);
         } else {
           setSubmissionStatus("error");
@@ -238,17 +252,19 @@ const usePurchaseOrder = () => {
         updatedItemDetails[index].quantity
       );
 
-      updatedItemDetails[index].unitPrice = !isNaN(parseFloat(value))
+      updatedItemDetails[index].unitPrice = !isNaN(
+        parseFloat(updatedItemDetails[index].unitPrice)
+      )
         ? Math.max(0, parseFloat(updatedItemDetails[index].unitPrice))
         : 0;
 
-      updatedItemDetails[index].totalPrice = (
-        updatedItemDetails[index].quantity * updatedItemDetails[index].unitPrice
-      ).toFixed(2);
+      updatedItemDetails[index].totalPrice =
+        updatedItemDetails[index].quantity *
+        updatedItemDetails[index].unitPrice;
       return {
         ...prevFormData,
         itemDetails: updatedItemDetails,
-        totalAmount: calculateTotalAmount().toFixed(2),
+        totalAmount: calculateTotalAmount(),
       };
     });
   };
@@ -281,20 +297,6 @@ const usePurchaseOrder = () => {
     });
   };
 
-  const formatDateTime = () => {
-    const currentDateTime = new Date();
-    const options = {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    };
-    return currentDateTime.toLocaleDateString("en-US", options);
-  };
-
   const handlePrint = () => {
     window.print();
   };
@@ -319,6 +321,8 @@ const usePurchaseOrder = () => {
     submissionStatus,
     validFields,
     validationErrors,
+    referenceNo,
+    alertRef,
     handleInputChange,
     handleSupplierChange,
     handleItemDetailsChange,
@@ -327,7 +331,6 @@ const usePurchaseOrder = () => {
     handleAddItem,
     handleRemoveItem,
     handlePrint,
-    formatDateTime,
     calculateTotalAmount,
   };
 };

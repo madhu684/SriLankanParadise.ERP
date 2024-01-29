@@ -1,8 +1,8 @@
 import React from "react";
-import useGrn from "./useGrn";
-import CurrentDateTime from "../currentDateTime/currentDateTime";
+import useGrnUpdate from "./useGrnUpdate";
+import CurrentDateTime from "../../currentDateTime/currentDateTime";
 
-const Grn = ({ handleClose, handleUpdated }) => {
+const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
   const {
     formData,
     submissionStatus,
@@ -21,7 +21,8 @@ const Grn = ({ handleClose, handleUpdated }) => {
     calculateTotalAmount,
     handlePurchaseOrderChange,
     handleStatusChange,
-  } = useGrn({
+  } = useGrnUpdate({
+    grn,
     onFormSubmit: () => {
       handleClose();
       handleUpdated();
@@ -31,8 +32,8 @@ const Grn = ({ handleClose, handleUpdated }) => {
   return (
     <div className="container mt-4">
       {/* Header */}
+      <div ref={alertRef}></div>
       <div className="mb-4">
-        <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
           <img
             src="path/to/your/logo.png"
@@ -181,7 +182,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
                 className={`form-select ${
                   validFields.purchaseOrderId ? "is-valid" : ""
                 } ${validationErrors.purchaseOrderId ? "is-invalid" : ""}`}
-                // value={formData.purchaseOrderId}
+                value={grn?.purchaseOrder?.referenceNo}
                 onChange={(e) => handlePurchaseOrderChange(e.target.value)}
                 required
               >
@@ -239,9 +240,13 @@ const Grn = ({ handleClose, handleUpdated }) => {
                       <input
                         type="text"
                         className="form-control"
-                        value={item.id}
+                        value={item.itemId}
                         onChange={(e) =>
-                          handleItemDetailsChange(index, "id", e.target.value)
+                          handleItemDetailsChange(
+                            index,
+                            "itemId",
+                            e.target.value
+                          )
                         }
                       />
                     </td>
@@ -307,7 +312,9 @@ const Grn = ({ handleClose, handleUpdated }) => {
                       <button
                         type="button"
                         className="btn btn-outline-danger"
-                        onClick={() => handleRemoveItem(index)}
+                        onClick={() =>
+                          handleRemoveItem(index, item?.grnDetailId)
+                        }
                       >
                         Delete
                       </button>
@@ -371,4 +378,4 @@ const Grn = ({ handleClose, handleUpdated }) => {
   );
 };
 
-export default Grn;
+export default GrnUpdate;

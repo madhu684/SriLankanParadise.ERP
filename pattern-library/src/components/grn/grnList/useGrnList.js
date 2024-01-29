@@ -1,24 +1,24 @@
 import { useState, useEffect } from "react";
-import { get_purchase_orders_with_out_drafts_api } from "../../../services/purchaseApi";
-import { get_purchase_orders_by_user_id_api } from "../../../services/purchaseApi";
+import { get_grn_masters_with_out_drafts_api } from "../../../services/purchaseApi";
+import { get_grn_masters_by_user_id_api } from "../../../services/purchaseApi";
 import { get_user_permissions_api } from "../../../services/userManagementApi";
 
-const usePurchaseOrderList = () => {
-  const [purchaseOrders, setPurchaseOrders] = useState([]);
+const useGrnList = () => {
+  const [Grns, setGrns] = useState([]);
   const [userPermissions, setUserPermissions] = useState([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [error, setError] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedRowData, setSelectedRowData] = useState([]);
-  const [showApprovePOModal, setShowApprovePOModal] = useState(false);
-  const [showApprovePOModalInParent, setShowApprovePOModalInParent] =
+  const [showApproveGrnModal, setShowApproveGrnModal] = useState(false);
+  const [showApproveGrnModalInParent, setShowApproveGrnModalInParent] =
     useState(false);
-  const [showDetailPOModal, setShowDetailPOModal] = useState(false);
-  const [showDetailPOModalInParent, setShowDetailPOModalInParent] =
+  const [showDetailGrnModal, setShowDetailGrnModal] = useState(false);
+  const [showDetailGrnModalInParent, setShowDetailGrnModalInParent] =
     useState(false);
-  const [showCreatePOForm, setShowCreatePOForm] = useState(false);
-  const [showUpdatePOForm, setShowUpdatePOForm] = useState(false);
-  const [PODetail, setPODetail] = useState("");
+  const [showCreateGrnForm, setShowCreateGrnForm] = useState(false);
+  const [showUpdateGrnForm, setShowUpdateGrnForm] = useState(false);
+  const [GRNDetail, setGRNDetail] = useState("");
   const [isLoadingPermissions, setIsLoadingPermissions] = useState(true);
 
   const fetchUserPermissions = async () => {
@@ -37,41 +37,34 @@ const usePurchaseOrderList = () => {
   const fetchData = async () => {
     try {
       if (!isLoadingPermissions && userPermissions) {
-        if (hasPermission("Approve Purchase Order")) {
-          // const purchaseOrderResponse =
-          //   await get_purchase_orders_with_out_drafts_api();
-          // setPurchaseOrders(purchaseOrderResponse.data.result);
-
-          const purchaseOrderWithoutDraftsResponse =
-            await get_purchase_orders_with_out_drafts_api(
+        if (hasPermission("Approve Goods Received Note")) {
+          const GrnWithoutDraftsResponse =
+            await get_grn_masters_with_out_drafts_api(
               sessionStorage.getItem("companyId")
             );
 
-          const purchaseOrderByUserIdResponse =
-            await get_purchase_orders_by_user_id_api(
-              sessionStorage.getItem("userId")
-            );
+          const GrnByUserIdResponse = await get_grn_masters_by_user_id_api(
+            sessionStorage.getItem("userId")
+          );
 
-          let newPurchaseOrders =
-            purchaseOrderWithoutDraftsResponse.data.result;
-          const additionalOrders = purchaseOrderByUserIdResponse.data.result;
+          let newGrns = GrnWithoutDraftsResponse.data.result;
+          const additionalOrders = GrnByUserIdResponse.data.result;
 
           const uniqueNewOrders = additionalOrders.filter(
             (order) =>
-              !newPurchaseOrders.some(
+              !newGrns.some(
                 (existingOrder) =>
-                  existingOrder.purchaseOrderId === order.purchaseOrderId
+                  existingOrder.grnMasterId === order.grnMasterId
               )
           );
 
-          newPurchaseOrders = [...newPurchaseOrders, ...uniqueNewOrders];
-          setPurchaseOrders(newPurchaseOrders);
+          newGrns = [...newGrns, ...uniqueNewOrders];
+          setGrns(newGrns);
         } else {
-          const purchaseOrderResponse =
-            await get_purchase_orders_by_user_id_api(
-              sessionStorage.getItem("userId")
-            );
-          setPurchaseOrders(purchaseOrderResponse.data.result);
+          const GrnResponse = await get_grn_masters_by_user_id_api(
+            sessionStorage.getItem("userId")
+          );
+          setGrns(GrnResponse.data.result);
         }
       }
     } catch (error) {
@@ -89,20 +82,20 @@ const usePurchaseOrderList = () => {
     fetchData();
   }, [isLoadingPermissions, userPermissions]);
 
-  const handleShowApprovePOModal = () => {
-    setShowApprovePOModal(true);
-    setShowApprovePOModalInParent(true);
+  const handleShowApproveGrnModal = () => {
+    setShowApproveGrnModal(true);
+    setShowApproveGrnModalInParent(true);
   };
 
-  const handleCloseApprovePOModal = () => {
-    setShowApprovePOModal(false);
-    handleCloseApprovePOModalInParent();
+  const handleCloseApproveGrnModal = () => {
+    setShowApproveGrnModal(false);
+    handleCloseApproveGrnModalInParent();
   };
 
-  const handleCloseApprovePOModalInParent = () => {
+  const handleCloseApproveGrnModalInParent = () => {
     const delay = 300;
     setTimeout(() => {
-      setShowApprovePOModalInParent(false);
+      setShowApproveGrnModalInParent(false);
     }, delay);
   };
 
@@ -115,32 +108,32 @@ const usePurchaseOrderList = () => {
     }, delay);
   };
 
-  const handleShowDetailPOModal = () => {
-    setShowDetailPOModal(true);
-    setShowDetailPOModalInParent(true);
+  const handleShowDetailGrnModal = () => {
+    setShowDetailGrnModal(true);
+    setShowDetailGrnModalInParent(true);
   };
 
-  const handleCloseDetailPOModal = () => {
-    setShowDetailPOModal(false);
-    handleCloseDetailPOModalInParent();
+  const handleCloseDetailGrnModal = () => {
+    setShowDetailGrnModal(false);
+    handleCloseDetailGrnModalInParent();
   };
 
-  const handleCloseDetailPOModalInParent = () => {
+  const handleCloseDetailGrnModalInParent = () => {
     const delay = 300;
     setTimeout(() => {
-      setShowDetailPOModalInParent(false);
-      setPODetail("");
+      setShowDetailGrnModalInParent(false);
+      setGRNDetail("");
     }, delay);
   };
 
-  const handleViewDetails = (purchaseOrder) => {
-    setPODetail(purchaseOrder);
-    handleShowDetailPOModal();
+  const handleViewDetails = (Grn) => {
+    setGRNDetail(Grn);
+    handleShowDetailGrnModal();
   };
 
-  const handleUpdate = (purchaseOrder) => {
-    setPODetail(purchaseOrder);
-    setShowUpdatePOForm(true);
+  const handleUpdate = (Grn) => {
+    setGRNDetail(Grn);
+    setShowUpdateGrnForm(true);
   };
 
   const handleUpdated = async () => {
@@ -154,14 +147,14 @@ const usePurchaseOrderList = () => {
 
   const handleRowSelect = (id) => {
     const isSelected = selectedRows.includes(id);
-    const selectedRow = purchaseOrders.find((pr) => pr.purchaseOrderId === id);
+    const selectedRow = Grns.find((pr) => pr.grnMasterId === id);
 
     if (isSelected) {
       setSelectedRows((prevSelected) =>
         prevSelected.filter((selectedId) => selectedId !== id)
       );
       setSelectedRowData((prevSelectedData) =>
-        prevSelectedData.filter((data) => data.purchaseOrderId !== id)
+        prevSelectedData.filter((data) => data.grnMasterId !== id)
       );
     } else {
       setSelectedRows((prevSelected) => [...prevSelected, id]);
@@ -175,6 +168,12 @@ const usePurchaseOrderList = () => {
   const isAnyRowSelected = selectedRows.length === 1;
 
   const getStatusLabel = (statusCode) => {
+    if (statusCode === null || statusCode === undefined) {
+      return "Unknown Status";
+    }
+
+    const secondDigit = parseInt(String(statusCode).charAt(1), 10);
+
     const statusLabels = {
       0: "Draft",
       1: "Pending Approval",
@@ -186,10 +185,16 @@ const usePurchaseOrderList = () => {
       7: "On Hold",
     };
 
-    return statusLabels[statusCode] || "Unknown Status";
+    return statusLabels[secondDigit] || "Unknown Status";
   };
 
   const getStatusBadgeClass = (statusCode) => {
+    if (statusCode === null || statusCode === undefined) {
+      return "Unknown Status";
+    }
+
+    const secondDigit = parseInt(String(statusCode).charAt(1), 10);
+
     const statusClasses = {
       0: "bg-secondary",
       1: "bg-warning",
@@ -201,14 +206,14 @@ const usePurchaseOrderList = () => {
       7: "bg-secondary",
     };
 
-    return statusClasses[statusCode] || "bg-secondary";
+    return statusClasses[secondDigit] || "bg-secondary";
   };
 
   const areAnySelectedRowsPending = (selectedRows) => {
-    return selectedRows.some(
-      (id) =>
-        purchaseOrders.find((po) => po.purchaseOrderId === id)?.status === 1
-    );
+    return selectedRows.some((id) => {
+      const grn = Grns.find((grn) => grn.grnMasterId === id);
+      return grn && grn.status && grn.status.toString().charAt(1) === "1";
+    });
   };
 
   const hasPermission = (permissionName) => {
@@ -220,38 +225,38 @@ const usePurchaseOrderList = () => {
   };
 
   return {
-    purchaseOrders,
+    Grns,
     isLoadingData,
     isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
-    showApprovePOModal,
-    showApprovePOModalInParent,
-    showDetailPOModal,
-    showDetailPOModalInParent,
+    showApproveGrnModal,
+    showApproveGrnModalInParent,
+    showDetailGrnModal,
+    showDetailGrnModalInParent,
     selectedRowData,
-    showCreatePOForm,
-    showUpdatePOForm,
+    showCreateGrnForm,
+    showUpdateGrnForm,
     userPermissions,
-    PODetail,
+    GRNDetail,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleViewDetails,
     getStatusLabel,
     getStatusBadgeClass,
     handleRowSelect,
-    handleShowApprovePOModal,
-    handleCloseApprovePOModal,
-    handleShowDetailPOModal,
-    handleCloseDetailPOModal,
+    handleShowApproveGrnModal,
+    handleCloseApproveGrnModal,
+    handleShowDetailGrnModal,
+    handleCloseDetailGrnModal,
     handleApproved,
-    setShowCreatePOForm,
-    setShowUpdatePOForm,
+    setShowCreateGrnForm,
+    setShowUpdateGrnForm,
     hasPermission,
     handleUpdate,
     handleUpdated,
   };
 };
 
-export default usePurchaseOrderList;
+export default useGrnList;

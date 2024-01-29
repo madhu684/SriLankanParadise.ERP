@@ -1,45 +1,44 @@
 import React from "react";
-import usePurchaseRequisitionList from "./usePurchaseRequisitionList";
-import PurchaseRequisitionApproval from "../purchaseRequisitionApproval/purchaseRequisitionApproval";
-import PurchaseRequisition from "../purchaseRequisition";
-import PurchaseRequisitionDetail from "../purchaseRequisitionDetail/purchaseRequisitionDetail";
-import PurchaseRequisitionUpdate from "../purchaseRequisitionUpdate/purchaseRequisitionUpdate";
+import useGrnList from "./useGrnList.js";
+import GrnApproval from "../grnApproval/grnApproval.jsx";
+import Grn from "../grn";
+import GrnDetail from "../grnDetail/grnDetail.jsx";
+import GrnUpdate from "../grnUpdate/grnUpdate.jsx";
 import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
 
-const PurchaseRequisitionList = () => {
+const GrnList = () => {
   const {
-    purchaseRequisitions,
+    Grns,
     isLoadingData,
     isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
     selectedRowData,
-    showApprovePRModal,
-    showApprovePRModalInParent,
-    showDetailPRModal,
-    showDetailPRModalInParent,
-    showCreatePRForm,
-    showUpdatePRForm,
-    PRDetail,
+    showApproveGrnModal,
+    showApproveGrnModalInParent,
+    showDetailGrnModal,
+    showDetailGrnModalInParent,
+    showCreateGrnForm,
+    showUpdateGrnForm,
+    GRNDetail,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleRowSelect,
     getStatusLabel,
     getStatusBadgeClass,
-    handleShowApprovePRModal,
-    handleCloseApprovePRModal,
-    handleShowDetailPRModal,
-    handleCloseDetailPRModal,
+    handleShowApproveGrnModal,
+    handleCloseApproveGrnModal,
+    handleCloseDetailGrnModal,
     handleApproved,
     handleViewDetails,
-    setShowCreatePRForm,
-    setShowUpdatePRForm,
+    setShowCreateGrnForm,
+    setShowUpdateGrnForm,
     hasPermission,
     handleUpdate,
     handleUpdated,
-  } = usePurchaseRequisitionList();
+  } = useGrnList();
 
   if (isLoadingData || isLoadingPermissions) {
     return <LoadingSpinner />;
@@ -49,39 +48,39 @@ const PurchaseRequisitionList = () => {
     return <ErrorComponent error={error} />;
   }
 
-  if (showCreatePRForm) {
+  if (showCreateGrnForm) {
     return (
-      <PurchaseRequisition
-        handleClose={() => setShowCreatePRForm(false)}
+      <Grn
+        handleClose={() => setShowCreateGrnForm(false)}
         handleUpdated={handleUpdated}
       />
     );
   }
 
-  if (showUpdatePRForm) {
+  if (showUpdateGrnForm) {
     return (
-      <PurchaseRequisitionUpdate
-        handleClose={() => setShowUpdatePRForm(false)}
-        purchaseRequisition={PRDetail || selectedRowData[0]}
+      <GrnUpdate
+        handleClose={() => setShowUpdateGrnForm(false)}
+        grn={GRNDetail || selectedRowData[0]}
         handleUpdated={handleUpdated}
       />
     );
   }
 
-  if (!purchaseRequisitions) {
+  if (!Grns) {
     return (
       <div className="container mt-4">
-        <h2>Purchase Requisitions</h2>
+        <h2>Goods Received Notes</h2>
         <div
           className="d-flex flex-column justify-content-center align-items-center text-center vh-100"
           style={{ maxHeight: "80vh" }}
         >
-          <p>You haven't created any purchase requisition. Create a new one.</p>
-          {hasPermission("Create Purchase Requisition") && (
+          <p>You haven't created any goods received note. Create a new one.</p>
+          {hasPermission("Create Goods Received Note") && (
             <button
               type="button"
               className="btn btn-primary"
-              onClick={() => setShowCreatePRForm(true)}
+              onClick={() => setShowCreateGrnForm(true)}
             >
               Create
             </button>
@@ -93,32 +92,32 @@ const PurchaseRequisitionList = () => {
 
   return (
     <div className="container mt-4">
-      <h2>Purchase Requisitions</h2>
+      <h2>Goods Received Notes</h2>
       <div className="mt-3 d-flex justify-content-start align-items-center">
         <div className="btn-group" role="group">
-          {hasPermission("Create Purchase Requisition") && (
+          {hasPermission("Create Goods Received Note") && (
             <button
               type="button"
               className="btn btn-primary"
-              onClick={() => setShowCreatePRForm(true)}
+              onClick={() => setShowCreateGrnForm(true)}
             >
               Create
             </button>
           )}
-          {hasPermission("Approve Purchase Requisition") &&
+          {hasPermission("Approve Goods Received Note") &&
             isAnyRowSelected &&
             areAnySelectedRowsPending(selectedRows) && (
               <button
                 className="btn btn-success"
-                onClick={handleShowApprovePRModal}
+                onClick={handleShowApproveGrnModal}
               >
                 Approve
               </button>
             )}
-          {hasPermission("Update Purchase Requisition") && isAnyRowSelected && (
+          {hasPermission("Update Goods Received Note") && isAnyRowSelected && (
             <button
               className="btn btn-warning"
-              onClick={() => setShowUpdatePRForm(true)}
+              onClick={() => setShowUpdateGrnForm(true)}
             >
               Edit
             </button>
@@ -132,40 +131,40 @@ const PurchaseRequisitionList = () => {
               <th>
                 <input type="checkbox" onChange={() => setSelectedRows([])} />
               </th>
-              <th>ID</th>
-              <th>Requested By</th>
-              <th>Department</th>
+              <th>Id</th>
+              <th>Received By</th>
+              <th>Received Date</th>
               <th>Status</th>
               <th>Details</th>
             </tr>
           </thead>
           <tbody>
-            {purchaseRequisitions.map((pr) => (
-              <tr key={pr.purchaseRequisitionId}>
+            {Grns.map((Grn) => (
+              <tr key={Grn.grnMasterId}>
                 <td>
                   <input
                     type="checkbox"
-                    checked={selectedRows.includes(pr.purchaseRequisitionId)}
-                    onChange={() => handleRowSelect(pr.purchaseRequisitionId)}
+                    checked={selectedRows.includes(Grn.grnMasterId)}
+                    onChange={() => handleRowSelect(Grn.grnMasterId)}
                   />
                 </td>
-                <td>{pr.purchaseRequisitionId}</td>
-                <td>{pr.requestedBy}</td>
-                <td>{pr.department}</td>
+                <td>{Grn.grnMasterId}</td>
+                <td>{Grn.receivedBy}</td>
+                <td>{Grn?.receivedDate?.split("T")[0]}</td>
                 <td>
                   <span
                     className={`badge rounded-pill ${getStatusBadgeClass(
-                      pr.status
+                      Grn.status
                     )}`}
                   >
-                    {getStatusLabel(pr.status)}
+                    {getStatusLabel(Grn.status)}
                   </span>
                 </td>
                 <td>
-                  {pr.status === 0 ? (
+                  {Grn.status.toString().charAt(1) === "0" ? (
                     <button
                       className="btn btn-warning me-2"
-                      onClick={() => handleUpdate(pr)}
+                      onClick={() => handleUpdate(Grn)}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -182,7 +181,7 @@ const PurchaseRequisitionList = () => {
                   ) : (
                     <button
                       className="btn btn-primary me-2"
-                      onClick={() => handleViewDetails(pr)}
+                      onClick={() => handleViewDetails(Grn)}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -205,19 +204,19 @@ const PurchaseRequisitionList = () => {
             ))}
           </tbody>
         </table>
-        {showApprovePRModalInParent && (
-          <PurchaseRequisitionApproval
-            show={showApprovePRModal}
-            handleClose={handleCloseApprovePRModal}
-            purchaseRequisition={selectedRowData[0]}
+        {showApproveGrnModalInParent && (
+          <GrnApproval
+            show={showApproveGrnModal}
+            handleClose={handleCloseApproveGrnModal}
+            grn={selectedRowData[0]}
             handleApproved={handleApproved}
           />
         )}
-        {showDetailPRModalInParent && (
-          <PurchaseRequisitionDetail
-            show={showDetailPRModal}
-            handleClose={handleCloseDetailPRModal}
-            purchaseRequisition={PRDetail}
+        {showDetailGrnModalInParent && (
+          <GrnDetail
+            show={showDetailGrnModal}
+            handleClose={handleCloseDetailGrnModal}
+            grn={GRNDetail}
           />
         )}
       </div>
@@ -225,4 +224,4 @@ const PurchaseRequisitionList = () => {
   );
 };
 
-export default PurchaseRequisitionList;
+export default GrnList;

@@ -1,65 +1,64 @@
 import React from "react";
 import { Modal, Button } from "react-bootstrap";
-import usePurchaseOrderApproval from "./usePurchaseOrderApproval";
-import usePurchaseOrderList from "../purchaseOrderList/usePurchaseOrderList";
+import useGrnApproval from "./useGrnApproval";
+import useGrnList from "../grnList/useGrnList";
 
-const PurchaseOrderApproval = ({
-  show,
-  handleClose,
-  handleApproved,
-  purchaseOrder,
-}) => {
-  const { approvalStatus, handleApprove } = usePurchaseOrderApproval({
+const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
+  const { approvalStatus, handleApprove } = useGrnApproval({
+    grn,
     onFormSubmit: () => {
       handleClose();
       handleApproved();
     },
   });
-  const { getStatusLabel, getStatusBadgeClass } = usePurchaseOrderList();
+  const { getStatusLabel, getStatusBadgeClass } = useGrnList();
   return (
     <Modal show={show} onHide={handleClose} centered scrollable size="lg">
       <Modal.Header closeButton>
-        <Modal.Title>Approve Purchase Order</Modal.Title>
+        <Modal.Title>Approve Goods Received Note</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div className="mb-3 d-flex justify-content-between">
-          <h6>Details for Purchase Order : {purchaseOrder.referenceNo}</h6>
+          <h6>Details for Goods Received Note : {grn.grnMasterId}</h6>
           <div>
-            Status :{" "}
+            Grn Status :{" "}
             <span
               className={`badge rounded-pill ${getStatusBadgeClass(
-                purchaseOrder.status
+                grn.status
               )}`}
             >
-              {getStatusLabel(purchaseOrder.status)}
+              {getStatusLabel(grn.status)}
             </span>
           </div>
         </div>
         <div className="row">
           <div className="col-md-6">
             <p>
-              <strong>Supplier Name:</strong>{" "}
-              {purchaseOrder.supplier.supplierName}
+              <strong>GRN Date:</strong> {grn?.grnDate?.split("T")[0]}
             </p>
             <p>
-              <strong>Contact Person:</strong>{" "}
-              {purchaseOrder.supplier.contactPerson}
+              <strong>Received By:</strong> {grn.receivedBy}
             </p>
             <p>
-              <strong>Contact Number:</strong> {purchaseOrder.supplier.phone}
+              <strong>Received Date:</strong> {grn?.receivedDate?.split("T")[0]}
             </p>
             <p>
-              <strong>Email:</strong> {purchaseOrder.supplier.email}
+              <strong>Goods Receiving Status:</strong>{" "}
+              <span
+                className={`badge rounded-pill ${getStatusBadgeClass(
+                  parseInt(`${1}${grn.status.toString().charAt(0)}`, 10)
+                )}`}
+              >
+                {getStatusLabel(
+                  parseInt(`${1}${grn.status.toString().charAt(0)}`, 10)
+                )}
+              </span>
             </p>
           </div>
           <div className="col-md-6">
             <p>
-              <strong>Order Date:</strong>{" "}
-              {purchaseOrder?.orderDate?.split("T")[0]}
-            </p>
-            <p>
-              <strong>Delivery Date:</strong>{" "}
-              {purchaseOrder?.deliveryDate?.split("T")[0]}
+              <strong>Purchase Order Reference No:</strong>{" "}
+              {grn.purchaseOrder.referenceNo}
             </p>
           </div>
         </div>
@@ -68,21 +67,21 @@ const PurchaseOrderApproval = ({
         <table className="table mt-2">
           <thead>
             <tr>
-              <th>Item Category</th>
               <th>Item ID</th>
-              <th>Name</th>
-              <th>Quantity</th>
+              <th>Received Quantity</th>
+              <th>Accepted Quantity</th>
+              <th>Rejected Quantity</th>
               <th>Unit Price</th>
               <th>Total Price</th>
             </tr>
           </thead>
           <tbody>
-            {purchaseOrder.purchaseOrderDetails.map((item, index) => (
+            {grn.grnDetails.map((item, index) => (
               <tr key={index}>
-                <td>{item.itemCategory}</td>
                 <td>{item.itemId}</td>
-                <td>{item.name}</td>
-                <td>{item.quantity}</td>
+                <td>{item.receivedQuantity}</td>
+                <td>{item.acceptedQuantity}</td>
+                <td>{item.rejectedQuantity}</td>
                 <td>{item.unitPrice.toFixed(2)}</td>
                 <td>{item.totalPrice.toFixed(2)}</td>
               </tr>
@@ -92,7 +91,7 @@ const PurchaseOrderApproval = ({
             <tr>
               <td colSpan="4"></td>
               <th>Total Amount</th>
-              <td colSpan="2">{purchaseOrder.totalAmount.toFixed(2)}</td>
+              <td colSpan="2">{grn.totalAmount.toFixed(2)}</td>
             </tr>
           </tfoot>
         </table>
@@ -101,12 +100,12 @@ const PurchaseOrderApproval = ({
             className="alert alert-success alert-dismissible fade show mb-3"
             role="alert"
           >
-            Purchase Order approved!
+            Goods Received Note approved!
           </div>
         )}
         {approvalStatus === "error" && (
           <div className="alert alert-danger mb-3" role="alert">
-            Error approving purchase Order. Please try again.
+            Error approving goods received note. Please try again.
           </div>
         )}
       </Modal.Body>
@@ -116,7 +115,7 @@ const PurchaseOrderApproval = ({
         </Button>
         <Button
           variant="success"
-          onClick={() => handleApprove(purchaseOrder.purchaseOrderId)}
+          onClick={() => handleApprove(grn.grnMasterId)}
         >
           Approve
         </Button>
@@ -125,4 +124,4 @@ const PurchaseOrderApproval = ({
   );
 };
 
-export default PurchaseOrderApproval;
+export default GrnApproval;

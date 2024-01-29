@@ -1,14 +1,17 @@
 import React from "react";
 import usePurchaseOrderList from "./usePurchaseOrderList";
-import { Spinner } from "react-bootstrap";
-import PurchaseOrderApproval from "../PurchaseOrderApproval/PurchaseOrderApproval";
+import PurchaseOrderApproval from "../purchaseOrderApproval/purchaseOrderApproval";
 import PurchaseOrder from "../purchaseOrder";
-import PurchaseOrderDetail from "../PurchaseOrderDetail/PurchaseOrderDetail";
+import PurchaseOrderDetail from "../purchaseOrderDetail/purchaseOrderDetail";
+import PurchaseOrderUpdate from "../purchaseOrderUpdate/purchaseOrderUpdate";
+import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
+import ErrorComponent from "../../errorComponent/errorComponent";
 
 const PurchaseOrderList = () => {
   const {
     purchaseOrders,
-    isLoading,
+    isLoadingData,
+    isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
@@ -18,8 +21,8 @@ const PurchaseOrderList = () => {
     showDetailPOModal,
     showDetailPOModalInParent,
     showCreatePOForm,
-    userPermissions,
-    PRDetail,
+    showUpdatePOForm,
+    PODetail,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleRowSelect,
@@ -27,40 +30,41 @@ const PurchaseOrderList = () => {
     getStatusBadgeClass,
     handleShowApprovePOModal,
     handleCloseApprovePOModal,
-    handleShowDetailPOModal,
     handleCloseDetailPOModal,
     handleApproved,
     handleViewDetails,
     setShowCreatePOForm,
+    setShowUpdatePOForm,
     hasPermission,
+    handleUpdate,
+    handleUpdated,
   } = usePurchaseOrderList();
 
-  if (isLoading) {
-    return (
-      <div
-        className="d-flex justify-content-center align-items-center vh-100"
-        style={{ maxHeight: "80vh" }}
-      >
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </Spinner>
-      </div>
-    );
+  if (isLoadingData || isLoadingPermissions) {
+    return <LoadingSpinner />;
   }
 
   if (error) {
-    return (
-      <div
-        className="d-flex justify-content-center align-items-center vh-100"
-        style={{ maxHeight: "80vh" }}
-      >
-        Error: {error}
-      </div>
-    );
+    return <ErrorComponent error={error} />;
   }
 
   if (showCreatePOForm) {
-    return <PurchaseOrder handleClose={() => setShowCreatePOForm(false)} />;
+    return (
+      <PurchaseOrder
+        handleClose={() => setShowCreatePOForm(false)}
+        handleUpdated={handleUpdated}
+      />
+    );
+  }
+
+  if (showUpdatePOForm) {
+    return (
+      <PurchaseOrderUpdate
+        handleClose={() => setShowUpdatePOForm(false)}
+        purchaseOrder={PODetail || selectedRowData[0]}
+        handleUpdated={handleUpdated}
+      />
+    );
   }
 
   if (!purchaseOrders) {
@@ -110,6 +114,14 @@ const PurchaseOrderList = () => {
                 Approve
               </button>
             )}
+          {hasPermission("Update Purchase Order") && isAnyRowSelected && (
+            <button
+              className="btn btn-warning"
+              onClick={() => setShowUpdatePOForm(true)}
+            >
+              Edit
+            </button>
+          )}
         </div>
       </div>
       <div className="table-responsive">
@@ -119,55 +131,74 @@ const PurchaseOrderList = () => {
               <th>
                 <input type="checkbox" onChange={() => setSelectedRows([])} />
               </th>
-              <th>ID</th>
-              <th>Requested By</th>
-              <th>Department</th>
+              <th>Reference No</th>
+              <th>Ordered By</th>
+              <th>Supplier Name</th>
               <th>Status</th>
-              <th>View Details</th>
+              <th>Details</th>
             </tr>
           </thead>
           <tbody>
-            {purchaseOrders.map((pr) => (
-              <tr key={pr.purchaseOrderId}>
+            {purchaseOrders.map((po) => (
+              <tr key={po.purchaseOrderId}>
                 <td>
                   <input
                     type="checkbox"
-                    checked={selectedRows.includes(pr.purchaseOrderId)}
-                    onChange={() => handleRowSelect(pr.purchaseOrderId)}
+                    checked={selectedRows.includes(po.purchaseOrderId)}
+                    onChange={() => handleRowSelect(po.purchaseOrderId)}
                   />
                 </td>
-                <td>{pr.purchaseOrderId}</td>
-                <td>{pr.requestedBy}</td>
-                <td>{pr.department}</td>
+                <td>{po.referenceNo}</td>
+                <td>{po.orderedBy}</td>
+                <td>{po.supplier.supplierName}</td>
                 <td>
                   <span
                     className={`badge rounded-pill ${getStatusBadgeClass(
-                      pr.status
+                      po.status
                     )}`}
                   >
-                    {getStatusLabel(pr.status)}
+                    {getStatusLabel(po.status)}
                   </span>
                 </td>
                 <td>
-                  <button
-                    className="btn btn-primary me-2"
-                    onClick={() => handleViewDetails(pr)}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      fill="currentColor"
-                      className="bi bi-arrow-right"
-                      viewBox="0 0 16 16"
+                  {po.status === 0 ? (
+                    <button
+                      className="btn btn-warning me-2"
+                      onClick={() => handleUpdate(po)}
                     >
-                      <path
-                        fillRule="evenodd"
-                        d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"
-                      />
-                    </svg>{" "}
-                    View
-                  </button>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        fill="currentColor"
+                        className="bi bi-pencil-fill"
+                        viewBox="0 0 16 16"
+                      >
+                        <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z" />
+                      </svg>{" "}
+                      Edit
+                    </button>
+                  ) : (
+                    <button
+                      className="btn btn-primary me-2"
+                      onClick={() => handleViewDetails(po)}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        fill="currentColor"
+                        className="bi bi-arrow-right"
+                        viewBox="0 0 16 16"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"
+                        />
+                      </svg>{" "}
+                      View
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
@@ -185,7 +216,7 @@ const PurchaseOrderList = () => {
           <PurchaseOrderDetail
             show={showDetailPOModal}
             handleClose={handleCloseDetailPOModal}
-            purchaseOrder={PRDetail}
+            purchaseOrder={PODetail}
           />
         )}
       </div>

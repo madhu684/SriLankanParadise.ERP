@@ -1,12 +1,18 @@
 import { useState, useEffect, useRef } from "react";
 import {
   get_company_locations_api,
-  post_purchase_requisition_api,
+  put_purchase_requisition_api,
+  put_purchase_requisition_detail_api,
   post_purchase_requisition_detail_api,
-} from "../../services/purchaseApi";
+  delete_purchase_requisition_detail_api,
+} from "../../../services/purchaseApi";
 
-const usePurchaseRequisition = ({ onFormSubmit }) => {
+const usePurchaseRequisitionUpdate = ({
+  purchaseRequisition,
+  onFormSubmit,
+}) => {
   const [formData, setFormData] = useState({
+    PurchaseRequisitionId: "",
     requestorName: "",
     department: "",
     email: "",
@@ -24,6 +30,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
+  const [itemIdsToBeDeleted, setItemIdsToBeDeleted] = useState([]);
   const alertRef = useRef(null);
 
   useEffect(() => {
@@ -38,6 +45,31 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
 
     fetchLocations();
   }, []);
+
+  useEffect(() => {
+    const deepCopyPurchaseRequisition = JSON.parse(
+      JSON.stringify(purchaseRequisition)
+    );
+    setFormData({
+      purchaseRequisitionId:
+        deepCopyPurchaseRequisition?.purchaseRequisitionId ?? "",
+      requestorName: deepCopyPurchaseRequisition?.requestedBy ?? "",
+      department: deepCopyPurchaseRequisition?.department ?? "",
+      email: deepCopyPurchaseRequisition?.email ?? "",
+      contactNumber: deepCopyPurchaseRequisition?.contactNo ?? "",
+      deliveryLocation: deepCopyPurchaseRequisition?.deliveryLocation ?? "",
+      requisitionDate:
+        deepCopyPurchaseRequisition?.requisitionDate?.split("T")[0] ?? "",
+      purposeOfRequest: deepCopyPurchaseRequisition?.purposeOfRequest ?? "",
+      deliveryDate:
+        deepCopyPurchaseRequisition?.deliveryDate?.split("T")[0] ?? "",
+      referenceNumber: deepCopyPurchaseRequisition?.referenceNo ?? "",
+      itemDetails:
+        deepCopyPurchaseRequisition?.purchaseRequisitionDetails ?? [],
+      attachments: deepCopyPurchaseRequisition?.attachments ?? [],
+      totalAmount: deepCopyPurchaseRequisition?.totalAmount ?? "",
+    });
+  }, [purchaseRequisition]);
 
   useEffect(() => {
     if (submissionStatus != null) {
@@ -246,47 +278,67 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
           approvedUserId: null,
           approvedDate: null,
           companyId: sessionStorage.getItem("companyId"),
-          permissionId: 9,
+          permissionId: 16,
         };
 
-        const response = await post_purchase_requisition_api(
+        const response = await put_purchase_requisition_api(
+          purchaseRequisition.purchaseRequisitionId,
           purchaseRequisitionData
         );
 
-        const purchaseRequisitionId =
-          response.data.result.purchaseRequisitionId;
-
         // Extract itemDetails from formData
         const itemDetailsData = formData.itemDetails.map(async (item) => {
+          let detailsApiResponse;
           const detailsData = {
-            purchaseRequisitionId,
-            itemCategory: item.category,
-            itemId: item.id,
+            purchaseRequisitionId: purchaseRequisition.purchaseRequisitionId,
+            itemCategory: item.itemCategory,
+            itemId: item.itemId,
             name: item.name,
             quantity: item.quantity,
             unitPrice: item.unitPrice,
             totalPrice: item.totalPrice,
-            permissionId: 9,
+            permissionId: 16,
           };
 
-          // Call post_purchase_requisition_detail_api for each item
-          const detailsApiResponse = await post_purchase_requisition_detail_api(
-            detailsData
-          );
-
+          if (item.purchaseRequisitionDetailId != null) {
+            // Call put_purchase_requisition_detail_api for each item
+            detailsApiResponse = await put_purchase_requisition_detail_api(
+              item.purchaseRequisitionDetailId,
+              detailsData
+            );
+          } else {
+            // Call post_purchase_requisition_detail_api for each item
+            detailsApiResponse = await post_purchase_requisition_detail_api(
+              detailsData
+            );
+          }
           return detailsApiResponse;
         });
 
         const detailsResponses = await Promise.all(itemDetailsData);
 
         const allDetailsSuccessful = detailsResponses.every(
-          (detailsResponse) => detailsResponse.status === 201
+          (detailsResponse) => detailsResponse.status === 201 || 200
         );
+
+        for (const itemIdToBeDeleted of itemIdsToBeDeleted) {
+          const response = await delete_purchase_requisition_detail_api(
+            itemIdToBeDeleted
+          );
+          console.log(
+            `Successfully deleted item with ID: ${itemIdToBeDeleted}`
+          );
+        }
+        // Clear the itmeIdsToBeDeleted array after deletion
+        setItemIdsToBeDeleted([]);
 
         if (allDetailsSuccessful) {
           if (isSaveAsDraft) {
             setSubmissionStatus("successSavedAsDraft");
-            console.log("Purchase requisition saved as draft!", formData);
+            console.log(
+              "Purchase requisition updated and saved as draft!",
+              formData
+            );
           } else {
             setSubmissionStatus("successSubmitted");
             console.log(
@@ -353,18 +405,18 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
       itemDetails: [
         ...prevFormData.itemDetails,
         {
-          category: "",
-          id: "",
+          itemCategory: "",
+          itemId: "",
           name: "",
           quantity: 0,
-          unitPrice: 0.0,
-          totalPrice: 0.0,
+          unitPrice: 0,
+          totalPrice: 0,
         },
       ],
     }));
   };
 
-  const handleRemoveItem = (index) => {
+  const handleRemoveItem = async (index, purchaseRequisitionDetailId) => {
     setFormData((prevFormData) => {
       const updatedItemDetails = [...prevFormData.itemDetails];
       updatedItemDetails.splice(index, 1);
@@ -373,6 +425,16 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
         itemDetails: updatedItemDetails,
       };
     });
+
+    if (
+      purchaseRequisitionDetailId !== null &&
+      purchaseRequisitionDetailId !== undefined
+    ) {
+      setItemIdsToBeDeleted((prevIds) => [
+        ...prevIds,
+        purchaseRequisitionDetailId,
+      ]);
+    }
   };
 
   const handlePrint = () => {
@@ -411,4 +473,4 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
   };
 };
 
-export default usePurchaseRequisition;
+export default usePurchaseRequisitionUpdate;

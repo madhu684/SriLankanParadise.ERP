@@ -1,8 +1,12 @@
 import React from "react";
-import usePurchaseRequisition from "./usePurchaseRequisition";
-import CurrentDateTime from "../currentDateTime/currentDateTime";
+import usePurchaseRequisitionUpdate from "./usePurchaseRequisitionUpdate";
+import CurrentDateTime from "../../currentDateTime/currentDateTime";
 
-const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
+const PurchaseRequisitionUpdate = ({
+  handleClose,
+  purchaseRequisition,
+  handleUpdated,
+}) => {
   const {
     formData,
     locations,
@@ -18,7 +22,8 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
     handlePrint,
     handleAttachmentChange,
     calculateTotalPrice,
-  } = usePurchaseRequisition({
+  } = usePurchaseRequisitionUpdate({
+    purchaseRequisition,
     onFormSubmit: () => {
       handleClose();
       handleUpdated();
@@ -52,7 +57,8 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
       )}
       {submissionStatus === "successSavedAsDraft" && (
         <div className="alert alert-success mb-3" role="alert">
-          Purchase requisition saved as draft, you can edit and submit it later!
+          Purchase requisition updated and saved as draft, you can edit and
+          submit it later!
         </div>
       )}
       {submissionStatus === "error" && (
@@ -60,7 +66,6 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
           Error submitting purchase requisition. Please try again.
         </div>
       )}
-
       <form>
         <div className="row g-3 mb-3 d-flex justify-content-between">
           <div className="col-md-5">
@@ -296,11 +301,11 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
                       <input
                         type="text"
                         className="form-control"
-                        value={item.category}
+                        value={item.itemCategory}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            "category",
+                            "itemCategory",
                             e.target.value
                           )
                         }
@@ -310,9 +315,13 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
                       <input
                         type="text"
                         className="form-control"
-                        value={item.id}
+                        value={item.itemId}
                         onChange={(e) =>
-                          handleItemDetailsChange(index, "id", e.target.value)
+                          handleItemDetailsChange(
+                            index,
+                            "itemId",
+                            e.target.value
+                          )
                         }
                       />
                     </td>
@@ -359,7 +368,12 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
                       <button
                         type="button"
                         className="btn btn-outline-danger"
-                        onClick={() => handleRemoveItem(index)}
+                        onClick={() =>
+                          handleRemoveItem(
+                            index,
+                            item?.purchaseRequisitionDetailId
+                          )
+                        }
                       >
                         Delete
                       </button>
@@ -444,4 +458,4 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
   );
 };
 
-export default PurchaseRequisition;
+export default PurchaseRequisitionUpdate;
