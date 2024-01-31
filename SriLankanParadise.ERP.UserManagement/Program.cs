@@ -18,12 +18,15 @@ builder.Services.AddControllers();
 // Register HttpContextAccessor
 builder.Services.AddHttpContextAccessor();
 
+// Allowed origins
+var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
+
 // CORS configuration
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin", builder =>
     {
-        builder.WithOrigins("http://localhost:3000") // Allow requests from this origin
+        builder.WithOrigins(allowedOrigins) // Allow requests from this origin
                .AllowAnyMethod()
                .AllowAnyHeader()
                .AllowCredentials(); // Allow cookies
@@ -100,6 +103,12 @@ builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddScoped<ILocationRepository, LocationRepository>();
 builder.Services.AddScoped<ISupplierService, SupplierService>();
 builder.Services.AddScoped<ISupplierRepository, SupplierRepository>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<ISalesOrderService, SalesOrderService>();
+builder.Services.AddScoped<ISalesOrderRepository, SalesOrderRepository>();
+builder.Services.AddScoped<ISalesOrderDetailService, SalesOrderDetailService>();
+builder.Services.AddScoped<ISalesOrderDetailRepository, SalesOrderDetailRepository>();
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
