@@ -9,6 +9,8 @@ import PurchaseRequisition from "./components/purchaseRequisition/purchaseRequis
 import PurchaseOrder from "./components/purchaseOrder/purchaseOrder";
 import Grn from "./components/grn/grn";
 import PurchaseRequisitionList from "./components/purchaseRequisition/purchaseRequisitionList/purchaseRequisitionList";
+import SalesOrder from "./components/salesOrder/salesOrder";
+import SalesInvoice from "./components/salesInvoice/salesInvoice";
 
 const Routers = () => {
   return (
@@ -22,6 +24,8 @@ const Routers = () => {
         <Route path="/purchaseorder" element={<PurchaseOrder />} />
         <Route path="/grn" element={<Grn />} />
         <Route path="/purchaselist" element={<PurchaseRequisitionList />} />
+        <Route path="/salesorder" element={<SalesOrder />} />
+        <Route path="/salesinvoice" element={<SalesInvoice />} />
         {/* <Route path="/main" element={<Main />}>
           <Route index element={<PurchaseRequisition />} />
           <Route path="purchase Orders" element={<PurchaseOrder />} />

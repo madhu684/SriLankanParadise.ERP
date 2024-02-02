@@ -3,6 +3,8 @@ import Registration from "../registration/registration.js";
 import PurchaseRequisitionList from "../purchaseRequisition/purchaseRequisitionList/purchaseRequisitionList.jsx";
 import PurchaseOrderList from "../purchaseOrder/purchaseOrderList/purchaseOrderList.jsx";
 import GrnList from "../grn/grnList/grnList.jsx";
+import SalesOrderList from "../salesOrder/salesOrderList/salesOrderList.jsx";
+import SalesInvoiceList from "../salesInvoice/salesInvoiceList/salesInvoiceList.jsx";
 
 const useMain = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -67,6 +69,10 @@ const useMain = () => {
         return <PurchaseOrderList />;
       case "Goods Received Notes":
         return <GrnList />;
+      case "Sales Orders":
+        return <SalesOrderList />;
+      case "Sales Invoices":
+        return <SalesInvoiceList />;
       default:
         return null;
     }

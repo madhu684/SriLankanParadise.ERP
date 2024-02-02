@@ -1,52 +1,46 @@
 import { useState, useEffect, useRef } from "react";
-import { get_purchase_orders_with_out_drafts_api } from "../../services/purchaseApi";
 import {
-  post_grn_master_api,
-  post_grn_detail_api,
-} from "../../services/purchaseApi";
+  get_sales_orders_with_out_drafts_api,
+  post_sales_invoice_api,
+  post_sales_invoice_detail_api,
+} from "../../services/salesApi";
 
-const useGrn = ({ onFormSubmit }) => {
+const useSalesInvoice = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
-    grnDate: "",
-    receivedBy: "",
-    receivedDate: "",
+    invoiceDate: "",
+    dueDate: "",
     itemDetails: [],
-    status: "",
-    purchaseOrderId: "",
+    attachments: [],
     totalAmount: 0,
+    salesOrderId: "",
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
-  const [selectedPurchaseOrder, setSelectedPurchaseOrder] = useState(null);
-  const [purchaseOrderOptions, setPurchaseOrders] = useState([]);
-  const statusOptions = [
-    { id: "4", label: "In Progress" },
-    { id: "5", label: "Completed" },
-  ];
   const alertRef = useRef(null);
+  const [salesOrderOptions, setSalesOrders] = useState([]);
+  const [selectedSalesOrder, setSelectedSalesOrder] = useState(null);
 
   useEffect(() => {
-    const fetchPurchaseOrders = async () => {
+    const fetchSalesOrders = async () => {
       try {
-        const response = await get_purchase_orders_with_out_drafts_api(
+        const response = await get_sales_orders_with_out_drafts_api(
           sessionStorage?.getItem("companyId")
         );
-        const filteredPurchaseOrders = response.data.result.filter(
-          (po) => po.status === 2
+        const filteredSalesOrders = response.data.result.filter(
+          (so) => so.status === 2
         );
-        setPurchaseOrders(filteredPurchaseOrders);
+        setSalesOrders(filteredSalesOrders);
       } catch (error) {
-        console.error("Error fetching purchase orders:", error);
+        console.error("Error fetching slaes orders:", error);
       }
     };
 
-    fetchPurchaseOrders();
+    fetchSalesOrders();
   }, []);
 
   useEffect(() => {
     if (submissionStatus != null) {
-      // Scroll to the success alert when it becomes visible
       alertRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [submissionStatus]);
@@ -60,13 +54,11 @@ const useGrn = ({ onFormSubmit }) => {
     let isFieldValid = true;
     let errorMessage = "";
 
-    // Required validation
     if (value === null || value === undefined || `${value}`.trim() === "") {
       isFieldValid = false;
       errorMessage = `${fieldDisplayName} is required`;
     }
 
-    // Additional validation
     if (
       isFieldValid &&
       additionalRules.validationFunction &&
@@ -82,84 +74,111 @@ const useGrn = ({ onFormSubmit }) => {
     return isFieldValid;
   };
 
+  const validateAttachments = (files) => {
+    let isAttachmentsValid = true;
+    let errorMessage = "";
+    const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+
+    if (!files || files.length === 0) {
+      isAttachmentsValid = true; // Attachments are optional, so it's considered valid if there are none.
+      errorMessage = "";
+    }
+
+    for (const file of files) {
+      if (file.size > maxSizeInBytes) {
+        isAttachmentsValid = false;
+        errorMessage = "Attachment size exceeds the limit (10MB)";
+      }
+
+      if (!allowedTypes.includes(file.type)) {
+        isAttachmentsValid = false;
+        errorMessage =
+          "Invalid file type. Allowed types: JPEG, PNG, PDF, Word documents";
+      }
+    }
+
+    setValidFields((prev) => ({ ...prev, attachments: isAttachmentsValid }));
+    setValidationErrors((prev) => ({ ...prev, attachments: errorMessage }));
+
+    return isAttachmentsValid;
+  };
+
   const validateForm = () => {
-    const isGrnDateValid = validateField(
-      "grnDate",
-      "GRN date",
-      formData.grnDate
+    const isInvoiceDateValid = validateField(
+      "invoiceDate",
+      "Invoice date",
+      formData.invoiceDate
     );
 
-    const isReceivedByValid = validateField(
-      "receivedBy",
-      "Received By",
-      formData.receivedBy
+    const isDueDateValid = validateField(
+      "dueDate",
+      "Due date",
+      formData.dueDate
     );
 
-    const isReceivedDateValid = validateField(
-      "receivedDate",
-      "Received date",
-      formData.receivedDate
+    const isSalesOrderIdValid = validateField(
+      "salesOrderId",
+      "Sales order reference number",
+      formData.salesOrderId
     );
 
-    const isStatusValid = validateField("status", "Status", formData.status);
-
-    const isPurchaseOrderIdValid = validateField(
-      "purchaseOrderId",
-      "Purchase order reference number",
-      formData.purchaseOrderId
-    );
+    const isAttachmentsValid = validateAttachments(formData.attachments);
 
     return (
-      isGrnDateValid &&
-      isReceivedByValid &&
-      isReceivedDateValid &&
-      isStatusValid &&
-      isPurchaseOrderIdValid
+      isInvoiceDateValid &&
+      isDueDateValid &&
+      isSalesOrderIdValid &&
+      isAttachmentsValid
     );
   };
 
   const handleSubmit = async (isSaveAsDraft) => {
     try {
       const status = isSaveAsDraft ? 0 : 1;
-
-      const combinedStatus = parseInt(`${formData.status}${status}`, 10);
-
       const isFormValid = validateForm();
+
       if (isFormValid) {
-        const grnData = {
-          purchaseOrderId: formData.purchaseOrderId,
-          grnDate: formData.grnDate,
-          receivedBy: formData.receivedBy,
-          receivedDate: formData.receivedDate,
-          status: combinedStatus,
-          companyId: sessionStorage?.getItem("companyId") ?? null,
-          receivedUserId: sessionStorage?.getItem("userId") ?? null,
+        const salesInvoiceData = {
+          invoiceDate: formData.invoiceDate,
+          dueDate: formData.dueDate,
+          totalAmount: formData.totalAmount,
+          status: status,
+          createdBy: sessionStorage?.getItem("username") ?? null,
+          createdUserId: sessionStorage?.getItem("userId") ?? null,
           approvedBy: null,
           approvedUserId: null,
           approvedDate: null,
-          totalAmount: formData.totalAmount,
-          permissionId: 20,
+          companyId: sessionStorage?.getItem("companyId") ?? null,
+          salesOrderId: formData.salesOrderId,
+          permissionId: 29,
         };
 
-        const response = await post_grn_master_api(grnData);
+        const response = await post_sales_invoice_api(salesInvoiceData);
+        //setReferenceNo(response.data.result.referenceNo);
 
-        const grnMasterId = response.data.result.grnMasterId;
+        const salesInvoiceId = response.data.result.salesInvoiceId;
 
-        // Extract itemDetails from formData
         const itemDetailsData = formData.itemDetails.map(async (item) => {
           const detailsData = {
-            grnMasterId,
-            receivedQuantity: item.receivedQuantity,
-            acceptedQuantity: item.acceptedQuantity,
-            rejectedQuantity: item.rejectedQuantity,
+            salesInvoiceId,
+            quantity: item.quantity,
             unitPrice: item.unitPrice,
             totalPrice: item.totalPrice,
-            itemId: item.id,
-            permissionId: 20,
+            itemBatchItemMasterId: item.itemMasterId,
+            itemBatchBatchId: item.itemBatchId,
+            permissionId: 29,
           };
 
-          // Call post_purchase_requisition_detail_api for each item
-          const detailsApiResponse = await post_grn_detail_api(detailsData);
+          const detailsApiResponse = await post_sales_invoice_detail_api(
+            detailsData
+          );
 
           return detailsApiResponse;
         });
@@ -173,10 +192,10 @@ const useGrn = ({ onFormSubmit }) => {
         if (allDetailsSuccessful) {
           if (isSaveAsDraft) {
             setSubmissionStatus("successSavedAsDraft");
-            console.log("GRN saved as draft!", formData);
+            console.log("Sales invoice saved as draft!", formData);
           } else {
             setSubmissionStatus("successSubmitted");
-            console.log("GRN submitted successfully!", formData);
+            console.log("Sales invoice submitted successfully!", formData);
           }
 
           setTimeout(() => {
@@ -208,15 +227,10 @@ const useGrn = ({ onFormSubmit }) => {
       const updatedItemDetails = [...prevFormData.itemDetails];
       updatedItemDetails[index][field] = value;
 
-      // Ensure positive values for Quantities
-      updatedItemDetails[index].receivedQuantity = Math.max(
+      // Ensure positive values for Quantities and Unit Prices
+      updatedItemDetails[index].quantity = Math.max(
         0,
-        updatedItemDetails[index].receivedQuantity
-      );
-
-      updatedItemDetails[index].acceptedQuantity = Math.max(
-        0,
-        updatedItemDetails[index].acceptedQuantity
+        updatedItemDetails[index].quantity
       );
 
       updatedItemDetails[index].unitPrice = !isNaN(
@@ -226,13 +240,8 @@ const useGrn = ({ onFormSubmit }) => {
         : 0;
 
       updatedItemDetails[index].totalPrice =
-        updatedItemDetails[index].acceptedQuantity *
+        updatedItemDetails[index].quantity *
         updatedItemDetails[index].unitPrice;
-
-      updatedItemDetails[index].rejectedQuantity =
-        updatedItemDetails[index].receivedQuantity -
-        updatedItemDetails[index].acceptedQuantity;
-
       return {
         ...prevFormData,
         itemDetails: updatedItemDetails,
@@ -247,10 +256,9 @@ const useGrn = ({ onFormSubmit }) => {
       itemDetails: [
         ...prevFormData.itemDetails,
         {
-          id: "",
-          receivedQuantity: 0,
-          acceptedQuantity: 0,
-          rejectedQuantity: 0,
+          itemMasterId: "",
+          itemBatchId: "",
+          quantity: 0,
           unitPrice: 0.0,
           totalPrice: 0.0,
         },
@@ -273,52 +281,52 @@ const useGrn = ({ onFormSubmit }) => {
     window.print();
   };
 
+  const handleAttachmentChange = (files) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      attachments: files,
+    }));
+  };
+
   const calculateTotalAmount = () => {
     return formData.itemDetails.reduce(
-      (total, item) => total + item.acceptedQuantity * item.unitPrice,
+      (total, item) => total + item.quantity * item.unitPrice,
       0
     );
   };
 
-  const handlePurchaseOrderChange = (referenceId) => {
-    const selectedPurchaseOrder = purchaseOrderOptions.find(
-      (purchaseOrder) => purchaseOrder.referenceNo === referenceId
+  const handleSalesOrderChange = (referenceId) => {
+    const selectedSalesOrder = salesOrderOptions.find(
+      (salesOrder) => salesOrder.referenceNo === referenceId
     );
-
-    setSelectedPurchaseOrder(selectedPurchaseOrder);
+    console.log(selectedSalesOrder);
+    setSelectedSalesOrder(selectedSalesOrder);
 
     setFormData((prevFormData) => ({
       ...prevFormData,
-      purchaseOrderId: selectedPurchaseOrder?.purchaseOrderId ?? "",
-    }));
-  };
-
-  const handleStatusChange = (selectedOption) => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      status: selectedOption.id,
+      salesOrderId: selectedSalesOrder?.salesOrderId ?? "",
+      itemDetails: selectedSalesOrder?.salesOrderDetails ?? [],
     }));
   };
 
   return {
     formData,
+    submissionStatus,
     validFields,
     validationErrors,
-    selectedPurchaseOrder,
-    purchaseOrderOptions,
-    statusOptions,
-    submissionStatus,
     alertRef,
+    salesOrderOptions,
+    selectedSalesOrder,
     handleInputChange,
     handleItemDetailsChange,
+    handleAttachmentChange,
+    handleSubmit,
     handleAddItem,
     handleRemoveItem,
     handlePrint,
-    handleSubmit,
     calculateTotalAmount,
-    handlePurchaseOrderChange,
-    handleStatusChange,
+    handleSalesOrderChange,
   };
 };
 
-export default useGrn;
+export default useSalesInvoice;
