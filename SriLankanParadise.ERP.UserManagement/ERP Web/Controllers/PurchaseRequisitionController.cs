@@ -1,8 +1,6 @@
 ﻿using System.Net;
 using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using SriLankanParadise.ERP.UserManagement.Business_Service;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
@@ -86,14 +84,22 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         }
 
 
-        [HttpGet("GetPurchaseRequisitionsWithoutDrafts")]
-        public async Task<ApiResponseModel> GetPurchaseRequisitionsWithoutDrafts()
+        [HttpGet("GetPurchaseRequisitionsWithoutDraftsByCompanyId/{companyId}")]
+        public async Task<ApiResponseModel> GetPurchaseRequisitionsWithoutDraftsByCompanyId(int companyId)
         {
             try
             {
-                var purchaseRequisitions = await _purchaseRequisitionService.GetPurchaseRequisitionsWithoutDrafts();
-                var purchaseRequisitionDtos = _mapper.Map<IEnumerable<PurchaseRequisitionDto>>(purchaseRequisitions);
-                AddResponseMessage(Response, LogMessages.PurchaseRequisitionsRetrieved, purchaseRequisitionDtos, true, HttpStatusCode.OK);
+                var purchaseRequisitions = await _purchaseRequisitionService.GetPurchaseRequisitionsWithoutDraftsByCompanyId(companyId);
+                if (purchaseRequisitions != null)
+                {
+                    var purchaseRequisitionDtos = _mapper.Map<IEnumerable<PurchaseRequisitionDto>>(purchaseRequisitions);
+                    AddResponseMessage(Response, LogMessages.PurchaseRequisitionsRetrieved, purchaseRequisitionDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.PurchaseRequisitionsNotFound);
+                    AddResponseMessage(Response, LogMessages.PurchaseRequisitionsNotFound, null, true, HttpStatusCode.NotFound);
+                }
             }
             catch (Exception ex)
             {
@@ -188,6 +194,43 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
             return Response;
+        }
+
+        [HttpPut("{purchaseRequisitionId}")]
+        public async Task<ApiResponseModel> UpdatePurchaseRequisition(int purchaseRequisitionId, PurchaseRequisitionRequestModel purchaseRequisitionRequest)
+        {
+            try
+            {
+                var existingPurchaseRequisition = await _purchaseRequisitionService.GetPurchaseRequisitionByPurchaseRequisitionId(purchaseRequisitionId);
+                if (existingPurchaseRequisition == null)
+                {
+                    _logger.LogWarning(LogMessages.PurchaseRequisitionNotFound);
+                    return AddResponseMessage(Response, LogMessages.PurchaseRequisitionNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+                var updatedPurchaseRequisition = _mapper.Map<PurchaseRequisition>(purchaseRequisitionRequest);
+                updatedPurchaseRequisition.PurchaseRequisitionId = purchaseRequisitionId; // Ensure the ID is not changed
+
+                await _purchaseRequisitionService.UpdatePurchaseRequisition(existingPurchaseRequisition.PurchaseRequisitionId, updatedPurchaseRequisition);
+
+                // Create action log
+                var actionLog = new ActionLogModel()
+                {
+                    ActionId = purchaseRequisitionRequest.PermissionId,
+                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                    Timestamp = DateTime.UtcNow
+                };
+                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+
+                _logger.LogInformation(LogMessages.PurchaseRequisitionUpdated);
+                return AddResponseMessage(Response, LogMessages.PurchaseRequisitionUpdated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
         }
 
     }

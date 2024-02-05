@@ -1,16 +1,53 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { get_purchase_orders_with_out_drafts_api } from "../../services/purchaseApi";
+import {
+  post_grn_master_api,
+  post_grn_detail_api,
+} from "../../services/purchaseApi";
 
-const useGrn = () => {
+const useGrn = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
     grnDate: "",
     receivedBy: "",
     receivedDate: "",
     itemDetails: [],
+    status: "",
+    purchaseOrderId: "",
     totalAmount: 0,
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
+  const [selectedPurchaseOrder, setSelectedPurchaseOrder] = useState(null);
+  const [purchaseOrderOptions, setPurchaseOrders] = useState([]);
+  const statusOptions = [
+    { id: "4", label: "In Progress" },
+    { id: "5", label: "Completed" },
+  ];
+  const alertRef = useRef(null);
+
+  useEffect(() => {
+    const fetchPurchaseOrders = async () => {
+      try {
+        const response = await get_purchase_orders_with_out_drafts_api(1);
+        const filteredPurchaseOrders = response.data.result.filter(
+          (po) => po.status === 2
+        );
+        setPurchaseOrders(filteredPurchaseOrders);
+      } catch (error) {
+        console.error("Error fetching suppliers:", error);
+      }
+    };
+
+    fetchPurchaseOrders();
+  }, []);
+
+  useEffect(() => {
+    if (submissionStatus != null) {
+      // Scroll to the success alert when it becomes visible
+      alertRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [submissionStatus]);
 
   const validateField = (
     fieldName,
@@ -62,19 +99,98 @@ const useGrn = () => {
       formData.receivedDate
     );
 
-    // Additional validations for itemDetails as needed
-    return isGrnDateValid && isReceivedByValid && isReceivedDateValid;
+    const isStatusValid = validateField("status", "Status", formData.status);
+
+    const isPurchaseOrderIdValid = validateField(
+      "purchaseOrderId",
+      "Purchase Order Reference Number",
+      formData.purchaseOrderId
+    );
+
+    return (
+      isGrnDateValid &&
+      isReceivedByValid &&
+      isReceivedDateValid &&
+      isStatusValid &&
+      isPurchaseOrderIdValid
+    );
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (isSaveAsDraft) => {
     try {
+      const status = isSaveAsDraft ? 0 : 1;
+
+      const combinedStatus = parseInt(`${formData.status}${status}`, 10);
+
       const isFormValid = validateForm();
       if (isFormValid) {
-        console.log("Inside the API call for GRN");
+        const grnData = {
+          purchaseOrderId: formData.purchaseOrderId,
+          grnDate: formData.grnDate,
+          receivedBy: formData.receivedBy,
+          receivedDate: formData.receivedDate,
+          status: combinedStatus,
+          companyId: sessionStorage?.getItem("companyId") ?? null,
+          receivedUserId: sessionStorage?.getItem("userId") ?? null,
+          approvedBy: null,
+          approvedUserId: null,
+          approvedDate: null,
+          totalAmount: formData.totalAmount,
+          permissionId: 20,
+        };
+
+        const response = await post_grn_master_api(grnData);
+
+        const grnMasterId = response.data.result.grnMasterId;
+
+        // Extract itemDetails from formData
+        const itemDetailsData = formData.itemDetails.map(async (item) => {
+          const detailsData = {
+            grnMasterId,
+            receivedQuantity: item.receivedQuantity,
+            acceptedQuantity: item.acceptedQuantity,
+            rejectedQuantity: item.rejectedQuantity,
+            unitPrice: item.unitPrice,
+            totalPrice: item.totalPrice,
+            itemId: item.id,
+            permissionId: 20,
+          };
+
+          // Call post_purchase_requisition_detail_api for each item
+          const detailsApiResponse = await post_grn_detail_api(detailsData);
+
+          return detailsApiResponse;
+        });
+
+        const detailsResponses = await Promise.all(itemDetailsData);
+
+        const allDetailsSuccessful = detailsResponses.every(
+          (detailsResponse) => detailsResponse.status === 201
+        );
+
+        if (allDetailsSuccessful) {
+          if (isSaveAsDraft) {
+            setSubmissionStatus("successSavedAsDraft");
+            console.log("GRN saved as draft!", formData);
+          } else {
+            setSubmissionStatus("successSubmitted");
+            console.log("GRN submitted successfully!", formData);
+          }
+
+          setTimeout(() => {
+            setSubmissionStatus(null);
+            onFormSubmit();
+          }, 3000);
+        } else {
+          setSubmissionStatus("error");
+        }
       }
     } catch (error) {
       console.error("Error submitting form:", error);
       setSubmissionStatus("error");
+      setTimeout(() => {
+        setSubmissionStatus(null);
+      }, 3000);
     }
   };
 
@@ -101,18 +217,24 @@ const useGrn = () => {
         updatedItemDetails[index].acceptedQuantity
       );
 
-      updatedItemDetails[index].unitPrice = !isNaN(parseFloat(value))
+      updatedItemDetails[index].unitPrice = !isNaN(
+        parseFloat(updatedItemDetails[index].unitPrice)
+      )
         ? Math.max(0, parseFloat(updatedItemDetails[index].unitPrice))
         : 0;
 
-      updatedItemDetails[index].totalPrice = (
+      updatedItemDetails[index].totalPrice =
         updatedItemDetails[index].acceptedQuantity *
-        updatedItemDetails[index].unitPrice
-      ).toFixed(2);
+        updatedItemDetails[index].unitPrice;
+
+      updatedItemDetails[index].rejectedQuantity =
+        updatedItemDetails[index].receivedQuantity -
+        updatedItemDetails[index].acceptedQuantity;
+
       return {
         ...prevFormData,
         itemDetails: updatedItemDetails,
-        totalAmount: calculateTotalAmount().toFixed(2),
+        totalAmount: calculateTotalAmount(),
       };
     });
   };
@@ -145,20 +267,6 @@ const useGrn = () => {
     });
   };
 
-  const formatDateTime = () => {
-    const currentDateTime = new Date();
-    const options = {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    };
-    return currentDateTime.toLocaleDateString("en-US", options);
-  };
-
   const handlePrint = () => {
     window.print();
   };
@@ -170,10 +278,35 @@ const useGrn = () => {
     );
   };
 
+  const handlePurchaseOrderChange = (referenceId) => {
+    const selectedPurchaseOrder = purchaseOrderOptions.find(
+      (purchaseOrder) => purchaseOrder.referenceNo === referenceId
+    );
+
+    setSelectedPurchaseOrder(selectedPurchaseOrder);
+
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      purchaseOrderId: selectedPurchaseOrder?.purchaseOrderId ?? "",
+    }));
+  };
+
+  const handleStatusChange = (selectedOption) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      status: selectedOption.id,
+    }));
+  };
+
   return {
     formData,
     validFields,
     validationErrors,
+    selectedPurchaseOrder,
+    purchaseOrderOptions,
+    statusOptions,
+    submissionStatus,
+    alertRef,
     handleInputChange,
     handleItemDetailsChange,
     handleAddItem,
@@ -181,7 +314,8 @@ const useGrn = () => {
     handlePrint,
     handleSubmit,
     calculateTotalAmount,
-    formatDateTime,
+    handlePurchaseOrderChange,
+    handleStatusChange,
   };
 };
 

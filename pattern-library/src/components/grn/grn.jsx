@@ -1,52 +1,72 @@
 import React from "react";
 import useGrn from "./useGrn";
+import CurrentDateTime from "../currentDateTime/currentDateTime";
 
-const Grn = () => {
+const Grn = ({ handleClose, handleUpdated }) => {
   const {
     formData,
     submissionStatus,
     validFields,
     validationErrors,
+    selectedPurchaseOrder,
+    purchaseOrderOptions,
+    statusOptions,
+    alertRef,
     handleInputChange,
     handleItemDetailsChange,
     handleAddItem,
     handleRemoveItem,
     handleSubmit,
     handlePrint,
-    formatDateTime,
-  } = useGrn();
+    calculateTotalAmount,
+    handlePurchaseOrderChange,
+    handleStatusChange,
+  } = useGrn({
+    onFormSubmit: () => {
+      handleClose();
+      handleUpdated();
+    },
+  });
 
   return (
     <div className="container mt-4">
       {/* Header */}
       <div className="mb-4">
+        <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
           <img
             src="path/to/your/logo.png"
             alt="Company Logo"
             className="img-fluid"
           />
-          <p>Date and Time: {formatDateTime()}</p>
+          <p>
+            Date and Time: <CurrentDateTime />
+          </p>
         </div>
         <h1 className="mt-2 text-center">Goods Received Note</h1>
         <hr />
       </div>
 
       {/* Display success or error message */}
-      {submissionStatus === "success" && (
+      {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
-          Form submitted successfully!
+          GRN submitted successfully!
+        </div>
+      )}
+      {submissionStatus === "successSavedAsDraft" && (
+        <div className="alert alert-success mb-3" role="alert">
+          GRN saved as draft, you can edit and submit it later!
         </div>
       )}
       {submissionStatus === "error" && (
         <div className="alert alert-danger mb-3" role="alert">
-          Error submitting form. Please try again.
+          Error submitting GRN. Please try again.
         </div>
       )}
 
       <form>
         {/* GRN Information */}
-        <div className="row mb-3">
+        <div className="row mb-3 d-flex justify-content-between">
           <div className="col-md-5">
             <h4>1. GRN Information</h4>
             <div className="mb-3 mt-3">
@@ -116,6 +136,83 @@ const Grn = () => {
                 </div>
               )}
             </div>
+            {/* Status Dropdown */}
+            <div className="mb-3">
+              <label htmlFor="status" className="form-label">
+                Status
+              </label>
+              <select
+                id="status"
+                className={`form-select ${
+                  validFields.status ? "is-valid" : ""
+                } ${validationErrors.status ? "is-invalid" : ""}`}
+                value={formData.status}
+                onChange={(e) =>
+                  handleStatusChange(
+                    statusOptions.find((option) => option.id === e.target.value)
+                  )
+                }
+                required
+              >
+                <option value="">Select Status</option>
+                {statusOptions.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              {validationErrors.status && (
+                <div className="invalid-feedback">
+                  {validationErrors.status}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Purchase Order ID Selection */}
+          <div className="col-md-5">
+            <h4>2. Purchase Order Details</h4>
+            <div className="mb-3 mt-3">
+              <label htmlFor="purchaseOrder" className="form-label">
+                Purchase Order Reference No
+              </label>
+              <select
+                id="purchaseOrder"
+                className={`form-select ${
+                  validFields.purchaseOrderId ? "is-valid" : ""
+                } ${validationErrors.purchaseOrderId ? "is-invalid" : ""}`}
+                // value={formData.purchaseOrderId}
+                onChange={(e) => handlePurchaseOrderChange(e.target.value)}
+                required
+              >
+                <option value="">Select Reference Number</option>
+                {purchaseOrderOptions.map((option) => (
+                  <option key={option.referenceNo} value={option.referenceNo}>
+                    {option.referenceNo}
+                  </option>
+                ))}
+              </select>
+              {validationErrors.purchaseOrderId && (
+                <div className="invalid-feedback">
+                  {validationErrors.purchaseOrderId}
+                </div>
+              )}
+            </div>
+
+            {/* Display selected Purchase Order details */}
+            {selectedPurchaseOrder && (
+              <div className="mb-3">
+                <p>Supplier: {selectedPurchaseOrder?.supplier?.supplierName}</p>
+                <p>
+                  Order Date:{" "}
+                  {selectedPurchaseOrder?.orderDate?.split("T")[0] ?? ""}
+                </p>
+                <p>
+                  Delivery Date:{" "}
+                  {selectedPurchaseOrder?.deliveryDate?.split("T")[0] ?? ""}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -205,7 +302,7 @@ const Grn = () => {
                         }
                       />
                     </td>
-                    <td>{item.totalPrice}</td>
+                    <td>{item.totalPrice.toFixed(2)}</td>
                     <td>
                       <button
                         type="button"
@@ -222,7 +319,7 @@ const Grn = () => {
                 <tr>
                   <td colSpan="4"></td>
                   <th>Total Amount</th>
-                  <td colSpan="2">{formData.totalAmount}</td>
+                  <td colSpan="2">{calculateTotalAmount().toFixed(2)}</td>
                 </tr>
               </tfoot>
             </table>
@@ -243,11 +340,15 @@ const Grn = () => {
           <button
             type="button"
             className="btn btn-primary me-2"
-            onClick={handleSubmit}
+            onClick={() => handleSubmit(false)}
           >
             Submit
           </button>
-          <button type="button" className="btn btn-secondary me-2">
+          <button
+            type="button"
+            className="btn btn-secondary me-2"
+            onClick={() => handleSubmit(true)}
+          >
             Save as Draft
           </button>
           <button
@@ -257,7 +358,11 @@ const Grn = () => {
           >
             Print
           </button>
-          <button type="button" className="btn btn-danger">
+          <button
+            type="button"
+            className="btn btn-danger"
+            onClick={handleClose}
+          >
             Cancel
           </button>
         </div>

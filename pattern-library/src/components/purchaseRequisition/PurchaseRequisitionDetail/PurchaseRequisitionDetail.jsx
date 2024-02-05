@@ -1,23 +1,36 @@
 import React from "react";
 import { Modal, Button } from "react-bootstrap";
 import usePurchaseRequisitionDetial from "./usePurchaseRequisitionDetail";
+import usePurchaseRequisitionList from "../purchaseRequisitionList/usePurchaseRequisitionList";
 
 const PurchaseRequisitionDetail = ({
   show,
   handleClose,
   purchaseRequisition,
 }) => {
-  const { formatDate } = usePurchaseRequisitionDetial();
+  const { getStatusLabel, getStatusBadgeClass } = usePurchaseRequisitionList();
   return (
     <Modal show={show} onHide={handleClose} centered scrollable size="lg">
       <Modal.Header closeButton>
         <Modal.Title>Purchase Requisition</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <h6>
-          Details for Purchase Requisition ID:{" "}
-          {purchaseRequisition.purchaseRequisitionId}
-        </h6>
+        <div className="mb-3 d-flex justify-content-between">
+          <h6>
+            Details for Purchase Requisition ID:{" "}
+            {purchaseRequisition.purchaseRequisitionId}
+          </h6>
+          <div>
+            Status :{" "}
+            <span
+              className={`badge rounded-pill ${getStatusBadgeClass(
+                purchaseRequisition.status
+              )}`}
+            >
+              {getStatusLabel(purchaseRequisition.status)}
+            </span>
+          </div>
+        </div>
         <div className="row">
           <div className="col-md-6">
             <p>
@@ -36,7 +49,7 @@ const PurchaseRequisitionDetail = ({
           <div className="col-md-6">
             <p>
               <strong>Requisition Date:</strong>{" "}
-              {formatDate(purchaseRequisition.requisitionDate)}
+              {purchaseRequisition?.requisitionDate?.split("T")[0]}
             </p>
             <p>
               <strong>Purpose of Request:</strong>{" "}
@@ -44,7 +57,7 @@ const PurchaseRequisitionDetail = ({
             </p>
             <p>
               <strong>Delivery Date:</strong>{" "}
-              {formatDate(purchaseRequisition.deliveryDate)}
+              {purchaseRequisition?.deliveryDate?.split("T")[0]}
             </p>
             <p>
               <strong>Delivery Location:</strong>{" "}

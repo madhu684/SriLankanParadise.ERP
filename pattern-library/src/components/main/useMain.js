@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import Registration from "../registration/registration.js";
-import PurchaseRequisitionList from "../purchaseRequisition/PurchaseRequisitionList/PurchaseRequisitionList.jsx";
+import PurchaseRequisitionList from "../purchaseRequisition/purchaseRequisitionList/purchaseRequisitionList.jsx";
+import PurchaseOrderList from "../purchaseOrder/purchaseOrderList/purchaseOrderList.jsx";
+import GrnList from "../grn/grnList/grnList.jsx";
 
 const useMain = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -61,6 +63,10 @@ const useMain = () => {
         return <Registration />;
       case "Purchase Requisitions":
         return <PurchaseRequisitionList />;
+      case "Purchase Orders":
+        return <PurchaseOrderList />;
+      case "Goods Received Notes":
+        return <GrnList />;
       default:
         return null;
     }

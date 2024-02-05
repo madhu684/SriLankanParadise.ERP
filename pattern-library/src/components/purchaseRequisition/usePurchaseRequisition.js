@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   get_company_locations_api,
   post_purchase_requisition_api,
   post_purchase_requisition_detail_api,
 } from "../../services/purchaseApi";
 
-const usePurchaseRequisition = () => {
+const usePurchaseRequisition = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
     requestorName: "",
     department: "",
@@ -24,6 +24,7 @@ const usePurchaseRequisition = () => {
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
+  const alertRef = useRef(null);
 
   useEffect(() => {
     const fetchLocations = async () => {
@@ -37,6 +38,13 @@ const usePurchaseRequisition = () => {
 
     fetchLocations();
   }, []);
+
+  useEffect(() => {
+    if (submissionStatus != null) {
+      // Scroll to the success alert when it becomes visible
+      alertRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [submissionStatus]);
 
   const validateField = (
     fieldName,
@@ -215,20 +223,6 @@ const usePurchaseRequisition = () => {
     );
   };
 
-  const formatDateTime = () => {
-    const currentDateTime = new Date();
-    const options = {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    };
-    return currentDateTime.toLocaleDateString("en-US", options);
-  };
-
   const handleSubmit = async (isSaveAsDraft) => {
     try {
       const status = isSaveAsDraft ? 0 : 1;
@@ -251,6 +245,7 @@ const usePurchaseRequisition = () => {
           approvedBy: null,
           approvedUserId: null,
           approvedDate: null,
+          companyId: sessionStorage.getItem("companyId"),
           permissionId: 9,
         };
 
@@ -302,6 +297,7 @@ const usePurchaseRequisition = () => {
 
           setTimeout(() => {
             setSubmissionStatus(null);
+            onFormSubmit();
           }, 3000);
         } else {
           setSubmissionStatus("error");
@@ -334,17 +330,19 @@ const usePurchaseRequisition = () => {
         updatedItemDetails[index].quantity
       );
 
-      updatedItemDetails[index].unitPrice = !isNaN(parseFloat(value))
+      updatedItemDetails[index].unitPrice = !isNaN(
+        parseFloat(updatedItemDetails[index].unitPrice)
+      )
         ? Math.max(0, parseFloat(updatedItemDetails[index].unitPrice))
         : 0;
 
-      updatedItemDetails[index].totalPrice = (
-        updatedItemDetails[index].quantity * updatedItemDetails[index].unitPrice
-      ).toFixed(2);
+      updatedItemDetails[index].totalPrice =
+        updatedItemDetails[index].quantity *
+        updatedItemDetails[index].unitPrice;
       return {
         ...prevFormData,
         itemDetails: updatedItemDetails,
-        totalAmount: calculateTotalPrice().toFixed(2),
+        totalAmount: calculateTotalPrice(),
       };
     });
   };
@@ -401,12 +399,12 @@ const usePurchaseRequisition = () => {
     submissionStatus,
     validFields,
     validationErrors,
+    alertRef,
     handleInputChange,
     handleItemDetailsChange,
     handleSubmit,
     handleAddItem,
     handleRemoveItem,
-    formatDateTime,
     handlePrint,
     handleAttachmentChange,
     calculateTotalPrice,

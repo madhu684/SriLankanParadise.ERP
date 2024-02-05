@@ -16,5 +16,20 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             await _grnDetailRepository.AddGrnDetail(grnDetail);
         }
+
+        public async Task<GrnDetail> GetGrnDetailByGrnDetailId(int grnDetailId)
+        {
+            return await _grnDetailRepository.GetGrnDetailByGrnDetailId(grnDetailId);
+        }
+
+        public async Task UpdateGrnDetail(int grnDetailId, GrnDetail grnDetail)
+        {
+            await _grnDetailRepository.UpdateGrnDetail(grnDetailId, grnDetail);
+        }
+
+        public async Task DeleteGrnDetail(int grnDetailId)
+        {
+            await _grnDetailRepository.DeleteGrnDetail(grnDetailId);
+        }
     }
 }

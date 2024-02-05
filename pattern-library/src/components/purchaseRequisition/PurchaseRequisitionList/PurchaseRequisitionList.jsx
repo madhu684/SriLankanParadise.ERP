@@ -1,14 +1,17 @@
 import React from "react";
 import usePurchaseRequisitionList from "./usePurchaseRequisitionList";
-import { Spinner } from "react-bootstrap";
-import PurchaseRequisitionApproval from "../PurchaseRequisitionApproval/PurchaseRequisitionApproval";
+import PurchaseRequisitionApproval from "../purchaseRequisitionApproval/purchaseRequisitionApproval";
 import PurchaseRequisition from "../purchaseRequisition";
-import PurchaseRequisitionDetail from "../PurchaseRequisitionDetail/PurchaseRequisitionDetail";
+import PurchaseRequisitionDetail from "../purchaseRequisitionDetail/purchaseRequisitionDetail";
+import PurchaseRequisitionUpdate from "../purchaseRequisitionUpdate/purchaseRequisitionUpdate";
+import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
+import ErrorComponent from "../../errorComponent/errorComponent";
 
 const PurchaseRequisitionList = () => {
   const {
     purchaseRequisitions,
-    isLoading,
+    isLoadingData,
+    isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
@@ -18,7 +21,7 @@ const PurchaseRequisitionList = () => {
     showDetailPRModal,
     showDetailPRModalInParent,
     showCreatePRForm,
-    userPermissions,
+    showUpdatePRForm,
     PRDetail,
     areAnySelectedRowsPending,
     setSelectedRows,
@@ -32,33 +35,36 @@ const PurchaseRequisitionList = () => {
     handleApproved,
     handleViewDetails,
     setShowCreatePRForm,
+    setShowUpdatePRForm,
     hasPermission,
+    handleUpdate,
+    handleUpdated,
   } = usePurchaseRequisitionList();
 
-  if (isLoading) {
-    return (
-      <div
-        className="d-flex justify-content-center align-items-center vh-100"
-        style={{ maxHeight: "80vh" }}
-      >
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </Spinner>
-      </div>
-    );
+  if (isLoadingData || isLoadingPermissions) {
+    return <LoadingSpinner />;
   }
 
   if (error) {
-    return (
-      <div className="d-flex justify-content-center align-items-center vh-100">
-        Error: {error}
-      </div>
-    );
+    return <ErrorComponent error={error} />;
   }
 
   if (showCreatePRForm) {
     return (
-      <PurchaseRequisition handleClose={() => setShowCreatePRForm(false)} />
+      <PurchaseRequisition
+        handleClose={() => setShowCreatePRForm(false)}
+        handleUpdated={handleUpdated}
+      />
+    );
+  }
+
+  if (showUpdatePRForm) {
+    return (
+      <PurchaseRequisitionUpdate
+        handleClose={() => setShowUpdatePRForm(false)}
+        purchaseRequisition={PRDetail || selectedRowData[0]}
+        handleUpdated={handleUpdated}
+      />
     );
   }
 
@@ -109,6 +115,14 @@ const PurchaseRequisitionList = () => {
                 Approve
               </button>
             )}
+          {hasPermission("Update Purchase Requisition") && isAnyRowSelected && (
+            <button
+              className="btn btn-warning"
+              onClick={() => setShowUpdatePRForm(true)}
+            >
+              Edit
+            </button>
+          )}
         </div>
       </div>
       <div className="table-responsive">
@@ -122,7 +136,7 @@ const PurchaseRequisitionList = () => {
               <th>Requested By</th>
               <th>Department</th>
               <th>Status</th>
-              <th>View Details</th>
+              <th>Details</th>
             </tr>
           </thead>
           <tbody>
@@ -148,25 +162,44 @@ const PurchaseRequisitionList = () => {
                   </span>
                 </td>
                 <td>
-                  <button
-                    className="btn btn-primary me-2"
-                    onClick={() => handleViewDetails(pr)}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      fill="currentColor"
-                      className="bi bi-arrow-right"
-                      viewBox="0 0 16 16"
+                  {pr.status === 0 ? (
+                    <button
+                      className="btn btn-warning me-2"
+                      onClick={() => handleUpdate(pr)}
                     >
-                      <path
-                        fillRule="evenodd"
-                        d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"
-                      />
-                    </svg>{" "}
-                    View
-                  </button>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        fill="currentColor"
+                        className="bi bi-pencil-fill"
+                        viewBox="0 0 16 16"
+                      >
+                        <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z" />
+                      </svg>{" "}
+                      Edit
+                    </button>
+                  ) : (
+                    <button
+                      className="btn btn-primary me-2"
+                      onClick={() => handleViewDetails(pr)}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        fill="currentColor"
+                        className="bi bi-arrow-right"
+                        viewBox="0 0 16 16"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"
+                        />
+                      </svg>{" "}
+                      View
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

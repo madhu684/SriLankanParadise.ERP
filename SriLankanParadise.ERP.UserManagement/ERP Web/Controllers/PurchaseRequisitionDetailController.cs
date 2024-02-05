@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using SriLankanParadise.ERP.UserManagement.Business_Service;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
@@ -63,6 +64,77 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
             return Response;
+        }
+
+        [HttpPut("{purchaseRequisitionDetailId}")]
+        public async Task<ApiResponseModel> UpdatePurchaseRequisitionDetail(int purchaseRequisitionDetailId, PurchaseRequisitionDetailRequestModel purchaseRequisitionDetailRequest)
+        {
+            try
+            {
+                var existingPurchaseRequisitionDetail = await _purchaseRequisitionDetailService.GetPurchaseRequisitionDetailByPurchaseRequisitionDetailId(purchaseRequisitionDetailId);
+                if (existingPurchaseRequisitionDetail == null)
+                {
+                    _logger.LogWarning(LogMessages.PurchaseRequisitionDetailNotFound);
+                    return AddResponseMessage(Response, LogMessages.PurchaseRequisitionDetailNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+                var updatedPurchaseRequisitionDetail = _mapper.Map<PurchaseRequisitionDetail>(purchaseRequisitionDetailRequest);
+                updatedPurchaseRequisitionDetail.PurchaseRequisitionDetailId = purchaseRequisitionDetailId; // Ensure the ID is not changed
+
+                await _purchaseRequisitionDetailService.UpdatePurchaseRequisitionDetail(existingPurchaseRequisitionDetail.PurchaseRequisitionDetailId, updatedPurchaseRequisitionDetail);
+
+                // Create action log
+                var actionLog = new ActionLogModel()
+                {
+                    ActionId = purchaseRequisitionDetailRequest.PermissionId,
+                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                    Timestamp = DateTime.UtcNow
+                };
+                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+
+                _logger.LogInformation(LogMessages.PurchaseRequisitionDetailUpdated);
+                return AddResponseMessage(Response, LogMessages.PurchaseRequisitionDetailUpdated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
+
+        [HttpDelete("{purchaseRequisitionDetailId}")]
+        public async Task<ApiResponseModel> DeletePurchaseRequisitionDetail(int purchaseRequisitionDetailId)
+        {
+            try
+            {
+                var existingPurchaseRequisitionDetail = await _purchaseRequisitionDetailService.GetPurchaseRequisitionDetailByPurchaseRequisitionDetailId(purchaseRequisitionDetailId);
+                if (existingPurchaseRequisitionDetail == null)
+                {
+                    _logger.LogWarning(LogMessages.PurchaseRequisitionDetailNotFound);
+                    return AddResponseMessage(Response, LogMessages.PurchaseRequisitionDetailNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+                await _purchaseRequisitionDetailService.DeletePurchaseRequisitionDetail(purchaseRequisitionDetailId);
+
+                // Create action log
+                var actionLog = new ActionLogModel()
+                {
+                    ActionId = 17,
+                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                    Timestamp = DateTime.UtcNow
+                };
+                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+
+                _logger.LogInformation(LogMessages.PurchaseRequisitionDetailDeleted);
+                return AddResponseMessage(Response, LogMessages.PurchaseRequisitionDetailDeleted, null, true, HttpStatusCode.NoContent);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
         }
     }
 }

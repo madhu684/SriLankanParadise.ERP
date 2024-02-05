@@ -19,6 +19,8 @@ public partial class GrnDetail
 
     public decimal? TotalPrice { get; set; }
 
+    public string? ItemId { get; set; }
+
     public virtual GrnMaster GrnMaster { get; set; } = null!;
 
     public virtual ICollection<ItemBatchHasGrnDetail> ItemBatchHasGrnDetails { get; set; } = new List<ItemBatchHasGrnDetail>();
