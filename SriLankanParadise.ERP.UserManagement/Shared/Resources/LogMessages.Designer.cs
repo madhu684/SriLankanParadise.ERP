@@ -178,6 +178,33 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Customer created successfully.
+        /// </summary>
+        public static string CustomerCreated {
+            get {
+                return ResourceManager.GetString("CustomerCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customers not found.
+        /// </summary>
+        public static string CustomersNotFound {
+            get {
+                return ResourceManager.GetString("CustomersNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customers retrieved.
+        /// </summary>
+        public static string CustomersRetrieved {
+            get {
+                return ResourceManager.GetString("CustomersRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Grn detail created successfully.
         /// </summary>
         public static string GrnDetailCreated {
@@ -597,6 +624,204 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string RolesRetrieved {
             get {
                 return ResourceManager.GetString("RolesRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales invoice approved.
+        /// </summary>
+        public static string SalesInvoiceApproved {
+            get {
+                return ResourceManager.GetString("SalesInvoiceApproved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales invoice created successfully.
+        /// </summary>
+        public static string SalesInvoiceCreated {
+            get {
+                return ResourceManager.GetString("SalesInvoiceCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales invoice detail created successfully.
+        /// </summary>
+        public static string SalesInvoiceDetailCreated {
+            get {
+                return ResourceManager.GetString("SalesInvoiceDetailCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales invoice detail deleted.
+        /// </summary>
+        public static string SalesInvoiceDetailDeleted {
+            get {
+                return ResourceManager.GetString("SalesInvoiceDetailDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales invoice detail not found.
+        /// </summary>
+        public static string SalesInvoiceDetailNotFound {
+            get {
+                return ResourceManager.GetString("SalesInvoiceDetailNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales invoice detail updated successfully.
+        /// </summary>
+        public static string SalesInvoiceDetailUpdated {
+            get {
+                return ResourceManager.GetString("SalesInvoiceDetailUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales invoice not found.
+        /// </summary>
+        public static string SalesInvoiceNotFound {
+            get {
+                return ResourceManager.GetString("SalesInvoiceNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales invoice retrieved.
+        /// </summary>
+        public static string SalesInvoiceRetrieved {
+            get {
+                return ResourceManager.GetString("SalesInvoiceRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales invoices not found.
+        /// </summary>
+        public static string SalesInvoicesNotFound {
+            get {
+                return ResourceManager.GetString("SalesInvoicesNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales invoices retrieved.
+        /// </summary>
+        public static string SalesInvoicesRetrieved {
+            get {
+                return ResourceManager.GetString("SalesInvoicesRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales invoice updated successfully.
+        /// </summary>
+        public static string SalesInvoiceUpdated {
+            get {
+                return ResourceManager.GetString("SalesInvoiceUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales order approved.
+        /// </summary>
+        public static string SalesOrderApproved {
+            get {
+                return ResourceManager.GetString("SalesOrderApproved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales order created successfully.
+        /// </summary>
+        public static string SalesOrderCreated {
+            get {
+                return ResourceManager.GetString("SalesOrderCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales order detail created successfully.
+        /// </summary>
+        public static string SalesOrderDetailCreated {
+            get {
+                return ResourceManager.GetString("SalesOrderDetailCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales order detail deleted.
+        /// </summary>
+        public static string SalesOrderDetailDeleted {
+            get {
+                return ResourceManager.GetString("SalesOrderDetailDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales order detail not found.
+        /// </summary>
+        public static string SalesOrderDetailNotFound {
+            get {
+                return ResourceManager.GetString("SalesOrderDetailNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales order detail updated successfully.
+        /// </summary>
+        public static string SalesOrderDetailUpdated {
+            get {
+                return ResourceManager.GetString("SalesOrderDetailUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales order not found.
+        /// </summary>
+        public static string SalesOrderNotFound {
+            get {
+                return ResourceManager.GetString("SalesOrderNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales order retrieved.
+        /// </summary>
+        public static string SalesOrderRetrieved {
+            get {
+                return ResourceManager.GetString("SalesOrderRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales orders not found.
+        /// </summary>
+        public static string SalesOrdersNotFound {
+            get {
+                return ResourceManager.GetString("SalesOrdersNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales orders retrieved.
+        /// </summary>
+        public static string SalesOrdersRetrieved {
+            get {
+                return ResourceManager.GetString("SalesOrdersRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales order updated successfully.
+        /// </summary>
+        public static string SalesOrderUpdated {
+            get {
+                return ResourceManager.GetString("SalesOrderUpdated", resourceCulture);
             }
         }
         

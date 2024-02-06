@@ -48,6 +48,18 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<GrnDetail, GrnDetailDto>();
             CreateMap<Location, LocationDto>();
             CreateMap<Supplier, SupplierDto>();
+            CreateMap<CustomerRequestModel, Customer>();
+            CreateMap<Customer, CustomerDto>();
+            CreateMap<SalesOrderRequestModel, SalesOrder>();
+            CreateMap<SalesOrder, SalesOrderDto>();
+            CreateMap<SalesOrderDetailRequestModel, SalesOrderDetail>();
+            CreateMap<SalesOrderDetail, SalesOrderDetailDto>();
+            CreateMap<ApproveSalesOrderRequestModel, SalesOrder>();
+            CreateMap<SalesInvoiceRequestModel, SalesInvoice>();
+            CreateMap<SalesInvoice, SalesInvoiceDto>();
+            CreateMap<SalesInvoiceDetailRequestModel, SalesInvoiceDetail>();
+            CreateMap<SalesInvoiceDetail, SalesInvoiceDetailDto>();
+            CreateMap<ApproveSalesInvoiceRequestModel, SalesInvoice>();
             // Add more mapping configurations if needed
         }
     }

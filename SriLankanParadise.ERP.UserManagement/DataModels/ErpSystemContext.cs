@@ -252,6 +252,12 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.ContactPerson).HasMaxLength(50);
             entity.Property(e => e.CustomerName).HasMaxLength(50);
             entity.Property(e => e.Email).HasMaxLength(50);
+            entity.Property(e => e.Phone).HasMaxLength(12);
+
+            entity.HasOne(d => d.Company).WithMany(p => p.Customers)
+                .HasForeignKey(d => d.CompanyId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Customer_Company");
         });
 
         modelBuilder.Entity<GrnDetail>(entity =>
@@ -532,6 +538,9 @@ public partial class ErpSystemContext : DbContext
 
             entity.ToTable("SalesInvoice");
 
+            entity.Property(e => e.ApprovedBy).HasMaxLength(50);
+            entity.Property(e => e.ApprovedDate).HasColumnType("date");
+            entity.Property(e => e.CreatedBy).HasMaxLength(50);
             entity.Property(e => e.DueDate).HasColumnType("date");
             entity.Property(e => e.InvoiceDate).HasColumnType("date");
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
@@ -558,13 +567,18 @@ public partial class ErpSystemContext : DbContext
 
             entity.ToTable("SalesOrder");
 
+            entity.Property(e => e.ApprovedBy).HasMaxLength(50);
+            entity.Property(e => e.ApprovedDate).HasColumnType("date");
+            entity.Property(e => e.CreatedBy).HasMaxLength(50);
             entity.Property(e => e.DeliveryDate).HasColumnType("date");
             entity.Property(e => e.OrderDate).HasColumnType("date");
+            entity.Property(e => e.ReferenceNo)
+                .HasMaxLength(20)
+                .HasDefaultValueSql("('SO'+CONVERT([nvarchar](20),NEXT VALUE FOR [dbo].[SalesOrderReferenceNoSeq]))");
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.Customer).WithMany(p => p.SalesOrders)
                 .HasForeignKey(d => d.CustomerId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__SalesOrde__Custo__1F63A897");
         });
 
@@ -714,6 +728,7 @@ public partial class ErpSystemContext : DbContext
                 .HasConstraintName("FK_UserRole_User");
         });
         modelBuilder.HasSequence("PurchaseOrderReferenceNoSeq").StartsAt(1000L);
+        modelBuilder.HasSequence("SalesOrderReferenceNoSeq").StartsAt(1000L);
 
         OnModelCreatingPartial(modelBuilder);
     }

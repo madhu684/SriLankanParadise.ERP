@@ -34,3 +34,25 @@ Status 0: Draft (Default)
 	   50: Completed - Draft
 	   41: In Progress - Pending Approval
 	   51: Completed - Pending Approval
+
+--- Sales Order ---
+
+Status 0: Draft (Default)
+	   1: Pending Approval
+	   2: Approved
+	   3: Rejected
+	   4: In Progress
+	   5: Completed
+	   6: Cancelled
+	   7: On Hold
+
+--- Sales Invoice ---
+
+Status 0: Draft (Default)
+	   1: Pending Approval
+	   2: Approved
+	   3: Rejected
+	   4: In Progress
+	   5: Completed
+	   6: Cancelled
+	   7: On Hold
