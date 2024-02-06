@@ -113,6 +113,13 @@ builder.Services.AddScoped<ISalesInvoiceService, SalesInvoiceService>();
 builder.Services.AddScoped<ISalesInvoiceRepository, SalesInvoiceRepository>();
 builder.Services.AddScoped<ISalesInvoiceDetailService, SalesInvoiceDetailService>();
 builder.Services.AddScoped<ISalesInvoiceDetailRepository, SalesInvoiceDetailRepository>();
+builder.Services.AddScoped<IPaymentModeService, PaymentModeService>();
+builder.Services.AddScoped<IPaymentModeRepository, PaymentModeRepository>();
+builder.Services.AddScoped<ISalesReceiptService, SalesReceiptService>();
+builder.Services.AddScoped<ISalesReceiptRepository, SalesReceiptRepository>();
+builder.Services.AddScoped<ISalesReceiptSalesInvoiceService, SalesReceiptSalesInvoiceService>();
+builder.Services.AddScoped<ISalesReceiptSalesInvoiceRepository, SalesReceiptSalesInvoiceRepository>();
+
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -120,6 +127,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+// CORS middleware
+app.UseCors("AllowSpecificOrigin");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -136,9 +146,6 @@ app.UseAuthorization();
 
 app.UseMiddleware<AuditMiddleware>();
 
-
-// CORS middleware
-app.UseCors("AllowSpecificOrigin");
 
 app.MapControllers();
 
