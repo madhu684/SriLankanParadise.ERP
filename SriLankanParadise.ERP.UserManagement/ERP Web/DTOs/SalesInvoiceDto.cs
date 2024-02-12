@@ -26,6 +26,10 @@
 
         public int? SalesOrderId { get; set; }
 
+        public string? ReferenceNo { get; set; }
+
+        public decimal? AmountDue { get; set; }
+
         public virtual IEnumerable<SalesInvoiceDetailDto>? SalesInvoiceDetails { get; set; }
     }
 }

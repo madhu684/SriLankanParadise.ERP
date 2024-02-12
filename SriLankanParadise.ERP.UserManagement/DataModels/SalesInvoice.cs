@@ -29,5 +29,11 @@ public partial class SalesInvoice
 
     public int? SalesOrderId { get; set; }
 
+    public string? ReferenceNo { get; set; }
+
+    public decimal? AmountDue { get; set; }
+
     public virtual ICollection<SalesInvoiceDetail> SalesInvoiceDetails { get; set; } = new List<SalesInvoiceDetail>();
+
+    public virtual ICollection<SalesReceiptSalesInvoice> SalesReceiptSalesInvoices { get; set; } = new List<SalesReceiptSalesInvoice>();
 }

@@ -20,6 +20,4 @@ public partial class Customer
     public virtual Company Company { get; set; } = null!;
 
     public virtual ICollection<SalesOrder> SalesOrders { get; set; } = new List<SalesOrder>();
-
-    public virtual ICollection<SalesReceipt> SalesReceipts { get; set; } = new List<SalesReceipt>();
 }
