@@ -47,7 +47,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             try
             {
                 var purchaseOrders = await _dbContext.GrnMasters
-                    .Where(gm => !gm.Status.ToString().StartsWith("0") && gm.CompanyId == companyId)
+                    .Where(gm => !gm.Status.ToString().EndsWith("0") && gm.CompanyId == companyId)
                     .Include(gm => gm.PurchaseOrder)
                     .Include(gm => gm.GrnDetails)
                     .ToListAsync();
