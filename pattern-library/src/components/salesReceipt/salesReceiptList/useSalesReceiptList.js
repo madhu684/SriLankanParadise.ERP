@@ -1,24 +1,24 @@
 import { useState, useEffect } from "react";
-import { get_sales_invoices_with_out_drafts_api } from "../../../services/salesApi";
-import { get_sales_invoices_by_user_id_api } from "../../../services/salesApi";
+import { get_sales_receipts_with_out_drafts_api } from "../../../services/salesApi";
+import { get_sales_receipts_by_user_id_api } from "../../../services/salesApi";
 import { get_user_permissions_api } from "../../../services/userManagementApi";
 
-const useSalesInvoiceList = () => {
-  const [salesInvoices, setSalesInvoices] = useState([]);
+const useSalesReceiptList = () => {
+  const [salesReceipts, setSalesReceipts] = useState([]);
   const [userPermissions, setUserPermissions] = useState([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [error, setError] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedRowData, setSelectedRowData] = useState([]);
-  const [showApproveSIModal, setShowApproveSIModal] = useState(false);
-  const [showApproveSIModalInParent, setShowApproveSIModalInParent] =
+  const [showApproveSRModal, setShowApproveSRModal] = useState(false);
+  const [showApproveSRModalInParent, setShowApproveSRModalInParent] =
     useState(false);
-  const [showDetailSIModal, setShowDetailSIModal] = useState(false);
-  const [showDetailSIModalInParent, setShowDetailSIModalInParent] =
+  const [showDetailSRModal, setShowDetailSRModal] = useState(false);
+  const [showDetailSRModalInParent, setShowDetailSRModalInParent] =
     useState(false);
-  const [showCreateSIForm, setShowCreateSIForm] = useState(false);
-  const [showUpdateSIForm, setShowUpdateSIForm] = useState(false);
-  const [SIDetail, setSIDetail] = useState("");
+  const [showCreateSRForm, setShowCreateSRForm] = useState(false);
+  const [showUpdateSRForm, setShowUpdateSRForm] = useState(false);
+  const [SRDetail, setSRDetail] = useState("");
   const [isLoadingPermissions, setIsLoadingPermissions] = useState(true);
 
   const fetchUserPermissions = async () => {
@@ -37,50 +37,50 @@ const useSalesInvoiceList = () => {
   const fetchData = async () => {
     try {
       if (!isLoadingPermissions && userPermissions) {
-        if (hasPermission("Approve Sales Invoice")) {
-          const SalesInvoiceWithoutDraftsResponse =
-            await get_sales_invoices_with_out_drafts_api(
+        if (hasPermission("View All Sales Receipts")) {
+          const salesReceiptWithoutDraftsResponse =
+            await get_sales_receipts_with_out_drafts_api(
               sessionStorage.getItem("companyId")
             );
 
-          const SalesInvoiceByUserIdResponse =
-            await get_sales_invoices_by_user_id_api(
+          const salesReceiptByUserIdResponse =
+            await get_sales_receipts_by_user_id_api(
               sessionStorage.getItem("userId")
             );
 
-          let newSalesInvoices = [];
+          let newSalesReceipts = [];
           if (
-            SalesInvoiceWithoutDraftsResponse &&
-            SalesInvoiceWithoutDraftsResponse.data.result
+            salesReceiptWithoutDraftsResponse &&
+            salesReceiptWithoutDraftsResponse.data.result
           ) {
-            newSalesInvoices = SalesInvoiceWithoutDraftsResponse.data.result;
+            newSalesReceipts = salesReceiptWithoutDraftsResponse.data.result;
           }
 
-          let additionalInvoices = [];
+          let additionalReceipts = [];
           if (
-            SalesInvoiceByUserIdResponse &&
-            SalesInvoiceByUserIdResponse.data.result
+            salesReceiptByUserIdResponse &&
+            salesReceiptByUserIdResponse.data.result
           ) {
-            additionalInvoices = SalesInvoiceByUserIdResponse.data.result;
+            additionalReceipts = salesReceiptByUserIdResponse.data.result;
           }
-          //let newSalesInvoices = SalesInvoiceWithoutDraftsResponse.data.result;
-          //const additionalInvoices = SalesInvoiceByUserIdResponse.data.result;
+          //let newSalesReceipts = salesReceiptWithoutDraftsResponse.data.result;
+          // const additionalReceipts = salesReceiptByUserIdResponse.data.result;
 
-          const uniqueNewInvoices = additionalInvoices.filter(
-            (invoice) =>
-              !newSalesInvoices.some(
-                (existinginvoice) =>
-                  existinginvoice.salesInvoiceId === invoice.salesInvoiceId
+          const uniqueNewReceipts = additionalReceipts.filter(
+            (receipt) =>
+              !newSalesReceipts.some(
+                (existingReceipt) =>
+                  existingReceipt.salesReceiptId === receipt.salesReceiptId
               )
           );
 
-          newSalesInvoices = [...newSalesInvoices, ...uniqueNewInvoices];
-          setSalesInvoices(newSalesInvoices);
+          newSalesReceipts = [...newSalesReceipts, ...uniqueNewReceipts];
+          setSalesReceipts(newSalesReceipts);
         } else {
-          const SalesInvoiceResponse = await get_sales_invoices_by_user_id_api(
+          const SalesReceiptResponse = await get_sales_receipts_by_user_id_api(
             sessionStorage.getItem("userId")
           );
-          setSalesInvoices(SalesInvoiceResponse.data.result);
+          setSalesReceipts(SalesReceiptResponse.data.result);
         }
       }
     } catch (error) {
@@ -98,20 +98,20 @@ const useSalesInvoiceList = () => {
     fetchData();
   }, [isLoadingPermissions, userPermissions]);
 
-  const handleShowApproveSIModal = () => {
-    setShowApproveSIModal(true);
-    setShowApproveSIModalInParent(true);
+  const handleShowApproveSRModal = () => {
+    setShowApproveSRModal(true);
+    setShowApproveSRModalInParent(true);
   };
 
-  const handleCloseApproveSIModal = () => {
-    setShowApproveSIModal(false);
-    handleCloseApproveSIModalInParent();
+  const handleCloseApproveSRModal = () => {
+    setShowApproveSRModal(false);
+    handleCloseApproveSRModalInParent();
   };
 
-  const handleCloseApproveSIModalInParent = () => {
+  const handleCloseApproveSRModalInParent = () => {
     const delay = 300;
     setTimeout(() => {
-      setShowApproveSIModalInParent(false);
+      setShowApproveSRModalInParent(false);
     }, delay);
   };
 
@@ -124,32 +124,32 @@ const useSalesInvoiceList = () => {
     }, delay);
   };
 
-  const handleShowDetailSIModal = () => {
-    setShowDetailSIModal(true);
-    setShowDetailSIModalInParent(true);
+  const handleShowDetailSRModal = () => {
+    setShowDetailSRModal(true);
+    setShowDetailSRModalInParent(true);
   };
 
-  const handleCloseDetailSIModal = () => {
-    setShowDetailSIModal(false);
-    handleCloseDetailSIModalInParent();
+  const handleCloseDetailSRModal = () => {
+    setShowDetailSRModal(false);
+    handleCloseDetailSRModalInParent();
   };
 
-  const handleCloseDetailSIModalInParent = () => {
+  const handleCloseDetailSRModalInParent = () => {
     const delay = 300;
     setTimeout(() => {
-      setShowDetailSIModalInParent(false);
-      setSIDetail("");
+      setShowDetailSRModalInParent(false);
+      setSRDetail("");
     }, delay);
   };
 
-  const handleViewDetails = (salesInvoice) => {
-    setSIDetail(salesInvoice);
-    handleShowDetailSIModal();
+  const handleViewDetails = (salesReceipt) => {
+    setSRDetail(salesReceipt);
+    handleShowDetailSRModal();
   };
 
-  const handleUpdate = (salesInvoice) => {
-    setSIDetail(salesInvoice);
-    setShowUpdateSIForm(true);
+  const handleUpdate = (salesReceipt) => {
+    setSRDetail(salesReceipt);
+    setShowUpdateSRForm(true);
   };
 
   const handleUpdated = async () => {
@@ -158,25 +158,25 @@ const useSalesInvoiceList = () => {
     const delay = 300;
     setTimeout(() => {
       setSelectedRowData([]);
-      setSIDetail("");
+      setSRDetail("");
     }, delay);
   };
 
   const handleClose = () => {
-    setShowUpdateSIForm(false);
-    setSIDetail("");
+    setShowUpdateSRForm(false);
+    setSRDetail("");
   };
 
   const handleRowSelect = (id) => {
     const isSelected = selectedRows.includes(id);
-    const selectedRow = salesInvoices.find((si) => si.salesInvoiceId === id);
+    const selectedRow = salesReceipts.find((sr) => sr.salesReceiptId === id);
 
     if (isSelected) {
       setSelectedRows((prevSelected) =>
         prevSelected.filter((selectedId) => selectedId !== id)
       );
       setSelectedRowData((prevSelectedData) =>
-        prevSelectedData.filter((data) => data.salesInvoiceId !== id)
+        prevSelectedData.filter((data) => data.salesReceiptId !== id)
       );
     } else {
       setSelectedRows((prevSelected) => [...prevSelected, id]);
@@ -192,7 +192,7 @@ const useSalesInvoiceList = () => {
   const getStatusLabel = (statusCode) => {
     const statusLabels = {
       0: "Draft",
-      1: "Pending Approval",
+      1: "Created",
       2: "Approved",
       3: "Rejected",
       4: "In Progress",
@@ -221,7 +221,7 @@ const useSalesInvoiceList = () => {
 
   const areAnySelectedRowsPending = (selectedRows) => {
     return selectedRows.some(
-      (id) => salesInvoices.find((si) => si.salesInvoiceId === id)?.status === 1
+      (id) => salesReceipts.find((sr) => sr.salesReceiptId === id)?.status === 1
     );
   };
 
@@ -234,34 +234,34 @@ const useSalesInvoiceList = () => {
   };
 
   return {
-    salesInvoices,
+    salesReceipts,
     isLoadingData,
     isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
-    showApproveSIModal,
-    showApproveSIModalInParent,
-    showDetailSIModal,
-    showDetailSIModalInParent,
+    showApproveSRModal,
+    showApproveSRModalInParent,
+    showDetailSRModal,
+    showDetailSRModalInParent,
     selectedRowData,
-    showCreateSIForm,
-    showUpdateSIForm,
+    showCreateSRForm,
+    showUpdateSRForm,
     userPermissions,
-    SIDetail,
+    SRDetail,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleViewDetails,
     getStatusLabel,
     getStatusBadgeClass,
     handleRowSelect,
-    handleShowApproveSIModal,
-    handleCloseApproveSIModal,
-    handleShowDetailSIModal,
-    handleCloseDetailSIModal,
+    handleShowApproveSRModal,
+    handleCloseApproveSRModal,
+    handleShowDetailSRModal,
+    handleCloseDetailSRModal,
     handleApproved,
-    setShowCreateSIForm,
-    setShowUpdateSIForm,
+    setShowCreateSRForm,
+    setShowUpdateSRForm,
     hasPermission,
     handleUpdate,
     handleUpdated,
@@ -269,4 +269,4 @@ const useSalesInvoiceList = () => {
   };
 };
 
-export default useSalesInvoiceList;
+export default useSalesReceiptList;

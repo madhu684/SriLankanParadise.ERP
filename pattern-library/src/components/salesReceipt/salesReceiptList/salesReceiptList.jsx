@@ -1,45 +1,39 @@
 import React from "react";
-import useSalesInvoiceList from "./useSalesInvoiceList";
-import SalesInvoiceApproval from "../salesInvoiceApproval/salesInvoiceApproval";
-import SalesInvoice from "../salesInvoice";
-import SalesInvoiceDetail from "../salesInvoiceDetail/salesInvoiceDetail";
-import SalesInvoiceUpdate from "../salesInvoiceUpdate/salesInvoiceUpdate";
+import useSalesReceiptList from "./useSalesReceiptList";
+import SalesReceipt from "../salesReceipt";
+import SalesReceiptDetail from "../salesReceiptDetail/salesReceiptDetail";
+import SalesReceiptUpdate from "../salesReceiptUpdate/salesReceiptUpdate";
 import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
 
-const SalesInvoiceList = () => {
+const SalesReceiptList = () => {
   const {
-    salesInvoices,
+    salesReceipts,
     isLoadingData,
     isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
     selectedRowData,
-    showApproveSIModal,
-    showApproveSIModalInParent,
-    showDetailSIModal,
-    showDetailSIModalInParent,
-    showCreateSIForm,
-    showUpdateSIForm,
-    SIDetail,
+    showDetailSRModal,
+    showDetailSRModalInParent,
+    showCreateSRForm,
+    showUpdateSRForm,
+    SRDetail,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleRowSelect,
     getStatusLabel,
     getStatusBadgeClass,
-    handleShowApproveSIModal,
-    handleCloseApproveSIModal,
-    handleCloseDetailSIModal,
-    handleApproved,
+    handleCloseDetailSRModal,
     handleViewDetails,
-    setShowCreateSIForm,
-    setShowUpdateSIForm,
+    setShowCreateSRForm,
+    setShowUpdateSRForm,
     hasPermission,
     handleUpdate,
     handleUpdated,
     handleClose,
-  } = useSalesInvoiceList();
+  } = useSalesReceiptList();
 
   if (error) {
     return <ErrorComponent error={error} />;
@@ -48,44 +42,44 @@ const SalesInvoiceList = () => {
   if (
     isLoadingData ||
     isLoadingPermissions ||
-    (salesInvoices && !salesInvoices.length > 0)
+    (salesReceipts && !salesReceipts.length > 0)
   ) {
     return <LoadingSpinner />;
   }
 
-  if (showCreateSIForm) {
+  if (showCreateSRForm) {
     return (
-      <SalesInvoice
-        handleClose={() => setShowCreateSIForm(false)}
+      <SalesReceipt
+        handleClose={() => setShowCreateSRForm(false)}
         handleUpdated={handleUpdated}
       />
     );
   }
 
-  if (showUpdateSIForm) {
+  if (showUpdateSRForm) {
     return (
-      <SalesInvoiceUpdate
+      <SalesReceiptUpdate
         handleClose={handleClose}
-        salesInvoice={SIDetail || selectedRowData[0]}
+        salesReceipt={SRDetail || selectedRowData[0]}
         handleUpdated={handleUpdated}
       />
     );
   }
 
-  if (!salesInvoices) {
+  if (!salesReceipts) {
     return (
       <div className="container mt-4">
-        <h2>Sales Invoices</h2>
+        <h2>Sales Receipts</h2>
         <div
           className="d-flex flex-column justify-content-center align-items-center text-center vh-100"
           style={{ maxHeight: "80vh" }}
         >
-          <p>You haven't created any sales invoice. Create a new one.</p>
-          {hasPermission("Create Sales Invoice") && (
+          <p>You haven't created any sales receipt. Create a new one.</p>
+          {hasPermission("Create Sales Receipt") && (
             <button
               type="button"
               className="btn btn-primary"
-              onClick={() => setShowCreateSIForm(true)}
+              onClick={() => setShowCreateSRForm(true)}
             >
               Create
             </button>
@@ -97,32 +91,22 @@ const SalesInvoiceList = () => {
 
   return (
     <div className="container mt-4">
-      <h2>Sales Invoices</h2>
+      <h2>Sales Receipts</h2>
       <div className="mt-3 d-flex justify-content-start align-items-center">
         <div className="btn-group" role="group">
-          {hasPermission("Create Sales Invoice") && (
+          {hasPermission("Create Sales Receipt") && (
             <button
               type="button"
               className="btn btn-primary"
-              onClick={() => setShowCreateSIForm(true)}
+              onClick={() => setShowCreateSRForm(true)}
             >
               Create
             </button>
           )}
-          {hasPermission("Approve Sales Invoice") &&
-            isAnyRowSelected &&
-            areAnySelectedRowsPending(selectedRows) && (
-              <button
-                className="btn btn-success"
-                onClick={handleShowApproveSIModal}
-              >
-                Approve
-              </button>
-            )}
-          {hasPermission("Update Sales Invoice") && isAnyRowSelected && (
+          {hasPermission("Update Sales Receipt") && isAnyRowSelected && (
             <button
               className="btn btn-warning"
-              onClick={() => setShowUpdateSIForm(true)}
+              onClick={() => setShowUpdateSRForm(true)}
             >
               Edit
             </button>
@@ -136,40 +120,40 @@ const SalesInvoiceList = () => {
               <th>
                 <input type="checkbox" />
               </th>
-              <th>Reference No</th>
+              <th>Receipt Id</th>
               <th>Created By</th>
-              <th>Invoice Date</th>
+              <th>Receipt Date</th>
               <th>Status</th>
               <th>Details</th>
             </tr>
           </thead>
           <tbody>
-            {salesInvoices.map((si) => (
-              <tr key={si.salesInvoiceId}>
+            {salesReceipts.map((sr) => (
+              <tr key={sr.salesReceiptId}>
                 <td>
                   <input
                     type="checkbox"
-                    checked={selectedRows.includes(si.salesInvoiceId)}
-                    onChange={() => handleRowSelect(si.salesInvoiceId)}
+                    checked={selectedRows.includes(sr.salesReceiptId)}
+                    onChange={() => handleRowSelect(sr.salesReceiptId)}
                   />
                 </td>
-                <td>{si.referenceNo}</td>
-                <td>{si.createdBy}</td>
-                <td>{si?.invoiceDate?.split("T")[0]}</td>
+                <td>{sr.salesReceiptId}</td>
+                <td>{sr.createdBy}</td>
+                <td>{sr?.receiptDate?.split("T")[0]}</td>
                 <td>
                   <span
                     className={`badge rounded-pill ${getStatusBadgeClass(
-                      si.status
+                      sr.status
                     )}`}
                   >
-                    {getStatusLabel(si.status)}
+                    {getStatusLabel(sr.status)}
                   </span>
                 </td>
                 <td>
-                  {si.status === 0 ? (
+                  {sr.status === 0 ? (
                     <button
                       className="btn btn-warning me-2"
-                      onClick={() => handleUpdate(si)}
+                      onClick={() => handleUpdate(sr)}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -186,7 +170,7 @@ const SalesInvoiceList = () => {
                   ) : (
                     <button
                       className="btn btn-primary me-2"
-                      onClick={() => handleViewDetails(si)}
+                      onClick={() => handleViewDetails(sr)}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -209,19 +193,11 @@ const SalesInvoiceList = () => {
             ))}
           </tbody>
         </table>
-        {showApproveSIModalInParent && (
-          <SalesInvoiceApproval
-            show={showApproveSIModal}
-            handleClose={handleCloseApproveSIModal}
-            salesInvoice={selectedRowData[0]}
-            handleApproved={handleApproved}
-          />
-        )}
-        {showDetailSIModalInParent && (
-          <SalesInvoiceDetail
-            show={showDetailSIModal}
-            handleClose={handleCloseDetailSIModal}
-            salesInvoice={SIDetail}
+        {showDetailSRModalInParent && (
+          <SalesReceiptDetail
+            show={showDetailSRModal}
+            handleClose={handleCloseDetailSRModal}
+            salesReceipt={SRDetail}
           />
         )}
       </div>
@@ -229,4 +205,4 @@ const SalesInvoiceList = () => {
   );
 };
 
-export default SalesInvoiceList;
+export default SalesReceiptList;
