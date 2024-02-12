@@ -29,13 +29,15 @@ const useGrn = ({ onFormSubmit }) => {
   useEffect(() => {
     const fetchPurchaseOrders = async () => {
       try {
-        const response = await get_purchase_orders_with_out_drafts_api(1);
+        const response = await get_purchase_orders_with_out_drafts_api(
+          sessionStorage?.getItem("companyId")
+        );
         const filteredPurchaseOrders = response.data.result.filter(
           (po) => po.status === 2
         );
         setPurchaseOrders(filteredPurchaseOrders);
       } catch (error) {
-        console.error("Error fetching suppliers:", error);
+        console.error("Error fetching purchase orders:", error);
       }
     };
 
@@ -103,7 +105,7 @@ const useGrn = ({ onFormSubmit }) => {
 
     const isPurchaseOrderIdValid = validateField(
       "purchaseOrderId",
-      "Purchase Order Reference Number",
+      "Purchase order reference number",
       formData.purchaseOrderId
     );
 

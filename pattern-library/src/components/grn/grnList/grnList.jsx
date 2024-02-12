@@ -38,14 +38,15 @@ const GrnList = () => {
     hasPermission,
     handleUpdate,
     handleUpdated,
+    handleClose,
   } = useGrnList();
-
-  if (isLoadingData || isLoadingPermissions) {
-    return <LoadingSpinner />;
-  }
 
   if (error) {
     return <ErrorComponent error={error} />;
+  }
+
+  if (isLoadingData || isLoadingPermissions || (Grns && !Grns.length > 0)) {
+    return <LoadingSpinner />;
   }
 
   if (showCreateGrnForm) {
@@ -60,7 +61,7 @@ const GrnList = () => {
   if (showUpdateGrnForm) {
     return (
       <GrnUpdate
-        handleClose={() => setShowUpdateGrnForm(false)}
+        handleClose={handleClose}
         grn={GRNDetail || selectedRowData[0]}
         handleUpdated={handleUpdated}
       />
@@ -129,7 +130,7 @@ const GrnList = () => {
           <thead>
             <tr>
               <th>
-                <input type="checkbox" onChange={() => setSelectedRows([])} />
+                <input type="checkbox" />
               </th>
               <th>Id</th>
               <th>Received By</th>
