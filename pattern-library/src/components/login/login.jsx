@@ -99,8 +99,18 @@ function template() {
                 <button
                   className="btn btn-primary btn-block mt-3"
                   type="submit"
+                  disabled={this.state.loading} // Disable button when loading
                 >
-                  Login
+                  {this.state.loading ? (
+                    <div
+                      className="spinner-border spinner-border-sm"
+                      role="status"
+                    >
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                  ) : (
+                    "Login"
+                  )}
                 </button>
               </form>
             </div>
