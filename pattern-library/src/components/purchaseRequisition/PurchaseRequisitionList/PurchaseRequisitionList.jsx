@@ -6,6 +6,7 @@ import PurchaseRequisitionDetail from "../purchaseRequisitionDetail/purchaseRequ
 import PurchaseRequisitionUpdate from "../purchaseRequisitionUpdate/purchaseRequisitionUpdate";
 import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
+import PurchaseRequisitionConvert from "../purchaseRequisitionConvert/purchaseRequisitionConvert";
 
 const PurchaseRequisitionList = () => {
   const {
@@ -23,7 +24,9 @@ const PurchaseRequisitionList = () => {
     showCreatePRForm,
     showUpdatePRForm,
     PRDetail,
+    showConvertPRForm,
     areAnySelectedRowsPending,
+    areAnySelectedRowsApproved,
     setSelectedRows,
     handleRowSelect,
     getStatusLabel,
@@ -40,6 +43,8 @@ const PurchaseRequisitionList = () => {
     handleUpdate,
     handleUpdated,
     handleClose,
+    handleConvert,
+    setShowConvertPRForm,
   } = usePurchaseRequisitionList();
 
   if (error) {
@@ -69,6 +74,16 @@ const PurchaseRequisitionList = () => {
         handleClose={handleClose}
         purchaseRequisition={PRDetail || selectedRowData[0]}
         handleUpdated={handleUpdated}
+      />
+    );
+  }
+
+  if (showConvertPRForm) {
+    return (
+      <PurchaseRequisitionConvert
+        handleClose={handleClose}
+        purchaseRequisition={PRDetail || selectedRowData[0]}
+        handleConverted={handleUpdated}
       />
     );
   }
@@ -118,6 +133,16 @@ const PurchaseRequisitionList = () => {
                 onClick={handleShowApprovePRModal}
               >
                 Approve
+              </button>
+            )}
+          {hasPermission("Convert Purchase Requisition") &&
+            isAnyRowSelected &&
+            areAnySelectedRowsApproved(selectedRows) && (
+              <button
+                className="btn btn-success"
+                onClick={() => setShowConvertPRForm(true)}
+              >
+                Convert
               </button>
             )}
           {hasPermission("Update Purchase Requisition") && isAnyRowSelected && (

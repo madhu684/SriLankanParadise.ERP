@@ -78,6 +78,13 @@ const usePurchaseRequisitionUpdate = ({
     }
   }, [submissionStatus]);
 
+  useEffect(() => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      totalAmount: calculateTotalPrice(),
+    }));
+  }, [formData.itemDetails]);
+
   const validateField = (
     fieldName,
     fieldDisplayName,
@@ -263,7 +270,7 @@ const usePurchaseRequisitionUpdate = ({
       if (isFormValid) {
         const purchaseRequisitionData = {
           requestedBy: formData.requestorName,
-          RequestedUserId: sessionStorage.getItem("userId"),
+          requestedUserId: sessionStorage.getItem("userId"),
           department: formData.department,
           email: formData.email,
           contactNo: formData.contactNumber,

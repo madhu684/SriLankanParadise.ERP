@@ -18,6 +18,7 @@ const usePurchaseRequisitionList = () => {
     useState(false);
   const [showCreatePRForm, setShowCreatePRForm] = useState(false);
   const [showUpdatePRForm, setShowUpdatePRForm] = useState(false);
+  const [showConvertPRForm, setShowConvertPRForm] = useState(false);
   const [PRDetail, setPRDetail] = useState("");
   const [isLoadingPermissions, setIsLoadingPermissions] = useState(true);
 
@@ -177,7 +178,13 @@ const usePurchaseRequisitionList = () => {
 
   const handleClose = () => {
     setShowUpdatePRForm(false);
+    setShowConvertPRForm(false);
     setPRDetail("");
+  };
+
+  const handleConvert = (purchaseRequisition) => {
+    setPRDetail(purchaseRequisition);
+    setShowConvertPRForm(true);
   };
 
   const handleRowSelect = (id) => {
@@ -242,6 +249,14 @@ const usePurchaseRequisitionList = () => {
     );
   };
 
+  const areAnySelectedRowsApproved = (selectedRows) => {
+    return selectedRows.some(
+      (id) =>
+        purchaseRequisitions.find((pr) => pr.purchaseRequisitionId === id)
+          ?.status === 2
+    );
+  };
+
   const hasPermission = (permissionName) => {
     return userPermissions?.some(
       (permission) =>
@@ -265,7 +280,9 @@ const usePurchaseRequisitionList = () => {
     showCreatePRForm,
     showUpdatePRForm,
     PRDetail,
+    showConvertPRForm,
     areAnySelectedRowsPending,
+    areAnySelectedRowsApproved,
     setSelectedRows,
     handleViewDetails,
     getStatusLabel,
@@ -282,6 +299,8 @@ const usePurchaseRequisitionList = () => {
     handleUpdate,
     handleUpdated,
     handleClose,
+    handleConvert,
+    setShowConvertPRForm,
   };
 };
 

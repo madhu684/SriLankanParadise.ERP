@@ -3,9 +3,13 @@ import {
   get_company_suppliers_api,
   post_purchase_order_api,
   post_purchase_order_detail_api,
-} from "../../services/purchaseApi";
+  put_purchase_requisition_api,
+} from "../../../services/purchaseApi";
 
-const usePurchaseOrder = ({ onFormSubmit }) => {
+const usePurchaseRequisitionConvert = ({
+  onFormSubmit,
+  purchaseRequisition,
+}) => {
   const [formData, setFormData] = useState({
     supplierId: "",
     orderDate: "",
@@ -45,11 +49,22 @@ const usePurchaseOrder = ({ onFormSubmit }) => {
   }, [submissionStatus]);
 
   useEffect(() => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      totalAmount: calculateTotalAmount(),
-    }));
-  }, [formData.itemDetails]);
+    const deepCopyPurchaseRequisition = JSON.parse(
+      JSON.stringify(purchaseRequisition)
+    );
+    setFormData({
+      itemDetails:
+        deepCopyPurchaseRequisition?.purchaseRequisitionDetails ?? [],
+      attachments: deepCopyPurchaseRequisition?.attachments ?? [],
+      totalAmount: deepCopyPurchaseRequisition?.totalAmount ?? "",
+      supplierId: "",
+      orderDate: "",
+      deliveryDate: "",
+      status: 0,
+      remark: "",
+      selectedSupplier: "",
+    });
+  }, [purchaseRequisition]);
 
   const validateField = (
     fieldName,
@@ -178,8 +193,8 @@ const usePurchaseOrder = ({ onFormSubmit }) => {
         const itemDetailsData = formData.itemDetails.map(async (item) => {
           const detailsData = {
             purchaseOrderId,
-            itemCategory: item.category,
-            itemId: item.id,
+            itemCategory: item.itemCategory,
+            itemId: item.itemId,
             name: item.name,
             quantity: item.quantity,
             unitPrice: item.unitPrice,
@@ -201,13 +216,46 @@ const usePurchaseOrder = ({ onFormSubmit }) => {
           (detailsResponse) => detailsResponse.status === 201
         );
 
-        if (allDetailsSuccessful) {
+        // Update the purchase requisition status
+        const purchaseRequisitionData = {
+          requestedBy: purchaseRequisition.requestedBy,
+          requestedUserId: purchaseRequisition.requestedUserId,
+          department: purchaseRequisition.department,
+          email: purchaseRequisition.email,
+          contactNo: purchaseRequisition.contactNo,
+          requisitionDate:
+            purchaseRequisition?.requisitionDate?.split("T")[0] ?? "",
+          purposeOfRequest: purchaseRequisition.purposeOfRequest,
+          deliveryDate: purchaseRequisition?.deliveryDate?.split("T")[0] ?? "",
+          deliveryLocation: purchaseRequisition.deliveryLocation,
+          referenceNo: purchaseRequisition.referenceNo,
+          totalAmount: purchaseRequisition.totalAmount,
+          status: 4,
+          approvedBy: purchaseRequisition.approvedBy,
+          approvedUserId: purchaseRequisition.approvedUserId,
+          approvedDate: purchaseRequisition?.approvedDate?.split("T")[0] ?? "",
+          companyId: purchaseRequisition.companyId,
+          permissionId: 16,
+        };
+
+        const putResponse = await put_purchase_requisition_api(
+          purchaseRequisition.purchaseRequisitionId,
+          purchaseRequisitionData
+        );
+
+        if (allDetailsSuccessful && putResponse.status === 200) {
           if (isSaveAsDraft) {
             setSubmissionStatus("successSavedAsDraft");
-            console.log("Purchase order saved as draft!", formData);
+            console.log(
+              "Purchase requisition converted and saved as draft!",
+              formData
+            );
           } else {
             setSubmissionStatus("successSubmitted");
-            console.log("Purchase order submitted successfully!", formData);
+            console.log(
+              "Purchase requisition converted successfully!",
+              formData
+            );
           }
 
           setTimeout(() => {
@@ -219,7 +267,7 @@ const usePurchaseOrder = ({ onFormSubmit }) => {
         }
       }
     } catch (error) {
-      console.error("Error submitting form:", error);
+      console.error("Error converting purchase requisition:", error);
       setSubmissionStatus("error");
       setTimeout(() => {
         setSubmissionStatus(null);
@@ -246,62 +294,6 @@ const usePurchaseOrder = ({ onFormSubmit }) => {
       supplierId,
       selectedSupplier,
     }));
-  };
-
-  const handleItemDetailsChange = (index, field, value) => {
-    setFormData((prevFormData) => {
-      const updatedItemDetails = [...prevFormData.itemDetails];
-      updatedItemDetails[index][field] = value;
-
-      // Ensure positive values for Quantities and Unit Prices
-      updatedItemDetails[index].quantity = Math.max(
-        0,
-        updatedItemDetails[index].quantity
-      );
-
-      updatedItemDetails[index].unitPrice = !isNaN(
-        parseFloat(updatedItemDetails[index].unitPrice)
-      )
-        ? Math.max(0, parseFloat(updatedItemDetails[index].unitPrice))
-        : 0;
-
-      updatedItemDetails[index].totalPrice =
-        updatedItemDetails[index].quantity *
-        updatedItemDetails[index].unitPrice;
-      return {
-        ...prevFormData,
-        itemDetails: updatedItemDetails,
-        totalAmount: calculateTotalAmount(),
-      };
-    });
-  };
-
-  const handleAddItem = () => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      itemDetails: [
-        ...prevFormData.itemDetails,
-        {
-          category: "",
-          id: "",
-          name: "",
-          quantity: 0,
-          unitPrice: 0.0,
-          totalPrice: 0.0,
-        },
-      ],
-    }));
-  };
-
-  const handleRemoveItem = (index) => {
-    setFormData((prevFormData) => {
-      const updatedItemDetails = [...prevFormData.itemDetails];
-      updatedItemDetails.splice(index, 1);
-      return {
-        ...prevFormData,
-        itemDetails: updatedItemDetails,
-      };
-    });
   };
 
   const handlePrint = () => {
@@ -332,14 +324,11 @@ const usePurchaseOrder = ({ onFormSubmit }) => {
     alertRef,
     handleInputChange,
     handleSupplierChange,
-    handleItemDetailsChange,
     handleAttachmentChange,
     handleSubmit,
-    handleAddItem,
-    handleRemoveItem,
     handlePrint,
     calculateTotalAmount,
   };
 };
 
-export default usePurchaseOrder;
+export default usePurchaseRequisitionConvert;
