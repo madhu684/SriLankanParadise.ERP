@@ -11,11 +11,13 @@ public partial class Customer
 
     public string? ContactPerson { get; set; }
 
-    public int? Phone { get; set; }
+    public string? Phone { get; set; }
 
     public string? Email { get; set; }
 
-    public virtual ICollection<SalesOrder> SalesOrders { get; set; } = new List<SalesOrder>();
+    public int CompanyId { get; set; }
 
-    public virtual ICollection<SalesReceipt> SalesReceipts { get; set; } = new List<SalesReceipt>();
+    public virtual Company Company { get; set; } = null!;
+
+    public virtual ICollection<SalesOrder> SalesOrders { get; set; } = new List<SalesOrder>();
 }

@@ -44,6 +44,12 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<GrnDetail, GrnDetailDto>();
             CreateMap<Location, LocationDto>();
             CreateMap<Supplier, SupplierDto>();
+            CreateMap<UnitRequestModel, Unit>();
+            CreateMap<Unit, UnitDto>();
+            CreateMap<CategoryRequestModel, Category>();
+            CreateMap<Category, CategoryDto>();
+            CreateMap<ItemMasterRequestModel, ItemMaster>();
+            CreateMap<ItemMaster, ItemMasterDto>();
             // Add more mapping configurations if needed
         }
     }

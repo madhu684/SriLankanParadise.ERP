@@ -117,6 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="CategoriesNotFound" xml:space="preserve">
+    <value>Categories not found</value>
+  </data>
+  <data name="CategoriesRetrieved" xml:space="preserve">
+    <value>Categories retrieved</value>
+  </data>
+  <data name="CategoryCreated" xml:space="preserve">
+    <value>Category created successfully</value>
+  </data>
   <data name="CompaniesRetrieved" xml:space="preserve">
     <value>Companies retrieved</value>
   </data>
@@ -167,6 +176,24 @@
   </data>
   <data name="InvalidUsernameOrPassword" xml:space="preserve">
     <value>Invalid username or password</value>
+  </data>
+  <data name="ItemMasterCreated" xml:space="preserve">
+    <value>Item master created successfully</value>
+  </data>
+  <data name="ItemMasterDeleted" xml:space="preserve">
+    <value>Item master deleted successfully</value>
+  </data>
+  <data name="ItemMasterNotFound" xml:space="preserve">
+    <value>Item master not found</value>
+  </data>
+  <data name="ItemMastersNotFound" xml:space="preserve">
+    <value>Item masters not found</value>
+  </data>
+  <data name="ItemMastersRetrieved" xml:space="preserve">
+    <value>Item masters retrieved</value>
+  </data>
+  <data name="ItemMasterUpdated" xml:space="preserve">
+    <value>Item master updated successfully</value>
   </data>
   <data name="LocationsNotFound" xml:space="preserve">
     <value>Locations not found</value>
@@ -269,6 +296,15 @@
   </data>
   <data name="SuppliersRetrieved" xml:space="preserve">
     <value>Suppliers retrieved</value>
+  </data>
+  <data name="UnitCreated" xml:space="preserve">
+    <value>Unit created successfully</value>
+  </data>
+  <data name="UnitsNotFound" xml:space="preserve">
+    <value>Units not found</value>
+  </data>
+  <data name="UnitsRetrieved" xml:space="preserve">
+    <value>Units retrieved</value>
   </data>
   <data name="UserAlreadyExists" xml:space="preserve">
     <value>User already exists</value>

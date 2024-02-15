@@ -37,6 +37,8 @@ public partial class PurchaseRequisition
 
     public DateTime? ApprovedDate { get; set; }
 
+    public int? CompanyId { get; set; }
+
     public virtual Location DeliveryLocationNavigation { get; set; } = null!;
 
     public virtual ICollection<PurchaseRequisitionDetail> PurchaseRequisitionDetails { get; set; } = new List<PurchaseRequisitionDetail>();

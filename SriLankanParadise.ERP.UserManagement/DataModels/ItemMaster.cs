@@ -19,6 +19,10 @@ public partial class ItemMaster
 
     public decimal? CostPrice { get; set; }
 
+    public bool? Status { get; set; }
+
+    public int? CompanyId { get; set; }
+
     public virtual Category Category { get; set; } = null!;
 
     public virtual ICollection<ItemBatch> ItemBatches { get; set; } = new List<ItemBatch>();
