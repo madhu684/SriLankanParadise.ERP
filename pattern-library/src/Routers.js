@@ -11,6 +11,7 @@ import Grn from "./components/grn/grn";
 import PurchaseRequisitionList from "./components/purchaseRequisition/PurchaseRequisitionList/PurchaseRequisitionList";
 import ItemMaster from "./components/itemMaster/itemMaster";
 import Category from "./components/category/category";
+import Unit from "./components/unit/unit";
 
 const Routers = () => {
   return (
@@ -26,6 +27,7 @@ const Routers = () => {
         <Route path="/purchaselist" element={<PurchaseRequisitionList />} />
         <Route path="/itemmaster" element={<ItemMaster />} />
         <Route path="/category" element={<Category />} />
+        <Route path="/unit" element={<Unit />} />
       </Routes>
     </Router>
   );

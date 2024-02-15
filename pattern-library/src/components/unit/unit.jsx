@@ -1,7 +1,7 @@
 import React from "react";
-import useCategory from "./useCategory";
+import useUnit from "./useUnit";
 
-const Category = () => {
+const Unit = () => {
   const {
     formData,
     validFields,
@@ -11,7 +11,7 @@ const Category = () => {
     formatDateTime,
     handleInputChange,
     handleSubmit,
-  } = useCategory();
+  } = useUnit();
 
   return (
     <div className="container mt-4">
@@ -26,53 +26,51 @@ const Category = () => {
           />
           <p>Date and Time: {formatDateTime()}</p>
         </div>
-        <h1 className="mt-2 text-center">Create Category</h1>
+        <h1 className="mt-2 text-center">Create Unit</h1>
         <hr />
       </div>
 
       {/* Display success or error messages */}
       {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
-          Category created successfully!
+          Unit created successfully!
         </div>
       )}
       {submissionStatus === "successSavedAsDraft" && (
         <div className="alert alert-success mb-3" role="alert">
-          Category created as inactive, you can edit and active it later!
+          Unit created as inactive, you can edit and active it later!
         </div>
       )}
       {submissionStatus === "error" && (
         <div className="alert alert-danger mb-3" role="alert">
-          Error creating category. Please try again.
+          Error creating unit. Please try again.
         </div>
       )}
 
       <form>
-        {/* Category Information */}
+        {/* Unit Information */}
         <div className="row mb-3">
           <div className="col-md-6">
-            <h4>Category Information</h4>
+            <h4>Unit Information</h4>
 
             <div className="mb-3 mt-3">
-              <label htmlFor="categoryName" className="form-label">
-                Category Name
+              <label htmlFor="unitName" className="form-label">
+                Unit Name
               </label>
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.categoryName ? "is-valid" : ""
-                } ${validationErrors.categoryName ? "is-invalid" : ""}`}
-                id="categoryName"
-                placeholder="Enter Category Name"
-                value={formData.categoryName}
-                onChange={(e) =>
-                  handleInputChange("categoryName", e.target.value)
-                }
+                  validFields.unitName ? "is-valid" : ""
+                } ${validationErrors.unitName ? "is-invalid" : ""}`}
+                id="unitName"
+                placeholder="Enter Unit Name"
+                value={formData.UnitName}
+                onChange={(e) => handleInputChange("unitName", e.target.value)}
                 required
               />
-              {validationErrors.categoryName && (
+              {validationErrors.unitName && (
                 <div className="invalid-feedback">
-                  {validationErrors.categoryName}
+                  {validationErrors.unitName}
                 </div>
               )}
             </div>
@@ -121,4 +119,4 @@ const Category = () => {
   );
 };
 
-export default Category;
+export default Unit;

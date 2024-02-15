@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { post_category_api } from "../../services/inventoryApi";
+import { post_unit_api } from "../../services/inventoryApi";
 
-const useCategory = () => {
+const useUnit = () => {
   const [formData, setFormData] = useState({
-    categoryName: "",
+    unitName: "",
     status: "",
   });
   const [validFields, setValidFields] = useState({});
@@ -60,15 +60,15 @@ const useCategory = () => {
   };
 
   const validateForm = () => {
-    const isCategoryNameValid = validateField(
-      "categoryName",
-      "Category name",
-      formData.categoryName
+    const isUnitNameValid = validateField(
+      "unitName",
+      "Unit name",
+      formData.unitName
     );
 
     const isStatusValid = validateField("status", "Status", formData.status);
 
-    return isCategoryNameValid && isStatusValid;
+    return isUnitNameValid && isStatusValid;
   };
 
   const handleSubmit = async () => {
@@ -76,22 +76,22 @@ const useCategory = () => {
       const status = formData.status === "1" ? true : false;
       const isFormValid = validateForm();
       if (isFormValid) {
-        const categoryData = {
-          categoryName: formData.categoryName,
+        const UnitData = {
+          unitName: formData.unitName,
           status: status,
           companyId: 1, //sessionStorage.getItem("companyId")
-          permissionId: 1038,
+          permissionId: 1037,
         };
 
-        const response = await post_category_api(categoryData);
+        const response = await post_unit_api(UnitData);
 
         if (response.status === 201) {
           if (status === false) {
             setSubmissionStatus("successSavedAsDraft");
-            console.log("Category created as inactive!", formData);
+            console.log("Unit created as inactive!", formData);
           } else {
             setSubmissionStatus("successSubmitted");
-            console.log("Category created successfully!", formData);
+            console.log("Unit created successfully!", formData);
           }
 
           setTimeout(() => {
@@ -136,4 +136,4 @@ const useCategory = () => {
   };
 };
 
-export default useCategory;
+export default useUnit;

@@ -8,6 +8,8 @@ const ItemMaster = () => {
     validationErrors,
     categoryOptions,
     unitOptions,
+    submissionStatus,
+    alertRef,
     formatDateTime,
     handleInputChange,
     handleSubmit,
@@ -17,6 +19,7 @@ const ItemMaster = () => {
     <div className="container mt-4">
       {/* Header */}
       <div className="mb-4">
+        <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
           <img
             src="path/to/your/logo.png"
@@ -29,6 +32,23 @@ const ItemMaster = () => {
         <hr />
       </div>
 
+      {/* Display success or error messages */}
+      {submissionStatus === "successSubmitted" && (
+        <div className="alert alert-success mb-3" role="alert">
+          Item master created successfully!
+        </div>
+      )}
+      {submissionStatus === "successSavedAsDraft" && (
+        <div className="alert alert-success mb-3" role="alert">
+          Item master saved as draft, you can edit and create it later!
+        </div>
+      )}
+      {submissionStatus === "error" && (
+        <div className="alert alert-danger mb-3" role="alert">
+          Error creating item master. Please try again.
+        </div>
+      )}
+
       <form>
         {/* Item Master Information */}
         <div className="row g-3 mb-3 d-flex justify-content-between">
@@ -36,35 +56,6 @@ const ItemMaster = () => {
             <h4>Item Information</h4>
 
             <div className="mb-3 mt-3">
-              <label htmlFor="unitId" className="form-label">
-                Unit
-              </label>
-              <select
-                className={`form-select ${
-                  validFields.unitId ? "is-valid" : ""
-                } ${validationErrors.unitId ? "is-invalid" : ""}`}
-                id="unitId"
-                value={formData.unitId}
-                onChange={(e) => handleInputChange("unitId", e.target.value)}
-                required
-              >
-                <option value="" disabled>
-                  Select Unit
-                </option>
-                {unitOptions.map((unit) => (
-                  <option key={unit.id} value={unit.id}>
-                    {unit.name}
-                  </option>
-                ))}
-              </select>
-              {validationErrors.unitId && (
-                <div className="invalid-feedback">
-                  {validationErrors.unitId}
-                </div>
-              )}
-            </div>
-
-            <div className="mb-3">
               <label htmlFor="categoryId" className="form-label">
                 Category
               </label>
@@ -79,12 +70,10 @@ const ItemMaster = () => {
                 }
                 required
               >
-                <option value="" disabled>
-                  Select Category
-                </option>
-                {categoryOptions.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
+                <option value="">Select Category</option>
+                {categoryOptions?.map((category) => (
+                  <option key={category.categoryId} value={category.categoryId}>
+                    {category.categoryName}
                   </option>
                 ))}
               </select>
@@ -122,11 +111,38 @@ const ItemMaster = () => {
             <h4>Stock Information</h4>
 
             <div className="mb-3 mt-3">
+              <label htmlFor="unitId" className="form-label">
+                Unit
+              </label>
+              <select
+                className={`form-select ${
+                  validFields.unitId ? "is-valid" : ""
+                } ${validationErrors.unitId ? "is-invalid" : ""}`}
+                id="unitId"
+                value={formData.unitId}
+                onChange={(e) => handleInputChange("unitId", e.target.value)}
+                required
+              >
+                <option value="">Select Unit</option>
+                {unitOptions?.map((unit) => (
+                  <option key={unit.unitId} value={unit.unitId}>
+                    {unit.unitName}
+                  </option>
+                ))}
+              </select>
+              {validationErrors.unitId && (
+                <div className="invalid-feedback">
+                  {validationErrors.unitId}
+                </div>
+              )}
+            </div>
+
+            <div className="mb-3 mt-3">
               <label htmlFor="stockQuantity" className="form-label">
                 Stock Quantity
               </label>
               <input
-                type="number"
+                type="text"
                 className={`form-control ${
                   validFields.stockQuantity ? "is-valid" : ""
                 } ${validationErrors.stockQuantity ? "is-invalid" : ""}`}
@@ -149,7 +165,7 @@ const ItemMaster = () => {
                 Selling Price
               </label>
               <input
-                type="number"
+                type="text"
                 className={`form-control ${
                   validFields.sellingPrice ? "is-valid" : ""
                 } ${validationErrors.sellingPrice ? "is-invalid" : ""}`}
@@ -172,7 +188,7 @@ const ItemMaster = () => {
                 Cost Price
               </label>
               <input
-                type="number"
+                type="text"
                 className={`form-control ${
                   validFields.costPrice ? "is-valid" : ""
                 } ${validationErrors.costPrice ? "is-invalid" : ""}`}
@@ -196,9 +212,16 @@ const ItemMaster = () => {
           <button
             type="button"
             className="btn btn-primary me-2"
-            onClick={handleSubmit}
+            onClick={() => handleSubmit(false)}
           >
-            Submit
+            Create
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary me-2"
+            onClick={() => handleSubmit(true)}
+          >
+            Save as Draft
           </button>
           <button type="button" className="btn btn-danger">
             Cancel
