@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using SriLankanParadise.ERP.UserManagement.Business_Service;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
@@ -80,6 +81,159 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
             return Response;
+        }
+
+
+        [HttpGet("GetPurchaseOrdersWithoutDraftsByCompanyId/{companyId}")]
+        public async Task<ApiResponseModel> GetPurchaseOrdersWithoutDraftsByCompanyId(int companyId)
+        {
+            try
+            {
+                var purchaseOrders = await _purchaseOrderService.GetPurchaseOrdersWithoutDraftsByCompanyId(companyId);
+                if (purchaseOrders != null)
+                {
+                    var purchaseOrderDtos = _mapper.Map<IEnumerable<PurchaseOrderDto>>(purchaseOrders);
+                    AddResponseMessage(Response, LogMessages.PurchaseOrdersRetrieved, purchaseOrderDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.PurchaseOrdersNotFound);
+                    AddResponseMessage(Response, LogMessages.PurchaseOrdersNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+
+        [HttpGet("GetPurchaseOrdersByUserId/{userId}")]
+        public async Task<ApiResponseModel> GetPurchaseOrdersByUserId(int userId)
+        {
+            try
+            {
+                var purchaseOrders = await _purchaseOrderService.GetPurchaseOrdersByUserId(userId);
+                if (purchaseOrders != null)
+                {
+                    var purchaseOrderDtos = _mapper.Map<IEnumerable<PurchaseOrderDto>>(purchaseOrders);
+                    AddResponseMessage(Response, LogMessages.PurchaseOrdersRetrieved, purchaseOrderDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.PurchaseOrdersNotFound);
+                    AddResponseMessage(Response, LogMessages.PurchaseOrdersNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("{purchaseOrderId}")]
+        public async Task<ApiResponseModel> GetPurchaseOrderByPurchaseOrderId(int purchaseOrderId)
+        {
+            try
+            {
+                var purchaseOrder = await _purchaseOrderService.GetPurchaseOrderByPurchaseOrderId(purchaseOrderId);
+                if (purchaseOrder!= null)
+                {
+                    var purchaseOrderDto = _mapper.Map<PurchaseOrderDto>(purchaseOrder);
+                    AddResponseMessage(Response, LogMessages.PurchaseOrderRetrieved, purchaseOrderDto, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.PurchaseOrderNotFound);
+                    AddResponseMessage(Response, LogMessages.PurchaseOrderNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpPatch("approve/{purchaseOrderId}")]
+        public async Task<ApiResponseModel> ApprovePurchaseOrder(int purchaseOrderId, ApprovePurchaseOrderRequestModel approvePurchaseOrderRequest)
+        {
+            try
+            {
+                var existingPurchaseOrder = await _purchaseOrderService.GetPurchaseOrderByPurchaseOrderId(purchaseOrderId);
+                if (existingPurchaseOrder == null)
+                {
+                    _logger.LogWarning(LogMessages.PurchaseOrderNotFound);
+                    return AddResponseMessage(Response, LogMessages.PurchaseOrderNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+                var approvedPurchaseOrder = _mapper.Map<PurchaseOrder>(approvePurchaseOrderRequest);
+                approvedPurchaseOrder.PurchaseOrderId = purchaseOrderId; // Ensure the ID is not changed
+
+                await _purchaseOrderService.ApprovePurchaseOrder(existingPurchaseOrder.PurchaseOrderId, approvedPurchaseOrder);
+
+                // Create action log
+                var actionLog = new ActionLogModel()
+                {
+                    ActionId = approvePurchaseOrderRequest.PermissionId,
+                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                    Timestamp = DateTime.UtcNow
+                };
+                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+
+                _logger.LogInformation(LogMessages.PurchaseOrderApproved);
+                return AddResponseMessage(Response, LogMessages.PurchaseOrderApproved, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
+
+        [HttpPut("{purchaseOrderId}")]
+        public async Task<ApiResponseModel> UpdatePurchaseOrder(int purchaseOrderId, PurchaseOrderRequestModel purchaseOrderRequest)
+        {
+            try
+            {
+                var existingPurchaseOrder = await _purchaseOrderService.GetPurchaseOrderByPurchaseOrderId(purchaseOrderId);
+                if (existingPurchaseOrder == null)
+                {
+                    _logger.LogWarning(LogMessages.PurchaseOrderNotFound);
+                    return AddResponseMessage(Response, LogMessages.PurchaseOrderNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+                var updatedPurchaseOrder = _mapper.Map<PurchaseOrder>(purchaseOrderRequest);
+                updatedPurchaseOrder.PurchaseOrderId = purchaseOrderId; // Ensure the ID is not changed
+                updatedPurchaseOrder.ReferenceNo = existingPurchaseOrder.ReferenceNo; // // Ensure the ReferenceNo is not changed
+
+                await _purchaseOrderService.UpdatePurchaseOrder(existingPurchaseOrder.PurchaseOrderId, updatedPurchaseOrder);
+
+                // Create action log
+                var actionLog = new ActionLogModel()
+                {
+                    ActionId = purchaseOrderRequest.PermissionId,
+                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                    Timestamp = DateTime.UtcNow
+                };
+                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+
+                _logger.LogInformation(LogMessages.PurchaseOrderUpdated);
+                return AddResponseMessage(Response, LogMessages.PurchaseOrderUpdated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
         }
     }
 }

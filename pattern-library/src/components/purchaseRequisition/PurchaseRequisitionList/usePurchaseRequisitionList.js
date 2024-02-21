@@ -6,7 +6,7 @@ import { get_user_permissions_api } from "../../../services/userManagementApi";
 const usePurchaseRequisitionList = () => {
   const [purchaseRequisitions, setPurchaseRequisitions] = useState([]);
   const [userPermissions, setUserPermissions] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const [error, setError] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedRowData, setSelectedRowData] = useState([]);
@@ -17,36 +17,73 @@ const usePurchaseRequisitionList = () => {
   const [showDetailPRModalInParent, setShowDetailPRModalInParent] =
     useState(false);
   const [showCreatePRForm, setShowCreatePRForm] = useState(false);
+  const [showUpdatePRForm, setShowUpdatePRForm] = useState(false);
   const [PRDetail, setPRDetail] = useState("");
+  const [isLoadingPermissions, setIsLoadingPermissions] = useState(true);
 
   const fetchUserPermissions = async () => {
     try {
       const userPermissionsResponse = await get_user_permissions_api(
         sessionStorage.getItem("userId")
       );
-      setUserPermissions(userPermissionsResponse.data.result);
+      setUserPermissions(Object.freeze(userPermissionsResponse.data.result));
     } catch (error) {
-      setError("Error fetching data");
+      setError("Error fetching permissions");
+    } finally {
+      setIsLoadingPermissions(false);
     }
   };
 
   const fetchData = async () => {
     try {
-      if (hasPermission("Approve Purchase Requisition")) {
-        const purchaseRequisitionResponse =
-          await get_purchase_requisitions_with_out_drafts_api();
-        setPurchaseRequisitions(purchaseRequisitionResponse.data.result);
-      } else {
-        const purchaseRequisitionResponse =
-          await get_purchase_requisitions_by_user_id_api(
-            sessionStorage.getItem("userId")
+      if (!isLoadingPermissions && userPermissions) {
+        if (hasPermission("Approve Purchase Requisition")) {
+          // const purchaseRequisitionResponse =
+          //   await get_purchase_requisitions_with_out_drafts_api(
+          //     sessionStorage.getItem("companyId")
+          //   );
+          // setPurchaseRequisitions(purchaseRequisitionResponse.data.result);
+          const purchaseRequisitionWithoutDraftsResponse =
+            await get_purchase_requisitions_with_out_drafts_api(
+              sessionStorage.getItem("companyId")
+            );
+
+          const purchaseRequisitionByUserIdResponse =
+            await get_purchase_requisitions_by_user_id_api(
+              sessionStorage.getItem("userId")
+            );
+
+          let newPurchaseRequisitions =
+            purchaseRequisitionWithoutDraftsResponse.data.result;
+          const additionalRequisitions =
+            purchaseRequisitionByUserIdResponse.data.result;
+
+          const uniqueNewRequisitions = additionalRequisitions.filter(
+            (requisition) =>
+              !newPurchaseRequisitions.some(
+                (existingRequisition) =>
+                  existingRequisition.purchaseRequisitionId ===
+                  requisition.purchaseRequisitionId
+              )
           );
-        setPurchaseRequisitions(purchaseRequisitionResponse.data.result);
+
+          newPurchaseRequisitions = [
+            ...newPurchaseRequisitions,
+            ...uniqueNewRequisitions,
+          ];
+          setPurchaseRequisitions(newPurchaseRequisitions);
+        } else {
+          const purchaseRequisitionResponse =
+            await get_purchase_requisitions_by_user_id_api(
+              sessionStorage.getItem("userId")
+            );
+          setPurchaseRequisitions(purchaseRequisitionResponse.data.result);
+        }
       }
     } catch (error) {
       setError("Error fetching data");
     } finally {
-      setIsLoading(false);
+      setIsLoadingData(false);
     }
   };
 
@@ -56,7 +93,7 @@ const usePurchaseRequisitionList = () => {
 
   useEffect(() => {
     fetchData();
-  }, [userPermissions]);
+  }, [isLoadingPermissions, userPermissions]);
 
   const handleShowApprovePRModal = () => {
     setShowApprovePRModal(true);
@@ -105,6 +142,20 @@ const usePurchaseRequisitionList = () => {
   const handleViewDetails = (purchaseRequisition) => {
     setPRDetail(purchaseRequisition);
     handleShowDetailPRModal();
+  };
+
+  const handleUpdate = (purchaseRequisition) => {
+    setPRDetail(purchaseRequisition);
+    setShowUpdatePRForm(true);
+  };
+
+  const handleUpdated = async () => {
+    fetchData();
+    setSelectedRows([]);
+    const delay = 300;
+    setTimeout(() => {
+      setSelectedRowData([]);
+    }, delay);
   };
 
   const handleRowSelect = (id) => {
@@ -179,7 +230,8 @@ const usePurchaseRequisitionList = () => {
 
   return {
     purchaseRequisitions,
-    isLoading,
+    isLoadingData,
+    isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
@@ -189,7 +241,7 @@ const usePurchaseRequisitionList = () => {
     showDetailPRModalInParent,
     selectedRowData,
     showCreatePRForm,
-    userPermissions,
+    showUpdatePRForm,
     PRDetail,
     areAnySelectedRowsPending,
     setSelectedRows,
@@ -203,7 +255,10 @@ const usePurchaseRequisitionList = () => {
     handleCloseDetailPRModal,
     handleApproved,
     setShowCreatePRForm,
+    setShowUpdatePRForm,
     hasPermission,
+    handleUpdate,
+    handleUpdated,
   };
 };
 

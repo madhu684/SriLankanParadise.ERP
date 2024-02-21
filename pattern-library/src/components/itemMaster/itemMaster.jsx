@@ -1,7 +1,9 @@
 import React from "react";
 import useItemMaster from "./useItemMaster";
+import CurrentDateTime from "../currentDateTime/currentDateTime";
+import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 
-const ItemMaster = () => {
+const ItemMaster = ({ handleClose, handleUpdated }) => {
   const {
     formData,
     validFields,
@@ -10,10 +12,16 @@ const ItemMaster = () => {
     unitOptions,
     submissionStatus,
     alertRef,
-    formatDateTime,
+    loading,
+    loadingDraft,
     handleInputChange,
     handleSubmit,
-  } = useItemMaster();
+  } = useItemMaster({
+    onFormSubmit: () => {
+      handleClose();
+      handleUpdated();
+    },
+  });
 
   return (
     <div className="container mt-4">
@@ -26,7 +34,10 @@ const ItemMaster = () => {
             alt="Company Logo"
             className="img-fluid"
           />
-          <p>Date and Time: {formatDateTime()}</p>
+          <p>
+            {" "}
+            Date and Time: <CurrentDateTime />
+          </p>
         </div>
         <h1 className="mt-2 text-center">Item Master</h1>
         <hr />
@@ -107,6 +118,7 @@ const ItemMaster = () => {
             </div>
           </div>
 
+          {/* Stock Information */}
           <div className="col-md-5">
             <h4>Stock Information</h4>
 
@@ -160,6 +172,7 @@ const ItemMaster = () => {
                 </div>
               )}
             </div>
+
             <div className="mb-3">
               <label htmlFor="sellingPrice" className="form-label">
                 Selling Price
@@ -183,6 +196,7 @@ const ItemMaster = () => {
                 </div>
               )}
             </div>
+
             <div className="mb-3">
               <label htmlFor="costPrice" className="form-label">
                 Cost Price
@@ -213,17 +227,32 @@ const ItemMaster = () => {
             type="button"
             className="btn btn-primary me-2"
             onClick={() => handleSubmit(false)}
+            disabled={loading || loadingDraft || submissionStatus !== null}
           >
-            Create
+            {loading && submissionStatus === null ? (
+              <ButtonLoadingSpinner text="Creating..." />
+            ) : (
+              "Create"
+            )}
           </button>
           <button
             type="button"
             className="btn btn-secondary me-2"
             onClick={() => handleSubmit(true)}
+            disabled={loading || loadingDraft || submissionStatus !== null}
           >
-            Save as Draft
+            {loadingDraft && submissionStatus === null ? (
+              <ButtonLoadingSpinner text="Saving as Draft..." />
+            ) : (
+              "Save as Draft"
+            )}
           </button>
-          <button type="button" className="btn btn-danger">
+          <button
+            type="button"
+            className="btn btn-danger"
+            onClick={handleClose}
+            disabled={loading || loadingDraft || submissionStatus !== null}
+          >
             Cancel
           </button>
         </div>

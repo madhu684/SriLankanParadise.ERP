@@ -1,35 +1,44 @@
 import React from "react";
 import usePurchaseRequisition from "./usePurchaseRequisition";
+import CurrentDateTime from "../currentDateTime/currentDateTime";
 
-const PurchaseRequisition = ({ handleClose }) => {
+const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
   const {
     formData,
     locations,
     submissionStatus,
     validFields,
     validationErrors,
+    alertRef,
     handleInputChange,
     handleItemDetailsChange,
     handleSubmit,
     handleAddItem,
     handleRemoveItem,
-    formatDateTime,
     handlePrint,
     handleAttachmentChange,
     calculateTotalPrice,
-  } = usePurchaseRequisition();
+  } = usePurchaseRequisition({
+    onFormSubmit: () => {
+      handleClose();
+      handleUpdated();
+    },
+  });
 
   return (
     <div className="container mt-4">
       {/* Header */}
       <div className="mb-4">
+        <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
           <img
             src="path/to/your/logo.png"
             alt="Company Logo"
             className="img-fluid"
           />
-          <p>Date and Time: {formatDateTime()}</p>
+          <p>
+            Date and Time: <CurrentDateTime />
+          </p>
         </div>
         <h1 className="mt-2 text-center">Purchase Requisition</h1>
         <hr />
@@ -345,7 +354,7 @@ const PurchaseRequisition = ({ handleClose }) => {
                         }
                       />
                     </td>
-                    <td>{item.totalPrice}</td>
+                    <td>{item.totalPrice.toFixed(2)}</td>
                     <td>
                       <button
                         type="button"

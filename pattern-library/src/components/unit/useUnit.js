@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { post_unit_api } from "../../services/inventoryApi";
 
-const useUnit = () => {
+const useUnit = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
     unitName: "",
     status: "",
@@ -10,6 +10,7 @@ const useUnit = () => {
   const [validationErrors, setValidationErrors] = useState({});
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const alertRef = useRef(null);
+  const [loading, setLoading] = useState(false);
 
   const handleInputChange = (field, value) => {
     setFormData({
@@ -42,15 +43,11 @@ const useUnit = () => {
     // Additional validation
     if (
       isFieldValid &&
-      additionalRules.validationFunctions &&
-      additionalRules.validationFunctions.length > 0
+      additionalRules.validationFunction &&
+      !additionalRules.validationFunction(value)
     ) {
-      additionalRules.validationFunctions.forEach((rule) => {
-        if (!rule.validationFunction(value)) {
-          isFieldValid = false;
-          errorMessage = rule.errorMessage;
-        }
-      });
+      isFieldValid = false;
+      errorMessage = additionalRules.errorMessage;
     }
 
     setValidFields((prev) => ({ ...prev, [fieldName]: isFieldValid }));
@@ -76,14 +73,16 @@ const useUnit = () => {
       const status = formData.status === "1" ? true : false;
       const isFormValid = validateForm();
       if (isFormValid) {
-        const UnitData = {
+        setLoading(true);
+
+        const unitData = {
           unitName: formData.unitName,
           status: status,
-          companyId: 1, //sessionStorage.getItem("companyId")
+          companyId: sessionStorage.getItem("companyId"),
           permissionId: 1037,
         };
 
-        const response = await post_unit_api(UnitData);
+        const response = await post_unit_api(unitData);
 
         if (response.status === 201) {
           if (status === false) {
@@ -96,6 +95,8 @@ const useUnit = () => {
 
           setTimeout(() => {
             setSubmissionStatus(null);
+            onFormSubmit();
+            setLoading(false);
           }, 3000);
         } else {
           setSubmissionStatus("error");
@@ -106,22 +107,9 @@ const useUnit = () => {
       setSubmissionStatus("error");
       setTimeout(() => {
         setSubmissionStatus(null);
+        setLoading(false);
       }, 3000);
     }
-  };
-
-  const formatDateTime = () => {
-    const currentDateTime = new Date();
-    const options = {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    };
-    return currentDateTime.toLocaleDateString("en-US", options);
   };
 
   return {
@@ -130,7 +118,7 @@ const useUnit = () => {
     validationErrors,
     submissionStatus,
     alertRef,
-    formatDateTime,
+    loading,
     handleInputChange,
     handleSubmit,
   };

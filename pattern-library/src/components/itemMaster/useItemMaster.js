@@ -5,7 +5,7 @@ import {
   post_item_master_api,
 } from "../../services/inventoryApi";
 
-const useItemMaster = () => {
+const useItemMaster = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
     unitId: "",
     categoryId: "",
@@ -20,6 +20,8 @@ const useItemMaster = () => {
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const alertRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+  const [loadingDraft, setLoadingDraft] = useState(false);
 
   const handleInputChange = (field, value) => {
     setFormData({
@@ -78,15 +80,11 @@ const useItemMaster = () => {
     // Additional validation
     if (
       isFieldValid &&
-      additionalRules.validationFunctions &&
-      additionalRules.validationFunctions.length > 0
+      additionalRules.validationFunction &&
+      !additionalRules.validationFunction(value)
     ) {
-      additionalRules.validationFunctions.forEach((rule) => {
-        if (!rule.validationFunction(value)) {
-          isFieldValid = false;
-          errorMessage = rule.errorMessage;
-        }
-      });
+      isFieldValid = false;
+      errorMessage = additionalRules.errorMessage;
     }
 
     setValidFields((prev) => ({ ...prev, [fieldName]: isFieldValid }));
@@ -115,17 +113,9 @@ const useItemMaster = () => {
       "Stock quantity",
       formData.stockQuantity,
       {
-        validationFunctions: [
-          {
-            validationFunction: (quantity) =>
-              /^\d*\.?\d+$/.test(quantity) && parseFloat(quantity) >= 0,
-            errorMessage: "Stock quantity must be a positive numeric value",
-          },
-          {
-            validationFunction: (quantity) => parseFloat(quantity) > 0,
-            errorMessage: "Stock quantity must be greater than 0",
-          },
-        ],
+        validationFunction: (quantity) =>
+          /^\d*\.?\d+$/.test(quantity) && parseFloat(quantity) > 0,
+        errorMessage: "Quantity must be a positive numeric value",
       }
     );
 
@@ -163,8 +153,15 @@ const useItemMaster = () => {
   const handleSubmit = async (isSaveAsDraft) => {
     try {
       const status = isSaveAsDraft ? false : true;
+
       const isFormValid = validateForm();
       if (isFormValid) {
+        if (isSaveAsDraft) {
+          setLoadingDraft(true);
+        } else {
+          setLoading(true);
+        }
+
         const itemMasterData = {
           unitId: formData.unitId,
           categoryId: formData.categoryId,
@@ -173,7 +170,9 @@ const useItemMaster = () => {
           sellingPrice: formData.sellingPrice,
           costPrice: formData.costPrice,
           status: status,
-          companyId: 1, //sessionStorage.getItem("companyId")
+          companyId: sessionStorage.getItem("companyId"),
+          createdBy: sessionStorage.getItem("username"),
+          createdUserId: sessionStorage.getItem("userId"),
           permissionId: 1039,
         };
 
@@ -190,6 +189,9 @@ const useItemMaster = () => {
 
           setTimeout(() => {
             setSubmissionStatus(null);
+            onFormSubmit();
+            setLoading(false);
+            setLoadingDraft(false);
           }, 3000);
         } else {
           setSubmissionStatus("error");
@@ -200,22 +202,10 @@ const useItemMaster = () => {
       setSubmissionStatus("error");
       setTimeout(() => {
         setSubmissionStatus(null);
+        setLoading(false);
+        setLoadingDraft(false);
       }, 3000);
     }
-  };
-
-  const formatDateTime = () => {
-    const currentDateTime = new Date();
-    const options = {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    };
-    return currentDateTime.toLocaleDateString("en-US", options);
   };
 
   return {
@@ -226,7 +216,8 @@ const useItemMaster = () => {
     unitOptions,
     submissionStatus,
     alertRef,
-    formatDateTime,
+    loading,
+    loadingDraft,
     handleInputChange,
     handleSubmit,
   };

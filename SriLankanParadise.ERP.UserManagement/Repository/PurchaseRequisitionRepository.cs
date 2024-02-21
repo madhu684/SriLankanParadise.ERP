@@ -42,15 +42,21 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<PurchaseRequisition>> GetPurchaseRequisitionsWithoutDrafts()
+        public async Task<IEnumerable<PurchaseRequisition>> GetPurchaseRequisitionsWithoutDraftsByCompanyId(int companyId)
         {
             try
             {
-                return await _dbContext.PurchaseRequisitions
-                    .Where(pr => pr.Status != 0)
+                var purchaseRequisitions = await _dbContext.PurchaseRequisitions
+                    .Where(pr => pr.Status != 0 && pr.CompanyId == companyId)
                     .Include(pr => pr.PurchaseRequisitionDetails)
                     .Include(pr => pr.DeliveryLocationNavigation)
                     .ToListAsync();
+
+                if (purchaseRequisitions.Any())
+                {
+                    return purchaseRequisitions;
+                }
+                return null;
             }
             catch (Exception)
             {
@@ -119,6 +125,25 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
             catch (Exception)
             {
+                throw;
+            }
+        }
+
+        public async Task UpdatePurchaseRequisition(int purchaseRequisitionId, PurchaseRequisition purchaseRequisition)
+        {
+            try
+            {
+                var existPurchaseRequisition = await _dbContext.PurchaseRequisitions.FindAsync(purchaseRequisitionId);
+
+                if (existPurchaseRequisition != null)
+                {
+                    _dbContext.Entry(existPurchaseRequisition).CurrentValues.SetValues(purchaseRequisition);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+
                 throw;
             }
         }

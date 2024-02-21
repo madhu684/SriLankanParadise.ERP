@@ -1,17 +1,24 @@
 import React from "react";
 import useCategory from "./useCategory";
+import CurrentDateTime from "../currentDateTime/currentDateTime";
+import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 
-const Category = () => {
+const Category = ({ handleClose, handleUpdated }) => {
   const {
     formData,
     validFields,
     validationErrors,
     submissionStatus,
     alertRef,
-    formatDateTime,
+    loading,
     handleInputChange,
     handleSubmit,
-  } = useCategory();
+  } = useCategory({
+    onFormSubmit: () => {
+      handleClose();
+      handleUpdated();
+    },
+  });
 
   return (
     <div className="container mt-4">
@@ -24,9 +31,12 @@ const Category = () => {
             alt="Company Logo"
             className="img-fluid"
           />
-          <p>Date and Time: {formatDateTime()}</p>
+          <p>
+            {" "}
+            Date and Time: <CurrentDateTime />
+          </p>
         </div>
-        <h1 className="mt-2 text-center">Create Category</h1>
+        <h1 className="mt-2 text-center">Category</h1>
         <hr />
       </div>
 
@@ -109,10 +119,20 @@ const Category = () => {
             type="button"
             className="btn btn-primary me-2"
             onClick={handleSubmit}
+            disabled={loading || submissionStatus !== null}
           >
-            Create
+            {loading && submissionStatus === null ? (
+              <ButtonLoadingSpinner text="Creating..." />
+            ) : (
+              "Create"
+            )}
           </button>
-          <button type="button" className="btn btn-danger">
+          <button
+            type="button"
+            className="btn btn-danger"
+            onClick={handleClose}
+            disabled={loading || submissionStatus !== null}
+          >
             Cancel
           </button>
         </div>

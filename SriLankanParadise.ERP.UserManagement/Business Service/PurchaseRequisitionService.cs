@@ -23,9 +23,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             return await _purchaseRequisitionRepository.GetAll();
         }
 
-        public async Task<IEnumerable<PurchaseRequisition>> GetPurchaseRequisitionsWithoutDrafts()
+        public async Task<IEnumerable<PurchaseRequisition>> GetPurchaseRequisitionsWithoutDraftsByCompanyId(int companyId)
         {
-            return await _purchaseRequisitionRepository.GetPurchaseRequisitionsWithoutDrafts();
+            return await _purchaseRequisitionRepository.GetPurchaseRequisitionsWithoutDraftsByCompanyId(companyId);
         }
 
         public async Task ApprovePurchaseRequisition(int purchaseRequisitionId, PurchaseRequisition purchaseRequisition)
@@ -41,6 +41,11 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         public async Task<IEnumerable<PurchaseRequisition>> GetPurchaseRequisitionsByUserId(int userId)
         {
             return await _purchaseRequisitionRepository.GetPurchaseRequisitionsByUserId(userId);
+        }
+
+        public async Task UpdatePurchaseRequisition(int purchaseRequisitionId, PurchaseRequisition purchaseRequisition)
+        {
+            await _purchaseRequisitionRepository.UpdatePurchaseRequisition(purchaseRequisitionId, purchaseRequisition);
         }
 
     }

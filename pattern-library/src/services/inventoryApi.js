@@ -1,6 +1,11 @@
 import axios from "axios";
 
-export const API_BASE_URL = "https://localhost:7287/api";
+//Import url from config file
+const baseUrl = process.env.REACT_APP_API_BASEURL;
+const baseUrl2 = process.env.REACT_APP_API_BASEURL2;
+const sublink = process.env.REACT_APP_API_SUBLINK;
+
+export const API_BASE_URL = `${baseUrl}${sublink}`;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -19,6 +24,21 @@ export const get_units_by_company_id_api = async (companyId) => {
   }
 };
 
+export const get_all_units_by_company_id_api = async (companyId) => {
+  try {
+    const response = await api.get(
+      `/unit/GetAllUnitsByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const post_unit_api = async (formData) => {
   try {
     const response = await api.post("/unit", formData, {
@@ -27,6 +47,28 @@ export const post_unit_api = async (formData) => {
     return response.data;
   } catch (error) {
     console.log(error);
+    throw error;
+  }
+};
+
+export const put_unit_api = async (unitId, unitData) => {
+  try {
+    const response = await api.put(`/unit/${unitId}`, unitData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const delete_unit_api = async (unitId) => {
+  try {
+    const response = await api.delete(`/unit/${unitId}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
     throw error;
   }
 };
@@ -47,6 +89,21 @@ export const get_categories_by_company_id_api = async (companyId) => {
   }
 };
 
+export const get_all_categories_by_company_id_api = async (companyId) => {
+  try {
+    const response = await api.get(
+      `/category/GetAllCategoriesByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const post_category_api = async (formData) => {
   try {
     const response = await api.post("/category", formData, {
@@ -55,6 +112,28 @@ export const post_category_api = async (formData) => {
     return response.data;
   } catch (error) {
     console.log(error);
+    throw error;
+  }
+};
+
+export const put_category_api = async (categoryId, categoryData) => {
+  try {
+    const response = await api.put(`/category/${categoryId}`, categoryData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const delete_category_api = async (categoryId) => {
+  try {
+    const response = await api.delete(`/category/${categoryId}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
     throw error;
   }
 };
@@ -94,6 +173,36 @@ export const delete_item_master_api = async (itemMasterId) => {
     });
     return response.data;
   } catch (error) {
+    throw error;
+  }
+};
+
+export const get_item_masters_by_company_id_api = async (companyId) => {
+  try {
+    const response = await api.get(
+      `/itemMaster/GetItemMastersByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_item_masters_by_user_id_api = async (userId) => {
+  try {
+    const response = await api.get(
+      `/itemMaster/GetItemMastersByUserId/${userId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
     throw error;
   }
 };

@@ -8,12 +8,14 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
 
         Task<IEnumerable<PurchaseRequisition>> GetAll();
 
-        Task<IEnumerable<PurchaseRequisition>> GetPurchaseRequisitionsWithoutDrafts();
+        Task<IEnumerable<PurchaseRequisition>> GetPurchaseRequisitionsWithoutDraftsByCompanyId(int companyId);
 
         Task ApprovePurchaseRequisition(int purchaseRequisitionId, PurchaseRequisition purchaseRequisition);
 
         Task<PurchaseRequisition> GetPurchaseRequisitionByPurchaseRequisitionId(int purchaseRequisitionId);
 
         Task<IEnumerable<PurchaseRequisition>> GetPurchaseRequisitionsByUserId(int userId);
+
+        Task UpdatePurchaseRequisition(int purchaseRequisitionId, PurchaseRequisition purchaseRequisition);
     }
 }

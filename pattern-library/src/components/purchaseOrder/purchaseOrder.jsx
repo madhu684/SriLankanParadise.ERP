@@ -1,13 +1,16 @@
 import React from "react";
 import usePurchaseOrder from "./usePurchaseOrder";
+import CurrentDateTime from "../currentDateTime/currentDateTime";
 
-const PurchaseOrder = () => {
+const PurchaseOrder = ({ handleClose, handleUpdated }) => {
   const {
     formData,
     suppliers,
     submissionStatus,
     validFields,
     validationErrors,
+    referenceNo,
+    alertRef,
     handleInputChange,
     handleSupplierChange,
     handleItemDetailsChange,
@@ -16,20 +19,28 @@ const PurchaseOrder = () => {
     handleAddItem,
     handleRemoveItem,
     handlePrint,
-    formatDateTime,
-  } = usePurchaseOrder();
+    calculateTotalAmount,
+  } = usePurchaseOrder({
+    onFormSubmit: () => {
+      handleClose();
+      handleUpdated();
+    },
+  });
 
   return (
     <div className="container mt-4">
       {/* Header */}
       <div className="mb-4">
+        <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
           <img
             src="path/to/your/logo.png"
             alt="Company Logo"
             className="img-fluid"
           />
-          <p>Date and Time: {formatDateTime()}</p>
+          <p>
+            Date and Time: <CurrentDateTime />
+          </p>
         </div>
         <h1 className="mt-2 text-center">Purchase Order</h1>
         <hr />
@@ -38,12 +49,13 @@ const PurchaseOrder = () => {
       {/* Display success or error messages */}
       {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
-          Purchase order submitted successfully!
+          Purchase order submitted successfully! Reference Number: {referenceNo}
         </div>
       )}
       {submissionStatus === "successSavedAsDraft" && (
         <div className="alert alert-success mb-3" role="alert">
           Purchase order saved as draft, you can edit and submit it later!
+          Reference Number: {referenceNo}
         </div>
       )}
       {submissionStatus === "error" && (
@@ -224,7 +236,7 @@ const PurchaseOrder = () => {
                         }
                       />
                     </td>
-                    <td>{item.totalPrice}</td>
+                    <td>{item.totalPrice.toFixed(2)}</td>
                     <td>
                       <button
                         type="button"
@@ -241,7 +253,7 @@ const PurchaseOrder = () => {
                 <tr>
                   <td colSpan="4"></td>
                   <th>Total Amount</th>
-                  <td colSpan="2">{formData.totalAmount}</td>
+                  <td colSpan="2">{calculateTotalAmount().toFixed(2)}</td>
                 </tr>
               </tfoot>
             </table>
@@ -304,7 +316,11 @@ const PurchaseOrder = () => {
           >
             Print
           </button>
-          <button type="button" className="btn btn-danger">
+          <button
+            type="button"
+            className="btn btn-danger"
+            onClick={handleClose}
+          >
             Cancel
           </button>
         </div>
