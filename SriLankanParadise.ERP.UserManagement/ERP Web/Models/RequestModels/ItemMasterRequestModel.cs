@@ -18,6 +18,10 @@
 
         public int? CompanyId { get; set; }
 
+        public string? CreatedBy { get; set; }
+
+        public int? CreatedUserId { get; set; }
+
         public int PermissionId { get; set; }
     }
 }

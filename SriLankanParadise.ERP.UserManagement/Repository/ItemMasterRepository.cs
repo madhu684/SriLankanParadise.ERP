@@ -31,7 +31,10 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             try
             {
-                return await _dbContext.ItemMasters.ToListAsync();
+                return await _dbContext.ItemMasters
+                    .Include(im => im.Category)
+                    .Include(im => im.Unit)
+                    .ToListAsync();
             }
             catch (Exception)
             {
@@ -47,6 +50,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var itemMasters = await _dbContext.ItemMasters
                     .Where(im => im.Status == true && im.CompanyId == companyId)
+                    .Include(im => im.Category)
+                    .Include(im => im.Unit)
                     .ToListAsync();
 
                 return itemMasters.Any() ? itemMasters : null;
@@ -64,6 +69,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var itemMaster = await _dbContext.ItemMasters
                     .Where(im => im.ItemMasterId == itemMasterId)
+                    .Include(im => im.Category)
+                    .Include(im => im.Unit)
                     .FirstOrDefaultAsync();
 
                 return itemMaster;
@@ -104,6 +111,25 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     _dbContext.ItemMasters.Remove(itemMaster);
                     await _dbContext.SaveChangesAsync();
                 }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<ItemMaster>> GetItemMastersByUserId(int userId)
+        {
+            try
+            {
+                var itemMasters = await _dbContext.ItemMasters
+                    .Where(im => im.CreatedUserId == userId)
+                    .Include(im => im.Category)
+                    .Include(im => im.Unit)
+                    .ToListAsync();
+
+                return itemMasters.Any() ? itemMasters : null;
             }
             catch (Exception)
             {

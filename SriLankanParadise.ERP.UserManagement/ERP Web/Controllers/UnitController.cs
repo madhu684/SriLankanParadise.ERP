@@ -108,5 +108,101 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpGet("GetAllUnitsByCompanyId/{companyId}")]
+        public async Task<ApiResponseModel> GetAllUnitsByCompanyId(int companyId)
+        {
+            try
+            {
+                var units = await _unitService.GetAllUnitsByCompanyId(companyId);
+                if (units != null)
+                {
+                    var unitDtos = _mapper.Map<IEnumerable<UnitDto>>(units);
+                    AddResponseMessage(Response, LogMessages.UnitsRetrieved, unitDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.UnitsNotFound);
+                    AddResponseMessage(Response, LogMessages.UnitsNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpPut("{unitId}")]
+        public async Task<ApiResponseModel> UpdateUnit(int unitId, UnitRequestModel unitRequest)
+        {
+            try
+            {
+                var existingUnit = await _unitService.GetUnitByUnitId(unitId);
+                if (existingUnit == null)
+                {
+                    _logger.LogWarning(LogMessages.UnitNotFound);
+                    return AddResponseMessage(Response, LogMessages.UnitNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+                var updatedUnit = _mapper.Map<Unit>(unitRequest);
+                updatedUnit.UnitId = unitId; // Ensure the ID is not changed
+
+                await _unitService.UpdateUnit(existingUnit.UnitId, updatedUnit);
+
+                // Create action log
+                var actionLog = new ActionLogModel()
+                {
+                    ActionId = unitRequest.PermissionId,
+                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                    Timestamp = DateTime.UtcNow
+                };
+                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+
+                _logger.LogInformation(LogMessages.UnitUpdated);
+                return AddResponseMessage(Response, LogMessages.UnitUpdated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
+
+        [HttpDelete("{unitId}")]
+        public async Task<ApiResponseModel> DeleteUnit(int unitId)
+        {
+            try
+            {
+                var existingUnit = await _unitService.GetUnitByUnitId(unitId);
+                if (existingUnit == null)
+                {
+                    _logger.LogWarning(LogMessages.UnitNotFound);
+                    return AddResponseMessage(Response, LogMessages.UnitNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+                await _unitService.DeleteUnit(unitId);
+
+                // Create action log
+                var actionLog = new ActionLogModel()
+                {
+                    ActionId = 1046,
+                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                    Timestamp = DateTime.UtcNow
+                };
+                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+
+                _logger.LogInformation(LogMessages.UnitDeleted);
+                return AddResponseMessage(Response, LogMessages.UnitDeleted, null, true, HttpStatusCode.NoContent);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
     }
 }

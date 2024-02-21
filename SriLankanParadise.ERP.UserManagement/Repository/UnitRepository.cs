@@ -57,5 +57,76 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task<IEnumerable<Unit>> GetAllUnitsByCompanyId(int companyId)
+        {
+            try
+            {
+                var units = await _dbContext.Units
+                    .Where(u => u.CompanyId == companyId)
+                    .ToListAsync();
+
+                return units.Any() ? units : null;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<Unit> GetUnitByUnitId(int unitId)
+        {
+            try
+            {
+                var unit = await _dbContext.Units
+                    .Where(u => u.UnitId == unitId)
+                    .FirstOrDefaultAsync();
+
+                return unit;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task UpdateUnit(int unitId, Unit unit)
+        {
+            try
+            {
+                var existUnit = await _dbContext.Units.FindAsync(unitId);
+
+                if (existUnit != null)
+                {
+                    _dbContext.Entry(existUnit).CurrentValues.SetValues(unit);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task DeleteUnit(int unitId)
+        {
+            try
+            {
+                var unit = await _dbContext.Units.FindAsync(unitId);
+
+                if (unit != null)
+                {
+                    _dbContext.Units.Remove(unit);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }

@@ -345,6 +345,7 @@ public partial class ErpSystemContext : DbContext
             entity.ToTable("ItemMaster");
 
             entity.Property(e => e.CostPrice).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.CreatedBy).HasMaxLength(50);
             entity.Property(e => e.ItemName).HasMaxLength(50);
             entity.Property(e => e.SellingPrice).HasColumnType("decimal(18, 2)");
 

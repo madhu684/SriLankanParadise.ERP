@@ -162,7 +162,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 // Create action log
                 var actionLog = new ActionLogModel()
                 {
-                    ActionId = 8,
+                    ActionId = 1041,
                     UserId = Int32.Parse(HttpContext.User.Identity.Name),
                     Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
                     Timestamp = DateTime.UtcNow
@@ -177,6 +177,31 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 _logger.LogError(ex, ErrorMessages.InternalServerError);
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
+        }
+
+        [HttpGet("GetItemMastersByUserId/{userId}")]
+        public async Task<ApiResponseModel> GetItemMastersByUserId(int userId)
+        {
+            try
+            {
+                var itemMasters = await _itemMasterService.GetItemMastersByUserId(userId);
+                if (itemMasters != null)
+                {
+                    var itemMasterDtos = _mapper.Map<IEnumerable<ItemMasterDto>>(itemMasters);
+                    AddResponseMessage(Response, LogMessages.ItemMastersRetrieved, itemMasterDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.ItemMastersNotFound);
+                    AddResponseMessage(Response, LogMessages.ItemMastersNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
         }
     }
 }

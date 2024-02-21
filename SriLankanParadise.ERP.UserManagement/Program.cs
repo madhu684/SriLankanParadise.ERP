@@ -113,13 +113,6 @@ builder.Services.AddScoped<ISalesInvoiceService, SalesInvoiceService>();
 builder.Services.AddScoped<ISalesInvoiceRepository, SalesInvoiceRepository>();
 builder.Services.AddScoped<ISalesInvoiceDetailService, SalesInvoiceDetailService>();
 builder.Services.AddScoped<ISalesInvoiceDetailRepository, SalesInvoiceDetailRepository>();
-builder.Services.AddScoped<IPaymentModeService, PaymentModeService>();
-builder.Services.AddScoped<IPaymentModeRepository, PaymentModeRepository>();
-builder.Services.AddScoped<ISalesReceiptService, SalesReceiptService>();
-builder.Services.AddScoped<ISalesReceiptRepository, SalesReceiptRepository>();
-builder.Services.AddScoped<ISalesReceiptSalesInvoiceService, SalesReceiptSalesInvoiceService>();
-builder.Services.AddScoped<ISalesReceiptSalesInvoiceRepository, SalesReceiptSalesInvoiceRepository>();
-
 builder.Services.AddScoped<IUnitService, UnitService>();
 builder.Services.AddScoped<IUnitRepository, UnitRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();

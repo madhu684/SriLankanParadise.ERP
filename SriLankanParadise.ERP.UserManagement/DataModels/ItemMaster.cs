@@ -23,6 +23,10 @@ public partial class ItemMaster
 
     public int? CompanyId { get; set; }
 
+    public string? CreatedBy { get; set; }
+
+    public int? CreatedUserId { get; set; }
+
     public virtual Category Category { get; set; } = null!;
 
     public virtual ICollection<ItemBatch> ItemBatches { get; set; } = new List<ItemBatch>();

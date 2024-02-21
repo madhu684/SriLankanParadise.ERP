@@ -7,6 +7,7 @@ using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using System.Net;
 using SriLankanParadise.ERP.UserManagement.Shared.Resources;
+using SriLankanParadise.ERP.UserManagement.Business_Service;
 
 namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 {
@@ -105,6 +106,102 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
             return Response;
+        }
+
+        [HttpGet("GetAllCategoriesByCompanyId/{companyId}")]
+        public async Task<ApiResponseModel> GetAllCategoriesByCompanyId(int companyId)
+        {
+            try
+            {
+                var categories = await _categoryService.GetAllCategoriesByCompanyId(companyId);
+                if (categories != null)
+                {
+                    var categoryDtos = _mapper.Map<IEnumerable<CategoryDto>>(categories);
+                    AddResponseMessage(Response, LogMessages.CategoriesRetrieved, categoryDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.CategoriesNotFound);
+                    AddResponseMessage(Response, LogMessages.CategoriesNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpPut("{categoryId}")]
+        public async Task<ApiResponseModel> UpdateCategory(int categoryId, CategoryRequestModel categoryRequest)
+        {
+            try
+            {
+                var existingCategory = await _categoryService.GetCategoryByCategoryId(categoryId);
+                if (existingCategory == null)
+                {
+                    _logger.LogWarning(LogMessages.CategoryNotFound);
+                    return AddResponseMessage(Response, LogMessages.CategoryNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+                var updatedCategory = _mapper.Map<Category>(categoryRequest);
+                updatedCategory.CategoryId = categoryId; // Ensure the ID is not changed
+
+                await _categoryService.UpdateCategory(existingCategory.CategoryId, updatedCategory);
+
+                // Create action log
+                var actionLog = new ActionLogModel()
+                {
+                    ActionId = categoryRequest.PermissionId,
+                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                    Timestamp = DateTime.UtcNow
+                };
+                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+
+                _logger.LogInformation(LogMessages.CategoryUpdated);
+                return AddResponseMessage(Response, LogMessages.CategoryUpdated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
+
+        [HttpDelete("{categoryId}")]
+        public async Task<ApiResponseModel> DeleteCategory(int categoryId)
+        {
+            try
+            {
+                var existingCategory = await _categoryService.GetCategoryByCategoryId(categoryId);
+                if (existingCategory == null)
+                {
+                    _logger.LogWarning(LogMessages.CategoryNotFound);
+                    return AddResponseMessage(Response, LogMessages.CategoryNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+                await _categoryService.DeleteCategory(categoryId);
+
+                // Create action log
+                var actionLog = new ActionLogModel()
+                {
+                    ActionId = 1044,
+                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                    Timestamp = DateTime.UtcNow
+                };
+                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+
+                _logger.LogInformation(LogMessages.CategoryDeleted);
+                return AddResponseMessage(Response, LogMessages.CategoryDeleted, null, true, HttpStatusCode.NoContent);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
         }
     }
 }

@@ -26,5 +26,25 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             return await _categoryRepository.GetCategoriesByCompanyId(companyId);
         }
+
+        public async Task<IEnumerable<Category>> GetAllCategoriesByCompanyId(int companyId)
+        {
+            return await _categoryRepository.GetAllCategoriesByCompanyId(companyId);
+        }
+
+        public async Task<Category> GetCategoryByCategoryId(int categoryId)
+        {
+            return await _categoryRepository.GetCategoryByCategoryId(categoryId);
+        }
+
+        public async Task UpdateCategory(int categoryId, Category category)
+        {
+            await _categoryRepository.UpdateCategory(categoryId, category);
+        }
+
+        public async Task DeleteCategory(int categoryId)
+        {
+            await _categoryRepository.DeleteCategory(categoryId);
+        }
     }
 }

@@ -10,5 +10,13 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
 
         Task<IEnumerable<Unit>> GetUnitsByCompanyId(int companyId);
 
+        Task<IEnumerable<Unit>> GetAllUnitsByCompanyId(int companyId);
+
+        Task<Unit> GetUnitByUnitId(int unitId);
+
+        Task UpdateUnit(int unitId, Unit unit);
+
+        Task DeleteUnit(int unitId);
+
     }
 }
