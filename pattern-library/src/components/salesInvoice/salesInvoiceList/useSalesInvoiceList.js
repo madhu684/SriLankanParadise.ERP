@@ -48,18 +48,33 @@ const useSalesInvoiceList = () => {
               sessionStorage.getItem("userId")
             );
 
-          let newSalesInvoices = SalesInvoiceWithoutDraftsResponse.data.result;
-          const additionalOrders = SalesInvoiceByUserIdResponse.data.result;
+          let newSalesInvoices = [];
+          if (
+            SalesInvoiceWithoutDraftsResponse &&
+            SalesInvoiceWithoutDraftsResponse.data.result
+          ) {
+            newSalesInvoices = SalesInvoiceWithoutDraftsResponse.data.result;
+          }
 
-          const uniqueNewOrders = additionalOrders.filter(
-            (order) =>
+          let additionalInvoices = [];
+          if (
+            SalesInvoiceByUserIdResponse &&
+            SalesInvoiceByUserIdResponse.data.result
+          ) {
+            additionalInvoices = SalesInvoiceByUserIdResponse.data.result;
+          }
+          //let newSalesInvoices = SalesInvoiceWithoutDraftsResponse.data.result;
+          //const additionalInvoices = SalesInvoiceByUserIdResponse.data.result;
+
+          const uniqueNewInvoices = additionalInvoices.filter(
+            (invoice) =>
               !newSalesInvoices.some(
-                (existingOrder) =>
-                  existingOrder.salesInvoiceId === order.salesInvoiceId
+                (existinginvoice) =>
+                  existinginvoice.salesInvoiceId === invoice.salesInvoiceId
               )
           );
 
-          newSalesInvoices = [...newSalesInvoices, ...uniqueNewOrders];
+          newSalesInvoices = [...newSalesInvoices, ...uniqueNewInvoices];
           setSalesInvoices(newSalesInvoices);
         } else {
           const SalesInvoiceResponse = await get_sales_invoices_by_user_id_api(
@@ -154,7 +169,7 @@ const useSalesInvoiceList = () => {
 
   const handleRowSelect = (id) => {
     const isSelected = selectedRows.includes(id);
-    const selectedRow = salesInvoices.find((so) => so.salesInvoiceId === id);
+    const selectedRow = salesInvoices.find((si) => si.salesInvoiceId === id);
 
     if (isSelected) {
       setSelectedRows((prevSelected) =>
@@ -206,7 +221,7 @@ const useSalesInvoiceList = () => {
 
   const areAnySelectedRowsPending = (selectedRows) => {
     return selectedRows.some(
-      (id) => salesInvoices.find((so) => so.salesInvoiceId === id)?.status === 1
+      (id) => salesInvoices.find((si) => si.salesInvoiceId === id)?.status === 1
     );
   };
 

@@ -493,6 +493,33 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Payment mode created successfully.
+        /// </summary>
+        public static string PaymentModeCreated {
+            get {
+                return ResourceManager.GetString("PaymentModeCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Payment modes not found.
+        /// </summary>
+        public static string PaymentModesNotFound {
+            get {
+                return ResourceManager.GetString("PaymentModesNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Payment modes retrieved.
+        /// </summary>
+        public static string PaymentModesRetrieved {
+            get {
+                return ResourceManager.GetString("PaymentModesRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Permissions not found.
         /// </summary>
         public static string PermissionsNotFound {
@@ -930,6 +957,96 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string SalesOrderUpdated {
             get {
                 return ResourceManager.GetString("SalesOrderUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales receipt created successfully.
+        /// </summary>
+        public static string SalesReceiptCreated {
+            get {
+                return ResourceManager.GetString("SalesReceiptCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales receipt not found.
+        /// </summary>
+        public static string SalesReceiptNotFound {
+            get {
+                return ResourceManager.GetString("SalesReceiptNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales receipt retrieved.
+        /// </summary>
+        public static string SalesReceiptRetrieved {
+            get {
+                return ResourceManager.GetString("SalesReceiptRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SalesReceiptSalesInvoice created successfully.
+        /// </summary>
+        public static string SalesReceiptSalesInvoiceCreated {
+            get {
+                return ResourceManager.GetString("SalesReceiptSalesInvoiceCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SalesReceiptSalesInvoice deleted successfully.
+        /// </summary>
+        public static string SalesReceiptSalesInvoiceDeleted {
+            get {
+                return ResourceManager.GetString("SalesReceiptSalesInvoiceDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SalesReceiptSalesInvoice not found.
+        /// </summary>
+        public static string SalesReceiptSalesInvoiceNotFound {
+            get {
+                return ResourceManager.GetString("SalesReceiptSalesInvoiceNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SalesReceiptSalesInvoice updated successfully.
+        /// </summary>
+        public static string SalesReceiptSalesInvoiceUpdated {
+            get {
+                return ResourceManager.GetString("SalesReceiptSalesInvoiceUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales receipts not found.
+        /// </summary>
+        public static string SalesReceiptsNotFound {
+            get {
+                return ResourceManager.GetString("SalesReceiptsNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales receipts retrieved.
+        /// </summary>
+        public static string SalesReceiptsRetrieved {
+            get {
+                return ResourceManager.GetString("SalesReceiptsRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales receipt updated successfully.
+        /// </summary>
+        public static string SalesReceiptUpdated {
+            get {
+                return ResourceManager.GetString("SalesReceiptUpdated", resourceCulture);
             }
         }
         

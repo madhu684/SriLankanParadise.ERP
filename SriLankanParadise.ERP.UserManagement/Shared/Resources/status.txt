@@ -71,3 +71,8 @@ Status 0: Inactive
 
 Status 0: Inactive
 	   1: Active
+
+--- Sales Receipt ---
+
+Status 0: Draft (Default)
+	   1: Created

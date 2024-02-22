@@ -51,6 +51,13 @@ const useGrn = ({ onFormSubmit }) => {
     }
   }, [submissionStatus]);
 
+  useEffect(() => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      totalAmount: calculateTotalAmount(),
+    }));
+  }, [formData.itemDetails]);
+
   const validateField = (
     fieldName,
     fieldDisplayName,

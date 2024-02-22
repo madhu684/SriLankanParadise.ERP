@@ -41,12 +41,16 @@ const SalesOrderList = () => {
     handleClose,
   } = useSalesOrderList();
 
-  if (isLoadingData || isLoadingPermissions) {
-    return <LoadingSpinner />;
-  }
-
   if (error) {
     return <ErrorComponent error={error} />;
+  }
+
+  if (
+    isLoadingData ||
+    isLoadingPermissions ||
+    (salesOrders && !salesOrders.length > 0)
+  ) {
+    return <LoadingSpinner />;
   }
 
   if (showCreateSOForm) {
@@ -130,7 +134,7 @@ const SalesOrderList = () => {
           <thead>
             <tr>
               <th>
-                <input type="checkbox" onChange={() => setSelectedRows([])} />
+                <input type="checkbox" />
               </th>
               <th>Reference No</th>
               <th>Created By</th>

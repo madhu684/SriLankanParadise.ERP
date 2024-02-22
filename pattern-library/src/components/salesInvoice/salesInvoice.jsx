@@ -8,6 +8,7 @@ const SalesInvoice = ({ handleClose, handleUpdated }) => {
     submissionStatus,
     validFields,
     validationErrors,
+    referenceNo,
     alertRef,
     salesOrderOptions,
     selectedSalesOrder,
@@ -49,12 +50,13 @@ const SalesInvoice = ({ handleClose, handleUpdated }) => {
       {/* Display success or error messages */}
       {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
-          Sales invoice submitted successfully!
+          Sales invoice submitted successfully! Reference Number: {referenceNo}
         </div>
       )}
       {submissionStatus === "successSavedAsDraft" && (
         <div className="alert alert-success mb-3" role="alert">
           Sales invoice saved as draft, you can edit and submit it later!
+          Reference Number: {referenceNo}
         </div>
       )}
       {submissionStatus === "error" && (
