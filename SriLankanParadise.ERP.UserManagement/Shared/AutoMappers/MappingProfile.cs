@@ -66,6 +66,16 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<Category, CategoryDto>();
             CreateMap<ItemMasterRequestModel, ItemMaster>();
             CreateMap<ItemMaster, ItemMasterDto>();
+            CreateMap<BatchRequestModel, Batch>();
+            CreateMap<Batch, BatchDto>();
+            CreateMap<ItemBatchRequestModel, ItemBatch>();
+            CreateMap<ItemBatch, ItemBatchDto>();
+            CreateMap<BatchHasGrnMasterRequestModel, BatchHasGrnMaster>();
+            CreateMap<BatchHasGrnMaster, BatchHasGrnMasterDto>();
+            CreateMap<ItemBatchHasGrnDetailRequestModel, ItemBatchHasGrnDetail>();
+            CreateMap<ItemBatchHasGrnDetail, ItemBatchHasGrnDetailDto>();
+            CreateMap<LocationChannelItemBatchRequestModel, LocationChannelItemBatch>();
+            CreateMap<LocationChannelItemBatch, LocationChannelItemBatchDto>();
             // Add more mapping configurations if needed
         }
     }

@@ -13,6 +13,14 @@ public partial class ItemBatch
 
     public decimal? SellingPrice { get; set; }
 
+    public bool? Status { get; set; }
+
+    public int? CompanyId { get; set; }
+
+    public string? CreatedBy { get; set; }
+
+    public int? CreatedUserId { get; set; }
+
     public virtual Batch Batch { get; set; } = null!;
 
     public virtual ICollection<ItemBatchHasGrnDetail> ItemBatchHasGrnDetails { get; set; } = new List<ItemBatchHasGrnDetail>();

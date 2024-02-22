@@ -11,5 +11,7 @@ public partial class Channel
 
     public bool? Status { get; set; }
 
+    public int? CompanyId { get; set; }
+
     public virtual ICollection<LocationChannel> LocationChannels { get; set; } = new List<LocationChannel>();
 }

@@ -61,6 +61,42 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Batch created successfully.
+        /// </summary>
+        public static string BatchCreated {
+            get {
+                return ResourceManager.GetString("BatchCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Batches not found.
+        /// </summary>
+        public static string BatchesNotFound {
+            get {
+                return ResourceManager.GetString("BatchesNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Batches retrieved.
+        /// </summary>
+        public static string BatchesRetrieved {
+            get {
+                return ResourceManager.GetString("BatchesRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to BatchHasGrnMaster created successfully.
+        /// </summary>
+        public static string BatchHasGrnMasterCreated {
+            get {
+                return ResourceManager.GetString("BatchHasGrnMasterCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Categories not found.
         /// </summary>
         public static string CategoriesNotFound {
@@ -367,6 +403,42 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Item batch created successfully.
+        /// </summary>
+        public static string ItemBatchCreated {
+            get {
+                return ResourceManager.GetString("ItemBatchCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item batches not found.
+        /// </summary>
+        public static string ItemBatchesNotFound {
+            get {
+                return ResourceManager.GetString("ItemBatchesNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item batches retrieved.
+        /// </summary>
+        public static string ItemBatchesRetrieved {
+            get {
+                return ResourceManager.GetString("ItemBatchesRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ItemBatchHasGrnDetail created successfully.
+        /// </summary>
+        public static string ItemBatchHasGrnDetailCreated {
+            get {
+                return ResourceManager.GetString("ItemBatchHasGrnDetailCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Item master created successfully.
         /// </summary>
         public static string ItemMasterCreated {
@@ -417,6 +489,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string ItemMasterUpdated {
             get {
                 return ResourceManager.GetString("ItemMasterUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LocationChannelItemBatch created successfully.
+        /// </summary>
+        public static string LocationChannelItemBatchCreated {
+            get {
+                return ResourceManager.GetString("LocationChannelItemBatchCreated", resourceCulture);
             }
         }
         

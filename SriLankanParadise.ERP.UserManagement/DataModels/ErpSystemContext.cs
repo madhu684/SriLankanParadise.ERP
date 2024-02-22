@@ -306,6 +306,7 @@ public partial class ErpSystemContext : DbContext
             entity.ToTable("ItemBatch");
 
             entity.Property(e => e.CostPrice).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.CreatedBy).HasMaxLength(50);
             entity.Property(e => e.SellingPrice).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.Batch).WithMany(p => p.ItemBatches)
@@ -321,11 +322,9 @@ public partial class ErpSystemContext : DbContext
 
         modelBuilder.Entity<ItemBatchHasGrnDetail>(entity =>
         {
-            entity.HasKey(e => e.ItemBatchHasGrnDetail1);
+            entity.HasKey(e => e.ItemBatchHasGrnDetailId).HasName("PK_ItemBatchHasGrnDetailId");
 
             entity.ToTable("ItemBatchHasGrnDetail");
-
-            entity.Property(e => e.ItemBatchHasGrnDetail1).HasColumnName("ItemBatchHasGrnDetail");
 
             entity.HasOne(d => d.GrnDetail).WithMany(p => p.ItemBatchHasGrnDetails)
                 .HasForeignKey(d => d.GrnDetailId)
