@@ -5,6 +5,7 @@ import PurchaseOrderList from "../purchaseOrder/purchaseOrderList/purchaseOrderL
 import GrnList from "../grn/grnList/grnList.jsx";
 import SalesOrderList from "../salesOrder/salesOrderList/salesOrderList.jsx";
 import SalesInvoiceList from "../salesInvoice/salesInvoiceList/salesInvoiceList.jsx";
+import SalesReceiptList from "../salesReceipt/salesReceiptList/salesReceiptList.jsx";
 
 const useMain = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -73,6 +74,8 @@ const useMain = () => {
         return <SalesOrderList />;
       case "Sales Invoices":
         return <SalesInvoiceList />;
+      case "Sales Receipts":
+        return <SalesReceiptList />;
       default:
         return null;
     }

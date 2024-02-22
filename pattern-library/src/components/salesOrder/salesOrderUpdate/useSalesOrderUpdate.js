@@ -32,7 +32,9 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const response = await get_customers_by_company_id_api(1);
+        const response = await get_customers_by_company_id_api(
+          sessionStorage?.getItem("companyId")
+        );
         setCustomers(response.data.result);
       } catch (error) {
         console.error("Error fetching customers:", error);
@@ -62,6 +64,13 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
       alertRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [submissionStatus]);
+
+  useEffect(() => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      totalAmount: calculateTotalAmount(),
+    }));
+  }, [formData.itemDetails]);
 
   const validateField = (
     fieldName,

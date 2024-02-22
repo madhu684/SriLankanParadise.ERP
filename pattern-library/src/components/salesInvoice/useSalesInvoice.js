@@ -20,6 +20,7 @@ const useSalesInvoice = ({ onFormSubmit }) => {
   const alertRef = useRef(null);
   const [salesOrderOptions, setSalesOrders] = useState([]);
   const [selectedSalesOrder, setSelectedSalesOrder] = useState(null);
+  const [referenceNo, setReferenceNo] = useState(null);
 
   useEffect(() => {
     const fetchSalesOrders = async () => {
@@ -28,7 +29,7 @@ const useSalesInvoice = ({ onFormSubmit }) => {
           sessionStorage?.getItem("companyId")
         );
         const filteredSalesOrders = response.data.result.filter(
-          (so) => so.status === 2
+          (si) => si.status === 2
         );
         setSalesOrders(filteredSalesOrders);
       } catch (error) {
@@ -44,6 +45,13 @@ const useSalesInvoice = ({ onFormSubmit }) => {
       alertRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [submissionStatus]);
+
+  useEffect(() => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      totalAmount: calculateTotalAmount(),
+    }));
+  }, [formData.itemDetails]);
 
   const validateField = (
     fieldName,
@@ -157,11 +165,12 @@ const useSalesInvoice = ({ onFormSubmit }) => {
           approvedDate: null,
           companyId: sessionStorage?.getItem("companyId") ?? null,
           salesOrderId: formData.salesOrderId,
+          amountDue: formData.totalAmount,
           permissionId: 29,
         };
 
         const response = await post_sales_invoice_api(salesInvoiceData);
-        //setReferenceNo(response.data.result.referenceNo);
+        setReferenceNo(response.data.result.referenceNo);
 
         const salesInvoiceId = response.data.result.salesInvoiceId;
 
@@ -314,6 +323,7 @@ const useSalesInvoice = ({ onFormSubmit }) => {
     submissionStatus,
     validFields,
     validationErrors,
+    referenceNo,
     alertRef,
     salesOrderOptions,
     selectedSalesOrder,

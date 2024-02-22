@@ -24,6 +24,8 @@
 
         public int? SalesOrderId { get; set; }
 
+        public decimal? AmountDue { get; set; }
+
         public int PermissionId { get; set; }
     }
 }

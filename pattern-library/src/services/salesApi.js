@@ -298,3 +298,137 @@ export const delete_sales_invoice_detail_api = async (salesInvoiceDetailId) => {
     throw error;
   }
 };
+
+//payment modes api
+export const get_payment_modes_api = async (companyId) => {
+  try {
+    const response = await api.get(
+      `/paymentMode/GetPaymentModesByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+//sales receipt apis
+export const post_sales_receipt_api = async (formData) => {
+  try {
+    const response = await api.post("/salesReceipt", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_sales_receipt_api = async () => {
+  try {
+    const response = await api.get("/salesReceipt");
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_sales_receipts_with_out_drafts_api = async (companyId) => {
+  try {
+    const response = await api.get(
+      `/salesReceipt/GetSalesReceiptsWithoutDraftsByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_sales_receipts_by_user_id_api = async (userId) => {
+  try {
+    const response = await api.get(
+      `/salesReceipt/GetSalesReceiptsByUserId/${userId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const put_sales_receipt_api = async (
+  salesReceiptId,
+  salesReceiptData
+) => {
+  try {
+    const response = await api.put(
+      `/salesReceipt/${salesReceiptId}`,
+      salesReceiptData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+//SalesReceiptSalesInvoice apis
+export const post_sales_receipt_sales_invoice_api = async (formData) => {
+  try {
+    const response = await api.post("/salesReceiptSalesInvoice", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const put_sales_receipt_sales_invoice_api = async (
+  salesReceiptSalesInvoiceId,
+  salesReceiptSalesInvoiceIdData
+) => {
+  try {
+    const response = await api.put(
+      `/salesReceiptSalesInvoice/${salesReceiptSalesInvoiceId}`,
+      salesReceiptSalesInvoiceIdData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const delete_sales_receipt_sales_invoice_api = async (
+  salesReceiptSalesInvoiceId
+) => {
+  try {
+    const response = await api.delete(
+      `/salesReceiptSalesInvoice/${salesReceiptSalesInvoiceId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

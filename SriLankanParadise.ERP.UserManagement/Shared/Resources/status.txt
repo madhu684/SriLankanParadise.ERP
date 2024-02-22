@@ -56,3 +56,8 @@ Status 0: Draft (Default)
 	   5: Completed
 	   6: Cancelled
 	   7: On Hold
+
+--- Sales Receipt ---
+
+Status 0: Draft (Default)
+	   1: Created

@@ -33,7 +33,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           sessionStorage?.getItem("companyId")
         );
         const filteredSalesOrders = response.data.result.filter(
-          (so) => so.status === 2
+          (si) => si.status === 2
         );
         setSalesOrders(filteredSalesOrders);
       } catch (error) {
@@ -68,6 +68,13 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   useEffect(() => {
     getRefernceNo();
   }, [isLoadingSalesOrders, salesOrderOptions]);
+
+  useEffect(() => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      totalAmount: calculateTotalAmount(),
+    }));
+  }, [formData.itemDetails]);
 
   const validateField = (
     fieldName,
@@ -183,6 +190,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           approvedDate: null,
           companyId: sessionStorage?.getItem("companyId") ?? null,
           salesOrderId: formData.salesOrderId,
+          amountDue: formData.totalAmount,
           permissionId: 31,
         };
 

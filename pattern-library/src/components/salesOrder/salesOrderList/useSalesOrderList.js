@@ -48,8 +48,23 @@ const useSalesOrderList = () => {
               sessionStorage.getItem("userId")
             );
 
-          let newSalesOrders = SalesOrderWithoutDraftsResponse.data.result;
-          const additionalOrders = SalesOrderByUserIdResponse.data.result;
+          let newSalesOrders = [];
+          if (
+            SalesOrderWithoutDraftsResponse &&
+            SalesOrderWithoutDraftsResponse.data.result
+          ) {
+            newSalesOrders = SalesOrderWithoutDraftsResponse.data.result;
+          }
+
+          let additionalOrders = [];
+          if (
+            SalesOrderByUserIdResponse &&
+            SalesOrderByUserIdResponse.data.result
+          ) {
+            additionalOrders = SalesOrderByUserIdResponse.data.result;
+          }
+          //let newSalesOrders = SalesOrderWithoutDraftsResponse.data.result;
+          //const additionalOrders = SalesOrderByUserIdResponse.data.result;
 
           const uniqueNewOrders = additionalOrders.filter(
             (order) =>

@@ -57,6 +57,8 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<Module> Modules { get; set; }
 
+    public virtual DbSet<PaymentMode> PaymentModes { get; set; }
+
     public virtual DbSet<Permission> Permissions { get; set; }
 
     public virtual DbSet<PurchaseOrder> PurchaseOrders { get; set; }
@@ -80,6 +82,8 @@ public partial class ErpSystemContext : DbContext
     public virtual DbSet<SalesOrderDetail> SalesOrderDetails { get; set; }
 
     public virtual DbSet<SalesReceipt> SalesReceipts { get; set; }
+
+    public virtual DbSet<SalesReceiptSalesInvoice> SalesReceiptSalesInvoices { get; set; }
 
     public virtual DbSet<SubModule> SubModules { get; set; }
 
@@ -410,6 +414,15 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.ModuleName).HasMaxLength(50);
         });
 
+        modelBuilder.Entity<PaymentMode>(entity =>
+        {
+            entity.HasKey(e => e.PaymentModeId).HasName("PK__PaymentM__F9599549A3B51321");
+
+            entity.ToTable("PaymentMode");
+
+            entity.Property(e => e.Mode).HasMaxLength(50);
+        });
+
         modelBuilder.Entity<Permission>(entity =>
         {
             entity.ToTable("Permission");
@@ -538,11 +551,15 @@ public partial class ErpSystemContext : DbContext
 
             entity.ToTable("SalesInvoice");
 
+            entity.Property(e => e.AmountDue).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.ApprovedBy).HasMaxLength(50);
             entity.Property(e => e.ApprovedDate).HasColumnType("date");
             entity.Property(e => e.CreatedBy).HasMaxLength(50);
             entity.Property(e => e.DueDate).HasColumnType("date");
             entity.Property(e => e.InvoiceDate).HasColumnType("date");
+            entity.Property(e => e.ReferenceNo)
+                .HasMaxLength(20)
+                .HasDefaultValueSql("('SI'+CONVERT([nvarchar](20),NEXT VALUE FOR [dbo].[SalesInvoiceReferenceNoSeq]))");
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
         });
 
@@ -609,13 +626,30 @@ public partial class ErpSystemContext : DbContext
             entity.ToTable("SalesReceipt");
 
             entity.Property(e => e.AmountReceived).HasColumnType("decimal(18, 2)");
-            entity.Property(e => e.PaymentMethod).HasMaxLength(50);
+            entity.Property(e => e.CreatedBy).HasMaxLength(50);
             entity.Property(e => e.ReceiptDate).HasColumnType("date");
+            entity.Property(e => e.ReferenceNo).HasMaxLength(20);
 
-            entity.HasOne(d => d.Customer).WithMany(p => p.SalesReceipts)
-                .HasForeignKey(d => d.CustomerId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__SalesRece__Custo__1C873BEC");
+            entity.HasOne(d => d.PaymentMode).WithMany(p => p.SalesReceipts)
+                .HasForeignKey(d => d.PaymentModeId)
+                .HasConstraintName("FK_SalesReceipt_PaymentMode");
+        });
+
+        modelBuilder.Entity<SalesReceiptSalesInvoice>(entity =>
+        {
+            entity.HasKey(e => e.SalesReceiptSalesInvoiceId).HasName("PK__SalesRec__BCB7101771C12306");
+
+            entity.ToTable("SalesReceiptSalesInvoice");
+
+            entity.Property(e => e.SettledAmount).HasColumnType("decimal(18, 2)");
+
+            entity.HasOne(d => d.SalesInvoice).WithMany(p => p.SalesReceiptSalesInvoices)
+                .HasForeignKey(d => d.SalesInvoiceId)
+                .HasConstraintName("FK_SalesReceiptSalesInvoice_SalesInvoice");
+
+            entity.HasOne(d => d.SalesReceipt).WithMany(p => p.SalesReceiptSalesInvoices)
+                .HasForeignKey(d => d.SalesReceiptId)
+                .HasConstraintName("FK_SalesReceiptSalesInvoice_SalesReceipt");
         });
 
         modelBuilder.Entity<SubModule>(entity =>
@@ -728,6 +762,7 @@ public partial class ErpSystemContext : DbContext
                 .HasConstraintName("FK_UserRole_User");
         });
         modelBuilder.HasSequence("PurchaseOrderReferenceNoSeq").StartsAt(1000L);
+        modelBuilder.HasSequence("SalesInvoiceReferenceNoSeq").StartsAt(1000L);
         modelBuilder.HasSequence("SalesOrderReferenceNoSeq").StartsAt(1000L);
 
         OnModelCreatingPartial(modelBuilder);
