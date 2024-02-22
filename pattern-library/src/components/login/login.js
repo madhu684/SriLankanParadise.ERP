@@ -15,6 +15,7 @@ class login extends React.Component {
       errorMessageToast: "",
       successMessageToast: "",
       redirectToMain: false, // Flag to trigger the redirection
+      loading: false, // Flag to indicate loading state
     };
   }
 
@@ -29,6 +30,9 @@ class login extends React.Component {
     event.preventDefault();
     const { username, password, permissionId } = this.state;
 
+    // Set loading to true to show loading spinner
+    this.setState({ loading: true });
+
     try {
       const formData = {
         username: username,
@@ -42,6 +46,7 @@ class login extends React.Component {
         this.setState({
           showErrorToast: true,
           errorMessageToast: response.message,
+          loading: false, // Reset loading state
         });
       } else {
         this.setState({
@@ -65,6 +70,7 @@ class login extends React.Component {
         "companyLogoPath",
         response.data.result.company.logoPath
       );
+
       // Set redirectToMain to true upon successful login
       this.setState({ redirectToMain: true });
 
@@ -74,6 +80,7 @@ class login extends React.Component {
       this.setState({
         error: "Invalid username or password. Please try again.",
         showErrorToast: true,
+        loading: false, // Reset loading state
       });
     }
   };
