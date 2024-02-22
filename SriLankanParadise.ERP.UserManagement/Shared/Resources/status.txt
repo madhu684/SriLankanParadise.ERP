@@ -57,6 +57,21 @@ Status 0: Draft (Default)
 	   6: Cancelled
 	   7: On Hold
 
+--- Item Master ---
+
+Status 0: Draft (Inactive)
+	   1: Active
+
+--- Unit ---
+
+Status 0: Inactive
+	   1: Active
+	   
+--- Category ---
+
+Status 0: Inactive
+	   1: Active
+
 --- Sales Receipt ---
 
 Status 0: Draft (Default)

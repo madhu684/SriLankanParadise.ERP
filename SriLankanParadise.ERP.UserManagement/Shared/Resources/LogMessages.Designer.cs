@@ -61,6 +61,60 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Categories not found.
+        /// </summary>
+        public static string CategoriesNotFound {
+            get {
+                return ResourceManager.GetString("CategoriesNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Categories retrieved.
+        /// </summary>
+        public static string CategoriesRetrieved {
+            get {
+                return ResourceManager.GetString("CategoriesRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Category created successfully.
+        /// </summary>
+        public static string CategoryCreated {
+            get {
+                return ResourceManager.GetString("CategoryCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Category deleted successfully.
+        /// </summary>
+        public static string CategoryDeleted {
+            get {
+                return ResourceManager.GetString("CategoryDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Category not found.
+        /// </summary>
+        public static string CategoryNotFound {
+            get {
+                return ResourceManager.GetString("CategoryNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Category updated successfully.
+        /// </summary>
+        public static string CategoryUpdated {
+            get {
+                return ResourceManager.GetString("CategoryUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Companies retrieved.
         /// </summary>
         public static string CompaniesRetrieved {
@@ -309,6 +363,60 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string InvalidUsernameOrPassword {
             get {
                 return ResourceManager.GetString("InvalidUsernameOrPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item master created successfully.
+        /// </summary>
+        public static string ItemMasterCreated {
+            get {
+                return ResourceManager.GetString("ItemMasterCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item master deleted successfully.
+        /// </summary>
+        public static string ItemMasterDeleted {
+            get {
+                return ResourceManager.GetString("ItemMasterDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item master not found.
+        /// </summary>
+        public static string ItemMasterNotFound {
+            get {
+                return ResourceManager.GetString("ItemMasterNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item masters not found.
+        /// </summary>
+        public static string ItemMastersNotFound {
+            get {
+                return ResourceManager.GetString("ItemMastersNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item masters retrieved.
+        /// </summary>
+        public static string ItemMastersRetrieved {
+            get {
+                return ResourceManager.GetString("ItemMastersRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item master updated successfully.
+        /// </summary>
+        public static string ItemMasterUpdated {
+            get {
+                return ResourceManager.GetString("ItemMasterUpdated", resourceCulture);
             }
         }
         
@@ -1038,6 +1146,60 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string SuppliersRetrieved {
             get {
                 return ResourceManager.GetString("SuppliersRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unit created successfully.
+        /// </summary>
+        public static string UnitCreated {
+            get {
+                return ResourceManager.GetString("UnitCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unit deleted successfully.
+        /// </summary>
+        public static string UnitDeleted {
+            get {
+                return ResourceManager.GetString("UnitDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unit not found.
+        /// </summary>
+        public static string UnitNotFound {
+            get {
+                return ResourceManager.GetString("UnitNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Units not found.
+        /// </summary>
+        public static string UnitsNotFound {
+            get {
+                return ResourceManager.GetString("UnitsNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Units retrieved.
+        /// </summary>
+        public static string UnitsRetrieved {
+            get {
+                return ResourceManager.GetString("UnitsRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unit updated successfully.
+        /// </summary>
+        public static string UnitUpdated {
+            get {
+                return ResourceManager.GetString("UnitUpdated", resourceCulture);
             }
         }
         

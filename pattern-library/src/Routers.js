@@ -14,6 +14,7 @@ import SalesReceipt from "./components/salesReceipt/salesReceipt";
 import PurchaseRequisitionList from "./components/purchaseRequisition/purchaseRequisitionList/purchaseRequisitionList";
 import ItemMaster from "./components/itemMaster/itemMaster";
 import Category from "./components/category/category";
+import Unit from "./components/unit/unit";
 
 const Routers = () => {
   return (
@@ -38,6 +39,7 @@ const Routers = () => {
         </Route> */}
         <Route path="/itemmaster" element={<ItemMaster />} />
         <Route path="/category" element={<Category />} />
+        <Route path="/unit" element={<Unit />} />
       </Routes>
     </Router>
   );

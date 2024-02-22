@@ -345,6 +345,7 @@ public partial class ErpSystemContext : DbContext
             entity.ToTable("ItemMaster");
 
             entity.Property(e => e.CostPrice).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.CreatedBy).HasMaxLength(50);
             entity.Property(e => e.ItemName).HasMaxLength(50);
             entity.Property(e => e.SellingPrice).HasColumnType("decimal(18, 2)");
 
@@ -724,7 +725,9 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.Firstname).HasMaxLength(50);
             entity.Property(e => e.Lastname).HasMaxLength(50);
             entity.Property(e => e.PasswordHash).HasMaxLength(500);
-            entity.Property(e => e.Username).HasMaxLength(50);
+            entity.Property(e => e.Username)
+                .HasMaxLength(50)
+                .UseCollation("SQL_Latin1_General_CP1_CS_AS");
 
             entity.HasOne(d => d.Company).WithMany(p => p.Users)
                 .HasForeignKey(d => d.CompanyId)
