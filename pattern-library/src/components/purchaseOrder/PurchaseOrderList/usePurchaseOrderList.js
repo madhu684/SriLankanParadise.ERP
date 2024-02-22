@@ -52,9 +52,23 @@ const usePurchaseOrderList = () => {
               sessionStorage.getItem("userId")
             );
 
-          let newPurchaseOrders =
-            purchaseOrderWithoutDraftsResponse.data.result;
-          const additionalOrders = purchaseOrderByUserIdResponse.data.result;
+          let newPurchaseOrders = [];
+          if (
+            purchaseOrderWithoutDraftsResponse &&
+            purchaseOrderWithoutDraftsResponse.data.result
+          ) {
+            newPurchaseOrders = purchaseOrderWithoutDraftsResponse.data.result;
+          }
+
+          let additionalOrders = [];
+          if (
+            purchaseOrderByUserIdResponse &&
+            purchaseOrderByUserIdResponse.data.result
+          ) {
+            additionalOrders = purchaseOrderByUserIdResponse.data.result;
+          }
+          // let newPurchaseOrders = purchaseOrderWithoutDraftsResponse.data.result;
+          //const additionalOrders = purchaseOrderByUserIdResponse.data.result;
 
           const uniqueNewOrders = additionalOrders.filter(
             (order) =>
@@ -149,7 +163,13 @@ const usePurchaseOrderList = () => {
     const delay = 300;
     setTimeout(() => {
       setSelectedRowData([]);
+      setPODetail("");
     }, delay);
+  };
+
+  const handleClose = () => {
+    setShowUpdatePOForm(false);
+    setPODetail("");
   };
 
   const handleRowSelect = (id) => {
@@ -251,6 +271,7 @@ const usePurchaseOrderList = () => {
     hasPermission,
     handleUpdate,
     handleUpdated,
+    handleClose,
   };
 };
 

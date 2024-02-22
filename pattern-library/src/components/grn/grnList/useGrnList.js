@@ -47,18 +47,30 @@ const useGrnList = () => {
             sessionStorage.getItem("userId")
           );
 
-          let newGrns = GrnWithoutDraftsResponse.data.result;
-          const additionalOrders = GrnByUserIdResponse.data.result;
+          let newGrns = [];
+          if (
+            GrnWithoutDraftsResponse &&
+            GrnWithoutDraftsResponse.data.result
+          ) {
+            newGrns = GrnWithoutDraftsResponse.data.result;
+          }
 
-          const uniqueNewOrders = additionalOrders.filter(
-            (order) =>
+          let additionalGrns = [];
+          if (GrnByUserIdResponse && GrnByUserIdResponse.data.result) {
+            additionalGrns = GrnByUserIdResponse.data.result;
+          }
+
+          //let newGrns = GrnWithoutDraftsResponse.data.result;
+          //const additionalOrders = GrnByUserIdResponse.data.result;
+
+          const uniqueNewGrns = additionalGrns.filter(
+            (grn) =>
               !newGrns.some(
-                (existingOrder) =>
-                  existingOrder.grnMasterId === order.grnMasterId
+                (existingGrn) => existingGrn.grnMasterId === grn.grnMasterId
               )
           );
 
-          newGrns = [...newGrns, ...uniqueNewOrders];
+          newGrns = [...newGrns, ...uniqueNewGrns];
           setGrns(newGrns);
         } else {
           const GrnResponse = await get_grn_masters_by_user_id_api(
@@ -142,7 +154,13 @@ const useGrnList = () => {
     const delay = 300;
     setTimeout(() => {
       setSelectedRowData([]);
+      setGRNDetail("");
     }, delay);
+  };
+
+  const handleClose = () => {
+    setShowUpdateGrnForm(false);
+    setGRNDetail("");
   };
 
   const handleRowSelect = (id) => {
@@ -256,6 +274,7 @@ const useGrnList = () => {
     hasPermission,
     handleUpdate,
     handleUpdated,
+    handleClose,
   };
 };
 

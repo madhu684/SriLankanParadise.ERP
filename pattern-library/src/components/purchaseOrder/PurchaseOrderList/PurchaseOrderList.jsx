@@ -38,14 +38,19 @@ const PurchaseOrderList = () => {
     hasPermission,
     handleUpdate,
     handleUpdated,
+    handleClose,
   } = usePurchaseOrderList();
-
-  if (isLoadingData || isLoadingPermissions) {
-    return <LoadingSpinner />;
-  }
 
   if (error) {
     return <ErrorComponent error={error} />;
+  }
+
+  if (
+    isLoadingData ||
+    isLoadingPermissions ||
+    (purchaseOrders && !purchaseOrders.length > 0)
+  ) {
+    return <LoadingSpinner />;
   }
 
   if (showCreatePOForm) {
@@ -60,7 +65,7 @@ const PurchaseOrderList = () => {
   if (showUpdatePOForm) {
     return (
       <PurchaseOrderUpdate
-        handleClose={() => setShowUpdatePOForm(false)}
+        handleClose={handleClose}
         purchaseOrder={PODetail || selectedRowData[0]}
         handleUpdated={handleUpdated}
       />
@@ -129,7 +134,7 @@ const PurchaseOrderList = () => {
           <thead>
             <tr>
               <th>
-                <input type="checkbox" onChange={() => setSelectedRows([])} />
+                <input type="checkbox" />
               </th>
               <th>Reference No</th>
               <th>Ordered By</th>
