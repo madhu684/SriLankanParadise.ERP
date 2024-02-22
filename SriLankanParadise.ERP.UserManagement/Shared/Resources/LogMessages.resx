@@ -117,6 +117,24 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="CategoriesNotFound" xml:space="preserve">
+    <value>Categories not found</value>
+  </data>
+  <data name="CategoriesRetrieved" xml:space="preserve">
+    <value>Categories retrieved</value>
+  </data>
+  <data name="CategoryCreated" xml:space="preserve">
+    <value>Category created successfully</value>
+  </data>
+  <data name="CategoryDeleted" xml:space="preserve">
+    <value>Category deleted successfully</value>
+  </data>
+  <data name="CategoryNotFound" xml:space="preserve">
+    <value>Category not found</value>
+  </data>
+  <data name="CategoryUpdated" xml:space="preserve">
+    <value>Category updated successfully</value>
+  </data>
   <data name="CompaniesRetrieved" xml:space="preserve">
     <value>Companies retrieved</value>
   </data>
@@ -156,8 +174,74 @@
   <data name="CompanyUpdated" xml:space="preserve">
     <value>Company updated successfully</value>
   </data>
+  <data name="CustomerCreated" xml:space="preserve">
+    <value>Customer created successfully</value>
+  </data>
+  <data name="CustomersNotFound" xml:space="preserve">
+    <value>Customers not found</value>
+  </data>
+  <data name="CustomersRetrieved" xml:space="preserve">
+    <value>Customers retrieved</value>
+  </data>
+  <data name="GrnDetailCreated" xml:space="preserve">
+    <value>Grn detail created successfully</value>
+  </data>
+  <data name="GrnDetailDeleted" xml:space="preserve">
+    <value>Grn detail deleted successfully</value>
+  </data>
+  <data name="GrnDetailNotFound" xml:space="preserve">
+    <value>Grn detail not found</value>
+  </data>
+  <data name="GrnDetailUpdated" xml:space="preserve">
+    <value>Grn detail updated successfully</value>
+  </data>
+  <data name="GrnMasterApproved" xml:space="preserve">
+    <value>Grn master approved</value>
+  </data>
+  <data name="GrnMasterCreated" xml:space="preserve">
+    <value>Grn master created successfully</value>
+  </data>
+  <data name="GrnMasterNotFound" xml:space="preserve">
+    <value>Grn master not found</value>
+  </data>
+  <data name="GrnMasterRetrieved" xml:space="preserve">
+    <value>Grn master retrieved</value>
+  </data>
+  <data name="GrnMastersNotFound" xml:space="preserve">
+    <value>Grn masters not found</value>
+  </data>
+  <data name="GrnMastersRetrieved" xml:space="preserve">
+    <value>Grn masters retrieved</value>
+  </data>
+  <data name="GrnMasterUpdated" xml:space="preserve">
+    <value>Grn master updated successfully</value>
+  </data>
   <data name="InvalidUsernameOrPassword" xml:space="preserve">
     <value>Invalid username or password</value>
+  </data>
+  <data name="ItemMasterCreated" xml:space="preserve">
+    <value>Item master created successfully</value>
+  </data>
+  <data name="ItemMasterDeleted" xml:space="preserve">
+    <value>Item master deleted successfully</value>
+  </data>
+  <data name="ItemMasterNotFound" xml:space="preserve">
+    <value>Item master not found</value>
+  </data>
+  <data name="ItemMastersNotFound" xml:space="preserve">
+    <value>Item masters not found</value>
+  </data>
+  <data name="ItemMastersRetrieved" xml:space="preserve">
+    <value>Item masters retrieved</value>
+  </data>
+  <data name="ItemMasterUpdated" xml:space="preserve">
+    <value>Item master updated successfully</value>
+  </data>
+  <data name="LocationsNotFound" xml:space="preserve">
+    <value>Locations not found</value>
+  </data>
+  <data name="LocationsRetrieved" xml:space="preserve">
+    <value>Locations retrieved</value>
   </data>
   <data name="ModuleCreated" xml:space="preserve">
     <value>Module created successfully</value>
@@ -177,29 +261,200 @@
   <data name="ModuleUpdated" xml:space="preserve">
     <value>Module updated successfully</value>
   </data>
+  <data name="PaymentModeCreated" xml:space="preserve">
+    <value>Payment mode created successfully</value>
+  </data>
+  <data name="PaymentModesNotFound" xml:space="preserve">
+    <value>Payment modes not found</value>
+  </data>
+  <data name="PaymentModesRetrieved" xml:space="preserve">
+    <value>Payment modes retrieved</value>
+  </data>
   <data name="PermissionsNotFound" xml:space="preserve">
-    <value>Permissions Not Found</value>
+    <value>Permissions not found</value>
   </data>
   <data name="PermissionsRetrieved" xml:space="preserve">
-    <value>Permissions Retrieved</value>
+    <value>Permissions retrieved</value>
+  </data>
+  <data name="PurchaseOrderApproved" xml:space="preserve">
+    <value>Purchase order approved</value>
+  </data>
+  <data name="PurchaseOrderCreated" xml:space="preserve">
+    <value>Purchase order created successfully</value>
+  </data>
+  <data name="PurchaseOrderDetailCreated" xml:space="preserve">
+    <value>Purchase order detail created successfully</value>
+  </data>
+  <data name="PurchaseOrderDetailDeleted" xml:space="preserve">
+    <value>Purchase order detail deleted</value>
+  </data>
+  <data name="PurchaseOrderDetailNotFound" xml:space="preserve">
+    <value>Purchase order detail not found</value>
+  </data>
+  <data name="PurchaseOrderDetailUpdated" xml:space="preserve">
+    <value>Purchase order detail updated successfully</value>
+  </data>
+  <data name="PurchaseOrderNotFound" xml:space="preserve">
+    <value>Purchase order not found</value>
+  </data>
+  <data name="PurchaseOrderRetrieved" xml:space="preserve">
+    <value>Purchase order retrieved</value>
+  </data>
+  <data name="PurchaseOrdersNotFound" xml:space="preserve">
+    <value>Purchase orders not found</value>
+  </data>
+  <data name="PurchaseOrdersRetrieved" xml:space="preserve">
+    <value>Purchase orders retrieved</value>
+  </data>
+  <data name="PurchaseOrderUpdated" xml:space="preserve">
+    <value>Purchase order updated successfully</value>
+  </data>
+  <data name="PurchaseRequisitionApproved" xml:space="preserve">
+    <value>Purchase requisition approved</value>
+  </data>
+  <data name="PurchaseRequisitionCreated" xml:space="preserve">
+    <value>Purchase requisition created successfully</value>
+  </data>
+  <data name="PurchaseRequisitionDetailCreated" xml:space="preserve">
+    <value>Purchase requisition detail created successfully</value>
+  </data>
+  <data name="PurchaseRequisitionDetailDeleted" xml:space="preserve">
+    <value>Purchase requisition detail deleted successfully</value>
+  </data>
+  <data name="PurchaseRequisitionDetailNotFound" xml:space="preserve">
+    <value>Purchase requisition detail not found</value>
+  </data>
+  <data name="PurchaseRequisitionDetailUpdated" xml:space="preserve">
+    <value>Purchase requisition detail updated successfully</value>
+  </data>
+  <data name="PurchaseRequisitionNotFound" xml:space="preserve">
+    <value>Purchase requisition not found</value>
+  </data>
+  <data name="PurchaseRequisitionRetrieved" xml:space="preserve">
+    <value>Purchase requisition retrieved</value>
+  </data>
+  <data name="PurchaseRequisitionsNotFound" xml:space="preserve">
+    <value>Purchase requisitions not found</value>
+  </data>
+  <data name="PurchaseRequisitionsRetrieved" xml:space="preserve">
+    <value>Purchase requisitions retrieved</value>
+  </data>
+  <data name="PurchaseRequisitionUpdated" xml:space="preserve">
+    <value>Purchase requisition updated successfully</value>
   </data>
   <data name="RolePermissionCreated" xml:space="preserve">
-    <value>Role Permission created successfully</value>
+    <value>Role permission created successfully</value>
   </data>
   <data name="RolesNotFound" xml:space="preserve">
-    <value>Roles Not Found</value>
+    <value>Roles not found</value>
   </data>
   <data name="RolesRetrieved" xml:space="preserve">
-    <value>Roles Retrieved</value>
+    <value>Roles retrieved</value>
+  </data>
+  <data name="SalesInvoiceApproved" xml:space="preserve">
+    <value>Sales invoice approved</value>
+  </data>
+  <data name="SalesInvoiceCreated" xml:space="preserve">
+    <value>Sales invoice created successfully</value>
+  </data>
+  <data name="SalesInvoiceDetailCreated" xml:space="preserve">
+    <value>Sales invoice detail created successfully</value>
+  </data>
+  <data name="SalesInvoiceDetailDeleted" xml:space="preserve">
+    <value>Sales invoice detail deleted</value>
+  </data>
+  <data name="SalesInvoiceDetailNotFound" xml:space="preserve">
+    <value>Sales invoice detail not found</value>
+  </data>
+  <data name="SalesInvoiceDetailUpdated" xml:space="preserve">
+    <value>Sales invoice detail updated successfully</value>
+  </data>
+  <data name="SalesInvoiceNotFound" xml:space="preserve">
+    <value>Sales invoice not found</value>
+  </data>
+  <data name="SalesInvoiceRetrieved" xml:space="preserve">
+    <value>Sales invoice retrieved</value>
+  </data>
+  <data name="SalesInvoicesNotFound" xml:space="preserve">
+    <value>Sales invoices not found</value>
+  </data>
+  <data name="SalesInvoicesRetrieved" xml:space="preserve">
+    <value>Sales invoices retrieved</value>
+  </data>
+  <data name="SalesInvoiceUpdated" xml:space="preserve">
+    <value>Sales invoice updated successfully</value>
+  </data>
+  <data name="SalesOrderApproved" xml:space="preserve">
+    <value>Sales order approved</value>
+  </data>
+  <data name="SalesOrderCreated" xml:space="preserve">
+    <value>Sales order created successfully</value>
+  </data>
+  <data name="SalesOrderDetailCreated" xml:space="preserve">
+    <value>Sales order detail created successfully</value>
+  </data>
+  <data name="SalesOrderDetailDeleted" xml:space="preserve">
+    <value>Sales order detail deleted</value>
+  </data>
+  <data name="SalesOrderDetailNotFound" xml:space="preserve">
+    <value>Sales order detail not found</value>
+  </data>
+  <data name="SalesOrderDetailUpdated" xml:space="preserve">
+    <value>Sales order detail updated successfully</value>
+  </data>
+  <data name="SalesOrderNotFound" xml:space="preserve">
+    <value>Sales order not found</value>
+  </data>
+  <data name="SalesOrderRetrieved" xml:space="preserve">
+    <value>Sales order retrieved</value>
+  </data>
+  <data name="SalesOrdersNotFound" xml:space="preserve">
+    <value>Sales orders not found</value>
+  </data>
+  <data name="SalesOrdersRetrieved" xml:space="preserve">
+    <value>Sales orders retrieved</value>
+  </data>
+  <data name="SalesOrderUpdated" xml:space="preserve">
+    <value>Sales order updated successfully</value>
+  </data>
+  <data name="SalesReceiptCreated" xml:space="preserve">
+    <value>Sales receipt created successfully</value>
+  </data>
+  <data name="SalesReceiptNotFound" xml:space="preserve">
+    <value>Sales receipt not found</value>
+  </data>
+  <data name="SalesReceiptRetrieved" xml:space="preserve">
+    <value>Sales receipt retrieved</value>
+  </data>
+  <data name="SalesReceiptSalesInvoiceCreated" xml:space="preserve">
+    <value>SalesReceiptSalesInvoice created successfully</value>
+  </data>
+  <data name="SalesReceiptSalesInvoiceDeleted" xml:space="preserve">
+    <value>SalesReceiptSalesInvoice deleted successfully</value>
+  </data>
+  <data name="SalesReceiptSalesInvoiceNotFound" xml:space="preserve">
+    <value>SalesReceiptSalesInvoice not found</value>
+  </data>
+  <data name="SalesReceiptSalesInvoiceUpdated" xml:space="preserve">
+    <value>SalesReceiptSalesInvoice updated successfully</value>
+  </data>
+  <data name="SalesReceiptsNotFound" xml:space="preserve">
+    <value>Sales receipts not found</value>
+  </data>
+  <data name="SalesReceiptsRetrieved" xml:space="preserve">
+    <value>Sales receipts retrieved</value>
+  </data>
+  <data name="SalesReceiptUpdated" xml:space="preserve">
+    <value>Sales receipt updated successfully</value>
   </data>
   <data name="SubModuleCreated" xml:space="preserve">
-    <value>Sub Module created successfully</value>
+    <value>Sub module created successfully</value>
   </data>
   <data name="SubModulesNotFound" xml:space="preserve">
-    <value>Sub Modules not found</value>
+    <value>Sub modules not found</value>
   </data>
   <data name="SubModulesRetrieved" xml:space="preserve">
-    <value>Sub Modules retrieved</value>
+    <value>Sub modules retrieved</value>
   </data>
   <data name="SubscriptionCreated" xml:space="preserve">
     <value>Subscription created successfully</value>
@@ -219,6 +474,30 @@
   <data name="SubscriptionUpdated" xml:space="preserve">
     <value>Subscription updated successfully</value>
   </data>
+  <data name="SuppliersNotFound" xml:space="preserve">
+    <value>Suppliers not found</value>
+  </data>
+  <data name="SuppliersRetrieved" xml:space="preserve">
+    <value>Suppliers retrieved</value>
+  </data>
+  <data name="UnitCreated" xml:space="preserve">
+    <value>Unit created successfully</value>
+  </data>
+  <data name="UnitDeleted" xml:space="preserve">
+    <value>Unit deleted successfully</value>
+  </data>
+  <data name="UnitNotFound" xml:space="preserve">
+    <value>Unit not found</value>
+  </data>
+  <data name="UnitsNotFound" xml:space="preserve">
+    <value>Units not found</value>
+  </data>
+  <data name="UnitsRetrieved" xml:space="preserve">
+    <value>Units retrieved</value>
+  </data>
+  <data name="UnitUpdated" xml:space="preserve">
+    <value>Unit updated successfully</value>
+  </data>
   <data name="UserAlreadyExists" xml:space="preserve">
     <value>User already exists</value>
   </data>
@@ -226,10 +505,16 @@
     <value>User authenticated successfully</value>
   </data>
   <data name="UseRoleCreated" xml:space="preserve">
-    <value>User Role created successfully</value>
+    <value>User role created successfully</value>
   </data>
   <data name="UserPermissionCreated" xml:space="preserve">
-    <value>User Permission created successfully</value>
+    <value>User permission created successfully</value>
+  </data>
+  <data name="UserPermissionsNotFound" xml:space="preserve">
+    <value>User permissions not found</value>
+  </data>
+  <data name="UserPermissionsRetrieved" xml:space="preserve">
+    <value>User permissions retrieved</value>
   </data>
   <data name="UserRegistered" xml:space="preserve">
     <value>User registered successfully</value>

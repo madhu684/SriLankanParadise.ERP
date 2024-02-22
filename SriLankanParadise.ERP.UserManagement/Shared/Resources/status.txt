@@ -1,0 +1,78 @@
+﻿--- Purchase Requisition ---
+
+Status 0: Draft (Default)
+	   1: Pending Approval
+	   2: Approved
+	   3: Rejected
+	   4: In Progress
+	   5: Completed
+	   6: Cancelled
+	   7: On Hold
+	   
+--- Purchase Order ---
+
+Status 0: Draft (Default)
+	   1: Pending Approval
+	   2: Approved
+	   3: Rejected
+	   4: In Progress
+	   5: Completed
+	   6: Cancelled
+	   7: On Hold
+	   
+--- Goods Received Note ---
+
+Status 0: Draft (Default)
+	   1: Pending Approval
+	   2: Approved
+	   3: Rejected
+	   4: In Progress
+	   5: Completed
+	   6: Cancelled
+	   7: On Hold
+	   40: In Progress - Draft
+	   50: Completed - Draft
+	   41: In Progress - Pending Approval
+	   51: Completed - Pending Approval
+
+--- Sales Order ---
+
+Status 0: Draft (Default)
+	   1: Pending Approval
+	   2: Approved
+	   3: Rejected
+	   4: In Progress
+	   5: Completed
+	   6: Cancelled
+	   7: On Hold
+
+--- Sales Invoice ---
+
+Status 0: Draft (Default)
+	   1: Pending Approval
+	   2: Approved
+	   3: Rejected
+	   4: In Progress
+	   5: Completed
+	   6: Cancelled
+	   7: On Hold
+
+--- Item Master ---
+
+Status 0: Draft (Inactive)
+	   1: Active
+
+--- Unit ---
+
+Status 0: Inactive
+	   1: Active
+	   
+--- Category ---
+
+Status 0: Inactive
+	   1: Active
+
+--- Sales Receipt ---
+
+Status 0: Draft (Default)
+	   1: Created

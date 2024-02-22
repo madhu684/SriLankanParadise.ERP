@@ -1,11 +1,17 @@
 import axios from "axios";
 
-export const API_BASE_URL = "https://localhost:7287/api";
+//Import url from config file
+const baseUrl = process.env.REACT_APP_API_BASEURL;
+const baseUrl2 = process.env.REACT_APP_API_BASEURL2;
+const sublink = process.env.REACT_APP_API_SUBLINK;
+
+export const API_BASE_URL = `${baseUrl}${sublink}`;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
 });
 
+//authentication apis
 export const login_api = async (formData) => {
   try {
     const response = await api.post("/user/login", formData, {
@@ -30,6 +36,7 @@ export const logout_api = async () => {
   }
 };
 
+//registration related apis
 export const company_modules_api = async (companyId) => {
   try {
     const response = await api.get(
@@ -305,6 +312,23 @@ export const put_module_api = async (moduleId, moduleData) => {
     const response = await api.put(`/module/${moduleId}`, moduleData);
     return response.data;
   } catch (error) {
+    throw error;
+  }
+};
+
+//user permissions
+export const get_user_permissions_api = async (userId) => {
+  try {
+    const response = await api.get(
+      "/userPermission/GetUserPermissionsByUserId",
+      {
+        params: { userId: userId },
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
     throw error;
   }
 };

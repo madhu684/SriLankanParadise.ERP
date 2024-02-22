@@ -4,8 +4,9 @@ import useMain from "./useMain";
 import TopNav from "../topNav/topNav";
 import Menu from "../menu";
 import DiscardConfirmationModal from "../confirmationModals/discardConfirmationModal/discardConfirmationModal";
+import { Outlet } from "react-router-dom";
 
-const Main = () => {
+const Main = ({ children }) => {
   const {
     toggleSidebar,
     isSidebarOpen,
@@ -40,6 +41,8 @@ const Main = () => {
               {/* Main content */}
               <main>
                 {renderDetail(selectedSubmodule)}
+                {children}
+                {/* <Outlet /> */}
                 {/* Render Discard Confirmation Modal */}
                 {showDiscardConfirmation && (
                   <DiscardConfirmationModal
