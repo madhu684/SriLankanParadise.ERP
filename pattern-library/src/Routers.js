@@ -8,7 +8,7 @@ import Admin from "./components/admin";
 import PurchaseRequisition from "./components/purchaseRequisition/purchaseRequisition";
 import PurchaseOrder from "./components/purchaseOrder/purchaseOrder";
 import Grn from "./components/grn/grn";
-import PurchaseRequisitionList from "./components/purchaseRequisition/PurchaseRequisitionList/PurchaseRequisitionList";
+import PurchaseRequisitionList from "./components/purchaseRequisition/purchaseRequisitionList/purchaseRequisitionList";
 import ItemMaster from "./components/itemMaster/itemMaster";
 import Category from "./components/category/category";
 
