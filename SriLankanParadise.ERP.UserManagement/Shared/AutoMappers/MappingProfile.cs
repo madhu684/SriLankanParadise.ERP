@@ -80,8 +80,9 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<BatchHasGrnMaster, BatchHasGrnMasterDto>();
             CreateMap<ItemBatchHasGrnDetailRequestModel, ItemBatchHasGrnDetail>();
             CreateMap<ItemBatchHasGrnDetail, ItemBatchHasGrnDetailDto>();
-            CreateMap<LocationChannelItemBatchRequestModel, LocationChannelItemBatch>();
-            CreateMap<LocationChannelItemBatch, LocationChannelItemBatchDto>();
+            CreateMap<ItemTypeRequestModel, ItemType>();
+            CreateMap<ItemType, ItemTypeDto>();
+
             // Add more mapping configurations if needed
         }
     }

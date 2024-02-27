@@ -21,13 +21,17 @@ public partial class ItemBatch
 
     public int? CreatedUserId { get; set; }
 
+    public int? TempQuantity { get; set; }
+
+    public int? LocationId { get; set; }
+
     public virtual Batch Batch { get; set; } = null!;
 
     public virtual ICollection<ItemBatchHasGrnDetail> ItemBatchHasGrnDetails { get; set; } = new List<ItemBatchHasGrnDetail>();
 
     public virtual ItemMaster ItemMaster { get; set; } = null!;
 
-    public virtual ICollection<LocationChannelItemBatch> LocationChannelItemBatches { get; set; } = new List<LocationChannelItemBatch>();
+    public virtual Location? Location { get; set; }
 
     public virtual ICollection<SalesOrderDetail> SalesOrderDetails { get; set; } = new List<SalesOrderDetail>();
 }

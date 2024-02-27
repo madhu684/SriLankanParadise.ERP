@@ -18,6 +18,10 @@
 
         public int? CreatedUserId { get; set; }
 
+        public int? TempQuantity { get; set; }
+
+        public int? LocationId { get; set; }
+
         public int PermissionId { get; set; }
     }
 }

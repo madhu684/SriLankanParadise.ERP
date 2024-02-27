@@ -34,6 +34,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 return await _dbContext.ItemMasters
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
+                    .Include(im => im.ItemType)
                     .ToListAsync();
             }
             catch (Exception)
@@ -52,6 +53,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Where(im => im.Status == true && im.CompanyId == companyId)
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
+                    .Include(im => im.ItemType)
                     .ToListAsync();
 
                 return itemMasters.Any() ? itemMasters : null;
@@ -71,6 +73,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Where(im => im.ItemMasterId == itemMasterId)
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
+                    .Include(im => im.ItemType)
                     .FirstOrDefaultAsync();
 
                 return itemMaster;
@@ -127,6 +130,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Where(im => im.CreatedUserId == userId)
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
+                    .Include(im => im.ItemType)
                     .ToListAsync();
 
                 return itemMasters.Any() ? itemMasters : null;

@@ -13,12 +13,6 @@ public partial class ItemMaster
 
     public string? ItemName { get; set; }
 
-    public int? StockQuantity { get; set; }
-
-    public decimal? SellingPrice { get; set; }
-
-    public decimal? CostPrice { get; set; }
-
     public bool? Status { get; set; }
 
     public int? CompanyId { get; set; }
@@ -27,9 +21,17 @@ public partial class ItemMaster
 
     public int? CreatedUserId { get; set; }
 
+    public int? ItemTypeId { get; set; }
+
     public virtual Category Category { get; set; } = null!;
 
+    public virtual ICollection<IssueDetail> IssueDetails { get; set; } = new List<IssueDetail>();
+
     public virtual ICollection<ItemBatch> ItemBatches { get; set; } = new List<ItemBatch>();
+
+    public virtual ItemType? ItemType { get; set; }
+
+    public virtual ICollection<RequisitionDetail> RequisitionDetails { get; set; } = new List<RequisitionDetail>();
 
     public virtual Unit Unit { get; set; } = null!;
 }

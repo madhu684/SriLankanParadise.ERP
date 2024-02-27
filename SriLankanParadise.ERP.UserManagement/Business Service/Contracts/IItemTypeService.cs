@@ -2,8 +2,8 @@
 
 namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
 {
-    public interface ILocationChannelItemBatchService
+    public interface IItemTypeService
     {
-        Task AddLocationChannelItemBatch(LocationChannelItemBatch locationChannelItemBatch);
+        Task<IEnumerable<ItemType>> GetItemTypesByCompanyId(int companyId);
     }
 }

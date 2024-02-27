@@ -261,6 +261,12 @@
   <data name="ItemMasterUpdated" xml:space="preserve">
     <value>Item master updated successfully</value>
   </data>
+  <data name="ItemTypesNotFound" xml:space="preserve">
+    <value>Item types not found</value>
+  </data>
+  <data name="ItemTypesRetrieved" xml:space="preserve">
+    <value>Item types retrieved</value>
+  </data>
   <data name="LocationChannelItemBatchCreated" xml:space="preserve">
     <value>LocationChannelItemBatch created successfully</value>
   </data>

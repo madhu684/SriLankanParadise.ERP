@@ -17,5 +17,9 @@
         public string? CreatedBy { get; set; }
 
         public int? CreatedUserId { get; set; }
+
+        public int? TempQuantity { get; set; }
+
+        public int? LocationId { get; set; }
     }
 }

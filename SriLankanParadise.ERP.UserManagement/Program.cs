@@ -127,8 +127,8 @@ builder.Services.AddScoped<IBatchHasGrnMasterService, BatchHasGrnMasterService>(
 builder.Services.AddScoped<IBatchHasGrnMasterRepository, BatchHasGrnMasterRepository>();
 builder.Services.AddScoped<IItemBatchHasGrnDetailService, ItemBatchHasGrnDetailService>();
 builder.Services.AddScoped<IItemBatchHasGrnDetailRepository, ItemBatchHasGrnDetailRepository>();
-builder.Services.AddScoped<ILocationChannelItemBatchService, LocationChannelItemBatchService>();
-builder.Services.AddScoped<ILocationChannelItemBatchRepository, LocationChannelItemBatchRepository>();
+builder.Services.AddScoped<IItemTypeService, ItemTypeService>();
+builder.Services.AddScoped<IItemTypeRepository, ItemTypeRepository>();
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
