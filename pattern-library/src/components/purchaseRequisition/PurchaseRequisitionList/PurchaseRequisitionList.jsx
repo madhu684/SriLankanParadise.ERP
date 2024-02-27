@@ -6,6 +6,7 @@ import PurchaseRequisitionDetail from "../PurchaseRequisitionDetail/PurchaseRequ
 import PurchaseRequisitionUpdate from "../purchaseRequisitionUpdate/purchaseRequisitionUpdate";
 import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
+import PurchaseRequisitionConvert from "../purchaseRequisitionConvert/purchaseRequisitionConvert";
 
 const PurchaseRequisitionList = () => {
   const {
@@ -23,7 +24,9 @@ const PurchaseRequisitionList = () => {
     showCreatePRForm,
     showUpdatePRForm,
     PRDetail,
+    showConvertPRForm,
     areAnySelectedRowsPending,
+    areAnySelectedRowsApproved,
     setSelectedRows,
     handleRowSelect,
     getStatusLabel,
@@ -39,14 +42,21 @@ const PurchaseRequisitionList = () => {
     hasPermission,
     handleUpdate,
     handleUpdated,
+    handleClose,
+    handleConvert,
+    setShowConvertPRForm,
   } = usePurchaseRequisitionList();
-
-  if (isLoadingData || isLoadingPermissions) {
-    return <LoadingSpinner />;
-  }
 
   if (error) {
     return <ErrorComponent error={error} />;
+  }
+
+  if (
+    isLoadingData ||
+    isLoadingPermissions ||
+    (purchaseRequisitions && !purchaseRequisitions.length > 0)
+  ) {
+    return <LoadingSpinner />;
   }
 
   if (showCreatePRForm) {
@@ -61,9 +71,19 @@ const PurchaseRequisitionList = () => {
   if (showUpdatePRForm) {
     return (
       <PurchaseRequisitionUpdate
-        handleClose={() => setShowUpdatePRForm(false)}
+        handleClose={handleClose}
         purchaseRequisition={PRDetail || selectedRowData[0]}
         handleUpdated={handleUpdated}
+      />
+    );
+  }
+
+  if (showConvertPRForm) {
+    return (
+      <PurchaseRequisitionConvert
+        handleClose={handleClose}
+        purchaseRequisition={PRDetail || selectedRowData[0]}
+        handleConverted={handleUpdated}
       />
     );
   }
@@ -115,6 +135,16 @@ const PurchaseRequisitionList = () => {
                 Approve
               </button>
             )}
+          {hasPermission("Convert Purchase Requisition") &&
+            isAnyRowSelected &&
+            areAnySelectedRowsApproved(selectedRows) && (
+              <button
+                className="btn btn-success"
+                onClick={() => setShowConvertPRForm(true)}
+              >
+                Convert
+              </button>
+            )}
           {hasPermission("Update Purchase Requisition") && isAnyRowSelected && (
             <button
               className="btn btn-warning"
@@ -130,7 +160,7 @@ const PurchaseRequisitionList = () => {
           <thead>
             <tr>
               <th>
-                <input type="checkbox" onChange={() => setSelectedRows([])} />
+                <input type="checkbox" />
               </th>
               <th>ID</th>
               <th>Requested By</th>

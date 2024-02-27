@@ -95,7 +95,10 @@ class menu extends React.Component {
 
   generateCompanyLogoUrl = () => {
     try {
-      const baseApiUrl = API_BASE_URL.replace("/api", "");
+      //const baseApiUrl = API_BASE_URL.replace("/api", "");
+
+      // Remove the last occurrence of '/api' from API_BASE_URL
+      const baseApiUrl = API_BASE_URL.replace(/\/api(?!.*\/api)/, "");
 
       const adjustedRelativePath = this.state.companyLogoPath
         .replace(/\\/g, "/")

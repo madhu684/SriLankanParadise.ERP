@@ -41,12 +41,16 @@ const SalesInvoiceList = () => {
     handleClose,
   } = useSalesInvoiceList();
 
-  if (isLoadingData || isLoadingPermissions) {
-    return <LoadingSpinner />;
-  }
-
   if (error) {
     return <ErrorComponent error={error} />;
+  }
+
+  if (
+    isLoadingData ||
+    isLoadingPermissions ||
+    (salesInvoices && !salesInvoices.length > 0)
+  ) {
+    return <LoadingSpinner />;
   }
 
   if (showCreateSIForm) {
@@ -130,9 +134,9 @@ const SalesInvoiceList = () => {
           <thead>
             <tr>
               <th>
-                <input type="checkbox" onChange={() => setSelectedRows([])} />
+                <input type="checkbox" />
               </th>
-              <th>ID</th>
+              <th>Reference No</th>
               <th>Created By</th>
               <th>Invoice Date</th>
               <th>Status</th>
@@ -149,7 +153,7 @@ const SalesInvoiceList = () => {
                     onChange={() => handleRowSelect(si.salesInvoiceId)}
                   />
                 </td>
-                <td>{si.salesInvoiceId}</td>
+                <td>{si.referenceNo}</td>
                 <td>{si.createdBy}</td>
                 <td>{si?.invoiceDate?.split("T")[0]}</td>
                 <td>

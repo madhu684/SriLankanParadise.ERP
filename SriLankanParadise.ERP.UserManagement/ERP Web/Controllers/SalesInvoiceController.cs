@@ -213,6 +213,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                 var updatedSalesInvoice = _mapper.Map<SalesInvoice>(salesInvoiceRequest);
                 updatedSalesInvoice.SalesInvoiceId = salesInvoiceId; // Ensure the ID is not changed
+                updatedSalesInvoice.ReferenceNo = existingSalesInvoice.ReferenceNo; // Ensure the ReferenceNo is not changed
 
                 await _salesInvoiceService.UpdateSalesInvoice(existingSalesInvoice.SalesInvoiceId, updatedSalesInvoice);
 

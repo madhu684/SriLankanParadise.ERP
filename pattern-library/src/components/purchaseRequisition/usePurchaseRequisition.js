@@ -46,6 +46,13 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     }
   }, [submissionStatus]);
 
+  useEffect(() => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      totalAmount: calculateTotalPrice(),
+    }));
+  }, [formData.itemDetails]);
+
   const validateField = (
     fieldName,
     fieldDisplayName,

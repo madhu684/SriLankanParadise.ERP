@@ -12,7 +12,7 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
       </Modal.Header>
       <Modal.Body>
         <div className="mb-3 d-flex justify-content-between">
-          <h6>Details for Sales Invoice : {salesInvoice.salesInvoiceId}</h6>
+          <h6>Details for Sales Invoice : {salesInvoice.referenceNo}</h6>
           <div>
             Status :{" "}
             <span

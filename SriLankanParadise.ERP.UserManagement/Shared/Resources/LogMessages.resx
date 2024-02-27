@@ -288,6 +288,15 @@
   <data name="ModuleUpdated" xml:space="preserve">
     <value>Module updated successfully</value>
   </data>
+  <data name="PaymentModeCreated" xml:space="preserve">
+    <value>Payment mode created successfully</value>
+  </data>
+  <data name="PaymentModesNotFound" xml:space="preserve">
+    <value>Payment modes not found</value>
+  </data>
+  <data name="PaymentModesRetrieved" xml:space="preserve">
+    <value>Payment modes retrieved</value>
+  </data>
   <data name="PermissionsNotFound" xml:space="preserve">
     <value>Permissions not found</value>
   </data>
@@ -434,6 +443,36 @@
   </data>
   <data name="SalesOrderUpdated" xml:space="preserve">
     <value>Sales order updated successfully</value>
+  </data>
+  <data name="SalesReceiptCreated" xml:space="preserve">
+    <value>Sales receipt created successfully</value>
+  </data>
+  <data name="SalesReceiptNotFound" xml:space="preserve">
+    <value>Sales receipt not found</value>
+  </data>
+  <data name="SalesReceiptRetrieved" xml:space="preserve">
+    <value>Sales receipt retrieved</value>
+  </data>
+  <data name="SalesReceiptSalesInvoiceCreated" xml:space="preserve">
+    <value>SalesReceiptSalesInvoice created successfully</value>
+  </data>
+  <data name="SalesReceiptSalesInvoiceDeleted" xml:space="preserve">
+    <value>SalesReceiptSalesInvoice deleted successfully</value>
+  </data>
+  <data name="SalesReceiptSalesInvoiceNotFound" xml:space="preserve">
+    <value>SalesReceiptSalesInvoice not found</value>
+  </data>
+  <data name="SalesReceiptSalesInvoiceUpdated" xml:space="preserve">
+    <value>SalesReceiptSalesInvoice updated successfully</value>
+  </data>
+  <data name="SalesReceiptsNotFound" xml:space="preserve">
+    <value>Sales receipts not found</value>
+  </data>
+  <data name="SalesReceiptsRetrieved" xml:space="preserve">
+    <value>Sales receipts retrieved</value>
+  </data>
+  <data name="SalesReceiptUpdated" xml:space="preserve">
+    <value>Sales receipt updated successfully</value>
   </data>
   <data name="SubModuleCreated" xml:space="preserve">
     <value>Sub module created successfully</value>
