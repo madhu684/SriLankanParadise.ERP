@@ -48,6 +48,30 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<GrnDetail, GrnDetailDto>();
             CreateMap<Location, LocationDto>();
             CreateMap<Supplier, SupplierDto>();
+            CreateMap<CustomerRequestModel, Customer>();
+            CreateMap<Customer, CustomerDto>();
+            CreateMap<SalesOrderRequestModel, SalesOrder>();
+            CreateMap<SalesOrder, SalesOrderDto>();
+            CreateMap<SalesOrderDetailRequestModel, SalesOrderDetail>();
+            CreateMap<SalesOrderDetail, SalesOrderDetailDto>();
+            CreateMap<ApproveSalesOrderRequestModel, SalesOrder>();
+            CreateMap<SalesInvoiceRequestModel, SalesInvoice>();
+            CreateMap<SalesInvoice, SalesInvoiceDto>();
+            CreateMap<SalesInvoiceDetailRequestModel, SalesInvoiceDetail>();
+            CreateMap<SalesInvoiceDetail, SalesInvoiceDetailDto>();
+            CreateMap<ApproveSalesInvoiceRequestModel, SalesInvoice>();
+            CreateMap<UnitRequestModel, Unit>();
+            CreateMap<Unit, UnitDto>();
+            CreateMap<CategoryRequestModel, Category>();
+            CreateMap<Category, CategoryDto>();
+            CreateMap<ItemMasterRequestModel, ItemMaster>();
+            CreateMap<ItemMaster, ItemMasterDto>();
+            CreateMap<PaymentMode, PaymentModeDto>();
+            CreateMap<PaymentModeRequestModel, PaymentMode>();
+            CreateMap<SalesReceipt, SalesReceiptDto>();
+            CreateMap<SalesReceiptRequestModel, SalesReceipt>();
+            CreateMap<SalesReceiptSalesInvoice, SalesReceiptSalesInvoiceDto>();
+            CreateMap<SalesReceiptSalesInvoiceRequestModel, SalesReceiptSalesInvoice>();
             // Add more mapping configurations if needed
         }
     }

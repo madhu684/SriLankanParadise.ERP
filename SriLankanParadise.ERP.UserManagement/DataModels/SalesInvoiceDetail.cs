@@ -15,5 +15,9 @@ public partial class SalesInvoiceDetail
 
     public decimal? TotalPrice { get; set; }
 
+    public int? ItemBatchItemMasterId { get; set; }
+
+    public int? ItemBatchBatchId { get; set; }
+
     public virtual SalesInvoice SalesInvoice { get; set; } = null!;
 }
