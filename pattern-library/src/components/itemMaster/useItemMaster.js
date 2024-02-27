@@ -3,16 +3,16 @@ import {
   get_units_by_company_id_api,
   get_categories_by_company_id_api,
   post_item_master_api,
+  get_item_types_by_company_id_api,
 } from "../../services/inventoryApi";
+import { useQuery } from "@tanstack/react-query";
 
 const useItemMaster = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
     unitId: "",
     categoryId: "",
     itemName: "",
-    stockQuantity: "",
-    sellingPrice: "",
-    costPrice: "",
+    itemTypeId: "",
   });
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
@@ -22,6 +22,28 @@ const useItemMaster = ({ onFormSubmit }) => {
   const alertRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
+  //const [itemTypes, setItemTypes] = useState([]);
+
+  const fetchItemTypes = async () => {
+    try {
+      const response = await get_item_types_by_company_id_api(
+        sessionStorage.getItem("companyId")
+      );
+      return response.data.result;
+    } catch (error) {
+      throw new Error("Error fetching itemTypes: " + error.message);
+    }
+  };
+
+  const {
+    data: itemTypes,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["itemTypes"],
+    queryFn: fetchItemTypes,
+  });
 
   const handleInputChange = (field, value) => {
     setFormData({
@@ -33,7 +55,9 @@ const useItemMaster = ({ onFormSubmit }) => {
   useEffect(() => {
     const fetchUnits = async () => {
       try {
-        const response = await get_units_by_company_id_api(1);
+        const response = await get_units_by_company_id_api(
+          sessionStorage.getItem("companyId")
+        );
         setUnitOptions(response.data.result);
       } catch (error) {
         console.error("Error fetching units:", error);
@@ -46,7 +70,9 @@ const useItemMaster = ({ onFormSubmit }) => {
   useEffect(() => {
     const fetchcategories = async () => {
       try {
-        const response = await get_categories_by_company_id_api(1);
+        const response = await get_categories_by_company_id_api(
+          sessionStorage.getItem("companyId")
+        );
         setCategoryOptions(response.data.result);
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -55,6 +81,21 @@ const useItemMaster = ({ onFormSubmit }) => {
 
     fetchcategories();
   }, []);
+
+  // useEffect(() => {
+  //   const fetchItemTypes = async () => {
+  //     try {
+  //       const response = await get_item_types_by_company_id_api(
+  //         sessionStorage.getItem("companyId")
+  //       );
+  //       setItemTypes(response.data.result);
+  //     } catch (error) {
+  //       console.error("Error fetching itemTypes:", error);
+  //     }
+  //   };
+
+  //   fetchItemTypes();
+  // }, []);
 
   useEffect(() => {
     if (submissionStatus != null) {
@@ -108,46 +149,13 @@ const useItemMaster = ({ onFormSubmit }) => {
       formData.itemName
     );
 
-    const isStockQuantityValid = validateField(
-      "stockQuantity",
-      "Stock quantity",
-      formData.stockQuantity,
-      {
-        validationFunction: (quantity) =>
-          /^\d*\.?\d+$/.test(quantity) && parseFloat(quantity) > 0,
-        errorMessage: "Quantity must be a positive numeric value",
-      }
+    const isItemTypeValid = validateField(
+      "itemTypeId",
+      "Item type",
+      formData.itemTypeId
     );
 
-    const isSellingPriceValid = validateField(
-      "sellingPrice",
-      "Selling price",
-      formData.sellingPrice,
-      {
-        validationFunction: (sellingPrice) =>
-          /^\d*\.?\d+$/.test(sellingPrice) && parseFloat(sellingPrice) >= 0,
-        errorMessage: "Selling price must be a positive numeric value",
-      }
-    );
-
-    const isCostPriceValid = validateField(
-      "costPrice",
-      "Cost price",
-      formData.costPrice,
-      {
-        validationFunction: (costPrice) =>
-          /^\d*\.?\d+$/.test(costPrice) && parseFloat(costPrice) >= 0,
-        errorMessage: "Cost price must be a positive numeric value",
-      }
-    );
-    return (
-      isUnitValid &&
-      isCategoryValid &&
-      isItemNameValid &&
-      isStockQuantityValid &&
-      isSellingPriceValid &&
-      isCostPriceValid
-    );
+    return isUnitValid && isCategoryValid && isItemNameValid && isItemTypeValid;
   };
 
   const handleSubmit = async (isSaveAsDraft) => {
@@ -166,13 +174,11 @@ const useItemMaster = ({ onFormSubmit }) => {
           unitId: formData.unitId,
           categoryId: formData.categoryId,
           itemName: formData.itemName,
-          stockQuantity: formData.stockQuantity,
-          sellingPrice: formData.sellingPrice,
-          costPrice: formData.costPrice,
           status: status,
           companyId: sessionStorage.getItem("companyId"),
           createdBy: sessionStorage.getItem("username"),
           createdUserId: sessionStorage.getItem("userId"),
+          itemTypeId: formData.itemTypeId,
           permissionId: 1039,
         };
 
@@ -218,6 +224,10 @@ const useItemMaster = ({ onFormSubmit }) => {
     alertRef,
     loading,
     loadingDraft,
+    itemTypes,
+    isLoading,
+    isError,
+    error,
     handleInputChange,
     handleSubmit,
   };

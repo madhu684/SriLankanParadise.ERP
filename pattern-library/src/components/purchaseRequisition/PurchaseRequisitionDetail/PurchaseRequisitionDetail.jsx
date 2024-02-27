@@ -1,7 +1,7 @@
 import React from "react";
 import { Modal, Button } from "react-bootstrap";
 import usePurchaseRequisitionDetial from "./usePurchaseRequisitionDetail";
-import usePurchaseRequisitionList from "../PurchaseRequisitionList/usePurchaseRequisitionList";
+import usePurchaseRequisitionList from "../purchaseRequisitionList/usePurchaseRequisitionList";
 
 const PurchaseRequisitionDetail = ({
   show,
