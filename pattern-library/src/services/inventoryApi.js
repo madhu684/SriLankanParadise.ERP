@@ -206,3 +206,19 @@ export const get_item_masters_by_user_id_api = async (userId) => {
     throw error;
   }
 };
+
+//item types api
+export const get_item_types_by_company_id_api = async (companyId) => {
+  try {
+    const response = await api.get(
+      `/itemType/GetItemTypesByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

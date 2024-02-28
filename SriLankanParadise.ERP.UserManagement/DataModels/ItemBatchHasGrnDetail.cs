@@ -5,7 +5,7 @@ namespace SriLankanParadise.ERP.UserManagement.DataModels;
 
 public partial class ItemBatchHasGrnDetail
 {
-    public int ItemBatchHasGrnDetail1 { get; set; }
+    public int ItemBatchHasGrnDetailId { get; set; }
 
     public int GrnDetailId { get; set; }
 

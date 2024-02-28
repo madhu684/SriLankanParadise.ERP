@@ -1,7 +1,7 @@
 import React from "react";
 import { Modal, Button } from "react-bootstrap";
 import usePurchaseOrderDetial from "./usePurchaseOrderDetail";
-import usePurchaseOrderList from "../PurchaseOrderList/usePurchaseOrderList";
+import usePurchaseOrderList from "../purchaseOrderList/usePurchaseOrderList";
 
 const PurchaseOrderDetail = ({ show, handleClose, purchaseOrder }) => {
   const { getStatusLabel, getStatusBadgeClass } = usePurchaseOrderList();

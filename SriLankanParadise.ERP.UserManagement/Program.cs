@@ -125,6 +125,16 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IItemMasterService, ItemMasterService>();
 builder.Services.AddScoped<IItemMasterRepository, ItemMasterRepository>();
+builder.Services.AddScoped<IBatchService, BatchService>();
+builder.Services.AddScoped<IBatchRepository, BatchRepository>();
+builder.Services.AddScoped<IItemBatchService, ItemBatchService>();
+builder.Services.AddScoped<IItemBatchRepository, ItemBatchRepository>();
+builder.Services.AddScoped<IBatchHasGrnMasterService, BatchHasGrnMasterService>();
+builder.Services.AddScoped<IBatchHasGrnMasterRepository, BatchHasGrnMasterRepository>();
+builder.Services.AddScoped<IItemBatchHasGrnDetailService, ItemBatchHasGrnDetailService>();
+builder.Services.AddScoped<IItemBatchHasGrnDetailRepository, ItemBatchHasGrnDetailRepository>();
+builder.Services.AddScoped<IItemTypeService, ItemTypeService>();
+builder.Services.AddScoped<IItemTypeRepository, ItemTypeRepository>();
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

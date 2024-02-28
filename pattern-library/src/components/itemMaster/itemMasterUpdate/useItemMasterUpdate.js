@@ -3,6 +3,7 @@ import {
   get_units_by_company_id_api,
   get_categories_by_company_id_api,
   put_item_master_api,
+  get_item_types_by_company_id_api,
 } from "../../../services/inventoryApi";
 
 const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
@@ -10,9 +11,7 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     unitId: "",
     categoryId: "",
     itemName: "",
-    stockQuantity: "",
-    sellingPrice: "",
-    costPrice: "",
+    itemTypeId: "",
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -22,11 +21,14 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
+  const [itemTypes, setItemTypes] = useState([]);
 
   useEffect(() => {
     const fetchUnits = async () => {
       try {
-        const response = await get_units_by_company_id_api(1);
+        const response = await get_units_by_company_id_api(
+          sessionStorage.getItem("companyId")
+        );
         setUnitOptions(response.data.result);
       } catch (error) {
         console.error("Error fetching units:", error);
@@ -39,7 +41,9 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
   useEffect(() => {
     const fetchcategories = async () => {
       try {
-        const response = await get_categories_by_company_id_api(1);
+        const response = await get_categories_by_company_id_api(
+          sessionStorage.getItem("companyId")
+        );
         setCategoryOptions(response.data.result);
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -50,14 +54,27 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
   }, []);
 
   useEffect(() => {
+    const fetchItemTypes = async () => {
+      try {
+        const response = await get_item_types_by_company_id_api(
+          sessionStorage.getItem("companyId")
+        );
+        setItemTypes(response.data.result);
+      } catch (error) {
+        console.error("Error fetching itemTypes:", error);
+      }
+    };
+
+    fetchItemTypes();
+  }, []);
+
+  useEffect(() => {
     const deepCopyItemMaster = JSON.parse(JSON.stringify(itemMaster));
     setFormData({
       unitId: deepCopyItemMaster?.unitId,
       categoryId: deepCopyItemMaster?.categoryId,
       itemName: deepCopyItemMaster?.itemName,
-      stockQuantity: deepCopyItemMaster?.stockQuantity,
-      sellingPrice: deepCopyItemMaster?.sellingPrice,
-      costPrice: deepCopyItemMaster?.costPrice,
+      itemTypeId: deepCopyItemMaster?.itemTypeId,
     });
   }, [itemMaster]);
 
@@ -114,46 +131,13 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       formData.itemName
     );
 
-    const isStockQuantityValid = validateField(
-      "stockQuantity",
-      "Stock quantity",
-      formData.stockQuantity,
-      {
-        validationFunction: (quantity) =>
-          /^\d*\.?\d+$/.test(quantity) && parseFloat(quantity) > 0,
-        errorMessage: "Quantity must be a positive numeric value",
-      }
+    const isItemTypeValid = validateField(
+      "itemTypeId",
+      "Item type",
+      formData.itemTypeId
     );
 
-    const isSellingPriceValid = validateField(
-      "sellingPrice",
-      "Selling price",
-      formData.sellingPrice,
-      {
-        validationFunction: (sellingPrice) =>
-          /^\d*\.?\d+$/.test(sellingPrice) && parseFloat(sellingPrice) >= 0,
-        errorMessage: "Selling price must be a positive numeric value",
-      }
-    );
-
-    const isCostPriceValid = validateField(
-      "costPrice",
-      "Cost price",
-      formData.costPrice,
-      {
-        validationFunction: (costPrice) =>
-          /^\d*\.?\d+$/.test(costPrice) && parseFloat(costPrice) >= 0,
-        errorMessage: "Cost price must be a positive numeric value",
-      }
-    );
-    return (
-      isUnitValid &&
-      isCategoryValid &&
-      isItemNameValid &&
-      isStockQuantityValid &&
-      isSellingPriceValid &&
-      isCostPriceValid
-    );
+    return isUnitValid && isCategoryValid && isItemNameValid && isItemTypeValid;
   };
 
   const handleSubmit = async (isSaveAsDraft) => {
@@ -172,13 +156,11 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
           unitId: formData.unitId,
           categoryId: formData.categoryId,
           itemName: formData.itemName,
-          stockQuantity: formData.stockQuantity,
-          sellingPrice: formData.sellingPrice,
-          costPrice: formData.costPrice,
           status: status,
           companyId: sessionStorage.getItem("companyId"),
           createdBy: sessionStorage.getItem("username"),
           createdUserId: sessionStorage.getItem("userId"),
+          itemTypeId: formData.itemTypeId,
           permissionId: 1040,
         };
 
@@ -234,6 +216,7 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     unitOptions,
     loading,
     loadingDraft,
+    itemTypes,
     handleInputChange,
     handleSubmit,
   };
