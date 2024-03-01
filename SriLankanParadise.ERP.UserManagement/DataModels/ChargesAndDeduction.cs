@@ -31,5 +31,7 @@ public partial class ChargesAndDeduction
 
     public bool? IsApplicableForLineItem { get; set; }
 
+    public int? CompanyId { get; set; }
+
     public virtual ICollection<ChargesAndDeductionApplied> ChargesAndDeductionApplieds { get; set; } = new List<ChargesAndDeductionApplied>();
 }
