@@ -375,6 +375,24 @@
   <data name="PurchaseRequisitionUpdated" xml:space="preserve">
     <value>Purchase requisition updated successfully</value>
   </data>
+  <data name="RequisitionDetailCreated" xml:space="preserve">
+    <value>Requisition detail created successfully</value>
+  </data>
+  <data name="RequisitionMasterApproved" xml:space="preserve">
+    <value>Requisition master approved</value>
+  </data>
+  <data name="RequisitionMasterCreated" xml:space="preserve">
+    <value>Requisition master created successfully</value>
+  </data>
+  <data name="RequisitionMasterNotFound" xml:space="preserve">
+    <value>Requisition master not found</value>
+  </data>
+  <data name="RequisitionMastersNotFound" xml:space="preserve">
+    <value>Requisition masters not found</value>
+  </data>
+  <data name="RequisitionMastersRetrieved" xml:space="preserve">
+    <value>Requisition masters retrieved</value>
+  </data>
   <data name="RolePermissionCreated" xml:space="preserve">
     <value>Role permission created successfully</value>
   </data>

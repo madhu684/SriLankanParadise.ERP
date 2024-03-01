@@ -65,6 +65,40 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
+        public async Task<IEnumerable<ItemMaster>> GetItemMastersByCompanyId(int companyId, string searchQuery, string itemType)
+        {
+            try
+            {
+                // Check if both searchQuery and itemType are provided
+                if (string.IsNullOrEmpty(searchQuery) || string.IsNullOrEmpty(itemType))
+                {
+                    return null;
+                }
+
+                var query = _dbContext.ItemMasters
+                    .Where(im => im.Status == true && im.CompanyId == companyId);
+
+                // Apply search query
+                query = query.Where(im => im.ItemName.Contains(searchQuery));
+
+                // Apply item type filter
+                query = query.Include(im => im.Category)
+                    .Include(im => im.Unit)
+                    .Include(im => im.ItemType)
+                    .Where(im => im.ItemType.Name == itemType);
+
+                var itemMasters = await query.ToListAsync();
+
+                return itemMasters.Any() ? itemMasters : null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+
         public async Task<ItemMaster> GetItemMasterByItemMasterId(int itemMasterId)
         {
             try

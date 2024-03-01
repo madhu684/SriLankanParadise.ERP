@@ -12,6 +12,8 @@
 
         public int? LocationTypeId { get; set; }
 
+        public virtual LocationTypeDto? LocationType { get; set; }
+
         public int? ParentId { get; set; }
     }
 }

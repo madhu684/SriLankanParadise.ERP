@@ -835,6 +835,60 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Requisition detail created successfully.
+        /// </summary>
+        public static string RequisitionDetailCreated {
+            get {
+                return ResourceManager.GetString("RequisitionDetailCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Requisition master approved.
+        /// </summary>
+        public static string RequisitionMasterApproved {
+            get {
+                return ResourceManager.GetString("RequisitionMasterApproved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Requisition master created successfully.
+        /// </summary>
+        public static string RequisitionMasterCreated {
+            get {
+                return ResourceManager.GetString("RequisitionMasterCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Requisition master not found.
+        /// </summary>
+        public static string RequisitionMasterNotFound {
+            get {
+                return ResourceManager.GetString("RequisitionMasterNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Requisition masters not found.
+        /// </summary>
+        public static string RequisitionMastersNotFound {
+            get {
+                return ResourceManager.GetString("RequisitionMastersNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Requisition masters retrieved.
+        /// </summary>
+        public static string RequisitionMastersRetrieved {
+            get {
+                return ResourceManager.GetString("RequisitionMastersRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Role permission created successfully.
         /// </summary>
         public static string RolePermissionCreated {

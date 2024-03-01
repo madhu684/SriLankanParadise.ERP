@@ -19,6 +19,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var locations = await _dbContext.Locations
                     .Where(l => l.CompanyId == companyId)
+                    .Include(l => l.LocationType)
                     .ToListAsync();
                
                 if (locations.Any())

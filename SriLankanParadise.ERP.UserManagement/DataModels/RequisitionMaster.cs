@@ -25,11 +25,17 @@ public partial class RequisitionMaster
 
     public int? CompanyId { get; set; }
 
-    public int? RequestPlacedLocationId { get; set; }
-
     public string? RequisitionType { get; set; }
 
+    public int? RequestedFromLocationId { get; set; }
+
+    public int? RequestedToLocationId { get; set; }
+
     public virtual ICollection<IssueMaster> IssueMasters { get; set; } = new List<IssueMaster>();
+
+    public virtual Location? RequestedFromLocation { get; set; }
+
+    public virtual Location? RequestedToLocation { get; set; }
 
     public virtual ICollection<RequisitionDetail> RequisitionDetails { get; set; } = new List<RequisitionDetail>();
 }

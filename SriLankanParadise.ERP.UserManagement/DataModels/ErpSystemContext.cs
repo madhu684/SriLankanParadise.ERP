@@ -637,6 +637,14 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.RequestedBy).HasMaxLength(50);
             entity.Property(e => e.RequisitionDate).HasColumnType("datetime");
             entity.Property(e => e.RequisitionType).HasMaxLength(50);
+
+            entity.HasOne(d => d.RequestedFromLocation).WithMany(p => p.RequisitionMasterRequestedFromLocations)
+                .HasForeignKey(d => d.RequestedFromLocationId)
+                .HasConstraintName("FK_RequestedFromLocation_RequisitionMaster");
+
+            entity.HasOne(d => d.RequestedToLocation).WithMany(p => p.RequisitionMasterRequestedToLocations)
+                .HasForeignKey(d => d.RequestedToLocationId)
+                .HasConstraintName("FK_RequestedToLocation_RequisitionMaster");
         });
 
         modelBuilder.Entity<Role>(entity =>
