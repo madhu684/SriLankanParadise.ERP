@@ -17,7 +17,7 @@ const TopNav = ({ onToggleSidebar }) => {
       >
         <span className="navbar-toggler-icon"></span>
       </button>
-      <span className="navbar-brand">ERP App</span>
+      <span className="navbar-brand">Enterprise Resource App</span>
     </nav>
   );
 };

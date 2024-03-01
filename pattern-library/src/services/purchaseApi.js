@@ -425,3 +425,90 @@ export const get_company_suppliers_api = async (companyId) => {
     throw error;
   }
 };
+
+//requisition master apis
+export const post_requisition_master_api = async (formData) => {
+  try {
+    const response = await api.post("/requisitionMaster", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_requisitions_masters_api = async () => {
+  try {
+    const response = await api.get("/requisitionMaster", {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_requisition_masters_with_out_drafts_api = async (
+  companyId
+) => {
+  try {
+    const response = await api.get(
+      `/requisitionMaster/GetRequisitionMastersWithoutDraftsByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_requisition_masters_by_user_id_api = async (userId) => {
+  try {
+    const response = await api.get(
+      `/requisitionMaster/GetRequisitionMastersByUserId/${userId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const approve_requisition_master_api = async (
+  requisitionMasterId,
+  approvalData
+) => {
+  try {
+    const response = await api.patch(
+      `/requisitionMaster/approve/${requisitionMasterId}`,
+      approvalData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const post_requisition_detail_api = async (formData) => {
+  try {
+    const response = await api.post("/requisitionDetail", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

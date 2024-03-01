@@ -9,6 +9,7 @@ import ItemMasterList from "../itemMaster/itemMasterList/itemMasterList.jsx";
 import CategoryList from "../category/categoryList/categoryList.jsx";
 import UnitList from "../unit/unitList/unitList.jsx";
 import SalesReceiptList from "../salesReceipt/salesReceiptList/salesReceiptList.jsx";
+import MaterialRequisitionList from "../materialRequisition/materialRequisitionList/materialRequisitionList.jsx";
 
 const useMain = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -85,6 +86,8 @@ const useMain = () => {
         return <UnitList />;
       case "Sales Receipts":
         return <SalesReceiptList />;
+      case "Material Requisitions":
+        return <MaterialRequisitionList />;
       default:
         return null;
     }

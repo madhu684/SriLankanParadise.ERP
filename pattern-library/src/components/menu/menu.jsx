@@ -1,6 +1,7 @@
 import "./menu.css";
 import React from "react";
 import { Navigate } from "react-router-dom";
+import userImage from "../../assets/images/person-circle.svg";
 
 function template() {
   const {
@@ -117,7 +118,7 @@ function template() {
               onClick={this.toggleDropdown}
             >
               <img
-                src=""
+                src={userImage}
                 alt=""
                 width="32"
                 height="32"
