@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { approve_requisition_master_api } from "../../../services/purchaseApi";
 
 const useMaterialRequisitionApproval = ({ onFormSubmit }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
   const [loading, setLoading] = useState(false);
+  const alertRef = useRef(null);
 
   useEffect(() => {
     if (approvalStatus === "approved") {
@@ -12,6 +13,13 @@ const useMaterialRequisitionApproval = ({ onFormSubmit }) => {
       }, 2000);
     }
   }, [approvalStatus, onFormSubmit]);
+
+  useEffect(() => {
+    if (approvalStatus != null) {
+      // Scroll to the success alert when it becomes visible
+      alertRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [approvalStatus]);
 
   const handleApprove = async (requisitionMasterId) => {
     try {
@@ -56,9 +64,10 @@ const useMaterialRequisitionApproval = ({ onFormSubmit }) => {
 
   return {
     approvalStatus,
-    handleApprove,
+    alertRef,
     loading,
     approvalStatus,
+    handleApprove,
   };
 };
 

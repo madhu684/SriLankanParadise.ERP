@@ -1,6 +1,10 @@
 import React from "react";
 import usePurchaseRequisition from "./usePurchaseRequisition";
 import CurrentDateTime from "../currentDateTime/currentDateTime";
+import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
+import LoadingSpinner from "../loadingSpinner/loadingSpinner";
+import ErrorComponent from "../errorComponent/errorComponent";
+import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 
 const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
   const {
@@ -10,20 +14,40 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
     validFields,
     validationErrors,
     alertRef,
+    isError,
+    isLoading,
+    error,
+    loading,
+    loadingDraft,
+    searchTerm,
+    availableItems,
+    isItemsLoading,
+    isItemsError,
+    itemsError,
     handleInputChange,
     handleItemDetailsChange,
     handleSubmit,
-    handleAddItem,
+    handleSelectItem,
     handleRemoveItem,
     handlePrint,
     handleAttachmentChange,
     calculateTotalPrice,
+    setSearchTerm,
   } = usePurchaseRequisition({
     onFormSubmit: () => {
       handleClose();
       handleUpdated();
     },
   });
+  const companyLogoUrl = useCompanyLogoUrl();
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (isError) {
+    return <ErrorComponent error={"Error fetching data"} />;
+  }
 
   return (
     <div className="container mt-4">
@@ -31,13 +55,9 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img
-            src="path/to/your/logo.png"
-            alt="Company Logo"
-            className="img-fluid"
-          />
+          <img src={companyLogoUrl} alt="Company Logo" height={30} />
           <p>
-            Date and Time: <CurrentDateTime />
+            <CurrentDateTime />
           </p>
         </div>
         <h1 className="mt-2 text-center">Purchase Requisition</h1>
@@ -206,58 +226,67 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
               )}
             </div>
             <div className="mb-3">
-              <label htmlFor="deliveryDate" className="form-label">
-                Delivery Date
+              <label htmlFor="expectedDeliveryDate" className="form-label">
+                Expected Delivery Date
               </label>
               <input
                 type="date"
                 className={`form-control ${
-                  validFields.deliveryDate ? "is-valid" : ""
-                } ${validationErrors.deliveryDate ? "is-invalid" : ""}`}
-                id="deliveryDate"
+                  validFields.expectedDeliveryDate ? "is-valid" : ""
+                } ${validationErrors.expectedDeliveryDate ? "is-invalid" : ""}`}
+                id="expectedDeliveryDate"
                 placeholder="Enter delivery date"
-                value={formData.deliveryDate}
+                value={formData.expectedDeliveryDate}
                 onChange={(e) =>
-                  handleInputChange("deliveryDate", e.target.value)
+                  handleInputChange("expectedDeliveryDate", e.target.value)
                 }
                 required
               />
-              {validationErrors.deliveryDate && (
+              {validationErrors.expectedDeliveryDate && (
                 <div className="invalid-feedback">
-                  {validationErrors.deliveryDate}
+                  {validationErrors.expectedDeliveryDate}
                 </div>
               )}
             </div>
             <div className="mb-3">
-              <label htmlFor="deliveryLocation" className="form-label">
-                Delivery Location
+              <label htmlFor="expectedDeliveryLocation" className="form-label">
+                Expected Delivery Location
               </label>
               <select
                 className={`form-select ${
-                  validFields.deliveryLocation ? "is-valid" : ""
-                } ${validationErrors.deliveryLocation ? "is-invalid" : ""}`}
-                id="deliveryLocation"
-                value={formData?.deliveryLocation ?? ""}
+                  validFields.expectedDeliveryLocation ? "is-valid" : ""
+                } ${
+                  validationErrors.expectedDeliveryLocation ? "is-invalid" : ""
+                }`}
+                id="expectedDeliveryLocation"
+                value={formData?.expectedDeliveryLocation ?? ""}
                 onChange={(e) =>
-                  handleInputChange("deliveryLocation", e.target.value)
+                  handleInputChange("expectedDeliveryLocation", e.target.value)
                 }
               >
                 <option value="">Select Location</option>
-                {locations.map((location) => (
-                  <option key={location.locationId} value={location.locationId}>
-                    {location.locationName}
-                  </option>
-                ))}
+                {locations
+                  .filter(
+                    (location) => location.locationType.name === "Warehouse"
+                  )
+                  .map((location) => (
+                    <option
+                      key={location.locationId}
+                      value={location.locationId}
+                    >
+                      {location.locationName}
+                    </option>
+                  ))}
               </select>
-              {validationErrors.deliveryLocation && (
+              {validationErrors.expectedDeliveryLocation && (
                 <div className="invalid-feedback">
-                  {validationErrors.deliveryLocation}
+                  {validationErrors.expectedDeliveryLocation}
                 </div>
               )}
             </div>
             <div className="mb-3">
               <label htmlFor="referenceNumber" className="form-label">
-                Reference Number (if applicable)
+                Reference Number
               </label>
               <input
                 type="text"
@@ -275,61 +304,97 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
 
         {/* Item Details */}
         <h4>3. Item Details</h4>
+        <div className="col-md-5">
+          {/* Item Search */}
+          <div className="mb-3 mt-3">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Search for an item..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {/* Dropdown for filtered items */}
+            {searchTerm && (
+              <div className="dropdown">
+                <ul className="dropdown-menu" style={{ display: "block" }}>
+                  {isItemsLoading ? (
+                    <li className="dropdown-item">
+                      <ButtonLoadingSpinner text="Searching..." />
+                    </li>
+                  ) : isItemsError ? (
+                    <li className="dropdown-item">
+                      Error: {itemsError.message}
+                    </li>
+                  ) : availableItems === null ||
+                    availableItems?.filter(
+                      (item) =>
+                        !formData.itemDetails.some(
+                          (detail) => detail.id === item.itemMasterId
+                        )
+                    ).length === 0 ? (
+                    <li className="dropdown-item">No items found</li>
+                  ) : (
+                    availableItems
+                      ?.filter(
+                        (item) =>
+                          !formData.itemDetails.some(
+                            (detail) => detail.id === item.itemMasterId
+                          )
+                      ) // Filter out items that are already in itemDetails
+                      .map((item) => (
+                        <li key={item.itemMasterId}>
+                          <button
+                            className="dropdown-item"
+                            onClick={() => handleSelectItem(item)}
+                          >
+                            {item.itemName}
+                          </button>
+                        </li>
+                      ))
+                  )}
+                </ul>
+              </div>
+            )}
+
+            {!formData.itemDetails.length > 0 && (
+              <div className="mb-3">
+                <small className="form-text text-muted">
+                  Please search for an item and add it
+                </small>
+              </div>
+            )}
+          </div>
+        </div>
+
         {formData.itemDetails.length > 0 && (
           <div className="table-responsive mb-2">
             <table className="table mt-2">
               <thead>
                 <tr>
-                  <th>Item Category</th>
-                  <th>Item ID</th>
-                  <th>Name</th>
+                  <th>Item Name</th>
+                  <th>Unit</th>
                   <th>Quantity</th>
                   <th>Unit Price</th>
-                  <th>Total Price</th>
-                  <th>Action</th>
+                  <th className="text-end">Total Price</th>
+                  <th className="text-end">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {formData.itemDetails.map((item, index) => (
                   <tr key={index}>
-                    <td>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={item.category}
-                        onChange={(e) =>
-                          handleItemDetailsChange(
-                            index,
-                            "category",
-                            e.target.value
-                          )
-                        }
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={item.id}
-                        onChange={(e) =>
-                          handleItemDetailsChange(index, "id", e.target.value)
-                        }
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={item.name}
-                        onChange={(e) =>
-                          handleItemDetailsChange(index, "name", e.target.value)
-                        }
-                      />
-                    </td>
+                    <td>{item.name}</td>
+                    <td>{item.unit}</td>
                     <td>
                       <input
                         type="number"
-                        className="form-control"
+                        className={`form-control ${
+                          validFields[`quantity_${index}`] ? "is-valid" : ""
+                        } ${
+                          validationErrors[`quantity_${index}`]
+                            ? "is-invalid"
+                            : ""
+                        }`}
                         value={item.quantity}
                         onChange={(e) =>
                           handleItemDetailsChange(
@@ -339,6 +404,11 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
                           )
                         }
                       />
+                      {validationErrors[`quantity_${index}`] && (
+                        <div className="invalid-feedback">
+                          {validationErrors[`quantity_${index}`]}
+                        </div>
+                      )}
                     </td>
                     <td>
                       <input
@@ -354,8 +424,8 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
                         }
                       />
                     </td>
-                    <td>{item.totalPrice.toFixed(2)}</td>
-                    <td>
+                    <td className="text-end">{item.totalPrice.toFixed(2)}</td>
+                    <td className="text-end">
                       <button
                         type="button"
                         className="btn btn-outline-danger"
@@ -369,21 +439,17 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
               </tbody>
               <tfoot>
                 <tr>
-                  <td colSpan="4"></td>
-                  <th>Total Amount</th>
-                  <td colSpan="2">{calculateTotalPrice().toFixed(2)}</td>
+                  <td colSpan="3"></td>
+                  <th className="text-end">Total Amount</th>
+                  <td className="text-end">
+                    {calculateTotalPrice().toFixed(2)}
+                  </td>
+                  <td></td>
                 </tr>
               </tfoot>
             </table>
           </div>
         )}
-        <button
-          type="button"
-          className="btn btn-outline-primary mb-3"
-          onClick={handleAddItem}
-        >
-          Add Item
-        </button>
 
         {/* Attachments */}
         <h4>4. Attachments</h4>
@@ -414,20 +480,36 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
             type="button"
             className="btn btn-primary me-2"
             onClick={() => handleSubmit(false)}
+            disabled={
+              !formData.itemDetails.length > 0 ||
+              loading ||
+              loadingDraft ||
+              submissionStatus !== null
+            }
           >
-            Submit
+            {loading && submissionStatus === null ? (
+              <ButtonLoadingSpinner text="Submitting..." />
+            ) : (
+              "Submit"
+            )}
           </button>
           <button
             type="button"
             className="btn btn-secondary me-2"
             onClick={() => handleSubmit(true)}
+            disabled={loading || loadingDraft || submissionStatus !== null}
           >
-            Save as Draft
+            {loadingDraft && submissionStatus === null ? (
+              <ButtonLoadingSpinner text="Saving as Draft..." />
+            ) : (
+              "Save as Draft"
+            )}
           </button>
           <button
             type="button"
             className="btn btn-success me-2"
             onClick={handlePrint}
+            disabled={loading || loadingDraft || submissionStatus !== null}
           >
             Print
           </button>
@@ -435,6 +517,7 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
             type="button"
             className="btn btn-danger"
             onClick={handleClose}
+            disabled={loading || loadingDraft || submissionStatus !== null}
           >
             Cancel
           </button>

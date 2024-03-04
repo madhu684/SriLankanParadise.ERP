@@ -44,7 +44,7 @@ const MaterialRequisitionList = () => {
   } = useMaterialRequisitionList();
 
   if (error || isPermissionsError) {
-    return <ErrorComponent error={error || permissionError} />;
+    return <ErrorComponent error={error || permissionError.message} />;
   }
 
   if (
@@ -126,7 +126,7 @@ const MaterialRequisitionList = () => {
               </th>
               <th>ID</th>
               <th>Requested By</th>
-              <th>Date & Time</th>
+              <th>MRN Date</th>
               <th>Status</th>
               <th>Details</th>
             </tr>

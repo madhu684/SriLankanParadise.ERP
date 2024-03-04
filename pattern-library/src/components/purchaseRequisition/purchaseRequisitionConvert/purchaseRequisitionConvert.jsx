@@ -1,6 +1,7 @@
 import React from "react";
 import usePurchaseRequisitionConvert from "./usePurchaseRequisitionConvert";
 import CurrentDateTime from "../../currentDateTime/currentDateTime";
+import useCompanyLogoUrl from "../../companyLogo/useCompanyLogoUrl";
 
 const PurchaseRequisitionConvert = ({
   handleClose,
@@ -29,19 +30,17 @@ const PurchaseRequisitionConvert = ({
     },
   });
 
+  const companyLogoUrl = useCompanyLogoUrl();
+
   return (
     <div className="container mt-4">
       {/* Header */}
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img
-            src="path/to/your/logo.png"
-            alt="Company Logo"
-            className="img-fluid"
-          />
+          <img src={companyLogoUrl} alt="Company Logo" height={30} />
           <p>
-            Date and Time: <CurrentDateTime />
+            <CurrentDateTime />
           </p>
         </div>
         <h1 className="mt-2 text-center">Convert Purchase Requisition</h1>
@@ -165,31 +164,32 @@ const PurchaseRequisitionConvert = ({
             <table className="table">
               <thead>
                 <tr>
-                  <th>Item Category</th>
-                  <th>Item ID</th>
-                  <th>Name</th>
+                  <th>Item Name</th>
+                  <th>Unit</th>
                   <th>Quantity</th>
                   <th>Unit Price</th>
-                  <th>Total Price</th>
+                  <th className="text-end">Total Price</th>
                 </tr>
               </thead>
               <tbody>
                 {formData.itemDetails.map((item, index) => (
                   <tr key={index}>
-                    <td>{item.itemCategory}</td>
-                    <td>{item.itemId}</td>
-                    <td>{item.name}</td>
+                    <td>{item.itemMaster?.itemName}</td>
+                    <td>{item.itemMaster?.unit.unitName}</td>
                     <td>{item.quantity}</td>
-                    <td>{item.unitPrice}</td>
-                    <td>{item.totalPrice.toFixed(2)}</td>
+                    <td>{item.unitPrice.toFixed(2)}</td>
+                    <td className="text-end">{item.totalPrice.toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
                 <tr>
-                  <td colSpan="4"></td>
+                  <td colSpan="3"></td>
                   <th>Total Amount</th>
-                  <td colSpan="2">{calculateTotalAmount().toFixed(2)}</td>
+                  <td className="text-end">
+                    {calculateTotalAmount().toFixed(2)}
+                  </td>
+                  <td></td>
                 </tr>
               </tfoot>
             </table>

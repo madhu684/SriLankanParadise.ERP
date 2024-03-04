@@ -25,6 +25,8 @@ const PurchaseRequisitionList = () => {
     showUpdatePRForm,
     PRDetail,
     showConvertPRForm,
+    isPermissionsError,
+    permissionError,
     areAnySelectedRowsPending,
     areAnySelectedRowsApproved,
     setSelectedRows,
@@ -47,8 +49,8 @@ const PurchaseRequisitionList = () => {
     setShowConvertPRForm,
   } = usePurchaseRequisitionList();
 
-  if (error) {
-    return <ErrorComponent error={error} />;
+  if (error || isPermissionsError) {
+    return <ErrorComponent error={error || permissionError.message} />;
   }
 
   if (
@@ -126,6 +128,8 @@ const PurchaseRequisitionList = () => {
             </button>
           )}
           {hasPermission("Approve Purchase Requisition") &&
+            selectedRowData[0]?.requestedUserId !==
+              parseInt(sessionStorage.getItem("userId")) &&
             isAnyRowSelected &&
             areAnySelectedRowsPending(selectedRows) && (
               <button
@@ -164,7 +168,7 @@ const PurchaseRequisitionList = () => {
               </th>
               <th>ID</th>
               <th>Requested By</th>
-              <th>Department</th>
+              <th>Expected Delivery Date</th>
               <th>Status</th>
               <th>Details</th>
             </tr>
@@ -181,7 +185,7 @@ const PurchaseRequisitionList = () => {
                 </td>
                 <td>{pr.purchaseRequisitionId}</td>
                 <td>{pr.requestedBy}</td>
-                <td>{pr.department}</td>
+                <td>{pr.expectedDeliveryDate?.split("T")[0]}</td>
                 <td>
                   <span
                     className={`badge rounded-pill ${getStatusBadgeClass(

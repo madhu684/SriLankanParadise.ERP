@@ -15,7 +15,6 @@ import PurchaseRequisitionList from "./components/purchaseRequisition/purchaseRe
 import ItemMaster from "./components/itemMaster/itemMaster";
 import Category from "./components/category/category";
 import Unit from "./components/unit/unit";
-import MaterialRequisition from "./components/materialRequisition/materialRequisition";
 
 const Routers = () => {
   return (
@@ -41,7 +40,6 @@ const Routers = () => {
         <Route path="/itemmaster" element={<ItemMaster />} />
         <Route path="/category" element={<Category />} />
         <Route path="/unit" element={<Unit />} />
-        <Route path="/mrn" element={<MaterialRequisition />} />
       </Routes>
     </Router>
   );

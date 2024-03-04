@@ -12,7 +12,7 @@ const MaterialRequisitionApproval = ({
   handleApproved,
   materialRequisition,
 }) => {
-  const { approvalStatus, handleApprove, loading } =
+  const { approvalStatus, alertRef, handleApprove, loading } =
     useMaterialRequisitionApproval({
       onFormSubmit: () => {
         handleClose();
@@ -98,6 +98,7 @@ const MaterialRequisitionApproval = ({
             ))}
           </tbody>
         </table>
+        <div ref={alertRef}></div>
         {approvalStatus === "approved" && (
           <div
             className="alert alert-success alert-dismissible fade show mb-3"

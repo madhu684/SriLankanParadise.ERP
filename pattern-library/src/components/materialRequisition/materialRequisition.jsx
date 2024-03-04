@@ -45,7 +45,7 @@ const MaterialRequisition = ({ handleClose, handleUpdated }) => {
   }
 
   if (isError) {
-    return <ErrorComponent error={error} />;
+    return <ErrorComponent error={"Error fetching data"} />;
   }
 
   return (

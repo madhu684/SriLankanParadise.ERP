@@ -219,12 +219,13 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
     try {
       const status = isSaveAsDraft ? 0 : 1;
 
-      setLoading(true);
       // Get the current date and time in UTC timezone in the specified format
       const requisitionDate = new Date().toISOString();
 
       const isFormValid = validateForm(isSaveAsDraft);
       if (isFormValid) {
+        setLoading(true);
+
         const materialRequisitionData = {
           requestedUserId: sessionStorage.getItem("userId"),
           requestedBy: sessionStorage.getItem("username"),
