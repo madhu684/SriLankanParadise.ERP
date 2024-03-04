@@ -69,8 +69,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             try
             {
-                // Check if both searchQuery and itemType are provided
-                if (string.IsNullOrEmpty(searchQuery) || string.IsNullOrEmpty(itemType))
+                // Check if searchQuery is provided
+                if (string.IsNullOrEmpty(searchQuery))
                 {
                     return null;
                 }
@@ -81,11 +81,20 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 // Apply search query
                 query = query.Where(im => im.ItemName.Contains(searchQuery));
 
-                // Apply item type filter
-                query = query.Include(im => im.Category)
-                    .Include(im => im.Unit)
-                    .Include(im => im.ItemType)
-                    .Where(im => im.ItemType.Name == itemType);
+                // Apply item type filter conditionally
+                if (!string.IsNullOrEmpty(itemType) && itemType.ToUpper() != "ALL")
+                {
+                    query = query.Include(im => im.Category)
+                        .Include(im => im.Unit)
+                        .Include(im => im.ItemType)
+                        .Where(im => im.ItemType.Name == itemType);
+                }
+                else
+                {
+                    query = query.Include(im => im.Category)
+                        .Include(im => im.Unit)
+                        .Include(im => im.ItemType);
+                }
 
                 var itemMasters = await query.ToListAsync();
 
@@ -96,6 +105,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
 
 
 

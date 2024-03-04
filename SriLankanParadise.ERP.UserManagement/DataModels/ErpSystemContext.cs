@@ -573,19 +573,21 @@ public partial class ErpSystemContext : DbContext
             entity.ToTable("PurchaseRequisition");
 
             entity.Property(e => e.ApprovedBy).HasMaxLength(50);
-            entity.Property(e => e.ApprovedDate).HasColumnType("date");
+            entity.Property(e => e.ApprovedDate).HasColumnType("datetime");
             entity.Property(e => e.ContactNo).HasMaxLength(12);
-            entity.Property(e => e.DeliveryDate).HasColumnType("date");
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
             entity.Property(e => e.Department).HasMaxLength(50);
             entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.ExpectedDeliveryDate).HasColumnType("date");
+            entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
             entity.Property(e => e.PurposeOfRequest).HasMaxLength(250);
             entity.Property(e => e.ReferenceNo).HasMaxLength(50);
             entity.Property(e => e.RequestedBy).HasMaxLength(50);
             entity.Property(e => e.RequisitionDate).HasColumnType("date");
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
 
-            entity.HasOne(d => d.DeliveryLocationNavigation).WithMany(p => p.PurchaseRequisitions)
-                .HasForeignKey(d => d.DeliveryLocation)
+            entity.HasOne(d => d.ExpectedDeliveryLocationNavigation).WithMany(p => p.PurchaseRequisitions)
+                .HasForeignKey(d => d.ExpectedDeliveryLocation)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PurchaseRequisition_Location");
         });
@@ -596,11 +598,12 @@ public partial class ErpSystemContext : DbContext
 
             entity.ToTable("PurchaseRequisitionDetail");
 
-            entity.Property(e => e.ItemCategory).HasMaxLength(50);
-            entity.Property(e => e.ItemId).HasMaxLength(50);
-            entity.Property(e => e.Name).HasMaxLength(50);
             entity.Property(e => e.TotalPrice).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
+
+            entity.HasOne(d => d.ItemMaster).WithMany(p => p.PurchaseRequisitionDetails)
+                .HasForeignKey(d => d.ItemMasterId)
+                .HasConstraintName("FK_PurchaseRequisitionDetail_ItemMaster");
 
             entity.HasOne(d => d.PurchaseRequisition).WithMany(p => p.PurchaseRequisitionDetails)
                 .HasForeignKey(d => d.PurchaseRequisitionId)
