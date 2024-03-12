@@ -1,6 +1,11 @@
 import React from "react";
 import usePurchaseOrder from "./usePurchaseOrder";
 import CurrentDateTime from "../currentDateTime/currentDateTime";
+import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
+import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
+import LoadingSpinner from "../loadingSpinner/loadingSpinner";
+import ErrorComponent from "../errorComponent/errorComponent";
+import Supplier from "../supplier/supplier";
 
 const PurchaseOrder = ({ handleClose, handleUpdated }) => {
   const {
@@ -11,6 +16,25 @@ const PurchaseOrder = ({ handleClose, handleUpdated }) => {
     validationErrors,
     referenceNo,
     alertRef,
+    searchTerm,
+    availableItems,
+    isItemsLoading,
+    isItemsError,
+    itemsError,
+    isLoading,
+    isError,
+    error,
+    supplierSearchTerm,
+    showCreateSupplierMoalInParent,
+    showCreateSupplierModal,
+    chargesAndDeductions,
+    isLoadingchargesAndDeductions,
+    ischargesAndDeductionsError,
+    isLoadingTransactionTypes,
+    isTransactionTypesError,
+    transactionTypesError,
+    loading,
+    loadingDraft,
     handleInputChange,
     handleSupplierChange,
     handleItemDetailsChange,
@@ -19,6 +43,17 @@ const PurchaseOrder = ({ handleClose, handleUpdated }) => {
     handleAddItem,
     handleRemoveItem,
     handlePrint,
+    calculateSubTotal,
+    setSearchTerm,
+    handleSelectItem,
+    handleSelectSupplier,
+    setSupplierSearchTerm,
+    handleResetSupplier,
+    handleCloseCreateSupplierModal,
+    handleAddSupplier,
+    handleShowCreateSupplierModal,
+    renderColumns,
+    renderSubColumns,
     calculateTotalAmount,
   } = usePurchaseOrder({
     onFormSubmit: () => {
@@ -27,19 +62,25 @@ const PurchaseOrder = ({ handleClose, handleUpdated }) => {
     },
   });
 
+  const companyLogoUrl = useCompanyLogoUrl();
+
+  if (isLoading || isLoadingchargesAndDeductions || isLoadingTransactionTypes) {
+    return <LoadingSpinner />;
+  }
+
+  if (isError || ischargesAndDeductionsError || transactionTypesError) {
+    return <ErrorComponent error={"Error fetching data"} />;
+  }
+
   return (
     <div className="container mt-4">
       {/* Header */}
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img
-            src="path/to/your/logo.png"
-            alt="Company Logo"
-            className="img-fluid"
-          />
+          <img src={companyLogoUrl} alt="Company Logo" height={30} />
           <p>
-            Date and Time: <CurrentDateTime />
+            <CurrentDateTime />
           </p>
         </div>
         <h1 className="mt-2 text-center">Purchase Order</h1>
@@ -69,38 +110,143 @@ const PurchaseOrder = ({ handleClose, handleUpdated }) => {
           <div className="col-md-5">
             {/* Supplier Information */}
             <h4>1. Supplier Information</h4>
-            <div className="mb-3 mt-3">
+            <div className="mb-1 mt-3">
               <label htmlFor="supplierId" className="form-label">
-                Supplier Name
+                Supplier
               </label>
-              <select
-                className={`form-select ${
-                  validFields.supplierId ? "is-valid" : ""
-                } ${validationErrors.supplierId ? "is-invalid" : ""}`}
-                id="supplierId"
-                onChange={(e) => handleSupplierChange(e.target.value)}
-                required
-              >
-                <option value="">Select Supplier</option>
-                {suppliers.map((supplier) => (
-                  <option key={supplier.supplierId} value={supplier.supplierId}>
-                    {supplier.supplierName}
-                  </option>
-                ))}
-              </select>
-              {validationErrors.supplierId && (
-                <div className="invalid-feedback">
-                  {validationErrors.supplierId}
+              {formData.selectedSupplier === "" && (
+                <div className="mb-3 position-relative">
+                  <div className="input-group">
+                    <span className="input-group-text bg-transparent ">
+                      <i className="bi bi-search"></i>
+                    </span>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        validFields.supplierId ? "is-valid" : ""
+                      } ${validationErrors.supplierId ? "is-invalid" : ""}`}
+                      placeholder="Search for a supplier..."
+                      value={supplierSearchTerm}
+                      onChange={(e) => setSupplierSearchTerm(e.target.value)}
+                      autoFocus={false}
+                    />
+                    {supplierSearchTerm && (
+                      <span
+                        className="input-group-text bg-transparent"
+                        style={{
+                          cursor: "pointer",
+                        }}
+                        onClick={() => setSupplierSearchTerm("")}
+                      >
+                        <i className="bi bi-x"></i>
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Dropdown for filtered suppliers */}
+                  {supplierSearchTerm && (
+                    <div className="dropdown" style={{ width: "100%" }}>
+                      <ul
+                        className="dropdown-menu"
+                        style={{
+                          display: "block",
+                          width: "100%",
+                          maxHeight: "200px",
+                          overflowY: "auto",
+                        }}
+                      >
+                        {suppliers
+                          .filter(
+                            (supplier) =>
+                              supplier.supplierName
+                                .toLowerCase()
+                                .includes(supplierSearchTerm.toLowerCase()) ||
+                              supplier.phone
+                                .replace(/\s/g, "")
+                                .includes(supplierSearchTerm.replace(/\s/g, ""))
+                          )
+                          .map((supplier) => (
+                            <li key={supplier.supplierId}>
+                              <button
+                                className="dropdown-item"
+                                onClick={() => handleSelectSupplier(supplier)}
+                              >
+                                <span className="me-3">
+                                  <i className="bi bi-shop"></i>
+                                </span>{" "}
+                                {supplier?.supplierName} - {supplier?.phone}
+                              </button>
+                            </li>
+                          ))}
+                        {suppliers.filter(
+                          (supplier) =>
+                            supplier.supplierName
+                              .toLowerCase()
+                              .includes(supplierSearchTerm.toLowerCase()) ||
+                            supplier.phone
+                              .replace(/\s/g, "")
+                              .includes(supplierSearchTerm.replace(/\s/g, ""))
+                        ).length === 0 && (
+                          <>
+                            <li className="dropdown-item text-center">
+                              <span className="me-3">
+                                <i className="bi bi-emoji-frown"></i>
+                              </span>
+                              No suppliers found
+                            </li>
+                            <li className="dropdown-item disabled text-center">
+                              If the supplier is not found, you can add a new
+                              one.
+                            </li>
+                            <div className="d-flex justify-content-center">
+                              <button
+                                type="button"
+                                className="btn btn-outline-primary mx-3 mt-2 mb-2 "
+                                onClick={handleShowCreateSupplierModal}
+                              >
+                                Add New Supplier
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </ul>
+                    </div>
+                  )}
+                  {formData.selectedSupplier === "" && (
+                    <div className="mb-3">
+                      <small className="form-text text-muted">
+                        {validationErrors.supplierId && (
+                          <div className="text-danger mb-1">
+                            {validationErrors.supplierId}
+                          </div>
+                        )}
+                        Please search for a supplier and select it
+                      </small>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
             {/* Additional Supplier Information */}
             {formData.selectedSupplier && (
-              <div className="mb-3">
-                <p>Contact Person: {formData.selectedSupplier.contactPerson}</p>
-                <p>Phone: {formData.selectedSupplier.phone}</p>
-                <p>Email: {formData.selectedSupplier.email}</p>
+              <div className="card mb-3">
+                <div className="card-header">Selected Supplier</div>
+                <div className="card-body">
+                  <p>Supplier Name: {formData.selectedSupplier.supplierName}</p>
+                  <p>
+                    Contact Person: {formData.selectedSupplier.contactPerson}
+                  </p>
+                  <p>Phone: {formData.selectedSupplier.phone}</p>
+                  <p>Email: {formData.selectedSupplier.email}</p>
+                  <button
+                    type="button"
+                    className="btn btn-outline-danger float-end"
+                    onClick={handleResetSupplier}
+                  >
+                    Reset Supplier
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -121,6 +267,7 @@ const PurchaseOrder = ({ handleClose, handleUpdated }) => {
                 placeholder="Enter order date"
                 value={formData.orderDate}
                 onChange={(e) => handleInputChange("orderDate", e.target.value)}
+                disabled
                 required
               />
               {validationErrors.orderDate && (
@@ -129,89 +276,141 @@ const PurchaseOrder = ({ handleClose, handleUpdated }) => {
                 </div>
               )}
             </div>
-            <div className="mb-3">
-              <label htmlFor="deliveryDate" className="form-label">
-                Delivery Date
-              </label>
-              <input
-                type="date"
-                className={`form-control ${
-                  validFields.deliveryDate ? "is-valid" : ""
-                } ${validationErrors.deliveryDate ? "is-invalid" : ""}`}
-                id="deliveryDate"
-                placeholder="Enter delivery date"
-                value={formData.deliveryDate}
-                onChange={(e) =>
-                  handleInputChange("deliveryDate", e.target.value)
-                }
-                required
-              />
-              {validationErrors.deliveryDate && (
-                <div className="invalid-feedback">
-                  {validationErrors.deliveryDate}
+          </div>
+        </div>
+
+        <div className="row mb-3 d-flex justify-content-between">
+          <div className="col-md-5">
+            {/* Item Details */}
+            <h4>3. Item Details</h4>
+            {/* Item Search */}
+            <div className="mb-0 mt-3">
+              <div className="input-group">
+                <span className="input-group-text bg-transparent">
+                  <i className="bi bi-search"></i>
+                </span>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Search for an item..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                {searchTerm && (
+                  <span
+                    className="input-group-text bg-transparent"
+                    style={{
+                      cursor: "pointer",
+                    }}
+                    onClick={() => setSearchTerm("")}
+                  >
+                    <i className="bi bi-x"></i>
+                  </span>
+                )}
+              </div>
+
+              {/* Dropdown for filtered items */}
+              {searchTerm && (
+                <div className="dropdown" style={{ width: "100%" }}>
+                  <ul
+                    className="dropdown-menu"
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      maxHeight: "200px",
+                      overflowY: "auto",
+                    }}
+                  >
+                    {isItemsLoading ? (
+                      <li className="dropdown-item">
+                        <ButtonLoadingSpinner text="Searching..." />
+                      </li>
+                    ) : isItemsError ? (
+                      <li className="dropdown-item">
+                        Error: {itemsError.message}
+                      </li>
+                    ) : availableItems === null ||
+                      availableItems?.filter(
+                        (item) =>
+                          !formData.itemDetails.some(
+                            (detail) => detail.id === item.itemMasterId
+                          )
+                      ).length === 0 ? (
+                      <li className="dropdown-item">
+                        <span className="me-3">
+                          <i className="bi bi-emoji-frown"></i>
+                        </span>
+                        No items found
+                      </li>
+                    ) : (
+                      availableItems
+                        ?.filter(
+                          (item) =>
+                            !formData.itemDetails.some(
+                              (detail) => detail.id === item.itemMasterId
+                            )
+                        ) // Filter out items that are already in itemDetails
+                        .map((item) => (
+                          <li key={item.itemMasterId}>
+                            <button
+                              className="dropdown-item"
+                              onClick={() => handleSelectItem(item)}
+                            >
+                              <span className="me-3">
+                                <i className="bi bi-cart4"></i>
+                              </span>{" "}
+                              {item.itemName}
+                            </button>
+                          </li>
+                        ))
+                    )}
+                  </ul>
+                </div>
+              )}
+
+              {!formData.itemDetails.length > 0 && (
+                <div className="mb-3">
+                  <small className="form-text text-muted">
+                    Please search for an item and add it
+                  </small>
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Item Details */}
-        <h4>3. Item Details</h4>
         {formData.itemDetails.length > 0 && (
           <div className="table-responsive mb-2">
-            <table className="table">
+            <table
+              className="table mt-0"
+              style={{ minWidth: "1000px", overflowX: "auto" }}
+            >
               <thead>
                 <tr>
-                  <th>Item Category</th>
-                  <th>Item ID</th>
-                  <th>Name</th>
+                  <th>Item Name</th>
+                  <th>Unit</th>
                   <th>Quantity</th>
                   <th>Unit Price</th>
-                  <th>Total Price</th>
-                  <th>Action</th>
+                  {renderColumns()}
+                  <th className="text-end">Total Price</th>
+                  <th className="text-end">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {formData.itemDetails.map((item, index) => (
                   <tr key={index}>
-                    <td>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={item.category}
-                        onChange={(e) =>
-                          handleItemDetailsChange(
-                            index,
-                            "category",
-                            e.target.value
-                          )
-                        }
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={item.id}
-                        onChange={(e) =>
-                          handleItemDetailsChange(index, "id", e.target.value)
-                        }
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={item.name}
-                        onChange={(e) =>
-                          handleItemDetailsChange(index, "name", e.target.value)
-                        }
-                      />
-                    </td>
+                    <td>{item.name}</td>
+                    <td>{item.unit}</td>
                     <td>
                       <input
                         type="number"
-                        className="form-control"
+                        className={`form-control ${
+                          validFields[`quantity_${index}`] ? "is-valid" : ""
+                        } ${
+                          validationErrors[`quantity_${index}`]
+                            ? "is-invalid"
+                            : ""
+                        }`}
                         value={item.quantity}
                         onChange={(e) =>
                           handleItemDetailsChange(
@@ -221,11 +420,22 @@ const PurchaseOrder = ({ handleClose, handleUpdated }) => {
                           )
                         }
                       />
+                      {validationErrors[`quantity_${index}`] && (
+                        <div className="invalid-feedback">
+                          {validationErrors[`quantity_${index}`]}
+                        </div>
+                      )}
                     </td>
                     <td>
                       <input
                         type="number"
-                        className="form-control"
+                        className={`form-control ${
+                          validFields[`unitPrice_${index}`] ? "is-valid" : ""
+                        } ${
+                          validationErrors[`unitPrice_${index}`]
+                            ? "is-invalid"
+                            : ""
+                        }`}
                         value={item.unitPrice}
                         onChange={(e) =>
                           handleItemDetailsChange(
@@ -235,9 +445,45 @@ const PurchaseOrder = ({ handleClose, handleUpdated }) => {
                           )
                         }
                       />
+                      {validationErrors[`unitPrice_${index}`] && (
+                        <div className="invalid-feedback">
+                          {validationErrors[`unitPrice_${index}`]}
+                        </div>
+                      )}
                     </td>
-                    <td>{item.totalPrice.toFixed(2)}</td>
-                    <td>
+                    {item.chargesAndDeductions.map((charge, chargeIndex) => (
+                      <td key={chargeIndex}>
+                        <input
+                          className="form-control"
+                          type="number"
+                          value={charge.value}
+                          onChange={(e) => {
+                            let newValue = parseFloat(e.target.value);
+
+                            // If the entered value is not a valid number, set it to 0
+                            if (isNaN(newValue)) {
+                              newValue = 0;
+                            } else {
+                              // If the charge is a percentage, ensure the value is between 0 and 100
+                              if (charge.isPercentage) {
+                                newValue = Math.min(100, Math.max(0, newValue)); // Clamp the value between 0 and 100
+                              } else {
+                                // For non-percentage charges, ensure the value is positive
+                                newValue = Math.max(0, newValue);
+                              }
+                            }
+
+                            handleItemDetailsChange(
+                              index,
+                              `chargesAndDeductions_${chargeIndex}_value`,
+                              newValue
+                            );
+                          }}
+                        />
+                      </td>
+                    ))}
+                    <td className="text-end">{item.totalPrice.toFixed(2)}</td>
+                    <td className="text-end">
                       <button
                         type="button"
                         className="btn btn-outline-danger"
@@ -251,22 +497,37 @@ const PurchaseOrder = ({ handleClose, handleUpdated }) => {
               </tbody>
               <tfoot>
                 <tr>
-                  <td colSpan="4"></td>
+                  <td
+                    colSpan={
+                      4 +
+                      formData.itemDetails[0].chargesAndDeductions.length -
+                      1
+                    }
+                  ></td>
+                  <th>Sub Total</th>
+                  <td className="text-end">{calculateSubTotal().toFixed(2)}</td>
+                  <td></td>
+                </tr>
+                {renderSubColumns()}
+
+                <tr>
+                  <td
+                    colSpan={
+                      4 +
+                      formData.itemDetails[0].chargesAndDeductions.length -
+                      1
+                    }
+                  ></td>
                   <th>Total Amount</th>
-                  <td colSpan="2">{calculateTotalAmount().toFixed(2)}</td>
+                  <td className="text-end">
+                    {calculateTotalAmount().toFixed(2)}
+                  </td>
+                  <td></td>
                 </tr>
               </tfoot>
             </table>
           </div>
         )}
-
-        <button
-          type="button"
-          className="btn btn-outline-primary mb-3"
-          onClick={handleAddItem}
-        >
-          Add Item
-        </button>
 
         {/* Attachments */}
         <h4>4. Attachments</h4>
@@ -296,23 +557,37 @@ const PurchaseOrder = ({ handleClose, handleUpdated }) => {
             type="button"
             className="btn btn-primary me-2"
             onClick={() => handleSubmit(false)}
+            disabled={
+              !formData.itemDetails.length > 0 ||
+              loading ||
+              loadingDraft ||
+              submissionStatus !== null
+            }
           >
-            Submit
+            {loading && submissionStatus === null ? (
+              <ButtonLoadingSpinner text="Submitting..." />
+            ) : (
+              "Submit"
+            )}
           </button>
           <button
             type="button"
             className="btn btn-secondary me-2"
             onClick={() => handleSubmit(true)}
+            disabled={loading || loadingDraft || submissionStatus !== null}
           >
-            Save as Draft
+            {loadingDraft && submissionStatus === null ? (
+              <ButtonLoadingSpinner text="Saving as Draft..." />
+            ) : (
+              "Save as Draft"
+            )}
           </button>
-          {/* <button type="button" className="btn btn-info me-2">
-              View History
-            </button> */}
+
           <button
             type="button"
             className="btn btn-success me-2"
             onClick={handlePrint}
+            disabled={loading || loadingDraft || submissionStatus !== null}
           >
             Print
           </button>
@@ -320,11 +595,19 @@ const PurchaseOrder = ({ handleClose, handleUpdated }) => {
             type="button"
             className="btn btn-danger"
             onClick={handleClose}
+            disabled={loading || loadingDraft || submissionStatus !== null}
           >
             Cancel
           </button>
         </div>
       </form>
+      {showCreateSupplierMoalInParent && (
+        <Supplier
+          show={showCreateSupplierModal}
+          handleClose={handleCloseCreateSupplierModal}
+          handleAddSupplier={handleAddSupplier}
+        />
+      )}
     </div>
   );
 };

@@ -322,8 +322,16 @@ const PurchaseRequisitionUpdate = ({
             />
             {/* Dropdown for filtered items */}
             {searchTerm && (
-              <div className="dropdown">
-                <ul className="dropdown-menu" style={{ display: "block" }}>
+              <div className="dropdown" style={{ width: "100%" }}>
+                <ul
+                  className="dropdown-menu"
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    maxHeight: "200px",
+                    overflowY: "auto",
+                  }}
+                >
                   {isItemsLoading ? (
                     <li className="dropdown-item">
                       <ButtonLoadingSpinner text="Searching..." />

@@ -426,6 +426,18 @@ export const get_company_suppliers_api = async (companyId) => {
   }
 };
 
+export const post_supplier_api = async (formData) => {
+  try {
+    const response = await api.post("/supplier", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 //requisition master apis
 export const post_requisition_master_api = async (formData) => {
   try {
@@ -509,6 +521,101 @@ export const post_requisition_detail_api = async (formData) => {
     return response.data;
   } catch (error) {
     console.log(error);
+    throw error;
+  }
+};
+
+//ChargesAndDeduction apis
+export const get_charges_and_deductions_by_company_id_api = async (
+  companyId
+) => {
+  try {
+    const response = await api.get(
+      `/chargesAndDeduction/GetChargesAndDeductionsByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const post_charges_and_deductions_applied_api = async (formData) => {
+  try {
+    const response = await api.post("/chargesAndDeductionApplied", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_transaction_types_api = async () => {
+  try {
+    const response = await api.get("./transactionType/GetTransactionTypes", {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_charges_and_deductions_applied_api = async (
+  transactionTypeId,
+  transactionId,
+  companyId
+) => {
+  try {
+    const response = await api.get(
+      `/chargesAndDeductionApplied/GetChargesAndDeductionsApplied?transactionTypeId=${transactionTypeId}&transactionId=${transactionId}&companyId=${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const put_charges_and_deductions_applied_api = async (
+  chargesAndDeductionAppliedId,
+  chargesAndDeductionAppliedrData
+) => {
+  try {
+    const response = await api.put(
+      `/chargesAndDeductionApplied/${chargesAndDeductionAppliedId}`,
+      chargesAndDeductionAppliedrData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const delete_charges_and_deductions_applied_api = async (
+  chargesAndDeductionAppliedId
+) => {
+  try {
+    const response = await api.delete(
+      `/chargesAndDeductionApplied/${chargesAndDeductionAppliedId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
     throw error;
   }
 };

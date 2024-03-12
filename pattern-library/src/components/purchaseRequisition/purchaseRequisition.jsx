@@ -316,8 +316,16 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
             />
             {/* Dropdown for filtered items */}
             {searchTerm && (
-              <div className="dropdown">
-                <ul className="dropdown-menu" style={{ display: "block" }}>
+              <div className="dropdown" style={{ width: "100%" }}>
+                <ul
+                  className="dropdown-menu"
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    maxHeight: "200px",
+                    overflowY: "auto",
+                  }}
+                >
                   {isItemsLoading ? (
                     <li className="dropdown-item">
                       <ButtonLoadingSpinner text="Searching..." />
@@ -440,7 +448,7 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
               <tfoot>
                 <tr>
                   <td colSpan="3"></td>
-                  <th className="text-end">Total Amount</th>
+                  <th>Total Amount</th>
                   <td className="text-end">
                     {calculateTotalPrice().toFixed(2)}
                   </td>

@@ -20,7 +20,7 @@ function template() {
         className={`bg-light menu ${isSidebarOpen ? "" : "d-none"} transition`}
       >
         <div
-          className="d-flex flex-column flex-shrink-0 p-3 bg-light"
+          className="d-flex flex-column flex-shrink-0 p-3 bg-light "
           style={{ height: "100vh" }}
         >
           <div className="container-fluid">
@@ -47,65 +47,67 @@ function template() {
             </a>
           </div>
           <hr />
-          <ul className="nav flex-column mb-auto">
-            {modules.map((module) => (
-              <li className="nav-item" key={module.id}>
-                <a
-                  href="#"
-                  className={`nav-link nav-link-hover rounded ${
-                    activeModules.includes(module.id)
-                      ? "nav-link-active text-light"
-                      : "text-dark"
-                  }`}
-                  onClick={() => this.handleModuleClick(module.id)}
-                  data-bs-toggle="collapse"
-                  data-bs-target={`#submodulesCollapse${module.id}`}
-                  aria-expanded={
-                    activeModules.includes(module.id) ? "true" : "false"
-                  }
-                >
-                  {module.name}
-                </a>
-                {module.submodules && module.submodules.length > 0 && (
-                  <div
-                    className="collapse"
-                    id={`submodulesCollapse${module.id}`}
+          <div className="mb-auto overflow-y-auto">
+            <ul className="nav flex-column mb-auto">
+              {modules.map((module) => (
+                <li className="nav-item" key={module.id}>
+                  <a
+                    href="#"
+                    className={`nav-link nav-link-hover rounded ${
+                      activeModules.includes(module.id)
+                        ? "nav-link-active text-light"
+                        : "text-dark"
+                    }`}
+                    onClick={() => this.handleModuleClick(module.id)}
+                    data-bs-toggle="collapse"
+                    data-bs-target={`#submodulesCollapse${module.id}`}
+                    aria-expanded={
+                      activeModules.includes(module.id) ? "true" : "false"
+                    }
                   >
-                    <ul className="list-unstyled ps-2">
-                      {module.submodules.map((submodule) => (
-                        <li key={submodule.id}>
-                          <a
-                            href={`#${
-                              activeSubmodule === submodule.name
-                                ? activeSubmodule.toLowerCase()
-                                : submodule.name.toLowerCase()
-                            }`}
-                            className="nav-link link-dark smaller-text"
-                            onClick={() =>
-                              this.handleSubmoduleClick(
-                                module.id,
-                                submodule.name
-                              )
-                            }
-                          >
-                            <span
-                              className={`p-1 nav-link-hover-lite rounded ${
+                    {module.name}
+                  </a>
+                  {module.submodules && module.submodules.length > 0 && (
+                    <div
+                      className="collapse"
+                      id={`submodulesCollapse${module.id}`}
+                    >
+                      <ul className="list-unstyled ps-2">
+                        {module.submodules.map((submodule) => (
+                          <li key={submodule.id}>
+                            <a
+                              href={`#${
                                 activeSubmodule === submodule.name
-                                  ? "nav-link-active-small"
-                                  : ""
+                                  ? activeSubmodule.toLowerCase()
+                                  : submodule.name.toLowerCase()
                               }`}
+                              className="nav-link link-dark smaller-text"
+                              onClick={() =>
+                                this.handleSubmoduleClick(
+                                  module.id,
+                                  submodule.name
+                                )
+                              }
                             >
-                              {submodule.name}
-                            </span>
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
+                              <span
+                                className={`p-1 nav-link-hover-lite rounded ${
+                                  activeSubmodule === submodule.name
+                                    ? "nav-link-active-small"
+                                    : ""
+                                }`}
+                              >
+                                {submodule.name}
+                              </span>
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
           <hr />
           <div
             className={`nav-item dropdown ${isDropdownOpen ? "dropup" : ""}`}

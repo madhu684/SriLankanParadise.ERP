@@ -327,8 +327,11 @@ const usePurchaseRequisitionUpdate = ({
 
       const isFormValid = validateForm(isSaveAsDraft);
       if (isFormValid) {
-        setLoading(true);
-        setLoadingDraft(true);
+        if (isSaveAsDraft) {
+          setLoadingDraft(true);
+        } else {
+          setLoading(true);
+        }
 
         const purchaseRequisitionData = {
           requestedBy: formData.requestorName,

@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { get_purchase_orders_with_out_drafts_api } from "../../../services/purchaseApi";
 import { get_purchase_orders_by_user_id_api } from "../../../services/purchaseApi";
 import { get_user_permissions_api } from "../../../services/userManagementApi";
+import { useQuery } from "@tanstack/react-query";
 
 const usePurchaseOrderList = () => {
   const [purchaseOrders, setPurchaseOrders] = useState([]);
-  const [userPermissions, setUserPermissions] = useState([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [error, setError] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -19,29 +19,32 @@ const usePurchaseOrderList = () => {
   const [showCreatePOForm, setShowCreatePOForm] = useState(false);
   const [showUpdatePOForm, setShowUpdatePOForm] = useState(false);
   const [PODetail, setPODetail] = useState("");
-  const [isLoadingPermissions, setIsLoadingPermissions] = useState(true);
 
   const fetchUserPermissions = async () => {
     try {
-      const userPermissionsResponse = await get_user_permissions_api(
+      const response = await get_user_permissions_api(
         sessionStorage.getItem("userId")
       );
-      setUserPermissions(Object.freeze(userPermissionsResponse.data.result));
+      return response.data.result;
     } catch (error) {
-      setError("Error fetching permissions");
-    } finally {
-      setIsLoadingPermissions(false);
+      console.error("Error fetching user permissions:", error);
     }
   };
+
+  const {
+    data: userPermissions,
+    isLoading: isLoadingPermissions,
+    isError: isPermissionsError,
+    error: permissionError,
+  } = useQuery({
+    queryKey: ["userPermissions"],
+    queryFn: fetchUserPermissions,
+  });
 
   const fetchData = async () => {
     try {
       if (!isLoadingPermissions && userPermissions) {
         if (hasPermission("Approve Purchase Order")) {
-          // const purchaseOrderResponse =
-          //   await get_purchase_orders_with_out_drafts_api();
-          // setPurchaseOrders(purchaseOrderResponse.data.result);
-
           const purchaseOrderWithoutDraftsResponse =
             await get_purchase_orders_with_out_drafts_api(
               sessionStorage.getItem("companyId")
@@ -67,8 +70,6 @@ const usePurchaseOrderList = () => {
           ) {
             additionalOrders = purchaseOrderByUserIdResponse.data.result;
           }
-          // let newPurchaseOrders = purchaseOrderWithoutDraftsResponse.data.result;
-          //const additionalOrders = purchaseOrderByUserIdResponse.data.result;
 
           const uniqueNewOrders = additionalOrders.filter(
             (order) =>
@@ -255,6 +256,9 @@ const usePurchaseOrderList = () => {
     showUpdatePOForm,
     userPermissions,
     PODetail,
+    isLoadingPermissions,
+    isPermissionsError,
+    permissionError,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleViewDetails,
