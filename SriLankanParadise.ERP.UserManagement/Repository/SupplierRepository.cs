@@ -32,5 +32,20 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task AddSupplier(Supplier supplier)
+        {
+            try
+            {
+                _dbContext.Suppliers.Add(supplier);
+                await _dbContext.SaveChangesAsync();
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }

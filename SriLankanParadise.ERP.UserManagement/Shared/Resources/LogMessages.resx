@@ -147,6 +147,33 @@
   <data name="CategoryUpdated" xml:space="preserve">
     <value>Category updated successfully</value>
   </data>
+  <data name="ChargesAndDeductionAppliedCreated" xml:space="preserve">
+    <value>Charges and deduction applied created successfully</value>
+  </data>
+  <data name="ChargesAndDeductionAppliedDeleted" xml:space="preserve">
+    <value>Charges and deduction applied deleted</value>
+  </data>
+  <data name="ChargesAndDeductionAppliedNotFound" xml:space="preserve">
+    <value>Charges and deduction applied not found</value>
+  </data>
+  <data name="ChargesAndDeductionAppliedUpdated" xml:space="preserve">
+    <value>Charges and deduction applied updated successfully</value>
+  </data>
+  <data name="ChargesAndDeductionCreated" xml:space="preserve">
+    <value>Charges and deduction created successfully</value>
+  </data>
+  <data name="ChargesAndDeductionsAppliedNotFound" xml:space="preserve">
+    <value>Charges and deductions applied not found</value>
+  </data>
+  <data name="ChargesAndDeductionsAppliedRetrieved" xml:space="preserve">
+    <value>Charges and deductions applied retrieved</value>
+  </data>
+  <data name="ChargesAndDeductionsNotFound" xml:space="preserve">
+    <value>Charges and deductions not found</value>
+  </data>
+  <data name="ChargesAndDeductionsRetrieved" xml:space="preserve">
+    <value>Charges and deductions retrieved</value>
+  </data>
   <data name="CompaniesRetrieved" xml:space="preserve">
     <value>Companies retrieved</value>
   </data>
@@ -525,11 +552,20 @@
   <data name="SubscriptionUpdated" xml:space="preserve">
     <value>Subscription updated successfully</value>
   </data>
+  <data name="SupplierCreated" xml:space="preserve">
+    <value>Supplier created successfully</value>
+  </data>
   <data name="SuppliersNotFound" xml:space="preserve">
     <value>Suppliers not found</value>
   </data>
   <data name="SuppliersRetrieved" xml:space="preserve">
     <value>Suppliers retrieved</value>
+  </data>
+  <data name="TransactionTypesNotFound" xml:space="preserve">
+    <value>Transaction types not found</value>
+  </data>
+  <data name="TransactionTypesRetrieved" xml:space="preserve">
+    <value>TransactionTypesRetrieved </value>
   </data>
   <data name="UnitCreated" xml:space="preserve">
     <value>Unit created successfully</value>

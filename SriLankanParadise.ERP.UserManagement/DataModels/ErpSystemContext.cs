@@ -532,9 +532,9 @@ public partial class ErpSystemContext : DbContext
             entity.ToTable("PurchaseOrder");
 
             entity.Property(e => e.ApprovedBy).HasMaxLength(50);
-            entity.Property(e => e.ApprovedDate).HasColumnType("date");
-            entity.Property(e => e.DeliveryDate).HasColumnType("date");
-            entity.Property(e => e.OrderDate).HasColumnType("date");
+            entity.Property(e => e.ApprovedDate).HasColumnType("datetime");
+            entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
+            entity.Property(e => e.OrderDate).HasColumnType("datetime");
             entity.Property(e => e.OrderedBy).HasMaxLength(50);
             entity.Property(e => e.ReferenceNo)
                 .HasMaxLength(20)
@@ -554,11 +554,12 @@ public partial class ErpSystemContext : DbContext
 
             entity.ToTable("PurchaseOrderDetail");
 
-            entity.Property(e => e.ItemCategory).HasMaxLength(50);
-            entity.Property(e => e.ItemId).HasMaxLength(50);
-            entity.Property(e => e.Name).HasMaxLength(50);
             entity.Property(e => e.TotalPrice).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
+
+            entity.HasOne(d => d.ItemMaster).WithMany(p => p.PurchaseOrderDetails)
+                .HasForeignKey(d => d.ItemMasterId)
+                .HasConstraintName("FK_PurchaseOrderDetail_ItemMaster");
 
             entity.HasOne(d => d.PurchaseOrder).WithMany(p => p.PurchaseOrderDetails)
                 .HasForeignKey(d => d.PurchaseOrderId)

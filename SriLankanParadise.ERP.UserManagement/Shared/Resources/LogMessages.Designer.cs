@@ -151,6 +151,87 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Charges and deduction applied created successfully.
+        /// </summary>
+        public static string ChargesAndDeductionAppliedCreated {
+            get {
+                return ResourceManager.GetString("ChargesAndDeductionAppliedCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Charges and deduction applied deleted.
+        /// </summary>
+        public static string ChargesAndDeductionAppliedDeleted {
+            get {
+                return ResourceManager.GetString("ChargesAndDeductionAppliedDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Charges and deduction applied not found.
+        /// </summary>
+        public static string ChargesAndDeductionAppliedNotFound {
+            get {
+                return ResourceManager.GetString("ChargesAndDeductionAppliedNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Charges and deduction applied updated successfully.
+        /// </summary>
+        public static string ChargesAndDeductionAppliedUpdated {
+            get {
+                return ResourceManager.GetString("ChargesAndDeductionAppliedUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Charges and deduction created successfully.
+        /// </summary>
+        public static string ChargesAndDeductionCreated {
+            get {
+                return ResourceManager.GetString("ChargesAndDeductionCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Charges and deductions applied not found.
+        /// </summary>
+        public static string ChargesAndDeductionsAppliedNotFound {
+            get {
+                return ResourceManager.GetString("ChargesAndDeductionsAppliedNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Charges and deductions applied retrieved.
+        /// </summary>
+        public static string ChargesAndDeductionsAppliedRetrieved {
+            get {
+                return ResourceManager.GetString("ChargesAndDeductionsAppliedRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Charges and deductions not found.
+        /// </summary>
+        public static string ChargesAndDeductionsNotFound {
+            get {
+                return ResourceManager.GetString("ChargesAndDeductionsNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Charges and deductions retrieved.
+        /// </summary>
+        public static string ChargesAndDeductionsRetrieved {
+            get {
+                return ResourceManager.GetString("ChargesAndDeductionsRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Companies retrieved.
         /// </summary>
         public static string CompaniesRetrieved {
@@ -1285,6 +1366,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Supplier created successfully.
+        /// </summary>
+        public static string SupplierCreated {
+            get {
+                return ResourceManager.GetString("SupplierCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Suppliers not found.
         /// </summary>
         public static string SuppliersNotFound {
@@ -1299,6 +1389,24 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string SuppliersRetrieved {
             get {
                 return ResourceManager.GetString("SuppliersRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Transaction types not found.
+        /// </summary>
+        public static string TransactionTypesNotFound {
+            get {
+                return ResourceManager.GetString("TransactionTypesNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to TransactionTypesRetrieved .
+        /// </summary>
+        public static string TransactionTypesRetrieved {
+            get {
+                return ResourceManager.GetString("TransactionTypesRetrieved", resourceCulture);
             }
         }
         

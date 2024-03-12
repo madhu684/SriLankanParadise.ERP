@@ -139,6 +139,12 @@ builder.Services.AddScoped<IRequisitionMasterService, RequisitionMasterService>(
 builder.Services.AddScoped<IRequisitionMasterRepository, RequisitionMasterRepository>();
 builder.Services.AddScoped<IRequisitionDetailService, RequisitionDetailService>();
 builder.Services.AddScoped<IRequisitionDetailRepository, RequisitionDetailRepository>();
+builder.Services.AddScoped<IChargesAndDeductionService, ChargesAndDeductionService>();
+builder.Services.AddScoped<IChargesAndDeductionRepository, ChargesAndDeductionRepository>();
+builder.Services.AddScoped<IChargesAndDeductionAppliedService, ChargesAndDeductionAppliedService>();
+builder.Services.AddScoped<IChargesAndDeductionAppliedRepository, ChargesAndDeductionAppliedRepository>();
+builder.Services.AddScoped<ITransactionTypeService, TransactionTypeService>();
+builder.Services.AddScoped<ITransactionTypeRepository, TransactionTypeRepository>();
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
