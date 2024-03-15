@@ -258,6 +258,24 @@
   <data name="InvalidUsernameOrPassword" xml:space="preserve">
     <value>Invalid username or password</value>
   </data>
+  <data name="IssueDetailCreated" xml:space="preserve">
+    <value>Issue detail created successfully</value>
+  </data>
+  <data name="IssueMasterApproved" xml:space="preserve">
+    <value>Issue master approved</value>
+  </data>
+  <data name="IssueMasterCreated" xml:space="preserve">
+    <value>Issue master created successfully</value>
+  </data>
+  <data name="IssueMasterNotFound" xml:space="preserve">
+    <value>Issue master not found</value>
+  </data>
+  <data name="IssueMastersNotFound" xml:space="preserve">
+    <value>Issue masters not found</value>
+  </data>
+  <data name="IssueMastersRetrieved" xml:space="preserve">
+    <value>Issue masters retrieved</value>
+  </data>
   <data name="ItemBatchCreated" xml:space="preserve">
     <value>Item batch created successfully</value>
   </data>

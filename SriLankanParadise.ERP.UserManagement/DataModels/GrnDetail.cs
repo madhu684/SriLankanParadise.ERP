@@ -17,11 +17,15 @@ public partial class GrnDetail
 
     public decimal? UnitPrice { get; set; }
 
-    public decimal? TotalPrice { get; set; }
+    public int? ItemId { get; set; }
 
-    public string? ItemId { get; set; }
+    public int? FreeQuantity { get; set; }
+
+    public DateTime? ExpiryDate { get; set; }
 
     public virtual GrnMaster GrnMaster { get; set; } = null!;
+
+    public virtual ItemMaster? Item { get; set; }
 
     public virtual ICollection<ItemBatchHasGrnDetail> ItemBatchHasGrnDetails { get; set; } = new List<ItemBatchHasGrnDetail>();
 }

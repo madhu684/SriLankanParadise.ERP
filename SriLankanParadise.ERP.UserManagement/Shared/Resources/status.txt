@@ -34,6 +34,9 @@ Status 0: Draft (Default)
 	   50: Completed - Draft
 	   41: In Progress - Pending Approval
 	   51: Completed - Pending Approval
+	   42: In Progress - Approved
+	   52: Completed - Approved 
+	   ect.
 
 --- Sales Order ---
 

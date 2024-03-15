@@ -31,6 +31,8 @@ public partial class RequisitionMaster
 
     public int? RequestedToLocationId { get; set; }
 
+    public string? ReferenceNumber { get; set; }
+
     public virtual ICollection<IssueMaster> IssueMasters { get; set; } = new List<IssueMaster>();
 
     public virtual Location? RequestedFromLocation { get; set; }

@@ -484,6 +484,60 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Issue detail created successfully.
+        /// </summary>
+        public static string IssueDetailCreated {
+            get {
+                return ResourceManager.GetString("IssueDetailCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Issue master approved.
+        /// </summary>
+        public static string IssueMasterApproved {
+            get {
+                return ResourceManager.GetString("IssueMasterApproved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Issue master created successfully.
+        /// </summary>
+        public static string IssueMasterCreated {
+            get {
+                return ResourceManager.GetString("IssueMasterCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Issue master not found.
+        /// </summary>
+        public static string IssueMasterNotFound {
+            get {
+                return ResourceManager.GetString("IssueMasterNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Issue masters not found.
+        /// </summary>
+        public static string IssueMastersNotFound {
+            get {
+                return ResourceManager.GetString("IssueMastersNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Issue masters retrieved.
+        /// </summary>
+        public static string IssueMastersRetrieved {
+            get {
+                return ResourceManager.GetString("IssueMastersRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Item batch created successfully.
         /// </summary>
         public static string ItemBatchCreated {

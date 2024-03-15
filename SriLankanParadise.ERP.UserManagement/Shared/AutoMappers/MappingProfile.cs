@@ -95,6 +95,11 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<ChargesAndDeductionApplied, ChargesAndDeductionAppliedDto>();
             CreateMap<TransactionTypeRequestModel, TransactionType>();
             CreateMap<TransactionType, TransactionTypeDto>();
+            CreateMap<IssueMasterRequestModel, IssueMaster>();
+            CreateMap<ApproveIssueMasterRequestModel, IssueMaster>();
+            CreateMap<IssueMaster, IssueMasterDto>();
+            CreateMap<IssueDetailRequestModel, IssueDetail>();
+            CreateMap<IssueDetail, IssueDetailDto>();
             // Add more mapping configurations if needed
         }
     }

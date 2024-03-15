@@ -25,6 +25,8 @@ public partial class ItemMaster
 
     public virtual Category Category { get; set; } = null!;
 
+    public virtual ICollection<GrnDetail> GrnDetails { get; set; } = new List<GrnDetail>();
+
     public virtual ICollection<IssueDetail> IssueDetails { get; set; } = new List<IssueDetail>();
 
     public virtual ICollection<ItemBatch> ItemBatches { get; set; } = new List<ItemBatch>();

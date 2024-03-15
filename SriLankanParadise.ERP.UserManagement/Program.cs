@@ -145,6 +145,10 @@ builder.Services.AddScoped<IChargesAndDeductionAppliedService, ChargesAndDeducti
 builder.Services.AddScoped<IChargesAndDeductionAppliedRepository, ChargesAndDeductionAppliedRepository>();
 builder.Services.AddScoped<ITransactionTypeService, TransactionTypeService>();
 builder.Services.AddScoped<ITransactionTypeRepository, TransactionTypeRepository>();
+builder.Services.AddScoped<IIssueMasterService, IssueMasterService>();
+builder.Services.AddScoped<IIssueMasterRepository, IssueMasterRepository>();
+builder.Services.AddScoped<IIssueDetailService, IssueDetailService>();
+builder.Services.AddScoped<IIssueDetailRepository, IssueDetailRepository>();
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

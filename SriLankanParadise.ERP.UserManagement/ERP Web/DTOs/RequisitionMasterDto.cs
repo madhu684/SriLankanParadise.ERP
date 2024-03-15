@@ -33,5 +33,7 @@
         public virtual LocationDto? RequestedToLocation { get; set; }
 
         public virtual IEnumerable<RequisitionDetailDto>? RequisitionDetails { get; set; }
+
+        public string? ReferenceNumber { get; set; }
     }
 }

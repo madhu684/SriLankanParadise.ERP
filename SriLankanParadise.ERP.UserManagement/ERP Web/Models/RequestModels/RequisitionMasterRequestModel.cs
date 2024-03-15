@@ -26,6 +26,8 @@
 
         public int? RequestedToLocationId { get; set; }
 
+        public string? ReferenceNumber { get; set; }
+
         public int PermissionId { get; set; }
     }
 }
