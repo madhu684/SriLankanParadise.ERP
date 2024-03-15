@@ -619,3 +619,69 @@ export const delete_charges_and_deductions_applied_api = async (
     throw error;
   }
 };
+
+export const get_grn_masters_by_purchase_order_id_api = async (
+  purchaseOrderId
+) => {
+  try {
+    const response = await api.get(
+      `/grnMaster/GetGrnMastersByPurchaseOrderId/${purchaseOrderId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+//item batch apis
+export const post_batch_api = async (formData) => {
+  try {
+    const response = await api.post("/batch", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const post_batchHasGrnMaster_api = async (formData) => {
+  try {
+    const response = await api.post("/batchHasGrnMaster", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const post_itemBatch_api = async (formData) => {
+  try {
+    const response = await api.post("/itemBatch", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const post_itemBatchHasGrnDetail_api = async (formData) => {
+  try {
+    const response = await api.post("/itemBatchHasGrnDetail", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

@@ -1,63 +1,63 @@
 import React from "react";
 import { Modal, Button } from "react-bootstrap";
-import useMaterialRequisitionDetial from "./useMaterialRequisitionDetail";
-import useMaterialRequisitionList from "../materialRequisitionList/useMaterialRequisitionList";
+import useTransferRequisitionDetial from "./useTransferRequisitionDetail";
+import useTransferRequisitionList from "../transferRequisitionList/useTransferRequisitionList";
 import moment from "moment";
 import "moment-timezone";
 
-const MaterialRequisitionDetail = ({
+const TransferRequisitionDetail = ({
   show,
   handleClose,
-  materialRequisition,
+  transferRequisition,
 }) => {
-  const { getStatusLabel, getStatusBadgeClass } = useMaterialRequisitionList();
+  const { getStatusLabel, getStatusBadgeClass } = useTransferRequisitionList();
   return (
     <Modal show={show} onHide={handleClose} centered scrollable size="lg">
       <Modal.Header closeButton>
-        <Modal.Title>Material Requisition</Modal.Title>
+        <Modal.Title>Transfer Requisition</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div className="mb-3 d-flex justify-content-between">
           <h6>
-            Details for Material Requisition Ref Number:{" "}
-            {materialRequisition.referenceNumber}
+            Details for Transfer Requisition Note Ref Number:{" "}
+            {transferRequisition.referenceNumber}
           </h6>
           <div>
             Status :{" "}
             <span
               className={`badge rounded-pill ${getStatusBadgeClass(
-                materialRequisition.status
+                transferRequisition.status
               )}`}
             >
-              {getStatusLabel(materialRequisition.status)}
+              {getStatusLabel(transferRequisition.status)}
             </span>
           </div>
         </div>
         <div className="row mb-3">
           <div className="col-md-6">
             <p>
-              <strong>Requested By:</strong> {materialRequisition.requestedBy}
+              <strong>Requested By:</strong> {transferRequisition.requestedBy}
             </p>
             <p>
               <strong>Requisition Date:</strong>{" "}
               {moment
-                .utc(materialRequisition?.requisitionDate)
+                .utc(transferRequisition?.requisitionDate)
                 .tz("Asia/Colombo")
                 .format("YYYY-MM-DD hh:mm:ss A")}
             </p>
             <p>
               <strong>Purpose of Request:</strong>{" "}
-              {materialRequisition.purposeOfRequest}
+              {transferRequisition.purposeOfRequest}
             </p>
-            {materialRequisition.status === 2 && (
+            {transferRequisition.status === 2 && (
               <>
                 <p>
-                  <strong>Approved By:</strong> {materialRequisition.approvedBy}
+                  <strong>Approved By:</strong> {transferRequisition.approvedBy}
                 </p>
                 <p>
                   <strong>Approved Date:</strong>{" "}
                   {moment
-                    .utc(materialRequisition?.approvedDate)
+                    .utc(transferRequisition?.approvedDate)
                     .tz("Asia/Colombo")
                     .format("YYYY-MM-DD hh:mm:ss A")}
                 </p>
@@ -67,11 +67,11 @@ const MaterialRequisitionDetail = ({
           <div className="col-md-6">
             <p>
               <strong>Delivery Location:</strong>{" "}
-              {materialRequisition.requestedFromLocation?.locationName}
+              {transferRequisition.requestedFromLocation?.locationName}
             </p>
             <p>
               <strong>Warehouse Location:</strong>{" "}
-              {materialRequisition.requestedToLocation?.locationName}
+              {transferRequisition.requestedToLocation?.locationName}
             </p>
           </div>
         </div>
@@ -86,7 +86,7 @@ const MaterialRequisitionDetail = ({
             </tr>
           </thead>
           <tbody>
-            {materialRequisition.requisitionDetails.map((item, index) => (
+            {transferRequisition.requisitionDetails.map((item, index) => (
               <tr key={index}>
                 <td>{item.itemMaster.itemName}</td>
                 <td>{item.itemMaster.unit.unitName}</td>
@@ -105,4 +105,4 @@ const MaterialRequisitionDetail = ({
   );
 };
 
-export default MaterialRequisitionDetail;
+export default TransferRequisitionDetail;

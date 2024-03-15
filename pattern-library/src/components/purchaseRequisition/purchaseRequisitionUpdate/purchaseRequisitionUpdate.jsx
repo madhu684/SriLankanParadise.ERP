@@ -313,13 +313,29 @@ const PurchaseRequisitionUpdate = ({
         <div className="col-md-5">
           {/* Item Search */}
           <div className="mb-3 mt-3">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Search for an item..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+            <div className="input-group">
+              <span className="input-group-text bg-transparent ">
+                <i className="bi bi-search"></i>
+              </span>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search for an item..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              {searchTerm && (
+                <span
+                  className="input-group-text bg-transparent"
+                  style={{
+                    cursor: "pointer",
+                  }}
+                  onClick={() => setSearchTerm("")}
+                >
+                  <i className="bi bi-x"></i>
+                </span>
+              )}
+            </div>
             {/* Dropdown for filtered items */}
             {searchTerm && (
               <div className="dropdown" style={{ width: "100%" }}>
@@ -347,7 +363,12 @@ const PurchaseRequisitionUpdate = ({
                           (detail) => detail.id === item.itemMasterId
                         )
                     ).length === 0 ? (
-                    <li className="dropdown-item">No items found</li>
+                    <li className="dropdown-item">
+                      <span className="me-3">
+                        <i className="bi bi-emoji-frown"></i>
+                      </span>
+                      No items found
+                    </li>
                   ) : (
                     availableItems
                       ?.filter(
@@ -362,6 +383,9 @@ const PurchaseRequisitionUpdate = ({
                             className="dropdown-item"
                             onClick={() => handleSelectItem(item)}
                           >
+                            <span className="me-3">
+                              <i className="bi bi-cart4"></i>
+                            </span>
                             {item.itemName}
                           </button>
                         </li>

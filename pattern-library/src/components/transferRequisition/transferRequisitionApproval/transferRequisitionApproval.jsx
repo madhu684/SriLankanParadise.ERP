@@ -1,25 +1,25 @@
 import React from "react";
 import { Modal, Button } from "react-bootstrap";
-import useMaterialRequisitionApproval from "./useMaterialRequisitionApproval";
-import useMaterialRequisitionList from "../materialRequisitionList/useMaterialRequisitionList";
+import useTransferRequisitionApproval from "./useTransferRequisitionApproval";
+import useTransferRequisitionList from "../transferRequisitionList/useTransferRequisitionList";
 import moment from "moment";
 import "moment-timezone";
 import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 
-const MaterialRequisitionApproval = ({
+const TransferRequisitionApproval = ({
   show,
   handleClose,
   handleApproved,
-  materialRequisition,
+  transferRequisition,
 }) => {
   const { approvalStatus, alertRef, handleApprove, loading } =
-    useMaterialRequisitionApproval({
+    useTransferRequisitionApproval({
       onFormSubmit: () => {
         handleClose();
         handleApproved();
       },
     });
-  const { getStatusLabel, getStatusBadgeClass } = useMaterialRequisitionList();
+  const { getStatusLabel, getStatusBadgeClass } = useTransferRequisitionList();
   return (
     <Modal
       show={show}
@@ -31,50 +31,50 @@ const MaterialRequisitionApproval = ({
       keyboard={!(loading || approvalStatus !== null)}
     >
       <Modal.Header closeButton={!(loading || approvalStatus !== null)}>
-        <Modal.Title>Approve Material Requisition</Modal.Title>
+        <Modal.Title>Approve Transfer Requisition</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div className="mb-3 d-flex justify-content-between">
           <h6>
-            Details for Material Requisition Ref Number:{" "}
-            {materialRequisition.referenceNumber}
+            Details for Transfer Requisition Ref Number:{" "}
+            {transferRequisition.referenceNumber}
           </h6>
           <div>
             Status :{" "}
             <span
               className={`badge rounded-pill ${getStatusBadgeClass(
-                materialRequisition.status
+                transferRequisition.status
               )}`}
             >
-              {getStatusLabel(materialRequisition.status)}
+              {getStatusLabel(transferRequisition.status)}
             </span>
           </div>
         </div>
         <div className="row mb-3">
           <div className="col-md-6">
             <p>
-              <strong>Requested By:</strong> {materialRequisition.requestedBy}
+              <strong>Requested By:</strong> {transferRequisition.requestedBy}
             </p>
             <p>
               <strong>Requisition Date:</strong>{" "}
               {moment
-                .utc(materialRequisition?.requisitionDate)
+                .utc(transferRequisition?.requisitionDate)
                 .tz("Asia/Colombo")
                 .format("YYYY-MM-DD HH:mm:ss A")}
             </p>
             <p>
               <strong>Purpose of Request:</strong>{" "}
-              {materialRequisition.purposeOfRequest}
+              {transferRequisition.purposeOfRequest}
             </p>
           </div>
           <div className="col-md-6">
             <p>
               <strong>Delivery Location:</strong>{" "}
-              {materialRequisition.requestedFromLocation?.locationName}
+              {transferRequisition.requestedFromLocation?.locationName}
             </p>
             <p>
               <strong>Warehouse Location:</strong>{" "}
-              {materialRequisition.requestedToLocation?.locationName}
+              {transferRequisition.requestedToLocation?.locationName}
             </p>
           </div>
         </div>
@@ -89,7 +89,7 @@ const MaterialRequisitionApproval = ({
             </tr>
           </thead>
           <tbody>
-            {materialRequisition.requisitionDetails.map((item, index) => (
+            {transferRequisition.requisitionDetails.map((item, index) => (
               <tr key={index}>
                 <td>{item.itemMaster.itemName}</td>
                 <td>{item.itemMaster.unit.unitName}</td>
@@ -104,12 +104,12 @@ const MaterialRequisitionApproval = ({
             className="alert alert-success alert-dismissible fade show mb-3"
             role="alert"
           >
-            Material requisition note approved!
+            Transfer requisition note approved!
           </div>
         )}
         {approvalStatus === "error" && (
           <div className="alert alert-danger mb-3" role="alert">
-            Error approving material requisition note. Please try again.
+            Error approving Transfer requisition note. Please try again.
           </div>
         )}
       </Modal.Body>
@@ -123,7 +123,7 @@ const MaterialRequisitionApproval = ({
         </Button>
         <Button
           variant="success"
-          onClick={() => handleApprove(materialRequisition.requisitionMasterId)}
+          onClick={() => handleApprove(transferRequisition.requisitionMasterId)}
           disabled={loading || approvalStatus !== null}
         >
           {loading && approvalStatus === null ? (
@@ -137,4 +137,4 @@ const MaterialRequisitionApproval = ({
   );
 };
 
-export default MaterialRequisitionApproval;
+export default TransferRequisitionApproval;

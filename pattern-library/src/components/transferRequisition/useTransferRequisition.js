@@ -7,7 +7,7 @@ import {
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
 
-const useMaterialRequisition = ({ onFormSubmit }) => {
+const useTransferRequisition = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
     deliveryLocation: null,
     warehouseLocation: null,
@@ -63,7 +63,7 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
   } = useQuery({
     queryKey: ["items", searchTerm],
     queryFn: () =>
-      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "Consumable"),
+      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "Sellable"),
   });
 
   useEffect(() => {
@@ -228,7 +228,7 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
     const randomNumber = Math.floor(1000 + Math.random() * 9000);
 
     // Combine the date and random number
-    const referenceNumber = `MRN_${formattedDate}_${randomNumber}`;
+    const referenceNumber = `TRN_${formattedDate}_${randomNumber}`;
 
     return referenceNumber;
   };
@@ -244,7 +244,7 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
       if (isFormValid) {
         setLoading(true);
 
-        const materialRequisitionData = {
+        const transferRequisitionData = {
           requestedUserId: sessionStorage.getItem("userId"),
           requestedBy: sessionStorage.getItem("username"),
           requisitionDate: requisitionDate,
@@ -254,7 +254,7 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
           approvedUserId: null,
           approvedDate: null,
           companyId: sessionStorage.getItem("companyId"),
-          requisitionType: "MRN",
+          requisitionType: "TRN",
           requestedFromLocationId: formData.deliveryLocation,
           requestedToLocationId: formData.warehouseLocation,
           referenceNumber: generateReferenceNumber(),
@@ -262,7 +262,7 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
         };
 
         const response = await post_requisition_master_api(
-          materialRequisitionData
+          transferRequisitionData
         );
 
         const requisitionMasterId = response.data.result.requisitionMasterId;
@@ -293,11 +293,11 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
         if (allDetailsSuccessful) {
           if (isSaveAsDraft) {
             setSubmissionStatus("successSavedAsDraft");
-            console.log("Material requisition saved as draft!", formData);
+            console.log("Transfer requisition saved as draft!", formData);
           } else {
             setSubmissionStatus("successSubmitted");
             console.log(
-              "Material requisition submitted successfully!",
+              "Transfer requisition submitted successfully!",
               formData
             );
           }
@@ -415,4 +415,4 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
   };
 };
 
-export default useMaterialRequisition;
+export default useTransferRequisition;

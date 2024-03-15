@@ -10,6 +10,7 @@ import CategoryList from "../category/categoryList/categoryList.jsx";
 import UnitList from "../unit/unitList/unitList.jsx";
 import SalesReceiptList from "../salesReceipt/salesReceiptList/salesReceiptList.jsx";
 import MaterialRequisitionList from "../materialRequisition/materialRequisitionList/materialRequisitionList.jsx";
+import TransferRequisitionList from "../transferRequisition/transferRequisitionList/transferRequisitionList.jsx";
 
 const useMain = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -88,6 +89,8 @@ const useMain = () => {
         return <SalesReceiptList />;
       case "Material Requisitions":
         return <MaterialRequisitionList />;
+      case "Transfer Requisitions":
+        return <TransferRequisitionList />;
       default:
         return null;
     }

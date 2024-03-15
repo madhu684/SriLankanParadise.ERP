@@ -574,7 +574,12 @@ const PurchaseOrder = ({ handleClose, handleUpdated }) => {
             type="button"
             className="btn btn-secondary me-2"
             onClick={() => handleSubmit(true)}
-            disabled={loading || loadingDraft || submissionStatus !== null}
+            disabled={
+              !formData.itemDetails.length > 0 ||
+              loading ||
+              loadingDraft ||
+              submissionStatus !== null
+            }
           >
             {loadingDraft && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Saving as Draft..." />

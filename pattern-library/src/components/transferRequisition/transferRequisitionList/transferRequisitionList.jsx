@@ -1,28 +1,28 @@
 import React from "react";
-import useMaterialRequisitionList from "./useMaterialRequisitionList";
-import MaterialRequisitionApproval from "../materialRequisitionApproval/materialRequisitionApproval";
-import MaterialRequisition from "../materialRequisition";
-import MaterialRequisitionDetail from "../materialRequisitionDetail/materialRequisitionDetail";
+import useTransferRequisitionList from "./useTransferRequisitionList";
+import TransferRequisitionApproval from "../transferRequisitionApproval/transferRequisitionApproval";
+import TransferRequisition from "../transferRequisition";
+import TransferRequisitionDetail from "../transferRequisitionDetail/transferRequisitionDetail";
 import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
 import moment from "moment";
 import "moment-timezone";
 
-const MaterialRequisitionList = () => {
+const TransferRequisitionList = () => {
   const {
-    materialRequisitions,
+    transferRequisitions,
     isLoadingData,
     isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
     selectedRowData,
-    showApproveMRModal,
-    showApproveMRModalInParent,
-    showDetailMRModal,
-    showDetailMRModalInParent,
-    showCreateMRForm,
-    MRDetail,
+    showApproveTRModal,
+    showApproveTRModalInParent,
+    showDetailTRModal,
+    showDetailTRModalInParent,
+    showCreateTRForm,
+    TRDetail,
     isPermissionsError,
     permissionError,
     areAnySelectedRowsPending,
@@ -30,18 +30,18 @@ const MaterialRequisitionList = () => {
     handleRowSelect,
     getStatusLabel,
     getStatusBadgeClass,
-    handleShowApproveMRModal,
-    handleCloseApproveMRModal,
-    handleShowDetailMRModal,
-    handleCloseDetailMRModal,
+    handleShowApproveTRModal,
+    handleCloseApproveTRModal,
+    handleShowDetailTRModal,
+    handleCloseDetailTRModal,
     handleApproved,
     handleViewDetails,
-    setShowCreateMRForm,
+    setShowCreateTRForm,
     hasPermission,
     handleUpdated,
     handleClose,
     formatDateInTimezone,
-  } = useMaterialRequisitionList();
+  } = useTransferRequisitionList();
 
   if (error || isPermissionsError) {
     return <ErrorComponent error={error || permissionError.message} />;
@@ -50,36 +50,36 @@ const MaterialRequisitionList = () => {
   if (
     isLoadingData ||
     isLoadingPermissions ||
-    (materialRequisitions && !materialRequisitions.length > 1)
+    (transferRequisitions && !transferRequisitions.length > 1)
   ) {
     return <LoadingSpinner />;
   }
 
-  if (showCreateMRForm) {
+  if (showCreateTRForm) {
     return (
-      <MaterialRequisition
-        handleClose={() => setShowCreateMRForm(false)}
+      <TransferRequisition
+        handleClose={() => setShowCreateTRForm(false)}
         handleUpdated={handleUpdated}
       />
     );
   }
 
-  if (materialRequisitions.length === 0) {
+  if (transferRequisitions.length === 0) {
     return (
       <div className="container mt-4">
-        <h2>Material Requisition Notes</h2>
+        <h2>Transfer Requisition Notes</h2>
         <div
           className="d-flex flex-column justify-content-center align-items-center text-center vh-100"
           style={{ maxHeight: "80vh" }}
         >
           <p>
-            You haven't created any material requisition note. Create a new one.
+            You haven't created any transfer requisition note. Create a new one.
           </p>
-          {hasPermission("Create Material Requisition Note") && (
+          {hasPermission("Create Transfer Requisition Note") && (
             <button
               type="button"
               className="btn btn-primary"
-              onClick={() => setShowCreateMRForm(true)}
+              onClick={() => setShowCreateTRForm(true)}
             >
               Create
             </button>
@@ -91,26 +91,26 @@ const MaterialRequisitionList = () => {
 
   return (
     <div className="container mt-4">
-      <h2>Material Requisition Notes</h2>
+      <h2>Transfer Requisition Notes</h2>
       <div className="mt-3 d-flex justify-content-start align-items-center">
         <div className="btn-group" role="group">
-          {hasPermission("Create Material Requisition Note") && (
+          {hasPermission("Create Transfer Requisition Note") && (
             <button
               type="button"
               className="btn btn-primary"
-              onClick={() => setShowCreateMRForm(true)}
+              onClick={() => setShowCreateTRForm(true)}
             >
               Create
             </button>
           )}
-          {hasPermission("Approve Material Requisition Note") &&
+          {hasPermission("Approve Transfer Requisition Note") &&
             selectedRowData[0]?.requestedUserId !==
               parseInt(sessionStorage.getItem("userId")) &&
             isAnyRowSelected &&
             areAnySelectedRowsPending(selectedRows) && (
               <button
                 className="btn btn-success"
-                onClick={handleShowApproveMRModal}
+                onClick={handleShowApproveTRModal}
               >
                 Approve
               </button>
@@ -126,13 +126,13 @@ const MaterialRequisitionList = () => {
               </th>
               <th>Reference Number</th>
               <th>Requested By</th>
-              <th>MRN Date</th>
+              <th>TRN Date</th>
               <th>Status</th>
               <th>Details</th>
             </tr>
           </thead>
           <tbody>
-            {materialRequisitions.map((mr) => (
+            {transferRequisitions.map((mr) => (
               <tr key={mr.requisitionMasterId}>
                 <td>
                   <input
@@ -183,19 +183,19 @@ const MaterialRequisitionList = () => {
             ))}
           </tbody>
         </table>
-        {showApproveMRModalInParent && (
-          <MaterialRequisitionApproval
-            show={showApproveMRModal}
-            handleClose={handleCloseApproveMRModal}
-            materialRequisition={selectedRowData[0]}
+        {showApproveTRModalInParent && (
+          <TransferRequisitionApproval
+            show={showApproveTRModal}
+            handleClose={handleCloseApproveTRModal}
+            transferRequisition={selectedRowData[0]}
             handleApproved={handleApproved}
           />
         )}
-        {showDetailMRModalInParent && (
-          <MaterialRequisitionDetail
-            show={showDetailMRModal}
-            handleClose={handleCloseDetailMRModal}
-            materialRequisition={MRDetail}
+        {showDetailTRModalInParent && (
+          <TransferRequisitionDetail
+            show={showDetailTRModal}
+            handleClose={handleCloseDetailTRModal}
+            transferRequisition={TRDetail}
           />
         )}
       </div>
@@ -203,4 +203,4 @@ const MaterialRequisitionList = () => {
   );
 };
 
-export default MaterialRequisitionList;
+export default TransferRequisitionList;

@@ -2,6 +2,9 @@ import React from "react";
 import usePurchaseRequisitionConvert from "./usePurchaseRequisitionConvert";
 import CurrentDateTime from "../../currentDateTime/currentDateTime";
 import useCompanyLogoUrl from "../../companyLogo/useCompanyLogoUrl";
+import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
+import ErrorComponent from "../../errorComponent/errorComponent";
+import Supplier from "../../supplier/supplier";
 
 const PurchaseRequisitionConvert = ({
   handleClose,
@@ -16,12 +19,24 @@ const PurchaseRequisitionConvert = ({
     validationErrors,
     referenceNo,
     alertRef,
+    isLoading,
+    isError,
+    error,
+    supplierSearchTerm,
+    showCreateSupplierMoalInParent,
+    showCreateSupplierModal,
     handleInputChange,
     handleSupplierChange,
     handleAttachmentChange,
     handleSubmit,
     handlePrint,
     calculateTotalAmount,
+    setSupplierSearchTerm,
+    handleSelectSupplier,
+    handleResetSupplier,
+    handleShowCreateSupplierModal,
+    handleCloseCreateSupplierModal,
+    handleAddSupplier,
   } = usePurchaseRequisitionConvert({
     purchaseRequisition,
     onFormSubmit: () => {
@@ -31,6 +46,14 @@ const PurchaseRequisitionConvert = ({
   });
 
   const companyLogoUrl = useCompanyLogoUrl();
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (isError) {
+    return <ErrorComponent error={"Error fetching data"} />;
+  }
 
   return (
     <div className="container mt-4">
@@ -71,38 +94,143 @@ const PurchaseRequisitionConvert = ({
           <div className="col-md-5">
             {/* Supplier Information */}
             <h4>1. Supplier Information</h4>
-            <div className="mb-3 mt-3">
+            <div className="mt-3">
               <label htmlFor="supplierId" className="form-label">
                 Supplier Name
               </label>
-              <select
-                className={`form-select ${
-                  validFields.supplierId ? "is-valid" : ""
-                } ${validationErrors.supplierId ? "is-invalid" : ""}`}
-                id="supplierId"
-                onChange={(e) => handleSupplierChange(e.target.value)}
-                required
-              >
-                <option value="">Select Supplier</option>
-                {suppliers.map((supplier) => (
-                  <option key={supplier.supplierId} value={supplier.supplierId}>
-                    {supplier.supplierName}
-                  </option>
-                ))}
-              </select>
-              {validationErrors.supplierId && (
-                <div className="invalid-feedback">
-                  {validationErrors.supplierId}
+              {formData.selectedSupplier === "" && (
+                <div className="mb-3 position-relative">
+                  <div className="input-group">
+                    <span className="input-group-text bg-transparent ">
+                      <i className="bi bi-search"></i>
+                    </span>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        validFields.supplierId ? "is-valid" : ""
+                      } ${validationErrors.supplierId ? "is-invalid" : ""}`}
+                      placeholder="Search for a supplier..."
+                      value={supplierSearchTerm}
+                      onChange={(e) => setSupplierSearchTerm(e.target.value)}
+                      autoFocus={false}
+                    />
+                    {supplierSearchTerm && (
+                      <span
+                        className="input-group-text bg-transparent"
+                        style={{
+                          cursor: "pointer",
+                        }}
+                        onClick={() => setSupplierSearchTerm("")}
+                      >
+                        <i className="bi bi-x"></i>
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Dropdown for filtered suppliers */}
+                  {supplierSearchTerm && (
+                    <div className="dropdown" style={{ width: "100%" }}>
+                      <ul
+                        className="dropdown-menu"
+                        style={{
+                          display: "block",
+                          width: "100%",
+                          maxHeight: "200px",
+                          overflowY: "auto",
+                        }}
+                      >
+                        {suppliers
+                          .filter(
+                            (supplier) =>
+                              supplier.supplierName
+                                .toLowerCase()
+                                .includes(supplierSearchTerm.toLowerCase()) ||
+                              supplier.phone
+                                .replace(/\s/g, "")
+                                .includes(supplierSearchTerm.replace(/\s/g, ""))
+                          )
+                          .map((supplier) => (
+                            <li key={supplier.supplierId}>
+                              <button
+                                className="dropdown-item"
+                                onClick={() => handleSelectSupplier(supplier)}
+                              >
+                                <span className="me-3">
+                                  <i className="bi bi-shop"></i>
+                                </span>{" "}
+                                {supplier?.supplierName} - {supplier?.phone}
+                              </button>
+                            </li>
+                          ))}
+                        {suppliers.filter(
+                          (supplier) =>
+                            supplier.supplierName
+                              .toLowerCase()
+                              .includes(supplierSearchTerm.toLowerCase()) ||
+                            supplier.phone
+                              .replace(/\s/g, "")
+                              .includes(supplierSearchTerm.replace(/\s/g, ""))
+                        ).length === 0 && (
+                          <>
+                            <li className="dropdown-item text-center">
+                              <span className="me-3">
+                                <i className="bi bi-emoji-frown"></i>
+                              </span>
+                              No suppliers found
+                            </li>
+                            <li className="dropdown-item disabled text-center">
+                              If the supplier is not found, you can add a new
+                              one.
+                            </li>
+                            <div className="d-flex justify-content-center">
+                              <button
+                                type="button"
+                                className="btn btn-outline-primary mx-3 mt-2 mb-2 "
+                                onClick={handleShowCreateSupplierModal}
+                              >
+                                Add New Supplier
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </ul>
+                    </div>
+                  )}
+                  {formData.selectedSupplier === "" && (
+                    <div className="mb-3">
+                      <small className="form-text text-muted">
+                        {validationErrors.supplierId && (
+                          <div className="text-danger mb-1">
+                            {validationErrors.supplierId}
+                          </div>
+                        )}
+                        Please search for a supplier and select it
+                      </small>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
             {/* Additional Supplier Information */}
             {formData.selectedSupplier && (
-              <div className="mb-3">
-                <p>Contact Person: {formData.selectedSupplier.contactPerson}</p>
-                <p>Phone: {formData.selectedSupplier.phone}</p>
-                <p>Email: {formData.selectedSupplier.email}</p>
+              <div className="card mb-3">
+                <div className="card-header">Selected Supplier</div>
+                <div className="card-body">
+                  <p>Supplier Name: {formData.selectedSupplier.supplierName}</p>
+                  <p>
+                    Contact Person: {formData.selectedSupplier.contactPerson}
+                  </p>
+                  <p>Phone: {formData.selectedSupplier.phone}</p>
+                  <p>Email: {formData.selectedSupplier.email}</p>
+                  <button
+                    type="button"
+                    className="btn btn-outline-danger float-end"
+                    onClick={handleResetSupplier}
+                  >
+                    Reset Supplier
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -124,33 +252,11 @@ const PurchaseRequisitionConvert = ({
                 value={formData.orderDate}
                 onChange={(e) => handleInputChange("orderDate", e.target.value)}
                 required
+                disabled
               />
               {validationErrors.orderDate && (
                 <div className="invalid-feedback">
                   {validationErrors.orderDate}
-                </div>
-              )}
-            </div>
-            <div className="mb-3">
-              <label htmlFor="deliveryDate" className="form-label">
-                Delivery Date
-              </label>
-              <input
-                type="date"
-                className={`form-control ${
-                  validFields.deliveryDate ? "is-valid" : ""
-                } ${validationErrors.deliveryDate ? "is-invalid" : ""}`}
-                id="deliveryDate"
-                placeholder="Enter delivery date"
-                value={formData.deliveryDate}
-                onChange={(e) =>
-                  handleInputChange("deliveryDate", e.target.value)
-                }
-                required
-              />
-              {validationErrors.deliveryDate && (
-                <div className="invalid-feedback">
-                  {validationErrors.deliveryDate}
                 </div>
               )}
             </div>
@@ -253,6 +359,13 @@ const PurchaseRequisitionConvert = ({
           </button>
         </div>
       </form>
+      {showCreateSupplierMoalInParent && (
+        <Supplier
+          show={showCreateSupplierModal}
+          handleClose={handleCloseCreateSupplierModal}
+          handleAddSupplier={handleAddSupplier}
+        />
+      )}
     </div>
   );
 };

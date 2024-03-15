@@ -1,12 +1,12 @@
 import React from "react";
-import useMaterialRequisition from "./useMaterialRequisition";
+import useTransferRequisition from "./useTransferRequisition";
 import CurrentDateTime from "../currentDateTime/currentDateTime";
 import LoadingSpinner from "../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../errorComponent/errorComponent";
 import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
 
-const MaterialRequisition = ({ handleClose, handleUpdated }) => {
+const TransferRequisition = ({ handleClose, handleUpdated }) => {
   const {
     formData,
     locations,
@@ -32,7 +32,7 @@ const MaterialRequisition = ({ handleClose, handleUpdated }) => {
     setFormData,
     setSearchTerm,
     handleSelectItem,
-  } = useMaterialRequisition({
+  } = useTransferRequisition({
     onFormSubmit: () => {
       handleClose();
       handleUpdated();
@@ -59,25 +59,25 @@ const MaterialRequisition = ({ handleClose, handleUpdated }) => {
             <CurrentDateTime />
           </p>
         </div>
-        <h1 className="mt-2 text-center">Material Requisition Note</h1>
+        <h1 className="mt-2 text-center">Transfer Requisition Note</h1>
         <hr />
       </div>
 
       {/* Display success or error messages */}
       {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
-          Material requisition note submitted successfully!
+          Transfer requisition note submitted successfully!
         </div>
       )}
       {submissionStatus === "successSavedAsDraft" && (
         <div className="alert alert-success mb-3" role="alert">
-          Material requisition note saved as draft, you can edit and submit it
+          Transfer requisition note saved as draft, you can edit and submit it
           later!
         </div>
       )}
       {submissionStatus === "error" && (
         <div className="alert alert-danger mb-3" role="alert">
-          Error submitting material requisition. Please try again.
+          Error submitting Transfer requisition. Please try again.
         </div>
       )}
 
@@ -411,4 +411,4 @@ const MaterialRequisition = ({ handleClose, handleUpdated }) => {
   );
 };
 
-export default MaterialRequisition;
+export default TransferRequisition;
