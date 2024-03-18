@@ -56,7 +56,7 @@ const PurchaseRequisitionList = () => {
   if (
     isLoadingData ||
     isLoadingPermissions ||
-    (purchaseRequisitions && !purchaseRequisitions.length > 1)
+    (purchaseRequisitions && !(purchaseRequisitions.length >= 0))
   ) {
     return <LoadingSpinner />;
   }

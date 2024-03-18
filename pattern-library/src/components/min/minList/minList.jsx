@@ -1,28 +1,29 @@
 import React from "react";
-import useMaterialRequisitionList from "./useMaterialRequisitionList";
-import MaterialRequisitionApproval from "../materialRequisitionApproval/materialRequisitionApproval";
-import MaterialRequisition from "../materialRequisition";
-import MaterialRequisitionDetail from "../materialRequisitionDetail/materialRequisitionDetail";
-import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
-import ErrorComponent from "../../errorComponent/errorComponent";
+import useMinList from "./useMinList.js";
+import MinApproval from "../minApproval/minApproval.jsx";
+import Min from "../min.jsx";
+import MinDetails from "../minDetail/minDetail.jsx";
+import LoadingSpinner from "../../loadingSpinner/loadingSpinner.jsx";
+import ErrorComponent from "../../errorComponent/errorComponent.jsx";
 import moment from "moment";
 import "moment-timezone";
 
-const MaterialRequisitionList = () => {
+const MinList = () => {
   const {
-    materialRequisitions,
+    mins,
     isLoadingData,
     isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
     selectedRowData,
-    showApproveMRModal,
-    showApproveMRModalInParent,
-    showDetailMRModal,
-    showDetailMRModalInParent,
-    showCreateMRForm,
-    MRDetail,
+    showApproveMinModal,
+    showApproveMinModalInParent,
+    showDetailMinModal,
+    showDetailMinModalInParent,
+    showCreateMinForm,
+    showUpdateMinForm,
+    MinDetail,
     isPermissionsError,
     permissionError,
     areAnySelectedRowsPending,
@@ -30,56 +31,49 @@ const MaterialRequisitionList = () => {
     handleRowSelect,
     getStatusLabel,
     getStatusBadgeClass,
-    handleShowApproveMRModal,
-    handleCloseApproveMRModal,
-    handleShowDetailMRModal,
-    handleCloseDetailMRModal,
+    handleShowApproveMinModal,
+    handleCloseApproveMinModal,
+    handleCloseDetailMinModal,
     handleApproved,
     handleViewDetails,
-    setShowCreateMRForm,
+    setShowCreateMinForm,
+    setShowUpdateMinForm,
     hasPermission,
     handleUpdated,
     handleClose,
-    formatDateInTimezone,
-  } = useMaterialRequisitionList();
+  } = useMinList();
 
   if (error || isPermissionsError) {
-    return <ErrorComponent error={error || permissionError.message} />;
+    return <ErrorComponent error={error || "Error fetching data"} />;
   }
 
-  if (
-    isLoadingData ||
-    isLoadingPermissions ||
-    (materialRequisitions && !(materialRequisitions.length >= 0))
-  ) {
+  if (isLoadingData || isLoadingPermissions || (mins && !(mins?.length >= 0))) {
     return <LoadingSpinner />;
   }
 
-  if (showCreateMRForm) {
+  if (showCreateMinForm) {
     return (
-      <MaterialRequisition
-        handleClose={() => setShowCreateMRForm(false)}
+      <Min
+        handleClose={() => setShowCreateMinForm(false)}
         handleUpdated={handleUpdated}
       />
     );
   }
 
-  if (materialRequisitions.length === 0) {
+  if (mins?.length === 0) {
     return (
       <div className="container mt-4">
-        <h2>Material Requisition Notes</h2>
+        <h2>Material Issue Notes</h2>
         <div
           className="d-flex flex-column justify-content-center align-items-center text-center vh-100"
           style={{ maxHeight: "80vh" }}
         >
-          <p>
-            You haven't created any material requisition note. Create a new one.
-          </p>
-          {hasPermission("Create Material Requisition Note") && (
+          <p>You haven't created any material issue note. Create a new one.</p>
+          {hasPermission("Create Material Issue Note") && (
             <button
               type="button"
               className="btn btn-primary"
-              onClick={() => setShowCreateMRForm(true)}
+              onClick={() => setShowCreateMinForm(true)}
             >
               Create
             </button>
@@ -91,26 +85,26 @@ const MaterialRequisitionList = () => {
 
   return (
     <div className="container mt-4">
-      <h2>Material Requisition Notes</h2>
+      <h2>Material Issue Notes</h2>
       <div className="mt-3 d-flex justify-content-start align-items-center">
         <div className="btn-group" role="group">
-          {hasPermission("Create Material Requisition Note") && (
+          {hasPermission("Create Material Issue Note") && (
             <button
               type="button"
               className="btn btn-primary"
-              onClick={() => setShowCreateMRForm(true)}
+              onClick={() => setShowCreateMinForm(true)}
             >
               Create
             </button>
           )}
-          {hasPermission("Approve Material Requisition Note") &&
-            selectedRowData[0]?.requestedUserId !==
+          {hasPermission("Approve Material Issue Note") &&
+            selectedRowData[0]?.createdUserId !==
               parseInt(sessionStorage.getItem("userId")) &&
             isAnyRowSelected &&
             areAnySelectedRowsPending(selectedRows) && (
               <button
                 className="btn btn-success"
-                onClick={handleShowApproveMRModal}
+                onClick={handleShowApproveMinModal}
               >
                 Approve
               </button>
@@ -125,43 +119,43 @@ const MaterialRequisitionList = () => {
                 <input type="checkbox" />
               </th>
               <th>Reference Number</th>
-              <th>Requested By</th>
-              <th>MRN Date</th>
+              <th>Issued By</th>
+              <th>MIN Date</th>
               <th>Status</th>
               <th>Details</th>
             </tr>
           </thead>
           <tbody>
-            {materialRequisitions.map((mr) => (
-              <tr key={mr.requisitionMasterId}>
+            {mins?.map((min) => (
+              <tr key={min.issueMasterId}>
                 <td>
                   <input
                     type="checkbox"
-                    checked={selectedRows.includes(mr.requisitionMasterId)}
-                    onChange={() => handleRowSelect(mr.requisitionMasterId)}
+                    checked={selectedRows.includes(min.issueMasterId)}
+                    onChange={() => handleRowSelect(min.issueMasterId)}
                   />
                 </td>
-                <td>{mr.referenceNumber}</td>
-                <td>{mr.requestedBy}</td>
+                <td>{min.referenceNumber}</td>
+                <td>{min.createdBy}</td>
                 <td>
                   {moment
-                    .utc(mr.requisitionDate)
+                    .utc(min?.issueDate)
                     .tz("Asia/Colombo")
                     .format("YYYY-MM-DD hh:mm:ss A")}
                 </td>
                 <td>
                   <span
                     className={`badge rounded-pill ${getStatusBadgeClass(
-                      mr.status
+                      min.status
                     )}`}
                   >
-                    {getStatusLabel(mr.status)}
+                    {getStatusLabel(min.status)}
                   </span>
                 </td>
                 <td>
                   <button
                     className="btn btn-primary me-2"
-                    onClick={() => handleViewDetails(mr)}
+                    onClick={() => handleViewDetails(min)}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -183,19 +177,19 @@ const MaterialRequisitionList = () => {
             ))}
           </tbody>
         </table>
-        {showApproveMRModalInParent && (
-          <MaterialRequisitionApproval
-            show={showApproveMRModal}
-            handleClose={handleCloseApproveMRModal}
-            materialRequisition={selectedRowData[0]}
-            handleApproved={handleApproved}
+        {showDetailMinModalInParent && (
+          <MinDetails
+            show={showDetailMinModal}
+            handleClose={handleCloseDetailMinModal}
+            min={MinDetail}
           />
         )}
-        {showDetailMRModalInParent && (
-          <MaterialRequisitionDetail
-            show={showDetailMRModal}
-            handleClose={handleCloseDetailMRModal}
-            materialRequisition={MRDetail}
+        {showApproveMinModalInParent && (
+          <MinApproval
+            show={showApproveMinModal}
+            handleClose={handleCloseApproveMinModal}
+            min={selectedRowData[0]}
+            handleApproved={handleApproved}
           />
         )}
       </div>
@@ -203,4 +197,4 @@ const MaterialRequisitionList = () => {
   );
 };
 
-export default MaterialRequisitionList;
+export default MinList;

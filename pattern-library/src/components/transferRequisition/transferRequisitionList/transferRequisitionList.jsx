@@ -50,7 +50,7 @@ const TransferRequisitionList = () => {
   if (
     isLoadingData ||
     isLoadingPermissions ||
-    (transferRequisitions && !transferRequisitions.length > 1)
+    (transferRequisitions && !(transferRequisitions.length >= 0))
   ) {
     return <LoadingSpinner />;
   }

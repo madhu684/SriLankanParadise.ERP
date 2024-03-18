@@ -97,10 +97,6 @@ const usePurchaseOrderList = () => {
   };
 
   useEffect(() => {
-    fetchUserPermissions();
-  }, []);
-
-  useEffect(() => {
     fetchData();
   }, [isLoadingPermissions, userPermissions]);
 

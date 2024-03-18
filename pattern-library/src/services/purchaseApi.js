@@ -685,3 +685,117 @@ export const post_itemBatchHasGrnDetail_api = async (formData) => {
     throw error;
   }
 };
+
+export const get_item_batches_api = async (companyId) => {
+  try {
+    const response = await api.get(
+      `/itemBatch/GetItemBatchesByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+//issue master apis
+export const post_issue_master_api = async (formData) => {
+  try {
+    const response = await api.post("/issueMaster", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_issues_masters_api = async () => {
+  try {
+    const response = await api.get("/issueMaster", {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_issue_masters_with_out_drafts_api = async (companyId) => {
+  try {
+    const response = await api.get(
+      `/issueMaster/GetIssueMastersWithoutDraftsByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_issue_masters_by_user_id_api = async (userId) => {
+  try {
+    const response = await api.get(
+      `/issueMaster/GetIssueMastersByUserId/${userId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const approve_issue_master_api = async (issueMasterId, approvalData) => {
+  try {
+    const response = await api.patch(
+      `/issueMaster/approve/${issueMasterId}`,
+      approvalData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const post_issue_detail_api = async (formData) => {
+  try {
+    const response = await api.post("/issueDetail", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_issue_masters_by_requisition_master_id_api = async (
+  requisitionMasterId
+) => {
+  try {
+    const response = await api.get(
+      `/issueMaster/GetIssueMastersByRequisitionMasterId/${requisitionMasterId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

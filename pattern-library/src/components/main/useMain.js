@@ -11,6 +11,8 @@ import UnitList from "../unit/unitList/unitList.jsx";
 import SalesReceiptList from "../salesReceipt/salesReceiptList/salesReceiptList.jsx";
 import MaterialRequisitionList from "../materialRequisition/materialRequisitionList/materialRequisitionList.jsx";
 import TransferRequisitionList from "../transferRequisition/transferRequisitionList/transferRequisitionList.jsx";
+import MinList from "../min/minList/minList.jsx";
+import TinList from "../tin/tinList/tinList.jsx";
 
 const useMain = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -91,6 +93,10 @@ const useMain = () => {
         return <MaterialRequisitionList />;
       case "Transfer Requisitions":
         return <TransferRequisitionList />;
+      case "Material Issue Notes":
+        return <MinList />;
+      case "Transfer Issue Notes":
+        return <TinList />;
       default:
         return null;
     }

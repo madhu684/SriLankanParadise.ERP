@@ -90,11 +90,27 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
     }
   };
 
+  const generateBatchRef = () => {
+    const currentDate = new Date();
+    const formattedDate = currentDate
+      .toISOString()
+      .split("T")[0]
+      .replace(/-/g, "");
+
+    // Generate random 4-digit number
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+
+    // Combine components to form batch reference
+    return `B-${formattedDate}-${randomNum}`;
+  };
+
   const createBatch = async () => {
     const currentDate = new Date();
     const formattedDate = currentDate.toISOString();
+    const batchRef = generateBatchRef();
 
     const batchData = {
+      batchRef: batchRef,
       date: formattedDate,
       companyId: sessionStorage.getItem("companyId"),
       permissionId: 1047,

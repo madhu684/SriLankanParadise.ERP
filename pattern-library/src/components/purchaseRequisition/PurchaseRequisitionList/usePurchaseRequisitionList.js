@@ -104,10 +104,6 @@ const usePurchaseRequisitionList = () => {
   };
 
   useEffect(() => {
-    fetchUserPermissions();
-  }, []);
-
-  useEffect(() => {
     fetchData();
   }, [isLoadingPermissions, userPermissions]);
 

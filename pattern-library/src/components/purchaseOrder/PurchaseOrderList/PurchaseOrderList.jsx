@@ -50,7 +50,7 @@ const PurchaseOrderList = () => {
   if (
     isLoadingData ||
     isLoadingPermissions ||
-    (purchaseOrders && !purchaseOrders.length > 1)
+    (purchaseOrders && !(purchaseOrders.length >= 0))
   ) {
     return <LoadingSpinner />;
   }
@@ -74,7 +74,7 @@ const PurchaseOrderList = () => {
     );
   }
 
-  if (purchaseOrders.length === 1) {
+  if (purchaseOrders.length === 0) {
     return (
       <div className="container mt-4">
         <h2>Purchase Orders</h2>

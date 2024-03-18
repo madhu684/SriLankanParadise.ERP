@@ -47,7 +47,7 @@ const GrnList = () => {
     return <ErrorComponent error={error || "Error fetching data"} />;
   }
 
-  if (isLoadingData || isLoadingPermissions || (Grns && !Grns.length > 1)) {
+  if (isLoadingData || isLoadingPermissions || (Grns && !(Grns.length >= 0))) {
     return <LoadingSpinner />;
   }
 
@@ -70,7 +70,7 @@ const GrnList = () => {
     );
   }
 
-  if (Grns.length === 1) {
+  if (Grns.length === 0) {
     return (
       <div className="container mt-4">
         <h2>Goods Received Notes</h2>
