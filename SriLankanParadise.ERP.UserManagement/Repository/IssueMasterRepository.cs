@@ -32,9 +32,12 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             try
             {
                 return await _dbContext.IssueMasters
+                    .Include(im=>im.RequisitionMaster)
                     .Include(rm => rm.IssueDetails)
-                    .ThenInclude(rd => rd.ItemMaster)
+                    .ThenInclude(id => id.ItemMaster )
                     .ThenInclude(im => im.Unit)
+                    .Include(rm => rm.IssueDetails)
+                    .ThenInclude(id => id.Batch)
                     .ToListAsync();
             }
             catch (Exception)
@@ -50,9 +53,12 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var issueMasters = await _dbContext.IssueMasters
                     .Where(rm => rm.Status != 0 && rm.CompanyId == companyId)
+                    .Include(im => im.RequisitionMaster)
                     .Include(rm => rm.IssueDetails)
                     .ThenInclude(rd => rd.ItemMaster)
                     .ThenInclude(im => im.Unit)
+                    .Include(rm => rm.IssueDetails)
+                    .ThenInclude(id => id.Batch)
                     .ToListAsync();
 
                 if (issueMasters.Any())
@@ -98,9 +104,12 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var requisitionMaster = await _dbContext.IssueMasters
                     .Where(rm => rm.IssueMasterId == issueMasterId)
+                    .Include(im => im.RequisitionMaster)
                     .Include(rm => rm.IssueDetails)
                     .ThenInclude(rd => rd.ItemMaster)
                     .ThenInclude(im => im.Unit)
+                    .Include(rm => rm.IssueDetails)
+                    .ThenInclude(id => id.Batch)
                     .FirstOrDefaultAsync();
 
                 return requisitionMaster;
@@ -117,9 +126,12 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var issueMasters = await _dbContext.IssueMasters
                     .Where(rm => rm.CreatedUserId == userId)
-                    .Include(rm => rm.IssueDetails)
-                    .ThenInclude(rd => rd.ItemMaster)
+                    .Include(im => im.RequisitionMaster)
+                    .Include(im => im.IssueDetails)
+                    .ThenInclude(id => id.ItemMaster)
                     .ThenInclude(im => im.Unit)
+                    .Include(im => im.IssueDetails)
+                    .ThenInclude(id => id.Batch)
                     .ToListAsync();
 
                 if (issueMasters.Any())
@@ -127,6 +139,28 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     return issueMasters;
                 }
                 return null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<IssueMaster>> GetIssueMastersByRequisitionMasterId(int requisitionMasterId)
+        {
+            try
+            {
+                var issueMasters = await _dbContext.IssueMasters
+                    .Where(rm => rm.RequisitionMasterId == requisitionMasterId)
+                    .Include(im => im.RequisitionMaster)
+                    .Include(im=> im.IssueDetails)
+                    .ThenInclude(id=>id.ItemMaster)
+                    .ThenInclude(im => im.Unit)
+                    .Include(im=> im.IssueDetails)
+                    .ThenInclude(id => id.Batch)
+                    .ToListAsync();
+
+                return issueMasters.Any() ? issueMasters : null;
             }
             catch (Exception)
             {

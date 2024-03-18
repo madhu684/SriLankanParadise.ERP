@@ -1,4 +1,6 @@
-﻿namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
+﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+
+namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 {
     public class ItemBatchDto
     {
@@ -21,5 +23,7 @@
         public int? TempQuantity { get; set; }
 
         public int? LocationId { get; set; }
+
+        public virtual BatchDto? Batch { get; set; }
     }
 }

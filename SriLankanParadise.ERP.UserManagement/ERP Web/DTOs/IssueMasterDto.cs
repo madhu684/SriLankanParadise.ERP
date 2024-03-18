@@ -1,10 +1,14 @@
-﻿namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
+﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+
+namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 {
     public class IssueMasterDto
     {
         public int IssueMasterId { get; set; }
 
         public int RequisitionMasterId { get; set; }
+
+        public virtual RequisitionMasterDto? RequisitionMaster { get; set; }
 
         public DateTime? IssueDate { get; set; }
 
@@ -26,6 +30,6 @@
 
         public int? ApprovedUserId { get; set; }
 
-       // public virtual IEnumerable<IssueDetailDto>? IssueDetails { get; set; }
+        public virtual IEnumerable<IssueDetailDto>? IssueDetails { get; set; }
     }
 }

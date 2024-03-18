@@ -48,6 +48,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var itemBatches = await _dbContext.ItemBatches
                     .Where(ib => ib.Status == true && ib.CompanyId == companyId)
+                    .Include(ib => ib.Batch)
                     .ToListAsync();
 
                 return itemBatches.Any() ? itemBatches : null;
@@ -124,6 +125,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var itemMasters = await _dbContext.ItemBatches
                     .Where(ib => ib.CreatedUserId == userId)
+                    .Include(ib => ib.Batch)
                     .ToListAsync();
 
                 return itemMasters.Any() ? itemMasters : null;

@@ -15,5 +15,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task<IssueMaster> GetIssueMasterByIssueMasterId(int issueMasterId);
 
         Task<IEnumerable<IssueMaster>> GetIssueMastersByUserId(int userId);
+
+        Task<IEnumerable<IssueMaster>> GetIssueMastersByRequisitionMasterId(int requisitionMasterId);
     }
 }
