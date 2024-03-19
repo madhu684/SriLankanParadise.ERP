@@ -7,7 +7,7 @@ import LoadingSpinner from "../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../errorComponent/errorComponent";
 import Supplier from "../supplier/supplier";
 
-const PurchaseOrder = ({ handleClose, handleUpdated }) => {
+const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
   const {
     formData,
     suppliers,
@@ -60,6 +60,7 @@ const PurchaseOrder = ({ handleClose, handleUpdated }) => {
       handleClose();
       handleUpdated();
     },
+    purchaseRequisition,
   });
 
   const companyLogoUrl = useCompanyLogoUrl();
@@ -615,6 +616,10 @@ const PurchaseOrder = ({ handleClose, handleUpdated }) => {
       )}
     </div>
   );
+};
+
+PurchaseOrder.defaultProps = {
+  purchaseRequisition: null,
 };
 
 export default PurchaseOrder;

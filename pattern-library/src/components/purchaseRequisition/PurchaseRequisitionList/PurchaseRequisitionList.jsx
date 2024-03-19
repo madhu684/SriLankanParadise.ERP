@@ -6,7 +6,7 @@ import PurchaseRequisitionDetail from "../purchaseRequisitionDetail/PurchaseRequ
 import PurchaseRequisitionUpdate from "../purchaseRequisitionUpdate/purchaseRequisitionUpdate";
 import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
-import PurchaseRequisitionConvert from "../purchaseRequisitionConvert/purchaseRequisitionConvert";
+import PurchaseOrder from "../../purchaseOrder/purchaseOrder";
 
 const PurchaseRequisitionList = () => {
   const {
@@ -82,10 +82,10 @@ const PurchaseRequisitionList = () => {
 
   if (showConvertPRForm) {
     return (
-      <PurchaseRequisitionConvert
+      <PurchaseOrder
         handleClose={handleClose}
         purchaseRequisition={PRDetail || selectedRowData[0]}
-        handleConverted={handleUpdated}
+        handleUpdated={handleUpdated}
       />
     );
   }

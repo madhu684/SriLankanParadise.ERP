@@ -11,7 +11,7 @@ import { get_item_masters_by_company_id_with_query_api } from "../../services/in
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
 
-const usePurchaseOrder = ({ onFormSubmit }) => {
+const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   const currentDate = new Date().toISOString().split("T")[0];
   const [formData, setFormData] = useState({
     supplierId: "",
@@ -37,6 +37,7 @@ const usePurchaseOrder = ({ onFormSubmit }) => {
     useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   const fetchSuppliers = async () => {
     try {
@@ -76,6 +77,7 @@ const usePurchaseOrder = ({ onFormSubmit }) => {
     isLoading: isLoadingchargesAndDeductions,
     isError: ischargesAndDeductionsError,
     error: chargesAndDeductionsError,
+    refetch: refetchChargesAndDeductions,
   } = useQuery({
     queryKey: ["chargesAndDeductions"],
     queryFn: fetchchargesAndDeductions,
@@ -706,6 +708,82 @@ const usePurchaseOrder = ({ onFormSubmit }) => {
     }));
     setSearchTerm(""); // Clear the search term
   };
+
+  const handleInitializeItem = (item) => {
+    // Generate chargesAndDeductions array for the newly added item
+    const initializedCharges = chargesAndDeductions
+      .filter((charge) => charge.isApplicableForLineItem)
+      .map((charge) => ({
+        id: charge.chargesAndDeductionId,
+        name: charge.displayName,
+        value: charge.amount || charge.percentage,
+        sign: charge.sign,
+        isPercentage: charge.percentage !== null,
+      }));
+
+    // Calculate total price based on initial values and charges and deductions
+    let grandTotalPrice = item.quantity * item.unitPrice;
+    let totalPrice = grandTotalPrice;
+    initializedCharges.forEach((charge) => {
+      if (charge.isPercentage) {
+        const amount = (grandTotalPrice * charge.value) / 100;
+        if (charge.sign === "+") {
+          totalPrice += amount;
+        } else if (charge.sign === "-") {
+          totalPrice -= amount;
+        }
+      } else {
+        if (charge.sign === "+") {
+          totalPrice += charge.value;
+        } else if (charge.sign === "-") {
+          totalPrice -= charge.value;
+        }
+      }
+    });
+
+    // Ensure totalPrice is initialized and is a numerical value
+    totalPrice = isNaN(totalPrice) ? 0 : totalPrice;
+
+    // Create the new item object with calculated total price
+    const newItem = {
+      id: item?.itemMasterId,
+      name: item?.itemMaster?.itemName,
+      unit: item?.itemMaster?.unit.unitName,
+      quantity: item?.quantity,
+      unitPrice: item?.unitPrice,
+      totalPrice: totalPrice,
+      chargesAndDeductions: initializedCharges,
+    };
+
+    // Update formData with the new item
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      itemDetails: [...prevFormData.itemDetails, newItem],
+      subTotal: calculateSubTotal(),
+      totalAmount: calculateTotalAmount(),
+    }));
+  };
+
+  const initializeItems = () => {
+    if (!initialized) {
+      if (
+        !isLoadingchargesAndDeductions &&
+        chargesAndDeductions &&
+        purchaseRequisition !== null &&
+        purchaseRequisition.purchaseRequisitionDetails.length > 0
+      ) {
+        // Loop through each item in purchaseRequisitionDetails
+        purchaseRequisition.purchaseRequisitionDetails.forEach((item) => {
+          // Call handleInitializeItem for each item
+          handleInitializeItem(item);
+        });
+      }
+      console.log("Initializing...");
+      setInitialized(true);
+    }
+  };
+
+  chargesAndDeductions && initializeItems();
 
   const handleResetSupplier = () => {
     setFormData((prevFormData) => ({
