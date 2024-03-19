@@ -23,6 +23,8 @@ const GrnList = () => {
     showCreateGrnForm,
     showUpdateGrnForm,
     GRNDetail,
+    isPermissionsError,
+    permissionError,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleRowSelect,
@@ -38,14 +40,15 @@ const GrnList = () => {
     hasPermission,
     handleUpdate,
     handleUpdated,
+    handleClose,
   } = useGrnList();
 
-  if (isLoadingData || isLoadingPermissions) {
-    return <LoadingSpinner />;
+  if (error || isPermissionsError) {
+    return <ErrorComponent error={error || "Error fetching data"} />;
   }
 
-  if (error) {
-    return <ErrorComponent error={error} />;
+  if (isLoadingData || isLoadingPermissions || (Grns && !(Grns.length >= 0))) {
+    return <LoadingSpinner />;
   }
 
   if (showCreateGrnForm) {
@@ -60,14 +63,14 @@ const GrnList = () => {
   if (showUpdateGrnForm) {
     return (
       <GrnUpdate
-        handleClose={() => setShowUpdateGrnForm(false)}
+        handleClose={handleClose}
         grn={GRNDetail || selectedRowData[0]}
         handleUpdated={handleUpdated}
       />
     );
   }
 
-  if (!Grns) {
+  if (Grns.length === 0) {
     return (
       <div className="container mt-4">
         <h2>Goods Received Notes</h2>
@@ -105,6 +108,8 @@ const GrnList = () => {
             </button>
           )}
           {hasPermission("Approve Goods Received Note") &&
+            selectedRowData[0]?.receivedUserId !==
+              parseInt(sessionStorage.getItem("userId")) &&
             isAnyRowSelected &&
             areAnySelectedRowsPending(selectedRows) && (
               <button
@@ -114,14 +119,16 @@ const GrnList = () => {
                 Approve
               </button>
             )}
-          {hasPermission("Update Goods Received Note") && isAnyRowSelected && (
-            <button
-              className="btn btn-warning"
-              onClick={() => setShowUpdateGrnForm(true)}
-            >
-              Edit
-            </button>
-          )}
+          {hasPermission("Update Goods Received Note") &&
+            isAnyRowSelected &&
+            selectedRowData[0]?.status.toString().charAt(1) !== "2" && (
+              <button
+                className="btn btn-warning"
+                onClick={() => setShowUpdateGrnForm(true)}
+              >
+                Edit
+              </button>
+            )}
         </div>
       </div>
       <div className="table-responsive">
@@ -129,7 +136,7 @@ const GrnList = () => {
           <thead>
             <tr>
               <th>
-                <input type="checkbox" onChange={() => setSelectedRows([])} />
+                <input type="checkbox" />
               </th>
               <th>Id</th>
               <th>Received By</th>

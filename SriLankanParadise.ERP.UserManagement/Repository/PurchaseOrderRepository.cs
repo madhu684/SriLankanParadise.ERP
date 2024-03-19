@@ -50,6 +50,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var purchaseOrders= await _dbContext.PurchaseOrders
                     .Where(po => po.Status != 0 && po.CompanyId == companyId)
                     .Include(po => po.PurchaseOrderDetails)
+                    .ThenInclude(pod => pod.ItemMaster)
+                    .ThenInclude(im => im.Unit)
                     .Include(po => po.Supplier)
                     .ToListAsync();
 
@@ -69,6 +71,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var purchaseOrders = await _dbContext.PurchaseOrders
                     .Where(po => po.OrderedUserId == userId)
                     .Include(po => po.PurchaseOrderDetails)
+                    .ThenInclude(pod => pod.ItemMaster)
+                    .ThenInclude(im => im.Unit)
                     .Include(po => po.Supplier)
                     .ToListAsync();
 
@@ -112,6 +116,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var purchaseOrder = await _dbContext.PurchaseOrders
                     .Where(po => po.PurchaseOrderId == purchaseOrderId)
                     .Include(po => po.PurchaseOrderDetails)
+                    .ThenInclude(pod => pod.ItemMaster)
+                    .ThenInclude(im => im.Unit)
                     .Include(po => po.Supplier)
                     .FirstOrDefaultAsync();
 

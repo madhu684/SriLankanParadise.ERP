@@ -1,101 +1,85 @@
 import React from "react";
 import useItemMaster from "./useItemMaster";
+import CurrentDateTime from "../currentDateTime/currentDateTime";
+import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
+import LoadingSpinner from "../loadingSpinner/loadingSpinner";
+import ErrorComponent from "../errorComponent/errorComponent";
 
-const ItemMaster = () => {
+const ItemMaster = ({ handleClose, handleUpdated }) => {
   const {
     formData,
     validFields,
     validationErrors,
     categoryOptions,
     unitOptions,
-    formatDateTime,
+    itemTypes,
+    submissionStatus,
+    alertRef,
+    loading,
+    loadingDraft,
+    isError,
+    isLoading,
+    error,
     handleInputChange,
     handleSubmit,
-  } = useItemMaster();
+  } = useItemMaster({
+    onFormSubmit: () => {
+      handleClose();
+      handleUpdated();
+    },
+  });
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (isError) {
+    return <ErrorComponent error={error} />;
+  }
 
   return (
     <div className="container mt-4">
       {/* Header */}
       <div className="mb-4">
+        <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
           <img
             src="path/to/your/logo.png"
             alt="Company Logo"
             className="img-fluid"
           />
-          <p>Date and Time: {formatDateTime()}</p>
+          <p>
+            {" "}
+            Date and Time: <CurrentDateTime />
+          </p>
         </div>
         <h1 className="mt-2 text-center">Item Master</h1>
         <hr />
       </div>
+
+      {/* Display success or error messages */}
+      {submissionStatus === "successSubmitted" && (
+        <div className="alert alert-success mb-3" role="alert">
+          Item master created successfully!
+        </div>
+      )}
+      {submissionStatus === "successSavedAsDraft" && (
+        <div className="alert alert-success mb-3" role="alert">
+          Item master saved as draft, you can edit and create it later!
+        </div>
+      )}
+      {submissionStatus === "error" && (
+        <div className="alert alert-danger mb-3" role="alert">
+          Error creating item master. Please try again.
+        </div>
+      )}
 
       <form>
         {/* Item Master Information */}
         <div className="row g-3 mb-3 d-flex justify-content-between">
           <div className="col-md-5">
             <h4>Item Information</h4>
-
             <div className="mb-3 mt-3">
-              <label htmlFor="unitId" className="form-label">
-                Unit
-              </label>
-              <select
-                className={`form-select ${
-                  validFields.unitId ? "is-valid" : ""
-                } ${validationErrors.unitId ? "is-invalid" : ""}`}
-                id="unitId"
-                value={formData.unitId}
-                onChange={(e) => handleInputChange("unitId", e.target.value)}
-                required
-              >
-                <option value="" disabled>
-                  Select Unit
-                </option>
-                {unitOptions.map((unit) => (
-                  <option key={unit.id} value={unit.id}>
-                    {unit.name}
-                  </option>
-                ))}
-              </select>
-              {validationErrors.unitId && (
-                <div className="invalid-feedback">
-                  {validationErrors.unitId}
-                </div>
-              )}
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="categoryId" className="form-label">
-                Category
-              </label>
-              <select
-                className={`form-select ${
-                  validFields.categoryId ? "is-valid" : ""
-                } ${validationErrors.categoryId ? "is-invalid" : ""}`}
-                id="categoryId"
-                value={formData.categoryId}
-                onChange={(e) =>
-                  handleInputChange("categoryId", e.target.value)
-                }
-                required
-              >
-                <option value="" disabled>
-                  Select Category
-                </option>
-                {categoryOptions.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-              {validationErrors.categoryId && (
-                <div className="invalid-feedback">
-                  {validationErrors.categoryId}
-                </div>
-              )}
-            </div>
-
-            <div className="mb-3">
               <label htmlFor="itemName" className="form-label">
                 Item Name
               </label>
@@ -116,75 +100,89 @@ const ItemMaster = () => {
                 </div>
               )}
             </div>
-          </div>
-
-          <div className="col-md-5">
-            <h4>Stock Information</h4>
 
             <div className="mb-3 mt-3">
-              <label htmlFor="stockQuantity" className="form-label">
-                Stock Quantity
+              <label htmlFor="itemType" className="form-label">
+                Item Type
               </label>
-              <input
-                type="number"
-                className={`form-control ${
-                  validFields.stockQuantity ? "is-valid" : ""
-                } ${validationErrors.stockQuantity ? "is-invalid" : ""}`}
-                id="stockQuantity"
-                placeholder="Enter Stock Quantity"
-                value={formData.stockQuantity}
+              <select
+                className={`form-select ${
+                  validFields.itemTypeId ? "is-valid" : ""
+                } ${validationErrors.itemTypeId ? "is-invalid" : ""}`}
+                id="itemType"
+                value={formData.itemTypeId}
                 onChange={(e) =>
-                  handleInputChange("stockQuantity", e.target.value)
+                  handleInputChange("itemTypeId", e.target.value)
                 }
                 required
-              />
-              {validationErrors.stockQuantity && (
+              >
+                <option value="">Select Item Type</option>
+                {/* Assuming you have an array of item types */}
+                {itemTypes?.map((type) => (
+                  <option key={type.itemTypeId} value={type.itemTypeId}>
+                    {type.name}
+                  </option>
+                ))}
+              </select>
+              {validationErrors.itemTypeId && (
                 <div className="invalid-feedback">
-                  {validationErrors.stockQuantity}
+                  {validationErrors.itemTypeId}
                 </div>
               )}
             </div>
-            <div className="mb-3">
-              <label htmlFor="sellingPrice" className="form-label">
-                Selling Price
+
+            <div className="mb-3 mt-3">
+              <label htmlFor="categoryId" className="form-label">
+                Category
               </label>
-              <input
-                type="number"
-                className={`form-control ${
-                  validFields.sellingPrice ? "is-valid" : ""
-                } ${validationErrors.sellingPrice ? "is-invalid" : ""}`}
-                id="sellingPrice"
-                placeholder="Enter Selling Price"
-                value={formData.sellingPrice}
+              <select
+                className={`form-select ${
+                  validFields.categoryId ? "is-valid" : ""
+                } ${validationErrors.categoryId ? "is-invalid" : ""}`}
+                id="categoryId"
+                value={formData.categoryId}
                 onChange={(e) =>
-                  handleInputChange("sellingPrice", e.target.value)
+                  handleInputChange("categoryId", e.target.value)
                 }
                 required
-              />
-              {validationErrors.sellingPrice && (
+              >
+                <option value="">Select Category</option>
+                {categoryOptions?.map((category) => (
+                  <option key={category.categoryId} value={category.categoryId}>
+                    {category.categoryName}
+                  </option>
+                ))}
+              </select>
+              {validationErrors.categoryId && (
                 <div className="invalid-feedback">
-                  {validationErrors.sellingPrice}
+                  {validationErrors.categoryId}
                 </div>
               )}
             </div>
-            <div className="mb-3">
-              <label htmlFor="costPrice" className="form-label">
-                Cost Price
+
+            <div className="mb-3 mt-3">
+              <label htmlFor="unitId" className="form-label">
+                Unit
               </label>
-              <input
-                type="number"
-                className={`form-control ${
-                  validFields.costPrice ? "is-valid" : ""
-                } ${validationErrors.costPrice ? "is-invalid" : ""}`}
-                id="costPrice"
-                placeholder="Enter Cost Price"
-                value={formData.costPrice}
-                onChange={(e) => handleInputChange("costPrice", e.target.value)}
+              <select
+                className={`form-select ${
+                  validFields.unitId ? "is-valid" : ""
+                } ${validationErrors.unitId ? "is-invalid" : ""}`}
+                id="unitId"
+                value={formData.unitId}
+                onChange={(e) => handleInputChange("unitId", e.target.value)}
                 required
-              />
-              {validationErrors.costPrice && (
+              >
+                <option value="">Select Unit</option>
+                {unitOptions?.map((unit) => (
+                  <option key={unit.unitId} value={unit.unitId}>
+                    {unit.unitName}
+                  </option>
+                ))}
+              </select>
+              {validationErrors.unitId && (
                 <div className="invalid-feedback">
-                  {validationErrors.costPrice}
+                  {validationErrors.unitId}
                 </div>
               )}
             </div>
@@ -196,11 +194,33 @@ const ItemMaster = () => {
           <button
             type="button"
             className="btn btn-primary me-2"
-            onClick={handleSubmit}
+            onClick={() => handleSubmit(false)}
+            disabled={loading || loadingDraft || submissionStatus !== null}
           >
-            Submit
+            {loading && submissionStatus === null ? (
+              <ButtonLoadingSpinner text="Creating..." />
+            ) : (
+              "Create"
+            )}
           </button>
-          <button type="button" className="btn btn-danger">
+          <button
+            type="button"
+            className="btn btn-secondary me-2"
+            onClick={() => handleSubmit(true)}
+            disabled={loading || loadingDraft || submissionStatus !== null}
+          >
+            {loadingDraft && submissionStatus === null ? (
+              <ButtonLoadingSpinner text="Saving as Draft..." />
+            ) : (
+              "Save as Draft"
+            )}
+          </button>
+          <button
+            type="button"
+            className="btn btn-danger"
+            onClick={handleClose}
+            disabled={loading || loadingDraft || submissionStatus !== null}
+          >
             Cancel
           </button>
         </div>

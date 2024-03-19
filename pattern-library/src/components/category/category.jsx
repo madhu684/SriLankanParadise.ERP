@@ -1,31 +1,61 @@
 import React from "react";
 import useCategory from "./useCategory";
+import CurrentDateTime from "../currentDateTime/currentDateTime";
+import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 
-const Category = () => {
+const Category = ({ handleClose, handleUpdated }) => {
   const {
     formData,
     validFields,
     validationErrors,
-    formatDateTime,
+    submissionStatus,
+    alertRef,
+    loading,
     handleInputChange,
     handleSubmit,
-  } = useCategory();
+  } = useCategory({
+    onFormSubmit: () => {
+      handleClose();
+      handleUpdated();
+    },
+  });
 
   return (
     <div className="container mt-4">
       {/* Header */}
       <div className="mb-4">
+        <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
           <img
             src="path/to/your/logo.png"
             alt="Company Logo"
             className="img-fluid"
           />
-          <p>Date and Time: {formatDateTime()}</p>
+          <p>
+            {" "}
+            Date and Time: <CurrentDateTime />
+          </p>
         </div>
-        <h1 className="mt-2 text-center">Create Category</h1>
+        <h1 className="mt-2 text-center">Category</h1>
         <hr />
       </div>
+
+      {/* Display success or error messages */}
+      {submissionStatus === "successSubmitted" && (
+        <div className="alert alert-success mb-3" role="alert">
+          Category created successfully!
+        </div>
+      )}
+      {submissionStatus === "successSavedAsDraft" && (
+        <div className="alert alert-success mb-3" role="alert">
+          Category created as inactive, you can edit and active it later!
+        </div>
+      )}
+      {submissionStatus === "error" && (
+        <div className="alert alert-danger mb-3" role="alert">
+          Error creating category. Please try again.
+        </div>
+      )}
 
       <form>
         {/* Category Information */}
@@ -70,9 +100,7 @@ const Category = () => {
                 onChange={(e) => handleInputChange("status", e.target.value)}
                 required
               >
-                <option value="" disabled>
-                  Select Status
-                </option>
+                <option value="">Select Status</option>
                 <option value="1">Active</option>
                 <option value="0">Inactive</option>
               </select>
@@ -91,10 +119,20 @@ const Category = () => {
             type="button"
             className="btn btn-primary me-2"
             onClick={handleSubmit}
+            disabled={loading || submissionStatus !== null}
           >
-            Submit
+            {loading && submissionStatus === null ? (
+              <ButtonLoadingSpinner text="Creating..." />
+            ) : (
+              "Create"
+            )}
           </button>
-          <button type="button" className="btn btn-danger">
+          <button
+            type="button"
+            className="btn btn-danger"
+            onClick={handleClose}
+            disabled={loading || submissionStatus !== null}
+          >
             Cancel
           </button>
         </div>

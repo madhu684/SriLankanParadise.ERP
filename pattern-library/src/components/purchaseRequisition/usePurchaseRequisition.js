@@ -4,40 +4,77 @@ import {
   post_purchase_requisition_api,
   post_purchase_requisition_detail_api,
 } from "../../services/purchaseApi";
+import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
+import { useQuery } from "@tanstack/react-query";
 
 const usePurchaseRequisition = ({ onFormSubmit }) => {
+  const currentDate = new Date().toISOString().split("T")[0];
   const [formData, setFormData] = useState({
     requestorName: "",
     department: "",
     email: "",
     contactNumber: "",
-    deliveryLocation: null,
-    requisitionDate: "",
+    expectedDeliveryLocation: null,
+    requisitionDate: currentDate,
     purposeOfRequest: "",
-    deliveryDate: "",
+    expectedDeliveryDate: "",
     referenceNumber: "",
     itemDetails: [],
     attachments: [],
     totalAmount: 0,
   });
-  const [locations, setLocations] = useState([]);
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
   const alertRef = useRef(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [loadingDraft, setLoadingDraft] = useState(false);
 
-  useEffect(() => {
-    const fetchLocations = async () => {
-      try {
-        const response = await get_company_locations_api(1);
-        setLocations(response.data.result);
-      } catch (error) {
-        console.error("Error fetching locations:", error);
-      }
-    };
+  const fetchLocations = async () => {
+    try {
+      const response = await get_company_locations_api(
+        sessionStorage.getItem("companyId")
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching locations:", error);
+    }
+  };
 
-    fetchLocations();
-  }, []);
+  const {
+    data: locations,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["locations"],
+    queryFn: fetchLocations,
+  });
+
+  const fetchItems = async (companyId, searchQuery, itemType) => {
+    try {
+      const response = await get_item_masters_by_company_id_with_query_api(
+        companyId,
+        searchQuery,
+        itemType
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching items:", error);
+    }
+  };
+
+  const {
+    data: availableItems,
+    isLoading: isItemsLoading,
+    isError: isItemsError,
+    error: itemsError,
+  } = useQuery({
+    queryKey: ["items", searchTerm],
+    queryFn: () =>
+      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"),
+  });
 
   useEffect(() => {
     if (submissionStatus != null) {
@@ -45,6 +82,13 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
       alertRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [submissionStatus]);
+
+  useEffect(() => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      totalAmount: calculateTotalPrice(),
+    }));
+  }, [formData.itemDetails]);
 
   const validateField = (
     fieldName,
@@ -117,28 +161,17 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     if (isSaveAsDraft) {
       setValidFields({});
       setValidationErrors({});
-      const isRequestorNameValid = validateField(
-        "requestorName",
-        "Requestor name",
-        formData.requestorName
-      );
-
-      const isDepartmentValid = validateField(
-        "department",
-        "Department",
-        formData.department
-      );
 
       const isDeliveryLocationValid = validateField(
-        "deliveryLocation",
-        "Delivery location",
-        formData.deliveryLocation
+        "expectedDeliveryLocation",
+        "Expected delivery location",
+        formData.expectedDeliveryLocation
       );
 
       const isDeliveryDateValid = validateField(
-        "deliveryDate",
-        "Delivery date",
-        formData.deliveryDate
+        "expectedDeliveryDate",
+        "Expected delivery date",
+        formData.expectedDeliveryDate
       );
 
       const isRequisitionDateValid = validateField(
@@ -147,40 +180,55 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
         formData.requisitionDate
       );
 
+      let isItemQuantityValid = true;
+      // Validate item details
+      formData.itemDetails.forEach((item, index) => {
+        const fieldName = `quantity_${index}`;
+        const fieldDisplayName = `Quantity for ${item.name}`;
+
+        const additionalRules = {
+          validationFunction: (value) => parseFloat(value) > 0,
+          errorMessage: `${fieldDisplayName} must be greater than 0`,
+        };
+
+        const isValidQuantity = validateField(
+          fieldName,
+          fieldDisplayName,
+          item.quantity,
+          additionalRules
+        );
+
+        isItemQuantityValid = isItemQuantityValid && isValidQuantity;
+      });
+
       const isAttachmentsValid = validateAttachments(formData.attachments);
+
       return (
-        isRequestorNameValid &&
-        isDepartmentValid &&
         isDeliveryLocationValid &&
         isAttachmentsValid &&
         isDeliveryDateValid &&
-        isRequisitionDateValid
+        isRequisitionDateValid &&
+        isItemQuantityValid
       );
     }
-    const isRequestorNameValid = validateField(
-      "requestorName",
-      "Requestor name",
-      formData.requestorName
-    );
+
+    setValidFields({});
+    setValidationErrors({});
 
     const isDeliveryLocationValid = validateField(
-      "deliveryLocation",
-      "Delivery location",
-      formData.deliveryLocation
+      "expectedDeliveryLocation",
+      "Expected delivery location",
+      formData.expectedDeliveryLocation
     );
 
     const isAttachmentsValid = validateAttachments(formData.attachments);
 
-    const isDepartmentValid = validateField(
-      "department",
-      "Department",
-      formData.department
-    );
-
-    const isEmailValid = validateField("email", "Email", formData.email, {
-      validationFunction: (value) => /\S+@\S+\.\S+/.test(value),
-      errorMessage: "Please enter a valid email address",
-    });
+    const isEmailValid = formData.email
+      ? validateField("email", "Email", formData.email, {
+          validationFunction: (value) => /\S+@\S+\.\S+/.test(value),
+          errorMessage: "Please enter a valid email address",
+        })
+      : true;
 
     const isContactNumberValid = validateField(
       "contactNumber",
@@ -198,28 +246,41 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
       formData.requisitionDate
     );
 
-    const isPurposeOfRequestValid = validateField(
-      "purposeOfRequest",
-      "Purpose of request",
-      formData.purposeOfRequest
+    const isDeliveryDateValid = validateField(
+      "expectedDeliveryDate",
+      "Expected delivery date",
+      formData.expectedDeliveryDate
     );
 
-    const isDeliveryDateValid = validateField(
-      "deliveryDate",
-      "Delivery date",
-      formData.deliveryDate
-    );
+    let isItemQuantityValid = true;
+    // Validate item details
+    formData.itemDetails.forEach((item, index) => {
+      const fieldName = `quantity_${index}`;
+      const fieldDisplayName = `Quantity for ${item.name}`;
+
+      const additionalRules = {
+        validationFunction: (value) => parseFloat(value) > 0,
+        errorMessage: `${fieldDisplayName} must be greater than 0`,
+      };
+
+      const isValidQuantity = validateField(
+        fieldName,
+        fieldDisplayName,
+        item.quantity,
+        additionalRules
+      );
+
+      isItemQuantityValid = isItemQuantityValid && isValidQuantity;
+    });
 
     return (
-      isRequestorNameValid &&
-      isDepartmentValid &&
       isEmailValid &&
       isContactNumberValid &&
       isDeliveryLocationValid &&
       isRequisitionDateValid &&
-      isPurposeOfRequestValid &&
       isDeliveryDateValid &&
-      isAttachmentsValid
+      isAttachmentsValid &&
+      isItemQuantityValid
     );
   };
 
@@ -227,18 +288,27 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     try {
       const status = isSaveAsDraft ? 0 : 1;
 
+      // Get the current date and time in UTC timezone in the specified format
+      const createdDate = new Date().toISOString();
+
       const isFormValid = validateForm(isSaveAsDraft);
       if (isFormValid) {
+        if (isSaveAsDraft) {
+          setLoadingDraft(true);
+        } else {
+          setLoading(true);
+        }
+
         const purchaseRequisitionData = {
           requestedBy: formData.requestorName,
-          RequestedUserId: sessionStorage.getItem("userId"),
+          requestedUserId: sessionStorage.getItem("userId"),
           department: formData.department,
           email: formData.email,
           contactNo: formData.contactNumber,
           requisitionDate: formData.requisitionDate,
           purposeOfRequest: formData.purposeOfRequest,
-          deliveryDate: formData.deliveryDate,
-          deliveryLocation: formData.deliveryLocation,
+          expectedDeliveryDate: formData.expectedDeliveryDate,
+          expectedDeliveryLocation: formData.expectedDeliveryLocation,
           referenceNo: formData.referenceNumber,
           totalAmount: formData.totalAmount,
           status: status,
@@ -246,6 +316,8 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
           approvedUserId: null,
           approvedDate: null,
           companyId: sessionStorage.getItem("companyId"),
+          createdDate: createdDate,
+          lastUpdatedDate: createdDate,
           permissionId: 9,
         };
 
@@ -260,12 +332,10 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
         const itemDetailsData = formData.itemDetails.map(async (item) => {
           const detailsData = {
             purchaseRequisitionId,
-            itemCategory: item.category,
-            itemId: item.id,
-            name: item.name,
             quantity: item.quantity,
             unitPrice: item.unitPrice,
             totalPrice: item.totalPrice,
+            itemMasterId: item.id,
             permissionId: 9,
           };
 
@@ -297,6 +367,8 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
 
           setTimeout(() => {
             setSubmissionStatus(null);
+            setLoading(false);
+            setLoadingDraft(false);
             onFormSubmit();
           }, 3000);
         } else {
@@ -308,6 +380,8 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
       setSubmissionStatus("error");
       setTimeout(() => {
         setSubmissionStatus(null);
+        setLoading(false);
+        setLoadingDraft(false);
       }, 3000);
     }
   };
@@ -347,23 +421,6 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     });
   };
 
-  const handleAddItem = () => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      itemDetails: [
-        ...prevFormData.itemDetails,
-        {
-          category: "",
-          id: "",
-          name: "",
-          quantity: 0,
-          unitPrice: 0.0,
-          totalPrice: 0.0,
-        },
-      ],
-    }));
-  };
-
   const handleRemoveItem = (index) => {
     setFormData((prevFormData) => {
       const updatedItemDetails = [...prevFormData.itemDetails];
@@ -373,6 +430,8 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
         itemDetails: updatedItemDetails,
       };
     });
+    setValidFields({});
+    setValidationErrors({});
   };
 
   const handlePrint = () => {
@@ -393,6 +452,25 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     );
   };
 
+  // Handler to add the selected item to itemDetails
+  const handleSelectItem = (item) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      itemDetails: [
+        ...prevFormData.itemDetails,
+        {
+          id: item.itemMasterId,
+          name: item.itemName,
+          unit: item.unit.unitName,
+          quantity: 0,
+          unitPrice: 0.0,
+          totalPrice: 0.0,
+        },
+      ],
+    }));
+    setSearchTerm(""); // Clear the search term
+  };
+
   return {
     formData,
     locations,
@@ -400,14 +478,25 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     validFields,
     validationErrors,
     alertRef,
+    isError,
+    isLoading,
+    error,
+    searchTerm,
+    availableItems,
+    isItemsLoading,
+    isItemsError,
+    itemsError,
+    loading,
+    loadingDraft,
     handleInputChange,
     handleItemDetailsChange,
     handleSubmit,
-    handleAddItem,
+    handleSelectItem,
     handleRemoveItem,
     handlePrint,
     handleAttachmentChange,
     calculateTotalPrice,
+    setSearchTerm,
   };
 };
 

@@ -2,6 +2,8 @@ import React from "react";
 import { Modal, Button } from "react-bootstrap";
 import useGrnDetail from "./useGrnDetail";
 import useGrnList from "../grnList/useGrnList";
+import moment from "moment";
+import "moment-timezone";
 
 const GrnDetail = ({ show, handleClose, grn }) => {
   const { getStatusLabel, getStatusBadgeClass } = useGrnList();
@@ -24,7 +26,7 @@ const GrnDetail = ({ show, handleClose, grn }) => {
             </span>
           </div>
         </div>
-        <div className="row">
+        <div className="row mb-3">
           <div className="col-md-6">
             <p>
               <strong>GRN Date:</strong> {grn?.grnDate?.split("T")[0]}
@@ -47,8 +49,36 @@ const GrnDetail = ({ show, handleClose, grn }) => {
                 )}
               </span>
             </p>
+            {parseInt(grn.status.toString().charAt(1), 10) === 2 && (
+              <>
+                <p>
+                  <strong>Approved By:</strong> {grn.approvedBy}
+                </p>
+                <p>
+                  <strong>Approved Date:</strong>{" "}
+                  {moment
+                    .utc(grn?.approvedDate)
+                    .tz("Asia/Colombo")
+                    .format("YYYY-MM-DD hh:mm:ss A")}
+                </p>
+              </>
+            )}
           </div>
           <div className="col-md-6">
+            <p>
+              <strong>Created Date:</strong>{" "}
+              {moment
+                .utc(grn?.createdDate)
+                .tz("Asia/Colombo")
+                .format("YYYY-MM-DD hh:mm:ss A")}
+            </p>
+            <p>
+              <strong>Last Updated Date:</strong>{" "}
+              {moment
+                .utc(grn?.lastUpdatedDate)
+                .tz("Asia/Colombo")
+                .format("YYYY-MM-DD hh:mm:ss A")}
+            </p>
             <p>
               <strong>Purchase Order Reference No:</strong>{" "}
               {grn.purchaseOrder.referenceNo}
@@ -60,33 +90,28 @@ const GrnDetail = ({ show, handleClose, grn }) => {
         <table className="table mt-2">
           <thead>
             <tr>
-              <th>Item ID</th>
+              <th>Item Name</th>
+              <th>Unit</th>
               <th>Received Quantity</th>
-              <th>Accepted Quantity</th>
               <th>Rejected Quantity</th>
+              <th>Free Quantity</th>
+              <th>Expiry Date</th>
               <th>Unit Price</th>
-              <th>Total Price</th>
             </tr>
           </thead>
           <tbody>
             {grn.grnDetails.map((item, index) => (
               <tr key={index}>
-                <td>{item.itemId}</td>
+                <td>{item.item?.itemName}</td>
+                <td>{item.item?.unit.unitName}</td>
                 <td>{item.receivedQuantity}</td>
-                <td>{item.acceptedQuantity}</td>
                 <td>{item.rejectedQuantity}</td>
+                <td>{item.freeQuantity}</td>
+                <td>{item.expiryDate?.split("T")[0]}</td>
                 <td>{item.unitPrice.toFixed(2)}</td>
-                <td>{item.totalPrice.toFixed(2)}</td>
               </tr>
             ))}
           </tbody>
-          <tfoot>
-            <tr>
-              <td colSpan="4"></td>
-              <th>Total Amount</th>
-              <td colSpan="2">{grn.totalAmount.toFixed(2)}</td>
-            </tr>
-          </tfoot>
         </table>
       </Modal.Body>
       <Modal.Footer>

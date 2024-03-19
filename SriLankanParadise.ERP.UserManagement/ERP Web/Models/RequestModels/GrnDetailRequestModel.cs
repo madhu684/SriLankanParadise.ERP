@@ -12,10 +12,11 @@
 
         public decimal? UnitPrice { get; set; }
 
-        public decimal? TotalPrice { get; set; }
+        public int? ItemId { get; set; }
 
+        public int? FreeQuantity { get; set; }
 
-        public string? ItemId { get; set; }
+        public DateTime? ExpiryDate { get; set; }
 
         public int PermissionId { get; set; }
     }

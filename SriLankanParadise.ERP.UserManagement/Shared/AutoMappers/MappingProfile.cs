@@ -60,12 +60,46 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<SalesInvoiceDetailRequestModel, SalesInvoiceDetail>();
             CreateMap<SalesInvoiceDetail, SalesInvoiceDetailDto>();
             CreateMap<ApproveSalesInvoiceRequestModel, SalesInvoice>();
+            CreateMap<UnitRequestModel, Unit>();
+            CreateMap<Unit, UnitDto>();
+            CreateMap<CategoryRequestModel, Category>();
+            CreateMap<Category, CategoryDto>();
+            CreateMap<ItemMasterRequestModel, ItemMaster>();
+            CreateMap<ItemMaster, ItemMasterDto>();
             CreateMap<PaymentMode, PaymentModeDto>();
             CreateMap<PaymentModeRequestModel, PaymentMode>();
             CreateMap<SalesReceipt, SalesReceiptDto>();
             CreateMap<SalesReceiptRequestModel, SalesReceipt>();
             CreateMap<SalesReceiptSalesInvoice, SalesReceiptSalesInvoiceDto>();
             CreateMap<SalesReceiptSalesInvoiceRequestModel, SalesReceiptSalesInvoice>();
+            CreateMap<BatchRequestModel, Batch>();
+            CreateMap<Batch, BatchDto>();
+            CreateMap<ItemBatchRequestModel, ItemBatch>();
+            CreateMap<ItemBatch, ItemBatchDto>();
+            CreateMap<BatchHasGrnMasterRequestModel, BatchHasGrnMaster>();
+            CreateMap<BatchHasGrnMaster, BatchHasGrnMasterDto>();
+            CreateMap<ItemBatchHasGrnDetailRequestModel, ItemBatchHasGrnDetail>();
+            CreateMap<ItemBatchHasGrnDetail, ItemBatchHasGrnDetailDto>();
+            CreateMap<ItemTypeRequestModel, ItemType>();
+            CreateMap<ItemType, ItemTypeDto>();
+            CreateMap<LocationType, LocationTypeDto>();
+            CreateMap<RequisitionMasterRequestModel, RequisitionMaster>();
+            CreateMap<ApproveRequisitionMasterRequestModel, RequisitionMaster>();
+            CreateMap<RequisitionMaster, RequisitionMasterDto>();
+            CreateMap<RequisitionDetailRequestModel, RequisitionDetail>();
+            CreateMap<RequisitionDetail, RequisitionDetailDto>();
+            CreateMap<SupplierRequestModel, Supplier>();
+            CreateMap<ChargesAndDeductionRequestModel, ChargesAndDeduction>();
+            CreateMap<ChargesAndDeduction, ChargesAndDeductionDto>();
+            CreateMap<ChargesAndDeductionAppliedRequestModel, ChargesAndDeductionApplied>();
+            CreateMap<ChargesAndDeductionApplied, ChargesAndDeductionAppliedDto>();
+            CreateMap<TransactionTypeRequestModel, TransactionType>();
+            CreateMap<TransactionType, TransactionTypeDto>();
+            CreateMap<IssueMasterRequestModel, IssueMaster>();
+            CreateMap<ApproveIssueMasterRequestModel, IssueMaster>();
+            CreateMap<IssueMaster, IssueMasterDto>();
+            CreateMap<IssueDetailRequestModel, IssueDetail>();
+            CreateMap<IssueDetail, IssueDetailDto>();
             // Add more mapping configurations if needed
         }
     }

@@ -1,8 +1,8 @@
 import React from "react";
 import usePurchaseOrderList from "./usePurchaseOrderList";
-import PurchaseOrderApproval from "../purchaseOrderApproval/purchaseOrderApproval";
+import PurchaseOrderApproval from "../purchaseOrderApproval/PurchaseOrderApproval";
 import PurchaseOrder from "../purchaseOrder";
-import PurchaseOrderDetail from "../purchaseOrderDetail/purchaseOrderDetail";
+import PurchaseOrderDetail from "../purchaseOrderDetail/PurchaseOrderDetail";
 import PurchaseOrderUpdate from "../purchaseOrderUpdate/purchaseOrderUpdate";
 import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
@@ -23,6 +23,8 @@ const PurchaseOrderList = () => {
     showCreatePOForm,
     showUpdatePOForm,
     PODetail,
+    isPermissionsError,
+    permissionError,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleRowSelect,
@@ -38,14 +40,19 @@ const PurchaseOrderList = () => {
     hasPermission,
     handleUpdate,
     handleUpdated,
+    handleClose,
   } = usePurchaseOrderList();
 
-  if (isLoadingData || isLoadingPermissions) {
-    return <LoadingSpinner />;
+  if (error || isPermissionsError) {
+    return <ErrorComponent error={error || "Error fetching data"} />;
   }
 
-  if (error) {
-    return <ErrorComponent error={error} />;
+  if (
+    isLoadingData ||
+    isLoadingPermissions ||
+    (purchaseOrders && !(purchaseOrders.length >= 0))
+  ) {
+    return <LoadingSpinner />;
   }
 
   if (showCreatePOForm) {
@@ -60,14 +67,14 @@ const PurchaseOrderList = () => {
   if (showUpdatePOForm) {
     return (
       <PurchaseOrderUpdate
-        handleClose={() => setShowUpdatePOForm(false)}
+        handleClose={handleClose}
         purchaseOrder={PODetail || selectedRowData[0]}
         handleUpdated={handleUpdated}
       />
     );
   }
 
-  if (!purchaseOrders) {
+  if (purchaseOrders.length === 0) {
     return (
       <div className="container mt-4">
         <h2>Purchase Orders</h2>
@@ -105,6 +112,8 @@ const PurchaseOrderList = () => {
             </button>
           )}
           {hasPermission("Approve Purchase Order") &&
+            selectedRowData[0]?.orderedUserId !==
+              parseInt(sessionStorage.getItem("userId")) &&
             isAnyRowSelected &&
             areAnySelectedRowsPending(selectedRows) && (
               <button
@@ -129,7 +138,7 @@ const PurchaseOrderList = () => {
           <thead>
             <tr>
               <th>
-                <input type="checkbox" onChange={() => setSelectedRows([])} />
+                <input type="checkbox" />
               </th>
               <th>Reference No</th>
               <th>Ordered By</th>

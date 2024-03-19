@@ -22,7 +22,9 @@
 
         public DateTime? ApprovedDate { get; set; }
 
-        public decimal? TotalAmount { get; set; }
+        public DateTime? CreatedDate { get; set; }
+
+        public DateTime? LastUpdatedDate { get; set; }
 
         public int PermissionId { get; set; }
     }

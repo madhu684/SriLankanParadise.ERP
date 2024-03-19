@@ -1,11 +1,12 @@
 import React from "react";
 import usePurchaseRequisitionList from "./usePurchaseRequisitionList";
-import PurchaseRequisitionApproval from "../purchaseRequisitionApproval/purchaseRequisitionApproval";
+import PurchaseRequisitionApproval from "../purchaseRequisitionApproval/PurchaseRequisitionApproval";
 import PurchaseRequisition from "../purchaseRequisition";
-import PurchaseRequisitionDetail from "../purchaseRequisitionDetail/purchaseRequisitionDetail";
+import PurchaseRequisitionDetail from "../purchaseRequisitionDetail/PurchaseRequisitionDetail";
 import PurchaseRequisitionUpdate from "../purchaseRequisitionUpdate/purchaseRequisitionUpdate";
 import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
+import PurchaseOrder from "../../purchaseOrder/purchaseOrder";
 
 const PurchaseRequisitionList = () => {
   const {
@@ -23,7 +24,11 @@ const PurchaseRequisitionList = () => {
     showCreatePRForm,
     showUpdatePRForm,
     PRDetail,
+    showConvertPRForm,
+    isPermissionsError,
+    permissionError,
     areAnySelectedRowsPending,
+    areAnySelectedRowsApproved,
     setSelectedRows,
     handleRowSelect,
     getStatusLabel,
@@ -39,14 +44,21 @@ const PurchaseRequisitionList = () => {
     hasPermission,
     handleUpdate,
     handleUpdated,
+    handleClose,
+    handleConvert,
+    setShowConvertPRForm,
   } = usePurchaseRequisitionList();
 
-  if (isLoadingData || isLoadingPermissions) {
-    return <LoadingSpinner />;
+  if (error || isPermissionsError) {
+    return <ErrorComponent error={error || permissionError.message} />;
   }
 
-  if (error) {
-    return <ErrorComponent error={error} />;
+  if (
+    isLoadingData ||
+    isLoadingPermissions ||
+    (purchaseRequisitions && !(purchaseRequisitions.length >= 0))
+  ) {
+    return <LoadingSpinner />;
   }
 
   if (showCreatePRForm) {
@@ -61,14 +73,24 @@ const PurchaseRequisitionList = () => {
   if (showUpdatePRForm) {
     return (
       <PurchaseRequisitionUpdate
-        handleClose={() => setShowUpdatePRForm(false)}
+        handleClose={handleClose}
         purchaseRequisition={PRDetail || selectedRowData[0]}
         handleUpdated={handleUpdated}
       />
     );
   }
 
-  if (!purchaseRequisitions) {
+  if (showConvertPRForm) {
+    return (
+      <PurchaseOrder
+        handleClose={handleClose}
+        purchaseRequisition={PRDetail || selectedRowData[0]}
+        handleUpdated={handleUpdated}
+      />
+    );
+  }
+
+  if (purchaseRequisitions.length === 0) {
     return (
       <div className="container mt-4">
         <h2>Purchase Requisitions</h2>
@@ -106,6 +128,8 @@ const PurchaseRequisitionList = () => {
             </button>
           )}
           {hasPermission("Approve Purchase Requisition") &&
+            selectedRowData[0]?.requestedUserId !==
+              parseInt(sessionStorage.getItem("userId")) &&
             isAnyRowSelected &&
             areAnySelectedRowsPending(selectedRows) && (
               <button
@@ -113,6 +137,16 @@ const PurchaseRequisitionList = () => {
                 onClick={handleShowApprovePRModal}
               >
                 Approve
+              </button>
+            )}
+          {hasPermission("Convert Purchase Requisition") &&
+            isAnyRowSelected &&
+            areAnySelectedRowsApproved(selectedRows) && (
+              <button
+                className="btn btn-success"
+                onClick={() => setShowConvertPRForm(true)}
+              >
+                Convert
               </button>
             )}
           {hasPermission("Update Purchase Requisition") && isAnyRowSelected && (
@@ -130,11 +164,11 @@ const PurchaseRequisitionList = () => {
           <thead>
             <tr>
               <th>
-                <input type="checkbox" onChange={() => setSelectedRows([])} />
+                <input type="checkbox" />
               </th>
               <th>ID</th>
               <th>Requested By</th>
-              <th>Department</th>
+              <th>Expected Delivery Date</th>
               <th>Status</th>
               <th>Details</th>
             </tr>
@@ -151,7 +185,7 @@ const PurchaseRequisitionList = () => {
                 </td>
                 <td>{pr.purchaseRequisitionId}</td>
                 <td>{pr.requestedBy}</td>
-                <td>{pr.department}</td>
+                <td>{pr.expectedDeliveryDate?.split("T")[0]}</td>
                 <td>
                   <span
                     className={`badge rounded-pill ${getStatusBadgeClass(

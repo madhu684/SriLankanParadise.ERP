@@ -117,6 +117,63 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="BatchCreated" xml:space="preserve">
+    <value>Batch created successfully</value>
+  </data>
+  <data name="BatchesNotFound" xml:space="preserve">
+    <value>Batches not found</value>
+  </data>
+  <data name="BatchesRetrieved" xml:space="preserve">
+    <value>Batches retrieved</value>
+  </data>
+  <data name="BatchHasGrnMasterCreated" xml:space="preserve">
+    <value>BatchHasGrnMaster created successfully</value>
+  </data>
+  <data name="CategoriesNotFound" xml:space="preserve">
+    <value>Categories not found</value>
+  </data>
+  <data name="CategoriesRetrieved" xml:space="preserve">
+    <value>Categories retrieved</value>
+  </data>
+  <data name="CategoryCreated" xml:space="preserve">
+    <value>Category created successfully</value>
+  </data>
+  <data name="CategoryDeleted" xml:space="preserve">
+    <value>Category deleted successfully</value>
+  </data>
+  <data name="CategoryNotFound" xml:space="preserve">
+    <value>Category not found</value>
+  </data>
+  <data name="CategoryUpdated" xml:space="preserve">
+    <value>Category updated successfully</value>
+  </data>
+  <data name="ChargesAndDeductionAppliedCreated" xml:space="preserve">
+    <value>Charges and deduction applied created successfully</value>
+  </data>
+  <data name="ChargesAndDeductionAppliedDeleted" xml:space="preserve">
+    <value>Charges and deduction applied deleted</value>
+  </data>
+  <data name="ChargesAndDeductionAppliedNotFound" xml:space="preserve">
+    <value>Charges and deduction applied not found</value>
+  </data>
+  <data name="ChargesAndDeductionAppliedUpdated" xml:space="preserve">
+    <value>Charges and deduction applied updated successfully</value>
+  </data>
+  <data name="ChargesAndDeductionCreated" xml:space="preserve">
+    <value>Charges and deduction created successfully</value>
+  </data>
+  <data name="ChargesAndDeductionsAppliedNotFound" xml:space="preserve">
+    <value>Charges and deductions applied not found</value>
+  </data>
+  <data name="ChargesAndDeductionsAppliedRetrieved" xml:space="preserve">
+    <value>Charges and deductions applied retrieved</value>
+  </data>
+  <data name="ChargesAndDeductionsNotFound" xml:space="preserve">
+    <value>Charges and deductions not found</value>
+  </data>
+  <data name="ChargesAndDeductionsRetrieved" xml:space="preserve">
+    <value>Charges and deductions retrieved</value>
+  </data>
   <data name="CompaniesRetrieved" xml:space="preserve">
     <value>Companies retrieved</value>
   </data>
@@ -200,6 +257,69 @@
   </data>
   <data name="InvalidUsernameOrPassword" xml:space="preserve">
     <value>Invalid username or password</value>
+  </data>
+  <data name="IssueDetailCreated" xml:space="preserve">
+    <value>Issue detail created successfully</value>
+  </data>
+  <data name="IssueMasterApproved" xml:space="preserve">
+    <value>Issue master approved</value>
+  </data>
+  <data name="IssueMasterCreated" xml:space="preserve">
+    <value>Issue master created successfully</value>
+  </data>
+  <data name="IssueMasterNotFound" xml:space="preserve">
+    <value>Issue master not found</value>
+  </data>
+  <data name="IssueMastersNotFound" xml:space="preserve">
+    <value>Issue masters not found</value>
+  </data>
+  <data name="IssueMastersRetrieved" xml:space="preserve">
+    <value>Issue masters retrieved</value>
+  </data>
+  <data name="ItemBatchCreated" xml:space="preserve">
+    <value>Item batch created successfully</value>
+  </data>
+  <data name="ItemBatchesNotFound" xml:space="preserve">
+    <value>Item batches not found</value>
+  </data>
+  <data name="ItemBatchesRetrieved" xml:space="preserve">
+    <value>Item batches retrieved</value>
+  </data>
+  <data name="ItemBatchHasGrnDetailCreated" xml:space="preserve">
+    <value>ItemBatchHasGrnDetail created successfully</value>
+  </data>
+  <data name="ItemBatchNotFound" xml:space="preserve">
+    <value>Item batch not found</value>
+  </data>
+  <data name="ItemBatchUpdated" xml:space="preserve">
+    <value>Item batch updated successfully</value>
+  </data>
+  <data name="ItemMasterCreated" xml:space="preserve">
+    <value>Item master created successfully</value>
+  </data>
+  <data name="ItemMasterDeleted" xml:space="preserve">
+    <value>Item master deleted successfully</value>
+  </data>
+  <data name="ItemMasterNotFound" xml:space="preserve">
+    <value>Item master not found</value>
+  </data>
+  <data name="ItemMastersNotFound" xml:space="preserve">
+    <value>Item masters not found</value>
+  </data>
+  <data name="ItemMastersRetrieved" xml:space="preserve">
+    <value>Item masters retrieved</value>
+  </data>
+  <data name="ItemMasterUpdated" xml:space="preserve">
+    <value>Item master updated successfully</value>
+  </data>
+  <data name="ItemTypesNotFound" xml:space="preserve">
+    <value>Item types not found</value>
+  </data>
+  <data name="ItemTypesRetrieved" xml:space="preserve">
+    <value>Item types retrieved</value>
+  </data>
+  <data name="LocationChannelItemBatchCreated" xml:space="preserve">
+    <value>LocationChannelItemBatch created successfully</value>
   </data>
   <data name="LocationsNotFound" xml:space="preserve">
     <value>Locations not found</value>
@@ -305,6 +425,24 @@
   </data>
   <data name="PurchaseRequisitionUpdated" xml:space="preserve">
     <value>Purchase requisition updated successfully</value>
+  </data>
+  <data name="RequisitionDetailCreated" xml:space="preserve">
+    <value>Requisition detail created successfully</value>
+  </data>
+  <data name="RequisitionMasterApproved" xml:space="preserve">
+    <value>Requisition master approved</value>
+  </data>
+  <data name="RequisitionMasterCreated" xml:space="preserve">
+    <value>Requisition master created successfully</value>
+  </data>
+  <data name="RequisitionMasterNotFound" xml:space="preserve">
+    <value>Requisition master not found</value>
+  </data>
+  <data name="RequisitionMastersNotFound" xml:space="preserve">
+    <value>Requisition masters not found</value>
+  </data>
+  <data name="RequisitionMastersRetrieved" xml:space="preserve">
+    <value>Requisition masters retrieved</value>
   </data>
   <data name="RolePermissionCreated" xml:space="preserve">
     <value>Role permission created successfully</value>
@@ -438,11 +576,38 @@
   <data name="SubscriptionUpdated" xml:space="preserve">
     <value>Subscription updated successfully</value>
   </data>
+  <data name="SupplierCreated" xml:space="preserve">
+    <value>Supplier created successfully</value>
+  </data>
   <data name="SuppliersNotFound" xml:space="preserve">
     <value>Suppliers not found</value>
   </data>
   <data name="SuppliersRetrieved" xml:space="preserve">
     <value>Suppliers retrieved</value>
+  </data>
+  <data name="TransactionTypesNotFound" xml:space="preserve">
+    <value>Transaction types not found</value>
+  </data>
+  <data name="TransactionTypesRetrieved" xml:space="preserve">
+    <value>TransactionTypesRetrieved </value>
+  </data>
+  <data name="UnitCreated" xml:space="preserve">
+    <value>Unit created successfully</value>
+  </data>
+  <data name="UnitDeleted" xml:space="preserve">
+    <value>Unit deleted successfully</value>
+  </data>
+  <data name="UnitNotFound" xml:space="preserve">
+    <value>Unit not found</value>
+  </data>
+  <data name="UnitsNotFound" xml:space="preserve">
+    <value>Units not found</value>
+  </data>
+  <data name="UnitsRetrieved" xml:space="preserve">
+    <value>Units retrieved</value>
+  </data>
+  <data name="UnitUpdated" xml:space="preserve">
+    <value>Unit updated successfully</value>
   </data>
   <data name="UserAlreadyExists" xml:space="preserve">
     <value>User already exists</value>

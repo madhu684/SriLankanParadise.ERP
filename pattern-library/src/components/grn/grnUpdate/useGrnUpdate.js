@@ -5,7 +5,9 @@ import {
   put_grn_detail_api,
   post_grn_detail_api,
   delete_grn_detail_api,
+  get_grn_masters_by_purchase_order_id_api,
 } from "../../../services/purchaseApi";
+import { useQuery } from "@tanstack/react-query";
 
 const useGrnUpdate = ({ grn, onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -15,35 +17,66 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     itemDetails: [],
     status: "",
     purchaseOrderId: "",
-    totalAmount: 0,
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
   const [selectedPurchaseOrder, setSelectedPurchaseOrder] = useState(null);
-  const [purchaseOrderOptions, setPurchaseOrders] = useState([]);
   const statusOptions = [
     { id: "4", label: "In Progress" },
     { id: "5", label: "Completed" },
   ];
-  const [itemIdsToBeDeleted, setItemIdsToBeDeleted] = useState([]);
   const alertRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+  const [loadingDraft, setLoadingDraft] = useState(false);
 
-  useEffect(() => {
-    const fetchPurchaseOrders = async () => {
-      try {
-        const response = await get_purchase_orders_with_out_drafts_api(1);
-        const filteredPurchaseOrders = response.data.result.filter(
-          (po) => po.status === 2
-        );
-        setPurchaseOrders(filteredPurchaseOrders);
-      } catch (error) {
-        console.error("Error fetching suppliers:", error);
-      }
-    };
+  const fetchPurchaseOrders = async () => {
+    try {
+      const response = await get_purchase_orders_with_out_drafts_api(
+        sessionStorage?.getItem("companyId")
+      );
+      const filteredPurchaseOrders = response.data.result.filter(
+        (po) => po.status === 1
+      );
+      return filteredPurchaseOrders;
+    } catch (error) {
+      console.error("Error fetching purchase orders:", error);
+    }
+  };
 
-    fetchPurchaseOrders();
-  }, []);
+  const {
+    data: purchaseOrders,
+    isLoading,
+    isError,
+    error,
+    refetch: refetchPurchaseOrders,
+  } = useQuery({
+    queryKey: ["purchaseOrders"],
+    queryFn: fetchPurchaseOrders,
+  });
+
+  const fetchGrnsBypurchaseOrderId = async (purchaseOrderId) => {
+    try {
+      const response = await get_grn_masters_by_purchase_order_id_api(
+        purchaseOrderId
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching grns:", error);
+    }
+  };
+
+  const {
+    data: grns,
+    isLoading: isGrnsLoading,
+    isError: isGrnsError,
+    error: grnError,
+    refetch: refetchGrns,
+  } = useQuery({
+    queryKey: ["grns", selectedPurchaseOrder?.purchaseOrderId],
+    queryFn: () =>
+      fetchGrnsBypurchaseOrderId(selectedPurchaseOrder.purchaseOrderId),
+  });
 
   useEffect(() => {
     const deepCopyGrn = JSON.parse(JSON.stringify(grn));
@@ -51,13 +84,71 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       grnDate: deepCopyGrn?.grnDate?.split("T")[0] ?? "",
       receivedBy: deepCopyGrn?.receivedBy ?? "",
       receivedDate: deepCopyGrn?.receivedDate?.split("T")[0] ?? "",
-      itemDetails: deepCopyGrn?.grnDetails ?? [],
+      itemDetails: [],
       status: deepCopyGrn?.status?.toString().charAt(0) ?? "",
       purchaseOrderId: deepCopyGrn?.purchaseOrderId ?? "",
-      totalAmount: deepCopyGrn?.totalAmount ?? "",
       attachments: deepCopyGrn?.attachments ?? [],
     });
-  }, [grn]);
+
+    if (!isLoading && purchaseOrders) {
+      handlePurchaseOrderChange(deepCopyGrn?.purchaseOrder.referenceNo);
+    }
+  }, [grn, isLoading]);
+
+  useEffect(() => {
+    if (grns && selectedPurchaseOrder) {
+      const updatedItemDetails = selectedPurchaseOrder.purchaseOrderDetails
+        .map((poItem) => {
+          const receivedQuantity = grns.reduce((total, grn) => {
+            const grnDetail = grn.grnDetails.find(
+              (detail) => detail.itemId === poItem.itemMaster.itemMasterId
+            );
+            return total + (grnDetail ? grnDetail.receivedQuantity : 0);
+          }, 0);
+
+          const remainingQuantity = poItem.quantity - receivedQuantity;
+
+          const matchingGrnDetail = grns
+            .flatMap((grn) => grn.grnDetails)
+            .find((detail) => detail.itemId === poItem.itemMaster.itemMasterId);
+
+          return {
+            id: poItem.itemMaster.itemMasterId,
+            name: poItem.itemMaster.itemName,
+            unit: poItem.itemMaster.unit.unitName,
+            quantity: poItem.quantity,
+            remainingQuantity:
+              Math.max(0, remainingQuantity) +
+              (matchingGrnDetail ? matchingGrnDetail.receivedQuantity : 0),
+            receivedQuantity: matchingGrnDetail
+              ? matchingGrnDetail.receivedQuantity
+              : 0,
+            rejectedQuantity: matchingGrnDetail
+              ? matchingGrnDetail.rejectedQuantity
+              : 0,
+            freeQuantity: matchingGrnDetail
+              ? matchingGrnDetail.freeQuantity
+              : 0,
+            expiryDate: matchingGrnDetail
+              ? matchingGrnDetail.expiryDate?.split("T")[0]
+              : "",
+            unitPrice: poItem.unitPrice,
+            grnDetailId: matchingGrnDetail
+              ? matchingGrnDetail.grnDetailId
+              : null,
+            grnMasterId: matchingGrnDetail
+              ? matchingGrnDetail.grnMasterId
+              : null,
+          };
+        })
+        .filter((item) => item.grnMasterId === grn.grnMasterId);
+      // Update form data with filtered items
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        itemDetails: updatedItemDetails,
+      }));
+    }
+  }, [selectedPurchaseOrder, grns]);
 
   useEffect(() => {
     if (submissionStatus != null) {
@@ -98,6 +189,9 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
   };
 
   const validateForm = () => {
+    setValidFields({});
+    setValidationErrors({});
+
     const isGrnDateValid = validateField(
       "grnDate",
       "GRN date",
@@ -120,16 +214,105 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
 
     const isPurchaseOrderIdValid = validateField(
       "purchaseOrderId",
-      "Purchase Order Reference Number",
+      "Purchase order reference number",
       formData.purchaseOrderId
     );
+
+    let isItemQuantityValid = true;
+    // Validate item details
+    formData.itemDetails.forEach((item, index) => {
+      const fieldName = `receivedQuantity_${index}`;
+      const fieldDisplayName = `Received Quantity for ${item.name}`;
+
+      const additionalRules = {
+        validationFunction: (value) =>
+          parseFloat(value) > 0 && parseFloat(value) <= item.remainingQuantity,
+        errorMessage: `${fieldDisplayName} must be greater than 0 and less than or equal to remaining quantity ${item.remainingQuantity}`,
+      };
+
+      const isValidQuantity = validateField(
+        fieldName,
+        fieldDisplayName,
+        item.receivedQuantity,
+        additionalRules
+      );
+
+      isItemQuantityValid = isItemQuantityValid && isValidQuantity;
+    });
+
+    let isRejectedQuantityValid = true;
+    // Validate rejected quantity
+    formData.itemDetails.forEach((item, index) => {
+      const rejectedFieldName = `rejectedQuantity_${index}`;
+      const rejectedFieldDisplayName = `Rejected Quantity for ${item.name}`;
+
+      const additionalRejectedRules = {
+        validationFunction: (value) =>
+          parseFloat(value) <= item.receivedQuantity,
+        errorMessage: `${rejectedFieldDisplayName} must be less than or equal to received quantity ${item.receivedQuantity}`,
+      };
+
+      const isValidRejectedQuantity = validateField(
+        rejectedFieldName,
+        rejectedFieldDisplayName,
+        item.rejectedQuantity,
+        additionalRejectedRules
+      );
+
+      isRejectedQuantityValid =
+        isRejectedQuantityValid && isValidRejectedQuantity;
+    });
+
+    let isItemUnitPriceValid = true;
+
+    // Validate item details
+    formData.itemDetails.forEach((item, index) => {
+      // Validation for unit price
+      const unitPriceFieldName = `unitPrice_${index}`;
+      const unitPriceFieldDisplayName = `Unit Price for ${item.name}`;
+
+      const unitPriceAdditionalRules = {
+        validationFunction: (value) => parseFloat(value) > 0,
+        errorMessage: `${unitPriceFieldDisplayName} is required`,
+      };
+
+      const isValidUnitPrice = validateField(
+        unitPriceFieldName,
+        unitPriceFieldDisplayName,
+        item.unitPrice,
+        unitPriceAdditionalRules
+      );
+
+      isItemUnitPriceValid = isItemUnitPriceValid && isValidUnitPrice;
+    });
+
+    let isItemExpiryDateValid = true;
+
+    // Validate item details
+    formData.itemDetails.forEach((item, index) => {
+      // Validation for expiry date
+      const expiryDateFieldName = `expiryDate_${index}`;
+      const expiryDateFieldDisplayName = `Expiry Date for ${item.name}`;
+
+      const isValidExpiryDate = validateField(
+        expiryDateFieldName,
+        expiryDateFieldDisplayName,
+        item.expiryDate
+      );
+
+      isItemExpiryDateValid = isItemExpiryDateValid && isValidExpiryDate;
+    });
 
     return (
       isGrnDateValid &&
       isReceivedByValid &&
       isReceivedDateValid &&
       isStatusValid &&
-      isPurchaseOrderIdValid
+      isPurchaseOrderIdValid &&
+      isItemQuantityValid &&
+      isItemUnitPriceValid &&
+      isItemExpiryDateValid &&
+      isRejectedQuantityValid
     );
   };
 
@@ -139,9 +322,16 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
 
       const combinedStatus = parseInt(`${formData.status}${status}`, 10);
 
-      console.log(combinedStatus);
+      const currentDate = new Date().toISOString();
+
       const isFormValid = validateForm();
       if (isFormValid) {
+        if (isSaveAsDraft) {
+          setLoadingDraft(true);
+        } else {
+          setLoading(true);
+        }
+
         const grnData = {
           purchaseOrderId: formData.purchaseOrderId,
           grnDate: formData.grnDate,
@@ -153,7 +343,8 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
           approvedBy: null,
           approvedUserId: null,
           approvedDate: null,
-          totalAmount: formData.totalAmount,
+          createdDate: grn.createdDate,
+          lastUpdatedDate: currentDate,
           permissionId: 22,
         };
 
@@ -165,11 +356,12 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
           const detailsData = {
             grnMasterId: grn.grnMasterId,
             receivedQuantity: item.receivedQuantity,
-            acceptedQuantity: item.acceptedQuantity,
+            acceptedQuantity: item.receivedQuantity - item.rejectedQuantity,
             rejectedQuantity: item.rejectedQuantity,
             unitPrice: item.unitPrice,
-            totalPrice: item.totalPrice,
-            itemId: item.itemId,
+            itemId: item.id,
+            freeQuantity: item.freeQuantity,
+            expiryDate: item.expiryDate,
             permissionId: 22,
           };
 
@@ -179,9 +371,6 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
               item.grnDetailId,
               detailsData
             );
-          } else {
-            // Call post_grn_detail_api for each item
-            detailsApiResponse = await post_grn_detail_api(detailsData);
           }
           return detailsApiResponse;
         });
@@ -192,19 +381,10 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
           (detailsResponse) => detailsResponse.status === 201 || 200
         );
 
-        for (const itemIdToBeDeleted of itemIdsToBeDeleted) {
-          const response = await delete_grn_detail_api(itemIdToBeDeleted);
-          console.log(
-            `Successfully deleted item with ID: ${itemIdToBeDeleted}`
-          );
-        }
-        // Clear the itmeIdsToBeDeleted array after deletion
-        setItemIdsToBeDeleted([]);
-
         if (allDetailsSuccessful) {
           if (isSaveAsDraft) {
             setSubmissionStatus("successSavedAsDraft");
-            console.log("GRN saved as draft!", formData);
+            console.log("GRN updated ad saved as draft!", formData);
           } else {
             setSubmissionStatus("successSubmitted");
             console.log("GRN submitted successfully!", formData);
@@ -212,6 +392,8 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
 
           setTimeout(() => {
             setSubmissionStatus(null);
+            setLoading(false);
+            setLoadingDraft(false);
             onFormSubmit();
           }, 3000);
         } else {
@@ -223,6 +405,8 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       setSubmissionStatus("error");
       setTimeout(() => {
         setSubmissionStatus(null);
+        setLoading(false);
+        setLoadingDraft(false);
       }, 3000);
     }
   };
@@ -245,9 +429,14 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
         updatedItemDetails[index].receivedQuantity
       );
 
-      updatedItemDetails[index].acceptedQuantity = Math.max(
+      updatedItemDetails[index].rejectedQuantity = Math.max(
         0,
-        updatedItemDetails[index].acceptedQuantity
+        updatedItemDetails[index].rejectedQuantity
+      );
+
+      updatedItemDetails[index].freeQuantity = Math.max(
+        0,
+        updatedItemDetails[index].freeQuantity
       );
 
       updatedItemDetails[index].unitPrice = !isNaN(
@@ -256,67 +445,19 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
         ? Math.max(0, parseFloat(updatedItemDetails[index].unitPrice))
         : 0;
 
-      updatedItemDetails[index].totalPrice =
-        updatedItemDetails[index].acceptedQuantity *
-        updatedItemDetails[index].unitPrice;
-
-      updatedItemDetails[index].rejectedQuantity =
-        updatedItemDetails[index].receivedQuantity -
-        updatedItemDetails[index].acceptedQuantity;
-
-      return {
-        ...prevFormData,
-        itemDetails: updatedItemDetails,
-        totalAmount: calculateTotalAmount(),
-      };
-    });
-  };
-
-  const handleAddItem = () => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      itemDetails: [
-        ...prevFormData.itemDetails,
-        {
-          itemId: "",
-          receivedQuantity: 0,
-          acceptedQuantity: 0,
-          rejectedQuantity: 0,
-          unitPrice: 0.0,
-          totalPrice: 0.0,
-        },
-      ],
-    }));
-  };
-
-  const handleRemoveItem = (index, grnDetailId) => {
-    setFormData((prevFormData) => {
-      const updatedItemDetails = [...prevFormData.itemDetails];
-      updatedItemDetails.splice(index, 1);
       return {
         ...prevFormData,
         itemDetails: updatedItemDetails,
       };
     });
-
-    if (grnDetailId !== null && grnDetailId !== undefined) {
-      setItemIdsToBeDeleted((prevIds) => [...prevIds, grnDetailId]);
-    }
   };
 
   const handlePrint = () => {
     window.print();
   };
 
-  const calculateTotalAmount = () => {
-    return formData.itemDetails.reduce(
-      (total, item) => total + item.acceptedQuantity * item.unitPrice,
-      0
-    );
-  };
-
   const handlePurchaseOrderChange = (referenceId) => {
-    const selectedPurchaseOrder = purchaseOrderOptions.find(
+    const selectedPurchaseOrder = purchaseOrders.find(
       (purchaseOrder) => purchaseOrder.referenceNo === referenceId
     );
 
@@ -331,7 +472,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
   const handleStatusChange = (selectedOption) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
-      status: selectedOption.id,
+      status: selectedOption?.id,
     }));
   };
 
@@ -340,18 +481,18 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     validFields,
     validationErrors,
     selectedPurchaseOrder,
-    purchaseOrderOptions,
+    purchaseOrders,
     statusOptions,
     submissionStatus,
     alertRef,
+    isLoading,
+    isError,
+    loading,
+    loadingDraft,
     handleInputChange,
     handleItemDetailsChange,
-    handleAddItem,
-    handleRemoveItem,
     handlePrint,
     handleSubmit,
-    calculateTotalAmount,
-    handlePurchaseOrderChange,
     handleStatusChange,
   };
 };

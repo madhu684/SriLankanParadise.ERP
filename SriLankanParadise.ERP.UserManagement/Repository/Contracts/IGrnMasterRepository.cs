@@ -18,5 +18,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task ApproveGrnMaster(int grnMasterId, GrnMaster grnMaster);
 
         Task UpdateGrnMaster(int grnMasterId, GrnMaster grnMaster);
+
+        Task<IEnumerable<GrnMaster>> GetGrnMastersByPurchaseOrderId(int purchaseOrderId);
     }
 }

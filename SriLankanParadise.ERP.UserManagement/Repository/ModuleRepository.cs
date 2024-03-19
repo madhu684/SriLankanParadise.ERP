@@ -106,6 +106,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         module => module.ModuleId,
                         (csmu, module) => module
                     )
+                    .Include(m => m.SubModules)
                     .ToListAsync();
                 if (modules.Any())
                 {

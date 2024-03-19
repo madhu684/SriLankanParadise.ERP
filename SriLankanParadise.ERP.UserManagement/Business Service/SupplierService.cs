@@ -1,5 +1,6 @@
 ﻿using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.Repository;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Business_Service
@@ -16,5 +17,11 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             return await _supplierRepository.GetSuppliersByCompanyId(companyId);
         }
+
+        public async Task AddSupplier(Supplier supplier)
+        {
+            await _supplierRepository.AddSupplier(supplier);
+        }
+
     }
 }

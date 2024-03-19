@@ -17,12 +17,11 @@
         public DateTime RequisitionDate { get; set; }
 
         public string PurposeOfRequest { get; set; } = null!;
+        public DateTime ExpectedDeliveryDate { get; set; }
 
-        public DateTime DeliveryDate { get; set; }
+        public int ExpectedDeliveryLocation { get; set; }
 
-        public int DeliveryLocation { get; set; }
-
-        public virtual LocationDto? DeliveryLocationNavigation { get; set; }
+        public virtual LocationDto? ExpectedDeliveryLocationNavigation { get; set; }
 
         public string? ReferenceNo { get; set; }
 
@@ -37,6 +36,10 @@
         public DateTime? ApprovedDate { get; set; }
 
         public int? CompanyId { get; set; }
+
+        public DateTime? CreatedDate { get; set; }
+
+        public DateTime? LastUpdatedDate { get; set; }
 
         public virtual IEnumerable<PurchaseRequisitionDetailDto>? PurchaseRequisitionDetails { get; set;}
     }

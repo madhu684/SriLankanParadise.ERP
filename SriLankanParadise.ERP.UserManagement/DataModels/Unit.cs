@@ -11,5 +11,7 @@ public partial class Unit
 
     public bool? Status { get; set; }
 
+    public int? CompanyId { get; set; }
+
     public virtual ICollection<ItemMaster> ItemMasters { get; set; } = new List<ItemMaster>();
 }

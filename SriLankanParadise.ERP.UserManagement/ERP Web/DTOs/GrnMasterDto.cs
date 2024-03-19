@@ -28,8 +28,9 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public DateTime? ApprovedDate { get; set; }
 
-        public decimal? TotalAmount { get; set; }
+        public DateTime? CreatedDate { get; set; }
 
+        public DateTime? LastUpdatedDate { get; set; }
         public virtual IEnumerable<GrnDetailDto>? GrnDetails { get; set; }
 
     }

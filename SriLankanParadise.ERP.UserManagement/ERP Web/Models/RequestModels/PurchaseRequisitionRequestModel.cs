@@ -15,9 +15,9 @@
 
         public string PurposeOfRequest { get; set; } = null!;
 
-        public DateTime DeliveryDate { get; set; }
+        public DateTime ExpectedDeliveryDate { get; set; }
 
-        public int DeliveryLocation { get; set; }
+        public int ExpectedDeliveryLocation { get; set; }
 
         public string? ReferenceNo { get; set; }
 
@@ -32,6 +32,10 @@
         public DateTime? ApprovedDate { get; set; }
 
         public int? CompanyId { get; set; }
+
+        public DateTime? CreatedDate { get; set; }
+
+        public DateTime? LastUpdatedDate { get; set; }
 
         public int PermissionId { get; set; }
     }

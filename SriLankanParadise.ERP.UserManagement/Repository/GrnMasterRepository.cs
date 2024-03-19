@@ -47,9 +47,11 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             try
             {
                 var purchaseOrders = await _dbContext.GrnMasters
-                    .Where(gm => !gm.Status.ToString().StartsWith("0") && gm.CompanyId == companyId)
+                    .Where(gm => !gm.Status.ToString().EndsWith("0") && gm.CompanyId == companyId)
                     .Include(gm => gm.PurchaseOrder)
                     .Include(gm => gm.GrnDetails)
+                    .ThenInclude(gd => gd.Item)
+                    .ThenInclude(im => im.Unit)
                     .ToListAsync();
 
                 return purchaseOrders.Any() ? purchaseOrders : null;
@@ -69,6 +71,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Where(gm => gm.ReceivedUserId == userId)
                     .Include(gm => gm.PurchaseOrder)
                     .Include(gm => gm.GrnDetails)
+                    .ThenInclude(gd => gd.Item)
+                    .ThenInclude(im => im.Unit)
                     .ToListAsync();
 
 
@@ -88,6 +92,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Where(gm => gm.GrnMasterId == grnMasterId)
                     .Include(gm => gm.PurchaseOrder)
                     .Include(gm => gm.GrnDetails)
+                    .ThenInclude(gd => gd.Item)
+                    .ThenInclude(im => im.Unit)
                     .FirstOrDefaultAsync();
 
                 return purchaseOrder;
@@ -137,6 +143,25 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
              catch (Exception)
              {
 
+                 throw;
+             }
+         }
+
+         public async Task<IEnumerable<GrnMaster>> GetGrnMastersByPurchaseOrderId(int purchaseOrderId)
+         {
+             try
+             {
+                 var grnMasters = await _dbContext.GrnMasters
+                     .Where(gm => gm.PurchaseOrderId == purchaseOrderId)
+                     .Include(gm => gm.GrnDetails)
+                     .ThenInclude(gd => gd.Item)
+                     .ThenInclude(im => im.Unit)
+                     .ToListAsync();
+
+                 return grnMasters.Any() ? grnMasters : null;
+             }
+             catch (Exception)
+             {
                  throw;
              }
          }
