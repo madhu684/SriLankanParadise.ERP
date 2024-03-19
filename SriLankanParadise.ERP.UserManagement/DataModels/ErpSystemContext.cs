@@ -400,6 +400,7 @@ public partial class ErpSystemContext : DbContext
 
             entity.Property(e => e.CostPrice).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.CreatedBy).HasMaxLength(50);
+            entity.Property(e => e.ExpiryDate).HasColumnType("date");
             entity.Property(e => e.SellingPrice).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.Batch).WithMany(p => p.ItemBatches)

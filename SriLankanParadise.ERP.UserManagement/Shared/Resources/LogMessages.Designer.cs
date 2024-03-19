@@ -574,6 +574,24 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Item batch not found.
+        /// </summary>
+        public static string ItemBatchNotFound {
+            get {
+                return ResourceManager.GetString("ItemBatchNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item batch updated successfully.
+        /// </summary>
+        public static string ItemBatchUpdated {
+            get {
+                return ResourceManager.GetString("ItemBatchUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Item master created successfully.
         /// </summary>
         public static string ItemMasterCreated {

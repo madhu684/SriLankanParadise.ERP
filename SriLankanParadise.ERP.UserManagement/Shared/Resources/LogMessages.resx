@@ -288,6 +288,12 @@
   <data name="ItemBatchHasGrnDetailCreated" xml:space="preserve">
     <value>ItemBatchHasGrnDetail created successfully</value>
   </data>
+  <data name="ItemBatchNotFound" xml:space="preserve">
+    <value>Item batch not found</value>
+  </data>
+  <data name="ItemBatchUpdated" xml:space="preserve">
+    <value>Item batch updated successfully</value>
+  </data>
   <data name="ItemMasterCreated" xml:space="preserve">
     <value>Item master created successfully</value>
   </data>

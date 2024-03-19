@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using SriLankanParadise.ERP.UserManagement.Business_Service;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
@@ -131,6 +132,69 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
             return Response;
+        }
+
+        [HttpGet("GetItemBatchesByItemMasterId")]
+        public async Task<ApiResponseModel> GetItemBatchesByItemMasterId(int itemMasterId, int companyId)
+        {
+            try
+            {
+                var itemBatches = await _itemBatchService.GetItemBatchesByItemMasterId(itemMasterId,companyId);
+                if (itemBatches != null)
+                {
+                    var itemBatchDtos = _mapper.Map<IEnumerable<ItemBatchDto>>(itemBatches);
+                    AddResponseMessage(Response, LogMessages.ItemBatchesRetrieved, itemBatchDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.ItemBatchesNotFound);
+                    AddResponseMessage(Response, LogMessages.ItemBatchesNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpPut("{batchId}/{itemMasterId}")]
+        public async Task<ApiResponseModel> UpdateItemBatch(int batchId, int itemMasterId, ItemBatchRequestModel itemBatchRequest)
+        {
+            try
+            {
+                var existingItemBatch = await _itemBatchService.GetItemBatchByBatchIdAndItemMasterId(batchId, itemMasterId);
+                if (existingItemBatch == null)
+                {
+                    _logger.LogWarning(LogMessages.ItemBatchNotFound);
+                    return AddResponseMessage(Response, LogMessages.ItemBatchNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+                var updatedItemBatch = _mapper.Map<ItemBatch>(itemBatchRequest);
+                updatedItemBatch.BatchId = batchId; // Ensure the ID is not changed
+                updatedItemBatch.ItemMasterId = itemMasterId;
+
+                await _itemBatchService.UpdateItemBatch(existingItemBatch.BatchId, existingItemBatch.ItemMasterId, updatedItemBatch);
+
+                // Create action log
+                var actionLog = new ActionLogModel()
+                {
+                    ActionId = itemBatchRequest.PermissionId,
+                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                    Timestamp = DateTime.UtcNow
+                };
+                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+
+                _logger.LogInformation(LogMessages.ItemBatchUpdated);
+                return AddResponseMessage(Response, LogMessages.ItemBatchUpdated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
         }
     }
 }

@@ -25,6 +25,8 @@ public partial class ItemBatch
 
     public int? LocationId { get; set; }
 
+    public DateTime? ExpiryDate { get; set; }
+
     public virtual Batch Batch { get; set; } = null!;
 
     public virtual ICollection<ItemBatchHasGrnDetail> ItemBatchHasGrnDetails { get; set; } = new List<ItemBatchHasGrnDetail>();
