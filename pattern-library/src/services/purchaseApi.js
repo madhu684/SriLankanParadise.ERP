@@ -799,3 +799,41 @@ export const get_issue_masters_by_requisition_master_id_api = async (
     throw error;
   }
 };
+
+//item batch update related apis
+export const get_item_batches_by_item_master_id_api = async (
+  itemMasterId,
+  companyId
+) => {
+  try {
+    const response = await api.get(
+      `/itemBatch/GetItemBatchesByItemMasterId?itemMasterId=${itemMasterId}&companyId=${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const put_item_batch_api = async (
+  batchId,
+  itemMasterId,
+  itemBatchData
+) => {
+  try {
+    const response = await api.put(
+      `/itemBatch/${batchId}/${itemMasterId}`,
+      itemBatchData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

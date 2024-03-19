@@ -86,7 +86,7 @@ const useMinList = () => {
           );
           if (
             minResponse.data.result?.filter((im) => im.issueType === "MIN") ===
-            null
+            (null || undefined)
           ) {
             setMins([]);
           } else {

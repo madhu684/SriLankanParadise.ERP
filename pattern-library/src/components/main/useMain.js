@@ -13,6 +13,7 @@ import MaterialRequisitionList from "../materialRequisition/materialRequisitionL
 import TransferRequisitionList from "../transferRequisition/transferRequisitionList/transferRequisitionList.jsx";
 import MinList from "../min/minList/minList.jsx";
 import TinList from "../tin/tinList/tinList.jsx";
+import ItemBatchUpdate from "../itemBatch/itemBatchUpdate/itemBatchUpdate.jsx";
 
 const useMain = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -97,6 +98,8 @@ const useMain = () => {
         return <MinList />;
       case "Transfer Issue Notes":
         return <TinList />;
+      case "Item Batches":
+        return <ItemBatchUpdate />;
       default:
         return null;
     }

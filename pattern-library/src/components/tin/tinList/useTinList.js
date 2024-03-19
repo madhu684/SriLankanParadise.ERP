@@ -86,7 +86,7 @@ const useTinList = () => {
           );
           if (
             tinResponse.data.result?.filter((im) => im.issueType === "TIN") ===
-            null
+            (null || undefined)
           ) {
             setTins([]);
           } else {
