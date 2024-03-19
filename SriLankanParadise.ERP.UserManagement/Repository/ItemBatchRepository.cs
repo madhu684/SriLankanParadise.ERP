@@ -48,6 +48,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var itemBatches = await _dbContext.ItemBatches
                     .Where(ib => ib.Status == true && ib.CompanyId == companyId)
+                    .Include(ib => ib.Batch)
                     .ToListAsync();
 
                 return itemBatches.Any() ? itemBatches : null;
@@ -55,6 +56,22 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             catch (Exception)
             {
 
+                throw;
+            }
+        }
+
+        public async Task<ItemBatch> GetItemBatchByBatchIdAndItemMasterId(int batchId, int itemMasterId)
+        {
+            try
+            {
+                var itemBatch = await _dbContext.ItemBatches
+                    .Where(ib => ib.BatchId == batchId && ib.ItemMasterId == itemMasterId)
+                    .FirstOrDefaultAsync();
+
+                return itemBatch;
+            }
+            catch (Exception)
+            {
                 throw;
             }
         }
@@ -78,26 +95,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         }
 
         
-        public async Task UpdateItemMaster(int itemMasterId, ItemMaster itemMaster)
-        {
-            try
-            {
-                var existItemMaster = await _dbContext.ItemMasters.FindAsync(itemMasterId);
-
-                if (existItemMaster != null)
-                {
-                    _dbContext.Entry(existItemMaster).CurrentValues.SetValues(itemMaster);
-                    await _dbContext.SaveChangesAsync();
-                }
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-        
-        }
-
         
         public async Task DeleteItemMaster(int itemMasterId)
         {
@@ -124,6 +121,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var itemMasters = await _dbContext.ItemBatches
                     .Where(ib => ib.CreatedUserId == userId)
+                    .Include(ib => ib.Batch)
                     .ToListAsync();
 
                 return itemMasters.Any() ? itemMasters : null;
@@ -133,6 +131,45 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
 
                 throw;
             }
+        }
+
+        public async Task<IEnumerable<ItemBatch>> GetItemBatchesByItemMasterId(int itemMasterId, int companyId)
+        {
+            try
+            {
+                var itemBatches = await _dbContext.ItemBatches
+                    .Where(ib => ib.ItemMasterId == itemMasterId && ib.CompanyId == companyId)
+                    .Include(ib => ib.Batch)
+                    .Include(ib => ib.ItemMaster)
+                    .ToListAsync();
+
+                return itemBatches.Any() ? itemBatches : null;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task UpdateItemBatch(int batchId, int itemMasterId, ItemBatch itemBatch)
+        {
+            try
+            {
+                var existItemBatch = await _dbContext.ItemBatches.FindAsync( batchId, itemMasterId);
+
+                if (existItemBatch != null)
+                {
+                    _dbContext.Entry(existItemBatch).CurrentValues.SetValues(itemBatch);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
         }
     }
 }

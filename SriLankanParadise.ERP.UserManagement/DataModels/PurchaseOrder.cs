@@ -11,8 +11,6 @@ public partial class PurchaseOrder
 
     public DateTime? OrderDate { get; set; }
 
-    public DateTime? DeliveryDate { get; set; }
-
     public decimal? TotalAmount { get; set; }
 
     public int Status { get; set; }
@@ -32,6 +30,8 @@ public partial class PurchaseOrder
     public string? ReferenceNo { get; set; }
 
     public int? CompanyId { get; set; }
+
+    public DateTime? LastUpdatedDate { get; set; }
 
     public virtual ICollection<GrnMaster> GrnMasters { get; set; } = new List<GrnMaster>();
 

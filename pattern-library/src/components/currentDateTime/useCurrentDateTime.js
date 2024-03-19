@@ -1,6 +1,10 @@
+import { useState, useEffect } from "react";
+
 const useCurrentDateTime = () => {
-  const formatDateTime = () => {
-    const currentDateTime = new Date();
+  const [currentDateTime, setCurrentDateTime] = useState(formatDateTime());
+
+  function formatDateTime() {
+    const now = new Date();
     const options = {
       weekday: "long",
       year: "numeric",
@@ -8,12 +12,22 @@ const useCurrentDateTime = () => {
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-      second: "2-digit",
     };
-    return currentDateTime.toLocaleDateString("en-US", options);
-  };
+    return now.toLocaleDateString("en-US", options);
+  }
 
-  return formatDateTime();
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const seconds = new Date().getSeconds();
+      if (seconds === 0) {
+        setCurrentDateTime(formatDateTime());
+      }
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  return currentDateTime;
 };
 
 export default useCurrentDateTime;

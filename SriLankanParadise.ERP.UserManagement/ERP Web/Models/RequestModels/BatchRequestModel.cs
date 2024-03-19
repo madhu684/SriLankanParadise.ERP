@@ -2,6 +2,8 @@
 {
     public class BatchRequestModel
     {
+        public string? BatchRef { get; set; }
+
         public DateTime? Date { get; set; }
 
         public int? CompanyId { get; set; }

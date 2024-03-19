@@ -6,5 +6,7 @@
         public string ModuleName { get; set; } = null!;
 
         public bool Status { get; set; }
+
+        public virtual IEnumerable<SubModuleDto?> SubModules { get; set; }
     }
 }

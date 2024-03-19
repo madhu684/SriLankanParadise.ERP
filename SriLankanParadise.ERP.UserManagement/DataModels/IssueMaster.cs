@@ -25,6 +25,10 @@ public partial class IssueMaster
 
     public string? IssueType { get; set; }
 
+    public string? ReferenceNumber { get; set; }
+
+    public int? ApprovedUserId { get; set; }
+
     public virtual ICollection<IssueDetail> IssueDetails { get; set; } = new List<IssueDetail>();
 
     public virtual RequisitionMaster RequisitionMaster { get; set; } = null!;

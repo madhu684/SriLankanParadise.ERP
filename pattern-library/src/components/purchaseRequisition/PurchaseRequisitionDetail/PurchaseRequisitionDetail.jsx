@@ -2,6 +2,8 @@ import React from "react";
 import { Modal, Button } from "react-bootstrap";
 import usePurchaseRequisitionDetial from "./usePurchaseRequisitionDetail";
 import usePurchaseRequisitionList from "../purchaseRequisitionList/usePurchaseRequisitionList";
+import moment from "moment";
+import "moment-timezone";
 
 const PurchaseRequisitionDetail = ({
   show,
@@ -31,8 +33,22 @@ const PurchaseRequisitionDetail = ({
             </span>
           </div>
         </div>
-        <div className="row">
+        <div className="row mb-3">
           <div className="col-md-6">
+            <p>
+              <strong>Created Date:</strong>{" "}
+              {moment
+                .utc(purchaseRequisition?.createdDate)
+                .tz("Asia/Colombo")
+                .format("YYYY-MM-DD hh:mm:ss A")}
+            </p>
+            <p>
+              <strong>Last Updated Date:</strong>{" "}
+              {moment
+                .utc(purchaseRequisition?.lastUpdatedDate)
+                .tz("Asia/Colombo")
+                .format("YYYY-MM-DD hh:mm:ss A")}
+            </p>
             <p>
               <strong>Requested By:</strong> {purchaseRequisition.requestedBy}
             </p>
@@ -45,6 +61,20 @@ const PurchaseRequisitionDetail = ({
             <p>
               <strong>Contact Number:</strong> {purchaseRequisition.contactNo}
             </p>
+            {purchaseRequisition.status === 2 && (
+              <>
+                <p>
+                  <strong>Approved By:</strong> {purchaseRequisition.approvedBy}
+                </p>
+                <p>
+                  <strong>Approved Date:</strong>{" "}
+                  {moment
+                    .utc(purchaseRequisition?.approvedDate)
+                    .tz("Asia/Colombo")
+                    .format("YYYY-MM-DD hh:mm:ss A")}
+                </p>
+              </>
+            )}
           </div>
           <div className="col-md-6">
             <p>
@@ -56,12 +86,15 @@ const PurchaseRequisitionDetail = ({
               {purchaseRequisition.purposeOfRequest}
             </p>
             <p>
-              <strong>Delivery Date:</strong>{" "}
-              {purchaseRequisition?.deliveryDate?.split("T")[0]}
+              <strong>Expected Delivery Date:</strong>{" "}
+              {purchaseRequisition?.expectedDeliveryDate?.split("T")[0]}
             </p>
             <p>
-              <strong>Delivery Location:</strong>{" "}
-              {purchaseRequisition.deliveryLocationNavigation?.locationName}
+              <strong>Expected Delivery Location:</strong>{" "}
+              {
+                purchaseRequisition.expectedDeliveryLocationNavigation
+                  ?.locationName
+              }
             </p>
             <p>
               <strong>Reference Number:</strong>{" "}
@@ -74,33 +107,33 @@ const PurchaseRequisitionDetail = ({
         <table className="table mt-2">
           <thead>
             <tr>
-              <th>Item Category</th>
-              <th>Item ID</th>
-              <th>Name</th>
+              <th>Item Name</th>
+              <th>Unit</th>
               <th>Quantity</th>
               <th>Unit Price</th>
-              <th>Total Price</th>
+              <th className="text-end">Total Price</th>
             </tr>
           </thead>
           <tbody>
             {purchaseRequisition.purchaseRequisitionDetails.map(
               (item, index) => (
                 <tr key={index}>
-                  <td>{item.itemCategory}</td>
-                  <td>{item.itemId}</td>
-                  <td>{item.name}</td>
+                  <td>{item.itemMaster?.itemName}</td>
+                  <td>{item.itemMaster?.unit.unitName}</td>
                   <td>{item.quantity}</td>
                   <td>{item.unitPrice.toFixed(2)}</td>
-                  <td>{item.totalPrice.toFixed(2)}</td>
+                  <td className="text-end">{item.totalPrice.toFixed(2)}</td>
                 </tr>
               )
             )}
           </tbody>
           <tfoot>
             <tr>
-              <td colSpan="4"></td>
+              <td colSpan="3"></td>
               <th>Total Amount</th>
-              <td colSpan="2">{purchaseRequisition.totalAmount.toFixed(2)}</td>
+              <td className="text-end" colSpan="2">
+                {purchaseRequisition.totalAmount.toFixed(2)}
+              </td>
             </tr>
           </tfoot>
         </table>

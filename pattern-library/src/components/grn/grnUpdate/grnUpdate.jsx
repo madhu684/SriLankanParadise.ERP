@@ -1,6 +1,10 @@
 import React from "react";
 import useGrnUpdate from "./useGrnUpdate";
 import CurrentDateTime from "../../currentDateTime/currentDateTime";
+import useCompanyLogoUrl from "../../companyLogo/useCompanyLogoUrl";
+import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
+import ErrorComponent from "../../errorComponent/errorComponent";
+import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 
 const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
   const {
@@ -9,17 +13,17 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
     validFields,
     validationErrors,
     selectedPurchaseOrder,
-    purchaseOrderOptions,
+    purchaseOrders,
     statusOptions,
     alertRef,
+    isLoading,
+    isError,
+    loading,
+    loadingDraft,
     handleInputChange,
     handleItemDetailsChange,
-    handleAddItem,
-    handleRemoveItem,
     handleSubmit,
     handlePrint,
-    calculateTotalAmount,
-    handlePurchaseOrderChange,
     handleStatusChange,
   } = useGrnUpdate({
     grn,
@@ -28,6 +32,15 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
       handleUpdated();
     },
   });
+  const companyLogoUrl = useCompanyLogoUrl();
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (isError) {
+    return <ErrorComponent error={"Error fetching data"} />;
+  }
 
   return (
     <div className="container mt-4">
@@ -35,13 +48,9 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
       <div ref={alertRef}></div>
       <div className="mb-4">
         <div className="d-flex justify-content-between">
-          <img
-            src="path/to/your/logo.png"
-            alt="Company Logo"
-            className="img-fluid"
-          />
+          <img src={companyLogoUrl} alt="Company Logo" height={30} />
           <p>
-            Date and Time: <CurrentDateTime />
+            <CurrentDateTime />
           </p>
         </div>
         <h1 className="mt-2 text-center">Goods Received Note</h1>
@@ -56,7 +65,7 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
       )}
       {submissionStatus === "successSavedAsDraft" && (
         <div className="alert alert-success mb-3" role="alert">
-          GRN saved as draft, you can edit and submit it later!
+          GRN updated and saved as draft, you can edit and submit it later!
         </div>
       )}
       {submissionStatus === "error" && (
@@ -173,87 +182,71 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
           {/* Purchase Order ID Selection */}
           <div className="col-md-5">
             <h4>2. Purchase Order Details</h4>
-            <div className="mb-3 mt-3">
+            <div className="mt-3">
               <label htmlFor="purchaseOrder" className="form-label">
-                Purchase Order Reference No
+                Purchase Order
               </label>
-              <select
-                id="purchaseOrder"
-                className={`form-select ${
-                  validFields.purchaseOrderId ? "is-valid" : ""
-                } ${validationErrors.purchaseOrderId ? "is-invalid" : ""}`}
-                value={grn?.purchaseOrder?.referenceNo}
-                onChange={(e) => handlePurchaseOrderChange(e.target.value)}
-                required
-              >
-                <option value="">Select Reference Number</option>
-                {purchaseOrderOptions.map((option) => (
-                  <option key={option.referenceNo} value={option.referenceNo}>
-                    {option.referenceNo}
-                  </option>
-                ))}
-              </select>
-              {validationErrors.purchaseOrderId && (
-                <div className="invalid-feedback">
-                  {validationErrors.purchaseOrderId}
-                </div>
-              )}
             </div>
 
-            {/* Display selected Purchase Order details */}
+            {/* Additional Purchase Order Information */}
             {selectedPurchaseOrder && (
-              <div className="mb-3">
-                <p>Supplier: {selectedPurchaseOrder?.supplier?.supplierName}</p>
-                <p>
-                  Order Date:{" "}
-                  {selectedPurchaseOrder?.orderDate?.split("T")[0] ?? ""}
-                </p>
-                <p>
-                  Delivery Date:{" "}
-                  {selectedPurchaseOrder?.deliveryDate?.split("T")[0] ?? ""}
-                </p>
+              <div className="card mb-3">
+                <div className="card-header">Selected Purchase Order</div>
+                <div className="card-body">
+                  <p>
+                    Purchase Order Reference No:{" "}
+                    {selectedPurchaseOrder?.referenceNo}
+                  </p>
+                  <p>
+                    Supplier: {selectedPurchaseOrder?.supplier?.supplierName}
+                  </p>
+                  <p>
+                    Order Date:{" "}
+                    {selectedPurchaseOrder?.orderDate?.split("T")[0] ?? ""}
+                  </p>
+                </div>
               </div>
             )}
           </div>
         </div>
 
         {/* Item Details */}
-        <h4>2. Item Details</h4>
-        {formData.itemDetails.length > 0 && (
+        <h4>3. Item Details</h4>
+        {formData.itemDetails.length > 0 && formData.itemDetails.length > 0 && (
           <div className="table-responsive mb-2">
             <table className="table">
               <thead>
                 <tr>
-                  <th>Item ID</th>
+                  <th>Item Name</th>
+                  <th>Unit</th>
+                  <th>Ordered Quantity</th>
+                  <th>Remaining Quantity</th>
                   <th>Received Quantity</th>
-                  <th>Accepted Quantity</th>
                   <th>Rejected Quantity</th>
+                  <th>Free Quantity</th>
+                  <th>Expiry Date</th>
                   <th>Unit Price</th>
-                  <th>Total Price</th>
-                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
                 {formData.itemDetails.map((item, index) => (
                   <tr key={index}>
-                    <td>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={item.itemId}
-                        onChange={(e) =>
-                          handleItemDetailsChange(
-                            index,
-                            "itemId",
-                            e.target.value
-                          )
-                        }
-                      />
-                    </td>
+                    <td>{item.name}</td>
+                    <td>{item.unit}</td>
+                    <td>{item.quantity}</td>
+                    <td>{item.remainingQuantity}</td>
                     <td>
                       <input
                         type="number"
-                        className="form-control"
+                        className={`form-control ${
+                          validFields[`receivedQuantity_${index}`]
+                            ? "is-valid"
+                            : ""
+                        } ${
+                          validationErrors[`receivedQuantity_${index}`]
+                            ? "is-invalid"
+                            : ""
+                        }`}
                         value={item.receivedQuantity}
                         onChange={(e) =>
                           handleItemDetailsChange(
@@ -263,27 +256,25 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                           )
                         }
                       />
+                      {validationErrors[`receivedQuantity_${index}`] && (
+                        <div className="invalid-feedback">
+                          {validationErrors[`receivedQuantity_${index}`]}
+                        </div>
+                      )}
                     </td>
                     <td>
                       <input
                         type="number"
-                        className="form-control"
-                        value={item.acceptedQuantity}
-                        onChange={(e) =>
-                          handleItemDetailsChange(
-                            index,
-                            "acceptedQuantity",
-                            e.target.value
-                          )
-                        }
-                        max={item.receivedQuantity}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        className="form-control"
-                        value={item.receivedQuantity - item.acceptedQuantity}
+                        className={`form-control ${
+                          validFields[`rejectedQuantity_${index}`]
+                            ? "is-valid"
+                            : ""
+                        } ${
+                          validationErrors[`rejectedQuantity_${index}`]
+                            ? "is-invalid"
+                            : ""
+                        }`}
+                        value={item.rejectedQuantity}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
@@ -292,11 +283,61 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                           )
                         }
                       />
+                      {validationErrors[`rejectedQuantity_${index}`] && (
+                        <div className="invalid-feedback">
+                          {validationErrors[`rejectedQuantity_${index}`]}
+                        </div>
+                      )}
                     </td>
                     <td>
                       <input
                         type="number"
                         className="form-control"
+                        value={item.freeQuantity}
+                        onChange={(e) =>
+                          handleItemDetailsChange(
+                            index,
+                            "freeQuantity",
+                            e.target.value
+                          )
+                        }
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="date"
+                        className={`form-control ${
+                          validFields[`expiryDate_${index}`] ? "is-valid" : ""
+                        } ${
+                          validationErrors[`expiryDate_${index}`]
+                            ? "is-invalid"
+                            : ""
+                        }`}
+                        value={item.expiryDate}
+                        onChange={(e) =>
+                          handleItemDetailsChange(
+                            index,
+                            "expiryDate",
+                            e.target.value
+                          )
+                        }
+                      />
+                      {validationErrors[`expiryDate_${index}`] && (
+                        <div className="invalid-feedback">
+                          {validationErrors[`expiryDate_${index}`]}
+                        </div>
+                      )}
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        className={`form-control ${
+                          validFields[`unitPrice_${index}`] ? "is-valid" : ""
+                        } ${
+                          validationErrors[`unitPrice_${index}`]
+                            ? "is-invalid"
+                            : ""
+                        }`}
                         value={item.unitPrice}
                         onChange={(e) =>
                           handleItemDetailsChange(
@@ -306,41 +347,18 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                           )
                         }
                       />
-                    </td>
-                    <td>{item.totalPrice.toFixed(2)}</td>
-                    <td>
-                      <button
-                        type="button"
-                        className="btn btn-outline-danger"
-                        onClick={() =>
-                          handleRemoveItem(index, item?.grnDetailId)
-                        }
-                      >
-                        Delete
-                      </button>
+                      {validationErrors[`unitPrice_${index}`] && (
+                        <div className="invalid-feedback">
+                          {validationErrors[`unitPrice_${index}`]}
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
               </tbody>
-              <tfoot>
-                <tr>
-                  <td colSpan="4"></td>
-                  <th>Total Amount</th>
-                  <td colSpan="2">{calculateTotalAmount().toFixed(2)}</td>
-                </tr>
-              </tfoot>
             </table>
           </div>
         )}
-
-        {/* Add button to add more items */}
-        <button
-          type="button"
-          className="btn btn-outline-primary mb-3"
-          onClick={handleAddItem}
-        >
-          Add Item
-        </button>
 
         {/* Actions */}
         <div className="mb-3">
@@ -348,20 +366,41 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
             type="button"
             className="btn btn-primary me-2"
             onClick={() => handleSubmit(false)}
+            disabled={
+              !formData.itemDetails.length > 0 ||
+              loading ||
+              loadingDraft ||
+              submissionStatus !== null
+            }
           >
-            Submit
+            {loading && submissionStatus === null ? (
+              <ButtonLoadingSpinner text="Updating..." />
+            ) : (
+              "Update and Submit"
+            )}
           </button>
           <button
             type="button"
             className="btn btn-secondary me-2"
             onClick={() => handleSubmit(true)}
+            disabled={
+              !formData.itemDetails.length > 0 ||
+              loading ||
+              loadingDraft ||
+              submissionStatus !== null
+            }
           >
-            Save as Draft
+            {loadingDraft && submissionStatus === null ? (
+              <ButtonLoadingSpinner text="Saving as Draft..." />
+            ) : (
+              "Save as Draft"
+            )}
           </button>
           <button
             type="button"
             className="btn btn-success me-2"
             onClick={handlePrint}
+            disabled={loading || loadingDraft || submissionStatus !== null}
           >
             Print
           </button>
@@ -369,6 +408,7 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
             type="button"
             className="btn btn-danger"
             onClick={handleClose}
+            disabled={loading || loadingDraft || submissionStatus !== null}
           >
             Cancel
           </button>

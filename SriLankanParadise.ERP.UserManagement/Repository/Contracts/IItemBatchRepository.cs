@@ -10,6 +10,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
 
         Task<IEnumerable<ItemBatch>> GetItemBatchesByCompanyId(int companyId);
 
+        Task<ItemBatch> GetItemBatchByBatchIdAndItemMasterId(int batchId, int itemMasterId);
+
         /*Task<ItemBatch> GetItemBatchByItemBatchId(int itemBatchId);
 
         Task UpdateItemBatch(int itemBatchId, ItemBatch itemBatch);
@@ -17,5 +19,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task DeleteItemBatch(int itemBatchId);*/
 
         Task<IEnumerable<ItemBatch>> GetItemBatchesByUserId(int userId);
+
+        Task<IEnumerable<ItemBatch>> GetItemBatchesByItemMasterId(int itemMasterId, int companyId);
+
+        Task UpdateItemBatch(int batchId, int itemMasterId, ItemBatch itemBatch);
     }
 }

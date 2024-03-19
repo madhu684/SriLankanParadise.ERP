@@ -5,6 +5,9 @@ using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using System.Net;
 using SriLankanParadise.ERP.UserManagement.Shared.Resources;
+using SriLankanParadise.ERP.UserManagement.Business_Service;
+using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 
 namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 {
@@ -48,6 +51,37 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     _logger.LogWarning(LogMessages.SuppliersNotFound);
                     AddResponseMessage(Response, LogMessages.SuppliersNotFound, null, true, HttpStatusCode.NotFound);
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpPost]
+        public async Task<ApiResponseModel> AddSupplier(SupplierRequestModel supplierRequest)
+        {
+            try
+            {
+                var supplier = _mapper.Map<Supplier>(supplierRequest);
+                await _supplierService.AddSupplier(supplier);
+
+                // Create action log
+                var actionLog = new ActionLogModel()
+                {
+                    ActionId = supplierRequest.PermissionId,
+                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                    Timestamp = DateTime.UtcNow
+                };
+                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+
+                // send response
+                var supplierDto= _mapper.Map<SupplierDto>(supplier);
+                _logger.LogInformation(LogMessages.SupplierCreated);
+                AddResponseMessage(Response, LogMessages.SupplierCreated, supplierDto, true, HttpStatusCode.Created);
             }
             catch (Exception ex)
             {

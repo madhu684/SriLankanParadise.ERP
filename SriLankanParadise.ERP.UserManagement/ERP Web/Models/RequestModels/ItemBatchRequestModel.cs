@@ -22,6 +22,8 @@
 
         public int? LocationId { get; set; }
 
+        public DateTime? ExpiryDate { get; set; }
+
         public int PermissionId { get; set; }
     }
 }

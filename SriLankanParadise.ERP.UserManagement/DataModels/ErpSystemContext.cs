@@ -318,14 +318,17 @@ public partial class ErpSystemContext : DbContext
 
             entity.ToTable("GrnDetail");
 
-            entity.Property(e => e.ItemId).HasMaxLength(50);
-            entity.Property(e => e.TotalPrice).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.ExpiryDate).HasColumnType("date");
             entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.GrnMaster).WithMany(p => p.GrnDetails)
                 .HasForeignKey(d => d.GrnMasterId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__GrnDetail__GrnMa__01D345B0");
+
+            entity.HasOne(d => d.Item).WithMany(p => p.GrnDetails)
+                .HasForeignKey(d => d.ItemId)
+                .HasConstraintName("FK_GrnDetail_ItemMaster");
         });
 
         modelBuilder.Entity<GrnMaster>(entity =>
@@ -335,11 +338,12 @@ public partial class ErpSystemContext : DbContext
             entity.ToTable("GrnMaster");
 
             entity.Property(e => e.ApprovedBy).HasMaxLength(50);
-            entity.Property(e => e.ApprovedDate).HasColumnType("date");
+            entity.Property(e => e.ApprovedDate).HasColumnType("datetime");
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
             entity.Property(e => e.GrnDate).HasColumnType("date");
+            entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
             entity.Property(e => e.ReceivedBy).HasMaxLength(50);
             entity.Property(e => e.ReceivedDate).HasColumnType("date");
-            entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.PurchaseOrder).WithMany(p => p.GrnMasters)
                 .HasForeignKey(d => d.PurchaseOrderId)
@@ -380,6 +384,7 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.CreatedBy).HasMaxLength(50);
             entity.Property(e => e.IssueDate).HasColumnType("datetime");
             entity.Property(e => e.IssueType).HasMaxLength(50);
+            entity.Property(e => e.ReferenceNumber).HasMaxLength(255);
 
             entity.HasOne(d => d.RequisitionMaster).WithMany(p => p.IssueMasters)
                 .HasForeignKey(d => d.RequisitionMasterId)
@@ -395,6 +400,7 @@ public partial class ErpSystemContext : DbContext
 
             entity.Property(e => e.CostPrice).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.CreatedBy).HasMaxLength(50);
+            entity.Property(e => e.ExpiryDate).HasColumnType("date");
             entity.Property(e => e.SellingPrice).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.Batch).WithMany(p => p.ItemBatches)
@@ -532,9 +538,9 @@ public partial class ErpSystemContext : DbContext
             entity.ToTable("PurchaseOrder");
 
             entity.Property(e => e.ApprovedBy).HasMaxLength(50);
-            entity.Property(e => e.ApprovedDate).HasColumnType("date");
-            entity.Property(e => e.DeliveryDate).HasColumnType("date");
-            entity.Property(e => e.OrderDate).HasColumnType("date");
+            entity.Property(e => e.ApprovedDate).HasColumnType("datetime");
+            entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
+            entity.Property(e => e.OrderDate).HasColumnType("datetime");
             entity.Property(e => e.OrderedBy).HasMaxLength(50);
             entity.Property(e => e.ReferenceNo)
                 .HasMaxLength(20)
@@ -554,11 +560,12 @@ public partial class ErpSystemContext : DbContext
 
             entity.ToTable("PurchaseOrderDetail");
 
-            entity.Property(e => e.ItemCategory).HasMaxLength(50);
-            entity.Property(e => e.ItemId).HasMaxLength(50);
-            entity.Property(e => e.Name).HasMaxLength(50);
             entity.Property(e => e.TotalPrice).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
+
+            entity.HasOne(d => d.ItemMaster).WithMany(p => p.PurchaseOrderDetails)
+                .HasForeignKey(d => d.ItemMasterId)
+                .HasConstraintName("FK_PurchaseOrderDetail_ItemMaster");
 
             entity.HasOne(d => d.PurchaseOrder).WithMany(p => p.PurchaseOrderDetails)
                 .HasForeignKey(d => d.PurchaseOrderId)
@@ -573,19 +580,21 @@ public partial class ErpSystemContext : DbContext
             entity.ToTable("PurchaseRequisition");
 
             entity.Property(e => e.ApprovedBy).HasMaxLength(50);
-            entity.Property(e => e.ApprovedDate).HasColumnType("date");
+            entity.Property(e => e.ApprovedDate).HasColumnType("datetime");
             entity.Property(e => e.ContactNo).HasMaxLength(12);
-            entity.Property(e => e.DeliveryDate).HasColumnType("date");
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
             entity.Property(e => e.Department).HasMaxLength(50);
             entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.ExpectedDeliveryDate).HasColumnType("date");
+            entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
             entity.Property(e => e.PurposeOfRequest).HasMaxLength(250);
             entity.Property(e => e.ReferenceNo).HasMaxLength(50);
             entity.Property(e => e.RequestedBy).HasMaxLength(50);
             entity.Property(e => e.RequisitionDate).HasColumnType("date");
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
 
-            entity.HasOne(d => d.DeliveryLocationNavigation).WithMany(p => p.PurchaseRequisitions)
-                .HasForeignKey(d => d.DeliveryLocation)
+            entity.HasOne(d => d.ExpectedDeliveryLocationNavigation).WithMany(p => p.PurchaseRequisitions)
+                .HasForeignKey(d => d.ExpectedDeliveryLocation)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PurchaseRequisition_Location");
         });
@@ -596,11 +605,12 @@ public partial class ErpSystemContext : DbContext
 
             entity.ToTable("PurchaseRequisitionDetail");
 
-            entity.Property(e => e.ItemCategory).HasMaxLength(50);
-            entity.Property(e => e.ItemId).HasMaxLength(50);
-            entity.Property(e => e.Name).HasMaxLength(50);
             entity.Property(e => e.TotalPrice).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
+
+            entity.HasOne(d => d.ItemMaster).WithMany(p => p.PurchaseRequisitionDetails)
+                .HasForeignKey(d => d.ItemMasterId)
+                .HasConstraintName("FK_PurchaseRequisitionDetail_ItemMaster");
 
             entity.HasOne(d => d.PurchaseRequisition).WithMany(p => p.PurchaseRequisitionDetails)
                 .HasForeignKey(d => d.PurchaseRequisitionId)
@@ -634,9 +644,18 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.ApprovedBy).HasMaxLength(50);
             entity.Property(e => e.ApprovedDate).HasColumnType("datetime");
             entity.Property(e => e.PurposeOfRequest).HasMaxLength(200);
+            entity.Property(e => e.ReferenceNumber).HasMaxLength(255);
             entity.Property(e => e.RequestedBy).HasMaxLength(50);
             entity.Property(e => e.RequisitionDate).HasColumnType("datetime");
             entity.Property(e => e.RequisitionType).HasMaxLength(50);
+
+            entity.HasOne(d => d.RequestedFromLocation).WithMany(p => p.RequisitionMasterRequestedFromLocations)
+                .HasForeignKey(d => d.RequestedFromLocationId)
+                .HasConstraintName("FK_RequestedFromLocation_RequisitionMaster");
+
+            entity.HasOne(d => d.RequestedToLocation).WithMany(p => p.RequisitionMasterRequestedToLocations)
+                .HasForeignKey(d => d.RequestedToLocationId)
+                .HasConstraintName("FK_RequestedToLocation_RequisitionMaster");
         });
 
         modelBuilder.Entity<Role>(entity =>

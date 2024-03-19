@@ -135,6 +135,20 @@ builder.Services.AddScoped<IItemBatchHasGrnDetailService, ItemBatchHasGrnDetailS
 builder.Services.AddScoped<IItemBatchHasGrnDetailRepository, ItemBatchHasGrnDetailRepository>();
 builder.Services.AddScoped<IItemTypeService, ItemTypeService>();
 builder.Services.AddScoped<IItemTypeRepository, ItemTypeRepository>();
+builder.Services.AddScoped<IRequisitionMasterService, RequisitionMasterService>();
+builder.Services.AddScoped<IRequisitionMasterRepository, RequisitionMasterRepository>();
+builder.Services.AddScoped<IRequisitionDetailService, RequisitionDetailService>();
+builder.Services.AddScoped<IRequisitionDetailRepository, RequisitionDetailRepository>();
+builder.Services.AddScoped<IChargesAndDeductionService, ChargesAndDeductionService>();
+builder.Services.AddScoped<IChargesAndDeductionRepository, ChargesAndDeductionRepository>();
+builder.Services.AddScoped<IChargesAndDeductionAppliedService, ChargesAndDeductionAppliedService>();
+builder.Services.AddScoped<IChargesAndDeductionAppliedRepository, ChargesAndDeductionAppliedRepository>();
+builder.Services.AddScoped<ITransactionTypeService, TransactionTypeService>();
+builder.Services.AddScoped<ITransactionTypeRepository, TransactionTypeRepository>();
+builder.Services.AddScoped<IIssueMasterService, IssueMasterService>();
+builder.Services.AddScoped<IIssueMasterRepository, IssueMasterRepository>();
+builder.Services.AddScoped<IIssueDetailService, IssueDetailService>();
+builder.Services.AddScoped<IIssueDetailRepository, IssueDetailRepository>();
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

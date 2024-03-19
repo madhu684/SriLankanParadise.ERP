@@ -425,3 +425,415 @@ export const get_company_suppliers_api = async (companyId) => {
     throw error;
   }
 };
+
+export const post_supplier_api = async (formData) => {
+  try {
+    const response = await api.post("/supplier", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+//requisition master apis
+export const post_requisition_master_api = async (formData) => {
+  try {
+    const response = await api.post("/requisitionMaster", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_requisitions_masters_api = async () => {
+  try {
+    const response = await api.get("/requisitionMaster", {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_requisition_masters_with_out_drafts_api = async (
+  companyId
+) => {
+  try {
+    const response = await api.get(
+      `/requisitionMaster/GetRequisitionMastersWithoutDraftsByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_requisition_masters_by_user_id_api = async (userId) => {
+  try {
+    const response = await api.get(
+      `/requisitionMaster/GetRequisitionMastersByUserId/${userId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const approve_requisition_master_api = async (
+  requisitionMasterId,
+  approvalData
+) => {
+  try {
+    const response = await api.patch(
+      `/requisitionMaster/approve/${requisitionMasterId}`,
+      approvalData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const post_requisition_detail_api = async (formData) => {
+  try {
+    const response = await api.post("/requisitionDetail", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+//ChargesAndDeduction apis
+export const get_charges_and_deductions_by_company_id_api = async (
+  companyId
+) => {
+  try {
+    const response = await api.get(
+      `/chargesAndDeduction/GetChargesAndDeductionsByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const post_charges_and_deductions_applied_api = async (formData) => {
+  try {
+    const response = await api.post("/chargesAndDeductionApplied", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_transaction_types_api = async () => {
+  try {
+    const response = await api.get("./transactionType/GetTransactionTypes", {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_charges_and_deductions_applied_api = async (
+  transactionTypeId,
+  transactionId,
+  companyId
+) => {
+  try {
+    const response = await api.get(
+      `/chargesAndDeductionApplied/GetChargesAndDeductionsApplied?transactionTypeId=${transactionTypeId}&transactionId=${transactionId}&companyId=${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const put_charges_and_deductions_applied_api = async (
+  chargesAndDeductionAppliedId,
+  chargesAndDeductionAppliedrData
+) => {
+  try {
+    const response = await api.put(
+      `/chargesAndDeductionApplied/${chargesAndDeductionAppliedId}`,
+      chargesAndDeductionAppliedrData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const delete_charges_and_deductions_applied_api = async (
+  chargesAndDeductionAppliedId
+) => {
+  try {
+    const response = await api.delete(
+      `/chargesAndDeductionApplied/${chargesAndDeductionAppliedId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const get_grn_masters_by_purchase_order_id_api = async (
+  purchaseOrderId
+) => {
+  try {
+    const response = await api.get(
+      `/grnMaster/GetGrnMastersByPurchaseOrderId/${purchaseOrderId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+//item batch apis
+export const post_batch_api = async (formData) => {
+  try {
+    const response = await api.post("/batch", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const post_batchHasGrnMaster_api = async (formData) => {
+  try {
+    const response = await api.post("/batchHasGrnMaster", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const post_itemBatch_api = async (formData) => {
+  try {
+    const response = await api.post("/itemBatch", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const post_itemBatchHasGrnDetail_api = async (formData) => {
+  try {
+    const response = await api.post("/itemBatchHasGrnDetail", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_item_batches_api = async (companyId) => {
+  try {
+    const response = await api.get(
+      `/itemBatch/GetItemBatchesByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+//issue master apis
+export const post_issue_master_api = async (formData) => {
+  try {
+    const response = await api.post("/issueMaster", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_issues_masters_api = async () => {
+  try {
+    const response = await api.get("/issueMaster", {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_issue_masters_with_out_drafts_api = async (companyId) => {
+  try {
+    const response = await api.get(
+      `/issueMaster/GetIssueMastersWithoutDraftsByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_issue_masters_by_user_id_api = async (userId) => {
+  try {
+    const response = await api.get(
+      `/issueMaster/GetIssueMastersByUserId/${userId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const approve_issue_master_api = async (issueMasterId, approvalData) => {
+  try {
+    const response = await api.patch(
+      `/issueMaster/approve/${issueMasterId}`,
+      approvalData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const post_issue_detail_api = async (formData) => {
+  try {
+    const response = await api.post("/issueDetail", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_issue_masters_by_requisition_master_id_api = async (
+  requisitionMasterId
+) => {
+  try {
+    const response = await api.get(
+      `/issueMaster/GetIssueMastersByRequisitionMasterId/${requisitionMasterId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+//item batch update related apis
+export const get_item_batches_by_item_master_id_api = async (
+  itemMasterId,
+  companyId
+) => {
+  try {
+    const response = await api.get(
+      `/itemBatch/GetItemBatchesByItemMasterId?itemMasterId=${itemMasterId}&companyId=${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const put_item_batch_api = async (
+  batchId,
+  itemMasterId,
+  itemBatchData
+) => {
+  try {
+    const response = await api.put(
+      `/itemBatch/${batchId}/${itemMasterId}`,
+      itemBatchData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

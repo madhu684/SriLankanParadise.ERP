@@ -207,6 +207,25 @@ export const get_item_masters_by_user_id_api = async (userId) => {
   }
 };
 
+export const get_item_masters_by_company_id_with_query_api = async (
+  companyId,
+  searchQuery,
+  itemType
+) => {
+  try {
+    const response = await api.get(
+      `/itemMaster/GetItemMastersByCompanyIdWithQuery/${companyId}?searchQuery=${searchQuery}&itemType=${itemType}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
 //item types api
 export const get_item_types_by_company_id_api = async (companyId) => {
   try {

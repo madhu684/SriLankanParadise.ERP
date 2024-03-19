@@ -27,7 +27,9 @@ public partial class GrnMaster
 
     public DateTime? ApprovedDate { get; set; }
 
-    public decimal? TotalAmount { get; set; }
+    public DateTime? CreatedDate { get; set; }
+
+    public DateTime? LastUpdatedDate { get; set; }
 
     public virtual ICollection<BatchHasGrnMaster> BatchHasGrnMasters { get; set; } = new List<BatchHasGrnMaster>();
 

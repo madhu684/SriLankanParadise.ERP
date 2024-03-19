@@ -82,7 +82,24 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<ItemBatchHasGrnDetail, ItemBatchHasGrnDetailDto>();
             CreateMap<ItemTypeRequestModel, ItemType>();
             CreateMap<ItemType, ItemTypeDto>();
-
+            CreateMap<LocationType, LocationTypeDto>();
+            CreateMap<RequisitionMasterRequestModel, RequisitionMaster>();
+            CreateMap<ApproveRequisitionMasterRequestModel, RequisitionMaster>();
+            CreateMap<RequisitionMaster, RequisitionMasterDto>();
+            CreateMap<RequisitionDetailRequestModel, RequisitionDetail>();
+            CreateMap<RequisitionDetail, RequisitionDetailDto>();
+            CreateMap<SupplierRequestModel, Supplier>();
+            CreateMap<ChargesAndDeductionRequestModel, ChargesAndDeduction>();
+            CreateMap<ChargesAndDeduction, ChargesAndDeductionDto>();
+            CreateMap<ChargesAndDeductionAppliedRequestModel, ChargesAndDeductionApplied>();
+            CreateMap<ChargesAndDeductionApplied, ChargesAndDeductionAppliedDto>();
+            CreateMap<TransactionTypeRequestModel, TransactionType>();
+            CreateMap<TransactionType, TransactionTypeDto>();
+            CreateMap<IssueMasterRequestModel, IssueMaster>();
+            CreateMap<ApproveIssueMasterRequestModel, IssueMaster>();
+            CreateMap<IssueMaster, IssueMasterDto>();
+            CreateMap<IssueDetailRequestModel, IssueDetail>();
+            CreateMap<IssueDetail, IssueDetailDto>();
             // Add more mapping configurations if needed
         }
     }

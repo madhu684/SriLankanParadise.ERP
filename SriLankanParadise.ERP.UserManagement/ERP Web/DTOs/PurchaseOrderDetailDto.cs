@@ -6,16 +6,14 @@
 
         public int PurchaseOrderId { get; set; }
 
-        public string ItemCategory { get; set; } = null!;
-
-        public string ItemId { get; set; } = null!;
-
-        public string Name { get; set; } = null!;
+        public int? ItemMasterId { get; set; }
 
         public int Quantity { get; set; }
 
         public decimal UnitPrice { get; set; }
 
         public decimal TotalPrice { get; set; }
+
+        public virtual ItemMasterDto? ItemMaster { get; set; }
     }
 }

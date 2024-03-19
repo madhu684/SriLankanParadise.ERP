@@ -25,11 +25,17 @@ public partial class ItemMaster
 
     public virtual Category Category { get; set; } = null!;
 
+    public virtual ICollection<GrnDetail> GrnDetails { get; set; } = new List<GrnDetail>();
+
     public virtual ICollection<IssueDetail> IssueDetails { get; set; } = new List<IssueDetail>();
 
     public virtual ICollection<ItemBatch> ItemBatches { get; set; } = new List<ItemBatch>();
 
     public virtual ItemType? ItemType { get; set; }
+
+    public virtual ICollection<PurchaseOrderDetail> PurchaseOrderDetails { get; set; } = new List<PurchaseOrderDetail>();
+
+    public virtual ICollection<PurchaseRequisitionDetail> PurchaseRequisitionDetails { get; set; } = new List<PurchaseRequisitionDetail>();
 
     public virtual ICollection<RequisitionDetail> RequisitionDetails { get; set; } = new List<RequisitionDetail>();
 

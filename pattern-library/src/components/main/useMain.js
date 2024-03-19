@@ -9,6 +9,11 @@ import ItemMasterList from "../itemMaster/itemMasterList/itemMasterList.jsx";
 import CategoryList from "../category/categoryList/categoryList.jsx";
 import UnitList from "../unit/unitList/unitList.jsx";
 import SalesReceiptList from "../salesReceipt/salesReceiptList/salesReceiptList.jsx";
+import MaterialRequisitionList from "../materialRequisition/materialRequisitionList/materialRequisitionList.jsx";
+import TransferRequisitionList from "../transferRequisition/transferRequisitionList/transferRequisitionList.jsx";
+import MinList from "../min/minList/minList.jsx";
+import TinList from "../tin/tinList/tinList.jsx";
+import ItemBatchUpdate from "../itemBatch/itemBatchUpdate/itemBatchUpdate.jsx";
 
 const useMain = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -85,6 +90,16 @@ const useMain = () => {
         return <UnitList />;
       case "Sales Receipts":
         return <SalesReceiptList />;
+      case "Material Requisitions":
+        return <MaterialRequisitionList />;
+      case "Transfer Requisitions":
+        return <TransferRequisitionList />;
+      case "Material Issue Notes":
+        return <MinList />;
+      case "Transfer Issue Notes":
+        return <TinList />;
+      case "Item Batches":
+        return <ItemBatchUpdate />;
       default:
         return null;
     }

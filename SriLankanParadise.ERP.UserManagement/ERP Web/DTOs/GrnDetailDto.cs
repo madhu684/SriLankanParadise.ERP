@@ -1,4 +1,6 @@
-﻿namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
+﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+
+namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 {
     public class GrnDetailDto
     {
@@ -14,8 +16,13 @@
 
         public decimal? UnitPrice { get; set; }
 
-        public decimal? TotalPrice { get; set; }
+        public int? ItemId { get; set; }
 
-        public string? ItemId { get; set; }
+        public virtual ItemMasterDto? Item { get; set; }
+
+        public int? FreeQuantity { get; set; }
+
+        public DateTime? ExpiryDate { get; set; }
+
     }
 }

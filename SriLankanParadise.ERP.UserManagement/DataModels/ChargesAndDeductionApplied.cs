@@ -29,6 +29,8 @@ public partial class ChargesAndDeductionApplied
 
     public bool? Status { get; set; }
 
+    public int? CompanyId { get; set; }
+
     public virtual ChargesAndDeduction ChargesAndDeduction { get; set; } = null!;
 
     public virtual TransactionType? TransactionType { get; set; }
