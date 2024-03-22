@@ -12,6 +12,7 @@ const SalesInvoiceList = () => {
     salesInvoices,
     isLoadingData,
     isLoadingPermissions,
+    isPermissionsError,
     error,
     isAnyRowSelected,
     selectedRows,
@@ -41,8 +42,8 @@ const SalesInvoiceList = () => {
     handleClose,
   } = useSalesInvoiceList();
 
-  if (error) {
-    return <ErrorComponent error={error} />;
+  if (error || isPermissionsError) {
+    return <ErrorComponent error={error || "Error fetching data"} />;
   }
 
   if (
@@ -110,6 +111,8 @@ const SalesInvoiceList = () => {
             </button>
           )}
           {hasPermission("Approve Sales Invoice") &&
+            selectedRowData[0]?.createdUserId !==
+              parseInt(sessionStorage.getItem("userId")) &&
             isAnyRowSelected &&
             areAnySelectedRowsPending(selectedRows) && (
               <button
