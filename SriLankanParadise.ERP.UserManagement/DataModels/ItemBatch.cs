@@ -35,5 +35,7 @@ public partial class ItemBatch
 
     public virtual Location? Location { get; set; }
 
+    public virtual ICollection<SalesInvoiceDetail> SalesInvoiceDetails { get; set; } = new List<SalesInvoiceDetail>();
+
     public virtual ICollection<SalesOrderDetail> SalesOrderDetails { get; set; } = new List<SalesOrderDetail>();
 }

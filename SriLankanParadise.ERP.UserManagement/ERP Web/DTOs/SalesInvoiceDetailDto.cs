@@ -15,5 +15,7 @@
         public int? ItemBatchItemMasterId { get; set; }
 
         public int? ItemBatchBatchId { get; set; }
+
+        public virtual ItemBatchDto? ItemBatch { get; set; }
     }
 }

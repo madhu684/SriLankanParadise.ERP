@@ -31,7 +31,13 @@ public partial class SalesOrder
 
     public string? ReferenceNo { get; set; }
 
+    public DateTime? CreatedDate { get; set; }
+
+    public DateTime? LastUpdatedDate { get; set; }
+
     public virtual Customer? Customer { get; set; }
+
+    public virtual ICollection<SalesInvoice> SalesInvoices { get; set; } = new List<SalesInvoice>();
 
     public virtual ICollection<SalesOrderDetail> SalesOrderDetails { get; set; } = new List<SalesOrderDetail>();
 }

@@ -693,14 +693,20 @@ public partial class ErpSystemContext : DbContext
 
             entity.Property(e => e.AmountDue).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.ApprovedBy).HasMaxLength(50);
-            entity.Property(e => e.ApprovedDate).HasColumnType("date");
+            entity.Property(e => e.ApprovedDate).HasColumnType("datetime");
             entity.Property(e => e.CreatedBy).HasMaxLength(50);
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
             entity.Property(e => e.DueDate).HasColumnType("date");
             entity.Property(e => e.InvoiceDate).HasColumnType("date");
+            entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
             entity.Property(e => e.ReferenceNo)
                 .HasMaxLength(20)
                 .HasDefaultValueSql("('SI'+CONVERT([nvarchar](20),NEXT VALUE FOR [dbo].[SalesInvoiceReferenceNoSeq]))");
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
+
+            entity.HasOne(d => d.SalesOrder).WithMany(p => p.SalesInvoices)
+                .HasForeignKey(d => d.SalesOrderId)
+                .HasConstraintName("FK_SalesInvoice_SalesOrder");
         });
 
         modelBuilder.Entity<SalesInvoiceDetail>(entity =>
@@ -716,6 +722,10 @@ public partial class ErpSystemContext : DbContext
                 .HasForeignKey(d => d.SalesInvoiceId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__SalesInvo__Sales__19AACF41");
+
+            entity.HasOne(d => d.ItemBatch).WithMany(p => p.SalesInvoiceDetails)
+                .HasForeignKey(d => new { d.ItemBatchBatchId, d.ItemBatchItemMasterId })
+                .HasConstraintName("FK_SalesInvoiceDetail_ItemBatch");
         });
 
         modelBuilder.Entity<SalesOrder>(entity =>
@@ -725,9 +735,11 @@ public partial class ErpSystemContext : DbContext
             entity.ToTable("SalesOrder");
 
             entity.Property(e => e.ApprovedBy).HasMaxLength(50);
-            entity.Property(e => e.ApprovedDate).HasColumnType("date");
+            entity.Property(e => e.ApprovedDate).HasColumnType("datetime");
             entity.Property(e => e.CreatedBy).HasMaxLength(50);
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
             entity.Property(e => e.DeliveryDate).HasColumnType("date");
+            entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
             entity.Property(e => e.OrderDate).HasColumnType("date");
             entity.Property(e => e.ReferenceNo)
                 .HasMaxLength(20)
