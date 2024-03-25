@@ -779,8 +779,14 @@ public partial class ErpSystemContext : DbContext
 
             entity.Property(e => e.AmountReceived).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.CreatedBy).HasMaxLength(50);
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.ExcessAmount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
+            entity.Property(e => e.PaymentReferenceNo).HasMaxLength(20);
             entity.Property(e => e.ReceiptDate).HasColumnType("date");
-            entity.Property(e => e.ReferenceNo).HasMaxLength(20);
+            entity.Property(e => e.ReferenceNumber).HasMaxLength(255);
+            entity.Property(e => e.ShortAmount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.PaymentMode).WithMany(p => p.SalesReceipts)
                 .HasForeignKey(d => d.PaymentModeId)
