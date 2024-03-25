@@ -6,6 +6,7 @@ import {
   post_sales_receipt_sales_invoice_api,
   put_sales_invoice_api,
 } from "../../services/salesApi";
+import { useQuery } from "@tanstack/react-query";
 
 const useSalesReceipt = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -18,47 +19,65 @@ const useSalesReceipt = ({ onFormSubmit }) => {
     salesInvoiceReferenceNumbers: [],
     selectedSalesInvoices: [],
     totalAmountReceived: 0,
+    excessAmount: 0,
+    shortAmount: 0,
+    totalAmount: 0,
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
   const alertRef = useRef(null);
-  const [salesInvoiceOptions, setsalesInvoices] = useState([]);
   const [selectedsalesInvoice, setSelectedsalesInvoice] = useState(null);
   const [referenceNo, setReferenceNo] = useState(null);
-  const [paymentModes, setPaymentModes] = useState([]);
+  const [siSearchTerm, setSiSearchTerm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [loadingDraft, setLoadingDraft] = useState(false);
 
-  useEffect(() => {
-    const fetchsalesInvoices = async () => {
-      try {
-        const response = await get_sales_invoices_with_out_drafts_api(
-          sessionStorage?.getItem("companyId")
-        );
+  const fetchsalesInvoices = async () => {
+    try {
+      const response = await get_sales_invoices_with_out_drafts_api(
+        sessionStorage?.getItem("companyId")
+      );
 
-        const filteredsalesInvoices = response.data.result.filter(
-          (sr) => sr.status === 2
-        );
-        setsalesInvoices(filteredsalesInvoices);
-      } catch (error) {
-        console.error("Error fetching slaes invoices:", error);
-      }
-    };
+      const filteredsalesInvoices = response.data.result.filter(
+        (sr) => sr.status === 2
+      );
+      return filteredsalesInvoices;
+    } catch (error) {
+      console.error("Error fetching slaes invoices:", error);
+    }
+  };
 
-    fetchsalesInvoices();
-  }, []);
+  const {
+    data: salesInvoiceOptions,
+    isLoading: isSalesInvoiceOptionsLoading,
+    isError: isSalesInvoiceOptionsError,
+    error: salesInvoiceOptionsError,
+  } = useQuery({
+    queryKey: ["salesInvoiceOptions"],
+    queryFn: fetchsalesInvoices,
+  });
 
-  useEffect(() => {
-    const fetchPaymentModes = async () => {
-      try {
-        const response = await get_payment_modes_api(1);
-        setPaymentModes(response.data.result);
-      } catch (error) {
-        console.error("Error fetching payment modes:", error);
-      }
-    };
+  const fetchPaymentModes = async () => {
+    try {
+      const response = await get_payment_modes_api(
+        sessionStorage?.getItem("companyId")
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching payment modes:", error);
+    }
+  };
 
-    fetchPaymentModes();
-  }, []);
+  const {
+    data: paymentModes,
+    isLoading: isPaymentModesLoading,
+    isError: isPaymentModesError,
+    error: paymentModesError,
+  } = useQuery({
+    queryKey: ["paymentModes"],
+    queryFn: fetchPaymentModes,
+  });
 
   useEffect(() => {
     if (submissionStatus != null) {
@@ -69,9 +88,14 @@ const useSalesReceipt = ({ onFormSubmit }) => {
   useEffect(() => {
     setFormData((prevFormData) => ({
       ...prevFormData,
-      totalAmountReceived: calculateTotalAmount(),
+      totalAmountReceived: calculateTotalAmountReceived(),
+      totalAmount: calculateTotalAmount(),
     }));
-  }, [formData.selectedSalesInvoices]);
+  }, [
+    formData.selectedSalesInvoices,
+    formData.excessAmount,
+    formData.shortAmount,
+  ]);
 
   const validateField = (
     fieldName,
@@ -192,21 +216,52 @@ const useSalesReceipt = ({ onFormSubmit }) => {
     );
   };
 
+  const generateReferenceNumber = () => {
+    const currentDate = new Date();
+
+    // Format the date as needed (e.g., YYYYMMDDHHMMSS)
+    const formattedDate = currentDate
+      .toISOString()
+      .replace(/\D/g, "")
+      .slice(0, 14);
+
+    // Generate a random number (e.g., 4 digits)
+    const randomNumber = Math.floor(1000 + Math.random() * 9000);
+
+    // Combine the date and random number
+    const referenceNumber = `SR_${formattedDate}_${randomNumber}`;
+
+    return referenceNumber;
+  };
+
   const handleSubmit = async (isSaveAsDraft) => {
     try {
       const status = isSaveAsDraft ? 0 : 1;
       const isFormValid = validateForm();
+      const currentDate = new Date().toISOString();
 
       if (isFormValid) {
+        if (isSaveAsDraft) {
+          setLoadingDraft(true);
+        } else {
+          setLoading(true);
+        }
+
         const salesReceiptData = {
           receiptDate: formData.receiptDate,
           amountReceived: formData.totalAmountReceived,
-          referenceNo: formData.referenceNo,
+          paymentReferenceNo: formData.referenceNo,
           companyId: sessionStorage?.getItem("companyId") ?? null,
           paymentModeId: formData.paymentModeId,
           createdBy: sessionStorage?.getItem("username") ?? null,
           createdUserId: sessionStorage?.getItem("userId") ?? null,
           status: status,
+          excessAmount: formData.excessAmount,
+          shortAmount: formData.shortAmount,
+          totalAmount: formData.totalAmount,
+          createdDate: currentDate,
+          lastUpdatedDate: currentDate,
+          referenceNumber: generateReferenceNumber(),
           permissionId: 34,
         };
 
@@ -274,6 +329,8 @@ const useSalesReceipt = ({ onFormSubmit }) => {
 
           setTimeout(() => {
             setSubmissionStatus(null);
+            setLoading(false);
+            setLoadingDraft(false);
             onFormSubmit();
           }, 3000);
         } else {
@@ -285,6 +342,8 @@ const useSalesReceipt = ({ onFormSubmit }) => {
       setSubmissionStatus("error");
       setTimeout(() => {
         setSubmissionStatus(null);
+        setLoading(false);
+        setLoadingDraft(false);
       }, 3000);
     }
   };
@@ -345,6 +404,12 @@ const useSalesReceipt = ({ onFormSubmit }) => {
     );
   };
 
+  const calculateTotalAmountReceived = () => {
+    return (
+      calculateTotalAmount() + formData.excessAmount - formData.shortAmount
+    );
+  };
+
   const handleSalesInvoiceChange = (referenceId) => {
     if (referenceId && referenceId.trim() !== "") {
       const isSelected =
@@ -379,6 +444,7 @@ const useSalesReceipt = ({ onFormSubmit }) => {
         }));
       }
     }
+    setSiSearchTerm("");
   };
 
   const handleRemoveSalesInvoice = (selectedId) => {
@@ -403,13 +469,22 @@ const useSalesReceipt = ({ onFormSubmit }) => {
   return {
     formData,
     paymentModes,
+    isPaymentModesLoading,
+    isPaymentModesError,
+    paymentModesError,
     submissionStatus,
     validFields,
     validationErrors,
     referenceNo,
     alertRef,
     salesInvoiceOptions,
+    isSalesInvoiceOptionsLoading,
+    isSalesInvoiceOptionsError,
+    salesInvoiceOptionsError,
     selectedsalesInvoice,
+    siSearchTerm,
+    loading,
+    loadingDraft,
     handleInputChange,
     handleItemDetailsChange,
     handleAttachmentChange,
@@ -418,6 +493,8 @@ const useSalesReceipt = ({ onFormSubmit }) => {
     calculateTotalAmount,
     handleSalesInvoiceChange,
     handleRemoveSalesInvoice,
+    setSiSearchTerm,
+    calculateTotalAmountReceived,
   };
 };
 

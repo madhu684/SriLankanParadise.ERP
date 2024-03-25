@@ -20,6 +20,7 @@ const SalesReceiptList = () => {
     showCreateSRForm,
     showUpdateSRForm,
     SRDetail,
+    isPermissionsError,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleRowSelect,
@@ -35,8 +36,8 @@ const SalesReceiptList = () => {
     handleClose,
   } = useSalesReceiptList();
 
-  if (error) {
-    return <ErrorComponent error={error} />;
+  if (error || isPermissionsError) {
+    return <ErrorComponent error={error || "Error fetching data"} />;
   }
 
   if (
@@ -120,7 +121,7 @@ const SalesReceiptList = () => {
               <th>
                 <input type="checkbox" />
               </th>
-              <th>Receipt Id</th>
+              <th>Reference Number</th>
               <th>Created By</th>
               <th>Receipt Date</th>
               <th>Status</th>
@@ -137,7 +138,7 @@ const SalesReceiptList = () => {
                     onChange={() => handleRowSelect(sr.salesReceiptId)}
                   />
                 </td>
-                <td>{sr.salesReceiptId}</td>
+                <td>{sr.referenceNumber}</td>
                 <td>{sr.createdBy}</td>
                 <td>{sr?.receiptDate?.split("T")[0]}</td>
                 <td>

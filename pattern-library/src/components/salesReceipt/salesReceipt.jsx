@@ -1,6 +1,10 @@
 import React from "react";
 import useSalesReceipt from "./useSalesReceipt";
 import CurrentDateTime from "../currentDateTime/currentDateTime";
+import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
+import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
+import LoadingSpinner from "../loadingSpinner/loadingSpinner";
+import ErrorComponent from "../errorComponent/errorComponent";
 
 const SalesReceipt = ({ handleClose, handleUpdated }) => {
   const {
@@ -12,7 +16,16 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
     referenceNo,
     alertRef,
     salesInvoiceOptions,
+    isSalesInvoiceOptionsLoading,
+    isSalesInvoiceOptionsError,
+    salesInvoiceOptionsError,
     selectedsalesInvoice,
+    isPaymentModesLoading,
+    isPaymentModesError,
+    paymentModesError,
+    siSearchTerm,
+    loading,
+    loadingDraft,
     handleInputChange,
     handleItemDetailsChange,
     handleAttachmentChange,
@@ -21,6 +34,8 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
     calculateTotalAmount,
     handleSalesInvoiceChange,
     handleRemoveSalesInvoice,
+    setSiSearchTerm,
+    calculateTotalAmountReceived,
   } = useSalesReceipt({
     onFormSubmit: () => {
       handleClose();
@@ -28,19 +43,25 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
     },
   });
 
+  const companyLogoUrl = useCompanyLogoUrl();
+
+  if (isPaymentModesLoading || isSalesInvoiceOptionsLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (isPaymentModesError || isSalesInvoiceOptionsError) {
+    return <ErrorComponent error={"Error fetching data"} />;
+  }
+
   return (
     <div className="container mt-4">
       {/* Header */}
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img
-            src="path/to/your/logo.png"
-            alt="Company Logo"
-            className="img-fluid"
-          />
+          <img src={companyLogoUrl} alt="Company Logo" height={30} />
           <p>
-            Date and Time: <CurrentDateTime />
+            <CurrentDateTime />
           </p>
         </div>
         <h1 className="mt-2 text-center">Sales Receipt</h1>
@@ -128,7 +149,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
 
             <div className="mb-3">
               <label htmlFor="referenceNo" className="form-label">
-                Reference No
+                Payment Reference No
               </label>
               <input
                 type="text"
@@ -136,7 +157,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                   validFields.referenceNo ? "is-valid" : ""
                 } ${validationErrors.referenceNo ? "is-invalid" : ""}`}
                 id="referenceNo"
-                placeholder="Enter reference number"
+                placeholder="Enter payment reference number"
                 value={formData.referenceNo}
                 onChange={(e) =>
                   handleInputChange("referenceNo", e.target.value)
@@ -154,36 +175,112 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
           <div className="col-md-5">
             <h4>2. Sales Invoices</h4>
             <div className="mb-3 mt-3">
-              <label htmlFor="salesInvoice" className="form-label">
-                Sales Invoice Reference No
+              <label htmlFor="salesInvoices" className="form-label">
+                Sales Invoice
               </label>
-              <select
-                id="salesInvoice"
-                className={`form-select ${
-                  validFields.salesInvoiceId ? "is-valid" : ""
-                } ${validationErrors.salesInvoiceId ? "is-invalid" : ""}`}
-                onChange={(e) => handleSalesInvoiceChange(e.target.value)}
-                value={""}
-                required
-              >
-                <option value="">Select Reference Number</option>
-                {/* Options */}
-                {salesInvoiceOptions.map((option) => (
-                  <option key={option.referenceNo} value={option.referenceNo}>
-                    {option.referenceNo}
-                  </option>
-                ))}
-              </select>
-              {validationErrors.salesInvoiceId && (
-                <div className="invalid-feedback mb-3">
-                  {validationErrors.salesInvoiceId}
+              <div className="mb-3">
+                <div className="input-group">
+                  <span className="input-group-text bg-transparent ">
+                    <i className="bi bi-search"></i>
+                  </span>
+                  <input
+                    type="text"
+                    className={`form-control ${
+                      validFields.trnId ? "is-valid" : ""
+                    } ${validationErrors.trnId ? "is-invalid" : ""}`}
+                    placeholder="Search for a sales invoice..."
+                    value={siSearchTerm}
+                    onChange={(e) => setSiSearchTerm(e.target.value)}
+                    autoFocus={false}
+                  />
+                  {siSearchTerm && (
+                    <span
+                      className="input-group-text bg-transparent"
+                      style={{
+                        cursor: "pointer",
+                      }}
+                      onClick={() => setSiSearchTerm("")}
+                    >
+                      <i className="bi bi-x"></i>
+                    </span>
+                  )}
                 </div>
-              )}
+
+                {/* Dropdown for filtered suppliers */}
+                {siSearchTerm && (
+                  <div className="dropdown" style={{ width: "100%" }}>
+                    <ul
+                      className="dropdown-menu"
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        maxHeight: "200px",
+                        overflowY: "auto",
+                      }}
+                    >
+                      {salesInvoiceOptions
+                        .filter((si) =>
+                          si.referenceNo
+                            ?.replace(/\s/g, "")
+                            ?.toLowerCase()
+                            .includes(
+                              siSearchTerm.toLowerCase().replace(/\s/g, "")
+                            )
+                        )
+                        .map((si) => (
+                          <li key={si.salesInvoiceId}>
+                            <button
+                              type="button"
+                              className="dropdown-item"
+                              onClick={() =>
+                                handleSalesInvoiceChange(si.referenceNo)
+                              }
+                            >
+                              <span className="me-3">
+                                <i className="bi bi-file-earmark-text"></i>
+                              </span>{" "}
+                              {si?.referenceNo}
+                            </button>
+                          </li>
+                        ))}
+                      {salesInvoiceOptions.filter((si) =>
+                        si.referenceNo
+                          ?.replace(/\s/g, "")
+                          ?.toLowerCase()
+                          .includes(
+                            siSearchTerm.toLowerCase().replace(/\s/g, "")
+                          )
+                      ).length === 0 && (
+                        <li className="dropdown-item text-center">
+                          <span className="me-3">
+                            <i className="bi bi-emoji-frown"></i>
+                          </span>
+                          No sales invoices found
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+                {formData.selectedSalesInvoices?.length === 0 && (
+                  <div className="mb-3">
+                    <small className="form-text text-muted">
+                      {validationErrors.salesInvoiceId && (
+                        <div className="invalid-feedback mb-3">
+                          {validationErrors.salesInvoiceId}
+                        </div>
+                      )}
+                      Please search for a sales invoice and select it
+                    </small>
+                  </div>
+                )}
+              </div>
+
               {formData.salesInvoiceReferenceNumbers.length > 0 && (
                 <label htmlFor="salesInvoice" className="form-label mt-3">
                   Selected Sales Invoice Reference Numbers
                 </label>
               )}
+
               {/* Display selected reference numbers */}
               <ul className="list-group mt-2">
                 {formData.salesInvoiceReferenceNumbers.map((referenceNo) => (
@@ -263,8 +360,52 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
               <tfoot>
                 <tr>
                   <td colSpan="2"></td>
-                  <th>Total Amount Received</th>
+                  <th>Total Amount</th>
                   <td colSpan="2">{calculateTotalAmount().toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <td colSpan="2"></td>
+                  <th>Excess Amount</th>
+                  <td colSpan="2">
+                    <input
+                      className="form-control"
+                      type="number"
+                      value={formData.excessAmount}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value);
+                        const positiveValue = isNaN(value)
+                          ? 0
+                          : Math.max(0, value);
+                        handleInputChange("excessAmount", positiveValue);
+                      }}
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td colSpan="2"></td>
+                  <th>Short Amount</th>
+                  <td colSpan="2">
+                    <input
+                      className="form-control"
+                      type="number"
+                      value={formData.shortAmount}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value);
+                        const positiveValue = isNaN(value)
+                          ? 0
+                          : Math.max(0, value); // Ensures positive value
+                        handleInputChange("shortAmount", positiveValue);
+                      }}
+                    />
+                  </td>
+                </tr>
+
+                <tr>
+                  <td colSpan="2"></td>
+                  <th>Total Amount Received</th>
+                  <td colSpan="2">
+                    {calculateTotalAmountReceived().toFixed(2)}
+                  </td>
                 </tr>
               </tfoot>
             </table>
@@ -300,20 +441,41 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
             type="button"
             className="btn btn-primary me-2"
             onClick={() => handleSubmit(false)}
+            disabled={
+              !formData.selectedSalesInvoices?.length > 0 ||
+              loading ||
+              loadingDraft ||
+              submissionStatus !== null
+            }
           >
-            Create
+            {loading && submissionStatus === null ? (
+              <ButtonLoadingSpinner text="Submitting..." />
+            ) : (
+              "Submit"
+            )}
           </button>
           <button
             type="button"
             className="btn btn-secondary me-2"
             onClick={() => handleSubmit(true)}
+            disabled={
+              !formData.selectedSalesInvoices?.length > 0 ||
+              loading ||
+              loadingDraft ||
+              submissionStatus !== null
+            }
           >
-            Save as Draft
+            {loadingDraft && submissionStatus === null ? (
+              <ButtonLoadingSpinner text="Saving as Draft..." />
+            ) : (
+              "Save as Draft"
+            )}
           </button>
           <button
             type="button"
             className="btn btn-success me-2"
             onClick={handlePrint}
+            disabled={loading || loadingDraft || submissionStatus !== null}
           >
             Print
           </button>
@@ -321,6 +483,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
             type="button"
             className="btn btn-danger"
             onClick={handleClose}
+            disabled={loading || loadingDraft || submissionStatus !== null}
           >
             Cancel
           </button>

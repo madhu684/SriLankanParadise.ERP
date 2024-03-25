@@ -8,6 +8,8 @@ import {
   put_sales_invoice_api,
   delete_sales_receipt_sales_invoice_api,
 } from "../../../services/salesApi";
+import SalesReceipt from "../salesReceipt";
+import { useQuery } from "@tanstack/react-query";
 
 const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -21,6 +23,9 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
     selectedSalesInvoices: [],
     totalAmountReceived: 0,
     salesReceiptSalesInvoices: [],
+    excessAmount: 0,
+    shortAmount: 0,
+    totalAmount: 0,
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -28,44 +33,61 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
   const [itemIdsToBeDeleted, setItemIdsToBeDeleted] = useState([]);
   const alertRef = useRef(null);
   const [isLoadingSalesOrders, setIsLoadingSalesOrders] = useState(true);
-  const [paymentModes, setPaymentModes] = useState([]);
-  const [salesInvoiceOptions, setsalesInvoices] = useState([]);
   const [showPaymentRemovalConfirmation, setShowPaymentRemovalConfirmation] =
     useState(false);
   const [selectedInvoiceIdToRemove, setSelectedInvoiceIdToRemove] =
     useState(null);
+  const [selectedInvoiceIdToFilter, setSelectedInvoiceIdToFilter] =
+    useState(null);
+  const [siSearchTerm, setSiSearchTerm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [loadingDraft, setLoadingDraft] = useState(false);
 
-  useEffect(() => {
-    const fetchsalesInvoices = async () => {
-      try {
-        const response = await get_sales_invoices_with_out_drafts_api(
-          sessionStorage?.getItem("companyId")
-        );
+  const fetchsalesInvoices = async () => {
+    try {
+      const response = await get_sales_invoices_with_out_drafts_api(
+        sessionStorage?.getItem("companyId")
+      );
 
-        const filteredsalesInvoices = response.data.result.filter(
-          (sr) => sr.status === 2
-        );
-        setsalesInvoices(filteredsalesInvoices);
-      } catch (error) {
-        console.error("Error fetching slaes invoices:", error);
-      }
-    };
+      const filteredsalesInvoices = response.data.result.filter(
+        (sr) => sr.status === 2
+      );
+      return filteredsalesInvoices;
+    } catch (error) {
+      console.error("Error fetching slaes invoices:", error);
+    }
+  };
 
-    fetchsalesInvoices();
-  }, []);
+  const {
+    data: salesInvoiceOptions,
+    isLoading: isSalesInvoiceOptionsLoading,
+    isError: isSalesInvoiceOptionsError,
+    error: salesInvoiceOptionsError,
+  } = useQuery({
+    queryKey: ["salesInvoiceOptions"],
+    queryFn: fetchsalesInvoices,
+  });
 
-  useEffect(() => {
-    const fetchPaymentModes = async () => {
-      try {
-        const response = await get_payment_modes_api(1);
-        setPaymentModes(response.data.result);
-      } catch (error) {
-        console.error("Error fetching payment modes:", error);
-      }
-    };
+  const fetchPaymentModes = async () => {
+    try {
+      const response = await get_payment_modes_api(
+        sessionStorage?.getItem("companyId")
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching payment modes:", error);
+    }
+  };
 
-    fetchPaymentModes();
-  }, []);
+  const {
+    data: paymentModes,
+    isLoading: isPaymentModesLoading,
+    isError: isPaymentModesError,
+    error: paymentModesError,
+  } = useQuery({
+    queryKey: ["paymentModes"],
+    queryFn: fetchPaymentModes,
+  });
 
   useEffect(() => {
     const deepCopySalesReceipt = JSON.parse(JSON.stringify(salesReceipt));
@@ -115,6 +137,9 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
       selectedSalesInvoices: selectedSalesInvoices,
       salesReceiptSalesInvoices:
         deepCopySalesReceipt?.salesReceiptSalesInvoices ?? [],
+      excessAmount: deepCopySalesReceipt?.excessAmount ?? "",
+      shortAmount: deepCopySalesReceipt?.shortAmount ?? "",
+      totalAmount: deepCopySalesReceipt?.totalAmount ?? "",
     });
   }, [salesReceipt]);
 
@@ -128,9 +153,14 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
   useEffect(() => {
     setFormData((prevFormData) => ({
       ...prevFormData,
-      totalAmountReceived: calculateTotalAmount(),
+      totalAmountReceived: calculateTotalAmountReceived(),
+      totalAmount: calculateTotalAmount(),
     }));
-  }, [formData.selectedSalesInvoices]);
+  }, [
+    formData.selectedSalesInvoices,
+    formData.excessAmount,
+    formData.shortAmount,
+  ]);
 
   const validateField = (
     fieldName,
@@ -256,18 +286,31 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
   const handleSubmit = async (isSaveAsDraft) => {
     try {
       const status = isSaveAsDraft ? 0 : 1;
+      const currentDate = new Date().toISOString();
 
       const isFormValid = validateForm(isSaveAsDraft);
       if (isFormValid) {
+        if (isSaveAsDraft) {
+          setLoadingDraft(true);
+        } else {
+          setLoading(true);
+        }
+
         const SalesReceiptData = {
           receiptDate: formData.receiptDate,
           amountReceived: formData.totalAmountReceived,
-          referenceNo: formData.referenceNo,
+          paymentReferenceNo: formData.referenceNo,
           companyId: salesReceipt.companyId,
           paymentModeId: formData.paymentModeId,
           createdBy: salesReceipt.createdBy,
           createdUserId: salesReceipt.createdUserId,
           status: status,
+          excessAmount: formData.excessAmount,
+          shortAmount: formData.shortAmount,
+          totalAmount: formData.totalAmount,
+          createdDate: salesReceipt.createdDate,
+          lastUpdatedDate: currentDate,
+          referenceNumber: salesReceipt.referenceNumber,
           permissionId: 1033,
         };
 
@@ -387,6 +430,8 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
 
           setTimeout(() => {
             setSubmissionStatus(null);
+            setLoading(false);
+            setLoadingDraft(false);
             onFormSubmit();
           }, 3000);
         } else {
@@ -398,6 +443,8 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
       setSubmissionStatus("error");
       setTimeout(() => {
         setSubmissionStatus(null);
+        setLoading(false);
+        setLoadingDraft(false);
       }, 3000);
     }
   };
@@ -458,6 +505,12 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
     );
   };
 
+  const calculateTotalAmountReceived = () => {
+    return (
+      calculateTotalAmount() + formData.excessAmount - formData.shortAmount
+    );
+  };
+
   const handleSalesInvoiceChange = (referenceId) => {
     if (referenceId && referenceId.trim() !== "") {
       const isSelected =
@@ -492,6 +545,7 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
         }));
       }
     }
+    setSiSearchTerm("");
   };
 
   const handleRemoveSalesInvoice = (selectedId) => {
@@ -529,11 +583,11 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
       ]);
 
       // Update sales invoice options to remove the selected sales invoice
-      setsalesInvoices((prevSalesInvoices) =>
-        prevSalesInvoices.filter(
-          (salesInvoice) => salesInvoice.referenceNo !== selectedId
-        )
-      );
+      // setsalesInvoices((prevSalesInvoices) =>
+      //   prevSalesInvoices.filter(
+      //     (salesInvoice) => salesInvoice.referenceNo !== selectedId
+      //   )
+      // );
     }
   };
 
@@ -558,6 +612,7 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
 
   const handleConfirmPaymentRemoval = () => {
     handleRemoveSalesInvoice(selectedInvoiceIdToRemove);
+    setSelectedInvoiceIdToFilter(selectedInvoiceIdToRemove);
     setSelectedInvoiceIdToRemove(null);
     setShowPaymentRemovalConfirmation(false);
   };
@@ -576,6 +631,16 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
     salesInvoiceOptions,
     paymentModes,
     showPaymentRemovalConfirmation,
+    isPaymentModesLoading,
+    isPaymentModesError,
+    paymentModesError,
+    isSalesInvoiceOptionsLoading,
+    isSalesInvoiceOptionsError,
+    salesInvoiceOptionsError,
+    siSearchTerm,
+    loading,
+    loadingDraft,
+    selectedInvoiceIdToFilter,
     handleInputChange,
     handleItemDetailsChange,
     handleSubmit,
@@ -587,6 +652,8 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
     handleClosePaymentRemovalConfirmation,
     handleConfirmPaymentRemoval,
     handleRemovePayment,
+    setSiSearchTerm,
+    calculateTotalAmountReceived,
   };
 };
 
