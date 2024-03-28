@@ -119,9 +119,16 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
         referenceNo: salesInvoice.salesInvoice.referenceNo,
         amountDue:
           salesInvoice.salesInvoice.amountDue + salesInvoice.settledAmount,
-        payment: salesInvoice.settledAmount,
+        payment:
+          salesInvoice.settledAmount +
+          salesInvoice.customerBalance +
+          salesInvoice.excessAmount -
+          salesInvoice.shortAmount,
         updatedAmountDue: salesInvoice.salesInvoice.amountDue,
         salesReceiptSalesInvoiceId: salesInvoice.salesReceiptSalesInvoiceId,
+        excessAmount: salesInvoice.excessAmount,
+        shortAmount: salesInvoice.shortAmount,
+        customerBalance: salesInvoice.customerBalance,
       });
     });
 
@@ -298,7 +305,7 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
 
         const SalesReceiptData = {
           receiptDate: formData.receiptDate,
-          amountReceived: formData.totalAmountReceived,
+          amountReceived: formData.totalAmount,
           paymentReferenceNo: formData.referenceNo,
           companyId: salesReceipt.companyId,
           paymentModeId: formData.paymentModeId,
@@ -307,7 +314,6 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
           status: status,
           excessAmount: formData.excessAmount,
           shortAmount: formData.shortAmount,
-          totalAmount: formData.totalAmount,
           createdDate: salesReceipt.createdDate,
           lastUpdatedDate: currentDate,
           referenceNumber: salesReceipt.referenceNumber,
@@ -326,7 +332,14 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
             const salesReceiptSalesInvoiceData = {
               salesReceiptId: salesReceipt.salesReceiptId,
               salesInvoiceId: item.salesInvoiceId,
-              settledAmount: item.payment,
+              settledAmount:
+                item.payment -
+                item.excessAmount +
+                item.shortAmount -
+                item.customerBalance,
+              excessAmount: item.excessAmount,
+              shortAmount: item.shortAmount,
+              customerBalance: item.customerBalance,
               permissionId: 1033,
             };
 
@@ -343,11 +356,13 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
               );
             }
 
+            const siStatus = item.updatedAmountDue === 0 ? 5 : 2;
+
             const salesInvoiceData = {
               invoiceDate: item.invoiceDate,
               dueDate: item.dueDate,
               totalAmount: item.totalAmount,
-              status: item.status,
+              status: siStatus,
               createdBy: item.createdBy,
               createdUserId: item.createdUserId,
               approvedBy: item.approvedBy,
@@ -461,24 +476,67 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
       const updatedSelectedSalesInvoices = [
         ...prevFormData.selectedSalesInvoices,
       ];
-      updatedSelectedSalesInvoices[index][field] = value;
+      const currentItem = updatedSelectedSalesInvoices[index];
 
-      updatedSelectedSalesInvoices[index].payment = !isNaN(
-        parseFloat(updatedSelectedSalesInvoices[index].payment)
-      )
-        ? Math.min(
-            Math.max(
-              0,
-              parseFloat(updatedSelectedSalesInvoices[index].payment)
-            ),
-            updatedSelectedSalesInvoices[index].amountDue
-          )
-        : 0;
+      // Update the field value
+      currentItem[field] = value;
 
-      updatedSelectedSalesInvoices[index].updatedAmountDue =
-        updatedSelectedSalesInvoices[index].amountDue -
-        updatedSelectedSalesInvoices[index].payment;
+      // Calculate updated amount due
+      currentItem.updatedAmountDue =
+        currentItem.amountDue -
+        currentItem.payment +
+        currentItem.excessAmount -
+        currentItem.shortAmount;
 
+      // Calculate customer balance
+      const customerBalance = currentItem.payment - currentItem.amountDue;
+
+      // Check if customer balance is negative (indicating credit)
+      if (customerBalance < 0) {
+        if (field === "shortAmount") {
+          // Ensure shortAmount does not exceed the positive customerBalance
+          currentItem.shortAmount = Math.min(value, -customerBalance);
+        }
+        if (field === "excessAmount") {
+          currentItem.excessAmount = 0;
+        }
+      } else {
+        if (field === "excessAmount") {
+          // Ensure excessAmount does not exceed the positive customerBalance
+          currentItem.excessAmount = Math.min(value, customerBalance);
+        }
+        if (field === "shortAmount") {
+          currentItem.shortAmount = 0;
+        }
+      }
+
+      if (field === "payment") {
+        currentItem.excessAmount = 0;
+        currentItem.shortAmount = 0;
+      }
+
+      // Recalculate updatedAmountDue
+      currentItem.updatedAmountDue =
+        currentItem.amountDue -
+        currentItem.payment +
+        currentItem.excessAmount -
+        currentItem.shortAmount;
+
+      if (currentItem.updatedAmountDue < 0) {
+        currentItem.updatedAmountDue = 0;
+      }
+
+      currentItem.customerBalance =
+        currentItem.payment -
+        currentItem.amountDue +
+        currentItem.shortAmount -
+        currentItem.excessAmount;
+
+      if (currentItem.customerBalance < 0) {
+        currentItem.customerBalance = 0;
+      }
+
+      // Update the state
       return {
         ...prevFormData,
         selectedSalesInvoices: updatedSelectedSalesInvoices,
@@ -486,6 +544,30 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
       };
     });
   };
+
+  const calculateTotalExcessAmountAmount = () => {
+    return formData.selectedSalesInvoices.reduce(
+      (total, item) => total + parseFloat(item.excessAmount || 0),
+      0
+    );
+  };
+
+  const calculateTotalShortAmountAmount = () => {
+    return formData.selectedSalesInvoices.reduce(
+      (total, item) => total + parseFloat(item.shortAmount || 0),
+      0
+    );
+  };
+
+  useEffect(() => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      totalAmountReceived: calculateTotalAmountReceived(),
+      totalAmount: calculateTotalAmount(),
+      excessAmount: calculateTotalExcessAmountAmount(),
+      shortAmount: calculateTotalShortAmountAmount(),
+    }));
+  }, [formData.selectedSalesInvoices]);
 
   const handlePrint = () => {
     window.print();
@@ -581,13 +663,6 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
         ...prevItemIds,
         salesReceiptSalesInvoiceId,
       ]);
-
-      // Update sales invoice options to remove the selected sales invoice
-      // setsalesInvoices((prevSalesInvoices) =>
-      //   prevSalesInvoices.filter(
-      //     (salesInvoice) => salesInvoice.referenceNo !== selectedId
-      //   )
-      // );
     }
   };
 
@@ -654,6 +729,8 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
     handleRemovePayment,
     setSiSearchTerm,
     calculateTotalAmountReceived,
+    calculateTotalExcessAmountAmount,
+    calculateTotalShortAmountAmount,
   };
 };
 

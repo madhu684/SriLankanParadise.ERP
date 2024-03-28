@@ -1,12 +1,10 @@
-import { useState, useRef, useEffect } from "react";
-import { post_customer_api } from "../../services/salesApi";
+import { useState, useEffect, useRef } from "react";
+import { post_cashier_expense_out_api } from "../../services/salesApi";
 
-const useCustomer = ({ onFormSubmit }) => {
+const useCashierExpenseOut = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
-    customerName: "",
-    contactPerson: "",
-    phone: "",
-    email: "",
+    description: "",
+    amount: "",
   });
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
@@ -14,9 +12,15 @@ const useCustomer = ({ onFormSubmit }) => {
   const alertRef = useRef(null);
   const [loading, setLoading] = useState(false);
 
+  const handleInputChange = (field, value) => {
+    setFormData({
+      ...formData,
+      [field]: value,
+    });
+  };
+
   useEffect(() => {
     if (submissionStatus != null) {
-      // Scroll to the success alert when it becomes visible
       alertRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [submissionStatus]);
@@ -30,11 +34,13 @@ const useCustomer = ({ onFormSubmit }) => {
     let isFieldValid = true;
     let errorMessage = "";
 
+    // Required validation
     if (value === null || value === undefined || `${value}`.trim() === "") {
       isFieldValid = false;
       errorMessage = `${fieldDisplayName} is required`;
     }
 
+    // Additional validation
     if (
       isFieldValid &&
       additionalRules.validationFunction &&
@@ -51,66 +57,46 @@ const useCustomer = ({ onFormSubmit }) => {
   };
 
   const validateForm = () => {
-    setValidFields({});
-    setValidationErrors({});
-
-    const isCustomerNameValid = validateField(
-      "customerName",
-      "Customer name",
-      formData.customerName
+    const isDescriptionValid = validateField(
+      "description",
+      "Description",
+      formData.description
     );
 
-    const isPhoneValid = validateField(
-      "phone",
-      "Phone number",
-      formData.phone,
-      {
-        validationFunction: (phone) => /^\d+$/.test(phone),
-        errorMessage: "Invalid phone number. Please enter only digits.",
-      }
-    );
+    const isAmountValid = validateField("amount", "Amount", formData.amount);
 
-    const isEmailValid = formData.email
-      ? validateField("email", "Email", formData.email, {
-          validationFunction: (value) => /\S+@\S+\.\S+/.test(value),
-          errorMessage: "Please enter a valid email address",
-        })
-      : true;
-
-    return isCustomerNameValid && isPhoneValid && isEmailValid;
-  };
-
-  const handleInputChange = (field, value) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [field]: value,
-    }));
+    return isDescriptionValid && isAmountValid;
   };
 
   const handleSubmit = async () => {
     try {
       const isFormValid = validateForm();
+      const currentDate = new Date().toISOString();
 
       if (isFormValid) {
         setLoading(true);
-        const customerData = {
-          customerName: formData.customerName,
-          contactPerson: formData.contactPerson,
-          phone: formData.phone,
-          email: formData.email,
+
+        const cashierExpenseOutData = {
+          userId: sessionStorage.getItem("userId"),
+          description: formData.description,
+          amount: formData.amount,
+          createdDate: currentDate,
           companyId: sessionStorage.getItem("companyId"),
-          permissionId: 24,
+          permissionId: 1069,
         };
 
-        const response = await post_customer_api(customerData);
+        const response = await post_cashier_expense_out_api(
+          cashierExpenseOutData
+        );
 
         if (response.status === 201) {
-          setSubmissionStatus("success");
-          console.log("Custermer added successfully", customerData);
+          setSubmissionStatus("successSubmitted");
+          console.log("Cashier expense out created successfully!", formData);
+
           setTimeout(() => {
             setSubmissionStatus(null);
+            onFormSubmit();
             setLoading(false);
-            onFormSubmit(response.data.result);
           }, 3000);
         } else {
           setSubmissionStatus("error");
@@ -126,16 +112,26 @@ const useCustomer = ({ onFormSubmit }) => {
     }
   };
 
+  const handleClose = () => {
+    setFormData({
+      description: "",
+      amount: "",
+    });
+    setValidFields({});
+    setValidationErrors({});
+  };
+
   return {
     formData,
     validFields,
     validationErrors,
     submissionStatus,
-    loading,
     alertRef,
+    loading,
     handleInputChange,
     handleSubmit,
+    handleClose,
   };
 };
 
-export default useCustomer;
+export default useCashierExpenseOut;

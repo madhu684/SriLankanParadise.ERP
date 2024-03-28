@@ -1,12 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-import { post_customer_api } from "../../services/salesApi";
+import { put_cashier_session_api } from "../../../services/salesApi";
 
-const useCustomer = ({ onFormSubmit }) => {
+const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
   const [formData, setFormData] = useState({
-    customerName: "",
-    contactPerson: "",
-    phone: "",
-    email: "",
+    closingBalance: "",
   });
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
@@ -54,30 +51,13 @@ const useCustomer = ({ onFormSubmit }) => {
     setValidFields({});
     setValidationErrors({});
 
-    const isCustomerNameValid = validateField(
-      "customerName",
-      "Customer name",
-      formData.customerName
+    const isClosingBalanceValid = validateField(
+      "closingBalance",
+      "Closing balance",
+      formData.closingBalance
     );
 
-    const isPhoneValid = validateField(
-      "phone",
-      "Phone number",
-      formData.phone,
-      {
-        validationFunction: (phone) => /^\d+$/.test(phone),
-        errorMessage: "Invalid phone number. Please enter only digits.",
-      }
-    );
-
-    const isEmailValid = formData.email
-      ? validateField("email", "Email", formData.email, {
-          validationFunction: (value) => /\S+@\S+\.\S+/.test(value),
-          errorMessage: "Please enter a valid email address",
-        })
-      : true;
-
-    return isCustomerNameValid && isPhoneValid && isEmailValid;
+    return isClosingBalanceValid;
   };
 
   const handleInputChange = (field, value) => {
@@ -90,34 +70,39 @@ const useCustomer = ({ onFormSubmit }) => {
   const handleSubmit = async () => {
     try {
       const isFormValid = validateForm();
+      const currentDate = new Date().toISOString();
 
       if (isFormValid) {
         setLoading(true);
-        const customerData = {
-          customerName: formData.customerName,
-          contactPerson: formData.contactPerson,
-          phone: formData.phone,
-          email: formData.email,
+        const cashierSessionData = {
+          userId: sessionStorage.getItem("userId"),
+          sessionIn: cashierSession.sessionIn,
+          sessionOut: currentDate,
+          openingBalance: cashierSession.openingBalance,
+          closingBalance: formData.closingBalance,
           companyId: sessionStorage.getItem("companyId"),
-          permissionId: 24,
+          permissionId: 1068,
         };
 
-        const response = await post_customer_api(customerData);
+        const response = await put_cashier_session_api(
+          cashierSession.cashierSessionId,
+          cashierSessionData
+        );
 
-        if (response.status === 201) {
+        if (response.status === 200) {
           setSubmissionStatus("success");
-          console.log("Custermer added successfully", customerData);
+          console.log("Cashier session close successfully", cashierSessionData);
           setTimeout(() => {
             setSubmissionStatus(null);
             setLoading(false);
-            onFormSubmit(response.data.result);
+            onFormSubmit(response);
           }, 3000);
         } else {
           setSubmissionStatus("error");
         }
       }
     } catch (error) {
-      console.error("Error submitting form:", error);
+      console.error("Error closing cashier session", error);
       setSubmissionStatus("error");
       setTimeout(() => {
         setSubmissionStatus(null);
@@ -138,4 +123,4 @@ const useCustomer = ({ onFormSubmit }) => {
   };
 };
 
-export default useCustomer;
+export default useCashierSessionUpdate;

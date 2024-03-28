@@ -203,7 +203,7 @@ const useSalesInvoiceList = () => {
       2: "Approved",
       3: "Rejected",
       4: "In Progress",
-      5: "Completed",
+      5: "Settled",
       6: "Cancelled",
       7: "On Hold",
     };

@@ -14,6 +14,7 @@ import TransferRequisitionList from "../transferRequisition/transferRequisitionL
 import MinList from "../min/minList/minList.jsx";
 import TinList from "../tin/tinList/tinList.jsx";
 import ItemBatchUpdate from "../itemBatch/itemBatchUpdate/itemBatchUpdate.jsx";
+import CashierExpenseOut from "../cashierExpenseOut/cashierExpenseOut.jsx";
 
 const useMain = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -100,6 +101,8 @@ const useMain = () => {
         return <TinList />;
       case "Item Batches":
         return <ItemBatchUpdate />;
+      case "Cashier Expense Out":
+        return <CashierExpenseOut />;
       default:
         return null;
     }

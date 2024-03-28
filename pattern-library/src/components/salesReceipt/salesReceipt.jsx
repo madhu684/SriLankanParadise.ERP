@@ -36,6 +36,8 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
     handleRemoveSalesInvoice,
     setSiSearchTerm,
     calculateTotalAmountReceived,
+    calculateTotalExcessAmountAmount,
+    calculateTotalShortAmountAmount,
   } = useSalesReceipt({
     onFormSubmit: () => {
       handleClose();
@@ -320,7 +322,10 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                   <th>SI Ref No</th>
                   <th>Invoice Total</th>
                   <th>Amount Due</th>
-                  <th>Payment</th>
+                  <th>Excess Amount</th>
+                  <th>Short Amount</th>
+                  <th>Amount Received</th>
+                  <th className="text-end">Customer Balance</th>
                 </tr>
               </thead>
               <tbody>
@@ -328,7 +333,45 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                   <tr key={index}>
                     <td>{item.referenceNo}</td>
                     <td>{item.totalAmount.toFixed(2)}</td>
-                    <td>{(item.amountDue - item.payment).toFixed(2)}</td>
+                    <td>{item.amountDue.toFixed(2)}</td>
+                    <td>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={item.excessAmount}
+                        onChange={(e) => {
+                          const value = parseFloat(e.target.value);
+                          const positiveValue = isNaN(value)
+                            ? 0
+                            : Math.max(0, value);
+
+                          handleItemDetailsChange(
+                            index,
+                            "excessAmount",
+                            positiveValue
+                          );
+                        }}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={item.shortAmount}
+                        onChange={(e) => {
+                          const value = parseFloat(e.target.value);
+                          const positiveValue = isNaN(value)
+                            ? 0
+                            : Math.max(0, value);
+
+                          handleItemDetailsChange(
+                            index,
+                            "shortAmount",
+                            positiveValue
+                          );
+                        }}
+                      />
+                    </td>
                     <td>
                       <input
                         type="number"
@@ -340,13 +383,18 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                             : ""
                         }`}
                         value={item.payment}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const value = parseFloat(e.target.value);
+                          const positiveValue = isNaN(value)
+                            ? 0
+                            : Math.max(0, value);
+
                           handleItemDetailsChange(
                             index,
                             "payment",
-                            e.target.value
-                          )
-                        }
+                            positiveValue
+                          );
+                        }}
                       />
                       {validationErrors[`payment_${index}`] && (
                         <div className="invalid-feedback">
@@ -354,57 +402,32 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                         </div>
                       )}
                     </td>
+                    <td className="text-end">
+                      {item.customerBalance.toFixed(2)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
                 <tr>
-                  <td colSpan="2"></td>
-                  <th>Total Amount</th>
-                  <td colSpan="2">{calculateTotalAmount().toFixed(2)}</td>
-                </tr>
-                <tr>
-                  <td colSpan="2"></td>
-                  <th>Excess Amount</th>
-                  <td colSpan="2">
-                    <input
-                      className="form-control"
-                      type="number"
-                      value={formData.excessAmount}
-                      onChange={(e) => {
-                        const value = parseFloat(e.target.value);
-                        const positiveValue = isNaN(value)
-                          ? 0
-                          : Math.max(0, value);
-                        handleInputChange("excessAmount", positiveValue);
-                      }}
-                    />
+                  <td colSpan="5"></td>
+                  <th>Total Excess Amount</th>
+                  <td className="text-end">
+                    {calculateTotalExcessAmountAmount().toFixed(2)}
                   </td>
                 </tr>
                 <tr>
-                  <td colSpan="2"></td>
-                  <th>Short Amount</th>
-                  <td colSpan="2">
-                    <input
-                      className="form-control"
-                      type="number"
-                      value={formData.shortAmount}
-                      onChange={(e) => {
-                        const value = parseFloat(e.target.value);
-                        const positiveValue = isNaN(value)
-                          ? 0
-                          : Math.max(0, value); // Ensures positive value
-                        handleInputChange("shortAmount", positiveValue);
-                      }}
-                    />
+                  <td colSpan="5"></td>
+                  <th>Total Short Amount</th>
+                  <td className="text-end">
+                    {calculateTotalShortAmountAmount().toFixed(2)}
                   </td>
                 </tr>
-
                 <tr>
-                  <td colSpan="2"></td>
+                  <td colSpan="5"></td>
                   <th>Total Amount Received</th>
-                  <td colSpan="2">
-                    {calculateTotalAmountReceived().toFixed(2)}
+                  <td className="text-end">
+                    {calculateTotalAmount().toFixed(2)}
                   </td>
                 </tr>
               </tfoot>

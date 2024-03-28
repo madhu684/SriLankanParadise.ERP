@@ -1,12 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-import { post_customer_api } from "../../services/salesApi";
+import { post_cashier_session_api } from "../../services/salesApi";
 
-const useCustomer = ({ onFormSubmit }) => {
+const useCashierSession = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
-    customerName: "",
-    contactPerson: "",
-    phone: "",
-    email: "",
+    openingBalance: "",
   });
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
@@ -54,30 +51,13 @@ const useCustomer = ({ onFormSubmit }) => {
     setValidFields({});
     setValidationErrors({});
 
-    const isCustomerNameValid = validateField(
-      "customerName",
-      "Customer name",
-      formData.customerName
+    const isOpeningBalanceValid = validateField(
+      "openingBalance",
+      "Opening balance",
+      formData.openingBalance
     );
 
-    const isPhoneValid = validateField(
-      "phone",
-      "Phone number",
-      formData.phone,
-      {
-        validationFunction: (phone) => /^\d+$/.test(phone),
-        errorMessage: "Invalid phone number. Please enter only digits.",
-      }
-    );
-
-    const isEmailValid = formData.email
-      ? validateField("email", "Email", formData.email, {
-          validationFunction: (value) => /\S+@\S+\.\S+/.test(value),
-          errorMessage: "Please enter a valid email address",
-        })
-      : true;
-
-    return isCustomerNameValid && isPhoneValid && isEmailValid;
+    return isOpeningBalanceValid;
   };
 
   const handleInputChange = (field, value) => {
@@ -90,34 +70,36 @@ const useCustomer = ({ onFormSubmit }) => {
   const handleSubmit = async () => {
     try {
       const isFormValid = validateForm();
+      const currentDate = new Date().toISOString();
 
       if (isFormValid) {
         setLoading(true);
-        const customerData = {
-          customerName: formData.customerName,
-          contactPerson: formData.contactPerson,
-          phone: formData.phone,
-          email: formData.email,
+        const cashierSessionData = {
+          userId: sessionStorage.getItem("userId"),
+          sessionIn: currentDate,
+          sessionOut: null,
+          openingBalance: formData.openingBalance,
+          closingBalance: null,
           companyId: sessionStorage.getItem("companyId"),
-          permissionId: 24,
+          permissionId: 1067,
         };
 
-        const response = await post_customer_api(customerData);
+        const response = await post_cashier_session_api(cashierSessionData);
 
         if (response.status === 201) {
           setSubmissionStatus("success");
-          console.log("Custermer added successfully", customerData);
+          console.log("Cashier session open successfully", cashierSessionData);
           setTimeout(() => {
             setSubmissionStatus(null);
             setLoading(false);
-            onFormSubmit(response.data.result);
+            onFormSubmit(response);
           }, 3000);
         } else {
           setSubmissionStatus("error");
         }
       }
     } catch (error) {
-      console.error("Error submitting form:", error);
+      console.error("Error opening cashier session", error);
       setSubmissionStatus("error");
       setTimeout(() => {
         setSubmissionStatus(null);
@@ -138,4 +120,4 @@ const useCustomer = ({ onFormSubmit }) => {
   };
 };
 
-export default useCustomer;
+export default useCashierSession;
