@@ -27,8 +27,6 @@ public partial class SalesReceipt
 
     public decimal? ShortAmount { get; set; }
 
-    public decimal? TotalAmount { get; set; }
-
     public DateTime? CreatedDate { get; set; }
 
     public DateTime? LastUpdatedDate { get; set; }

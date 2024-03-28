@@ -129,6 +129,21 @@
   <data name="BatchHasGrnMasterCreated" xml:space="preserve">
     <value>BatchHasGrnMaster created successfully</value>
   </data>
+  <data name="CashierExpenseOutCreated" xml:space="preserve">
+    <value>Cashier expense out created successfully</value>
+  </data>
+  <data name="CashierSessionCreated" xml:space="preserve">
+    <value>Cashier session created successfully</value>
+  </data>
+  <data name="CashierSessionNotFound" xml:space="preserve">
+    <value>Cashier session not found</value>
+  </data>
+  <data name="CashierSessionsRetrieved" xml:space="preserve">
+    <value>Cashier sessions retrieved</value>
+  </data>
+  <data name="CashierSessionUpdated" xml:space="preserve">
+    <value>Cashier session updated successfully</value>
+  </data>
   <data name="CategoriesNotFound" xml:space="preserve">
     <value>Categories not found</value>
   </data>

@@ -26,7 +26,6 @@
 
         public decimal? ShortAmount { get; set; }
 
-        public decimal? TotalAmount { get; set; }
 
         public DateTime? CreatedDate { get; set; }
 

@@ -100,6 +100,10 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<IssueMaster, IssueMasterDto>();
             CreateMap<IssueDetailRequestModel, IssueDetail>();
             CreateMap<IssueDetail, IssueDetailDto>();
+            CreateMap<CashierSessionRequestModel, CashierSession>();
+            CreateMap<CashierSession, CashierSessionDto>();
+            CreateMap<CashierExpenseOutRequestModel, CashierExpenseOut>();
+            CreateMap<CashierExpenseOut, CashierExpenseOutDto>();
             // Add more mapping configurations if needed
         }
     }

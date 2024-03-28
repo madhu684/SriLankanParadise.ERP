@@ -27,6 +27,10 @@ public partial class User
 
     public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
 
+    public virtual ICollection<CashierExpenseOut> CashierExpenseOuts { get; set; } = new List<CashierExpenseOut>();
+
+    public virtual ICollection<CashierSession> CashierSessions { get; set; } = new List<CashierSession>();
+
     public virtual Company Company { get; set; } = null!;
 
     public virtual ICollection<UserPermission> UserPermissions { get; set; } = new List<UserPermission>();
