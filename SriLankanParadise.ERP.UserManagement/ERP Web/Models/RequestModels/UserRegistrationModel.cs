@@ -15,6 +15,8 @@
         public string? Lastname { get; set; }
 
         public int CompanyId { get; set; }
+
+        public int? LocationId { get; set; }
         public int PermissionId { get; set; }
     }
 }

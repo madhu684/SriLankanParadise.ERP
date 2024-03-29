@@ -13,6 +13,12 @@ public partial class SalesReceiptSalesInvoice
 
     public decimal? SettledAmount { get; set; }
 
+    public decimal? ExcessAmount { get; set; }
+
+    public decimal? ShortAmount { get; set; }
+
+    public decimal? CustomerBalance { get; set; }
+
     public virtual SalesInvoice? SalesInvoice { get; set; }
 
     public virtual SalesReceipt? SalesReceipt { get; set; }

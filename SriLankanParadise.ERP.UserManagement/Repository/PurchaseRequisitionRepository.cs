@@ -33,7 +33,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 return await _dbContext.PurchaseRequisitions
                     .Include(pr => pr.PurchaseRequisitionDetails)
-                    .Include(pr => pr.DeliveryLocationNavigation).ToListAsync();
+                    .Include(pr => pr.ExpectedDeliveryLocationNavigation).ToListAsync();
             }
             catch (Exception)
             {
@@ -49,7 +49,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var purchaseRequisitions = await _dbContext.PurchaseRequisitions
                     .Where(pr => pr.Status != 0 && pr.CompanyId == companyId)
                     .Include(pr => pr.PurchaseRequisitionDetails)
-                    .Include(pr => pr.DeliveryLocationNavigation)
+                    .Include(pr => pr.ExpectedDeliveryLocationNavigation)
                     .ToListAsync();
 
                 if (purchaseRequisitions.Any())
@@ -96,7 +96,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var purchaseRequisition = await _dbContext.PurchaseRequisitions
                     .Where(pr => pr.PurchaseRequisitionId == purchaseRequisitionId)
                     .Include(pr => pr.PurchaseRequisitionDetails)
-                    .Include(pr => pr.DeliveryLocationNavigation)
+                    .Include(pr => pr.ExpectedDeliveryLocationNavigation)
                     .FirstOrDefaultAsync();
 
                 return purchaseRequisition;
@@ -114,7 +114,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var purchaseRequisitions = await _dbContext.PurchaseRequisitions
                     .Where(pr => pr.RequestedUserId == userId)
                     .Include(pr => pr.PurchaseRequisitionDetails)
-                    .Include(pr => pr.DeliveryLocationNavigation)
+                    .Include(pr => pr.ExpectedDeliveryLocationNavigation)
                     .ToListAsync();
 
                 if (purchaseRequisitions.Any())

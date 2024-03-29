@@ -19,5 +19,7 @@
         public int CompanyId { get; set; }
 
         public virtual CompanyDto Company { get; set; } = null!;
+
+        public int? LocationId { get; set; }
     }
 }
