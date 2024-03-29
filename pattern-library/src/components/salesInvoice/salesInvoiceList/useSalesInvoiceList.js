@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { get_sales_invoices_with_out_drafts_api } from "../../../services/salesApi";
 import { get_sales_invoices_by_user_id_api } from "../../../services/salesApi";
 import { get_user_permissions_api } from "../../../services/userManagementApi";
+import { useQuery } from "@tanstack/react-query";
 
 const useSalesInvoiceList = () => {
   const [salesInvoices, setSalesInvoices] = useState([]);
-  const [userPermissions, setUserPermissions] = useState([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [error, setError] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -19,20 +19,27 @@ const useSalesInvoiceList = () => {
   const [showCreateSIForm, setShowCreateSIForm] = useState(false);
   const [showUpdateSIForm, setShowUpdateSIForm] = useState(false);
   const [SIDetail, setSIDetail] = useState("");
-  const [isLoadingPermissions, setIsLoadingPermissions] = useState(true);
 
   const fetchUserPermissions = async () => {
     try {
-      const userPermissionsResponse = await get_user_permissions_api(
+      const response = await get_user_permissions_api(
         sessionStorage.getItem("userId")
       );
-      setUserPermissions(Object.freeze(userPermissionsResponse.data.result));
+      return response.data.result;
     } catch (error) {
-      setError("Error fetching permissions");
-    } finally {
-      setIsLoadingPermissions(false);
+      console.error("Error fetching user permissions:", error);
     }
   };
+
+  const {
+    data: userPermissions,
+    isLoading: isLoadingPermissions,
+    isError: isPermissionsError,
+    error: permissionError,
+  } = useQuery({
+    queryKey: ["userPermissions"],
+    queryFn: fetchUserPermissions,
+  });
 
   const fetchData = async () => {
     try {
@@ -196,7 +203,7 @@ const useSalesInvoiceList = () => {
       2: "Approved",
       3: "Rejected",
       4: "In Progress",
-      5: "Completed",
+      5: "Settled",
       6: "Cancelled",
       7: "On Hold",
     };
@@ -237,6 +244,7 @@ const useSalesInvoiceList = () => {
     salesInvoices,
     isLoadingData,
     isLoadingPermissions,
+    isPermissionsError,
     error,
     isAnyRowSelected,
     selectedRows,

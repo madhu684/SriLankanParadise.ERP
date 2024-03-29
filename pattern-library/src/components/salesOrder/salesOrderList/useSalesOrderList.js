@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { get_sales_orders_with_out_drafts_api } from "../../../services/salesApi";
 import { get_sales_orders_by_user_id_api } from "../../../services/salesApi";
 import { get_user_permissions_api } from "../../../services/userManagementApi";
+import { useQuery } from "@tanstack/react-query";
 
 const useSalesOrderList = () => {
   const [salesOrders, setSalesOrders] = useState([]);
-  const [userPermissions, setUserPermissions] = useState([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [error, setError] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -19,20 +19,28 @@ const useSalesOrderList = () => {
   const [showCreateSOForm, setShowCreateSOForm] = useState(false);
   const [showUpdateSOForm, setShowUpdateSOForm] = useState(false);
   const [SODetail, setSODetail] = useState("");
-  const [isLoadingPermissions, setIsLoadingPermissions] = useState(true);
+  const [showConvertSOForm, setShowConvertSOForm] = useState(false);
 
   const fetchUserPermissions = async () => {
     try {
-      const userPermissionsResponse = await get_user_permissions_api(
+      const response = await get_user_permissions_api(
         sessionStorage.getItem("userId")
       );
-      setUserPermissions(Object.freeze(userPermissionsResponse.data.result));
+      return response.data.result;
     } catch (error) {
-      setError("Error fetching permissions");
-    } finally {
-      setIsLoadingPermissions(false);
+      console.error("Error fetching user permissions:", error);
     }
   };
+
+  const {
+    data: userPermissions,
+    isLoading: isLoadingPermissions,
+    isError: isPermissionsError,
+    error: permissionError,
+  } = useQuery({
+    queryKey: ["userPermissions"],
+    queryFn: fetchUserPermissions,
+  });
 
   const fetchData = async () => {
     try {
@@ -164,7 +172,13 @@ const useSalesOrderList = () => {
 
   const handleClose = () => {
     setShowUpdateSOForm(false);
+    setShowConvertSOForm(false);
     setSODetail("");
+  };
+
+  const handleConvert = (salesOrder) => {
+    setSODetail(salesOrder);
+    setShowConvertSOForm(true);
   };
 
   const handleRowSelect = (id) => {
@@ -233,10 +247,18 @@ const useSalesOrderList = () => {
     );
   };
 
+  const areAnySelectedRowsApproved = (selectedRows) => {
+    return selectedRows.some(
+      (id) => salesOrders.find((so) => so.salesOrderId === id)?.status === 2
+    );
+  };
+
   return {
     salesOrders,
     isLoadingData,
     isLoadingPermissions,
+    isPermissionsError,
+    permissionError,
     error,
     isAnyRowSelected,
     selectedRows,
@@ -249,6 +271,7 @@ const useSalesOrderList = () => {
     showUpdateSOForm,
     userPermissions,
     SODetail,
+    showConvertSOForm,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleViewDetails,
@@ -266,6 +289,9 @@ const useSalesOrderList = () => {
     handleUpdate,
     handleUpdated,
     handleClose,
+    areAnySelectedRowsApproved,
+    handleConvert,
+    setShowConvertSOForm,
   };
 };
 

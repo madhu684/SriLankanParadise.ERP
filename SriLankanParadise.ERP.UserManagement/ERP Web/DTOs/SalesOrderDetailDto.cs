@@ -1,4 +1,6 @@
-﻿namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
+﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+
+namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 {
     public class SalesOrderDetailDto
     {
@@ -15,5 +17,7 @@
         public decimal? UnitPrice { get; set; }
 
         public decimal? TotalPrice { get; set; }
+
+        public virtual ItemBatchDto? ItemBatch { get; set; }
     }
 }

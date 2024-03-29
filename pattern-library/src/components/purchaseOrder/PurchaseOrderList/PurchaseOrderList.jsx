@@ -23,6 +23,8 @@ const PurchaseOrderList = () => {
     showCreatePOForm,
     showUpdatePOForm,
     PODetail,
+    isPermissionsError,
+    permissionError,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleRowSelect,
@@ -41,14 +43,14 @@ const PurchaseOrderList = () => {
     handleClose,
   } = usePurchaseOrderList();
 
-  if (error) {
-    return <ErrorComponent error={error} />;
+  if (error || isPermissionsError) {
+    return <ErrorComponent error={error || "Error fetching data"} />;
   }
 
   if (
     isLoadingData ||
     isLoadingPermissions ||
-    (purchaseOrders && !purchaseOrders.length > 0)
+    (purchaseOrders && !(purchaseOrders.length >= 0))
   ) {
     return <LoadingSpinner />;
   }
@@ -72,7 +74,7 @@ const PurchaseOrderList = () => {
     );
   }
 
-  if (!purchaseOrders) {
+  if (purchaseOrders.length === 0) {
     return (
       <div className="container mt-4">
         <h2>Purchase Orders</h2>
@@ -110,6 +112,8 @@ const PurchaseOrderList = () => {
             </button>
           )}
           {hasPermission("Approve Purchase Order") &&
+            selectedRowData[0]?.orderedUserId !==
+              parseInt(sessionStorage.getItem("userId")) &&
             isAnyRowSelected &&
             areAnySelectedRowsPending(selectedRows) && (
               <button

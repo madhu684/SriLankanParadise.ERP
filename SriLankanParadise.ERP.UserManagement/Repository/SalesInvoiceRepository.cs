@@ -49,6 +49,13 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var salesInvoices = await _dbContext.SalesInvoices
                     .Where(si => si.Status != 0 && si.CompanyId == companyId)
                     .Include(si => si.SalesInvoiceDetails)
+                    .ThenInclude(sid => sid.ItemBatch)
+                    .ThenInclude(ib => ib.Batch)
+                    .Include(si => si.SalesInvoiceDetails)
+                    .ThenInclude(sod => sod.ItemBatch)
+                    .ThenInclude(ib => ib.ItemMaster)
+                    .ThenInclude(im => im.Unit)
+                    .Include(si => si.SalesOrder)
                     .ToListAsync();
 
                 return salesInvoices.Any() ? salesInvoices : null;
@@ -66,6 +73,13 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var salesInvoices = await _dbContext.SalesInvoices
                     .Where(si => si.CreatedUserId == userId)
                     .Include(si => si.SalesInvoiceDetails)
+                    .ThenInclude(sid => sid.ItemBatch)
+                    .ThenInclude(ib => ib.Batch)
+                    .Include(si => si.SalesInvoiceDetails)
+                    .ThenInclude(sod => sod.ItemBatch)
+                    .ThenInclude(ib => ib.ItemMaster)
+                    .ThenInclude(im => im.Unit)
+                    .Include(si => si.SalesOrder)
                     .ToListAsync();
 
                 return salesInvoices.Any() ? salesInvoices : null;
@@ -106,6 +120,13 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var salesInvoice = await _dbContext.SalesInvoices
                     .Where(si => si.SalesInvoiceId == salesInvoiceId)
                     .Include(si => si.SalesInvoiceDetails)
+                    .ThenInclude(sid => sid.ItemBatch)
+                    .ThenInclude(ib => ib.Batch)
+                    .Include(si => si.SalesInvoiceDetails)
+                    .ThenInclude(sod => sod.ItemBatch)
+                    .ThenInclude(ib => ib.ItemMaster)
+                    .ThenInclude(im => im.Unit)
+                    .Include(si => si.SalesOrder)
                     .FirstOrDefaultAsync();
 
                 return salesInvoice;

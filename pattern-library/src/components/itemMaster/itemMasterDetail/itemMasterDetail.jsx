@@ -6,7 +6,7 @@ import useItemMasterList from "../itemMasterList/useItemMasterList";
 const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
   const { getStatusLabel, getStatusBadgeClass } = useItemMasterList();
   return (
-    <Modal show={show} onHide={handleClose} centered scrollable size="lg">
+    <Modal show={show} onHide={handleClose} centered scrollable>
       <Modal.Header closeButton>
         <Modal.Title>Item Master</Modal.Title>
       </Modal.Header>
@@ -24,7 +24,7 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
             </span>
           </div>
         </div>
-        <div className="row mb-3">
+        <div className="row">
           <div className="col-md-6">
             <p>
               <strong>Created By:</strong> {itemMaster.createdBy}
@@ -34,31 +34,14 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
             <strong>Item name:</strong> {itemMaster.itemName}
           </p>
           <p>
-            <strong>Category:</strong> {itemMaster.category.categoryName}
+            <strong>Item type:</strong> {itemMaster.itemType?.name}
           </p>
-        </div>
-
-        {/* Stock Information Table */}
-        <h6>Stock Information</h6>
-        <div className="table-responsive mb-2">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Unit</th>
-                <th>Stock Quantity</th>
-                <th>Selling Price</th>
-                <th>Cost Price</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>{itemMaster?.unit.unitName}</td>
-                <td>{itemMaster?.stockQuantity}</td>
-                <td>{itemMaster?.sellingPrice.toFixed(2)}</td>
-                <td>{itemMaster?.costPrice.toFixed(2)}</td>
-              </tr>
-            </tbody>
-          </table>
+          <p>
+            <strong>Category:</strong> {itemMaster.category?.categoryName}
+          </p>
+          <p>
+            <strong>Unit:</strong> {itemMaster.unit?.unitName}
+          </p>
         </div>
       </Modal.Body>
       <Modal.Footer>

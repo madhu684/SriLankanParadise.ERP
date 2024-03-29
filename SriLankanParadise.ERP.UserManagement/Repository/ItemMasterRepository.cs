@@ -34,6 +34,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 return await _dbContext.ItemMasters
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
+                    .Include(im => im.ItemType)
                     .ToListAsync();
             }
             catch (Exception)
@@ -52,6 +53,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Where(im => im.Status == true && im.CompanyId == companyId)
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
+                    .Include(im => im.ItemType)
                     .ToListAsync();
 
                 return itemMasters.Any() ? itemMasters : null;
@@ -63,6 +65,50 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
+        public async Task<IEnumerable<ItemMaster>> GetItemMastersByCompanyId(int companyId, string searchQuery, string itemType)
+        {
+            try
+            {
+                // Check if searchQuery is provided
+                if (string.IsNullOrEmpty(searchQuery))
+                {
+                    return null;
+                }
+
+                var query = _dbContext.ItemMasters
+                    .Where(im => im.Status == true && im.CompanyId == companyId);
+
+                // Apply search query
+                query = query.Where(im => im.ItemName.Contains(searchQuery));
+
+                // Apply item type filter conditionally
+                if (!string.IsNullOrEmpty(itemType) && itemType.ToUpper() != "ALL")
+                {
+                    query = query.Include(im => im.Category)
+                        .Include(im => im.Unit)
+                        .Include(im => im.ItemType)
+                        .Where(im => im.ItemType.Name == itemType);
+                }
+                else
+                {
+                    query = query.Include(im => im.Category)
+                        .Include(im => im.Unit)
+                        .Include(im => im.ItemType);
+                }
+
+                var itemMasters = await query.ToListAsync();
+
+                return itemMasters.Any() ? itemMasters : null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+
+
         public async Task<ItemMaster> GetItemMasterByItemMasterId(int itemMasterId)
         {
             try
@@ -71,6 +117,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Where(im => im.ItemMasterId == itemMasterId)
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
+                    .Include(im => im.ItemType)
                     .FirstOrDefaultAsync();
 
                 return itemMaster;
@@ -127,6 +174,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Where(im => im.CreatedUserId == userId)
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
+                    .Include(im => im.ItemType)
                     .ToListAsync();
 
                 return itemMasters.Any() ? itemMasters : null;

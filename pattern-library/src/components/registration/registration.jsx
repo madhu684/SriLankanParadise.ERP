@@ -350,11 +350,11 @@ function template() {
                           }
                           required
                         >
-                          <option value="">Select Location</option>
-                          {/* {this.state.locations
+                          <option value="">Select Department</option>
+                          {this.state.locations
                             .filter(
                               (location) =>
-                                location.locationType.name === "Warehouse"
+                                location.locationType.name === "Department"
                             )
                             .map((location) => (
                               <option
@@ -363,7 +363,7 @@ function template() {
                               >
                                 {location.locationName}
                               </option>
-                            ))} */}
+                            ))}
                         </select>
                         {this.state.validationErrors.basic?.department && (
                           <div className="invalid-feedback">

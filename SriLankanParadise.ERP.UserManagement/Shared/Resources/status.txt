@@ -34,6 +34,9 @@ Status 0: Draft (Default)
 	   50: Completed - Draft
 	   41: In Progress - Pending Approval
 	   51: Completed - Pending Approval
+	   42: In Progress - Approved
+	   52: Completed - Approved 
+	   ect.
 
 --- Sales Order ---
 
@@ -53,7 +56,7 @@ Status 0: Draft (Default)
 	   2: Approved
 	   3: Rejected
 	   4: In Progress
-	   5: Completed
+	   5: Settled
 	   6: Cancelled
 	   7: On Hold
 
@@ -76,3 +79,21 @@ Status 0: Inactive
 
 Status 0: Draft (Default)
 	   1: Created
+
+--- Material/Transfer Issue Note ---
+
+Status 0: Draft (Default)
+	   1: Pending Approval
+	   2: Approved
+	   3: Rejected
+	   4: In Progress
+	   5: Completed
+	   6: Cancelled
+	   7: On Hold
+	   40: In Progress - Draft
+	   50: Completed - Draft
+	   41: In Progress - Pending Approval
+	   51: Completed - Pending Approval
+	   42: In Progress - Approved
+	   52: Completed - Approved 
+	   ect.

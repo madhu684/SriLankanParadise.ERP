@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { get_grn_masters_with_out_drafts_api } from "../../../services/purchaseApi";
 import { get_grn_masters_by_user_id_api } from "../../../services/purchaseApi";
 import { get_user_permissions_api } from "../../../services/userManagementApi";
+import { useQuery } from "@tanstack/react-query";
 
 const useGrnList = () => {
   const [Grns, setGrns] = useState([]);
-  const [userPermissions, setUserPermissions] = useState([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [error, setError] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -19,20 +19,27 @@ const useGrnList = () => {
   const [showCreateGrnForm, setShowCreateGrnForm] = useState(false);
   const [showUpdateGrnForm, setShowUpdateGrnForm] = useState(false);
   const [GRNDetail, setGRNDetail] = useState("");
-  const [isLoadingPermissions, setIsLoadingPermissions] = useState(true);
 
   const fetchUserPermissions = async () => {
     try {
-      const userPermissionsResponse = await get_user_permissions_api(
+      const response = await get_user_permissions_api(
         sessionStorage.getItem("userId")
       );
-      setUserPermissions(Object.freeze(userPermissionsResponse.data.result));
+      return response.data.result;
     } catch (error) {
-      setError("Error fetching permissions");
-    } finally {
-      setIsLoadingPermissions(false);
+      console.error("Error fetching user permissions:", error);
     }
   };
+
+  const {
+    data: userPermissions,
+    isLoading: isLoadingPermissions,
+    isError: isPermissionsError,
+    error: permissionError,
+  } = useQuery({
+    queryKey: ["userPermissions"],
+    queryFn: fetchUserPermissions,
+  });
 
   const fetchData = async () => {
     try {
@@ -60,9 +67,6 @@ const useGrnList = () => {
             additionalGrns = GrnByUserIdResponse.data.result;
           }
 
-          //let newGrns = GrnWithoutDraftsResponse.data.result;
-          //const additionalOrders = GrnByUserIdResponse.data.result;
-
           const uniqueNewGrns = additionalGrns.filter(
             (grn) =>
               !newGrns.some(
@@ -85,10 +89,6 @@ const useGrnList = () => {
       setIsLoadingData(false);
     }
   };
-
-  useEffect(() => {
-    fetchUserPermissions();
-  }, []);
 
   useEffect(() => {
     fetchData();
@@ -258,6 +258,9 @@ const useGrnList = () => {
     showUpdateGrnForm,
     userPermissions,
     GRNDetail,
+    isLoadingPermissions,
+    isPermissionsError,
+    permissionError,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleViewDetails,

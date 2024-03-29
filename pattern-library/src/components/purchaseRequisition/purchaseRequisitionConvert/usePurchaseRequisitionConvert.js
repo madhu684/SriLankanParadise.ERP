@@ -5,15 +5,16 @@ import {
   post_purchase_order_detail_api,
   put_purchase_requisition_api,
 } from "../../../services/purchaseApi";
+import { useQuery } from "@tanstack/react-query";
 
 const usePurchaseRequisitionConvert = ({
   onFormSubmit,
   purchaseRequisition,
 }) => {
+  const currentDate = new Date().toISOString().split("T")[0];
   const [formData, setFormData] = useState({
     supplierId: "",
-    orderDate: "",
-    deliveryDate: "",
+    orderDate: currentDate,
     itemDetails: [],
     status: 0,
     remark: "",
@@ -21,25 +22,39 @@ const usePurchaseRequisitionConvert = ({
     totalAmount: 0,
     selectedSupplier: "",
   });
-  const [suppliers, setSuppliers] = useState([]);
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
   const [referenceNo, setReferenceNo] = useState(null);
   const alertRef = useRef(null);
+  const [supplierSearchTerm, setSupplierSearchTerm] = useState("");
+  const [showCreateSupplierModal, setShowCreateSupplierModal] = useState(false);
+  const [showCreateSupplierMoalInParent, setShowCreateSupplierModalInParent] =
+    useState(false);
+  const [loading, setLoading] = useState(false);
+  const [loadingDraft, setLoadingDraft] = useState(false);
 
-  useEffect(() => {
-    const fetchSuppliers = async () => {
-      try {
-        const response = await get_company_suppliers_api(1);
-        setSuppliers(response.data.result);
-      } catch (error) {
-        console.error("Error fetching suppliers:", error);
-      }
-    };
+  const fetchSuppliers = async () => {
+    try {
+      const response = await get_company_suppliers_api(
+        sessionStorage.getItem("companyId")
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching suppliers:", error);
+    }
+  };
 
-    fetchSuppliers();
-  }, []);
+  const {
+    data: suppliers,
+    isLoading,
+    isError,
+    error,
+    refetch: refetchSuppliers,
+  } = useQuery({
+    queryKey: ["suppliers"],
+    queryFn: fetchSuppliers,
+  });
 
   useEffect(() => {
     if (submissionStatus != null) {
@@ -58,7 +73,7 @@ const usePurchaseRequisitionConvert = ({
       attachments: deepCopyPurchaseRequisition?.attachments ?? [],
       totalAmount: deepCopyPurchaseRequisition?.totalAmount ?? "",
       supplierId: "",
-      orderDate: "",
+      orderDate: currentDate,
       deliveryDate: "",
       status: 0,
       remark: "",
@@ -314,6 +329,47 @@ const usePurchaseRequisitionConvert = ({
     );
   };
 
+  const handleSelectSupplier = (selectedSupplier) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      supplierId: selectedSupplier.supplierId,
+      selectedSupplier: selectedSupplier,
+    }));
+    setSupplierSearchTerm(""); // Clear the supplier search term
+    setValidFields({});
+    setValidationErrors({});
+  };
+
+  const handleResetSupplier = () => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      selectedSupplier: "",
+      supplierId: "",
+    }));
+  };
+
+  const handleShowCreateSupplierModal = () => {
+    setShowCreateSupplierModal(true);
+    setShowCreateSupplierModalInParent(true);
+  };
+
+  const handleCloseCreateSupplierModal = () => {
+    setShowCreateSupplierModal(false);
+    handleCloseCreateSupplierModalInParent();
+  };
+
+  const handleCloseCreateSupplierModalInParent = () => {
+    const delay = 300;
+    setTimeout(() => {
+      setShowCreateSupplierModalInParent(false);
+    }, delay);
+  };
+
+  const handleAddSupplier = (responseData) => {
+    handleSelectSupplier(responseData);
+    refetchSuppliers();
+  };
+
   return {
     formData,
     suppliers,
@@ -322,12 +378,24 @@ const usePurchaseRequisitionConvert = ({
     validationErrors,
     referenceNo,
     alertRef,
+    isLoading,
+    isError,
+    error,
+    supplierSearchTerm,
+    showCreateSupplierMoalInParent,
+    showCreateSupplierModal,
     handleInputChange,
     handleSupplierChange,
     handleAttachmentChange,
     handleSubmit,
     handlePrint,
     calculateTotalAmount,
+    setSupplierSearchTerm,
+    handleSelectSupplier,
+    handleResetSupplier,
+    handleCloseCreateSupplierModal,
+    handleAddSupplier,
+    handleShowCreateSupplierModal,
   };
 };
 

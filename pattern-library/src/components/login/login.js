@@ -70,7 +70,7 @@ class login extends React.Component {
         "companyLogoPath",
         response.data.result.company.logoPath
       );
-
+      sessionStorage.setItem("locationId", response.data.result.locationId);
       // Set redirectToMain to true upon successful login
       this.setState({ redirectToMain: true });
 

@@ -6,7 +6,7 @@ import PurchaseRequisitionDetail from "../PurchaseRequisitionDetail/PurchaseRequ
 import PurchaseRequisitionUpdate from "../purchaseRequisitionUpdate/purchaseRequisitionUpdate";
 import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
-import PurchaseRequisitionConvert from "../purchaseRequisitionConvert/purchaseRequisitionConvert";
+import PurchaseOrder from "../../purchaseOrder/purchaseOrder";
 
 const PurchaseRequisitionList = () => {
   const {
@@ -25,6 +25,8 @@ const PurchaseRequisitionList = () => {
     showUpdatePRForm,
     PRDetail,
     showConvertPRForm,
+    isPermissionsError,
+    permissionError,
     areAnySelectedRowsPending,
     areAnySelectedRowsApproved,
     setSelectedRows,
@@ -47,14 +49,14 @@ const PurchaseRequisitionList = () => {
     setShowConvertPRForm,
   } = usePurchaseRequisitionList();
 
-  if (error) {
-    return <ErrorComponent error={error} />;
+  if (error || isPermissionsError) {
+    return <ErrorComponent error={error || permissionError.message} />;
   }
 
   if (
     isLoadingData ||
     isLoadingPermissions ||
-    (purchaseRequisitions && !purchaseRequisitions.length > 0)
+    (purchaseRequisitions && !(purchaseRequisitions.length >= 0))
   ) {
     return <LoadingSpinner />;
   }
@@ -80,15 +82,15 @@ const PurchaseRequisitionList = () => {
 
   if (showConvertPRForm) {
     return (
-      <PurchaseRequisitionConvert
+      <PurchaseOrder
         handleClose={handleClose}
         purchaseRequisition={PRDetail || selectedRowData[0]}
-        handleConverted={handleUpdated}
+        handleUpdated={handleUpdated}
       />
     );
   }
 
-  if (!purchaseRequisitions) {
+  if (purchaseRequisitions.length === 0) {
     return (
       <div className="container mt-4">
         <h2>Purchase Requisitions</h2>
@@ -126,6 +128,8 @@ const PurchaseRequisitionList = () => {
             </button>
           )}
           {hasPermission("Approve Purchase Requisition") &&
+            selectedRowData[0]?.requestedUserId !==
+              parseInt(sessionStorage.getItem("userId")) &&
             isAnyRowSelected &&
             areAnySelectedRowsPending(selectedRows) && (
               <button
@@ -164,7 +168,7 @@ const PurchaseRequisitionList = () => {
               </th>
               <th>ID</th>
               <th>Requested By</th>
-              <th>Department</th>
+              <th>Expected Delivery Date</th>
               <th>Status</th>
               <th>Details</th>
             </tr>
@@ -181,7 +185,7 @@ const PurchaseRequisitionList = () => {
                 </td>
                 <td>{pr.purchaseRequisitionId}</td>
                 <td>{pr.requestedBy}</td>
-                <td>{pr.department}</td>
+                <td>{pr.expectedDeliveryDate?.split("T")[0]}</td>
                 <td>
                   <span
                     className={`badge rounded-pill ${getStatusBadgeClass(

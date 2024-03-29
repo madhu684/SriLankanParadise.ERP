@@ -61,6 +61,87 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Batch created successfully.
+        /// </summary>
+        public static string BatchCreated {
+            get {
+                return ResourceManager.GetString("BatchCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Batches not found.
+        /// </summary>
+        public static string BatchesNotFound {
+            get {
+                return ResourceManager.GetString("BatchesNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Batches retrieved.
+        /// </summary>
+        public static string BatchesRetrieved {
+            get {
+                return ResourceManager.GetString("BatchesRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to BatchHasGrnMaster created successfully.
+        /// </summary>
+        public static string BatchHasGrnMasterCreated {
+            get {
+                return ResourceManager.GetString("BatchHasGrnMasterCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cashier expense out created successfully.
+        /// </summary>
+        public static string CashierExpenseOutCreated {
+            get {
+                return ResourceManager.GetString("CashierExpenseOutCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cashier session created successfully.
+        /// </summary>
+        public static string CashierSessionCreated {
+            get {
+                return ResourceManager.GetString("CashierSessionCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cashier session not found.
+        /// </summary>
+        public static string CashierSessionNotFound {
+            get {
+                return ResourceManager.GetString("CashierSessionNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cashier sessions retrieved.
+        /// </summary>
+        public static string CashierSessionsRetrieved {
+            get {
+                return ResourceManager.GetString("CashierSessionsRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cashier session updated successfully.
+        /// </summary>
+        public static string CashierSessionUpdated {
+            get {
+                return ResourceManager.GetString("CashierSessionUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Categories not found.
         /// </summary>
         public static string CategoriesNotFound {
@@ -111,6 +192,87 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string CategoryUpdated {
             get {
                 return ResourceManager.GetString("CategoryUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Charges and deduction applied created successfully.
+        /// </summary>
+        public static string ChargesAndDeductionAppliedCreated {
+            get {
+                return ResourceManager.GetString("ChargesAndDeductionAppliedCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Charges and deduction applied deleted.
+        /// </summary>
+        public static string ChargesAndDeductionAppliedDeleted {
+            get {
+                return ResourceManager.GetString("ChargesAndDeductionAppliedDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Charges and deduction applied not found.
+        /// </summary>
+        public static string ChargesAndDeductionAppliedNotFound {
+            get {
+                return ResourceManager.GetString("ChargesAndDeductionAppliedNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Charges and deduction applied updated successfully.
+        /// </summary>
+        public static string ChargesAndDeductionAppliedUpdated {
+            get {
+                return ResourceManager.GetString("ChargesAndDeductionAppliedUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Charges and deduction created successfully.
+        /// </summary>
+        public static string ChargesAndDeductionCreated {
+            get {
+                return ResourceManager.GetString("ChargesAndDeductionCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Charges and deductions applied not found.
+        /// </summary>
+        public static string ChargesAndDeductionsAppliedNotFound {
+            get {
+                return ResourceManager.GetString("ChargesAndDeductionsAppliedNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Charges and deductions applied retrieved.
+        /// </summary>
+        public static string ChargesAndDeductionsAppliedRetrieved {
+            get {
+                return ResourceManager.GetString("ChargesAndDeductionsAppliedRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Charges and deductions not found.
+        /// </summary>
+        public static string ChargesAndDeductionsNotFound {
+            get {
+                return ResourceManager.GetString("ChargesAndDeductionsNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Charges and deductions retrieved.
+        /// </summary>
+        public static string ChargesAndDeductionsRetrieved {
+            get {
+                return ResourceManager.GetString("ChargesAndDeductionsRetrieved", resourceCulture);
             }
         }
         
@@ -367,6 +529,114 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Issue detail created successfully.
+        /// </summary>
+        public static string IssueDetailCreated {
+            get {
+                return ResourceManager.GetString("IssueDetailCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Issue master approved.
+        /// </summary>
+        public static string IssueMasterApproved {
+            get {
+                return ResourceManager.GetString("IssueMasterApproved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Issue master created successfully.
+        /// </summary>
+        public static string IssueMasterCreated {
+            get {
+                return ResourceManager.GetString("IssueMasterCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Issue master not found.
+        /// </summary>
+        public static string IssueMasterNotFound {
+            get {
+                return ResourceManager.GetString("IssueMasterNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Issue masters not found.
+        /// </summary>
+        public static string IssueMastersNotFound {
+            get {
+                return ResourceManager.GetString("IssueMastersNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Issue masters retrieved.
+        /// </summary>
+        public static string IssueMastersRetrieved {
+            get {
+                return ResourceManager.GetString("IssueMastersRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item batch created successfully.
+        /// </summary>
+        public static string ItemBatchCreated {
+            get {
+                return ResourceManager.GetString("ItemBatchCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item batches not found.
+        /// </summary>
+        public static string ItemBatchesNotFound {
+            get {
+                return ResourceManager.GetString("ItemBatchesNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item batches retrieved.
+        /// </summary>
+        public static string ItemBatchesRetrieved {
+            get {
+                return ResourceManager.GetString("ItemBatchesRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ItemBatchHasGrnDetail created successfully.
+        /// </summary>
+        public static string ItemBatchHasGrnDetailCreated {
+            get {
+                return ResourceManager.GetString("ItemBatchHasGrnDetailCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item batch not found.
+        /// </summary>
+        public static string ItemBatchNotFound {
+            get {
+                return ResourceManager.GetString("ItemBatchNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item batch updated successfully.
+        /// </summary>
+        public static string ItemBatchUpdated {
+            get {
+                return ResourceManager.GetString("ItemBatchUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Item master created successfully.
         /// </summary>
         public static string ItemMasterCreated {
@@ -417,6 +687,33 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string ItemMasterUpdated {
             get {
                 return ResourceManager.GetString("ItemMasterUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item types not found.
+        /// </summary>
+        public static string ItemTypesNotFound {
+            get {
+                return ResourceManager.GetString("ItemTypesNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item types retrieved.
+        /// </summary>
+        public static string ItemTypesRetrieved {
+            get {
+                return ResourceManager.GetString("ItemTypesRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to LocationChannelItemBatch created successfully.
+        /// </summary>
+        public static string LocationChannelItemBatchCreated {
+            get {
+                return ResourceManager.GetString("LocationChannelItemBatchCreated", resourceCulture);
             }
         }
         
@@ -732,6 +1029,60 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string PurchaseRequisitionUpdated {
             get {
                 return ResourceManager.GetString("PurchaseRequisitionUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Requisition detail created successfully.
+        /// </summary>
+        public static string RequisitionDetailCreated {
+            get {
+                return ResourceManager.GetString("RequisitionDetailCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Requisition master approved.
+        /// </summary>
+        public static string RequisitionMasterApproved {
+            get {
+                return ResourceManager.GetString("RequisitionMasterApproved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Requisition master created successfully.
+        /// </summary>
+        public static string RequisitionMasterCreated {
+            get {
+                return ResourceManager.GetString("RequisitionMasterCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Requisition master not found.
+        /// </summary>
+        public static string RequisitionMasterNotFound {
+            get {
+                return ResourceManager.GetString("RequisitionMasterNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Requisition masters not found.
+        /// </summary>
+        public static string RequisitionMastersNotFound {
+            get {
+                return ResourceManager.GetString("RequisitionMastersNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Requisition masters retrieved.
+        /// </summary>
+        public static string RequisitionMastersRetrieved {
+            get {
+                return ResourceManager.GetString("RequisitionMastersRetrieved", resourceCulture);
             }
         }
         
@@ -1132,6 +1483,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Supplier created successfully.
+        /// </summary>
+        public static string SupplierCreated {
+            get {
+                return ResourceManager.GetString("SupplierCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Suppliers not found.
         /// </summary>
         public static string SuppliersNotFound {
@@ -1146,6 +1506,24 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string SuppliersRetrieved {
             get {
                 return ResourceManager.GetString("SuppliersRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Transaction types not found.
+        /// </summary>
+        public static string TransactionTypesNotFound {
+            get {
+                return ResourceManager.GetString("TransactionTypesNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to TransactionTypesRetrieved .
+        /// </summary>
+        public static string TransactionTypesRetrieved {
+            get {
+                return ResourceManager.GetString("TransactionTypesRetrieved", resourceCulture);
             }
         }
         

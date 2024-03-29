@@ -119,14 +119,14 @@ const ItemMasterList = () => {
               Edit
             </button>
           )}
-          {hasPermission("Delete Item Master") && isAnyRowSelected && (
+          {/* {hasPermission("Delete Item Master") && isAnyRowSelected && (
             <button
               className="btn btn-danger"
               onClick={() => setShowDeleteConfirmation(true)}
             >
               Delete
             </button>
-          )}
+          )} */}
         </div>
       </div>
       <div className="table-responsive">
@@ -138,7 +138,7 @@ const ItemMasterList = () => {
               </th>
               <th>Item Master Id</th>
               <th>Item Name</th>
-              <th>Quantity Stock</th>
+              <th>Item Type</th>
               <th>Status</th>
               <th>Details</th>
             </tr>
@@ -155,7 +155,7 @@ const ItemMasterList = () => {
                 </td>
                 <td>{im.itemMasterId}</td>
                 <td>{im.itemName}</td>
-                <td>{im.stockQuantity}</td>
+                <td>{im.itemType?.name}</td>
                 <td>
                   <span
                     className={`badge rounded-pill ${getStatusBadgeClass(

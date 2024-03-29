@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { get_sales_receipts_with_out_drafts_api } from "../../../services/salesApi";
 import { get_sales_receipts_by_user_id_api } from "../../../services/salesApi";
 import { get_user_permissions_api } from "../../../services/userManagementApi";
+import { useQuery } from "@tanstack/react-query";
 
 const useSalesReceiptList = () => {
   const [salesReceipts, setSalesReceipts] = useState([]);
-  const [userPermissions, setUserPermissions] = useState([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [error, setError] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -19,20 +19,27 @@ const useSalesReceiptList = () => {
   const [showCreateSRForm, setShowCreateSRForm] = useState(false);
   const [showUpdateSRForm, setShowUpdateSRForm] = useState(false);
   const [SRDetail, setSRDetail] = useState("");
-  const [isLoadingPermissions, setIsLoadingPermissions] = useState(true);
 
   const fetchUserPermissions = async () => {
     try {
-      const userPermissionsResponse = await get_user_permissions_api(
+      const response = await get_user_permissions_api(
         sessionStorage.getItem("userId")
       );
-      setUserPermissions(Object.freeze(userPermissionsResponse.data.result));
+      return response.data.result;
     } catch (error) {
-      setError("Error fetching permissions");
-    } finally {
-      setIsLoadingPermissions(false);
+      console.error("Error fetching user permissions:", error);
     }
   };
+
+  const {
+    data: userPermissions,
+    isLoading: isLoadingPermissions,
+    isError: isPermissionsError,
+    error: permissionError,
+  } = useQuery({
+    queryKey: ["userPermissions"],
+    queryFn: fetchUserPermissions,
+  });
 
   const fetchData = async () => {
     try {
@@ -249,6 +256,7 @@ const useSalesReceiptList = () => {
     showUpdateSRForm,
     userPermissions,
     SRDetail,
+    isPermissionsError,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleViewDetails,

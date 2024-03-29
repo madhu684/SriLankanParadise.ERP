@@ -9,5 +9,11 @@
         public string? LocationName { get; set; }
 
         public bool? Status { get; set; }
+
+        public int? LocationTypeId { get; set; }
+
+        public virtual LocationTypeDto? LocationType { get; set; }
+
+        public int? ParentId { get; set; }
     }
 }

@@ -513,7 +513,7 @@ class registration extends React.Component {
         firstname: this.state.formData.basic.firstname,
         lastname: this.state.formData.basic.lastname,
         companyId: this.state.formData.basic.companyId,
-        locationId: this.state.formData.basic.locationId,
+        locationId: this.state.formData.basic.department,
         permissionId: permissionId,
       };
 
@@ -776,6 +776,7 @@ class registration extends React.Component {
           firstname: "",
           lastname: "",
           companyId: sessionStorage.getItem("companyId"),
+          department: "",
         },
         "user-module": {
           assignedModules: [],

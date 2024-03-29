@@ -2,9 +2,20 @@ import React from "react";
 import { Modal, Button } from "react-bootstrap";
 import useGrnApproval from "./useGrnApproval";
 import useGrnList from "../grnList/useGrnList";
+import moment from "moment";
+import "moment-timezone";
+import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 
 const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
-  const { approvalStatus, handleApprove } = useGrnApproval({
+  const {
+    approvalStatus,
+    loading,
+    alertRef,
+    modGrn,
+    handleApprove,
+    handleCostPriceChange,
+    handleSellingPriceChange,
+  } = useGrnApproval({
     grn,
     onFormSubmit: () => {
       handleClose();
@@ -13,8 +24,16 @@ const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
   });
   const { getStatusLabel, getStatusBadgeClass } = useGrnList();
   return (
-    <Modal show={show} onHide={handleClose} centered scrollable size="lg">
-      <Modal.Header closeButton>
+    <Modal
+      show={show}
+      onHide={handleClose}
+      centered
+      scrollable
+      size="lg"
+      backdrop={!(loading || approvalStatus !== null) ? true : "static"}
+      keyboard={!(loading || approvalStatus !== null)}
+    >
+      <Modal.Header closeButton={!(loading || approvalStatus !== null)}>
         <Modal.Title>Approve Goods Received Note</Modal.Title>
       </Modal.Header>
       <Modal.Body>
@@ -31,7 +50,7 @@ const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
             </span>
           </div>
         </div>
-        <div className="row">
+        <div className="row mb-3">
           <div className="col-md-6">
             <p>
               <strong>GRN Date:</strong> {grn?.grnDate?.split("T")[0]}
@@ -57,6 +76,20 @@ const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
           </div>
           <div className="col-md-6">
             <p>
+              <strong>Created Date:</strong>{" "}
+              {moment
+                .utc(grn?.createdDate)
+                .tz("Asia/Colombo")
+                .format("YYYY-MM-DD hh:mm:ss A")}
+            </p>
+            <p>
+              <strong>Last Updated Date:</strong>{" "}
+              {moment
+                .utc(grn?.lastUpdatedDate)
+                .tz("Asia/Colombo")
+                .format("YYYY-MM-DD hh:mm:ss A")}
+            </p>
+            <p>
               <strong>Purchase Order Reference No:</strong>{" "}
               {grn.purchaseOrder.referenceNo}
             </p>
@@ -64,37 +97,62 @@ const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
         </div>
 
         <h6>Item Details</h6>
-        <table className="table mt-2">
-          <thead>
-            <tr>
-              <th>Item ID</th>
-              <th>Received Quantity</th>
-              <th>Accepted Quantity</th>
-              <th>Rejected Quantity</th>
-              <th>Unit Price</th>
-              <th>Total Price</th>
-            </tr>
-          </thead>
-          <tbody>
-            {grn.grnDetails.map((item, index) => (
-              <tr key={index}>
-                <td>{item.itemId}</td>
-                <td>{item.receivedQuantity}</td>
-                <td>{item.acceptedQuantity}</td>
-                <td>{item.rejectedQuantity}</td>
-                <td>{item.unitPrice.toFixed(2)}</td>
-                <td>{item.totalPrice.toFixed(2)}</td>
+        <div className="table-responsive mb-2">
+          <table
+            className="table mt-2"
+            style={{ minWidth: "1000px", overflowX: "auto" }}
+          >
+            <thead>
+              <tr>
+                <th>Item Name</th>
+                <th>Unit</th>
+                <th>Received Quantity</th>
+                <th>Rejected Quantity</th>
+                <th>Free Quantity</th>
+                <th>Expiry Date</th>
+                <th>Unit Price</th>
+                <th>Cost Price</th>
+                <th>Selling Price</th>
               </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colSpan="4"></td>
-              <th>Total Amount</th>
-              <td colSpan="2">{grn.totalAmount.toFixed(2)}</td>
-            </tr>
-          </tfoot>
-        </table>
+            </thead>
+            <tbody>
+              {modGrn &&
+                modGrn.grnDetails.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.item?.itemName}</td>
+                    <td>{item.item?.unit.unitName}</td>
+                    <td>{item.receivedQuantity}</td>
+                    <td>{item.rejectedQuantity}</td>
+                    <td>{item.freeQuantity}</td>
+                    <td>{item.expiryDate?.split("T")[0]}</td>
+                    <td>{item.unitPrice.toFixed(2)}</td>
+                    {/* Additional fields */}
+                    <td>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={item.costPrice}
+                        onChange={(e) =>
+                          handleCostPriceChange(e.target.value, index)
+                        }
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        className="form-control"
+                        value={item.sellingPrice}
+                        onChange={(e) =>
+                          handleSellingPriceChange(e.target.value, index)
+                        }
+                      />
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+        <div ref={alertRef}></div>
         {approvalStatus === "approved" && (
           <div
             className="alert alert-success alert-dismissible fade show mb-3"
@@ -110,14 +168,23 @@ const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
         )}
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
+        <Button
+          variant="secondary"
+          onClick={handleClose}
+          disabled={loading || approvalStatus !== null}
+        >
           Close
         </Button>
         <Button
           variant="success"
           onClick={() => handleApprove(grn.grnMasterId)}
+          disabled={loading || approvalStatus !== null}
         >
-          Approve
+          {loading && approvalStatus === null ? (
+            <ButtonLoadingSpinner text="Approving..." />
+          ) : (
+            "Approve"
+          )}
         </Button>
       </Modal.Footer>
     </Modal>

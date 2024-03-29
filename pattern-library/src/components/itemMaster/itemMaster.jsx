@@ -2,6 +2,8 @@ import React from "react";
 import useItemMaster from "./useItemMaster";
 import CurrentDateTime from "../currentDateTime/currentDateTime";
 import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
+import LoadingSpinner from "../loadingSpinner/loadingSpinner";
+import ErrorComponent from "../errorComponent/errorComponent";
 
 const ItemMaster = ({ handleClose, handleUpdated }) => {
   const {
@@ -10,10 +12,14 @@ const ItemMaster = ({ handleClose, handleUpdated }) => {
     validationErrors,
     categoryOptions,
     unitOptions,
+    itemTypes,
     submissionStatus,
     alertRef,
     loading,
     loadingDraft,
+    isError,
+    isLoading,
+    error,
     handleInputChange,
     handleSubmit,
   } = useItemMaster({
@@ -22,6 +28,14 @@ const ItemMaster = ({ handleClose, handleUpdated }) => {
       handleUpdated();
     },
   });
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (isError) {
+    return <ErrorComponent error={error} />;
+  }
 
   return (
     <div className="container mt-4">
@@ -65,6 +79,57 @@ const ItemMaster = ({ handleClose, handleUpdated }) => {
         <div className="row g-3 mb-3 d-flex justify-content-between">
           <div className="col-md-5">
             <h4>Item Information</h4>
+            <div className="mb-3 mt-3">
+              <label htmlFor="itemName" className="form-label">
+                Item Name
+              </label>
+              <input
+                type="text"
+                className={`form-control ${
+                  validFields.itemName ? "is-valid" : ""
+                } ${validationErrors.itemName ? "is-invalid" : ""}`}
+                id="itemName"
+                placeholder="Enter Item Name"
+                value={formData.itemName}
+                onChange={(e) => handleInputChange("itemName", e.target.value)}
+                required
+              />
+              {validationErrors.itemName && (
+                <div className="invalid-feedback">
+                  {validationErrors.itemName}
+                </div>
+              )}
+            </div>
+
+            <div className="mb-3 mt-3">
+              <label htmlFor="itemType" className="form-label">
+                Item Type
+              </label>
+              <select
+                className={`form-select ${
+                  validFields.itemTypeId ? "is-valid" : ""
+                } ${validationErrors.itemTypeId ? "is-invalid" : ""}`}
+                id="itemType"
+                value={formData.itemTypeId}
+                onChange={(e) =>
+                  handleInputChange("itemTypeId", e.target.value)
+                }
+                required
+              >
+                <option value="">Select Item Type</option>
+                {/* Assuming you have an array of item types */}
+                {itemTypes?.map((type) => (
+                  <option key={type.itemTypeId} value={type.itemTypeId}>
+                    {type.name}
+                  </option>
+                ))}
+              </select>
+              {validationErrors.itemTypeId && (
+                <div className="invalid-feedback">
+                  {validationErrors.itemTypeId}
+                </div>
+              )}
+            </div>
 
             <div className="mb-3 mt-3">
               <label htmlFor="categoryId" className="form-label">
@@ -95,33 +160,6 @@ const ItemMaster = ({ handleClose, handleUpdated }) => {
               )}
             </div>
 
-            <div className="mb-3">
-              <label htmlFor="itemName" className="form-label">
-                Item Name
-              </label>
-              <input
-                type="text"
-                className={`form-control ${
-                  validFields.itemName ? "is-valid" : ""
-                } ${validationErrors.itemName ? "is-invalid" : ""}`}
-                id="itemName"
-                placeholder="Enter Item Name"
-                value={formData.itemName}
-                onChange={(e) => handleInputChange("itemName", e.target.value)}
-                required
-              />
-              {validationErrors.itemName && (
-                <div className="invalid-feedback">
-                  {validationErrors.itemName}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Stock Information */}
-          <div className="col-md-5">
-            <h4>Stock Information</h4>
-
             <div className="mb-3 mt-3">
               <label htmlFor="unitId" className="form-label">
                 Unit
@@ -145,76 +183,6 @@ const ItemMaster = ({ handleClose, handleUpdated }) => {
               {validationErrors.unitId && (
                 <div className="invalid-feedback">
                   {validationErrors.unitId}
-                </div>
-              )}
-            </div>
-
-            <div className="mb-3 mt-3">
-              <label htmlFor="stockQuantity" className="form-label">
-                Stock Quantity
-              </label>
-              <input
-                type="text"
-                className={`form-control ${
-                  validFields.stockQuantity ? "is-valid" : ""
-                } ${validationErrors.stockQuantity ? "is-invalid" : ""}`}
-                id="stockQuantity"
-                placeholder="Enter Stock Quantity"
-                value={formData.stockQuantity}
-                onChange={(e) =>
-                  handleInputChange("stockQuantity", e.target.value)
-                }
-                required
-              />
-              {validationErrors.stockQuantity && (
-                <div className="invalid-feedback">
-                  {validationErrors.stockQuantity}
-                </div>
-              )}
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="sellingPrice" className="form-label">
-                Selling Price
-              </label>
-              <input
-                type="text"
-                className={`form-control ${
-                  validFields.sellingPrice ? "is-valid" : ""
-                } ${validationErrors.sellingPrice ? "is-invalid" : ""}`}
-                id="sellingPrice"
-                placeholder="Enter Selling Price"
-                value={formData.sellingPrice}
-                onChange={(e) =>
-                  handleInputChange("sellingPrice", e.target.value)
-                }
-                required
-              />
-              {validationErrors.sellingPrice && (
-                <div className="invalid-feedback">
-                  {validationErrors.sellingPrice}
-                </div>
-              )}
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="costPrice" className="form-label">
-                Cost Price
-              </label>
-              <input
-                type="text"
-                className={`form-control ${
-                  validFields.costPrice ? "is-valid" : ""
-                } ${validationErrors.costPrice ? "is-invalid" : ""}`}
-                id="costPrice"
-                placeholder="Enter Cost Price"
-                value={formData.costPrice}
-                onChange={(e) => handleInputChange("costPrice", e.target.value)}
-                required
-              />
-              {validationErrors.costPrice && (
-                <div className="invalid-feedback">
-                  {validationErrors.costPrice}
                 </div>
               )}
             </div>
