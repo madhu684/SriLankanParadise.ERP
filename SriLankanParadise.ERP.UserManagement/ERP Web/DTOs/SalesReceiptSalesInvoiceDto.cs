@@ -12,6 +12,12 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public decimal? SettledAmount { get; set; }
 
+        public decimal? ExcessAmount { get; set; }
+
+        public decimal? ShortAmount { get; set; }
+
+        public decimal? CustomerBalance { get; set; }
+
         public virtual SalesInvoiceDto? SalesInvoice { get; set; }
     }
 }

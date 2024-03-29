@@ -432,3 +432,46 @@ export const delete_sales_receipt_sales_invoice_api = async (
     throw error;
   }
 };
+
+//cashier session apis
+export const post_cashier_session_api = async (formData) => {
+  try {
+    const response = await api.post("/cashierSession", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const put_cashier_session_api = async (
+  cashierSessionId,
+  cashierSessionData
+) => {
+  try {
+    const response = await api.put(
+      `/cashierSession/${cashierSessionId}`,
+      cashierSessionData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const post_cashier_expense_out_api = async (formData) => {
+  try {
+    const response = await api.post("/cashierExpenseOut", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

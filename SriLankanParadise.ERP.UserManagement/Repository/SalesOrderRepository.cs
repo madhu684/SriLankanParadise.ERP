@@ -50,6 +50,12 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var salesOrders = await _dbContext.SalesOrders
                     .Where(so => so.Status != 0 && so.CompanyId == companyId)
                     .Include(so => so.SalesOrderDetails)
+                    .ThenInclude(sod => sod.ItemBatch)
+                    .ThenInclude(ib => ib.Batch)
+                    .Include(so => so.SalesOrderDetails)
+                    .ThenInclude(sod => sod.ItemBatch)
+                    .ThenInclude(ib => ib.ItemMaster)
+                    .ThenInclude(im => im.Unit)
                     .Include(so => so.Customer)
                     .ToListAsync();
 
@@ -69,6 +75,12 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var salesOrders = await _dbContext.SalesOrders
                     .Where(so => so.CreatedUserId == userId)
                     .Include(so => so.SalesOrderDetails)
+                    .ThenInclude(sod => sod.ItemBatch)
+                    .ThenInclude(ib => ib.Batch)
+                    .Include(so => so.SalesOrderDetails)
+                    .ThenInclude(sod => sod.ItemBatch)
+                    .ThenInclude(ib => ib.ItemMaster)
+                    .ThenInclude(im => im.Unit)
                     .Include(so => so.Customer)
                     .ToListAsync();
 
@@ -111,6 +123,12 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var salesOrder = await _dbContext.SalesOrders
                     .Where(so => so.SalesOrderId == salesOrderId)
                     .Include(so => so.SalesOrderDetails)
+                    .ThenInclude(sod => sod.ItemBatch)
+                    .ThenInclude(ib => ib.Batch)
+                    .Include(so => so.SalesOrderDetails)
+                    .ThenInclude(sod => sod.ItemBatch)
+                    .ThenInclude(ib => ib.ItemMaster)
+                    .ThenInclude(im => im.Unit)
                     .Include(so => so.Customer)
                     .FirstOrDefaultAsync();
 

@@ -6,7 +6,7 @@
 
         public decimal? AmountReceived { get; set; }
 
-        public string? ReferenceNo { get; set; }
+        public string? PaymentReferenceNo { get; set; }
 
         public int? CompanyId { get; set; }
 
@@ -17,6 +17,17 @@
         public int? CreatedUserId { get; set; }
 
         public int? Status { get; set; }
+
+        public decimal? ExcessAmount { get; set; }
+
+        public decimal? ShortAmount { get; set; }
+
+
+        public DateTime? CreatedDate { get; set; }
+
+        public DateTime? LastUpdatedDate { get; set; }
+
+        public string? ReferenceNumber { get; set; }
 
         public int PermissionId { get; set; }
     }

@@ -1,4 +1,6 @@
-﻿namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
+﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+
+namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 {
     public class SalesInvoiceDto
     {
@@ -29,6 +31,12 @@
         public string? ReferenceNo { get; set; }
 
         public decimal? AmountDue { get; set; }
+
+        public DateTime? CreatedDate { get; set; }
+
+        public DateTime? LastUpdatedDate { get; set; }
+
+        public virtual SalesOrderDto? SalesOrder { get; set; }
 
         public virtual IEnumerable<SalesInvoiceDetailDto>? SalesInvoiceDetails { get; set; }
     }

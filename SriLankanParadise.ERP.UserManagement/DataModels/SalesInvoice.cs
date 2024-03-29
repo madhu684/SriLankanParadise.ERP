@@ -33,7 +33,13 @@ public partial class SalesInvoice
 
     public decimal? AmountDue { get; set; }
 
+    public DateTime? CreatedDate { get; set; }
+
+    public DateTime? LastUpdatedDate { get; set; }
+
     public virtual ICollection<SalesInvoiceDetail> SalesInvoiceDetails { get; set; } = new List<SalesInvoiceDetail>();
+
+    public virtual SalesOrder? SalesOrder { get; set; }
 
     public virtual ICollection<SalesReceiptSalesInvoice> SalesReceiptSalesInvoices { get; set; } = new List<SalesReceiptSalesInvoice>();
 }

@@ -1,6 +1,7 @@
 import React from "react";
 import { Modal, Button } from "react-bootstrap";
 import useCustomer from "./useCustomer";
+import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 
 const Customer = ({ show, handleClose, handleAddCustomer }) => {
   const {
@@ -8,6 +9,8 @@ const Customer = ({ show, handleClose, handleAddCustomer }) => {
     validFields,
     validationErrors,
     submissionStatus,
+    loading,
+    alertRef,
     handleInputChange,
     handleSubmit,
   } = useCustomer({
@@ -18,8 +21,15 @@ const Customer = ({ show, handleClose, handleAddCustomer }) => {
   });
 
   return (
-    <Modal show={show} onHide={handleClose} centered scrollable>
-      <Modal.Header closeButton>
+    <Modal
+      show={show}
+      onHide={handleClose}
+      centered
+      scrollable
+      backdrop={!(loading || submissionStatus !== null) ? true : "static"}
+      keyboard={!(loading || submissionStatus !== null)}
+    >
+      <Modal.Header closeButton={!(loading || submissionStatus !== null)}>
         <Modal.Title>Add New Customer</Modal.Title>
       </Modal.Header>
       <Modal.Body>
@@ -112,6 +122,7 @@ const Customer = ({ show, handleClose, handleAddCustomer }) => {
             )}
           </div>
         </form>
+        <div ref={alertRef}></div>
         {/* Display success or error messages */}
         {submissionStatus === "success" && (
           <div className="alert alert-success mb-0" role="alert">
@@ -125,11 +136,23 @@ const Customer = ({ show, handleClose, handleAddCustomer }) => {
         )}
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
+        <Button
+          variant="secondary"
+          onClick={handleClose}
+          disabled={loading || submissionStatus !== null}
+        >
           Close
         </Button>
-        <Button variant="primary" onClick={handleSubmit}>
-          Save
+        <Button
+          variant="primary"
+          onClick={handleSubmit}
+          disabled={loading || submissionStatus !== null}
+        >
+          {loading && submissionStatus === null ? (
+            <ButtonLoadingSpinner text="Saving..." />
+          ) : (
+            "Save"
+          )}
         </Button>
       </Modal.Footer>
     </Modal>

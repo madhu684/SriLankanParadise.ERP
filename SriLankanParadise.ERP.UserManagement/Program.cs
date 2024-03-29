@@ -149,6 +149,10 @@ builder.Services.AddScoped<IIssueMasterService, IssueMasterService>();
 builder.Services.AddScoped<IIssueMasterRepository, IssueMasterRepository>();
 builder.Services.AddScoped<IIssueDetailService, IssueDetailService>();
 builder.Services.AddScoped<IIssueDetailRepository, IssueDetailRepository>();
+builder.Services.AddScoped<ICashierSessionService, CashierSessionService>();
+builder.Services.AddScoped<ICashierSessionRepository, CashierSessionRepository>();
+builder.Services.AddScoped<ICashierExpenseOutService, CashierExpenseOutService>();
+builder.Services.AddScoped<ICashierExpenseOutRepository, CashierExpenseOutRepository>();
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

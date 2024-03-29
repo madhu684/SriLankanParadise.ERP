@@ -6,12 +6,15 @@ import SalesOrderDetail from "../salesOrderDetail/salesOrderDetail";
 import SalesOrderUpdate from "../salesOrderUpdate/salesOrderUpdate";
 import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
+import SalesInvoice from "../../salesInvoice/salesInvoice";
 
 const SalesOrderList = () => {
   const {
     salesOrders,
     isLoadingData,
     isLoadingPermissions,
+    isPermissionsError,
+    permissionError,
     error,
     isAnyRowSelected,
     selectedRows,
@@ -23,6 +26,7 @@ const SalesOrderList = () => {
     showCreateSOForm,
     showUpdateSOForm,
     SODetail,
+    showConvertSOForm,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleRowSelect,
@@ -39,10 +43,13 @@ const SalesOrderList = () => {
     handleUpdate,
     handleUpdated,
     handleClose,
+    areAnySelectedRowsApproved,
+    handleConvert,
+    setShowConvertSOForm,
   } = useSalesOrderList();
 
-  if (error) {
-    return <ErrorComponent error={error} />;
+  if (error || isPermissionsError) {
+    return <ErrorComponent error={error || "Error fetching data"} />;
   }
 
   if (
@@ -65,6 +72,16 @@ const SalesOrderList = () => {
   if (showUpdateSOForm) {
     return (
       <SalesOrderUpdate
+        handleClose={handleClose}
+        salesOrder={SODetail || selectedRowData[0]}
+        handleUpdated={handleUpdated}
+      />
+    );
+  }
+
+  if (showConvertSOForm) {
+    return (
+      <SalesInvoice
         handleClose={handleClose}
         salesOrder={SODetail || selectedRowData[0]}
         handleUpdated={handleUpdated}
@@ -110,6 +127,8 @@ const SalesOrderList = () => {
             </button>
           )}
           {hasPermission("Approve Sales Order") &&
+            selectedRowData[0]?.createdUserId !==
+              parseInt(sessionStorage.getItem("userId")) &&
             isAnyRowSelected &&
             areAnySelectedRowsPending(selectedRows) && (
               <button
@@ -117,6 +136,16 @@ const SalesOrderList = () => {
                 onClick={handleShowApproveSOModal}
               >
                 Approve
+              </button>
+            )}
+          {hasPermission("Convert Sales Order") &&
+            isAnyRowSelected &&
+            areAnySelectedRowsApproved(selectedRows) && (
+              <button
+                className="btn btn-success"
+                onClick={() => setShowConvertSOForm(true)}
+              >
+                Convert
               </button>
             )}
           {hasPermission("Update Sales Order") && isAnyRowSelected && (

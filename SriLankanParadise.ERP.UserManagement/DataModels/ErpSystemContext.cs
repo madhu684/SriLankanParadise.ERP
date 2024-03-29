@@ -27,6 +27,10 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<BatchHasGrnMaster> BatchHasGrnMasters { get; set; }
 
+    public virtual DbSet<CashierExpenseOut> CashierExpenseOuts { get; set; }
+
+    public virtual DbSet<CashierSession> CashierSessions { get; set; }
+
     public virtual DbSet<Category> Categories { get; set; }
 
     public virtual DbSet<ChargesAndDeduction> ChargesAndDeductions { get; set; }
@@ -198,6 +202,37 @@ public partial class ErpSystemContext : DbContext
                 .HasForeignKey(d => d.GrnMasterId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__BatchHasG__GrnMa__6FB49575");
+        });
+
+        modelBuilder.Entity<CashierExpenseOut>(entity =>
+        {
+            entity.HasKey(e => e.CashierExpenseOutId).HasName("PK__CashierE__F3B5AFBCD6C6368D");
+
+            entity.ToTable("CashierExpenseOut");
+
+            entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.Description).HasMaxLength(255);
+
+            entity.HasOne(d => d.User).WithMany(p => p.CashierExpenseOuts)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_CashierExpenseOut_User");
+        });
+
+        modelBuilder.Entity<CashierSession>(entity =>
+        {
+            entity.HasKey(e => e.CashierSessionId).HasName("PK__CashierS__A430047D465B9DC9");
+
+            entity.ToTable("CashierSession");
+
+            entity.Property(e => e.ClosingBalance).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.OpeningBalance).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.SessionIn).HasColumnType("datetime");
+            entity.Property(e => e.SessionOut).HasColumnType("datetime");
+
+            entity.HasOne(d => d.User).WithMany(p => p.CashierSessions)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_CashierSession_User");
         });
 
         modelBuilder.Entity<Category>(entity =>
@@ -693,14 +728,20 @@ public partial class ErpSystemContext : DbContext
 
             entity.Property(e => e.AmountDue).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.ApprovedBy).HasMaxLength(50);
-            entity.Property(e => e.ApprovedDate).HasColumnType("date");
+            entity.Property(e => e.ApprovedDate).HasColumnType("datetime");
             entity.Property(e => e.CreatedBy).HasMaxLength(50);
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
             entity.Property(e => e.DueDate).HasColumnType("date");
             entity.Property(e => e.InvoiceDate).HasColumnType("date");
+            entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
             entity.Property(e => e.ReferenceNo)
                 .HasMaxLength(20)
                 .HasDefaultValueSql("('SI'+CONVERT([nvarchar](20),NEXT VALUE FOR [dbo].[SalesInvoiceReferenceNoSeq]))");
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
+
+            entity.HasOne(d => d.SalesOrder).WithMany(p => p.SalesInvoices)
+                .HasForeignKey(d => d.SalesOrderId)
+                .HasConstraintName("FK_SalesInvoice_SalesOrder");
         });
 
         modelBuilder.Entity<SalesInvoiceDetail>(entity =>
@@ -716,6 +757,10 @@ public partial class ErpSystemContext : DbContext
                 .HasForeignKey(d => d.SalesInvoiceId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__SalesInvo__Sales__19AACF41");
+
+            entity.HasOne(d => d.ItemBatch).WithMany(p => p.SalesInvoiceDetails)
+                .HasForeignKey(d => new { d.ItemBatchBatchId, d.ItemBatchItemMasterId })
+                .HasConstraintName("FK_SalesInvoiceDetail_ItemBatch");
         });
 
         modelBuilder.Entity<SalesOrder>(entity =>
@@ -725,9 +770,11 @@ public partial class ErpSystemContext : DbContext
             entity.ToTable("SalesOrder");
 
             entity.Property(e => e.ApprovedBy).HasMaxLength(50);
-            entity.Property(e => e.ApprovedDate).HasColumnType("date");
+            entity.Property(e => e.ApprovedDate).HasColumnType("datetime");
             entity.Property(e => e.CreatedBy).HasMaxLength(50);
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
             entity.Property(e => e.DeliveryDate).HasColumnType("date");
+            entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
             entity.Property(e => e.OrderDate).HasColumnType("date");
             entity.Property(e => e.ReferenceNo)
                 .HasMaxLength(20)
@@ -767,8 +814,13 @@ public partial class ErpSystemContext : DbContext
 
             entity.Property(e => e.AmountReceived).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.CreatedBy).HasMaxLength(50);
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.ExcessAmount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
+            entity.Property(e => e.PaymentReferenceNo).HasMaxLength(20);
             entity.Property(e => e.ReceiptDate).HasColumnType("date");
-            entity.Property(e => e.ReferenceNo).HasMaxLength(20);
+            entity.Property(e => e.ReferenceNumber).HasMaxLength(255);
+            entity.Property(e => e.ShortAmount).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.PaymentMode).WithMany(p => p.SalesReceipts)
                 .HasForeignKey(d => d.PaymentModeId)
@@ -781,7 +833,10 @@ public partial class ErpSystemContext : DbContext
 
             entity.ToTable("SalesReceiptSalesInvoice");
 
+            entity.Property(e => e.CustomerBalance).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.ExcessAmount).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.SettledAmount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.ShortAmount).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.SalesInvoice).WithMany(p => p.SalesReceiptSalesInvoices)
                 .HasForeignKey(d => d.SalesInvoiceId)

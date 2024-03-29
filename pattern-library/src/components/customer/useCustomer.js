@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { post_customer_api } from "../../services/salesApi";
 
 const useCustomer = ({ onFormSubmit }) => {
@@ -11,6 +11,15 @@ const useCustomer = ({ onFormSubmit }) => {
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
   const [submissionStatus, setSubmissionStatus] = useState(null);
+  const alertRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (submissionStatus != null) {
+      // Scroll to the success alert when it becomes visible
+      alertRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [submissionStatus]);
 
   const validateField = (
     fieldName,
@@ -42,16 +51,13 @@ const useCustomer = ({ onFormSubmit }) => {
   };
 
   const validateForm = () => {
+    setValidFields({});
+    setValidationErrors({});
+
     const isCustomerNameValid = validateField(
       "customerName",
       "Customer name",
       formData.customerName
-    );
-
-    const isContactPersonValid = validateField(
-      "contactPerson",
-      "Contact person",
-      formData.contactPerson
     );
 
     const isPhoneValid = validateField(
@@ -64,17 +70,14 @@ const useCustomer = ({ onFormSubmit }) => {
       }
     );
 
-    const isEmailValid = validateField("email", "Email", formData.email, {
-      validationFunction: (email) => /\S+@\S+\.\S+/.test(email),
-      errorMessage: "Invalid email address.",
-    });
+    const isEmailValid = formData.email
+      ? validateField("email", "Email", formData.email, {
+          validationFunction: (value) => /\S+@\S+\.\S+/.test(value),
+          errorMessage: "Please enter a valid email address",
+        })
+      : true;
 
-    return (
-      isCustomerNameValid &&
-      isContactPersonValid &&
-      isPhoneValid &&
-      isEmailValid
-    );
+    return isCustomerNameValid && isPhoneValid && isEmailValid;
   };
 
   const handleInputChange = (field, value) => {
@@ -89,12 +92,13 @@ const useCustomer = ({ onFormSubmit }) => {
       const isFormValid = validateForm();
 
       if (isFormValid) {
+        setLoading(true);
         const customerData = {
           customerName: formData.customerName,
           contactPerson: formData.contactPerson,
           phone: formData.phone,
           email: formData.email,
-          companyId: 1, //sessionStorage.getItem("companyId")
+          companyId: sessionStorage.getItem("companyId"),
           permissionId: 24,
         };
 
@@ -105,6 +109,7 @@ const useCustomer = ({ onFormSubmit }) => {
           console.log("Custermer added successfully", customerData);
           setTimeout(() => {
             setSubmissionStatus(null);
+            setLoading(false);
             onFormSubmit(response.data.result);
           }, 3000);
         } else {
@@ -116,6 +121,7 @@ const useCustomer = ({ onFormSubmit }) => {
       setSubmissionStatus("error");
       setTimeout(() => {
         setSubmissionStatus(null);
+        setLoading(false);
       }, 3000);
     }
   };
@@ -125,6 +131,8 @@ const useCustomer = ({ onFormSubmit }) => {
     validFields,
     validationErrors,
     submissionStatus,
+    loading,
+    alertRef,
     handleInputChange,
     handleSubmit,
   };
