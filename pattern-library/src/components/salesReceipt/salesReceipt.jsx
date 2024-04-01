@@ -320,6 +320,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
               <thead>
                 <tr>
                   <th>SI Ref No</th>
+                  <th>Ref Number</th>
                   <th>Invoice Total</th>
                   <th>Amount Due</th>
                   <th>Excess Amount</th>
@@ -332,6 +333,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                 {formData.selectedSalesInvoices.map((item, index) => (
                   <tr key={index}>
                     <td>{item.referenceNo}</td>
+                    <td>{item?.referenceNumber}</td>
                     <td>{item.totalAmount.toFixed(2)}</td>
                     <td>{item.amountDue.toFixed(2)}</td>
                     <td>
@@ -410,21 +412,21 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
               </tbody>
               <tfoot>
                 <tr>
-                  <td colSpan="5"></td>
+                  <td colSpan="6"></td>
                   <th>Total Excess Amount</th>
                   <td className="text-end">
                     {calculateTotalExcessAmountAmount().toFixed(2)}
                   </td>
                 </tr>
                 <tr>
-                  <td colSpan="5"></td>
+                  <td colSpan="6"></td>
                   <th>Total Short Amount</th>
                   <td className="text-end">
                     {calculateTotalShortAmountAmount().toFixed(2)}
                   </td>
                 </tr>
                 <tr>
-                  <td colSpan="5"></td>
+                  <td colSpan="6"></td>
                   <th>Total Amount Received</th>
                   <td className="text-end">
                     {calculateTotalAmount().toFixed(2)}

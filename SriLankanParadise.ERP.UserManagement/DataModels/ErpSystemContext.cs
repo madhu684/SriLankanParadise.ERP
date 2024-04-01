@@ -737,6 +737,7 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.ReferenceNo)
                 .HasMaxLength(20)
                 .HasDefaultValueSql("('SI'+CONVERT([nvarchar](20),NEXT VALUE FOR [dbo].[SalesInvoiceReferenceNoSeq]))");
+            entity.Property(e => e.ReferenceNumber).HasMaxLength(255);
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.SalesOrder).WithMany(p => p.SalesInvoices)

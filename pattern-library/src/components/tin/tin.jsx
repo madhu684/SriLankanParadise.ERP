@@ -88,7 +88,7 @@ const Tin = ({ handleClose, handleUpdated }) => {
         {/* Tin Information */}
         <div className="row mb-3 d-flex justify-content-between">
           <div className="col-md-5">
-            <h4>1. Tin Information</h4>
+            <h4>1. TIN Information</h4>
             {/* Status Dropdown */}
             <div className="mb-3 mt-3">
               <label htmlFor="status" className="form-label">

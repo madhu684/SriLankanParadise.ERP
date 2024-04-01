@@ -64,6 +64,7 @@ const SalesReceiptDetail = ({ show, handleClose, salesReceipt }) => {
             <thead>
               <tr>
                 <th>SI Ref No</th>
+                <th>Ref Number</th>
                 <th>Invoice Total</th>
                 <th>Amount Due</th>
                 <th>Excess Amount</th>
@@ -76,6 +77,7 @@ const SalesReceiptDetail = ({ show, handleClose, salesReceipt }) => {
               {salesReceipt.salesReceiptSalesInvoices.map((item, index) => (
                 <tr key={index}>
                   <td>{item.salesInvoice?.referenceNo}</td>
+                  <td>{item.salesInvoice?.referenceNumber}</td>
                   <td>{item.salesInvoice?.totalAmount.toFixed(2)}</td>
                   <td>{item.salesInvoice?.amountDue.toFixed(2)}</td>
                   <td>{item.excessAmount?.toFixed(2)}</td>
@@ -96,21 +98,21 @@ const SalesReceiptDetail = ({ show, handleClose, salesReceipt }) => {
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan="5"></td>
+                <td colSpan="6"></td>
                 <th>Total Excess Amount</th>
                 <td className="text-end">
                   {salesReceipt.excessAmount.toFixed(2)}
                 </td>
               </tr>
               <tr>
-                <td colSpan="5"></td>
+                <td colSpan="6"></td>
                 <th>Total Short Amount </th>
                 <td className="text-end">
                   {salesReceipt.shortAmount.toFixed(2)}
                 </td>
               </tr>
               <tr>
-                <td colSpan="5"></td>
+                <td colSpan="6"></td>
                 <th>Total Amount Received</th>
                 <td className="text-end">
                   {salesReceipt.amountReceived.toFixed(2)}
