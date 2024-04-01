@@ -1,7 +1,7 @@
 import React from "react";
 import { Modal, Button } from "react-bootstrap";
 import usePurchaseOrderApproval from "./usePurchaseOrderApproval";
-import usePurchaseOrderList from "../purchaseOrderList/usePurchaseOrderList";
+import usePurchaseOrderList from "../PurchaseOrderList/usePurchaseOrderList";
 import moment from "moment";
 import "moment-timezone";
 import ErrorComponent from "../../errorComponent/errorComponent";

@@ -937,6 +937,10 @@ public partial class ErpSystemContext : DbContext
                 .HasForeignKey(d => d.CompanyId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_User_Company");
+
+            entity.HasOne(d => d.Location).WithMany(p => p.Users)
+                .HasForeignKey(d => d.LocationId)
+                .HasConstraintName("FK_User_Location");
         });
 
         modelBuilder.Entity<UserPermission>(entity =>

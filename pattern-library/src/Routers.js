@@ -11,7 +11,7 @@ import Grn from "./components/grn/grn";
 import SalesOrder from "./components/salesOrder/salesOrder";
 import SalesInvoice from "./components/salesInvoice/salesInvoice";
 import SalesReceipt from "./components/salesReceipt/salesReceipt";
-import PurchaseRequisitionList from "./components/purchaseRequisition/purchaseRequisitionList/PurchaseRequisitionList";
+import PurchaseRequisitionList from "./components/purchaseRequisition/PurchaseRequisitionList/PurchaseRequisitionList";
 import ItemMaster from "./components/itemMaster/itemMaster";
 import Category from "./components/category/category";
 import Unit from "./components/unit/unit";
