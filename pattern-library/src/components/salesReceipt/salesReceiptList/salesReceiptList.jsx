@@ -21,6 +21,7 @@ const SalesReceiptList = () => {
     showUpdateSRForm,
     SRDetail,
     isPermissionsError,
+    cashierSessionOpen,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleRowSelect,
@@ -34,6 +35,7 @@ const SalesReceiptList = () => {
     handleUpdate,
     handleUpdated,
     handleClose,
+    closeAlertAfterDelay,
   } = useSalesReceiptList();
 
   if (error || isPermissionsError) {
@@ -48,7 +50,7 @@ const SalesReceiptList = () => {
     return <LoadingSpinner />;
   }
 
-  if (showCreateSRForm) {
+  if (showCreateSRForm && cashierSessionOpen) {
     return (
       <SalesReceipt
         handleClose={() => setShowCreateSRForm(false)}
@@ -85,6 +87,12 @@ const SalesReceiptList = () => {
               Create
             </button>
           )}
+          {showCreateSRForm && !cashierSessionOpen && (
+            <div className="alert alert-warning" role="alert">
+              Please open a cashier session to create sales receipts.
+              {closeAlertAfterDelay()}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -114,6 +122,12 @@ const SalesReceiptList = () => {
           )}
         </div>
       </div>
+      {showCreateSRForm && !cashierSessionOpen && (
+        <div className="alert alert-warning mt-3 mb-3" role="alert">
+          Please open a cashier session to create sales receipts.
+          {closeAlertAfterDelay()}
+        </div>
+      )}
       <div className="table-responsive">
         <table className="table mt-2">
           <thead>

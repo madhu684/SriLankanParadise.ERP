@@ -25,6 +25,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     itemMaster: "",
     invoiceDate: "",
     dueDate: "",
+    referenceNumber: "",
     itemDetails: [],
     attachments: [],
     totalAmount: 0,
@@ -260,6 +261,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
         salesInvoiceId: deepCopySalesInvoice?.salesInvoiceId ?? "",
         invoiceDate: deepCopySalesInvoice?.invoiceDate?.split("T")[0] ?? "",
         dueDate: deepCopySalesInvoice?.dueDate?.split("T")[0] ?? "",
+        referenceNumber: deepCopySalesInvoice?.referenceNumber ?? "",
         itemDetails: initializedLineItemCharges,
         attachments: deepCopySalesInvoice?.attachments ?? [],
         totalAmount: deepCopySalesInvoice?.totalAmount ?? "",
@@ -478,6 +480,12 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
       formData.dueDate
     );
 
+    const isReferenceNumberValid = validateField(
+      "referenceNumber",
+      "Reference Number",
+      formData.referenceNumber
+    );
+
     let isItemQuantityValid = true;
     // Validate item details
     formData.itemDetails.forEach((item, index) => {
@@ -505,7 +513,8 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
       isInvoiceDateValid &&
       isDueDateValid &&
       isItemQuantityValid &&
-      isAttachmentsValid
+      isAttachmentsValid &&
+      isReferenceNumberValid
     );
   };
 
@@ -537,6 +546,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           amountDue: formData.totalAmount,
           createdDate: salesInvoice.createdDate,
           lastUpdatedDate: currentDate,
+          referenceNumber: formData.referenceNumber,
           permissionId: 31,
         };
 

@@ -302,6 +302,7 @@ const SalesReceiptUpdate = ({ handleClose, salesReceipt, handleUpdated }) => {
                     >
                       {referenceNo}
                       <button
+                        type="button"
                         className="btn  btn-outline-danger btn-sm"
                         onClick={() => handleRemovePayment(referenceNo)}
                       >
@@ -330,6 +331,7 @@ const SalesReceiptUpdate = ({ handleClose, salesReceipt, handleUpdated }) => {
                 <thead>
                   <tr>
                     <th>SI Ref No</th>
+                    <th>Ref Number</th>
                     <th>Invoice Total</th>
                     <th>Amount Due</th>
                     <th>Excess Amount</th>
@@ -342,6 +344,7 @@ const SalesReceiptUpdate = ({ handleClose, salesReceipt, handleUpdated }) => {
                   {formData.selectedSalesInvoices.map((item, index) => (
                     <tr key={index}>
                       <td>{item.referenceNo}</td>
+                      <td>{item?.referenceNumber}</td>
                       <td>{item.totalAmount.toFixed(2)}</td>
                       <td>{item.amountDue.toFixed(2)}</td>
                       <td>
@@ -415,21 +418,21 @@ const SalesReceiptUpdate = ({ handleClose, salesReceipt, handleUpdated }) => {
                 </tbody>
                 <tfoot>
                   <tr>
-                    <td colSpan="5"></td>
+                    <td colSpan="6"></td>
                     <th>Total Excess Amount</th>
                     <td className="text-end">
                       {calculateTotalExcessAmountAmount().toFixed(2)}
                     </td>
                   </tr>
                   <tr>
-                    <td colSpan="5"></td>
+                    <td colSpan="6"></td>
                     <th>Total Short Amount</th>
                     <td className="text-end">
                       {calculateTotalShortAmountAmount().toFixed(2)}
                     </td>
                   </tr>
                   <tr>
-                    <td colSpan="5"></td>
+                    <td colSpan="6"></td>
                     <th>Total Amount Received</th>
                     <td className="text-end">
                       {calculateTotalAmount().toFixed(2)}

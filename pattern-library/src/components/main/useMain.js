@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import Registration from "../registration/registration.js";
-import PurchaseRequisitionList from "../purchaseRequisition/purchaseRequisitionList/PurchaseRequisitionList.jsx";
-import PurchaseOrderList from "../purchaseOrder/purchaseOrderList/PurchaseOrderList.jsx";
+import PurchaseRequisitionList from "../purchaseRequisition/PurchaseRequisitionList/PurchaseRequisitionList.jsx";
+import PurchaseOrderList from "../purchaseOrder/PurchaseOrderList/PurchaseOrderList.jsx";
 import GrnList from "../grn/grnList/grnList.jsx";
 import SalesOrderList from "../salesOrder/salesOrderList/salesOrderList.jsx";
 import SalesInvoiceList from "../salesInvoice/salesInvoiceList/salesInvoiceList.jsx";
