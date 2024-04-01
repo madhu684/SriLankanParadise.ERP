@@ -32,4 +32,6 @@ public partial class Location
     public virtual ICollection<RequisitionMaster> RequisitionMasterRequestedFromLocations { get; set; } = new List<RequisitionMaster>();
 
     public virtual ICollection<RequisitionMaster> RequisitionMasterRequestedToLocations { get; set; } = new List<RequisitionMaster>();
+
+    public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

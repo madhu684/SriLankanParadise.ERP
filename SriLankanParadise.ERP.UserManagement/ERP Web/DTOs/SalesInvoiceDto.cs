@@ -36,6 +36,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public DateTime? LastUpdatedDate { get; set; }
 
+        public string? ReferenceNumber { get; set; }
+
         public virtual SalesOrderDto? SalesOrder { get; set; }
 
         public virtual IEnumerable<SalesInvoiceDetailDto>? SalesInvoiceDetails { get; set; }
