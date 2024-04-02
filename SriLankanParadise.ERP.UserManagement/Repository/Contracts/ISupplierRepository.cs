@@ -7,5 +7,11 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task<IEnumerable<Supplier>> GetSuppliersByCompanyId(int companyId);
 
         Task AddSupplier(Supplier supplier);
+
+        Task<Supplier> GetSupplierBySupplierId(int supplierId);
+
+        Task UpdateSupplier(int supplierId, Supplier supplier);
+
+        Task DeleteSupplier(int supplierId);
     }
 }

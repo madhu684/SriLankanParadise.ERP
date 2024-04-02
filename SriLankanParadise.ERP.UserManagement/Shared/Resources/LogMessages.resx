@@ -129,6 +129,12 @@
   <data name="BatchHasGrnMasterCreated" xml:space="preserve">
     <value>BatchHasGrnMaster created successfully</value>
   </data>
+  <data name="BusinessTypeCreated" xml:space="preserve">
+    <value>Business type created successfully</value>
+  </data>
+  <data name="BusinessTypesRetrieved" xml:space="preserve">
+    <value>Business types retrieved</value>
+  </data>
   <data name="CashierExpenseOutCreated" xml:space="preserve">
     <value>Cashier expense out created successfully</value>
   </data>
@@ -224,6 +230,12 @@
   </data>
   <data name="CompanySubscriptionModuleUserCreated" xml:space="preserve">
     <value>Company subscription module user created successfully</value>
+  </data>
+  <data name="CompanyTypeCreated" xml:space="preserve">
+    <value>Company type created successfully</value>
+  </data>
+  <data name="CompanyTypesRetrieved" xml:space="preserve">
+    <value>Company types retrieved</value>
   </data>
   <data name="CompanyUpdated" xml:space="preserve">
     <value>Company updated successfully</value>
@@ -594,11 +606,20 @@
   <data name="SupplierCreated" xml:space="preserve">
     <value>Supplier created successfully</value>
   </data>
+  <data name="SupplierDeleted" xml:space="preserve">
+    <value>Supplier deleted  successfully</value>
+  </data>
+  <data name="SupplierNotFound" xml:space="preserve">
+    <value>Supplier not found</value>
+  </data>
   <data name="SuppliersNotFound" xml:space="preserve">
     <value>Suppliers not found</value>
   </data>
   <data name="SuppliersRetrieved" xml:space="preserve">
     <value>Suppliers retrieved</value>
+  </data>
+  <data name="SupplierUpdated" xml:space="preserve">
+    <value>Supplier updated successfully</value>
   </data>
   <data name="TransactionTypesNotFound" xml:space="preserve">
     <value>Transaction types not found</value>

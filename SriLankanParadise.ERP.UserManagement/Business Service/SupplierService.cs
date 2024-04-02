@@ -23,5 +23,20 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             await _supplierRepository.AddSupplier(supplier);
         }
 
+        public async Task<Supplier> GetSupplierBySupplierId(int supplierId)
+        {
+            return await _supplierRepository.GetSupplierBySupplierId(supplierId);
+        }
+
+        public async Task UpdateSupplier(int supplierId, Supplier supplier)
+        {
+            await _supplierRepository.UpdateSupplier(supplierId, supplier);
+        }
+
+        public async Task DeleteSupplier(int supplierId)
+        {
+            await _supplierRepository.DeleteSupplier(supplierId);
+        }
+
     }
 }

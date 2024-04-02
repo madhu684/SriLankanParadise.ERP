@@ -47,5 +47,59 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task<Supplier> GetSupplierBySupplierId(int supplierId)
+        {
+            try
+            {
+                var supplier = await _dbContext.Suppliers
+                    .Where(s => s.SupplierId == supplierId)
+                    .FirstOrDefaultAsync();
+
+                return supplier;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task UpdateSupplier(int supplierId, Supplier supplier)
+        {
+            try
+            {
+                var existSupplier = await _dbContext.Suppliers.FindAsync(supplierId);
+
+                if (existSupplier != null)
+                {
+                    _dbContext.Entry(existSupplier).CurrentValues.SetValues(supplier);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task DeleteSupplier(int supplierId)
+        {
+            try
+            {
+                var supplier= await _dbContext.Suppliers.FindAsync(supplierId);
+
+                if (supplier != null)
+                {
+                    _dbContext.Suppliers.Remove(supplier);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }

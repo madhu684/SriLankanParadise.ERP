@@ -97,6 +97,24 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Business type created successfully.
+        /// </summary>
+        public static string BusinessTypeCreated {
+            get {
+                return ResourceManager.GetString("BusinessTypeCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Business types retrieved.
+        /// </summary>
+        public static string BusinessTypesRetrieved {
+            get {
+                return ResourceManager.GetString("BusinessTypesRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cashier expense out created successfully.
         /// </summary>
         public static string CashierExpenseOutCreated {
@@ -381,6 +399,24 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string CompanySubscriptionModuleUserCreated {
             get {
                 return ResourceManager.GetString("CompanySubscriptionModuleUserCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Company type created successfully.
+        /// </summary>
+        public static string CompanyTypeCreated {
+            get {
+                return ResourceManager.GetString("CompanyTypeCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Company types retrieved.
+        /// </summary>
+        public static string CompanyTypesRetrieved {
+            get {
+                return ResourceManager.GetString("CompanyTypesRetrieved", resourceCulture);
             }
         }
         
@@ -1492,6 +1528,24 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Supplier deleted  successfully.
+        /// </summary>
+        public static string SupplierDeleted {
+            get {
+                return ResourceManager.GetString("SupplierDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supplier not found.
+        /// </summary>
+        public static string SupplierNotFound {
+            get {
+                return ResourceManager.GetString("SupplierNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Suppliers not found.
         /// </summary>
         public static string SuppliersNotFound {
@@ -1506,6 +1560,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string SuppliersRetrieved {
             get {
                 return ResourceManager.GetString("SuppliersRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supplier updated successfully.
+        /// </summary>
+        public static string SupplierUpdated {
+            get {
+                return ResourceManager.GetString("SupplierUpdated", resourceCulture);
             }
         }
         

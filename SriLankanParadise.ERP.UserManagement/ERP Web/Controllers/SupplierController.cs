@@ -90,5 +90,77 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpPut("{supplierId}")]
+        public async Task<ApiResponseModel> UpdateSupplier(int supplierId, SupplierRequestModel supplierRequest)
+        {
+            try
+            {
+                var existingSupplier = await _supplierService.GetSupplierBySupplierId(supplierId);
+                if (existingSupplier == null)
+                {
+                    _logger.LogWarning(LogMessages.SupplierNotFound);
+                    return AddResponseMessage(Response, LogMessages.SupplierNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+                var updatedSupplier = _mapper.Map<Supplier>(supplierRequest);
+                updatedSupplier.SupplierId = supplierId; // Ensure the ID is not changed
+                
+
+                await _supplierService.UpdateSupplier(existingSupplier.SupplierId, updatedSupplier);
+
+                // Create action log
+                var actionLog = new ActionLogModel()
+                {
+                    ActionId = supplierRequest.PermissionId,
+                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                    Timestamp = DateTime.UtcNow
+                };
+                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+
+                _logger.LogInformation(LogMessages.SupplierUpdated);
+                return AddResponseMessage(Response, LogMessages.SupplierUpdated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
+
+        [HttpDelete("{supplierId}")]
+        public async Task<ApiResponseModel> DeleteSupplier(int supplierId)
+        {
+            try
+            {
+                var existingSupplier = await _supplierService.GetSupplierBySupplierId(supplierId);
+                if (existingSupplier == null)
+                {
+                    _logger.LogWarning(LogMessages.SupplierNotFound);
+                    return AddResponseMessage(Response, LogMessages.SupplierNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+                await _supplierService.DeleteSupplier(supplierId);
+
+                // Create action log
+                var actionLog = new ActionLogModel()
+                {
+                    ActionId = 1070,
+                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                    Timestamp = DateTime.UtcNow
+                };
+                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+
+                _logger.LogInformation(LogMessages.SupplierDeleted);
+                return AddResponseMessage(Response, LogMessages.SupplierDeleted, null, true, HttpStatusCode.NoContent);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
     }
 }
