@@ -90,6 +90,19 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     }));
   }, [formData.itemDetails]);
 
+  useEffect(() => {
+    if (!isLoading && locations) {
+      const location = locations.find(
+        (location) =>
+          location.locationId === parseInt(sessionStorage.getItem("locationId"))
+      );
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        department: location.locationName,
+      }));
+    }
+  }, [isLoading, locations]);
+
   const validateField = (
     fieldName,
     fieldDisplayName,

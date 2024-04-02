@@ -100,6 +100,17 @@ const useSupplier = ({ onFormSubmit }) => {
           phone: formData.phone,
           email: formData.email,
           companyId: sessionStorage.getItem("companyId"),
+          addressLine1: "",
+          addressLine2: "",
+          officeContactNo: "",
+          businessRegistrationNo: "",
+          vatregistrationNo: "",
+          companyTypeId: null,
+          businessTypeId: null,
+          supplierLogoPath: "",
+          status: 0,
+          rating: 0,
+          remarks: "",
           permissionId: 1054,
         };
 

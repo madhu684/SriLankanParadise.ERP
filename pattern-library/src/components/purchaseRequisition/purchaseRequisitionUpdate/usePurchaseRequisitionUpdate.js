@@ -111,6 +111,19 @@ const usePurchaseRequisitionUpdate = ({
   }, [purchaseRequisition]);
 
   useEffect(() => {
+    if (!isLoading && locations) {
+      const location = locations.find(
+        (location) =>
+          location.locationId === parseInt(sessionStorage.getItem("locationId"))
+      );
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        department: location.locationName,
+      }));
+    }
+  }, [isLoading, locations]);
+
+  useEffect(() => {
     if (submissionStatus != null) {
       // Scroll to the success alert when it becomes visible
       alertRef.current.scrollIntoView({ behavior: "smooth" });
