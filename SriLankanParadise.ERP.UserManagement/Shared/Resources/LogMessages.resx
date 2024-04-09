@@ -603,11 +603,50 @@
   <data name="SubscriptionUpdated" xml:space="preserve">
     <value>Subscription updated successfully</value>
   </data>
+  <data name="SupplierAttachmentCreated" xml:space="preserve">
+    <value>Supplier attachment created successfully</value>
+  </data>
+  <data name="SupplierAttachmentDeleted" xml:space="preserve">
+    <value>Supplier attachment deleted successfully</value>
+  </data>
+  <data name="SupplierAttachmentNotFound" xml:space="preserve">
+    <value>Supplier attachment not found</value>
+  </data>
+  <data name="SupplierAttachmentsNotFound" xml:space="preserve">
+    <value>Supplier attachments not found</value>
+  </data>
+  <data name="SupplierAttachmentsRetrieved" xml:space="preserve">
+    <value>Supplier attachments retrieved</value>
+  </data>
+  <data name="SupplierAttachmentUpdated" xml:space="preserve">
+    <value>Supplier attachment updated successfully</value>
+  </data>
+  <data name="SupplierAttachmentUploaded" xml:space="preserve">
+    <value>Supplier attachment uploaded successfully</value>
+  </data>
+  <data name="SupplierCategoryCreated" xml:space="preserve">
+    <value>Supplier category created successfully</value>
+  </data>
+  <data name="SupplierCategoryDeleted" xml:space="preserve">
+    <value>Supplier category deleted successfully</value>
+  </data>
+  <data name="SupplierCategoryNotFound" xml:space="preserve">
+    <value>Supplier category not found</value>
+  </data>
   <data name="SupplierCreated" xml:space="preserve">
     <value>Supplier created successfully</value>
   </data>
   <data name="SupplierDeleted" xml:space="preserve">
     <value>Supplier deleted  successfully</value>
+  </data>
+  <data name="SupplierLogoNotFound" xml:space="preserve">
+    <value>Supplier logo not found</value>
+  </data>
+  <data name="SupplierLogoRetrieved" xml:space="preserve">
+    <value>Supplier logo retrieved</value>
+  </data>
+  <data name="SupplierLogoUploaded" xml:space="preserve">
+    <value>Supplier logo uploaded successfully</value>
   </data>
   <data name="SupplierNotFound" xml:space="preserve">
     <value>Supplier not found</value>

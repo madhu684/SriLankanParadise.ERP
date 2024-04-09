@@ -97,3 +97,10 @@ Status 0: Draft (Default)
 	   42: In Progress - Approved
 	   52: Completed - Approved 
 	   ect.
+
+--- Supplier ---
+
+Status 0: Inactive 
+	   1: Active
+	   99: Blacklist
+	   -1: Deleted

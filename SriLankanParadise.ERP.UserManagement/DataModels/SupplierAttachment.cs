@@ -11,5 +11,7 @@ public partial class SupplierAttachment
 
     public string? AttachmentPath { get; set; }
 
+    public int? Status { get; set; }
+
     public virtual Supplier? Supplier { get; set; }
 }

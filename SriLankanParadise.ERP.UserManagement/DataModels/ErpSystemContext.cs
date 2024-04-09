@@ -921,9 +921,13 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.AddressLine2).HasMaxLength(255);
             entity.Property(e => e.BusinessRegistrationNo).HasMaxLength(50);
             entity.Property(e => e.ContactPerson).HasMaxLength(50);
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.DeletedDate).HasColumnType("datetime");
             entity.Property(e => e.Email).HasMaxLength(50);
+            entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
             entity.Property(e => e.OfficeContactNo).HasMaxLength(20);
             entity.Property(e => e.Phone).HasMaxLength(12);
+            entity.Property(e => e.Rating).HasColumnType("decimal(3, 1)");
             entity.Property(e => e.Remarks).HasMaxLength(255);
             entity.Property(e => e.SupplierLogoPath).HasMaxLength(255);
             entity.Property(e => e.SupplierName).HasMaxLength(50);

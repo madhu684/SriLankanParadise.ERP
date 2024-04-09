@@ -1,4 +1,6 @@
-﻿namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
+﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+
+namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 {
     public class SupplierDto
     {
@@ -26,14 +28,32 @@
 
         public int? CompanyTypeId { get; set; }
 
+        public virtual CompanyTypeDto? CompanyType { get; set; }
+
         public int? BusinessTypeId { get; set; }
+
+        public virtual BusinessTypeDto? BusinessType { get; set; }
 
         public string? SupplierLogoPath { get; set; }
 
         public int? Status { get; set; }
 
-        public int? Rating { get; set; }
+        public decimal? Rating { get; set; }
 
         public string? Remarks { get; set; }
+
+        public DateTime? CreatedDate { get; set; }
+
+        public DateTime? LastUpdatedDate { get; set; }
+
+        public DateTime? DeletedDate { get; set; }
+
+        public int? DeletedUserId { get; set; }
+
+        public int? CreatedUserId { get; set; }
+
+        public virtual IEnumerable<SupplierCategoryDto>? SupplierCategories { get; set; }
+
+        public virtual ICollection<SupplierAttachmentDto>? SupplierAttachments { get; set; }
     }
 }

@@ -13,5 +13,12 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task UpdateSupplier(int supplierId, Supplier supplier);
 
         Task DeleteSupplier(int supplierId);
+
+        Task<string> SaveSupplierLogo(IFormFile file, string fileName);
+
+        Task<string> SaveSupplierAttachment(IFormFile file, string fileName);
+
+        Task<string> GetSupplierLogoPathAsync(int supplierId);
+
     }
 }

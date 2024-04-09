@@ -14,5 +14,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
 
         Task DeleteSupplier(int supplierId);
 
+        Task<string> UploadSupplierLogo(IFormFile file);
+
+        Task<string> UploadSupplierAttachment(IFormFile file);
+
+        Task<(byte[], string)> GetSupplierLogoFileAndContentTypeAsync(int supplierId);
     }
 }

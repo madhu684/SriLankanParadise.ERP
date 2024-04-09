@@ -162,5 +162,86 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
         }
+
+        [HttpPost("upload/logo")]
+        public async Task<ApiResponseModel> UploadSupplierLogo([FromForm] SupplierLogoRequestModel supplierLogoRequest)
+        {
+            try
+            {
+                var supplierLogo = supplierLogoRequest.LogoFile;
+                var filePath = await _supplierService.UploadSupplierLogo(supplierLogo);
+
+                // Create action log
+                var actionLog = new ActionLogModel()
+                {
+                    ActionId = supplierLogoRequest.PermissionId,
+                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                    Timestamp = DateTime.UtcNow
+                };
+                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+
+                _logger.LogInformation(LogMessages.SupplierLogoUploaded);
+                return AddResponseMessage(Response, LogMessages.SupplierLogoUploaded, filePath, true, HttpStatusCode.Created);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
+
+        [HttpPost("upload/attachment")]
+        public async Task<ApiResponseModel> UploadSupplierAttachment([FromForm] SupplierAttachmentUploadRequestModel supplierAttachmentRequest)
+        {
+            try
+            {
+                var supplierAttachment = supplierAttachmentRequest.AttachmentFile;
+                var filePath = await _supplierService.UploadSupplierAttachment(supplierAttachment);
+
+                // Create action log
+                var actionLog = new ActionLogModel()
+                {
+                    ActionId = supplierAttachmentRequest.PermissionId,
+                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                    Timestamp = DateTime.UtcNow
+                };
+                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+
+                _logger.LogInformation(LogMessages.SupplierAttachmentUploaded);
+                return AddResponseMessage(Response, LogMessages.SupplierAttachmentUploaded, filePath, true, HttpStatusCode.Created);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
+
+
+        [HttpGet("logo/{supplierId}")]
+        public async Task<IActionResult> GetSupplierLogo(int supplierId)
+        {
+            try
+            {
+                (byte[] logoBytes, string contentType) = await _supplierService.GetSupplierLogoFileAndContentTypeAsync(supplierId);
+
+                if (logoBytes != null && contentType != null)
+                {
+                    return File(logoBytes, contentType); // Directly return the image file here
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.SupplierLogoNotFound);
+                    return NotFound(LogMessages.SupplierLogoNotFound); // Return a NotFound result
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return StatusCode(500, ex.Message); // Return an InternalServerError result
+            }
+        }
     }
 }

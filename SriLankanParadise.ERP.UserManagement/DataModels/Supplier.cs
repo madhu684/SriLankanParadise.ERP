@@ -35,9 +35,19 @@ public partial class Supplier
 
     public int? Status { get; set; }
 
-    public int? Rating { get; set; }
+    public decimal? Rating { get; set; }
 
     public string? Remarks { get; set; }
+
+    public DateTime? CreatedDate { get; set; }
+
+    public DateTime? LastUpdatedDate { get; set; }
+
+    public DateTime? DeletedDate { get; set; }
+
+    public int? DeletedUserId { get; set; }
+
+    public int? CreatedUserId { get; set; }
 
     public virtual BusinessType? BusinessType { get; set; }
 
