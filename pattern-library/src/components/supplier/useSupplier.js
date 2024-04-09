@@ -90,6 +90,7 @@ const useSupplier = ({ onFormSubmit }) => {
   const handleSubmit = async () => {
     try {
       const isFormValid = validateForm();
+      const currentDate = new Date().toISOString();
 
       if (isFormValid) {
         setLoading(true);
@@ -108,9 +109,11 @@ const useSupplier = ({ onFormSubmit }) => {
           companyTypeId: null,
           businessTypeId: null,
           supplierLogoPath: "",
-          status: 0,
+          status: 1,
           rating: 0,
           remarks: "",
+          createdDate: currentDate,
+          lastUpdatedDate: currentDate,
           permissionId: 1054,
         };
 
