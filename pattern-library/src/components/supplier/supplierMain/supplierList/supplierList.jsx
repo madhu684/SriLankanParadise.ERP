@@ -82,7 +82,7 @@ const SupplierList = () => {
   if (!suppliers) {
     return (
       <div className="container mt-4">
-        <h2>Item Masters</h2>
+        <h2>Suppliers</h2>
         <div
           className="d-flex flex-column justify-content-center align-items-center text-center vh-100"
           style={{ maxHeight: "80vh" }}
