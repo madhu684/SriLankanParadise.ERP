@@ -1,7 +1,7 @@
 import React from "react";
 import { Modal, Button } from "react-bootstrap";
 import usePurchaseRequisitionApproval from "./usePurchaseRequisitionApproval";
-import usePurchaseRequisitionList from "../purchaseRequisitionList/usePurchaseRequisitionList";
+import usePurchaseRequisitionList from "../PurchaseRequisitionList/usePurchaseRequisitionList";
 import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 import moment from "moment";
 import "moment-timezone";

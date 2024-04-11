@@ -8,6 +8,7 @@ const AddCompanyForm = ({ show, handleClose, handleCompanyAdded }) => {
     handleLogoChange,
     handleFormSubmit,
     setShowSuccessAlert,
+    logo,
     companyName,
     showSuccessAlert,
     validFields,
@@ -60,6 +61,18 @@ const AddCompanyForm = ({ show, handleClose, handleCompanyAdded }) => {
               <div className="invalid-feedback">{validationErrors.logo}</div>
             )}
           </div>
+          {logo && (
+            <img
+              src={URL.createObjectURL(logo)}
+              alt="Supplier Logo"
+              className="img-thumbnail mt-2"
+              style={{
+                maxWidth: "200px",
+                maxHeight: "200px",
+                objectFit: "contain",
+              }}
+            />
+          )}
         </form>
         {showSuccessAlert && (
           <div

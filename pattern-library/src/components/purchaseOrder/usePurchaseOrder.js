@@ -655,7 +655,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
 
   const calculateTotalAmount = () => {
     // Calculate total price based on item details
-    const subtotal = formData.subTotal;
+    const subtotal = calculateSubTotal();
 
     // Calculate total amount based on subtotal and common charges and deductions
     let totalAmount = subtotal;

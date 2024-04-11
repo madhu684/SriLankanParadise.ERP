@@ -7,8 +7,8 @@ function template() {
   return (
     <div className="container mt-4 mb-4">
       <div className="row justify-content-center">
-        <div className="col-md-11">
-          <h4 className="mb-3 fw-semibold">User Registration</h4>
+        <div className="col-md-12">
+          <h2 className="mb-3 ">User Registration</h2>
           <div className="card border-secondary">
             <div className="card-header">
               <ul className="nav nav-tabs card-header-tabs">
@@ -260,6 +260,7 @@ function template() {
                           </div>
                         )}
                       </div>
+
                       <div className="form-group col-md-6">
                         <label htmlFor="password" className="form-label">
                           Password
@@ -321,6 +322,52 @@ function template() {
                         {this.state.validationErrors.basic?.confirmPassword && (
                           <div className="invalid-feedback">
                             {this.state.validationErrors.basic.confirmPassword}
+                          </div>
+                        )}
+                      </div>
+                      <div className="form-group col-md-6">
+                        <label htmlFor="department" className="form-label">
+                          Department
+                        </label>
+                        <select
+                          className={`form-select ${
+                            this.state.validFields.basic?.department
+                              ? "is-valid"
+                              : ""
+                          } ${
+                            this.state.validationErrors.basic?.department
+                              ? "is-invalid"
+                              : ""
+                          }`}
+                          id="department"
+                          value={this.state.formData.basic.department}
+                          onChange={(e) =>
+                            this.handleInputChange(
+                              "basic",
+                              "department",
+                              e.target.value
+                            )
+                          }
+                          required
+                        >
+                          <option value="">Select Department</option>
+                          {this.state.locations
+                            .filter(
+                              (location) =>
+                                location.locationType.name === "Department"
+                            )
+                            .map((location) => (
+                              <option
+                                key={location.locationId}
+                                value={location.locationId}
+                              >
+                                {location.locationName}
+                              </option>
+                            ))}
+                        </select>
+                        {this.state.validationErrors.basic?.department && (
+                          <div className="invalid-feedback">
+                            {this.state.validationErrors.basic.department}
                           </div>
                         )}
                       </div>

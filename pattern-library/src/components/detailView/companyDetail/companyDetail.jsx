@@ -3,6 +3,8 @@ import React from "react";
 import AddCompanyForm from "./addCompanyForm/addCompanyForm";
 import DeleteConfirmationModal from "../../confirmationModals/deleteConfirmationModal/deleteConfirmationModal";
 import UpdateCompanyForm from "./updateCompanyForm/updateCompanyForm";
+import moment from "moment";
+import "moment-timezone";
 
 function template() {
   const {
@@ -46,7 +48,10 @@ function template() {
               </td>
               <td>
                 {item.subscriptionExpiredDate
-                  ? item.subscriptionExpiredDate
+                  ? moment
+                      .utc(item.subscriptionExpiredDate)
+                      .tz("Asia/Colombo")
+                      .format("YYYY-MM-DD")
                   : "Not Applied"}
               </td>
               <td>{item.status ? "Active" : "Inactive"}</td>

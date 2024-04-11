@@ -8,6 +8,7 @@ import { company_subscription_module_user_api } from "../../services/userManagem
 import { user_role_api } from "../../services/userManagementApi.js";
 import { user_permission_api } from "../../services/userManagementApi.js";
 import { role_permission_api } from "../../services/userManagementApi.js";
+import { get_company_locations_api } from "../../services/purchaseApi";
 
 class registration extends React.Component {
   constructor(props) {
@@ -23,6 +24,7 @@ class registration extends React.Component {
           firstname: "",
           lastname: "",
           companyId: sessionStorage.getItem("companyId"),
+          department: "",
         },
         "user-module": {
           assignedModules: [], // Array to store assigned modules
@@ -63,6 +65,7 @@ class registration extends React.Component {
         "user-role": {},
         "role-permission": {},
       },
+      locations: [],
     };
   }
 
@@ -90,7 +93,7 @@ class registration extends React.Component {
       errors.username = "Username is required.";
     }
 
-    // TODO : Add more validations for the pasword field as needed.
+    // TODO : Add more validations for the password field as needed.
     if (!basic.password) {
       errors.password = "Password is required.";
     } else if (basic.password.length < 8) {
@@ -101,6 +104,10 @@ class registration extends React.Component {
       errors.confirmPassword = "Confirm Password is required.";
     } else if (basic.confirmPassword !== basic.password) {
       errors.confirmPassword = "Passwords do not match.";
+    }
+
+    if (!basic.department) {
+      errors.department = "Department is required.";
     }
 
     this.setState({
@@ -115,6 +122,7 @@ class registration extends React.Component {
           contactNo: !errors.contactNo,
           password: !errors.password,
           confirmPassword: !errors.confirmPassword,
+          department: !errors.department,
         },
       },
     });
@@ -505,6 +513,7 @@ class registration extends React.Component {
         firstname: this.state.formData.basic.firstname,
         lastname: this.state.formData.basic.lastname,
         companyId: this.state.formData.basic.companyId,
+        locationId: this.state.formData.basic.department,
         permissionId: permissionId,
       };
 
@@ -739,6 +748,22 @@ class registration extends React.Component {
     }));
   };
 
+  componentDidMount() {
+    // Fetch locations when the component mounts
+    this.fetchLocations();
+  }
+
+  fetchLocations = () => {
+    get_company_locations_api(sessionStorage.getItem("companyId"))
+      .then((response) => {
+        const locations = response.data.result;
+        this.setState({ locations });
+      })
+      .catch((error) => {
+        console.error("Error fetching locations:", error);
+      });
+  };
+
   resetState = () => {
     this.setState({
       formData: {
@@ -751,6 +776,7 @@ class registration extends React.Component {
           firstname: "",
           lastname: "",
           companyId: sessionStorage.getItem("companyId"),
+          department: "",
         },
         "user-module": {
           assignedModules: [],

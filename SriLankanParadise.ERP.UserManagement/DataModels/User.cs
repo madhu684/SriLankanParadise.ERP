@@ -23,6 +23,8 @@ public partial class User
 
     public bool Status { get; set; }
 
+    public int? LocationId { get; set; }
+
     public virtual ICollection<ActionLog> ActionLogs { get; set; } = new List<ActionLog>();
 
     public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
@@ -32,6 +34,8 @@ public partial class User
     public virtual ICollection<CashierSession> CashierSessions { get; set; } = new List<CashierSession>();
 
     public virtual Company Company { get; set; } = null!;
+
+    public virtual Location? Location { get; set; }
 
     public virtual ICollection<UserPermission> UserPermissions { get; set; } = new List<UserPermission>();
 
