@@ -310,6 +310,9 @@ public partial class ErpSystemContext : DbContext
         {
             entity.ToTable("Company");
 
+            entity.Property(e => e.BatchStockType)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.CompanyName).HasMaxLength(50);
             entity.Property(e => e.SubscriptionExpiredDate).HasColumnType("datetime");
 

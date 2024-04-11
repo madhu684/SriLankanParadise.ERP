@@ -1,6 +1,7 @@
 import React from "react";
 import { Modal, Button } from "react-bootstrap";
 import useUpdateCompanyForm from "./useUpdateCompanyForm";
+import ButtonLoadingSpinner from "../../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 
 const UpdateCompanyForm = ({
   show,
@@ -14,8 +15,11 @@ const UpdateCompanyForm = ({
     showSuccessAlert,
     validFields,
     validationErrors,
-    handleLogoChange,
+    companyLogoUrl,
     successAlertRef,
+    loading,
+    updateCompanySuccessfull,
+    handleLogoChange,
     handleFormSubmit,
     handleChange,
     setShowSuccessAlert,
@@ -28,8 +32,20 @@ const UpdateCompanyForm = ({
   });
 
   return (
-    <Modal show={show} onHide={handleClose} centered scrollable size="lg">
-      <Modal.Header closeButton>
+    <Modal
+      show={show}
+      onHide={handleClose}
+      centered
+      scrollable
+      size="lg"
+      backdrop={
+        !(loading || updateCompanySuccessfull !== null) ? true : "static"
+      }
+      keyboard={!(loading || updateCompanySuccessfull !== null)}
+    >
+      <Modal.Header
+        closeButton={!(loading || updateCompanySuccessfull !== null)}
+      >
         <Modal.Title>Update Company</Modal.Title>
       </Modal.Header>
       <Modal.Body>
@@ -60,7 +76,9 @@ const UpdateCompanyForm = ({
               Status
             </label>
             <select
-              className="form-select"
+              className={`form-select ${validFields.status ? "is-valid" : ""} ${
+                validationErrors.status ? "is-invalid" : ""
+              }`}
               id="status"
               value={formData?.status ?? false}
               onChange={(e) =>
@@ -70,6 +88,9 @@ const UpdateCompanyForm = ({
               <option value={true}>Active</option>
               <option value={false}>Inactive</option>
             </select>
+            {validationErrors.status && (
+              <div className="invalid-feedback">{validationErrors.status}</div>
+            )}
           </div>
 
           <div className="col-md-6 mb-3">
@@ -81,17 +102,10 @@ const UpdateCompanyForm = ({
                 validFields.subscriptionPlan ? "is-valid" : ""
               } ${validationErrors.subscriptionPlan ? "is-invalid" : ""}`}
               id="subscriptionPlan"
-              value={formData?.subscriptionPlan ?? "Not Subscribed"}
-              onChange={(e) =>
-                handleChange(
-                  "subscriptionPlan",
-                  e.target.value === "Not Subscribed" ? null : e.target.value
-                )
-              }
+              value={formData?.subscriptionPlan}
+              onChange={(e) => handleChange("subscriptionPlan", e.target.value)}
             >
-              <option value="" disabled>
-                Select a subscription plan
-              </option>
+              <option value="">Select a subscription plan</option>
               <option value="Not Subscribed">Not Subscribed</option>
               {subscriptionPlans.map((item) => (
                 <option key={item.subscriptionId} value={item.subscriptionId}>
@@ -126,12 +140,12 @@ const UpdateCompanyForm = ({
             />
           </div>
 
-          <div className="col-md-12 mb-3">
+          <div className="col-md-6 mb-3">
             <label htmlFor="subscriptionExpiredDate" className="form-label">
               Subscription Expired Date
             </label>
             <input
-              type="text"
+              type="date"
               className="form-control"
               id="subscriptionExpiredDate"
               placeholder="Subscription Expired Date"
@@ -143,6 +157,29 @@ const UpdateCompanyForm = ({
           </div>
 
           <div className="col-md-6 mb-3">
+            <label htmlFor="batchStockType" className="form-label">
+              Batch Stock Type
+            </label>
+            <select
+              className={`form-select ${
+                validFields.batchStockType ? "is-valid" : ""
+              } ${validationErrors.batchStockType ? "is-invalid" : ""}`}
+              id="batchStockType"
+              value={formData.batchStockType}
+              onChange={(e) => handleChange("batchStockType", e.target.value)}
+            >
+              <option value="">Select Batch Stock Type</option>
+              <option value="FIFO">FIFO (first-in, first-out)</option>
+              <option value="Average">Average</option>
+            </select>
+            {validationErrors.batchStockType && (
+              <div className="invalid-feedback">
+                {validationErrors.batchStockType}
+              </div>
+            )}
+          </div>
+
+          <div className="col-md-12 mb-3">
             <label htmlFor="logo" className="form-label">
               Logo
             </label>
@@ -158,11 +195,38 @@ const UpdateCompanyForm = ({
               <div className="invalid-feedback">{validationErrors.logo}</div>
             )}
           </div>
+          {formData.logo ? (
+            <div>
+              <img
+                src={URL.createObjectURL(formData.logo)}
+                alt="Supplier Logo"
+                className="img-thumbnail mt-2"
+                style={{
+                  maxWidth: "200px",
+                  maxHeight: "200px",
+                  objectFit: "contain",
+                }}
+              />
+            </div>
+          ) : (
+            <div>
+              <img
+                src={companyLogoUrl}
+                alt="Supplier Logo"
+                className="img-thumbnail mt-2"
+                style={{
+                  maxWidth: "200px",
+                  maxHeight: "200px",
+                  objectFit: "contain",
+                }}
+              />
+            </div>
+          )}
         </form>
         <div ref={successAlertRef}></div>
         {showSuccessAlert && (
           <div
-            className="alert alert-success mb-0"
+            className="alert alert-success mb-0 mt-3"
             role="alert"
             onClose={() => setShowSuccessAlert(false)}
           >
@@ -171,11 +235,23 @@ const UpdateCompanyForm = ({
         )}
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
+        <Button
+          variant="secondary"
+          onClick={handleClose}
+          disabled={loading || updateCompanySuccessfull !== null}
+        >
           Close
         </Button>
-        <Button variant="primary" onClick={handleFormSubmit}>
-          Update
+        <Button
+          variant="primary"
+          onClick={handleFormSubmit}
+          disabled={loading || updateCompanySuccessfull !== null}
+        >
+          {loading && updateCompanySuccessfull === null ? (
+            <ButtonLoadingSpinner text="Updating..." />
+          ) : (
+            "Update"
+          )}
         </Button>
       </Modal.Footer>
     </Modal>

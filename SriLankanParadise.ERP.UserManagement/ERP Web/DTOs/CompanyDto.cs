@@ -18,5 +18,7 @@
 
         public int? MaxUserCount { get; set; }
 
+        public string? BatchStockType { get; set; }
+
     }
 }
