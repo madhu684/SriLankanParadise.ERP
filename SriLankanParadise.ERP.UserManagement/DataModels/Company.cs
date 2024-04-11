@@ -19,6 +19,8 @@ public partial class Company
 
     public string? LogoPath { get; set; }
 
+    public string? BatchStockType { get; set; }
+
     public virtual ICollection<CompanySubscriptionModule> CompanySubscriptionModules { get; set; } = new List<CompanySubscriptionModule>();
 
     public virtual ICollection<Customer> Customers { get; set; } = new List<Customer>();
