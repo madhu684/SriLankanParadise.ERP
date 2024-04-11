@@ -20,6 +20,9 @@ const useAddCompanyForm = (onFormSubmit) => {
   });
 
   const validateForm = () => {
+    setValidFields({});
+    setValidationErrors({});
+
     // Validate companyName
     const isCompanyNameValid = companyName.trim() !== "";
     setValidFields((prev) => ({ ...prev, companyName: isCompanyNameValid }));
@@ -81,6 +84,7 @@ const useAddCompanyForm = (onFormSubmit) => {
           permissionId: 6,
           logoPath: logoPath,
           maxUserCount: null,
+          batchStockType: null,
         };
 
         const companyResponse = await post_company_api(companyData);
@@ -106,6 +110,7 @@ const useAddCompanyForm = (onFormSubmit) => {
     addCompanySuccessfull,
     validFields,
     validationErrors,
+    logo,
   };
 };
 
