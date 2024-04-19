@@ -475,3 +475,15 @@ export const post_cashier_expense_out_api = async (formData) => {
     throw error;
   }
 };
+
+export const get_company_api = async (companyId) => {
+  try {
+    const response = await api.get(`/company/${companyId}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
