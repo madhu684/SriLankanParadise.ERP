@@ -769,32 +769,34 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
                   )
                 );
 
-                if (item.salesOrderDetailId !== null) {
-                  detailsPromises.push(
-                    put_sales_order_detail_api(item.salesOrderDetailId, {
-                      itemBatchItemMasterId: batch.itemMasterId,
-                      itemBatchBatchId: batch.batchId,
-                      salesOrderId: salesOrder.salesOrderId,
-                      quantity: quantityToConsume,
-                      unitPrice: item.unitPrice,
-                      totalPrice:
-                        (item.totalPrice / item.quantity) * quantityToConsume,
-                      permissionId: 25,
-                    })
-                  );
-                } else {
-                  detailsPromises.push(
-                    post_sales_order_detail_api({
-                      itemBatchItemMasterId: batch.itemMasterId,
-                      itemBatchBatchId: batch.batchId,
-                      salesOrderId: salesOrder.salesOrderId,
-                      quantity: quantityToConsume,
-                      unitPrice: item.unitPrice,
-                      totalPrice:
-                        (item.totalPrice / item.quantity) * quantityToConsume,
-                      permissionId: 25,
-                    })
-                  );
+                if (quantityToConsume > 0) {
+                  if (item.salesOrderDetailId != null) {
+                    detailsPromises.push(
+                      put_sales_order_detail_api(item.salesOrderDetailId, {
+                        itemBatchItemMasterId: batch.itemMasterId,
+                        itemBatchBatchId: batch.batchId,
+                        salesOrderId: salesOrder.salesOrderId,
+                        quantity: quantityToConsume,
+                        unitPrice: item.unitPrice,
+                        totalPrice:
+                          (item.totalPrice / item.quantity) * quantityToConsume,
+                        permissionId: 25,
+                      })
+                    );
+                  } else {
+                    detailsPromises.push(
+                      post_sales_order_detail_api({
+                        itemBatchItemMasterId: batch.itemMasterId,
+                        itemBatchBatchId: batch.batchId,
+                        salesOrderId: salesOrder.salesOrderId,
+                        quantity: quantityToConsume,
+                        unitPrice: item.unitPrice,
+                        totalPrice:
+                          (item.totalPrice / item.quantity) * quantityToConsume,
+                        permissionId: 25,
+                      })
+                    );
+                  }
                 }
 
                 remainingQuantity -= quantityToConsume;
@@ -1571,6 +1573,7 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
     isCompanyError,
     showModal,
     company,
+    itemIdsToBeDeleted,
     closeModal,
     handleShowCreateCustomerModal,
     handleCloseCreateCustomerModal,

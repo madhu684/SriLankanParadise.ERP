@@ -12,8 +12,6 @@ const useSalesOrderDetail = (salesOrder) => {
     return subTotal;
   };
 
-  console.log(salesOrder);
-
   const fetchChargesAndDeductionsApplied = async () => {
     try {
       const response = await get_charges_and_deductions_applied_api(

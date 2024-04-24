@@ -44,6 +44,7 @@ const SalesOrderUpdate = ({ handleClose, salesOrder, handleUpdated }) => {
     isCompanyError,
     showModal,
     company,
+    itemIdsToBeDeleted,
     closeModal,
     handleShowCreateCustomerModal,
     handleCloseCreateCustomerModal,
@@ -393,10 +394,18 @@ const SalesOrderUpdate = ({ handleClose, salesOrder, handleUpdated }) => {
                   ) : availableItems === null ||
                     availableItems.length === 0 ||
                     availableItems.filter((item) => {
-                      // If batchStockType is FIFO, filter out items already present in formData.itemDetails
+                      // If batchStockType is FIFO, filter out items already present in formData.itemDetails and itemIdToBeDeleted
                       if (company.batchStockType === "FIFO") {
-                        return !formData.itemDetails.some(
-                          (detail) => detail.itemMasterId === item.itemMasterId
+                        return (
+                          !formData.itemDetails.some(
+                            (detail) =>
+                              detail.itemMasterId === item.itemMasterId
+                          ) &&
+                          !itemIdsToBeDeleted.some(
+                            (itemIdToBeDeleted) =>
+                              itemIdToBeDeleted.itemBatchItemMasterId ===
+                              item.itemMasterId
+                          )
                         );
                       }
                       // Otherwise, include all items
@@ -411,11 +420,18 @@ const SalesOrderUpdate = ({ handleClose, salesOrder, handleUpdated }) => {
                   ) : (
                     availableItems
                       .filter((item) => {
-                        // If batchStockType is FIFO, filter out items already present in formData.itemDetails
+                        // If batchStockType is FIFO, filter out items already present in formData.itemDetails and itemIdToBeDeleted
                         if (company.batchStockType === "FIFO") {
-                          return !formData.itemDetails.some(
-                            (detail) =>
-                              detail.itemMasterId === item.itemMasterId
+                          return (
+                            !formData.itemDetails.some(
+                              (detail) =>
+                                detail.itemMasterId === item.itemMasterId
+                            ) &&
+                            !itemIdsToBeDeleted.some(
+                              (itemIdToBeDeleted) =>
+                                itemIdToBeDeleted.itemBatchItemMasterId ===
+                                item.itemMasterId
+                            )
                           );
                         }
                         // Otherwise, include all items
@@ -717,6 +733,7 @@ const SalesOrderUpdate = ({ handleClose, salesOrder, handleUpdated }) => {
           handleClose={closeModal}
           itemBatches={itemBatches}
           itemDetails={formData.itemDetails}
+          itemIdsToBeDeleted={itemIdsToBeDeleted}
           handleBatchSelect={handleBatchSelection}
         />
       )}

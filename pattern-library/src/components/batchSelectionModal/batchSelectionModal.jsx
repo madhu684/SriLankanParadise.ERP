@@ -8,11 +8,16 @@ const BatchSelectionModal = ({
   handleClose,
   itemBatches,
   itemDetails,
+  itemIdsToBeDeleted,
   handleBatchSelect,
 }) => {
   const remainingBatches = itemBatches?.filter(
     (batch) =>
-      !itemDetails.some((detail) => detail.itemBatchId === batch.batchId)
+      !itemDetails.some((detail) => detail.itemBatchId === batch.batchId) &&
+      !itemIdsToBeDeleted.some(
+        (itemIdToBeDeleted) =>
+          itemIdToBeDeleted.itemBatch.batchId === batch.batchId
+      )
   );
 
   return (
@@ -62,6 +67,10 @@ const BatchSelectionModal = ({
       </Modal.Footer>
     </Modal>
   );
+};
+
+BatchSelectionModal.defaultProps = {
+  itemIdsToBeDeleted: [],
 };
 
 export default BatchSelectionModal;

@@ -25,6 +25,10 @@ const SalesInvoiceApproval = ({
     commonChargesAndDeductions,
     loading,
     alertRef,
+    isCompanyLoading,
+    isCompanyError,
+    company,
+    renderSalesInvoiceDetails,
     calculateSubTotal,
     handleApprove,
   } = useSalesInvoiceApproval({
@@ -49,9 +53,11 @@ const SalesInvoiceApproval = ({
         <Modal.Title>Approve Sales Invoice</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {isError && <ErrorComponent error={"Error fetching data"} />}
-        {isLoading && <LoadingSpinner maxHeight="65vh" />}
-        {!isError && !isLoading && (
+        {isError && isCompanyError && (
+          <ErrorComponent error={"Error fetching data"} />
+        )}
+        {isLoading && isCompanyLoading && <LoadingSpinner maxHeight="65vh" />}
+        {!isError && !isLoading && !isCompanyLoading && (
           <>
             <div className="mb-3 d-flex justify-content-between">
               <h6>Details for Sales Invoice : {salesInvoice.referenceNo}</h6>
@@ -109,6 +115,38 @@ const SalesInvoiceApproval = ({
                   <strong>Due Date:</strong>{" "}
                   {salesInvoice?.dueDate?.split("T")[0]}
                 </p>
+                {salesInvoice.salesOrder ? (
+                  <div className="card border-success mb-3">
+                    <div className="card-header bg-transparent">
+                      <strong>Associate Sales Order</strong>
+                    </div>
+                    <div className="card-body">
+                      <p>
+                        Sales Order Reference No:{" "}
+                        {salesInvoice.salesOrder.referenceNo}
+                      </p>
+                      <p>
+                        Order Date:{" "}
+                        {salesInvoice.salesOrder.orderDate?.split("T")[0] ?? ""}
+                      </p>
+                      <p>
+                        Delivery Date:{" "}
+                        {salesInvoice.salesOrder.deliveryDate?.split("T")[0] ??
+                          ""}
+                      </p>
+                      <p>
+                        Order Type:{" "}
+                        {salesInvoice.salesOrder.customerId !== null
+                          ? "Customer Order"
+                          : "Direct Order"}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="alert alert-warning" role="alert">
+                    This is a direct sales invoice, no sales order.
+                  </div>
+                )}
               </div>
             </div>
 
@@ -122,7 +160,7 @@ const SalesInvoiceApproval = ({
                   <tr>
                     <th>Item Name</th>
                     <th>Unit</th>
-                    <th>Batch Ref</th>
+                    {company.batchStockType !== "FIFO" && <th>Batch Ref</th>}
                     <th>Quantity</th>
                     <th>Unit Price</th>
                     {uniqueLineItemDisplayNames.map((displayName, index) => {
@@ -146,11 +184,13 @@ const SalesInvoiceApproval = ({
                   </tr>
                 </thead>
                 <tbody>
-                  {salesInvoice.salesInvoiceDetails.map((item, index) => (
+                  {renderSalesInvoiceDetails().map((item, index) => (
                     <tr key={index}>
                       <td>{item.itemBatch?.itemMaster?.itemName}</td>
                       <td>{item.itemBatch?.itemMaster?.unit.unitName}</td>
-                      <td>{item.itemBatch?.batch?.batchRef}</td>
+                      {company.batchStockType !== "FIFO" && (
+                        <td>{item.itemBatch?.batch?.batchRef}</td>
+                      )}
                       <td>{item.quantity}</td>
                       <td>{item.unitPrice.toFixed(2)}</td>
                       {/* Render line item charges/deductions */}
@@ -191,7 +231,13 @@ const SalesInvoiceApproval = ({
                 </tbody>
                 <tfoot>
                   <tr>
-                    <td colSpan={4 + uniqueLineItemDisplayNames.length}></td>
+                    <td
+                      colSpan={
+                        4 +
+                        uniqueLineItemDisplayNames.length -
+                        (company.batchStockType === "FIFO" ? 1 : 0)
+                      }
+                    ></td>
                     <th>Sub Total</th>
                     <td className="text-end">
                       {calculateSubTotal().toFixed(2)}
@@ -224,7 +270,11 @@ const SalesInvoiceApproval = ({
                       return (
                         <tr key={`${index}-${chargeIndex}`}>
                           <td
-                            colSpan={4 + uniqueLineItemDisplayNames.length}
+                            colSpan={
+                              4 +
+                              uniqueLineItemDisplayNames.length -
+                              (company.batchStockType === "FIFO" ? 1 : 0)
+                            }
                           ></td>
                           <th>
                             {charge.chargesAndDeduction.sign}{" "}
@@ -236,7 +286,13 @@ const SalesInvoiceApproval = ({
                     });
                   })}
                   <tr>
-                    <td colSpan={4 + uniqueLineItemDisplayNames.length}></td>
+                    <td
+                      colSpan={
+                        4 +
+                        uniqueLineItemDisplayNames.length -
+                        (company.batchStockType === "FIFO" ? 1 : 0)
+                      }
+                    ></td>
                     <th>Total Amount</th>
                     <td className="text-end">
                       {salesInvoice.totalAmount.toFixed(2)}

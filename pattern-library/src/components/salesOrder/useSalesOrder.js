@@ -503,18 +503,20 @@ const useSalesOrder = ({ onFormSubmit }) => {
                   )
                 );
 
-                detailsPromises.push(
-                  post_sales_order_detail_api({
-                    itemBatchItemMasterId: batch.itemMasterId,
-                    itemBatchBatchId: batch.batchId,
-                    salesOrderId,
-                    quantity: quantityToConsume,
-                    unitPrice: item.unitPrice,
-                    totalPrice:
-                      (item.totalPrice / item.quantity) * quantityToConsume,
-                    permissionId: 25,
-                  })
-                );
+                if (quantityToConsume > 0) {
+                  detailsPromises.push(
+                    post_sales_order_detail_api({
+                      itemBatchItemMasterId: batch.itemMasterId,
+                      itemBatchBatchId: batch.batchId,
+                      salesOrderId,
+                      quantity: quantityToConsume,
+                      unitPrice: item.unitPrice,
+                      totalPrice:
+                        (item.totalPrice / item.quantity) * quantityToConsume,
+                      permissionId: 25,
+                    })
+                  );
+                }
 
                 remainingQuantity -= quantityToConsume;
 
