@@ -153,6 +153,8 @@ builder.Services.AddScoped<ICashierSessionService, CashierSessionService>();
 builder.Services.AddScoped<ICashierSessionRepository, CashierSessionRepository>();
 builder.Services.AddScoped<ICashierExpenseOutService, CashierExpenseOutService>();
 builder.Services.AddScoped<ICashierExpenseOutRepository, CashierExpenseOutRepository>();
+builder.Services.AddScoped<IExpenseOutRequisitionService, ExpenseOutRequisitionService>();
+builder.Services.AddScoped<IExpenseOutRequisitionRepository, ExpenseOutRequisitionRepository>();
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

@@ -237,6 +237,24 @@
   <data name="CustomersRetrieved" xml:space="preserve">
     <value>Customers retrieved</value>
   </data>
+  <data name="ExpenseOutRequisitionCreated" xml:space="preserve">
+    <value>Expense out requisition created successfully</value>
+  </data>
+  <data name="ExpenseOutRequisitionNotFound" xml:space="preserve">
+    <value>Expense out requisition not found</value>
+  </data>
+  <data name="ExpenseOutRequisitionRetrieved" xml:space="preserve">
+    <value>Expense out requisition retrieved</value>
+  </data>
+  <data name="ExpenseOutRequisitionsNotFound" xml:space="preserve">
+    <value>Expense out requisitions not found</value>
+  </data>
+  <data name="ExpenseOutRequisitionsRetrieved" xml:space="preserve">
+    <value>Expense out requisitions retrieved</value>
+  </data>
+  <data name="ExpenseOutRequisitionUpdated" xml:space="preserve">
+    <value>Expense out requisition updated successfully</value>
+  </data>
   <data name="GrnDetailCreated" xml:space="preserve">
     <value>Grn detail created successfully</value>
   </data>

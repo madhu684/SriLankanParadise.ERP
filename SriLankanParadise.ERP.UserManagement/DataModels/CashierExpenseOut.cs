@@ -17,5 +17,9 @@ public partial class CashierExpenseOut
 
     public int? CompanyId { get; set; }
 
+    public int? ExpenseOutRequisitionId { get; set; }
+
+    public virtual ExpenseOutRequisition? ExpenseOutRequisition { get; set; }
+
     public virtual User? User { get; set; }
 }
