@@ -1,23 +1,28 @@
 import React from "react";
-import useCashierExpenseOut from "./useCashierExpenseOut";
-import CurrentDateTime from "../currentDateTime/currentDateTime";
-import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
-import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
+import useExpenseOutRequisitionUpdate from "./useExpenseOutRequisitionUpdate";
+import CurrentDateTime from "../../currentDateTime/currentDateTime";
+import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
+import useCompanyLogoUrl from "../../companyLogo/useCompanyLogoUrl";
 
-const CashierExpenseOut = () => {
+const ExpenseOutRequisitionUpdate = ({
+  handleClose,
+  expenseOutRequisition,
+  handleUpdated,
+}) => {
   const {
     formData,
+    submissionStatus,
     validFields,
     validationErrors,
-    submissionStatus,
     alertRef,
     loading,
     handleInputChange,
     handleSubmit,
-    handleClose,
-  } = useCashierExpenseOut({
+  } = useExpenseOutRequisitionUpdate({
+    expenseOutRequisition,
     onFormSubmit: () => {
       handleClose();
+      handleUpdated();
     },
   });
 
@@ -42,17 +47,12 @@ const CashierExpenseOut = () => {
       {/* Display success or error messages */}
       {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
-          Expense out request added successfully!
-        </div>
-      )}
-      {submissionStatus === "successSavedAsDraft" && (
-        <div className="alert alert-success mb-3" role="alert">
-          Expense out request added as draft, you can edit and submit it later!
+          Expense out request updated successfully!
         </div>
       )}
       {submissionStatus === "error" && (
         <div className="alert alert-danger mb-3" role="alert">
-          Error adding expense out request. Please try again.
+          Error updating expense out request. Please try again.
         </div>
       )}
 
@@ -122,9 +122,9 @@ const CashierExpenseOut = () => {
             disabled={loading || submissionStatus !== null}
           >
             {loading && submissionStatus === null ? (
-              <ButtonLoadingSpinner text="Requesting..." />
+              <ButtonLoadingSpinner text="Updating..." />
             ) : (
-              "Request"
+              "Update"
             )}
           </button>
           <button
@@ -141,4 +141,4 @@ const CashierExpenseOut = () => {
   );
 };
 
-export default CashierExpenseOut;
+export default ExpenseOutRequisitionUpdate;

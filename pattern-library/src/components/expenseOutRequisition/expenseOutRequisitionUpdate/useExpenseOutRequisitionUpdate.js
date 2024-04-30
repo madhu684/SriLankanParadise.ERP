@@ -1,26 +1,33 @@
 import { useState, useEffect, useRef } from "react";
-import { post_cashier_expense_out_api } from "../../services/salesApi";
+import { put_expense_out_requisition_api } from "../../../services/salesApi";
 
-const useCashierExpenseOut = ({ onFormSubmit }) => {
+const useExpenseOutRequisitionUpdate = ({
+  expenseOutRequisition,
+  onFormSubmit,
+}) => {
   const [formData, setFormData] = useState({
     reason: "",
     amount: "",
   });
+  const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
-  const [submissionStatus, setSubmissionStatus] = useState(null);
   const alertRef = useRef(null);
   const [loading, setLoading] = useState(false);
 
-  const handleInputChange = (field, value) => {
+  useEffect(() => {
+    const deepCopyExpenseOutRequisition = JSON.parse(
+      JSON.stringify(expenseOutRequisition)
+    );
     setFormData({
-      ...formData,
-      [field]: value,
+      reason: deepCopyExpenseOutRequisition?.reason ?? "",
+      amount: deepCopyExpenseOutRequisition?.amount ?? "",
     });
-  };
+  }, [expenseOutRequisition]);
 
   useEffect(() => {
     if (submissionStatus != null) {
+      // Scroll to the success alert when it becomes visible
       alertRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [submissionStatus]);
@@ -72,22 +79,36 @@ const useCashierExpenseOut = ({ onFormSubmit }) => {
       if (isFormValid) {
         setLoading(true);
 
-        const cashierExpenseOutData = {
-          userId: sessionStorage.getItem("userId"),
+        const expenseOutRequisionUpdateData = {
+          requestedUserId: expenseOutRequisition.requestedUserId,
+          requestedBy: expenseOutRequisition.requestedBy,
           reason: formData.reason,
           amount: formData.amount,
-          createdDate: currentDate,
-          companyId: sessionStorage.getItem("companyId"),
-          permissionId: 1069,
+          createdDate: expenseOutRequisition.createdDate,
+          lastUpdatedDate: currentDate,
+          referenceNumber: expenseOutRequisition.referenceNumber,
+          status: 1,
+          approvedBy: null,
+          approvedUserId: null,
+          approvedDate: null,
+          recommendedBy: null,
+          recommendedUserId: null,
+          recommendedDate: null,
+          companyId: expenseOutRequisition.companyId,
+          permissionId: 1083,
         };
 
-        const response = await post_cashier_expense_out_api(
-          cashierExpenseOutData
+        const approvalResponse = await put_expense_out_requisition_api(
+          expenseOutRequisition.expenseOutRequisitionId,
+          expenseOutRequisionUpdateData
         );
 
-        if (response.status === 201) {
+        if (approvalResponse.status === 200) {
           setSubmissionStatus("successSubmitted");
-          console.log("Cashier expense out created successfully!", formData);
+          console.log(
+            "Expense out requisition updated successfully!",
+            formData
+          );
 
           setTimeout(() => {
             setSubmissionStatus(null);
@@ -108,26 +129,23 @@ const useCashierExpenseOut = ({ onFormSubmit }) => {
     }
   };
 
-  const handleClose = () => {
-    setFormData({
-      reason: "",
-      amount: "",
-    });
-    setValidFields({});
-    setValidationErrors({});
+  const handleInputChange = (field, value) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [field]: value,
+    }));
   };
 
   return {
     formData,
+    submissionStatus,
     validFields,
     validationErrors,
-    submissionStatus,
     alertRef,
     loading,
     handleInputChange,
     handleSubmit,
-    handleClose,
   };
 };
 
-export default useCashierExpenseOut;
+export default useExpenseOutRequisitionUpdate;

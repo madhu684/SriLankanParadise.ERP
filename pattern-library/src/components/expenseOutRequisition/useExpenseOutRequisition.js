@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { post_cashier_expense_out_api } from "../../services/salesApi";
+import { post_expense_out_requisition_api } from "../../services/salesApi";
 
-const useCashierExpenseOut = ({ onFormSubmit }) => {
+const useExpenseOutRequisition = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
     reason: "",
     amount: "",
@@ -64,6 +64,24 @@ const useCashierExpenseOut = ({ onFormSubmit }) => {
     return isreasonValid && isAmountValid;
   };
 
+  const generateReferenceNumber = () => {
+    const currentDate = new Date();
+
+    // Format the date as needed (e.g., YYYYMMDDHHMMSS)
+    const formattedDate = currentDate
+      .toISOString()
+      .replace(/\D/g, "")
+      .slice(0, 14);
+
+    // Generate a random number (e.g., 4 digits)
+    const randomNumber = Math.floor(1000 + Math.random() * 9000);
+
+    // Combine the date and random number
+    const referenceNumber = `EOR_${formattedDate}_${randomNumber}`;
+
+    return referenceNumber;
+  };
+
   const handleSubmit = async () => {
     try {
       const isFormValid = validateForm();
@@ -72,22 +90,32 @@ const useCashierExpenseOut = ({ onFormSubmit }) => {
       if (isFormValid) {
         setLoading(true);
 
-        const cashierExpenseOutData = {
-          userId: sessionStorage.getItem("userId"),
+        const expenseOutRequisionData = {
+          requestedUserId: sessionStorage.getItem("userId"),
+          requestedBy: sessionStorage.getItem("username"),
           reason: formData.reason,
           amount: formData.amount,
           createdDate: currentDate,
+          lastUpdatedDate: currentDate,
+          referenceNumber: generateReferenceNumber(),
+          status: 1,
+          approvedBy: null,
+          approvedUserId: null,
+          approvedDate: null,
+          recommendedBy: null,
+          recommendedUserId: null,
+          recommendedDate: null,
           companyId: sessionStorage.getItem("companyId"),
-          permissionId: 1069,
+          permissionId: 1079,
         };
 
-        const response = await post_cashier_expense_out_api(
-          cashierExpenseOutData
+        const response = await post_expense_out_requisition_api(
+          expenseOutRequisionData
         );
 
         if (response.status === 201) {
           setSubmissionStatus("successSubmitted");
-          console.log("Cashier expense out created successfully!", formData);
+          console.log("Expense out request submitted successfully!", formData);
 
           setTimeout(() => {
             setSubmissionStatus(null);
@@ -126,8 +154,7 @@ const useCashierExpenseOut = ({ onFormSubmit }) => {
     loading,
     handleInputChange,
     handleSubmit,
-    handleClose,
   };
 };
 
-export default useCashierExpenseOut;
+export default useExpenseOutRequisition;

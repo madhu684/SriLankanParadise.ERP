@@ -1,10 +1,10 @@
 import React from "react";
-import useCashierExpenseOut from "./useCashierExpenseOut";
+import useExpenseOutRequisition from "./useExpenseOutRequisition";
 import CurrentDateTime from "../currentDateTime/currentDateTime";
 import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
 
-const CashierExpenseOut = () => {
+const ExpenseOutRequisition = ({ handleClose, handleUpdated }) => {
   const {
     formData,
     validFields,
@@ -14,10 +14,10 @@ const CashierExpenseOut = () => {
     loading,
     handleInputChange,
     handleSubmit,
-    handleClose,
-  } = useCashierExpenseOut({
+  } = useExpenseOutRequisition({
     onFormSubmit: () => {
       handleClose();
+      handleUpdated();
     },
   });
 
@@ -42,17 +42,18 @@ const CashierExpenseOut = () => {
       {/* Display success or error messages */}
       {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
-          Expense out request added successfully!
+          Expense out request submitted successfully!
         </div>
       )}
       {submissionStatus === "successSavedAsDraft" && (
         <div className="alert alert-success mb-3" role="alert">
-          Expense out request added as draft, you can edit and submit it later!
+          Expense out request created as draft, you can edit and submit it
+          later!
         </div>
       )}
       {submissionStatus === "error" && (
         <div className="alert alert-danger mb-3" role="alert">
-          Error adding expense out request. Please try again.
+          Error submitting expense out request. Please try again.
         </div>
       )}
 
@@ -141,4 +142,4 @@ const CashierExpenseOut = () => {
   );
 };
 
-export default CashierExpenseOut;
+export default ExpenseOutRequisition;
