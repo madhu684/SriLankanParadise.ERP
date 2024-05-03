@@ -248,8 +248,11 @@ public partial class ErpSystemContext : DbContext
 
             entity.ToTable("CashierSession");
 
-            entity.Property(e => e.ClosingBalance).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.ActualCashInHand).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.ActualChequesInHand).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.OpeningBalance).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.ReasonCashInHandDifference).HasMaxLength(255);
+            entity.Property(e => e.ReasonChequesInHandDifference).HasMaxLength(255);
             entity.Property(e => e.SessionIn).HasColumnType("datetime");
             entity.Property(e => e.SessionOut).HasColumnType("datetime");
 

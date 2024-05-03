@@ -106,6 +106,24 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cashier expense outs not found.
+        /// </summary>
+        public static string CashierExpenseOutsNotFound {
+            get {
+                return ResourceManager.GetString("CashierExpenseOutsNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cashier expense outs Retrieved.
+        /// </summary>
+        public static string CashierExpenseOutsRetrieved {
+            get {
+                return ResourceManager.GetString("CashierExpenseOutsRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cashier session created successfully.
         /// </summary>
         public static string CashierSessionCreated {

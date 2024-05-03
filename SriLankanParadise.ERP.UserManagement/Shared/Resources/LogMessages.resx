@@ -132,6 +132,12 @@
   <data name="CashierExpenseOutCreated" xml:space="preserve">
     <value>Cashier expense out created successfully</value>
   </data>
+  <data name="CashierExpenseOutsNotFound" xml:space="preserve">
+    <value>Cashier expense outs not found</value>
+  </data>
+  <data name="CashierExpenseOutsRetrieved" xml:space="preserve">
+    <value>Cashier expense outs Retrieved</value>
+  </data>
   <data name="CashierSessionCreated" xml:space="preserve">
     <value>Cashier session created successfully</value>
   </data>
