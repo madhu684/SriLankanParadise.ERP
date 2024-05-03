@@ -113,7 +113,7 @@ const MaterialRequisition = ({ handleClose, handleUpdated }) => {
 
             <div className="mb-3 mt-3">
               <label htmlFor="deliveryLocation" className="form-label">
-                Delivery Location
+                Department
               </label>
               <select
                 className={`form-select ${
@@ -129,6 +129,7 @@ const MaterialRequisition = ({ handleClose, handleUpdated }) => {
                     warehouseLocation: "",
                   }));
                 }}
+                disabled
               >
                 <option value="">Select Location</option>
                 {/* Filter out locations where locationType is not "Warehouse" */}

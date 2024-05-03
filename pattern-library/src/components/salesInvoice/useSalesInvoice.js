@@ -22,6 +22,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     itemMaster: "",
     invoiceDate: "",
     dueDate: "",
+    referenceNumber: "",
     itemDetails: [],
     attachments: [],
     totalAmount: 0,
@@ -286,6 +287,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         itemMaster: "",
         invoiceDate: "",
         dueDate: "",
+        referenceNumber: "",
         itemDetails: initializedLineItemCharges,
         attachments: [],
         totalAmount: 0,
@@ -380,6 +382,12 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
       formData.dueDate
     );
 
+    const isReferenceNumberValid = validateField(
+      "referenceNumber",
+      "Reference Number",
+      formData.referenceNumber
+    );
+
     const isAttachmentsValid = validateAttachments(formData.attachments);
 
     let isItemQuantityValid = true;
@@ -401,7 +409,8 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         additionalRules
       );
 
-      isItemQuantityValid = isItemQuantityValid && isValidQuantity;
+      isItemQuantityValid =
+        isItemQuantityValid && isValidQuantity && isReferenceNumberValid;
     });
 
     return (
@@ -546,6 +555,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
           amountDue: formData.totalAmount,
           createdDate: currentDate,
           lastUpdatedDate: currentDate,
+          referenceNumber: formData.referenceNumber,
           permissionId: 29,
         };
 

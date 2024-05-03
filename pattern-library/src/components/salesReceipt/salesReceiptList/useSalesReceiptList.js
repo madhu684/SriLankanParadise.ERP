@@ -20,6 +20,15 @@ const useSalesReceiptList = () => {
   const [showUpdateSRForm, setShowUpdateSRForm] = useState(false);
   const [SRDetail, setSRDetail] = useState("");
 
+  // Retrieve the cashier session from session storage
+  const cashierSessionJson = sessionStorage.getItem("cashierSession");
+
+  // Parse the JSON string to convert it into a JavaScript object
+  const cashierSession = JSON.parse(cashierSessionJson);
+
+  // Check if the cashier session is open
+  const cashierSessionOpen = cashierSession !== null;
+
   const fetchUserPermissions = async () => {
     try {
       const response = await get_user_permissions_api(
@@ -240,6 +249,12 @@ const useSalesReceiptList = () => {
     );
   };
 
+  const closeAlertAfterDelay = () => {
+    setTimeout(() => {
+      setShowCreateSRForm(false);
+    }, 3000); // Close the alert after 3000 milliseconds (3 seconds)
+  };
+
   return {
     salesReceipts,
     isLoadingData,
@@ -257,6 +272,7 @@ const useSalesReceiptList = () => {
     userPermissions,
     SRDetail,
     isPermissionsError,
+    cashierSessionOpen,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleViewDetails,
@@ -274,6 +290,7 @@ const useSalesReceiptList = () => {
     handleUpdate,
     handleUpdated,
     handleClose,
+    closeAlertAfterDelay,
   };
 };
 

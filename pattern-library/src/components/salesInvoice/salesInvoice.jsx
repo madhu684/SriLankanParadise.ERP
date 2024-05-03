@@ -159,6 +159,29 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                   {validationErrors.dueDate}
                 </div>
               )}
+              <div className="mt-3">
+                <label htmlFor="referenceNumber" className="form-label">
+                  Reference Number
+                </label>
+                <input
+                  type="text"
+                  className={`form-control ${
+                    validFields.referenceNumber ? "is-valid" : ""
+                  } ${validationErrors.referenceNumber ? "is-invalid" : ""}`}
+                  id="referenceNumber"
+                  placeholder="Enter reference number"
+                  value={formData.referenceNumber}
+                  onChange={(e) =>
+                    handleInputChange("referenceNumber", e.target.value)
+                  }
+                  required
+                />
+                {validationErrors.referenceNumber && (
+                  <div className="invalid-feedback">
+                    {validationErrors.referenceNumber}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

@@ -147,5 +147,22 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task<IEnumerable<PurchaseOrder>> GetPurchaseOrdersByCompanyId(int companyId)
+        {
+            try
+            {
+                var purchaseOrders = await _dbContext.PurchaseOrders
+                    .Where(po => po.CompanyId == companyId)
+                    .ToListAsync();
+
+                return purchaseOrders.Any() ? purchaseOrders : null;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }

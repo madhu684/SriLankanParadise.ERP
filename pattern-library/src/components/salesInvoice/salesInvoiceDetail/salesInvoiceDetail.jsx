@@ -67,6 +67,10 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                     .tz("Asia/Colombo")
                     .format("YYYY-MM-DD hh:mm:ss A")}
                 </p>
+                <p>
+                  <strong>Reference Number:</strong>{" "}
+                  {salesInvoice?.referenceNumber}
+                </p>
                 {salesInvoice.status === 2 && (
                   <>
                     <p>

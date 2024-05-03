@@ -17,5 +17,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task<PurchaseOrder> GetPurchaseOrderByPurchaseOrderId(int purchaseOrderId);
 
         Task UpdatePurchaseOrder(int purchaseOrderId, PurchaseOrder purchaseOrder);
+
+        Task<IEnumerable<PurchaseOrder>> GetPurchaseOrdersByCompanyId(int companyId);
     }
 }

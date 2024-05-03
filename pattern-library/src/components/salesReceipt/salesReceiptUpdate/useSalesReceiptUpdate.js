@@ -50,7 +50,7 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
       );
 
       const filteredsalesInvoices = response.data.result.filter(
-        (sr) => sr.status === 2
+        (sr) => sr.status === 2 || sr.status === 5
       );
       return filteredsalesInvoices;
     } catch (error) {
