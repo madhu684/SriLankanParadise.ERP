@@ -14,5 +14,7 @@
         public int? MaxUserCount { get; set; }
 
         public bool Status { get; set; }
+
+        public string? BatchStockType { get; set; }
     }
 }

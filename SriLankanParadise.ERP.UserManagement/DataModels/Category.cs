@@ -14,4 +14,6 @@ public partial class Category
     public int? CompanyId { get; set; }
 
     public virtual ICollection<ItemMaster> ItemMasters { get; set; } = new List<ItemMaster>();
+
+    public virtual ICollection<SupplierCategory> SupplierCategories { get; set; } = new List<SupplierCategory>();
 }

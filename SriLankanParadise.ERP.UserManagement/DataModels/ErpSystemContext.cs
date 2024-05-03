@@ -27,6 +27,8 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<BatchHasGrnMaster> BatchHasGrnMasters { get; set; }
 
+    public virtual DbSet<BusinessType> BusinessTypes { get; set; }
+
     public virtual DbSet<CashierExpenseOut> CashierExpenseOuts { get; set; }
 
     public virtual DbSet<CashierSession> CashierSessions { get; set; }
@@ -42,6 +44,8 @@ public partial class ErpSystemContext : DbContext
     public virtual DbSet<CompanySubscriptionModule> CompanySubscriptionModules { get; set; }
 
     public virtual DbSet<CompanySubscriptionModuleUser> CompanySubscriptionModuleUsers { get; set; }
+
+    public virtual DbSet<CompanyType> CompanyTypes { get; set; }
 
     public virtual DbSet<Customer> Customers { get; set; }
 
@@ -106,6 +110,10 @@ public partial class ErpSystemContext : DbContext
     public virtual DbSet<SubscriptionModule> SubscriptionModules { get; set; }
 
     public virtual DbSet<Supplier> Suppliers { get; set; }
+
+    public virtual DbSet<SupplierAttachment> SupplierAttachments { get; set; }
+
+    public virtual DbSet<SupplierCategory> SupplierCategories { get; set; }
 
     public virtual DbSet<TransactionType> TransactionTypes { get; set; }
 
@@ -204,6 +212,15 @@ public partial class ErpSystemContext : DbContext
                 .HasConstraintName("FK__BatchHasG__GrnMa__6FB49575");
         });
 
+        modelBuilder.Entity<BusinessType>(entity =>
+        {
+            entity.HasKey(e => e.BusinessTypeId).HasName("PK__Business__1D43DEC05AC0EEF6");
+
+            entity.ToTable("BusinessType");
+
+            entity.Property(e => e.TypeName).HasMaxLength(100);
+        });
+
         modelBuilder.Entity<CashierExpenseOut>(entity =>
         {
             entity.HasKey(e => e.CashierExpenseOutId).HasName("PK__CashierE__F3B5AFBCD6C6368D");
@@ -293,6 +310,9 @@ public partial class ErpSystemContext : DbContext
         {
             entity.ToTable("Company");
 
+            entity.Property(e => e.BatchStockType)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.CompanyName).HasMaxLength(50);
             entity.Property(e => e.SubscriptionExpiredDate).HasColumnType("datetime");
 
@@ -328,6 +348,15 @@ public partial class ErpSystemContext : DbContext
                 .HasForeignKey(d => d.CompanySubscriptionModuleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_CompanySubscriptionModuleUser_Module");
+        });
+
+        modelBuilder.Entity<CompanyType>(entity =>
+        {
+            entity.HasKey(e => e.CompanyTypeId).HasName("PK__CompanyT__060198D8DDBF81FD");
+
+            entity.ToTable("CompanyType");
+
+            entity.Property(e => e.TypeName).HasMaxLength(100);
         });
 
         modelBuilder.Entity<Customer>(entity =>
@@ -891,15 +920,66 @@ public partial class ErpSystemContext : DbContext
 
             entity.ToTable("Supplier");
 
+            entity.Property(e => e.AddressLine1).HasMaxLength(255);
+            entity.Property(e => e.AddressLine2).HasMaxLength(255);
+            entity.Property(e => e.BusinessRegistrationNo).HasMaxLength(50);
             entity.Property(e => e.ContactPerson).HasMaxLength(50);
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.DeletedDate).HasColumnType("datetime");
             entity.Property(e => e.Email).HasMaxLength(50);
+            entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
+            entity.Property(e => e.OfficeContactNo).HasMaxLength(20);
             entity.Property(e => e.Phone).HasMaxLength(12);
+            entity.Property(e => e.Rating).HasColumnType("decimal(3, 1)");
+            entity.Property(e => e.Remarks).HasMaxLength(255);
+            entity.Property(e => e.SupplierLogoPath).HasMaxLength(255);
             entity.Property(e => e.SupplierName).HasMaxLength(50);
+            entity.Property(e => e.VatregistrationNo)
+                .HasMaxLength(50)
+                .HasColumnName("VATRegistrationNo");
+
+            entity.HasOne(d => d.BusinessType).WithMany(p => p.Suppliers)
+                .HasForeignKey(d => d.BusinessTypeId)
+                .HasConstraintName("FK_Supplier_BusinessType");
 
             entity.HasOne(d => d.Company).WithMany(p => p.Suppliers)
                 .HasForeignKey(d => d.CompanyId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Supplier_Company");
+
+            entity.HasOne(d => d.CompanyType).WithMany(p => p.Suppliers)
+                .HasForeignKey(d => d.CompanyTypeId)
+                .HasConstraintName("FK_Supplier_CompanyType");
+        });
+
+        modelBuilder.Entity<SupplierAttachment>(entity =>
+        {
+            entity.HasKey(e => e.SupplierAttachmentId).HasName("PK__Supplier__81D2082A25C2E70A");
+
+            entity.ToTable("SupplierAttachment");
+
+            entity.Property(e => e.AttachmentPath)
+                .HasMaxLength(255)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.Supplier).WithMany(p => p.SupplierAttachments)
+                .HasForeignKey(d => d.SupplierId)
+                .HasConstraintName("FK_SupplierAttachment_Supplier");
+        });
+
+        modelBuilder.Entity<SupplierCategory>(entity =>
+        {
+            entity.HasKey(e => e.SupplierCategoryId).HasName("PK__Supplier__50E449708214BB52");
+
+            entity.ToTable("SupplierCategory");
+
+            entity.HasOne(d => d.Category).WithMany(p => p.SupplierCategories)
+                .HasForeignKey(d => d.CategoryId)
+                .HasConstraintName("FK_SupplierCategory_Category");
+
+            entity.HasOne(d => d.Supplier).WithMany(p => p.SupplierCategories)
+                .HasForeignKey(d => d.SupplierId)
+                .HasConstraintName("FK_SupplierCategory_Supplier");
         });
 
         modelBuilder.Entity<TransactionType>(entity =>
