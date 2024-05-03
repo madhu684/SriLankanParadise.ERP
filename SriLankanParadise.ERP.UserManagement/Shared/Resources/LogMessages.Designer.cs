@@ -124,6 +124,24 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cashier expense outs not found.
+        /// </summary>
+        public static string CashierExpenseOutsNotFound {
+            get {
+                return ResourceManager.GetString("CashierExpenseOutsNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cashier expense outs Retrieved.
+        /// </summary>
+        public static string CashierExpenseOutsRetrieved {
+            get {
+                return ResourceManager.GetString("CashierExpenseOutsRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cashier session created successfully.
         /// </summary>
         public static string CashierSessionCreated {
@@ -453,6 +471,60 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string CustomersRetrieved {
             get {
                 return ResourceManager.GetString("CustomersRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expense out requisition created successfully.
+        /// </summary>
+        public static string ExpenseOutRequisitionCreated {
+            get {
+                return ResourceManager.GetString("ExpenseOutRequisitionCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expense out requisition not found.
+        /// </summary>
+        public static string ExpenseOutRequisitionNotFound {
+            get {
+                return ResourceManager.GetString("ExpenseOutRequisitionNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expense out requisition retrieved.
+        /// </summary>
+        public static string ExpenseOutRequisitionRetrieved {
+            get {
+                return ResourceManager.GetString("ExpenseOutRequisitionRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expense out requisitions not found.
+        /// </summary>
+        public static string ExpenseOutRequisitionsNotFound {
+            get {
+                return ResourceManager.GetString("ExpenseOutRequisitionsNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expense out requisitions retrieved.
+        /// </summary>
+        public static string ExpenseOutRequisitionsRetrieved {
+            get {
+                return ResourceManager.GetString("ExpenseOutRequisitionsRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expense out requisition updated successfully.
+        /// </summary>
+        public static string ExpenseOutRequisitionUpdated {
+            get {
+                return ResourceManager.GetString("ExpenseOutRequisitionUpdated", resourceCulture);
             }
         }
         

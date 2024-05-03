@@ -12,6 +12,8 @@
 
         public int? CompanyId { get; set; }
 
+        public int? ExpenseOutRequisitionId { get; set; }
+
         public int PermissionId { get; set; }
     }
 }

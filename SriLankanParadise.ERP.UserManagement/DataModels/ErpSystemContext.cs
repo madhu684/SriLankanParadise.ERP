@@ -49,6 +49,8 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<Customer> Customers { get; set; }
 
+    public virtual DbSet<ExpenseOutRequisition> ExpenseOutRequisitions { get; set; }
+
     public virtual DbSet<GrnDetail> GrnDetails { get; set; }
 
     public virtual DbSet<GrnMaster> GrnMasters { get; set; }
@@ -231,6 +233,10 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.CreatedDate).HasColumnType("datetime");
             entity.Property(e => e.Description).HasMaxLength(255);
 
+            entity.HasOne(d => d.ExpenseOutRequisition).WithMany(p => p.CashierExpenseOuts)
+                .HasForeignKey(d => d.ExpenseOutRequisitionId)
+                .HasConstraintName("FK_CashierExpenseOut_ExpenseOutRequisition");
+
             entity.HasOne(d => d.User).WithMany(p => p.CashierExpenseOuts)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_CashierExpenseOut_User");
@@ -242,8 +248,11 @@ public partial class ErpSystemContext : DbContext
 
             entity.ToTable("CashierSession");
 
-            entity.Property(e => e.ClosingBalance).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.ActualCashInHand).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.ActualChequesInHand).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.OpeningBalance).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.ReasonCashInHandDifference).HasMaxLength(255);
+            entity.Property(e => e.ReasonChequesInHandDifference).HasMaxLength(255);
             entity.Property(e => e.SessionIn).HasColumnType("datetime");
             entity.Property(e => e.SessionOut).HasColumnType("datetime");
 
@@ -374,6 +383,24 @@ public partial class ErpSystemContext : DbContext
                 .HasForeignKey(d => d.CompanyId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Customer_Company");
+        });
+
+        modelBuilder.Entity<ExpenseOutRequisition>(entity =>
+        {
+            entity.HasKey(e => e.ExpenseOutRequisitionId).HasName("PK__ExpenseO__A207C4EAC69BB0C3");
+
+            entity.ToTable("ExpenseOutRequisition");
+
+            entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.ApprovedBy).HasMaxLength(255);
+            entity.Property(e => e.ApprovedDate).HasColumnType("datetime");
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
+            entity.Property(e => e.Reason).HasMaxLength(255);
+            entity.Property(e => e.RecommendedBy).HasMaxLength(255);
+            entity.Property(e => e.RecommendedDate).HasColumnType("datetime");
+            entity.Property(e => e.ReferenceNumber).HasMaxLength(255);
+            entity.Property(e => e.RequestedBy).HasMaxLength(255);
         });
 
         modelBuilder.Entity<GrnDetail>(entity =>
