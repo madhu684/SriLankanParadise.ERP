@@ -548,3 +548,18 @@ export const put_expense_out_requisition_api = async (
     throw error;
   }
 };
+
+export const get_cashier_expense_outs_by_user_id_api = async (userId) => {
+  try {
+    const response = await api.get(
+      `/cashierExpenseOut/GetCashierExpenseOutsByUserId/${userId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

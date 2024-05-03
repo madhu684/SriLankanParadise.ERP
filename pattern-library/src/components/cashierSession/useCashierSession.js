@@ -79,8 +79,11 @@ const useCashierSession = ({ onFormSubmit }) => {
           sessionIn: currentDate,
           sessionOut: null,
           openingBalance: formData.openingBalance,
-          closingBalance: null,
           companyId: sessionStorage.getItem("companyId"),
+          actualCashInHand: null,
+          actualChequesInHand: null,
+          reasonCashInHandDifference: null,
+          reasonChequesInHandDifference: null,
           permissionId: 1067,
         };
 
