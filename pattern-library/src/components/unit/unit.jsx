@@ -2,6 +2,7 @@ import React from "react";
 import useUnit from "./useUnit";
 import CurrentDateTime from "../currentDateTime/currentDateTime";
 import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
+import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
 
 const Unit = ({ handleClose, handleUpdated }) => {
   const {
@@ -20,20 +21,18 @@ const Unit = ({ handleClose, handleUpdated }) => {
     },
   });
 
+  const companyLogoUrl = useCompanyLogoUrl();
+
   return (
     <div className="container mt-4">
       {/* Header */}
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img
-            src="path/to/your/logo.png"
-            alt="Company Logo"
-            className="img-fluid"
-          />
+          <img src={companyLogoUrl} alt="Company Logo" height={30} />
           <p>
             {" "}
-            Date and Time: <CurrentDateTime />
+            <CurrentDateTime />
           </p>
         </div>
         <h1 className="mt-2 text-center">Unit</h1>

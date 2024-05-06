@@ -4,6 +4,7 @@ import CurrentDateTime from "../currentDateTime/currentDateTime";
 import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 import LoadingSpinner from "../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../errorComponent/errorComponent";
+import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
 
 const ItemMaster = ({ handleClose, handleUpdated }) => {
   const {
@@ -29,6 +30,8 @@ const ItemMaster = ({ handleClose, handleUpdated }) => {
     },
   });
 
+  const companyLogoUrl = useCompanyLogoUrl();
+
   if (isLoading) {
     return <LoadingSpinner />;
   }
@@ -43,14 +46,10 @@ const ItemMaster = ({ handleClose, handleUpdated }) => {
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img
-            src="path/to/your/logo.png"
-            alt="Company Logo"
-            className="img-fluid"
-          />
+          <img src={companyLogoUrl} alt="Company Logo" height={30} />
           <p>
             {" "}
-            Date and Time: <CurrentDateTime />
+            <CurrentDateTime />
           </p>
         </div>
         <h1 className="mt-2 text-center">Item Master</h1>
