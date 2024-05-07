@@ -1,5 +1,5 @@
 import React from "react";
-import logoImage from "../../assets/images/erp_system_logo.jpg";
+import logoImage from "../../assets/images/erp_system_logo.png";
 import "./login.css";
 import ToastMessage from "../toastMessage/toastMessage.js";
 import { Navigate } from "react-router-dom";
@@ -41,12 +41,8 @@ function template() {
             </div>
           </div>
           <div className="col-lg-4">
-            <div className="login text-center">
-              <img
-                src={logoImage}
-                alt="Logo"
-                className="logo img-fluid mb-4 mt-4"
-              />
+            <div className="login text-center d-flex flex-column justify-content-center align-items-center">
+              <img src={logoImage} alt="Logo" className="logo img-fluid" />
               {this.state.error && (
                 <div className="error-message mb-4">{this.state.error}</div>
               )}
