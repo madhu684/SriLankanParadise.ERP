@@ -94,6 +94,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
+
         public async Task<IEnumerable<Module>> GetModulesByUserId(int userId)
         {
             try
@@ -101,25 +102,33 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var modules = await _dbContext.CompanySubscriptionModuleUsers
                     .Where(csmu => csmu.UserId == userId)
                     .Join(
-                        _dbContext.Modules,
+                        _dbContext.CompanySubscriptionModules,
                         csmu => csmu.CompanySubscriptionModuleId,
-                        module => module.ModuleId,
-                        (csmu, module) => module
+                        csm => csm.CompanySubscriptionModuleId,
+                        (csmu, csm) => csm
+                    )
+                    .Join(
+                        _dbContext.SubscriptionModules,
+                        csm => csm.SubscriptionModuleId,
+                        sm => sm.SubscriptionModuleId,
+                        (csm, sm) => sm
+                    )
+                    .Join(
+                        _dbContext.Modules,
+                        sm => sm.ModuleId,
+                        m => m.ModuleId,
+                        (sm, m) => m
                     )
                     .Include(m => m.SubModules)
                     .ToListAsync();
-                if (modules.Any())
-                {
-                    return modules;
-                }
-                return null;
+
+                return modules;
             }
             catch (Exception)
             {
                 throw;
             }
         }
-
 
 
     }

@@ -11,5 +11,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task UpdateCompanySubscriptionModule(int companySubscriptionModuleId, CompanySubscriptionModule companySubscriptionModule);
 
         Task<IEnumerable<Module>> GetCompanySubscriptionModulesByCompanyId(int companyId);
+
+        Task<int?> GetCompanySubscriptionModuleIdByCompanyIdAndModuleId(int companyId, int moduleId);
     }
 }

@@ -122,6 +122,29 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
+        public async Task<int?> GetCompanySubscriptionModuleIdByCompanyIdAndModuleId(int companyId, int moduleId)
+        {
+            try
+            {
+                var companySubscriptionModuleId = await _dbContext.CompanySubscriptionModules
+                    .Where(csm => csm.CompanyId == companyId && csm.SubscriptionModule.ModuleId == moduleId)
+                    .Select(csm => csm.CompanySubscriptionModuleId)
+                    .FirstOrDefaultAsync();
+
+               
+                if (companySubscriptionModuleId != 0)
+                {
+                    return companySubscriptionModuleId;
+                }
+                return null;
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }
 
