@@ -155,6 +155,14 @@ builder.Services.AddScoped<ICashierExpenseOutService, CashierExpenseOutService>(
 builder.Services.AddScoped<ICashierExpenseOutRepository, CashierExpenseOutRepository>();
 builder.Services.AddScoped<IExpenseOutRequisitionService, ExpenseOutRequisitionService>();
 builder.Services.AddScoped<IExpenseOutRequisitionRepository, ExpenseOutRequisitionRepository>();
+builder.Services.AddScoped<IBusinessTypeService, BusinessTypeService>();
+builder.Services.AddScoped<IBusinessTypeRepository, BusinessTypeRepository>();
+builder.Services.AddScoped<ICompanyTypeService, CompanyTypeService>();
+builder.Services.AddScoped<ICompanyTypeRepository, CompanyTypeRepository>();
+builder.Services.AddScoped<ISupplierCategoryService, SupplierCategoryService>();
+builder.Services.AddScoped<ISupplierCategoryRepository, SupplierCategoryRepository>();
+builder.Services.AddScoped<ISupplierAttachmentService, SupplierAttachmentService>();
+builder.Services.AddScoped<ISupplierAttachmentRepository, SupplierAttachmentRepository>();
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

@@ -18,7 +18,7 @@ const MinDetail = ({ show, handleClose, min }) => {
             Details for Material Issue Note Ref Number: {min.referenceNumber}
           </h6>
           <div>
-            Min Status :{" "}
+            MIN Status :{" "}
             <span
               className={`badge rounded-pill ${getStatusBadgeClass(
                 min.status

@@ -35,7 +35,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 DateTime currentDateTime = DateTime.Now;
 
                 var chargesAndDeductions = await _dbContext.ChargesAndDeductions
-                    .Where(cd => cd.CompanyId == companyId && cd.DateApplied <= currentDateTime)
+                    .Where(cd => cd.CompanyId == companyId && cd.Status == true && cd.DateApplied <= currentDateTime)
                     .ToListAsync();
 
                 return chargesAndDeductions.Any() ? chargesAndDeductions : null;

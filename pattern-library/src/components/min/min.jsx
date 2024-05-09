@@ -88,7 +88,7 @@ const Min = ({ handleClose, handleUpdated }) => {
         {/* Min Information */}
         <div className="row mb-3 d-flex justify-content-between">
           <div className="col-md-5">
-            <h4>1. Min Information</h4>
+            <h4>1. MIN Information</h4>
             {/* Status Dropdown */}
             <div className="mb-3 mt-3">
               <label htmlFor="status" className="form-label">

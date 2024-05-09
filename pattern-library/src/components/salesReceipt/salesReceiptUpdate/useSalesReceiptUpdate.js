@@ -49,8 +49,8 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
         sessionStorage?.getItem("companyId")
       );
 
-      const filteredsalesInvoices = response.data.result?.filter(
-        (sr) => sr.status === 2
+      const filteredsalesInvoices = response.data.result.filter(
+        (sr) => sr.status === 2 || sr.status === 5
       );
       return filteredsalesInvoices || [];
     } catch (error) {

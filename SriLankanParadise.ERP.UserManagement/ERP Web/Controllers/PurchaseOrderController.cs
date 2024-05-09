@@ -235,5 +235,31 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
         }
+
+        [HttpGet("GetPurchaseOrdersByCompanyId/{companyId}")]
+        public async Task<ApiResponseModel> GetPurchaseOrdersByCompanyId(int companyId)
+        {
+            try
+            {
+                var purchaseOrders = await _purchaseOrderService.GetPurchaseOrdersByCompanyId(companyId);
+                if (purchaseOrders != null)
+                {
+                    var purchaseOrderDtos = _mapper.Map<IEnumerable<PurchaseOrderDto>>(purchaseOrders);
+                    AddResponseMessage(Response, LogMessages.PurchaseOrdersRetrieved, purchaseOrderDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.PurchaseOrdersNotFound);
+                    AddResponseMessage(Response, LogMessages.PurchaseOrdersNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }
