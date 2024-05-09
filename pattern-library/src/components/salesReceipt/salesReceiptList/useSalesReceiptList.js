@@ -87,7 +87,7 @@ const useSalesReceiptList = () => {
           const SalesReceiptResponse = await get_sales_receipts_by_user_id_api(
             sessionStorage.getItem("userId")
           );
-          setSalesReceipts(SalesReceiptResponse.data.result);
+          setSalesReceipts(SalesReceiptResponse.data.result || []);
         }
       }
     } catch (error) {
