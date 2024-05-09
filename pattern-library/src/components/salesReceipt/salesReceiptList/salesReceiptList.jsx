@@ -88,7 +88,7 @@ const SalesReceiptList = () => {
             </button>
           )}
           {showCreateSRForm && !cashierSessionOpen && (
-            <div className="alert alert-warning" role="alert">
+            <div className="alert alert-warning mt-3" role="alert">
               Please open a cashier session to create sales receipts.
               {closeAlertAfterDelay()}
             </div>
