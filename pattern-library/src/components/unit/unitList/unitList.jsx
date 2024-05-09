@@ -42,7 +42,11 @@ const UnitList = () => {
     return <ErrorComponent error={error} />;
   }
 
-  if (isLoadingData || isLoadingPermissions || (units && !units.length > 0)) {
+  if (
+    isLoadingData ||
+    isLoadingPermissions ||
+    (units && !(units.length >= 0))
+  ) {
     return <LoadingSpinner />;
   }
 
@@ -65,7 +69,7 @@ const UnitList = () => {
     );
   }
 
-  if (!units) {
+  if (units.length === 0) {
     return (
       <div className="container mt-4">
         <h2>Units</h2>

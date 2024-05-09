@@ -40,7 +40,7 @@ const useUnitList = () => {
         const UnitResponse = await get_all_units_by_company_id_api(
           sessionStorage.getItem("companyId")
         );
-        setunits(UnitResponse.data.result);
+        setunits(UnitResponse.data.result || []);
       }
     } catch (error) {
       setError("Error fetching data");

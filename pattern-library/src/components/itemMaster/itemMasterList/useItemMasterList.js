@@ -82,7 +82,7 @@ const useItemMasterList = () => {
           const itemMasterResponse = await get_item_masters_by_user_id_api(
             sessionStorage.getItem("userId")
           );
-          setItemMasters(itemMasterResponse.data.result);
+          setItemMasters(itemMasterResponse.data.result || []);
         }
       }
     } catch (error) {

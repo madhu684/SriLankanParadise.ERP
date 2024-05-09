@@ -40,7 +40,7 @@ const useCategoryList = () => {
         const CategoryResponse = await get_all_categories_by_company_id_api(
           sessionStorage.getItem("companyId")
         );
-        setCategories(CategoryResponse.data.result);
+        setCategories(CategoryResponse.data.result || []);
       }
     } catch (error) {
       setError("Error fetching data");
