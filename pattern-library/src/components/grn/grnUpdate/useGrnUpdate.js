@@ -35,10 +35,10 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       const response = await get_purchase_orders_with_out_drafts_api(
         sessionStorage?.getItem("companyId")
       );
-      const filteredPurchaseOrders = response.data.result.filter(
-        (po) => po.status === 1
+      const filteredPurchaseOrders = response.data.result?.filter(
+        (po) => po.status === 2
       );
-      return filteredPurchaseOrders;
+      return filteredPurchaseOrders || [];
     } catch (error) {
       console.error("Error fetching purchase orders:", error);
     }

@@ -32,10 +32,10 @@ const useTin = ({ onFormSubmit }) => {
       const response = await get_requisition_masters_with_out_drafts_api(
         sessionStorage?.getItem("companyId")
       );
-      const filteredTrns = response.data.result.filter(
+      const filteredTrns = response.data.result?.filter(
         (rm) => rm.requisitionType === "TRN" && rm.status === 2
       );
-      return filteredTrns;
+      return filteredTrns || [];
     } catch (error) {
       console.error("Error fetching Trns:", error);
     }

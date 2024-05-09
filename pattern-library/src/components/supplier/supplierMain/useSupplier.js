@@ -44,7 +44,7 @@ const useSupplier = ({ onFormSubmit }) => {
       const response = await get_categories_by_company_id_api(
         sessionStorage.getItem("companyId")
       );
-      return response.data.result;
+      return response.data.result || [];
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
@@ -63,7 +63,7 @@ const useSupplier = ({ onFormSubmit }) => {
   const fetchCompanyTypes = async () => {
     try {
       const response = await get_company_types_api();
-      return response.data.result;
+      return response.data.result || [];
     } catch (error) {
       console.error("Error fetching company types:", error);
     }
@@ -82,7 +82,7 @@ const useSupplier = ({ onFormSubmit }) => {
   const fetchBusinessTypes = async () => {
     try {
       const response = await get_business_types_api();
-      return response.data.result;
+      return response.data.result || [];
     } catch (error) {
       console.error("Error fetching business types:", error);
     }

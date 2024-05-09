@@ -55,7 +55,7 @@ const SupplierList = () => {
     isLoadingData ||
     isLoadingPermissions ||
     isLoadingPurchaseOrders ||
-    (suppliers && !suppliers.length > 0)
+    (suppliers && !(suppliers.length >= 0))
   ) {
     return <LoadingSpinner />;
   }
@@ -79,7 +79,7 @@ const SupplierList = () => {
     );
   }
 
-  if (!suppliers) {
+  if (suppliers.length === 0) {
     return (
       <div className="container mt-4">
         <h2>Suppliers</h2>

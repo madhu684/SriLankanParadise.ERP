@@ -74,9 +74,9 @@ const useSupplierList = () => {
           sessionStorage.getItem("companyId")
         );
         setSuppliers(
-          supplierResponse.data.result.filter(
+          supplierResponse.data.result?.filter(
             (supplier) => supplier.status !== -1
-          )
+          ) || []
         );
       }
     } catch (error) {
