@@ -98,7 +98,7 @@ const useMaterialRequisitionList = () => {
           setMaterialRequisitions(
             requisitionMastersResponse.data.result?.filter(
               (rm) => rm.requisitionType === "MRN"
-            )
+            ) || []
           );
         }
       }

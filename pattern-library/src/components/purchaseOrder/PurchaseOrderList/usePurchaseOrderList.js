@@ -86,7 +86,7 @@ const usePurchaseOrderList = () => {
             await get_purchase_orders_by_user_id_api(
               sessionStorage.getItem("userId")
             );
-          setPurchaseOrders(purchaseOrderResponse.data.result);
+          setPurchaseOrders(purchaseOrderResponse.data.result || []);
         }
       }
     } catch (error) {
