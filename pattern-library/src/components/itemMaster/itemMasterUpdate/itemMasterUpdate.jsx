@@ -16,8 +16,20 @@ const ItemMasterUpdate = ({ handleClose, itemMaster, handleUpdated }) => {
     itemTypes,
     loading,
     loadingDraft,
+    isMeasurementTypesLoading,
+    isMeasurementTypesError,
+    measurementTypes,
+    isItemsLoading,
+    isItemsError,
+    itemsError,
+    availableItems,
+    searchTerm,
+    selectedParentItem,
+    setSearchTerm,
     handleInputChange,
     handleSubmit,
+    handleSelectItem,
+    handleResetParentItem,
   } = useItemMasterUpdate({
     itemMaster,
     onFormSubmit: () => {
@@ -149,6 +161,39 @@ const ItemMasterUpdate = ({ handleClose, itemMaster, handleUpdated }) => {
             </div>
 
             <div className="mb-3 mt-3">
+              <label htmlFor="measurementType" className="form-label">
+                Measurement Type
+              </label>
+              <select
+                className={`form-select ${
+                  validFields.measurementType ? "is-valid" : ""
+                } ${validationErrors.measurementType ? "is-invalid" : ""}`}
+                id="measurementType"
+                value={formData.measurementType}
+                onChange={(e) =>
+                  handleInputChange("measurementType", e.target.value)
+                }
+                required
+              >
+                <option value="">Select measurement Type</option>
+                {/* Assuming you have an array of measurement types */}
+                {measurementTypes?.map((type) => (
+                  <option
+                    key={type.measurementTypeId}
+                    value={type.measurementTypeId}
+                  >
+                    {type.name}
+                  </option>
+                ))}
+              </select>
+              {validationErrors.measurementType && (
+                <div className="invalid-feedback">
+                  {validationErrors.measurementType}
+                </div>
+              )}
+            </div>
+
+            <div className="mb-3 mt-3">
               <label htmlFor="unitId" className="form-label">
                 Unit
               </label>
@@ -160,13 +205,19 @@ const ItemMasterUpdate = ({ handleClose, itemMaster, handleUpdated }) => {
                 value={formData.unitId}
                 onChange={(e) => handleInputChange("unitId", e.target.value)}
                 required
+                disabled={formData.measurementType === ""}
               >
                 <option value="">Select Unit</option>
-                {unitOptions?.map((unit) => (
-                  <option key={unit.unitId} value={unit.unitId}>
-                    {unit.unitName}
-                  </option>
-                ))}
+                {unitOptions
+                  ?.filter(
+                    (u) =>
+                      u.measurementTypeId === parseInt(formData.measurementType)
+                  )
+                  .map((unit) => (
+                    <option key={unit.unitId} value={unit.unitId}>
+                      {unit.unitName}
+                    </option>
+                  ))}
               </select>
               {validationErrors.unitId && (
                 <div className="invalid-feedback">
@@ -174,6 +225,149 @@ const ItemMasterUpdate = ({ handleClose, itemMaster, handleUpdated }) => {
                 </div>
               )}
             </div>
+          </div>
+          <div className="col-md-5">
+            <h4>Item Hierarchy</h4>
+            {/* Other form fields */}
+            <div className="mb-3 mt-3">
+              <label htmlFor="itemHierarchy" className="form-label">
+                Hierarchy Type (Main Item/ Sub Item)?
+              </label>
+              <select
+                className={`form-select ${
+                  validFields.itemHierarchy ? "is-valid" : ""
+                } ${validationErrors.itemHierarchy ? "is-invalid" : ""}`}
+                id="itemHierarchy"
+                value={formData.itemHierarchy}
+                onChange={(e) =>
+                  handleInputChange("itemHierarchy", e.target.value)
+                }
+                required
+              >
+                <option value="">Select Item Type</option>
+                <option value="main">Main Item</option>
+                <option value="sub">Sub Item</option>
+              </select>
+              {validationErrors.itemHierarchy && (
+                <div className="invalid-feedback">
+                  {validationErrors.itemHierarchy}
+                </div>
+              )}
+            </div>
+
+            {formData.itemHierarchy === "sub" && selectedParentItem === "" && (
+              <div className="mb-3 mt-4">
+                {/* Item Search */}
+                <div className="mb-0 mt-3">
+                  <div className="input-group">
+                    <span className="input-group-text bg-transparent">
+                      <i className="bi bi-search"></i>
+                    </span>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Search for a parent item..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    {searchTerm && (
+                      <span
+                        className="input-group-text bg-transparent"
+                        style={{
+                          cursor: "pointer",
+                        }}
+                        onClick={() => setSearchTerm("")}
+                      >
+                        <i className="bi bi-x"></i>
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Dropdown for filtered items */}
+                  {searchTerm && (
+                    <div className="dropdown" style={{ width: "100%" }}>
+                      <ul
+                        className="dropdown-menu"
+                        style={{
+                          display: "block",
+                          width: "100%",
+                          maxHeight: "200px",
+                          overflowY: "auto",
+                        }}
+                      >
+                        {isItemsLoading ? (
+                          <li className="dropdown-item">
+                            <ButtonLoadingSpinner text="Searching..." />
+                          </li>
+                        ) : isItemsError ? (
+                          <li className="dropdown-item">
+                            Error: {itemsError.message}
+                          </li>
+                        ) : availableItems === null ? (
+                          <li className="dropdown-item">
+                            <span className="me-3">
+                              <i className="bi bi-emoji-frown"></i>
+                            </span>
+                            No items found
+                          </li>
+                        ) : (
+                          availableItems?.map((item) => (
+                            <li key={item.itemMasterId}>
+                              <button
+                                type="button"
+                                className="dropdown-item"
+                                onClick={() => handleSelectItem(item)}
+                              >
+                                <span className="me-3">
+                                  <i className="bi bi-cart4"></i>
+                                </span>{" "}
+                                {item.itemName}
+                              </button>
+                            </li>
+                          ))
+                        )}
+                      </ul>
+                    </div>
+                  )}
+
+                  <div className="mb-3">
+                    <small className="form-text text-muted">
+                      Please search for a parent item for this sub item and add
+                      it
+                    </small>
+                  </div>
+                  {validationErrors.selectedParentItem && (
+                    <div className="text-danger">
+                      {validationErrors.selectedParentItem}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {selectedParentItem && (
+              <div className="card border-success mb-3 mt-4">
+                <div className="card-header">Selected Parent Item</div>
+                <div className="card-body">
+                  <p>Item Name: {selectedParentItem.itemName}</p>
+                  <p>Item Type: {selectedParentItem.itemType?.name}</p>
+                  <p>Category: {selectedParentItem.category.categoryName}</p>
+                  <hr />
+                  <p>
+                    Measurement Type:{" "}
+                    {selectedParentItem.unit?.measurementType?.name}
+                  </p>
+                  <p>Unit: {selectedParentItem.unit?.unitName}</p>
+                  <button
+                    type="button"
+                    className="btn btn-outline-danger float-end"
+                    onClick={handleResetParentItem}
+                  >
+                    Reset Parent Item
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

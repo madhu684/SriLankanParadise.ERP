@@ -12,6 +12,9 @@ const UnitUpdate = ({ handleClose, unit, handleUpdated }) => {
     validationErrors,
     alertRef,
     loading,
+    isLoading,
+    isError,
+    measurementTypes,
     handleInputChange,
     handleSubmit,
   } = useUnitUpdate({
@@ -81,6 +84,39 @@ const UnitUpdate = ({ handleClose, unit, handleUpdated }) => {
               {validationErrors.unitName && (
                 <div className="invalid-feedback">
                   {validationErrors.unitName}
+                </div>
+              )}
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="measurementType" className="form-label">
+                Measurement Type
+              </label>
+              <select
+                className={`form-select ${
+                  validFields.measurementType ? "is-valid" : ""
+                } ${validationErrors.measurementType ? "is-invalid" : ""}`}
+                id="measurementType"
+                value={formData.measurementType}
+                onChange={(e) =>
+                  handleInputChange("measurementType", e.target.value)
+                }
+                required
+              >
+                <option value="">Select measurement Type</option>
+                {/* Assuming you have an array of measurement types */}
+                {measurementTypes?.map((type) => (
+                  <option
+                    key={type.measurementTypeId}
+                    value={type.measurementTypeId}
+                  >
+                    {type.name}
+                  </option>
+                ))}
+              </select>
+              {validationErrors.measurementType && (
+                <div className="invalid-feedback">
+                  {validationErrors.measurementType}
                 </div>
               )}
             </div>

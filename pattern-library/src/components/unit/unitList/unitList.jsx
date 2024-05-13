@@ -133,6 +133,7 @@ const UnitList = () => {
               </th>
               <th>Unit Id</th>
               <th>Unit Name</th>
+              <th>Measurement Type</th>
               <th>Status</th>
               <th>Details</th>
             </tr>
@@ -149,6 +150,7 @@ const UnitList = () => {
                 </td>
                 <td>{u.unitId}</td>
                 <td>{u.unitName}</td>
+                <td>{u?.measurementType?.name}</td>
                 <td>
                   <span
                     className={`badge rounded-pill ${getStatusBadgeClass(
