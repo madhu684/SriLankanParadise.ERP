@@ -230,5 +230,30 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpGet("GetItemMasterByItemMasterId/{itemMasterId}")]
+        public async Task<ApiResponseModel> GetItemMasterByItemMasterId(int itemMasterId)
+        {
+            try
+            {
+                var itemMaster = await _itemMasterService.GetItemMasterByItemMasterId(itemMasterId);
+                if (itemMaster != null)
+                {
+                    var itemMasterDto = _mapper.Map<ItemMasterDto>(itemMaster);
+                    AddResponseMessage(Response, LogMessages.ItemMasterRetrieved, itemMasterDto, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.ItemMasterNotFound);
+                    AddResponseMessage(Response, LogMessages.ItemMasterNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

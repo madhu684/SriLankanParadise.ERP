@@ -354,6 +354,9 @@
   <data name="ItemMasterNotFound" xml:space="preserve">
     <value>Item master not found</value>
   </data>
+  <data name="ItemMasterRetrieved" xml:space="preserve">
+    <value>Item master retrieved</value>
+  </data>
   <data name="ItemMastersNotFound" xml:space="preserve">
     <value>Item masters not found</value>
   </data>
@@ -377,6 +380,15 @@
   </data>
   <data name="LocationsRetrieved" xml:space="preserve">
     <value>Locations retrieved</value>
+  </data>
+  <data name="MeasurementTypeCreated" xml:space="preserve">
+    <value>Measurement type created successfully</value>
+  </data>
+  <data name="MeasurementTypesNotFound" xml:space="preserve">
+    <value>Measurement types not found</value>
+  </data>
+  <data name="MeasurementTypesRetrieved" xml:space="preserve">
+    <value>Measurement types retrieved</value>
   </data>
   <data name="ModuleCreated" xml:space="preserve">
     <value>Module created successfully</value>
@@ -688,7 +700,7 @@
     <value>Transaction types not found</value>
   </data>
   <data name="TransactionTypesRetrieved" xml:space="preserve">
-    <value>TransactionTypesRetrieved </value>
+    <value>Transaction types retrieved </value>
   </data>
   <data name="UnitCreated" xml:space="preserve">
     <value>Unit created successfully</value>

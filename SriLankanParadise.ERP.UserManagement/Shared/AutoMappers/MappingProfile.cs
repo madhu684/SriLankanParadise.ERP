@@ -114,6 +114,8 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<SupplierCategory, SupplierCategoryDto>();
             CreateMap<SupplierAttachmentRequestModel, SupplierAttachment>();
             CreateMap<SupplierAttachment, SupplierAttachmentDto>();
+            CreateMap<MeasurementTypeRequestModel, MeasurementType>();
+            CreateMap<MeasurementType, MeasurementTypeDto>();
             // Add more mapping configurations if needed
         }
     }
