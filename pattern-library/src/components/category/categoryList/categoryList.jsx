@@ -45,7 +45,7 @@ const CategoryList = () => {
   if (
     isLoadingData ||
     isLoadingPermissions ||
-    (categories && !categories.length > 0)
+    (categories && !(categories.length >= 0))
   ) {
     return <LoadingSpinner />;
   }
@@ -69,7 +69,7 @@ const CategoryList = () => {
     );
   }
 
-  if (!categories) {
+  if (categories.length === 0) {
     return (
       <div className="container mt-4">
         <h2>Categories</h2>

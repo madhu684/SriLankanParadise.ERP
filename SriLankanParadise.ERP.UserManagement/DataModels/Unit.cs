@@ -13,5 +13,9 @@ public partial class Unit
 
     public int? CompanyId { get; set; }
 
+    public int? MeasurementTypeId { get; set; }
+
     public virtual ICollection<ItemMaster> ItemMasters { get; set; } = new List<ItemMaster>();
+
+    public virtual MeasurementType? MeasurementType { get; set; }
 }

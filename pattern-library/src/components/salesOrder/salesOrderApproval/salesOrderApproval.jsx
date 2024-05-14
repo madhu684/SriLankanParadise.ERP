@@ -25,6 +25,10 @@ const SalesOrderApproval = ({
     commonChargesAndDeductions,
     loading,
     alertRef,
+    isCompanyLoading,
+    isCompanyError,
+    company,
+    renderSalesOrderDetails,
     handleApprove,
     calculateSubTotal,
   } = useSalesOrderApproval({
@@ -49,9 +53,11 @@ const SalesOrderApproval = ({
         <Modal.Title>Approve Sales Order</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {isError && <ErrorComponent error={"Error fetching data"} />}
-        {isLoading && <LoadingSpinner maxHeight="65vh" />}
-        {!isError && !isLoading && (
+        {isError && isCompanyError && (
+          <ErrorComponent error={"Error fetching data"} />
+        )}
+        {isLoading && isCompanyLoading && <LoadingSpinner maxHeight="65vh" />}
+        {!isError && !isLoading && !isCompanyLoading && (
           <>
             <div className="mb-3 d-flex justify-content-between">
               <h6>Details for Sales Order : {salesOrder.referenceNo}</h6>
@@ -132,7 +138,7 @@ const SalesOrderApproval = ({
                   <tr>
                     <th>Item Name</th>
                     <th>Unit</th>
-                    <th>Batch Ref</th>
+                    {company.batchStockType !== "FIFO" && <th>Batch Ref</th>}
                     <th>Quantity</th>
                     <th>Unit Price</th>
                     {uniqueLineItemDisplayNames.map((displayName, index) => {
@@ -156,11 +162,13 @@ const SalesOrderApproval = ({
                   </tr>
                 </thead>
                 <tbody>
-                  {salesOrder.salesOrderDetails.map((item, index) => (
+                  {renderSalesOrderDetails().map((item, index) => (
                     <tr key={index}>
                       <td>{item.itemBatch?.itemMaster?.itemName}</td>
                       <td>{item.itemBatch?.itemMaster?.unit.unitName}</td>
-                      <td>{item.itemBatch?.batch?.batchRef}</td>
+                      {company.batchStockType !== "FIFO" && (
+                        <td>{item.itemBatch?.batch?.batchRef}</td>
+                      )}
                       <td>{item.quantity}</td>
                       <td>{item.unitPrice.toFixed(2)}</td>
                       {/* Render line item charges/deductions */}
@@ -201,7 +209,13 @@ const SalesOrderApproval = ({
                 </tbody>
                 <tfoot>
                   <tr>
-                    <td colSpan={4 + uniqueLineItemDisplayNames.length}></td>
+                    <td
+                      colSpan={
+                        4 +
+                        uniqueLineItemDisplayNames.length -
+                        (company.batchStockType === "FIFO" ? 1 : 0)
+                      }
+                    ></td>
                     <th>Sub Total</th>
                     <td className="text-end">
                       {calculateSubTotal().toFixed(2)}
@@ -234,7 +248,11 @@ const SalesOrderApproval = ({
                       return (
                         <tr key={`${index}-${chargeIndex}`}>
                           <td
-                            colSpan={4 + uniqueLineItemDisplayNames.length}
+                            colSpan={
+                              4 +
+                              uniqueLineItemDisplayNames.length -
+                              (company.batchStockType === "FIFO" ? 1 : 0)
+                            }
                           ></td>
                           <th>
                             {charge.chargesAndDeduction.sign}{" "}
@@ -246,7 +264,13 @@ const SalesOrderApproval = ({
                     });
                   })}
                   <tr>
-                    <td colSpan={4 + uniqueLineItemDisplayNames.length}></td>
+                    <td
+                      colSpan={
+                        4 +
+                        uniqueLineItemDisplayNames.length -
+                        (company.batchStockType === "FIFO" ? 1 : 0)
+                      }
+                    ></td>
                     <th>Total Amount</th>
                     <td className="text-end">
                       {salesOrder.totalAmount.toFixed(2)}

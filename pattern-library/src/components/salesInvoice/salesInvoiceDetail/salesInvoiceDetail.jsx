@@ -18,6 +18,10 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
     uniqueCommonDisplayNames,
     lineItemChargesAndDeductions,
     commonChargesAndDeductions,
+    isCompanyLoading,
+    isCompanyError,
+    company,
+    renderSalesInvoiceDetails,
   } = useSalesInvoiceDetial(salesInvoice);
   return (
     <Modal show={show} onHide={handleClose} centered scrollable size="lg">
@@ -25,9 +29,11 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
         <Modal.Title>Sales Invoice</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {isError && <ErrorComponent error={"Error fetching data"} />}
+        {isError && isCompanyError && (
+          <ErrorComponent error={"Error fetching data"} />
+        )}
         {isLoading && <LoadingSpinner maxHeight="65vh" />}
-        {!isError && !isLoading && (
+        {!isError && !isLoading && !isCompanyLoading && (
           <>
             <div className="mb-3 d-flex justify-content-between">
               <h6>Details for Sales Invoice : {salesInvoice.referenceNo}</h6>
@@ -134,7 +140,7 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                   <tr>
                     <th>Item Name</th>
                     <th>Unit</th>
-                    <th>Batch Ref</th>
+                    {company.batchStockType !== "FIFO" && <th>Batch Ref</th>}
                     <th>Quantity</th>
                     <th>Unit Price</th>
                     {uniqueLineItemDisplayNames.map((displayName, index) => {
@@ -158,11 +164,13 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {salesInvoice.salesInvoiceDetails.map((item, index) => (
+                  {renderSalesInvoiceDetails().map((item, index) => (
                     <tr key={index}>
                       <td>{item.itemBatch?.itemMaster?.itemName}</td>
                       <td>{item.itemBatch?.itemMaster?.unit.unitName}</td>
-                      <td>{item.itemBatch?.batch?.batchRef}</td>
+                      {company.batchStockType !== "FIFO" && (
+                        <td>{item.itemBatch?.batch?.batchRef}</td>
+                      )}
                       <td>{item.quantity}</td>
                       <td>{item.unitPrice.toFixed(2)}</td>
                       {/* Render line item charges/deductions */}
@@ -203,7 +211,13 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                 </tbody>
                 <tfoot>
                   <tr>
-                    <td colSpan={4 + uniqueLineItemDisplayNames.length}></td>
+                    <td
+                      colSpan={
+                        4 +
+                        uniqueLineItemDisplayNames.length -
+                        (company.batchStockType === "FIFO" ? 1 : 0)
+                      }
+                    ></td>
                     <th>Sub Total</th>
                     <td className="text-end">
                       {calculateSubTotal().toFixed(2)}
@@ -236,7 +250,11 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                       return (
                         <tr key={`${index}-${chargeIndex}`}>
                           <td
-                            colSpan={4 + uniqueLineItemDisplayNames.length}
+                            colSpan={
+                              4 +
+                              uniqueLineItemDisplayNames.length -
+                              (company.batchStockType === "FIFO" ? 1 : 0)
+                            }
                           ></td>
                           <th>
                             {charge.chargesAndDeduction.sign}{" "}
@@ -248,7 +266,13 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                     });
                   })}
                   <tr>
-                    <td colSpan={4 + uniqueLineItemDisplayNames.length}></td>
+                    <td
+                      colSpan={
+                        4 +
+                        uniqueLineItemDisplayNames.length -
+                        (company.batchStockType === "FIFO" ? 1 : 0)
+                      }
+                    ></td>
                     <th>Total Amount</th>
                     <td className="text-end">
                       {salesInvoice.totalAmount.toFixed(2)}

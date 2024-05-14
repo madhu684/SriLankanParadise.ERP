@@ -5,10 +5,10 @@ import {
   delete_item_master_api,
 } from "../../../services/inventoryApi";
 import { get_user_permissions_api } from "../../../services/userManagementApi";
+import { useQuery } from "@tanstack/react-query";
 
 const useItemMasterList = () => {
   const [itemMasters, setItemMasters] = useState([]);
-  const [userPermissions, setUserPermissions] = useState([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [error, setError] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -19,7 +19,6 @@ const useItemMasterList = () => {
   const [showCreateIMForm, setShowCreateIMForm] = useState(false);
   const [showUpdateIMForm, setShowUpdateIMForm] = useState(false);
   const [IMDetail, setIMDetail] = useState("");
-  const [isLoadingPermissions, setIsLoadingPermissions] = useState(true);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [submissionMessage, setSubmissionMessage] = useState(null);
@@ -27,16 +26,24 @@ const useItemMasterList = () => {
 
   const fetchUserPermissions = async () => {
     try {
-      const userPermissionsResponse = await get_user_permissions_api(
+      const response = await get_user_permissions_api(
         sessionStorage.getItem("userId")
       );
-      setUserPermissions(Object.freeze(userPermissionsResponse.data.result));
+      return response.data.result;
     } catch (error) {
-      setError("Error fetching permissions");
-    } finally {
-      setIsLoadingPermissions(false);
+      console.error("Error fetching user permissions:", error);
     }
   };
+
+  const {
+    data: userPermissions,
+    isLoading: isLoadingPermissions,
+    isError: isPermissionsError,
+    error: permissionError,
+  } = useQuery({
+    queryKey: ["userPermissions"],
+    queryFn: fetchUserPermissions,
+  });
 
   const fetchData = async () => {
     try {
@@ -82,7 +89,7 @@ const useItemMasterList = () => {
           const itemMasterResponse = await get_item_masters_by_user_id_api(
             sessionStorage.getItem("userId")
           );
-          setItemMasters(itemMasterResponse.data.result);
+          setItemMasters(itemMasterResponse.data.result || []);
         }
       }
     } catch (error) {

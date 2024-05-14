@@ -8,6 +8,8 @@
 
         public int? CompanyId { get; set; }
 
+        public int? MeasurementTypeId { get; set; }
+
         public int PermissionId { get; set; }
     }
 }

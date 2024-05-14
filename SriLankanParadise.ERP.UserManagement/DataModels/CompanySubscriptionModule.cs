@@ -19,5 +19,7 @@ public partial class CompanySubscriptionModule
 
     public virtual Company Company { get; set; } = null!;
 
+    public virtual ICollection<CompanySubscriptionModuleUser> CompanySubscriptionModuleUsers { get; set; } = new List<CompanySubscriptionModuleUser>();
+
     public virtual SubscriptionModule SubscriptionModule { get; set; } = null!;
 }

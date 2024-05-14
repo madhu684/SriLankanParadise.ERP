@@ -5,6 +5,7 @@ import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
 import LoadingSpinner from "../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../errorComponent/errorComponent";
 import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
+import BatchSelectionModal from "../batchSelectionModal/batchSelectionModal";
 
 const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
   const {
@@ -31,6 +32,11 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
     itemBatches,
     loading,
     loadingDraft,
+    isCompanyLoading,
+    isCompanyError,
+    showModal,
+    company,
+    closeModal,
     handleInputChange,
     handleItemDetailsChange,
     handleAttachmentChange,
@@ -54,11 +60,21 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
 
   const companyLogoUrl = useCompanyLogoUrl();
 
-  if (isLoading || isLoadingchargesAndDeductions || isLoadingTransactionTypes) {
+  if (
+    isLoading ||
+    isLoadingchargesAndDeductions ||
+    isLoadingTransactionTypes ||
+    isCompanyLoading
+  ) {
     return <LoadingSpinner />;
   }
 
-  if (isError || ischargesAndDeductionsError || isTransactionTypesError) {
+  if (
+    isError ||
+    ischargesAndDeductionsError ||
+    isTransactionTypesError ||
+    isCompanyError
+  ) {
     return <ErrorComponent error={"Error fetching data"} />;
   }
 
@@ -251,7 +267,18 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                     <li className="dropdown-item">
                       Error: {itemsError.message}
                     </li>
-                  ) : availableItems === null || availableItems.length === 0 ? (
+                  ) : availableItems === null ||
+                    availableItems.length === 0 ||
+                    availableItems.filter((item) => {
+                      // If batchStockType is FIFO, filter out items already present in formData.itemDetails
+                      if (company.batchStockType === "FIFO") {
+                        return !formData.itemDetails.some(
+                          (detail) => detail.itemMasterId === item.itemMasterId
+                        );
+                      }
+                      // Otherwise, include all items
+                      return true;
+                    }).length === 0 ? (
                     <li className="dropdown-item">
                       <span className="me-3">
                         <i className="bi bi-emoji-frown"></i>
@@ -259,19 +286,31 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                       No items found
                     </li>
                   ) : (
-                    availableItems.map((item) => (
-                      <li key={item.itemMasterId}>
-                        <button
-                          className="dropdown-item"
-                          onClick={() => handleSelectItem(item)}
-                        >
-                          <span className="me-3">
-                            <i className="bi bi-cart4"></i>
-                          </span>
-                          {item.itemName}
-                        </button>
-                      </li>
-                    ))
+                    availableItems
+                      .filter((item) => {
+                        // If batchStockType is FIFO, filter out items already present in formData.itemDetails
+                        if (company.batchStockType === "FIFO") {
+                          return !formData.itemDetails.some(
+                            (detail) =>
+                              detail.itemMasterId === item.itemMasterId
+                          );
+                        }
+                        // Otherwise, include all items
+                        return true;
+                      })
+                      .map((item) => (
+                        <li key={item.itemMasterId}>
+                          <button
+                            className="dropdown-item"
+                            onClick={() => handleSelectItem(item)}
+                          >
+                            <span className="me-3">
+                              <i className="bi bi-cart4"></i>
+                            </span>
+                            {item.itemName}
+                          </button>
+                        </li>
+                      ))
                   )}
                 </ul>
               </div>
@@ -294,7 +333,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
           </div>
         </div>
 
-        <div className="col-md-5">
+        {/* <div className="col-md-5">
           <div className="mb-3">
             <label htmlFor="batchSelection">Select Batch</label>
             <select
@@ -325,7 +364,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
               )}
             </select>
           </div>
-        </div>
+        </div> */}
 
         {!itemBatches && formData.itemMasterId !== 0 && (
           <div className="mb-3">
@@ -342,7 +381,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                 <tr>
                   <th>Item Name</th>
                   <th>Unit</th>
-                  <th>Batch Ref</th>
+                  {company.batchStockType !== "FIFO" && <th>Batch Ref</th>}
                   <th>Temp Qty</th>
                   <th>Quantity</th>
                   <th>Unit Price</th>
@@ -356,7 +395,9 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                   <tr key={index}>
                     <td>{item.name}</td>
                     <td>{item.unit}</td>
-                    <td>{item.batchRef}</td>
+                    {company.batchStockType !== "FIFO" && (
+                      <td>{item.batchRef}</td>
+                    )}
                     <td>{item.tempQuantity}</td>
                     <td>
                       <input
@@ -416,7 +457,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                       </td>
                     ))}
                     <td className="text-end">{item.totalPrice.toFixed(2)}</td>
-                    <td>
+                    <td className="text-end">
                       <button
                         type="button"
                         className="btn btn-outline-danger"
@@ -432,7 +473,9 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                 <tr>
                   <td
                     colSpan={
-                      5 + formData.itemDetails[0].chargesAndDeductions.length
+                      5 +
+                      formData.itemDetails[0].chargesAndDeductions.length -
+                      (company.batchStockType === "FIFO" ? 1 : 0)
                     }
                   ></td>
                   <th>Sub Total</th>
@@ -443,7 +486,9 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                 <tr>
                   <td
                     colSpan={
-                      5 + formData.itemDetails[0].chargesAndDeductions.length
+                      5 +
+                      formData.itemDetails[0].chargesAndDeductions.length -
+                      (company.batchStockType === "FIFO" ? 1 : 0)
                     }
                   ></td>
                   <th>Total Amount</th>
@@ -534,6 +579,15 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
           </button>
         </div>
       </form>
+      {itemBatches && (
+        <BatchSelectionModal
+          show={showModal}
+          handleClose={closeModal}
+          itemBatches={itemBatches}
+          itemDetails={formData.itemDetails}
+          handleBatchSelect={handleBatchSelection}
+        />
+      )}
     </div>
   );
 };

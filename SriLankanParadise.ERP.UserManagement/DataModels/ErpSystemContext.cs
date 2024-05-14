@@ -49,6 +49,8 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<Customer> Customers { get; set; }
 
+    public virtual DbSet<ExpenseOutRequisition> ExpenseOutRequisitions { get; set; }
+
     public virtual DbSet<GrnDetail> GrnDetails { get; set; }
 
     public virtual DbSet<GrnMaster> GrnMasters { get; set; }
@@ -68,6 +70,8 @@ public partial class ErpSystemContext : DbContext
     public virtual DbSet<Location> Locations { get; set; }
 
     public virtual DbSet<LocationType> LocationTypes { get; set; }
+
+    public virtual DbSet<MeasurementType> MeasurementTypes { get; set; }
 
     public virtual DbSet<Module> Modules { get; set; }
 
@@ -231,6 +235,10 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.CreatedDate).HasColumnType("datetime");
             entity.Property(e => e.Description).HasMaxLength(255);
 
+            entity.HasOne(d => d.ExpenseOutRequisition).WithMany(p => p.CashierExpenseOuts)
+                .HasForeignKey(d => d.ExpenseOutRequisitionId)
+                .HasConstraintName("FK_CashierExpenseOut_ExpenseOutRequisition");
+
             entity.HasOne(d => d.User).WithMany(p => p.CashierExpenseOuts)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_CashierExpenseOut_User");
@@ -242,8 +250,11 @@ public partial class ErpSystemContext : DbContext
 
             entity.ToTable("CashierSession");
 
-            entity.Property(e => e.ClosingBalance).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.ActualCashInHand).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.ActualChequesInHand).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.OpeningBalance).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.ReasonCashInHandDifference).HasMaxLength(255);
+            entity.Property(e => e.ReasonChequesInHandDifference).HasMaxLength(255);
             entity.Property(e => e.SessionIn).HasColumnType("datetime");
             entity.Property(e => e.SessionOut).HasColumnType("datetime");
 
@@ -347,7 +358,7 @@ public partial class ErpSystemContext : DbContext
             entity.HasOne(d => d.CompanySubscriptionModule).WithMany(p => p.CompanySubscriptionModuleUsers)
                 .HasForeignKey(d => d.CompanySubscriptionModuleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_CompanySubscriptionModuleUser_Module");
+                .HasConstraintName("FK_CompanySubscriptionModuleUser_CompanySubscriptionModule");
         });
 
         modelBuilder.Entity<CompanyType>(entity =>
@@ -374,6 +385,24 @@ public partial class ErpSystemContext : DbContext
                 .HasForeignKey(d => d.CompanyId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Customer_Company");
+        });
+
+        modelBuilder.Entity<ExpenseOutRequisition>(entity =>
+        {
+            entity.HasKey(e => e.ExpenseOutRequisitionId).HasName("PK__ExpenseO__A207C4EAC69BB0C3");
+
+            entity.ToTable("ExpenseOutRequisition");
+
+            entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.ApprovedBy).HasMaxLength(255);
+            entity.Property(e => e.ApprovedDate).HasColumnType("datetime");
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
+            entity.Property(e => e.Reason).HasMaxLength(255);
+            entity.Property(e => e.RecommendedBy).HasMaxLength(255);
+            entity.Property(e => e.RecommendedDate).HasColumnType("datetime");
+            entity.Property(e => e.ReferenceNumber).HasMaxLength(255);
+            entity.Property(e => e.RequestedBy).HasMaxLength(255);
         });
 
         modelBuilder.Entity<GrnDetail>(entity =>
@@ -517,6 +546,10 @@ public partial class ErpSystemContext : DbContext
                 .HasForeignKey(d => d.ItemTypeId)
                 .HasConstraintName("FK_ItemType_ItemMaster");
 
+            entity.HasOne(d => d.Parent).WithMany(p => p.InverseParent)
+                .HasForeignKey(d => d.ParentId)
+                .HasConstraintName("FK_ItemMaster_ParentId");
+
             entity.HasOne(d => d.Unit).WithMany(p => p.ItemMasters)
                 .HasForeignKey(d => d.UnitId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -565,6 +598,15 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<MeasurementType>(entity =>
+        {
+            entity.HasKey(e => e.MeasurementTypeId).HasName("PK__Measurem__167933E78448B79A");
+
+            entity.ToTable("MeasurementType");
+
+            entity.Property(e => e.Name).HasMaxLength(50);
         });
 
         modelBuilder.Entity<Module>(entity =>
@@ -999,6 +1041,10 @@ public partial class ErpSystemContext : DbContext
             entity.ToTable("Unit");
 
             entity.Property(e => e.UnitName).HasMaxLength(50);
+
+            entity.HasOne(d => d.MeasurementType).WithMany(p => p.Units)
+                .HasForeignKey(d => d.MeasurementTypeId)
+                .HasConstraintName("FK_Unit_MeasurementTypeId");
         });
 
         modelBuilder.Entity<User>(entity =>

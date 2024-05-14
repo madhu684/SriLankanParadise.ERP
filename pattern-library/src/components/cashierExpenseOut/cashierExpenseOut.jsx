@@ -35,24 +35,24 @@ const CashierExpenseOut = () => {
             <CurrentDateTime />
           </p>
         </div>
-        <h1 className="mt-2 text-center">Cashier Expense Out</h1>
+        <h1 className="mt-2 text-center">Expense Out Request</h1>
         <hr />
       </div>
 
       {/* Display success or error messages */}
       {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
-          Cashier expense out added successfully!
+          Expense out request added successfully!
         </div>
       )}
       {submissionStatus === "successSavedAsDraft" && (
         <div className="alert alert-success mb-3" role="alert">
-          Cashier expense out added as draft, you can edit and active it later!
+          Expense out request added as draft, you can edit and submit it later!
         </div>
       )}
       {submissionStatus === "error" && (
         <div className="alert alert-danger mb-3" role="alert">
-          Error adding cashier expense out. Please try again.
+          Error adding expense out request. Please try again.
         </div>
       )}
 
@@ -60,33 +60,9 @@ const CashierExpenseOut = () => {
         {/* Cashier Expense Out Information */}
         <div className="row mb-3">
           <div className="col-md-6">
-            <h4>Cashier Expense Out Information</h4>
+            <h4>Expense Out Request Information</h4>
 
             <div className="mb-3 mt-3">
-              <label htmlFor="description" className="form-label">
-                Description
-              </label>
-              <input
-                type="text"
-                className={`form-control ${
-                  validFields.description ? "is-valid" : ""
-                } ${validationErrors.description ? "is-invalid" : ""}`}
-                id="description"
-                placeholder="Enter Description"
-                value={formData.description}
-                onChange={(e) =>
-                  handleInputChange("description", e.target.value)
-                }
-                required
-              />
-              {validationErrors.description && (
-                <div className="invalid-feedback">
-                  {validationErrors.description}
-                </div>
-              )}
-            </div>
-
-            <div className="mb-3">
               <label htmlFor="status" className="form-label">
                 Amount
               </label>
@@ -111,6 +87,29 @@ const CashierExpenseOut = () => {
                 </div>
               )}
             </div>
+
+            <div className="mb-3">
+              <label htmlFor="reason" className="form-label">
+                Reason
+              </label>
+              <textarea
+                className={`form-control ${
+                  validFields.reason ? "is-valid" : ""
+                } ${validationErrors.reason ? "is-invalid" : ""}`}
+                id="reason"
+                placeholder="Enter Reason"
+                value={formData.reason}
+                onChange={(e) => handleInputChange("reason", e.target.value)}
+                required
+                rows="2"
+                maxLength="250"
+              />
+              {validationErrors.reason && (
+                <div className="invalid-feedback">
+                  {validationErrors.reason}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -123,9 +122,9 @@ const CashierExpenseOut = () => {
             disabled={loading || submissionStatus !== null}
           >
             {loading && submissionStatus === null ? (
-              <ButtonLoadingSpinner text="Adding..." />
+              <ButtonLoadingSpinner text="Requesting..." />
             ) : (
-              "Add"
+              "Request"
             )}
           </button>
           <button

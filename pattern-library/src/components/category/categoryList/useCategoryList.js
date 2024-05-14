@@ -4,10 +4,10 @@ import {
   delete_category_api,
 } from "../../../services/inventoryApi";
 import { get_user_permissions_api } from "../../../services/userManagementApi";
+import { useQuery } from "@tanstack/react-query";
 
 const useCategoryList = () => {
   const [categories, setCategories] = useState([]);
-  const [userPermissions, setUserPermissions] = useState([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [error, setError] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -15,7 +15,6 @@ const useCategoryList = () => {
   const [showCreateCategoryForm, setShowCreateCategoryForm] = useState(false);
   const [showUpdateCategoryForm, setShowUpdateCategoryForm] = useState(false);
   const [categoryDetail, setCategoryDetail] = useState("");
-  const [isLoadingPermissions, setIsLoadingPermissions] = useState(true);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [submissionMessage, setSubmissionMessage] = useState(null);
@@ -23,16 +22,24 @@ const useCategoryList = () => {
 
   const fetchUserPermissions = async () => {
     try {
-      const userPermissionsResponse = await get_user_permissions_api(
+      const response = await get_user_permissions_api(
         sessionStorage.getItem("userId")
       );
-      setUserPermissions(Object.freeze(userPermissionsResponse.data.result));
+      return response.data.result;
     } catch (error) {
-      setError("Error fetching permissions");
-    } finally {
-      setIsLoadingPermissions(false);
+      console.error("Error fetching user permissions:", error);
     }
   };
+
+  const {
+    data: userPermissions,
+    isLoading: isLoadingPermissions,
+    isError: isPermissionsError,
+    error: permissionError,
+  } = useQuery({
+    queryKey: ["userPermissions"],
+    queryFn: fetchUserPermissions,
+  });
 
   const fetchData = async () => {
     try {
@@ -40,7 +47,7 @@ const useCategoryList = () => {
         const CategoryResponse = await get_all_categories_by_company_id_api(
           sessionStorage.getItem("companyId")
         );
-        setCategories(CategoryResponse.data.result);
+        setCategories(CategoryResponse.data.result || []);
       }
     } catch (error) {
       setError("Error fetching data");

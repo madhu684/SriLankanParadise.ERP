@@ -98,6 +98,14 @@ Status 0: Draft (Default)
 	   52: Completed - Approved 
 	   ect.
 
+--- Expense Out Request ---
+
+Status 0: Draft (Default) 
+	   1: Pending Recommendation
+	   2: Pending Approval
+	   3: Approved
+	   4: Expensed out
+     
 --- Supplier ---
 
 Status 0: Inactive 

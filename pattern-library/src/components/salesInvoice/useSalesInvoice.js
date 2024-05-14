@@ -3,6 +3,7 @@ import {
   get_sales_orders_with_out_drafts_api,
   post_sales_invoice_api,
   post_sales_invoice_detail_api,
+  get_company_api,
 } from "../../services/salesApi";
 import {
   get_item_batches_by_item_master_id_api,
@@ -42,6 +43,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const fetchItemBatches = async (itemMasterId) => {
     try {
@@ -160,6 +162,27 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   } = useQuery({
     queryKey: ["chargesAndDeductionsApplied", salesOrder?.salesOrderId],
     queryFn: fetchChargesAndDeductionsApplied,
+  });
+
+  const fetchCompany = async () => {
+    try {
+      const response = await get_company_api(
+        sessionStorage?.getItem("companyId")
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching company:", error);
+    }
+  };
+
+  const {
+    data: company,
+    isLoading: isCompanyLoading,
+    isError: isCompanyError,
+    error: companyError,
+  } = useQuery({
+    queryKey: ["company"],
+    queryFn: fetchCompany,
   });
 
   useEffect(() => {
@@ -507,6 +530,8 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
       const status = isSaveAsDraft ? 0 : 1;
       const isFormValid = validateForm();
       const currentDate = new Date().toISOString();
+      let allDetailsBatchSuccessful;
+      let allDetailsSuccessful;
 
       if (isFormValid) {
         if (isSaveAsDraft) {
@@ -539,60 +564,133 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
 
         const salesInvoiceId = response.data.result.salesInvoiceId;
 
-        const itemDetailsData = formData.itemDetails.map(async (item) => {
-          const detailsData = {
-            salesInvoiceId,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            totalPrice: item.totalPrice,
-            itemBatchItemMasterId: item.itemMasterId,
-            itemBatchBatchId: item.itemBatchId,
-            permissionId: 29,
-          };
+        if (company.batchStockType === "FIFO") {
+          const batchUpdates = [];
+          const detailsPromises = [];
 
-          const detailsApiResponse = await post_sales_invoice_detail_api(
-            detailsData
+          const itemDetailsBatchData = formData.itemDetails.map(
+            async (item) => {
+              let remainingQuantity = item.quantity;
+
+              for (const batch of item.batch) {
+                const quantityToConsume = Math.min(
+                  remainingQuantity,
+                  batch.tempQuantity
+                );
+
+                const itemBatchUpdateData = {
+                  batchId: batch.batchId,
+                  itemMasterId: batch.itemMasterId,
+                  costPrice: batch.costPrice,
+                  sellingPrice: batch.sellingPrice,
+                  status: batch.status,
+                  companyId: batch.companyId,
+                  createdBy: batch.createdBy,
+                  createdUserId: batch.createdUserId,
+                  tempQuantity: batch.tempQuantity - quantityToConsume,
+                  locationId: batch.locationId,
+                  expiryDate: batch.expiryDate,
+                  permissionId: 1065,
+                };
+
+                batchUpdates.push(
+                  put_item_batch_api(
+                    batch.batchId,
+                    batch.itemMasterId,
+                    itemBatchUpdateData
+                  )
+                );
+
+                if (quantityToConsume > 0) {
+                  detailsPromises.push(
+                    post_sales_invoice_detail_api({
+                      itemBatchItemMasterId: batch.itemMasterId,
+                      itemBatchBatchId: batch.batchId,
+                      salesInvoiceId,
+                      quantity: quantityToConsume,
+                      unitPrice: item.unitPrice,
+                      totalPrice:
+                        (item.totalPrice / item.quantity) * quantityToConsume,
+                      permissionId: 25,
+                    })
+                  );
+                }
+
+                remainingQuantity -= quantityToConsume;
+
+                if (remainingQuantity <= 0) break; // Stop iterating if all quantity consumed
+              }
+            }
           );
 
-          return detailsApiResponse;
-        });
+          await Promise.all(itemDetailsBatchData);
 
-        const detailsResponses = await Promise.all(itemDetailsData);
-
-        const allDetailsSuccessful = detailsResponses.every(
-          (detailsResponse) => detailsResponse.status === 201
-        );
-
-        const itemDetailsBatchData = formData.itemDetails.map(async (item) => {
-          const itemBatchUpdateData = {
-            batchId: item.batch.batchId,
-            itemMasterId: item.batch.itemMasterId,
-            costPrice: item.batch.costPrice,
-            sellingPrice: item.batch.sellingPrice,
-            status: item.batch.status,
-            companyId: item.batch.companyId,
-            createdBy: item.batch.createdBy,
-            createdUserId: item.batch.createdUserId,
-            tempQuantity: item.batch.tempQuantity - item.quantity,
-            locationId: item.batch.locationId,
-            expiryDate: item.batch.expiryDate,
-            permissionId: 1065,
-          };
-
-          const detailsBatchApiResponse = await put_item_batch_api(
-            item.batch.batchId,
-            item.batch.itemMasterId,
-            itemBatchUpdateData
+          // Check if all details were successful
+          allDetailsBatchSuccessful = (await Promise.all(batchUpdates)).every(
+            (response) => response.status === 200
           );
 
-          return detailsBatchApiResponse;
-        });
+          allDetailsSuccessful = (await Promise.all(detailsPromises)).every(
+            (response) => response.status === 201
+          );
+        } else {
+          const itemDetailsBatchData = formData.itemDetails.map(
+            async (item) => {
+              const itemBatchUpdateData = {
+                batchId: item.batch.batchId,
+                itemMasterId: item.batch.itemMasterId,
+                costPrice: item.batch.costPrice,
+                sellingPrice: item.batch.sellingPrice,
+                status: item.batch.status,
+                companyId: item.batch.companyId,
+                createdBy: item.batch.createdBy,
+                createdUserId: item.batch.createdUserId,
+                tempQuantity: item.batch.tempQuantity - item.quantity,
+                locationId: item.batch.locationId,
+                expiryDate: item.batch.expiryDate,
+                permissionId: 1065,
+              };
 
-        const detailsBatchResponse = await Promise.all(itemDetailsBatchData);
+              const detailsBatchApiResponse = await put_item_batch_api(
+                item.batch.batchId,
+                item.batch.itemMasterId,
+                itemBatchUpdateData
+              );
 
-        const allDetailsBatchSuccessful = detailsBatchResponse.every(
-          (detailsResponse) => detailsResponse.status === 200
-        );
+              return detailsBatchApiResponse;
+            }
+          );
+
+          const detailsBatchResponse = await Promise.all(itemDetailsBatchData);
+
+          allDetailsBatchSuccessful = detailsBatchResponse.every(
+            (detailsResponse) => detailsResponse.status === 200
+          );
+
+          const itemDetailsData = formData.itemDetails.map(async (item) => {
+            const detailsData = {
+              itemBatchItemMasterId: item.itemMasterId,
+              itemBatchBatchId: item.itemBatchId,
+              salesInvoiceId,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              totalPrice: item.totalPrice,
+              permissionId: 25,
+            };
+
+            const detailsApiResponse = await post_sales_invoice_detail_api(
+              detailsData
+            );
+
+            return detailsApiResponse;
+          });
+
+          const detailsResponses = await Promise.all(itemDetailsData);
+
+          allDetailsSuccessful = detailsResponses.every(
+            (detailsResponse) => detailsResponse.status === 201
+          );
+        }
 
         const postChargesAndDeductionsAppliedResponse =
           await postChargesAndDeductionsApplied(salesInvoiceId);
@@ -763,6 +861,11 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     });
     setValidFields({});
     setValidationErrors({});
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      itemMasterId: 0,
+      itemMaster: "",
+    }));
   };
 
   const handlePrint = () => {
@@ -822,10 +925,15 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     refetchItemBatches();
     setValidFields({});
     setValidationErrors({});
+
+    if (company.batchStockType === "FIFO") {
+    } else {
+      openModal();
+    }
   };
 
-  const handleBatchSelection = (e) => {
-    const selectedBatchId = e.target.value;
+  const handleBatchSelection = (batchId) => {
+    const selectedBatchId = batchId;
     const batch = itemBatches.find(
       (batch) => batch.batchId === parseInt(selectedBatchId, 10)
     );
@@ -867,7 +975,75 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     } else {
       setSelectedBatch(null);
     }
+    closeModal();
   };
+
+  const handleBatchSelectionFIFO = () => {
+    const sortedBatches = itemBatches?.sort((a, b) => {
+      return new Date(a.batch.date) - new Date(b.batch.date);
+    });
+
+    // Select the oldest batch
+    const selectedBatch = sortedBatches[0];
+
+    // Calculate total temporary quantity
+    const totalTempQuantity = sortedBatches.reduce(
+      (accumulator, currentBatch) => accumulator + currentBatch.tempQuantity,
+      0
+    );
+
+    // Find the highest selling price among the batches
+    const highestSellingPrice = sortedBatches.reduce(
+      (maxPrice, currentBatch) =>
+        currentBatch.sellingPrice > maxPrice
+          ? currentBatch.sellingPrice
+          : maxPrice,
+      0
+    );
+
+    // Generate chargesAndDeductions array for the newly added item
+    const initializedCharges = chargesAndDeductions
+      .filter((charge) => charge.isApplicableForLineItem)
+      .map((charge) => ({
+        id: charge.chargesAndDeductionId,
+        name: charge.displayName,
+        value: charge.amount || charge.percentage,
+        sign: charge.sign,
+        isPercentage: charge.percentage !== null,
+      }));
+
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      itemDetails: [
+        ...prevFormData.itemDetails,
+        {
+          itemMasterId: formData.itemMasterId,
+          itemBatchId: null,
+          name: formData.itemMaster.itemName,
+          unit: formData.itemMaster.unit.unitName,
+          batchRef: null,
+          quantity: 0,
+          unitPrice: highestSellingPrice,
+          totalPrice: 0.0,
+          chargesAndDeductions: initializedCharges,
+          batch: sortedBatches,
+          tempQuantity: totalTempQuantity,
+        },
+      ],
+    }));
+  };
+
+  useEffect(() => {
+    // Check if itemBatches is defined and not empty
+    if (
+      itemBatches &&
+      itemBatches.length > 0 &&
+      company.batchStockType === "FIFO"
+    ) {
+      handleBatchSelectionFIFO();
+    }
+  }, [itemBatches]);
+
   const renderColumns = () => {
     return chargesAndDeductions.map((charge) => {
       if (charge.isApplicableForLineItem) {
@@ -923,7 +1099,9 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
             <tr key={chargeIndex}>
               <td
                 colSpan={
-                  5 + formData.itemDetails[0].chargesAndDeductions.length
+                  5 +
+                  formData.itemDetails[0].chargesAndDeductions.length -
+                  (company.batchStockType === "FIFO" ? 1 : 0)
                 }
               ></td>
               <th>
@@ -968,6 +1146,16 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     }
   };
 
+  // Function to open modal
+  const openModal = () => {
+    setShowModal(true);
+  };
+
+  // Function to close modal
+  const closeModal = () => {
+    setShowModal(false);
+  };
+
   return {
     formData,
     submissionStatus,
@@ -996,6 +1184,11 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     transactionTypesError,
     loading,
     loadingDraft,
+    isCompanyLoading,
+    isCompanyError,
+    showModal,
+    company,
+    closeModal,
     handleInputChange,
     handleItemDetailsChange,
     handleAttachmentChange,
