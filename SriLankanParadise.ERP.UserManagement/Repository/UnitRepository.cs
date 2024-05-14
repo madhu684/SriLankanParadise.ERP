@@ -47,6 +47,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var units = await _dbContext.Units
                     .Where(u => u.Status == true && u.CompanyId == companyId)
+                    .Include(u => u.MeasurementType)
                     .ToListAsync();
 
                 return units.Any() ? units : null;
@@ -64,6 +65,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var units = await _dbContext.Units
                     .Where(u => u.CompanyId == companyId)
+                    .Include(u => u.MeasurementType)
                     .ToListAsync();
 
                 return units.Any() ? units : null;

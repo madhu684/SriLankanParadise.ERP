@@ -42,7 +42,11 @@ const UnitList = () => {
     return <ErrorComponent error={error} />;
   }
 
-  if (isLoadingData || isLoadingPermissions || (units && !units.length > 0)) {
+  if (
+    isLoadingData ||
+    isLoadingPermissions ||
+    (units && !(units.length >= 0))
+  ) {
     return <LoadingSpinner />;
   }
 
@@ -65,7 +69,7 @@ const UnitList = () => {
     );
   }
 
-  if (!units) {
+  if (units.length === 0) {
     return (
       <div className="container mt-4">
         <h2>Units</h2>
@@ -129,6 +133,7 @@ const UnitList = () => {
               </th>
               <th>Unit Id</th>
               <th>Unit Name</th>
+              <th>Measurement Type</th>
               <th>Status</th>
               <th>Details</th>
             </tr>
@@ -145,6 +150,7 @@ const UnitList = () => {
                 </td>
                 <td>{u.unitId}</td>
                 <td>{u.unitName}</td>
+                <td>{u?.measurementType?.name}</td>
                 <td>
                   <span
                     className={`badge rounded-pill ${getStatusBadgeClass(

@@ -772,6 +772,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Item master retrieved.
+        /// </summary>
+        public static string ItemMasterRetrieved {
+            get {
+                return ResourceManager.GetString("ItemMasterRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Item masters not found.
         /// </summary>
         public static string ItemMastersNotFound {
@@ -840,6 +849,33 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string LocationsRetrieved {
             get {
                 return ResourceManager.GetString("LocationsRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Measurement type created successfully.
+        /// </summary>
+        public static string MeasurementTypeCreated {
+            get {
+                return ResourceManager.GetString("MeasurementTypeCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Measurement types not found.
+        /// </summary>
+        public static string MeasurementTypesNotFound {
+            get {
+                return ResourceManager.GetString("MeasurementTypesNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Measurement types retrieved.
+        /// </summary>
+        public static string MeasurementTypesRetrieved {
+            get {
+                return ResourceManager.GetString("MeasurementTypesRetrieved", resourceCulture);
             }
         }
         
@@ -1771,7 +1807,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to TransactionTypesRetrieved .
+        ///   Looks up a localized string similar to Transaction types retrieved .
         /// </summary>
         public static string TransactionTypesRetrieved {
             get {

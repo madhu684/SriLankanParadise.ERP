@@ -34,6 +34,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 return await _dbContext.ItemMasters
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
+                    .ThenInclude(u => u.MeasurementType)
                     .Include(im => im.ItemType)
                     .ToListAsync();
             }
@@ -53,6 +54,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Where(im => im.Status == true && im.CompanyId == companyId)
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
+                    .ThenInclude(u => u.MeasurementType)
                     .Include(im => im.ItemType)
                     .ToListAsync();
 
@@ -86,6 +88,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 {
                     query = query.Include(im => im.Category)
                         .Include(im => im.Unit)
+                        .ThenInclude(u => u.MeasurementType)
                         .Include(im => im.ItemType)
                         .Where(im => im.ItemType.Name == itemType);
                 }
@@ -93,6 +96,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 {
                     query = query.Include(im => im.Category)
                         .Include(im => im.Unit)
+                        .ThenInclude(u => u.MeasurementType)
                         .Include(im => im.ItemType);
                 }
 
@@ -117,6 +121,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Where(im => im.ItemMasterId == itemMasterId)
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
+                    .ThenInclude(u => u.MeasurementType)
                     .Include(im => im.ItemType)
                     .FirstOrDefaultAsync();
 
@@ -174,6 +179,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Where(im => im.CreatedUserId == userId)
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
+                    .ThenInclude(u => u.MeasurementType)
                     .Include(im => im.ItemType)
                     .ToListAsync();
 

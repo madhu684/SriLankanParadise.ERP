@@ -7,6 +7,7 @@ using SriLankanParadise.ERP.UserManagement.DataModels;
 using AutoMapper;
 using SriLankanParadise.ERP.UserManagement.Shared.AutoMappers;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore.Query;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -163,6 +164,8 @@ builder.Services.AddScoped<ISupplierCategoryService, SupplierCategoryService>();
 builder.Services.AddScoped<ISupplierCategoryRepository, SupplierCategoryRepository>();
 builder.Services.AddScoped<ISupplierAttachmentService, SupplierAttachmentService>();
 builder.Services.AddScoped<ISupplierAttachmentRepository, SupplierAttachmentRepository>();
+builder.Services.AddScoped<IMeasurementTypeService, MeasurementTypeService>();
+builder.Services.AddScoped<IMeasurementTypeRepository, MeasurementTypeRepository>();
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

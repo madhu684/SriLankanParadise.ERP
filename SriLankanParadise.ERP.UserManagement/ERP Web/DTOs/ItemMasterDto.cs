@@ -25,6 +25,8 @@
 
         public int? ItemTypeId { get; set; }
 
+        public int? ParentId { get; set; }
+
         public virtual ItemTypeDto? ItemType { get; set; }
 
     }

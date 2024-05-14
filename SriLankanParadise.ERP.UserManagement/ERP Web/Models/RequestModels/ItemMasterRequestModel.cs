@@ -18,6 +18,8 @@
 
         public int? ItemTypeId { get; set; }
 
+        public int? ParentId { get; set; }
+
         public int PermissionId { get; set; }
     }
 }

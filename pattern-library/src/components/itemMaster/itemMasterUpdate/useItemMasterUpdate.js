@@ -4,7 +4,11 @@ import {
   get_categories_by_company_id_api,
   put_item_master_api,
   get_item_types_by_company_id_api,
+  get_measurement_types_by_company_id_api,
+  get_item_masters_by_company_id_with_query_api,
+  get_item_master_by_item_master_id_api,
 } from "../../../services/inventoryApi";
+import { useQuery } from "@tanstack/react-query";
 
 const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -12,6 +16,8 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     categoryId: "",
     itemName: "",
     itemTypeId: "",
+    measurementType: "",
+    itemHierarchy: "",
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -22,6 +28,32 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [itemTypes, setItemTypes] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedParentItem, setSelectedParentItem] = useState("");
+
+  const fetchItems = async (companyId, searchQuery, itemType) => {
+    try {
+      const response = await get_item_masters_by_company_id_with_query_api(
+        companyId,
+        searchQuery,
+        itemType
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching items:", error);
+    }
+  };
+
+  const {
+    data: availableItems,
+    isLoading: isItemsLoading,
+    isError: isItemsError,
+    error: itemsError,
+  } = useQuery({
+    queryKey: ["items", searchTerm],
+    queryFn: () =>
+      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"),
+  });
 
   useEffect(() => {
     const fetchUnits = async () => {
@@ -68,14 +100,58 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     fetchItemTypes();
   }, []);
 
+  const fetchMeasurementTypes = async () => {
+    try {
+      const response = await get_measurement_types_by_company_id_api(
+        sessionStorage.getItem("companyId")
+      );
+      return response.data.result || [];
+    } catch (error) {
+      console.error("Error fetching measurement types:", error);
+    }
+  };
+
+  const {
+    data: measurementTypes,
+    isMeasurementTypesLoading,
+    isMeasurementTypesError,
+    measurementTypesError,
+  } = useQuery({
+    queryKey: ["measurementTypes"],
+    queryFn: () => fetchMeasurementTypes(),
+  });
+
   useEffect(() => {
     const deepCopyItemMaster = JSON.parse(JSON.stringify(itemMaster));
+    const itemHierarchy =
+      deepCopyItemMaster?.parentId !== deepCopyItemMaster?.itemMasterId
+        ? "sub"
+        : "main";
+
     setFormData({
       unitId: deepCopyItemMaster?.unitId,
       categoryId: deepCopyItemMaster?.categoryId,
       itemName: deepCopyItemMaster?.itemName,
       itemTypeId: deepCopyItemMaster?.itemTypeId,
+      measurementType:
+        deepCopyItemMaster?.unit?.measurementType?.measurementTypeId,
+      itemHierarchy: itemHierarchy,
     });
+
+    const fetchParentItem = async () => {
+      try {
+        const response = await get_item_master_by_item_master_id_api(
+          deepCopyItemMaster?.parentId
+        );
+        setSelectedParentItem(response.data.result);
+      } catch (error) {
+        console.error("Error fetching parent item:", error);
+      }
+    };
+
+    if (itemHierarchy === "sub") {
+      fetchParentItem();
+    }
   }, [itemMaster]);
 
   useEffect(() => {
@@ -117,6 +193,9 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
   };
 
   const validateForm = () => {
+    setValidFields({});
+    setValidationErrors({});
+
     const isUnitValid = validateField("unitId", "Unit", formData.unitId);
 
     const isCategoryValid = validateField(
@@ -137,7 +216,29 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       formData.itemTypeId
     );
 
-    return isUnitValid && isCategoryValid && isItemNameValid && isItemTypeValid;
+    const isItemHierarchyValid = validateField(
+      "itemHierarchy",
+      "Item hierarchy",
+      formData.itemHierarchy
+    );
+
+    let isparentItemValid = true;
+    if (formData.itemHierarchy === "sub") {
+      isparentItemValid = validateField(
+        "selectedParentItem",
+        "Parent item",
+        selectedParentItem
+      );
+    }
+
+    return (
+      isUnitValid &&
+      isCategoryValid &&
+      isItemNameValid &&
+      isItemTypeValid &&
+      isItemHierarchyValid &&
+      isparentItemValid
+    );
   };
 
   const handleSubmit = async (isSaveAsDraft) => {
@@ -161,6 +262,10 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
           createdBy: sessionStorage.getItem("username"),
           createdUserId: sessionStorage.getItem("userId"),
           itemTypeId: formData.itemTypeId,
+          parentId:
+            formData.itemHierarchy === "sub"
+              ? selectedParentItem?.itemMasterId
+              : itemMaster.itemMasterId,
           permissionId: 1040,
         };
 
@@ -200,10 +305,35 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
   };
 
   const handleInputChange = (field, value) => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [field]: value,
-    }));
+    if (field === "measurementType") {
+      // If it is, update unitId as well
+      setFormData({
+        ...formData,
+        [field]: value,
+        unitId: "",
+      });
+    } else {
+      // For other fields, update formData without changing unitId
+      setFormData({
+        ...formData,
+        [field]: value,
+      });
+    }
+
+    if (field === "itemHierarchy") {
+      handleResetParentItem();
+    }
+    setValidFields({});
+    setValidationErrors({});
+  };
+
+  const handleSelectItem = (item) => {
+    setSelectedParentItem(item);
+    setSearchTerm("");
+  };
+
+  const handleResetParentItem = () => {
+    setSelectedParentItem("");
   };
 
   return {
@@ -217,8 +347,21 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     loading,
     loadingDraft,
     itemTypes,
+    isMeasurementTypesLoading,
+    isMeasurementTypesError,
+    measurementTypes,
+    availableItems,
+    isItemsLoading,
+    isItemsError,
+    itemsError,
+    searchTerm,
+    selectedParentItem,
+    setSearchTerm,
+    setFormData,
     handleInputChange,
     handleSubmit,
+    handleSelectItem,
+    handleResetParentItem,
   };
 };
 

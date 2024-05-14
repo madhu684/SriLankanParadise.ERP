@@ -71,6 +71,8 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<LocationType> LocationTypes { get; set; }
 
+    public virtual DbSet<MeasurementType> MeasurementTypes { get; set; }
+
     public virtual DbSet<Module> Modules { get; set; }
 
     public virtual DbSet<PaymentMode> PaymentModes { get; set; }
@@ -356,7 +358,7 @@ public partial class ErpSystemContext : DbContext
             entity.HasOne(d => d.CompanySubscriptionModule).WithMany(p => p.CompanySubscriptionModuleUsers)
                 .HasForeignKey(d => d.CompanySubscriptionModuleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_CompanySubscriptionModuleUser_Module");
+                .HasConstraintName("FK_CompanySubscriptionModuleUser_CompanySubscriptionModule");
         });
 
         modelBuilder.Entity<CompanyType>(entity =>
@@ -544,6 +546,10 @@ public partial class ErpSystemContext : DbContext
                 .HasForeignKey(d => d.ItemTypeId)
                 .HasConstraintName("FK_ItemType_ItemMaster");
 
+            entity.HasOne(d => d.Parent).WithMany(p => p.InverseParent)
+                .HasForeignKey(d => d.ParentId)
+                .HasConstraintName("FK_ItemMaster_ParentId");
+
             entity.HasOne(d => d.Unit).WithMany(p => p.ItemMasters)
                 .HasForeignKey(d => d.UnitId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -592,6 +598,15 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<MeasurementType>(entity =>
+        {
+            entity.HasKey(e => e.MeasurementTypeId).HasName("PK__Measurem__167933E78448B79A");
+
+            entity.ToTable("MeasurementType");
+
+            entity.Property(e => e.Name).HasMaxLength(50);
         });
 
         modelBuilder.Entity<Module>(entity =>
@@ -1026,6 +1041,10 @@ public partial class ErpSystemContext : DbContext
             entity.ToTable("Unit");
 
             entity.Property(e => e.UnitName).HasMaxLength(50);
+
+            entity.HasOne(d => d.MeasurementType).WithMany(p => p.Units)
+                .HasForeignKey(d => d.MeasurementTypeId)
+                .HasConstraintName("FK_Unit_MeasurementTypeId");
         });
 
         modelBuilder.Entity<User>(entity =>

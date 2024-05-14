@@ -50,7 +50,7 @@ const ItemMasterList = () => {
   if (
     isLoadingData ||
     isLoadingPermissions ||
-    (itemMasters && !itemMasters.length > 0)
+    (itemMasters && !(itemMasters.length >= 0))
   ) {
     return <LoadingSpinner />;
   }
@@ -74,7 +74,7 @@ const ItemMasterList = () => {
     );
   }
 
-  if (!itemMasters) {
+  if (itemMasters.length === 0) {
     return (
       <div className="container mt-4">
         <h2>Item Masters</h2>
