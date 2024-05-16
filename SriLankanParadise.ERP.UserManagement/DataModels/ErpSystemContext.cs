@@ -534,6 +534,7 @@ public partial class ErpSystemContext : DbContext
 
             entity.ToTable("ItemMaster");
 
+            entity.Property(e => e.ConversionRate).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.CreatedBy).HasMaxLength(50);
             entity.Property(e => e.ItemName).HasMaxLength(50);
 
@@ -541,6 +542,10 @@ public partial class ErpSystemContext : DbContext
                 .HasForeignKey(d => d.CategoryId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__ItemMaste__Categ__72910220");
+
+            entity.HasOne(d => d.InventoryUnit).WithMany(p => p.ItemMasterInventoryUnits)
+                .HasForeignKey(d => d.InventoryUnitId)
+                .HasConstraintName("FK_ItemMaster_InventoryUnitId");
 
             entity.HasOne(d => d.ItemType).WithMany(p => p.ItemMasters)
                 .HasForeignKey(d => d.ItemTypeId)
@@ -550,7 +555,7 @@ public partial class ErpSystemContext : DbContext
                 .HasForeignKey(d => d.ParentId)
                 .HasConstraintName("FK_ItemMaster_ParentId");
 
-            entity.HasOne(d => d.Unit).WithMany(p => p.ItemMasters)
+            entity.HasOne(d => d.Unit).WithMany(p => p.ItemMasterUnits)
                 .HasForeignKey(d => d.UnitId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__ItemMaste__UnitI__73852659");
