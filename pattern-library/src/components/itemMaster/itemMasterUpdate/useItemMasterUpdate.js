@@ -18,16 +18,17 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     itemTypeId: "",
     measurementType: "",
     itemHierarchy: "",
+    inventoryMeasurementType: "",
+    inventoryUnitId: "",
+    conversionValue: "",
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
   const alertRef = useRef(null);
-  const [unitOptions, setUnitOptions] = useState([]);
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
-  const [itemTypes, setItemTypes] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedParentItem, setSelectedParentItem] = useState("");
 
@@ -55,20 +56,26 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"),
   });
 
-  useEffect(() => {
-    const fetchUnits = async () => {
-      try {
-        const response = await get_units_by_company_id_api(
-          sessionStorage.getItem("companyId")
-        );
-        setUnitOptions(response.data.result);
-      } catch (error) {
-        console.error("Error fetching units:", error);
-      }
-    };
+  const fetchUnits = async () => {
+    try {
+      const response = await get_units_by_company_id_api(
+        sessionStorage.getItem("companyId")
+      );
+      return response.data.result || [];
+    } catch (error) {
+      console.error("Error fetching units:", error);
+    }
+  };
 
-    fetchUnits();
-  }, []);
+  const {
+    data: unitOptions,
+    isLoading: isUnitOptionsLoading,
+    isError: isUnitOptionsError,
+    error: unitOptionsError,
+  } = useQuery({
+    queryKey: ["unitOptions", itemMaster.itemMasterId],
+    queryFn: fetchUnits,
+  });
 
   useEffect(() => {
     const fetchcategories = async () => {
@@ -85,20 +92,26 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     fetchcategories();
   }, []);
 
-  useEffect(() => {
-    const fetchItemTypes = async () => {
-      try {
-        const response = await get_item_types_by_company_id_api(
-          sessionStorage.getItem("companyId")
-        );
-        setItemTypes(response.data.result);
-      } catch (error) {
-        console.error("Error fetching itemTypes:", error);
-      }
-    };
+  const fetchItemTypes = async () => {
+    try {
+      const response = await get_item_types_by_company_id_api(
+        sessionStorage.getItem("companyId")
+      );
+      return response.data.result || [];
+    } catch (error) {
+      throw new Error("Error fetching itemTypes: " + error.message);
+    }
+  };
 
-    fetchItemTypes();
-  }, []);
+  const {
+    data: itemTypes,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["itemTypes", itemMaster.itemMasterId],
+    queryFn: fetchItemTypes,
+  });
 
   const fetchMeasurementTypes = async () => {
     try {
@@ -117,8 +130,8 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     isMeasurementTypesError,
     measurementTypesError,
   } = useQuery({
-    queryKey: ["measurementTypes"],
-    queryFn: () => fetchMeasurementTypes(),
+    queryKey: ["measurementTypes", itemMaster.itemMasterId],
+    queryFn: fetchMeasurementTypes,
   });
 
   useEffect(() => {
@@ -136,6 +149,10 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       measurementType:
         deepCopyItemMaster?.unit?.measurementType?.measurementTypeId,
       itemHierarchy: itemHierarchy,
+      inventoryMeasurementType:
+        deepCopyItemMaster?.inventoryUnit?.measurementTypeId,
+      inventoryUnitId: deepCopyItemMaster?.inventoryUnitId,
+      conversionValue: deepCopyItemMaster?.conversionRate,
     });
 
     const fetchParentItem = async () => {
@@ -231,16 +248,33 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       );
     }
 
+    const isInventoryUnitValid = validateField(
+      "inventoryUnitId",
+      "Inventory unit",
+      formData.inventoryUnitId
+    );
+
+    const isConversionValueValid = validateField(
+      "conversionValue",
+      "Conversion rate",
+      formData.conversionValue,
+      {
+        validationFunction: (value) => parseFloat(value) > 0,
+        errorMessage: `Conversion rate must be greater than 0`,
+      }
+    );
+
     return (
       isUnitValid &&
       isCategoryValid &&
       isItemNameValid &&
       isItemTypeValid &&
       isItemHierarchyValid &&
-      isparentItemValid
+      isparentItemValid &&
+      isInventoryUnitValid &&
+      isConversionValueValid
     );
   };
-
   const handleSubmit = async (isSaveAsDraft) => {
     try {
       const status = isSaveAsDraft ? false : true;
@@ -266,6 +300,8 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
             formData.itemHierarchy === "sub"
               ? selectedParentItem?.itemMasterId
               : itemMaster.itemMasterId,
+          inventoryUnitId: formData.inventoryUnitId,
+          conversionRate: formData.conversionValue,
           permissionId: 1040,
         };
 
@@ -312,6 +348,14 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
         [field]: value,
         unitId: "",
       });
+    } else if (field === "inventoryMeasurementType") {
+      // If it is, update unitId as well
+      setFormData({
+        ...formData,
+        [field]: value,
+        inventoryUnitId: "",
+        conversionValue: "",
+      });
     } else {
       // For other fields, update formData without changing unitId
       setFormData({
@@ -321,7 +365,14 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     }
 
     if (field === "itemHierarchy") {
-      handleResetParentItem();
+      setSelectedParentItem("");
+      setFormData({
+        ...formData,
+        [field]: value,
+        inventoryUnitId: "",
+        inventoryMeasurementType: "",
+        conversionValue: "",
+      });
     }
     setValidFields({});
     setValidationErrors({});
@@ -330,10 +381,21 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
   const handleSelectItem = (item) => {
     setSelectedParentItem(item);
     setSearchTerm("");
+    setFormData({
+      ...formData,
+      inventoryUnitId: item?.inventoryUnitId,
+      inventoryMeasurementType: item?.inventoryUnit?.measurementTypeId,
+    });
   };
 
   const handleResetParentItem = () => {
     setSelectedParentItem("");
+    setFormData({
+      ...formData,
+      inventoryUnitId: "",
+      inventoryMeasurementType: "",
+      conversionValue: "",
+    });
   };
 
   return {
@@ -356,6 +418,10 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     itemsError,
     searchTerm,
     selectedParentItem,
+    isUnitOptionsLoading,
+    isUnitOptionsError,
+    isLoading,
+    isError,
     setSearchTerm,
     setFormData,
     handleInputChange,

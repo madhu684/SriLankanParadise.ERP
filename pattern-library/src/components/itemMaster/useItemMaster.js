@@ -18,6 +18,9 @@ const useItemMaster = ({ onFormSubmit }) => {
     itemTypeId: "",
     measurementType: "",
     itemHierarchy: "main",
+    inventoryMeasurementType: "",
+    inventoryUnitId: "",
+    conversionValue: "",
   });
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
@@ -59,7 +62,7 @@ const useItemMaster = ({ onFormSubmit }) => {
       const response = await get_item_types_by_company_id_api(
         sessionStorage.getItem("companyId")
       );
-      return response.data.result;
+      return response.data.result || [];
     } catch (error) {
       throw new Error("Error fetching itemTypes: " + error.message);
     }
@@ -104,6 +107,14 @@ const useItemMaster = ({ onFormSubmit }) => {
         [field]: value,
         unitId: "",
       });
+    } else if (field === "inventoryMeasurementType") {
+      // If it is, update unitId as well
+      setFormData({
+        ...formData,
+        [field]: value,
+        inventoryUnitId: "",
+        conversionValue: "",
+      });
     } else {
       // For other fields, update formData without changing unitId
       setFormData({
@@ -113,7 +124,14 @@ const useItemMaster = ({ onFormSubmit }) => {
     }
 
     if (field === "itemHierarchy") {
-      handleResetParentItem();
+      setSelectedParentItem("");
+      setFormData({
+        ...formData,
+        [field]: value,
+        inventoryUnitId: "",
+        inventoryMeasurementType: "",
+        conversionValue: "",
+      });
     }
     setValidFields({});
     setValidationErrors({});
@@ -240,13 +258,31 @@ const useItemMaster = ({ onFormSubmit }) => {
       );
     }
 
+    const isInventoryUnitValid = validateField(
+      "inventoryUnitId",
+      "Inventory unit",
+      formData.inventoryUnitId
+    );
+
+    const isConversionValueValid = validateField(
+      "conversionValue",
+      "Conversion rate",
+      formData.conversionValue,
+      {
+        validationFunction: (value) => parseFloat(value) > 0,
+        errorMessage: `Conversion rate must be greater than 0`,
+      }
+    );
+
     return (
       isUnitValid &&
       isCategoryValid &&
       isItemNameValid &&
       isItemTypeValid &&
       isItemHierarchyValid &&
-      isparentItemValid
+      isparentItemValid &&
+      isInventoryUnitValid &&
+      isConversionValueValid
     );
   };
 
@@ -273,6 +309,8 @@ const useItemMaster = ({ onFormSubmit }) => {
           createdUserId: sessionStorage.getItem("userId"),
           itemTypeId: formData.itemTypeId,
           parentId: selectedParentItem?.itemMasterId || null,
+          inventoryUnitId: formData.inventoryUnitId,
+          conversionRate: formData.conversionValue,
           permissionId: 1039,
         };
 
@@ -290,6 +328,8 @@ const useItemMaster = ({ onFormSubmit }) => {
             createdUserId: sessionStorage.getItem("userId"),
             itemTypeId: formData.itemTypeId,
             parentId: itemMasterId,
+            inventoryUnitId: formData.inventoryUnitId,
+            conversionRate: formData.conversionValue,
             permissionId: 1040,
           };
 
@@ -329,10 +369,21 @@ const useItemMaster = ({ onFormSubmit }) => {
   const handleSelectItem = (item) => {
     setSelectedParentItem(item);
     setSearchTerm("");
+    setFormData({
+      ...formData,
+      inventoryUnitId: item?.inventoryUnitId,
+      inventoryMeasurementType: item?.inventoryUnit?.measurementTypeId,
+    });
   };
 
   const handleResetParentItem = () => {
     setSelectedParentItem("");
+    setFormData({
+      ...formData,
+      inventoryUnitId: "",
+      inventoryMeasurementType: "",
+      conversionValue: "",
+    });
   };
 
   return {
