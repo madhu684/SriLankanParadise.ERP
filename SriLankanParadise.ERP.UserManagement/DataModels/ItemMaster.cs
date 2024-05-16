@@ -25,9 +25,15 @@ public partial class ItemMaster
 
     public int? ParentId { get; set; }
 
+    public int? InventoryUnitId { get; set; }
+
+    public decimal? ConversionRate { get; set; }
+
     public virtual Category Category { get; set; } = null!;
 
     public virtual ICollection<GrnDetail> GrnDetails { get; set; } = new List<GrnDetail>();
+
+    public virtual Unit? InventoryUnit { get; set; }
 
     public virtual ICollection<ItemMaster> InverseParent { get; set; } = new List<ItemMaster>();
 

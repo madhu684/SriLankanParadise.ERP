@@ -20,6 +20,10 @@
 
         public int? ParentId { get; set; }
 
+        public int? InventoryUnitId { get; set; }
+
+        public decimal? ConversionRate { get; set; }
+
         public int PermissionId { get; set; }
     }
 }
