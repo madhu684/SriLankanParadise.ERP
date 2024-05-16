@@ -19,5 +19,8 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task DeleteItemMaster(int itemMasterId);
 
         Task<IEnumerable<ItemMaster>> GetItemMastersByUserId(int userId);
+
+        Task<IEnumerable<ItemMaster>> GetSubItemsByItemMasterId(int itemMaster);
+
     }
 }

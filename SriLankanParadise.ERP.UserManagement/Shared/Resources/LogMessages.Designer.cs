@@ -1546,6 +1546,24 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Sub items not found.
+        /// </summary>
+        public static string SubItemsNotFound {
+            get {
+                return ResourceManager.GetString("SubItemsNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sub items retrieved.
+        /// </summary>
+        public static string SubItemsRetrieved {
+            get {
+                return ResourceManager.GetString("SubItemsRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Sub module created successfully.
         /// </summary>
         public static string SubModuleCreated {

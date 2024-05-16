@@ -612,6 +612,12 @@
   <data name="SalesReceiptUpdated" xml:space="preserve">
     <value>Sales receipt updated successfully</value>
   </data>
+  <data name="SubItemsNotFound" xml:space="preserve">
+    <value>Sub items not found</value>
+  </data>
+  <data name="SubItemsRetrieved" xml:space="preserve">
+    <value>Sub items retrieved</value>
+  </data>
   <data name="SubModuleCreated" xml:space="preserve">
     <value>Sub module created successfully</value>
   </data>
