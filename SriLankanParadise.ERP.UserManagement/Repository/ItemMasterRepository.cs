@@ -56,6 +56,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(im => im.Unit)
                     .ThenInclude(u => u.MeasurementType)
                     .Include(im => im.ItemType)
+                    .Include(im => im.InventoryUnit)
+                    .ThenInclude(u => u.MeasurementType)
                     .ToListAsync();
 
                 return itemMasters.Any() ? itemMasters : null;
@@ -90,6 +92,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         .Include(im => im.Unit)
                         .ThenInclude(u => u.MeasurementType)
                         .Include(im => im.ItemType)
+                        .Include(im => im.InventoryUnit)
+                        .ThenInclude(u => u.MeasurementType)
                         .Where(im => im.ItemType.Name == itemType);
                 }
                 else
@@ -97,7 +101,10 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     query = query.Include(im => im.Category)
                         .Include(im => im.Unit)
                         .ThenInclude(u => u.MeasurementType)
-                        .Include(im => im.ItemType);
+                        .Include(im => im.ItemType)
+                        .Include(im => im.InventoryUnit)
+                        .ThenInclude(u => u.MeasurementType);
+
                 }
 
                 var itemMasters = await query.ToListAsync();
@@ -123,6 +130,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(im => im.Unit)
                     .ThenInclude(u => u.MeasurementType)
                     .Include(im => im.ItemType)
+                    .Include(im => im.InventoryUnit)
+                    .ThenInclude(u => u.MeasurementType)
                     .FirstOrDefaultAsync();
 
                 return itemMaster;
@@ -181,6 +190,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(im => im.Unit)
                     .ThenInclude(u => u.MeasurementType)
                     .Include(im => im.ItemType)
+                    .Include(im => im.InventoryUnit)
+                    .ThenInclude(u => u.MeasurementType)
                     .ToListAsync();
 
                 return itemMasters.Any() ? itemMasters : null;

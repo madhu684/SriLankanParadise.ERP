@@ -3,6 +3,8 @@ import useItemMasterUpdate from "./useItemMasterUpdate";
 import CurrentDateTime from "../../currentDateTime/currentDateTime";
 import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 import useCompanyLogoUrl from "../../companyLogo/useCompanyLogoUrl";
+import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
+import ErrorComponent from "../../errorComponent/errorComponent";
 
 const ItemMasterUpdate = ({ handleClose, itemMaster, handleUpdated }) => {
   const {
@@ -25,6 +27,10 @@ const ItemMasterUpdate = ({ handleClose, itemMaster, handleUpdated }) => {
     availableItems,
     searchTerm,
     selectedParentItem,
+    isUnitOptionsLoading,
+    isUnitOptionsError,
+    isLoading,
+    isError,
     setSearchTerm,
     handleInputChange,
     handleSubmit,
@@ -39,6 +45,14 @@ const ItemMasterUpdate = ({ handleClose, itemMaster, handleUpdated }) => {
   });
 
   const companyLogoUrl = useCompanyLogoUrl();
+
+  if (isUnitOptionsLoading || isLoading || isMeasurementTypesLoading) {
+    return <LoadingSpinner />;
+  }
+
+  if (isUnitOptionsError || isError || isMeasurementTypesError) {
+    return <ErrorComponent error={"Error fetching data"} />;
+  }
 
   return (
     <div className="container mt-4">
@@ -225,6 +239,122 @@ const ItemMasterUpdate = ({ handleClose, itemMaster, handleUpdated }) => {
                 </div>
               )}
             </div>
+            <h4>Inventory Valuation</h4>
+            <div className="mb-3 mt-3">
+              <label htmlFor="inventoryMeasurementType" className="form-label">
+                Measurement Type
+              </label>
+              <select
+                className={`form-select ${
+                  validFields.inventoryMeasurementType ? "is-valid" : ""
+                } ${
+                  validationErrors.inventoryMeasurementType ? "is-invalid" : ""
+                }`}
+                id="inventoryMeasurementType"
+                value={formData.inventoryMeasurementType}
+                onChange={(e) =>
+                  handleInputChange("inventoryMeasurementType", e.target.value)
+                }
+                required
+                disabled={selectedParentItem !== ""}
+              >
+                <option value="">Select measurement Type</option>
+                {/* Assuming you have an array of measurement types */}
+                {measurementTypes?.map((type) => (
+                  <option
+                    key={type.measurementTypeId}
+                    value={type.measurementTypeId}
+                  >
+                    {type.name}
+                  </option>
+                ))}
+              </select>
+              {validationErrors.inventoryMeasurementType && (
+                <div className="invalid-feedback">
+                  {validationErrors.inventoryMeasurementType}
+                </div>
+              )}
+            </div>
+
+            <div className="mb-3 mt-3">
+              <label htmlFor="inventoryUnitId" className="form-label">
+                Unit
+              </label>
+              <select
+                className={`form-select ${
+                  validFields.inventoryUnitId ? "is-valid" : ""
+                } ${validationErrors.inventoryUnitId ? "is-invalid" : ""}`}
+                id="inventoryUnitId"
+                value={formData.inventoryUnitId}
+                onChange={(e) =>
+                  handleInputChange("inventoryUnitId", e.target.value)
+                }
+                required
+                disabled={
+                  formData.inventoryMeasurementType === "" ||
+                  selectedParentItem !== ""
+                }
+              >
+                <option value="">Select Unit</option>
+                {unitOptions
+                  ?.filter(
+                    (u) =>
+                      u.measurementTypeId ===
+                      parseInt(formData.inventoryMeasurementType)
+                  )
+                  .map((unit) => (
+                    <option key={unit.unitId} value={unit.unitId}>
+                      {unit.unitName}
+                    </option>
+                  ))}
+              </select>
+              {validationErrors.inventoryUnitId && (
+                <div className="invalid-feedback">
+                  {validationErrors.inventoryUnitId}
+                </div>
+              )}
+            </div>
+            {formData.inventoryUnitId && formData.unitId && (
+              <div className="mb-3 mt-3">
+                <label htmlFor="conversionValue" className="form-label">
+                  How many{" "}
+                  <span className="fw-bold text-primary">
+                    {unitOptions
+                      ?.find(
+                        (u) => u.unitId === parseInt(formData?.inventoryUnitId)
+                      )
+                      .unitName.toLowerCase()}
+                  </span>{" "}
+                  in one{" "}
+                  <span className="fw-bold text-primary">
+                    {unitOptions
+                      ?.find((u) => u.unitId === parseInt(formData?.unitId))
+                      .unitName.toLowerCase()}
+                  </span>
+                  ?
+                </label>
+                <input
+                  type="number"
+                  className={`form-control ${
+                    validFields.conversionValue ? "is-valid" : ""
+                  } ${validationErrors.conversionValue ? "is-invalid" : ""}`}
+                  id="conversionValue"
+                  value={formData.conversionValue}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value);
+                    const positiveValue = isNaN(value) ? 0 : Math.max(0, value);
+                    handleInputChange("conversionValue", positiveValue);
+                  }}
+                  required
+                />
+
+                {validationErrors.conversionValue && (
+                  <div className="invalid-feedback">
+                    {validationErrors.conversionValue}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           <div className="col-md-5">
             <h4>Item Hierarchy</h4>
