@@ -70,6 +70,12 @@ const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
                   {grn?.receivedDate?.split("T")[0]}
                 </p>
                 <p>
+                  <strong>GRN Type:</strong>{" "}
+                  {grn?.grnType === "finishedGoodsIn"
+                    ? "Finished Goods In"
+                    : "Goods Received Note"}
+                </p>
+                <p>
                   <strong>Goods Receiving Status:</strong>{" "}
                   <span
                     className={`badge rounded-pill ${getStatusBadgeClass(
@@ -97,10 +103,12 @@ const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
                     .tz("Asia/Colombo")
                     .format("YYYY-MM-DD hh:mm:ss A")}
                 </p>
-                <p>
-                  <strong>Purchase Order Reference No:</strong>{" "}
-                  {grn.purchaseOrder.referenceNo}
-                </p>
+                {grn?.purchaseOrder?.referenceNo && (
+                  <p>
+                    <strong>Purchase Order Reference No:</strong>{" "}
+                    {grn?.purchaseOrder?.referenceNo}
+                  </p>
+                )}
               </div>
             </div>
             {/* 

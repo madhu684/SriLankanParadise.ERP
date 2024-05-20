@@ -5,6 +5,7 @@ import {
   post_grn_detail_api,
   get_grn_masters_by_purchase_order_id_api,
 } from "../../services/purchaseApi";
+import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
 
 const useGrn = ({ onFormSubmit }) => {
@@ -15,6 +16,7 @@ const useGrn = ({ onFormSubmit }) => {
     itemDetails: [],
     status: "",
     purchaseOrderId: "",
+    grnType: "goodsReceivedNote",
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -28,6 +30,35 @@ const useGrn = ({ onFormSubmit }) => {
   const [purchaseOrderSearchTerm, setPurchaseOrderSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
+  const grnTypeOptions = [
+    { id: "goodsReceivedNote", label: "Goods Received Note" },
+    { id: "finishedGoodsIn", label: "Finished Goods In" },
+  ];
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const fetchItems = async (companyId, searchQuery, itemType) => {
+    try {
+      const response = await get_item_masters_by_company_id_with_query_api(
+        companyId,
+        searchQuery,
+        itemType
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching items:", error);
+    }
+  };
+
+  const {
+    data: availableItems,
+    isLoading: isItemsLoading,
+    isError: isItemsError,
+    error: itemsError,
+  } = useQuery({
+    queryKey: ["items", searchTerm],
+    queryFn: () =>
+      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"),
+  });
 
   const fetchPurchaseOrders = async () => {
     try {
@@ -198,11 +229,14 @@ const useGrn = ({ onFormSubmit }) => {
 
     const isStatusValid = validateField("status", "Status", formData.status);
 
-    const isPurchaseOrderIdValid = validateField(
-      "purchaseOrderId",
-      "Purchase order reference number",
-      formData.purchaseOrderId
-    );
+    let isPurchaseOrderIdValid = true;
+    if (formData.grnType !== "finishedGoodsIn") {
+      isPurchaseOrderIdValid = validateField(
+        "purchaseOrderId",
+        "Purchase order reference number",
+        formData.purchaseOrderId
+      );
+    }
 
     let isItemQuantityValid = true;
     // Validate item details
@@ -210,11 +244,23 @@ const useGrn = ({ onFormSubmit }) => {
       const fieldName = `receivedQuantity_${index}`;
       const fieldDisplayName = `Received Quantity for ${item.name}`;
 
-      const additionalRules = {
-        validationFunction: (value) =>
-          parseFloat(value) > 0 && parseFloat(value) <= item.remainingQuantity,
-        errorMessage: `${fieldDisplayName} must be greater than 0 and less than or equal to remaining quantity ${item.remainingQuantity}`,
-      };
+      let additionalRules = {};
+
+      if (formData.grnType === "finishedGoodsIn") {
+        // Rule for finishedGoodsIn
+        additionalRules = {
+          validationFunction: (value) => parseFloat(value) > 0,
+          errorMessage: `${fieldDisplayName} must be greater than 0`,
+        };
+      } else {
+        // Default rule
+        additionalRules = {
+          validationFunction: (value) =>
+            parseFloat(value) > 0 &&
+            parseFloat(value) <= item.remainingQuantity,
+          errorMessage: `${fieldDisplayName} must be greater than 0 and less than or equal to remaining quantity ${item.remainingQuantity}`,
+        };
+      }
 
       const isValidQuantity = validateField(
         fieldName,
@@ -289,6 +335,12 @@ const useGrn = ({ onFormSubmit }) => {
       isItemExpiryDateValid = isItemExpiryDateValid && isValidExpiryDate;
     });
 
+    const isGrnTypeValid = validateField(
+      "grnType",
+      "GRN type",
+      formData.grnType
+    );
+
     return (
       isGrnDateValid &&
       isReceivedByValid &&
@@ -298,7 +350,8 @@ const useGrn = ({ onFormSubmit }) => {
       isItemQuantityValid &&
       isItemUnitPriceValid &&
       isItemExpiryDateValid &&
-      isRejectedQuantityValid
+      isRejectedQuantityValid &&
+      isGrnTypeValid
     );
   };
 
@@ -310,6 +363,11 @@ const useGrn = ({ onFormSubmit }) => {
 
       const currentDate = new Date().toISOString();
 
+      const purchaseOrderId =
+        formData.grnType === "finishedGoodsIn"
+          ? null
+          : formData.purchaseOrderId;
+
       const isFormValid = validateForm();
       if (isFormValid) {
         if (isSaveAsDraft) {
@@ -319,7 +377,7 @@ const useGrn = ({ onFormSubmit }) => {
         }
 
         const grnData = {
-          purchaseOrderId: formData.purchaseOrderId,
+          purchaseOrderId: purchaseOrderId,
           grnDate: formData.grnDate,
           receivedBy: formData.receivedBy,
           receivedDate: formData.receivedDate,
@@ -331,6 +389,7 @@ const useGrn = ({ onFormSubmit }) => {
           approvedDate: null,
           createdDate: currentDate,
           lastUpdatedDate: currentDate,
+          grnType: formData.grnType,
           permissionId: 20,
         };
 
@@ -399,6 +458,10 @@ const useGrn = ({ onFormSubmit }) => {
       ...prevFormData,
       [field]: value,
     }));
+
+    if (field === "grnType") {
+      handleResetPurchaseOrder();
+    }
   };
 
   const handleItemDetailsChange = (index, field, value) => {
@@ -489,6 +552,28 @@ const useGrn = ({ onFormSubmit }) => {
     setValidationErrors({});
   };
 
+  const handleSelectItem = (item) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      itemDetails: [
+        ...prevFormData.itemDetails,
+        {
+          id: item.itemMasterId,
+          name: item.itemName,
+          unit: item.unit.unitName,
+          quantity: 0,
+          remainingQuantity: 0,
+          receivedQuantity: 0,
+          rejectedQuantity: 0,
+          freeQuantity: 0,
+          expiryDate: "",
+          unitPrice: 0.0,
+        },
+      ],
+    }));
+    setSearchTerm(""); // Clear the search term
+  };
+
   return {
     formData,
     validFields,
@@ -503,6 +588,12 @@ const useGrn = ({ onFormSubmit }) => {
     purchaseOrderSearchTerm,
     loading,
     loadingDraft,
+    grnTypeOptions,
+    searchTerm,
+    availableItems,
+    isItemsLoading,
+    isItemsError,
+    itemsError,
     handleInputChange,
     handleItemDetailsChange,
     handleRemoveItem,
@@ -513,6 +604,8 @@ const useGrn = ({ onFormSubmit }) => {
     setPurchaseOrderSearchTerm,
     setSelectedPurchaseOrder,
     handleResetPurchaseOrder,
+    setSearchTerm,
+    handleSelectItem,
   };
 };
 
