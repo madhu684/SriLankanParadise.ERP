@@ -356,7 +356,7 @@ public partial class ErpSystemContext : DbContext
             entity.HasOne(d => d.CompanySubscriptionModule).WithMany(p => p.CompanySubscriptionModuleUsers)
                 .HasForeignKey(d => d.CompanySubscriptionModuleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_CompanySubscriptionModuleUser_Module");
+                .HasConstraintName("FK_CompanySubscriptionModuleUser_CompanySubscriptionModule");
         });
 
         modelBuilder.Entity<CompanyType>(entity =>

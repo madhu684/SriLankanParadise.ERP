@@ -149,6 +149,21 @@ export const user_modules_api = async (userId) => {
   }
 };
 
+export const get_company_subscription_module_id_api = async (
+  companyId,
+  moduleId
+) => {
+  try {
+    const response = await api.get(
+      `companySubscriptionModule/companySubscriptionModuleId/${companyId}/${moduleId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const submodules_api = async (moduleId) => {
   try {
     const response = await api.get(`/submodule/${moduleId}`);

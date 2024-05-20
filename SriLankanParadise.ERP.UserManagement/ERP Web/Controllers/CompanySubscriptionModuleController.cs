@@ -233,5 +233,30 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpGet("companySubscriptionModuleId/{companyId}/{moduleId}")]
+        public async Task<ApiResponseModel> GetCompanySubscriptionModuleIdByCompanyIdAndModuleId(int companyId, int moduleId)
+        {
+            try
+            {
+                var companySubscriptionModuleId = await _companySubscriptionModuleService.GetCompanySubscriptionModuleIdByCompanyIdAndModuleId(companyId, moduleId);
+                if (companySubscriptionModuleId != null)
+                {
+                    
+                    AddResponseMessage(Response, LogMessages.CompanySubscriptionModuleIdRetrieved, companySubscriptionModuleId, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.CompanySubscriptionModuleIdNotFound);
+                    AddResponseMessage(Response, LogMessages.CompanySubscriptionModuleIdNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

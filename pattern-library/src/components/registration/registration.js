@@ -4,7 +4,10 @@ import { company_modules_api } from "../../services/userManagementApi.js";
 import { module_roles_api } from "../../services/userManagementApi.js";
 import { module_permissions_api } from "../../services/userManagementApi.js";
 import { user_registration_api } from "../../services/userManagementApi.js";
-import { company_subscription_module_user_api } from "../../services/userManagementApi.js";
+import {
+  company_subscription_module_user_api,
+  get_company_subscription_module_id_api,
+} from "../../services/userManagementApi.js";
 import { user_role_api } from "../../services/userManagementApi.js";
 import { user_permission_api } from "../../services/userManagementApi.js";
 import { role_permission_api } from "../../services/userManagementApi.js";
@@ -502,7 +505,7 @@ class registration extends React.Component {
       const assignedModuleIds = this.state.formData[
         "user-module"
       ].assignedModules.map((module) => module.id);
-      const permissionId = parseInt(assignedModuleIds.join(""));
+      const permissionId = 3;
 
       // Extract basic user information
       const basicUserData = {
@@ -535,11 +538,17 @@ class registration extends React.Component {
         ].assignedModules.map((module) => module.id);
 
         // Prepare data for company_subscription_module_user_api
-        const userModulesFromData = assignedModuleIds.map((module, index) => ({
-          companySubscriptionModuleId: module,
-          userId: userId,
-          permissionId: permissionId,
-        }));
+        const userModulesFromData = assignedModuleIds.map(
+          async (module, index) => ({
+            companySubscriptionModuleId:
+              await get_company_subscription_module_id_api(
+                sessionStorage.getItem("companyId"),
+                module
+              ).data.result,
+            userId: userId,
+            permissionId: permissionId,
+          })
+        );
 
         // Loop through the prepared data and call the API for each row
         for (const userModuleData of userModulesFromData) {

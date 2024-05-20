@@ -222,6 +222,12 @@
   <data name="CompanySubscriptionModuleCreated" xml:space="preserve">
     <value>Company subscription module created successfully</value>
   </data>
+  <data name="CompanySubscriptionModuleIdNotFound" xml:space="preserve">
+    <value>Company subscription module id not found</value>
+  </data>
+  <data name="CompanySubscriptionModuleIdRetrieved" xml:space="preserve">
+    <value>Company subscription module id retrieved</value>
+  </data>
   <data name="CompanySubscriptionModuleNotFound" xml:space="preserve">
     <value>Company subscription module not found</value>
   </data>

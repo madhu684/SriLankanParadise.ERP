@@ -376,6 +376,24 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Company subscription module id not found.
+        /// </summary>
+        public static string CompanySubscriptionModuleIdNotFound {
+            get {
+                return ResourceManager.GetString("CompanySubscriptionModuleIdNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Company subscription module id retrieved.
+        /// </summary>
+        public static string CompanySubscriptionModuleIdRetrieved {
+            get {
+                return ResourceManager.GetString("CompanySubscriptionModuleIdRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Company subscription module not found.
         /// </summary>
         public static string CompanySubscriptionModuleNotFound {
