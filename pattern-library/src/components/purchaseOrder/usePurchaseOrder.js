@@ -46,10 +46,10 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
       );
 
       // Filter suppliers with status equal to 1 (active)
-      const filteredSuppliers = response.data.result.filter(
+      const filteredSuppliers = response.data.result?.filter(
         (supplier) => supplier.status === 1
       );
-      return filteredSuppliers;
+      return filteredSuppliers || [];
     } catch (error) {
       console.error("Error fetching suppliers:", error);
     }

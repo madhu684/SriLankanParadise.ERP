@@ -2,6 +2,7 @@ import React from "react";
 import useUnitUpdate from "./useUnitUpdate";
 import CurrentDateTime from "../../currentDateTime/currentDateTime";
 import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
+import useCompanyLogoUrl from "../../companyLogo/useCompanyLogoUrl";
 
 const UnitUpdate = ({ handleClose, unit, handleUpdated }) => {
   const {
@@ -11,6 +12,9 @@ const UnitUpdate = ({ handleClose, unit, handleUpdated }) => {
     validationErrors,
     alertRef,
     loading,
+    isLoading,
+    isError,
+    measurementTypes,
     handleInputChange,
     handleSubmit,
   } = useUnitUpdate({
@@ -21,20 +25,18 @@ const UnitUpdate = ({ handleClose, unit, handleUpdated }) => {
     },
   });
 
+  const companyLogoUrl = useCompanyLogoUrl();
+
   return (
     <div className="container mt-4">
       {/* Header */}
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img
-            src="path/to/your/logo.png"
-            alt="Company Logo"
-            className="img-fluid"
-          />
+          <img src={companyLogoUrl} alt="Company Logo" height={30} />
           <p>
             {" "}
-            Date and Time: <CurrentDateTime />
+            <CurrentDateTime />
           </p>
         </div>
         <h1 className="mt-2 text-center">Unit</h1>
@@ -82,6 +84,39 @@ const UnitUpdate = ({ handleClose, unit, handleUpdated }) => {
               {validationErrors.unitName && (
                 <div className="invalid-feedback">
                   {validationErrors.unitName}
+                </div>
+              )}
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="measurementType" className="form-label">
+                Measurement Type
+              </label>
+              <select
+                className={`form-select ${
+                  validFields.measurementType ? "is-valid" : ""
+                } ${validationErrors.measurementType ? "is-invalid" : ""}`}
+                id="measurementType"
+                value={formData.measurementType}
+                onChange={(e) =>
+                  handleInputChange("measurementType", e.target.value)
+                }
+                required
+              >
+                <option value="">Select measurement Type</option>
+                {/* Assuming you have an array of measurement types */}
+                {measurementTypes?.map((type) => (
+                  <option
+                    key={type.measurementTypeId}
+                    value={type.measurementTypeId}
+                  >
+                    {type.name}
+                  </option>
+                ))}
+              </select>
+              {validationErrors.measurementType && (
+                <div className="invalid-feedback">
+                  {validationErrors.measurementType}
                 </div>
               )}
             </div>

@@ -1,4 +1,6 @@
-﻿namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
+﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+
+namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 {
     public class UnitDto
     {
@@ -9,5 +11,9 @@
         public bool? Status { get; set; }
 
         public int? CompanyId { get; set; }
+
+        public int? MeasurementTypeId { get; set; }
+
+        public virtual MeasurementTypeDto? MeasurementType { get; set; }
     }
 }

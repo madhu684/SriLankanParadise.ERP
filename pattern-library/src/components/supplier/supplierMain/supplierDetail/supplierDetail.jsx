@@ -54,7 +54,9 @@ const SupplierDetail = ({ show, handleClose, supplier }) => {
             <div>
               <h4>{supplier.supplierName}</h4>{" "}
               <small className="text-muted">
-                {supplier.addressLine1 + ", " + supplier.addressLine2}
+                {supplier?.addressLine1
+                  ? supplier.addressLine1 + ", " + supplier.addressLine2
+                  : "Address not set"}
               </small>{" "}
               <div className="rating-stars mt-2">
                 {[...Array(5)].map((_, index) => {

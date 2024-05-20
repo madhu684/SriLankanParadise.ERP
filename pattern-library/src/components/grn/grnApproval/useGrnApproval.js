@@ -12,6 +12,8 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
   const [loading, setLoading] = useState(false);
   const alertRef = useRef(null);
   const [modGrn, setModGrn] = useState(null);
+  const [showManageItemModal, setShowManageItemModal] = useState(false);
+  const [manageItem, setManageItem] = useState(null);
 
   useEffect(() => {
     const deepCopyGrn = JSON.parse(JSON.stringify(grn));
@@ -196,14 +198,32 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
     }));
   };
 
+  const handleOpenManageItemModal = (item) => {
+    setManageItem(item);
+    setShowManageItemModal(true);
+  };
+
+  const handleCloseManageItemModal = () => {
+    setShowManageItemModal(false);
+    setManageItem(null);
+  };
+
+  const handleShowManageItemModal = () => {
+    setShowManageItemModal(true);
+  };
+
   return {
     approvalStatus,
     loading,
     alertRef,
     modGrn,
+    manageItem,
+    showManageItemModal,
     handleApprove,
     handleCostPriceChange,
     handleSellingPriceChange,
+    handleCloseManageItemModal,
+    handleOpenManageItemModal,
   };
 };
 

@@ -32,10 +32,10 @@ const useMin = ({ onFormSubmit }) => {
       const response = await get_requisition_masters_with_out_drafts_api(
         sessionStorage?.getItem("companyId")
       );
-      const filteredMrns = response.data.result.filter(
+      const filteredMrns = response.data.result?.filter(
         (rm) => rm.requisitionType === "MRN" && rm.status === 2
       );
-      return filteredMrns;
+      return filteredMrns || [];
     } catch (error) {
       console.error("Error fetching mrns:", error);
     }

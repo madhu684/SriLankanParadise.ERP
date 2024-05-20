@@ -71,6 +71,8 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<LocationType> LocationTypes { get; set; }
 
+    public virtual DbSet<MeasurementType> MeasurementTypes { get; set; }
+
     public virtual DbSet<Module> Modules { get; set; }
 
     public virtual DbSet<PaymentMode> PaymentModes { get; set; }
@@ -432,13 +434,13 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.ApprovedDate).HasColumnType("datetime");
             entity.Property(e => e.CreatedDate).HasColumnType("datetime");
             entity.Property(e => e.GrnDate).HasColumnType("date");
+            entity.Property(e => e.GrnType).HasMaxLength(50);
             entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
             entity.Property(e => e.ReceivedBy).HasMaxLength(50);
             entity.Property(e => e.ReceivedDate).HasColumnType("date");
 
             entity.HasOne(d => d.PurchaseOrder).WithMany(p => p.GrnMasters)
                 .HasForeignKey(d => d.PurchaseOrderId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_GrnMaster_PurchaseOrder");
         });
 
@@ -532,6 +534,7 @@ public partial class ErpSystemContext : DbContext
 
             entity.ToTable("ItemMaster");
 
+            entity.Property(e => e.ConversionRate).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.CreatedBy).HasMaxLength(50);
             entity.Property(e => e.ItemName).HasMaxLength(50);
 
@@ -540,11 +543,19 @@ public partial class ErpSystemContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__ItemMaste__Categ__72910220");
 
+            entity.HasOne(d => d.InventoryUnit).WithMany(p => p.ItemMasterInventoryUnits)
+                .HasForeignKey(d => d.InventoryUnitId)
+                .HasConstraintName("FK_ItemMaster_InventoryUnitId");
+
             entity.HasOne(d => d.ItemType).WithMany(p => p.ItemMasters)
                 .HasForeignKey(d => d.ItemTypeId)
                 .HasConstraintName("FK_ItemType_ItemMaster");
 
-            entity.HasOne(d => d.Unit).WithMany(p => p.ItemMasters)
+            entity.HasOne(d => d.Parent).WithMany(p => p.InverseParent)
+                .HasForeignKey(d => d.ParentId)
+                .HasConstraintName("FK_ItemMaster_ParentId");
+
+            entity.HasOne(d => d.Unit).WithMany(p => p.ItemMasterUnits)
                 .HasForeignKey(d => d.UnitId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__ItemMaste__UnitI__73852659");
@@ -592,6 +603,15 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<MeasurementType>(entity =>
+        {
+            entity.HasKey(e => e.MeasurementTypeId).HasName("PK__Measurem__167933E78448B79A");
+
+            entity.ToTable("MeasurementType");
+
+            entity.Property(e => e.Name).HasMaxLength(50);
         });
 
         modelBuilder.Entity<Module>(entity =>
@@ -1026,6 +1046,10 @@ public partial class ErpSystemContext : DbContext
             entity.ToTable("Unit");
 
             entity.Property(e => e.UnitName).HasMaxLength(50);
+
+            entity.HasOne(d => d.MeasurementType).WithMany(p => p.Units)
+                .HasForeignKey(d => d.MeasurementTypeId)
+                .HasConstraintName("FK_Unit_MeasurementTypeId");
         });
 
         modelBuilder.Entity<User>(entity =>

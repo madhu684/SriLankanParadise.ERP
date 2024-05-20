@@ -226,11 +226,57 @@ export const get_item_masters_by_company_id_with_query_api = async (
   }
 };
 
+export const get_item_master_by_item_master_id_api = async (itemMasterId) => {
+  try {
+    const response = await api.get(
+      `/itemMaster/GetItemMasterByItemMasterId/${itemMasterId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_sub_items_by_item_master_id_api = async (itemMasterId) => {
+  try {
+    const response = await api.get(
+      `/itemMaster/GetSubItemsByItemMasterId/${itemMasterId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 //item types api
 export const get_item_types_by_company_id_api = async (companyId) => {
   try {
     const response = await api.get(
       `/itemType/GetItemTypesByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+//measurement types api
+export const get_measurement_types_by_company_id_api = async (companyId) => {
+  try {
+    const response = await api.get(
+      `/measurementType/GetMeasurementTypesByCompanyId/${companyId}`,
       {
         withCredentials: true,
       }
