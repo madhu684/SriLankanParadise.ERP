@@ -49,7 +49,7 @@ const SalesInvoiceList = () => {
   if (
     isLoadingData ||
     isLoadingPermissions ||
-    (salesInvoices && !salesInvoices.length > 0)
+    (salesInvoices && !(salesInvoices.length >= 0))
   ) {
     return <LoadingSpinner />;
   }
@@ -73,7 +73,7 @@ const SalesInvoiceList = () => {
     );
   }
 
-  if (!salesInvoices) {
+  if (salesInvoices.length === 0) {
     return (
       <div className="container mt-4">
         <h2>Sales Invoices</h2>

@@ -45,7 +45,7 @@ const SalesReceiptList = () => {
   if (
     isLoadingData ||
     isLoadingPermissions ||
-    (salesReceipts && !salesReceipts.length > 0)
+    (salesReceipts && !(salesReceipts.length >= 0))
   ) {
     return <LoadingSpinner />;
   }
@@ -69,7 +69,7 @@ const SalesReceiptList = () => {
     );
   }
 
-  if (!salesReceipts) {
+  if (salesReceipts.length === 0) {
     return (
       <div className="container mt-4">
         <h2>Sales Receipts</h2>
@@ -88,7 +88,7 @@ const SalesReceiptList = () => {
             </button>
           )}
           {showCreateSRForm && !cashierSessionOpen && (
-            <div className="alert alert-warning" role="alert">
+            <div className="alert alert-warning mt-3" role="alert">
               Please open a cashier session to create sales receipts.
               {closeAlertAfterDelay()}
             </div>

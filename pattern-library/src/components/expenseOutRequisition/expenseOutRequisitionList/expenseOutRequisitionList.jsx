@@ -54,7 +54,7 @@ const ExpenseOutRequisitionList = () => {
   if (
     isLoadingData ||
     isLoadingPermissions ||
-    (expenseOutRequisitions && !expenseOutRequisitions.length > 0)
+    (expenseOutRequisitions && !(expenseOutRequisitions.length >= 0))
   ) {
     return <LoadingSpinner />;
   }
@@ -78,7 +78,7 @@ const ExpenseOutRequisitionList = () => {
     );
   }
 
-  if (!expenseOutRequisitions) {
+  if (expenseOutRequisitions.length === 0) {
     return (
       <div className="container mt-4">
         <h2>Expense Out Requisitions</h2>

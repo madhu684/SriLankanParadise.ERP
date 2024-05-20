@@ -87,7 +87,7 @@ const useSalesInvoiceList = () => {
           const SalesInvoiceResponse = await get_sales_invoices_by_user_id_api(
             sessionStorage.getItem("userId")
           );
-          setSalesInvoices(SalesInvoiceResponse.data.result);
+          setSalesInvoices(SalesInvoiceResponse.data.result || []);
         }
       }
     } catch (error) {

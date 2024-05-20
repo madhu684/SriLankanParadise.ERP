@@ -107,7 +107,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
       const response = await get_customers_by_company_id_api(
         sessionStorage?.getItem("companyId")
       );
-      return response.data.result;
+      return response.data.result || [];
     } catch (error) {
       console.error("Error fetching customers:", error);
     }

@@ -66,7 +66,10 @@ const useExpenseOutRequisitionUpdate = ({
   const validateForm = () => {
     const isreasonValid = validateField("reason", "Reason", formData.reason);
 
-    const isAmountValid = validateField("amount", "Amount", formData.amount);
+    const isAmountValid = validateField("amount", "Amount", formData.amount, {
+      validationFunction: (value) => parseFloat(value) > 0,
+      errorMessage: `Amount must be greater than 0`,
+    });
 
     return isreasonValid && isAmountValid;
   };
