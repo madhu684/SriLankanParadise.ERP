@@ -537,16 +537,18 @@ class registration extends React.Component {
           "user-module"
         ].assignedModules.map((module) => module.id);
 
-        // Prepare data for company_subscription_module_user_api
-        const userModulesFromData = assignedModuleIds.map(
-          async (module, index) => ({
-            companySubscriptionModuleId:
-              await get_company_subscription_module_id_api(
-                sessionStorage.getItem("companyId"),
-                module
-              ).data.result,
-            userId: userId,
-            permissionId: permissionId,
+        // Fetch company subscription module IDs and prepare data
+        const userModulesFromData = await Promise.all(
+          assignedModuleIds.map(async (module) => {
+            const response = await get_company_subscription_module_id_api(
+              sessionStorage.getItem("companyId"),
+              module
+            );
+            return {
+              companySubscriptionModuleId: response.data.result,
+              userId: userId,
+              permissionId: permissionId,
+            };
           })
         );
 
