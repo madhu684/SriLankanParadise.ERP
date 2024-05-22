@@ -118,7 +118,6 @@ function template() {
             className={`nav-item dropdown ${isDropdownOpen ? "dropup" : ""}`}
           >
             <a
-              href="#"
               className="d-flex align-items-center nav-link dropdown-toggle link-dark text-decoration-none"
               role="button"
               aria-expanded={isDropdownOpen}
@@ -159,7 +158,7 @@ function template() {
               <li>
                 <a
                   className="dropdown-item"
-                  href="#"
+                  role="button"
                   onClick={(e) => {
                     e.preventDefault();
                     this.handleLogout();
