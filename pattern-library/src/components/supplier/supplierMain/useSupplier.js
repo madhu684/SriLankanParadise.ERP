@@ -222,12 +222,6 @@ const useSupplier = ({ onFormSubmit }) => {
       formData.addressLine1
     );
 
-    const isBusinessRegistrationNoValid = validateField(
-      "businessRegistrationNo",
-      "Business registration number",
-      formData.businessRegistrationNo
-    );
-
     const isCompanyTypeIdValid = validateField(
       "companyTypeId",
       "Company type",
@@ -276,7 +270,6 @@ const useSupplier = ({ onFormSubmit }) => {
       isEmailValid &&
       isPhoneValid &&
       isContactNumberValid &&
-      isBusinessRegistrationNoValid &&
       isCompanyTypeIdValid &&
       isBusinessTypeIdValid &&
       isStatusValid &&

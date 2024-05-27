@@ -126,8 +126,8 @@ const SupplierList = () => {
           )}
           {hasPermission("Delete Supplier") &&
             isAnyRowSelected &&
-            !purchaseOrders.some(
-              (order) => order.supplierId === selectedRowData[0]?.supplierId
+            !purchaseOrders?.some(
+              (order) => order?.supplierId === selectedRowData[0]?.supplierId
             ) && (
               <button
                 className="btn btn-danger"
