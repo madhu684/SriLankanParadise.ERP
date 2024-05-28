@@ -7,6 +7,8 @@ import "moment-timezone";
 
 const GrnDetail = ({ show, handleClose, grn }) => {
   const { getStatusLabel, getStatusBadgeClass } = useGrnList();
+  const { grnTypeDisplayMap } = useGrnDetail();
+
   return (
     <Modal show={show} onHide={handleClose} centered scrollable size="lg">
       <Modal.Header closeButton>
@@ -38,10 +40,7 @@ const GrnDetail = ({ show, handleClose, grn }) => {
               <strong>Received Date:</strong> {grn?.receivedDate?.split("T")[0]}
             </p>
             <p>
-              <strong>GRN Type:</strong>{" "}
-              {grn?.grnType === "finishedGoodsIn"
-                ? "Finished Goods In"
-                : "Goods Received Note"}
+              <strong>GRN Type:</strong> {grnTypeDisplayMap[grn?.grnType]}
             </p>
             <p>
               <strong>Goods Receiving Status:</strong>{" "}

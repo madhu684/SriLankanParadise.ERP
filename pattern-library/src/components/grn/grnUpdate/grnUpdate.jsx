@@ -226,7 +226,9 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
             </div>
 
             {/* Additional Purchase Order Information */}
-            {formData.grnType !== "finishedGoodsIn" &&
+            {!["finishedGoodsIn", "directPurchase"].includes(
+              formData?.grnType
+            ) &&
               selectedPurchaseOrder && (
                 <div className="card mb-3">
                   <div className="card-header">Selected Purchase Order</div>
@@ -248,6 +250,11 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
             {formData.grnType === "finishedGoodsIn" && (
               <div className="alert alert-warning" role="alert">
                 This is a "Finished Goods In", no need a purchase order.
+              </div>
+            )}
+            {formData.grnType === "directPurchase" && (
+              <div className="alert alert-warning" role="alert">
+                This is a "Direct Purchase", no need a purchase order.
               </div>
             )}
           </div>
@@ -362,7 +369,9 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                 <tr>
                   <th>Item Name</th>
                   <th>Unit</th>
-                  {formData.grnType !== "finishedGoodsIn" && (
+                  {!["finishedGoodsIn", "directPurchase"].includes(
+                    formData?.grnType
+                  ) && (
                     <>
                       <th>Ordered Quantity</th>
                       <th>Remaining Quantity</th>
@@ -380,7 +389,9 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                   <tr key={index}>
                     <td>{item.name}</td>
                     <td>{item.unit}</td>
-                    {formData.grnType !== "finishedGoodsIn" && (
+                    {!["finishedGoodsIn", "directPurchase"].includes(
+                      formData?.grnType
+                    ) && (
                       <>
                         <td>{item.quantity}</td>
                         <td>{item.remainingQuantity}</td>
