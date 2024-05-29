@@ -85,6 +85,10 @@ const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
                     )}
                   </span>
                 </p>
+                <p>
+                  <strong>Warehouse Location:</strong>{" "}
+                  {grn?.warehouseLocation?.locationName}
+                </p>
               </div>
               <div className="col-md-6">
                 <p>

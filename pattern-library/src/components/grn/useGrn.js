@@ -4,6 +4,7 @@ import {
   post_grn_master_api,
   post_grn_detail_api,
   get_grn_masters_by_purchase_order_id_api,
+  get_company_locations_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
@@ -17,6 +18,7 @@ const useGrn = ({ onFormSubmit }) => {
     status: "",
     purchaseOrderId: "",
     grnType: "goodsReceivedNote",
+    warehouseLocation: null,
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -36,6 +38,27 @@ const useGrn = ({ onFormSubmit }) => {
     { id: "directPurchase", label: "Direct Purchase" },
   ];
   const [searchTerm, setSearchTerm] = useState("");
+
+  const fetchLocations = async () => {
+    try {
+      const response = await get_company_locations_api(
+        sessionStorage.getItem("companyId")
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching locations:", error);
+    }
+  };
+
+  const {
+    data: locations,
+    isLoading: isLocationsLoading,
+    isError: isLocationsError,
+    error: locationsError,
+  } = useQuery({
+    queryKey: ["locations"],
+    queryFn: fetchLocations,
+  });
 
   const fetchItems = async (companyId, searchQuery, itemType) => {
     try {
@@ -342,6 +365,12 @@ const useGrn = ({ onFormSubmit }) => {
       formData.grnType
     );
 
+    const isWarehouseLocationValid = validateField(
+      "warehouseLocation",
+      "Warehouse location",
+      formData.warehouseLocation
+    );
+
     return (
       isGrnDateValid &&
       isReceivedByValid &&
@@ -352,7 +381,8 @@ const useGrn = ({ onFormSubmit }) => {
       isItemUnitPriceValid &&
       isItemExpiryDateValid &&
       isRejectedQuantityValid &&
-      isGrnTypeValid
+      isGrnTypeValid &&
+      isWarehouseLocationValid
     );
   };
 
@@ -392,6 +422,7 @@ const useGrn = ({ onFormSubmit }) => {
           createdDate: currentDate,
           lastUpdatedDate: currentDate,
           grnType: formData.grnType,
+          warehouseLocationId: formData.warehouseLocation,
           permissionId: 20,
         };
 
@@ -596,6 +627,10 @@ const useGrn = ({ onFormSubmit }) => {
     isItemsLoading,
     isItemsError,
     itemsError,
+    locations,
+    isLocationsLoading,
+    isLocationsError,
+    locationsError,
     handleInputChange,
     handleItemDetailsChange,
     handleRemoveItem,

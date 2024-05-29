@@ -165,7 +165,7 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
       createdBy: sessionStorage.getItem("username"),
       createdUserId: sessionStorage.getItem("userId"),
       tempQuantity: grnDetail.acceptedQuantity + grnDetail.freeQuantity,
-      locationId: sessionStorage?.getItem("locationId"),
+      locationId: grn?.warehouseLocationId,
       expiryDate: grnDetail.expiryDate,
       permissionId: 1048,
     };
