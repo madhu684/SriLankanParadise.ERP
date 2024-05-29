@@ -14,7 +14,11 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
   const [modGrn, setModGrn] = useState(null);
   const [showManageItemModal, setShowManageItemModal] = useState(false);
   const [manageItem, setManageItem] = useState(null);
-
+  const grnTypeDisplayMap = {
+    finishedGoodsIn: "Finished Goods In",
+    directPurchase: "Direct Purchase",
+    goodsReceivedNote: "Goods Received Note",
+  };
   useEffect(() => {
     const deepCopyGrn = JSON.parse(JSON.stringify(grn));
 
@@ -219,6 +223,7 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
     modGrn,
     manageItem,
     showManageItemModal,
+    grnTypeDisplayMap,
     handleApprove,
     handleCostPriceChange,
     handleSellingPriceChange,

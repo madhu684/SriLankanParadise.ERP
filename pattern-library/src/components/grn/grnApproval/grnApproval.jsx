@@ -15,6 +15,7 @@ const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
     modGrn,
     manageItem,
     showManageItemModal,
+    grnTypeDisplayMap,
     handleApprove,
     handleCostPriceChange,
     handleSellingPriceChange,
@@ -70,10 +71,7 @@ const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
                   {grn?.receivedDate?.split("T")[0]}
                 </p>
                 <p>
-                  <strong>GRN Type:</strong>{" "}
-                  {grn?.grnType === "finishedGoodsIn"
-                    ? "Finished Goods In"
-                    : "Goods Received Note"}
+                  <strong>GRN Type:</strong> {grnTypeDisplayMap[grn?.grnType]}
                 </p>
                 <p>
                   <strong>Goods Receiving Status:</strong>{" "}

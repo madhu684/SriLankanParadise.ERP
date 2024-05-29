@@ -33,6 +33,7 @@ const useGrn = ({ onFormSubmit }) => {
   const grnTypeOptions = [
     { id: "goodsReceivedNote", label: "Goods Received Note" },
     { id: "finishedGoodsIn", label: "Finished Goods In" },
+    { id: "directPurchase", label: "Direct Purchase" },
   ];
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -230,7 +231,7 @@ const useGrn = ({ onFormSubmit }) => {
     const isStatusValid = validateField("status", "Status", formData.status);
 
     let isPurchaseOrderIdValid = true;
-    if (formData.grnType !== "finishedGoodsIn") {
+    if (!["finishedGoodsIn", "directPurchase"].includes(formData?.grnType)) {
       isPurchaseOrderIdValid = validateField(
         "purchaseOrderId",
         "Purchase order reference number",
@@ -246,8 +247,8 @@ const useGrn = ({ onFormSubmit }) => {
 
       let additionalRules = {};
 
-      if (formData.grnType === "finishedGoodsIn") {
-        // Rule for finishedGoodsIn
+      if (["finishedGoodsIn", "directPurchase"].includes(formData?.grnType)) {
+        // Rule for finishedGoodsIn or directPurchase
         additionalRules = {
           validationFunction: (value) => parseFloat(value) > 0,
           errorMessage: `${fieldDisplayName} must be greater than 0`,
@@ -363,10 +364,11 @@ const useGrn = ({ onFormSubmit }) => {
 
       const currentDate = new Date().toISOString();
 
-      const purchaseOrderId =
-        formData.grnType === "finishedGoodsIn"
-          ? null
-          : formData.purchaseOrderId;
+      const purchaseOrderId = ["finishedGoodsIn", "directPurchase"].includes(
+        formData?.grnType
+      )
+        ? null
+        : formData?.purchaseOrderId;
 
       const isFormValid = validateForm();
       if (isFormValid) {

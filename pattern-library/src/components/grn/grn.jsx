@@ -228,7 +228,9 @@ const Grn = ({ handleClose, handleUpdated }) => {
                 Purchase Order
               </label>
 
-              {formData.grnType !== "finishedGoodsIn" &&
+              {!["finishedGoodsIn", "directPurchase"].includes(
+                formData?.grnType
+              ) &&
                 selectedPurchaseOrder === null && (
                   <div className="mb-3">
                     <div className="input-group">
@@ -341,6 +343,11 @@ const Grn = ({ handleClose, handleUpdated }) => {
                   This is a "Finished Goods In", no need a purchase order.
                 </div>
               )}
+              {formData.grnType === "directPurchase" && (
+                <div className="alert alert-warning" role="alert">
+                  This is a "Direct Purchase", no need a purchase order.
+                </div>
+              )}
             </div>
 
             {/* Additional Purchase Order Information */}
@@ -377,7 +384,9 @@ const Grn = ({ handleClose, handleUpdated }) => {
             {/* Item Details */}
             <h4>3. Item Details</h4>
             {/* Item Search */}
-            {formData.grnType === "finishedGoodsIn" && (
+            {["finishedGoodsIn", "directPurchase"].includes(
+              formData?.grnType
+            ) && (
               <div className="mb-0 mt-3">
                 <div className="input-group">
                   <span className="input-group-text bg-transparent">
@@ -481,7 +490,9 @@ const Grn = ({ handleClose, handleUpdated }) => {
                 <tr>
                   <th>Item Name</th>
                   <th>Unit</th>
-                  {formData.grnType !== "finishedGoodsIn" && (
+                  {!["finishedGoodsIn", "directPurchase"].includes(
+                    formData?.grnType
+                  ) && (
                     <>
                       <th>Ordered Quantity</th>
                       <th>Remaining Quantity</th>
@@ -500,7 +511,9 @@ const Grn = ({ handleClose, handleUpdated }) => {
                   <tr key={index}>
                     <td>{item.name}</td>
                     <td>{item.unit}</td>
-                    {formData.grnType !== "finishedGoodsIn" && (
+                    {!["finishedGoodsIn", "directPurchase"].includes(
+                      formData?.grnType
+                    ) && (
                       <>
                         <td>{item.quantity}</td>
                         <td>{item.remainingQuantity}</td>
@@ -640,7 +653,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
           </div>
         )}
 
-        {formData.grnType !== "finishedGoodsIn" &&
+        {!["finishedGoodsIn", "directPurchase"].includes(formData?.grnType) &&
           selectedPurchaseOrder === null && (
             <div className="mb-3">
               <small className="form-text text-muted">
