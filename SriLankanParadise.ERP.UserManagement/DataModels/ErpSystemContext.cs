@@ -442,6 +442,10 @@ public partial class ErpSystemContext : DbContext
             entity.HasOne(d => d.PurchaseOrder).WithMany(p => p.GrnMasters)
                 .HasForeignKey(d => d.PurchaseOrderId)
                 .HasConstraintName("FK_GrnMaster_PurchaseOrder");
+
+            entity.HasOne(d => d.WarehouseLocation).WithMany(p => p.GrnMasters)
+                .HasForeignKey(d => d.WarehouseLocationId)
+                .HasConstraintName("FK_GrnMaster_WarehouseLocationId");
         });
 
         modelBuilder.Entity<IssueDetail>(entity =>
