@@ -27,6 +27,10 @@ const Grn = ({ handleClose, handleUpdated }) => {
     isItemsLoading,
     isItemsError,
     itemsError,
+    locations,
+    isLocationsLoading,
+    isLocationsError,
+    locationsError,
     handleInputChange,
     handleItemDetailsChange,
     handleRemoveItem,
@@ -215,6 +219,42 @@ const Grn = ({ handleClose, handleUpdated }) => {
               {validationErrors.status && (
                 <div className="invalid-feedback">
                   {validationErrors.status}
+                </div>
+              )}
+            </div>
+
+            <div className="mb-3 mt-3">
+              <label htmlFor="warehouseLocation" className="form-label">
+                Warehouse Location
+              </label>
+              <select
+                className={`form-select ${
+                  validFields.warehouseLocation ? "is-valid" : ""
+                } ${validationErrors.warehouseLocation ? "is-invalid" : ""}`}
+                id="warehouseLocation"
+                value={formData?.warehouseLocation ?? ""}
+                onChange={(e) =>
+                  handleInputChange("warehouseLocation", e.target.value)
+                }
+              >
+                <option value="">Select Warehouse</option>
+                {/* Filter out warehouse locations based on the locationType being "Warehouse" */}
+                {locations
+                  ?.filter(
+                    (location) => location.locationType.name === "Warehouse"
+                  )
+                  ?.map((location) => (
+                    <option
+                      key={location.locationId}
+                      value={location.locationId}
+                    >
+                      {location.locationName}
+                    </option>
+                  ))}
+              </select>
+              {validationErrors.warehouseLocation && (
+                <div className="invalid-feedback">
+                  {validationErrors.warehouseLocation}
                 </div>
               )}
             </div>

@@ -19,6 +19,8 @@ public partial class Location
 
     public virtual Company Company { get; set; } = null!;
 
+    public virtual ICollection<GrnMaster> GrnMasters { get; set; } = new List<GrnMaster>();
+
     public virtual ICollection<Location> InverseParent { get; set; } = new List<Location>();
 
     public virtual ICollection<ItemBatch> ItemBatches { get; set; } = new List<ItemBatch>();

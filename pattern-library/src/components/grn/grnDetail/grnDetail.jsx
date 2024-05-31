@@ -54,6 +54,10 @@ const GrnDetail = ({ show, handleClose, grn }) => {
                 )}
               </span>
             </p>
+            <p>
+              <strong>Warehouse Location:</strong>{" "}
+              {grn?.warehouseLocation?.locationName}
+            </p>
             {parseInt(grn.status.toString().charAt(1), 10) === 2 && (
               <>
                 <p>

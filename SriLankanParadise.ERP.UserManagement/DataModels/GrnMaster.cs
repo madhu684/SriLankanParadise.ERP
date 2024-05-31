@@ -33,9 +33,13 @@ public partial class GrnMaster
 
     public string? GrnType { get; set; }
 
+    public int? WarehouseLocationId { get; set; }
+
     public virtual ICollection<BatchHasGrnMaster> BatchHasGrnMasters { get; set; } = new List<BatchHasGrnMaster>();
 
     public virtual ICollection<GrnDetail> GrnDetails { get; set; } = new List<GrnDetail>();
 
     public virtual PurchaseOrder? PurchaseOrder { get; set; }
+
+    public virtual Location? WarehouseLocation { get; set; }
 }

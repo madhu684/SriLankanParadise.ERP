@@ -5,6 +5,7 @@ import {
   put_grn_detail_api,
   post_grn_detail_api,
   delete_grn_detail_api,
+  get_company_locations_api,
   get_grn_masters_by_purchase_order_id_api,
 } from "../../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../../services/inventoryApi";
@@ -19,6 +20,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     status: "",
     purchaseOrderId: "",
     grnType: "goodsReceivedNote",
+    warehouseLocation: null,
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -37,6 +39,27 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     { id: "directPurchase", label: "Direct Purchase" },
   ];
   const [searchTerm, setSearchTerm] = useState("");
+
+  const fetchLocations = async () => {
+    try {
+      const response = await get_company_locations_api(
+        sessionStorage.getItem("companyId")
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching locations:", error);
+    }
+  };
+
+  const {
+    data: locations,
+    isLoading: isLocationsLoading,
+    isError: isLocationsError,
+    error: locationsError,
+  } = useQuery({
+    queryKey: ["locations"],
+    queryFn: fetchLocations,
+  });
 
   const fetchItems = async (companyId, searchQuery, itemType) => {
     try {
@@ -121,6 +144,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       purchaseOrderId: deepCopyGrn?.purchaseOrderId ?? "",
       attachments: deepCopyGrn?.attachments ?? [],
       grnType: deepCopyGrn?.grnType,
+      warehouseLocation: deepCopyGrn?.warehouseLocationId,
     });
 
     if (!isLoading && purchaseOrders) {
@@ -379,6 +403,12 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       formData.grnType
     );
 
+    const isWarehouseLocationValid = validateField(
+      "warehouseLocation",
+      "Warehouse location",
+      formData.warehouseLocation
+    );
+
     return (
       isGrnDateValid &&
       isReceivedByValid &&
@@ -389,7 +419,8 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       isItemUnitPriceValid &&
       isItemExpiryDateValid &&
       isRejectedQuantityValid &&
-      isGrnTypeValid
+      isGrnTypeValid &&
+      isWarehouseLocationValid
     );
   };
 
@@ -422,13 +453,14 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
           receivedDate: formData.receivedDate,
           status: combinedStatus,
           companyId: sessionStorage?.getItem("companyId") ?? null,
-          receivedUserId: sessionStorage?.getItem("userId") ?? null,
+          receivedUserId: grn?.receivedUserId,
           approvedBy: null,
           approvedUserId: null,
           approvedDate: null,
           createdDate: grn.createdDate,
           lastUpdatedDate: currentDate,
           grnType: formData.grnType,
+          warehouseLocationId: formData.warehouseLocation,
           permissionId: 22,
         };
 
@@ -601,6 +633,10 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     isItemsLoading,
     isItemsError,
     itemsError,
+    locations,
+    isLocationsLoading,
+    isLocationsError,
+    locationsError,
     handleInputChange,
     handleItemDetailsChange,
     handlePrint,
