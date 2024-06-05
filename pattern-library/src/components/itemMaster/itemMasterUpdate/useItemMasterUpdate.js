@@ -15,12 +15,14 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     unitId: "",
     categoryId: "",
     itemName: "",
+    itemCode: "",
     itemTypeId: "",
     measurementType: "",
     itemHierarchy: "",
     inventoryMeasurementType: "",
     inventoryUnitId: "",
     conversionValue: "",
+    reorderLevel: "",
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -153,6 +155,8 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
         deepCopyItemMaster?.inventoryUnit?.measurementTypeId,
       inventoryUnitId: deepCopyItemMaster?.inventoryUnitId,
       conversionValue: deepCopyItemMaster?.conversionRate,
+      itemCode: deepCopyItemMaster?.itemCode ?? "",
+      reorderLevel: deepCopyItemMaster?.reorderLevel ?? "",
     });
 
     const fetchParentItem = async () => {
@@ -264,6 +268,18 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       }
     );
 
+    const isItemCodeValid = validateField(
+      "itemCode",
+      "Item code",
+      formData.itemCode
+    );
+
+    const isReorderLevelValid = validateField(
+      "reorderLevel",
+      "Reorder level",
+      formData.reorderLevel
+    );
+
     return (
       isUnitValid &&
       isCategoryValid &&
@@ -272,7 +288,9 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       isItemHierarchyValid &&
       isparentItemValid &&
       isInventoryUnitValid &&
-      isConversionValueValid
+      isConversionValueValid &&
+      isItemCodeValid &&
+      isReorderLevelValid
     );
   };
   const handleSubmit = async (isSaveAsDraft) => {
@@ -302,6 +320,8 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
               : itemMaster.itemMasterId,
           inventoryUnitId: formData.inventoryUnitId,
           conversionRate: formData.conversionValue,
+          itemCode: formData.itemCode,
+          reorderLevel: formData.reorderLevel,
           permissionId: 1040,
         };
 

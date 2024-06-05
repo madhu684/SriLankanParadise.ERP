@@ -34,13 +34,16 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
         <div className="row">
           <div className="col-md-6">
             <p>
-              <strong>Item name:</strong> {itemMaster.itemName}
+              <strong>Item name:</strong> {itemMaster?.itemName}
             </p>
             <p>
-              <strong>Item type:</strong> {itemMaster.itemType?.name}
+              <strong>Item code:</strong> {itemMaster?.itemCode}
             </p>
             <p>
-              <strong>Category:</strong> {itemMaster.category?.categoryName}
+              <strong>Item type:</strong> {itemMaster?.itemType?.name}
+            </p>
+            <p>
+              <strong>Category:</strong> {itemMaster?.category?.categoryName}
             </p>
           </div>
 
@@ -51,6 +54,9 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
             </p>
             <p>
               <strong>Unit:</strong> {itemMaster.unit?.unitName}
+            </p>
+            <p>
+              <strong>Reorder Level:</strong> {itemMaster?.reorderLevel}
             </p>
             <p>
               <strong>Hierarchy Type:</strong>{" "}
