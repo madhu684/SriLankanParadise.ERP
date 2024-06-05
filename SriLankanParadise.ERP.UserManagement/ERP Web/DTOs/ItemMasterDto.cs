@@ -35,7 +35,12 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public decimal? ConversionRate { get; set; }
 
+        public string? ItemCode { get; set; }
+
+        public int? ReorderLevel { get; set; }
+
         public virtual ItemTypeDto? ItemType { get; set; }
+
 
     }
 }

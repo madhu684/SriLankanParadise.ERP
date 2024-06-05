@@ -24,6 +24,10 @@
 
         public decimal? ConversionRate { get; set; }
 
+        public string? ItemCode { get; set; }
+
+        public int? ReorderLevel { get; set; }
+
         public int PermissionId { get; set; }
     }
 }

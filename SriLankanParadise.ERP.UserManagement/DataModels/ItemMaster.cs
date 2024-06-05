@@ -29,6 +29,10 @@ public partial class ItemMaster
 
     public decimal? ConversionRate { get; set; }
 
+    public string? ItemCode { get; set; }
+
+    public int? ReorderLevel { get; set; }
+
     public virtual Category Category { get; set; } = null!;
 
     public virtual ICollection<GrnDetail> GrnDetails { get; set; } = new List<GrnDetail>();
