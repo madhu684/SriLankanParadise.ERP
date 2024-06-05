@@ -15,12 +15,14 @@ const useItemMaster = ({ onFormSubmit }) => {
     unitId: "",
     categoryId: "",
     itemName: "",
+    itemCode: "",
     itemTypeId: "",
     measurementType: "",
     itemHierarchy: "main",
     inventoryMeasurementType: "",
     inventoryUnitId: "",
     conversionValue: "",
+    reorderLevel: "",
   });
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
@@ -274,6 +276,18 @@ const useItemMaster = ({ onFormSubmit }) => {
       }
     );
 
+    const isItemCodeValid = validateField(
+      "itemCode",
+      "Item code",
+      formData.itemCode
+    );
+
+    const isReorderLevelValid = validateField(
+      "reorderLevel",
+      "Reorder level",
+      formData.reorderLevel
+    );
+
     return (
       isUnitValid &&
       isCategoryValid &&
@@ -282,7 +296,9 @@ const useItemMaster = ({ onFormSubmit }) => {
       isItemHierarchyValid &&
       isparentItemValid &&
       isInventoryUnitValid &&
-      isConversionValueValid
+      isConversionValueValid &&
+      isItemCodeValid &&
+      isReorderLevelValid
     );
   };
 
@@ -330,6 +346,8 @@ const useItemMaster = ({ onFormSubmit }) => {
             parentId: itemMasterId,
             inventoryUnitId: formData.inventoryUnitId,
             conversionRate: formData.conversionValue,
+            itemCode: formData.itemCode,
+            reorderLevel: formData.reorderLevel,
             permissionId: 1040,
           };
 

@@ -113,6 +113,28 @@ const ItemMaster = ({ handleClose, handleUpdated }) => {
             </div>
 
             <div className="mb-3 mt-3">
+              <label htmlFor="itemCode" className="form-label">
+                Item Code
+              </label>
+              <input
+                type="text"
+                className={`form-control ${
+                  validFields.itemCode ? "is-valid" : ""
+                } ${validationErrors.itemCode ? "is-invalid" : ""}`}
+                id="itemCode"
+                placeholder="Enter Item Code"
+                value={formData.itemCode}
+                onChange={(e) => handleInputChange("itemCode", e.target.value)}
+                required
+              />
+              {validationErrors.itemCode && (
+                <div className="invalid-feedback">
+                  {validationErrors.itemCode}
+                </div>
+              )}
+            </div>
+
+            <div className="mb-3 mt-3">
               <label htmlFor="itemType" className="form-label">
                 Item Type
               </label>
@@ -352,6 +374,32 @@ const ItemMaster = ({ handleClose, handleUpdated }) => {
                 )}
               </div>
             )}
+
+            <div className="mb-3 mt-3">
+              <label htmlFor="reorderLevel" className="form-label">
+                Reorder level
+              </label>
+              <input
+                type="number"
+                className={`form-control ${
+                  validFields.reorderLevel ? "is-valid" : ""
+                } ${validationErrors.reorderLevel ? "is-invalid" : ""}`}
+                id="reorderLevel"
+                placeholder="Enter Reorder Level"
+                value={formData.reorderLevel}
+                onChange={(e) => {
+                  const value = parseFloat(e.target.value);
+                  const positiveValue = isNaN(value) ? 0 : Math.max(0, value);
+                  handleInputChange("reorderLevel", positiveValue);
+                }}
+                required
+              />
+              {validationErrors.reorderLevel && (
+                <div className="invalid-feedback">
+                  {validationErrors.reorderLevel}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="col-md-5">

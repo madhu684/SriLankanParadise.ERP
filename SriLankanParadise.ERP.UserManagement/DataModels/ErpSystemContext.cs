@@ -540,6 +540,7 @@ public partial class ErpSystemContext : DbContext
 
             entity.Property(e => e.ConversionRate).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.CreatedBy).HasMaxLength(50);
+            entity.Property(e => e.ItemCode).HasMaxLength(50);
             entity.Property(e => e.ItemName).HasMaxLength(50);
 
             entity.HasOne(d => d.Category).WithMany(p => p.ItemMasters)

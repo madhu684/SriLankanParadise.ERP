@@ -17,6 +17,7 @@ import ItemBatchUpdate from "../itemBatch/itemBatchUpdate/itemBatchUpdate.jsx";
 import ExpenseOutRequisitionList from "../expenseOutRequisition/expenseOutRequisitionList/expenseOutRequisitionList.jsx";
 import CashierExpenseOut from "../cashierExpenseOut/cashierExpenseOut.jsx";
 import SupplierList from "../supplier/supplierMain/supplierList/supplierList.jsx";
+import StockReport from "../stockReport/stockReport.jsx";
 
 const useMain = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -109,6 +110,8 @@ const useMain = () => {
         return <CashierExpenseOut />;
       case "Suppliers":
         return <SupplierList />;
+      case "Stock Report":
+        return <StockReport />;
       default:
         return null;
     }
