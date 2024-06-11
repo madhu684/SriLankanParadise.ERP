@@ -19,11 +19,21 @@ public partial class Location
 
     public virtual Company Company { get; set; } = null!;
 
+    public virtual ICollection<DailyStockBalance> DailyStockBalances { get; set; } = new List<DailyStockBalance>();
+
     public virtual ICollection<GrnMaster> GrnMasters { get; set; } = new List<GrnMaster>();
 
     public virtual ICollection<Location> InverseParent { get; set; } = new List<Location>();
 
     public virtual ICollection<ItemBatch> ItemBatches { get; set; } = new List<ItemBatch>();
+
+    public virtual ICollection<LocationInventory> LocationInventories { get; set; } = new List<LocationInventory>();
+
+    public virtual ICollection<LocationInventoryGoodsInTransit> LocationInventoryGoodsInTransitFromLocations { get; set; } = new List<LocationInventoryGoodsInTransit>();
+
+    public virtual ICollection<LocationInventoryGoodsInTransit> LocationInventoryGoodsInTransitToLocations { get; set; } = new List<LocationInventoryGoodsInTransit>();
+
+    public virtual ICollection<LocationInventoryMovement> LocationInventoryMovements { get; set; } = new List<LocationInventoryMovement>();
 
     public virtual LocationType? LocationType { get; set; }
 
@@ -34,6 +44,8 @@ public partial class Location
     public virtual ICollection<RequisitionMaster> RequisitionMasterRequestedFromLocations { get; set; } = new List<RequisitionMaster>();
 
     public virtual ICollection<RequisitionMaster> RequisitionMasterRequestedToLocations { get; set; } = new List<RequisitionMaster>();
+
+    public virtual ICollection<UserLocation> UserLocations { get; set; } = new List<UserLocation>();
 
     public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

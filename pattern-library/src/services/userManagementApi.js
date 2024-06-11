@@ -394,3 +394,37 @@ export const get_user_permissions_api = async (userId) => {
     throw error;
   }
 };
+
+//user location apis
+export const post_user_location_api = async (userLocationData) => {
+  try {
+    const response = await api.post("/userLocation", userLocationData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const put_user_location_api = async (userId, locationId) => {
+  try {
+    const response = await api.put(`/userLocation/${userId}/${locationId}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const delete_user_location_api = async (userId, locationId) => {
+  try {
+    const response = await api.delete(`/userLocation/${userId}/${locationId}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

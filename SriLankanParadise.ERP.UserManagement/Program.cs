@@ -154,6 +154,8 @@ builder.Services.AddScoped<ICashierSessionService, CashierSessionService>();
 builder.Services.AddScoped<ICashierSessionRepository, CashierSessionRepository>();
 builder.Services.AddScoped<ICashierExpenseOutService, CashierExpenseOutService>();
 builder.Services.AddScoped<ICashierExpenseOutRepository, CashierExpenseOutRepository>();
+builder.Services.AddScoped<IUserLocationService, UserLocationService>();
+builder.Services.AddScoped<IUserLocationRepository, UserLocationRepository>();
 builder.Services.AddScoped<IExpenseOutRequisitionService, ExpenseOutRequisitionService>();
 builder.Services.AddScoped<IExpenseOutRequisitionRepository, ExpenseOutRequisitionRepository>();
 builder.Services.AddScoped<IBusinessTypeService, BusinessTypeService>();
@@ -166,7 +168,6 @@ builder.Services.AddScoped<ISupplierAttachmentService, SupplierAttachmentService
 builder.Services.AddScoped<ISupplierAttachmentRepository, SupplierAttachmentRepository>();
 builder.Services.AddScoped<IMeasurementTypeService, MeasurementTypeService>();
 builder.Services.AddScoped<IMeasurementTypeRepository, MeasurementTypeRepository>();
-
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

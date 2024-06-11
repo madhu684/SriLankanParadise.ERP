@@ -1924,6 +1924,60 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to User location created successfully.
+        /// </summary>
+        public static string UserLocationCreated {
+            get {
+                return ResourceManager.GetString("UserLocationCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User location deleted successfully.
+        /// </summary>
+        public static string UserLocationDeleted {
+            get {
+                return ResourceManager.GetString("UserLocationDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User location not found.
+        /// </summary>
+        public static string UserLocationNotFound {
+            get {
+                return ResourceManager.GetString("UserLocationNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User locations not found.
+        /// </summary>
+        public static string UserLocationsNotFound {
+            get {
+                return ResourceManager.GetString("UserLocationsNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User locations retrieved.
+        /// </summary>
+        public static string UserLocationsRetrieved {
+            get {
+                return ResourceManager.GetString("UserLocationsRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User location updated successfully.
+        /// </summary>
+        public static string UserLocationUpdated {
+            get {
+                return ResourceManager.GetString("UserLocationUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to User role created successfully.
         /// </summary>
         public static string UseRoleCreated {
