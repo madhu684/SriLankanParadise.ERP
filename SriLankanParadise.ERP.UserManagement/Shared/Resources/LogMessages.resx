@@ -636,6 +636,24 @@
   <data name="UserAuthenticated" xml:space="preserve">
     <value>User authenticated successfully</value>
   </data>
+  <data name="UserLocationCreated" xml:space="preserve">
+    <value>User location created successfully</value>
+  </data>
+  <data name="UserLocationDeleted" xml:space="preserve">
+    <value>User location deleted successfully</value>
+  </data>
+  <data name="UserLocationNotFound" xml:space="preserve">
+    <value>User location not found</value>
+  </data>
+  <data name="UserLocationsNotFound" xml:space="preserve">
+    <value>User locations not found</value>
+  </data>
+  <data name="UserLocationsRetrieved" xml:space="preserve">
+    <value>User locations retrieved</value>
+  </data>
+  <data name="UserLocationUpdated" xml:space="preserve">
+    <value>User location updated successfully</value>
+  </data>
   <data name="UseRoleCreated" xml:space="preserve">
     <value>User role created successfully</value>
   </data>

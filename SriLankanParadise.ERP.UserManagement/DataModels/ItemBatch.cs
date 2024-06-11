@@ -27,13 +27,23 @@ public partial class ItemBatch
 
     public DateTime? ExpiryDate { get; set; }
 
+    public int? Qty { get; set; }
+
     public virtual Batch Batch { get; set; } = null!;
+
+    public virtual ICollection<DailyStockBalance> DailyStockBalances { get; set; } = new List<DailyStockBalance>();
 
     public virtual ICollection<ItemBatchHasGrnDetail> ItemBatchHasGrnDetails { get; set; } = new List<ItemBatchHasGrnDetail>();
 
     public virtual ItemMaster ItemMaster { get; set; } = null!;
 
     public virtual Location? Location { get; set; }
+
+    public virtual ICollection<LocationInventory> LocationInventories { get; set; } = new List<LocationInventory>();
+
+    public virtual ICollection<LocationInventoryGoodsInTransit> LocationInventoryGoodsInTransits { get; set; } = new List<LocationInventoryGoodsInTransit>();
+
+    public virtual ICollection<LocationInventoryMovement> LocationInventoryMovements { get; set; } = new List<LocationInventoryMovement>();
 
     public virtual ICollection<SalesInvoiceDetail> SalesInvoiceDetails { get; set; } = new List<SalesInvoiceDetail>();
 

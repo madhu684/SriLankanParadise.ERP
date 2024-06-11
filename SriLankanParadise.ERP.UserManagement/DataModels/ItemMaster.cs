@@ -23,15 +23,31 @@ public partial class ItemMaster
 
     public int? ItemTypeId { get; set; }
 
+    public int? ParentId { get; set; }
+
+    public int? InventoryUnitId { get; set; }
+
+    public decimal? ConversionRate { get; set; }
+
+    public string? ItemCode { get; set; }
+
+    public int? ReorderLevel { get; set; }
+
     public virtual Category Category { get; set; } = null!;
 
     public virtual ICollection<GrnDetail> GrnDetails { get; set; } = new List<GrnDetail>();
+
+    public virtual Unit? InventoryUnit { get; set; }
+
+    public virtual ICollection<ItemMaster> InverseParent { get; set; } = new List<ItemMaster>();
 
     public virtual ICollection<IssueDetail> IssueDetails { get; set; } = new List<IssueDetail>();
 
     public virtual ICollection<ItemBatch> ItemBatches { get; set; } = new List<ItemBatch>();
 
     public virtual ItemType? ItemType { get; set; }
+
+    public virtual ItemMaster? Parent { get; set; }
 
     public virtual ICollection<PurchaseOrderDetail> PurchaseOrderDetails { get; set; } = new List<PurchaseOrderDetail>();
 

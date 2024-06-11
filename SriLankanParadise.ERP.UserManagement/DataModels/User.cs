@@ -37,6 +37,8 @@ public partial class User
 
     public virtual Location? Location { get; set; }
 
+    public virtual ICollection<UserLocation> UserLocations { get; set; } = new List<UserLocation>();
+
     public virtual ICollection<UserPermission> UserPermissions { get; set; } = new List<UserPermission>();
 
     public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();

@@ -15,7 +15,7 @@ public partial class GrnMaster
 
     public int? Status { get; set; }
 
-    public int PurchaseOrderId { get; set; }
+    public int? PurchaseOrderId { get; set; }
 
     public int? CompanyId { get; set; }
 
@@ -31,9 +31,15 @@ public partial class GrnMaster
 
     public DateTime? LastUpdatedDate { get; set; }
 
+    public string? GrnType { get; set; }
+
+    public int? WarehouseLocationId { get; set; }
+
     public virtual ICollection<BatchHasGrnMaster> BatchHasGrnMasters { get; set; } = new List<BatchHasGrnMaster>();
 
     public virtual ICollection<GrnDetail> GrnDetails { get; set; } = new List<GrnDetail>();
 
-    public virtual PurchaseOrder PurchaseOrder { get; set; } = null!;
+    public virtual PurchaseOrder? PurchaseOrder { get; set; }
+
+    public virtual Location? WarehouseLocation { get; set; }
 }

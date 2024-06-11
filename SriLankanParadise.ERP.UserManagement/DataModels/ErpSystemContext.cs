@@ -49,6 +49,8 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<Customer> Customers { get; set; }
 
+    public virtual DbSet<DailyStockBalance> DailyStockBalances { get; set; }
+
     public virtual DbSet<ExpenseOutRequisition> ExpenseOutRequisitions { get; set; }
 
     public virtual DbSet<GrnDetail> GrnDetails { get; set; }
@@ -69,9 +71,19 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<Location> Locations { get; set; }
 
+    public virtual DbSet<LocationInventory> LocationInventories { get; set; }
+
+    public virtual DbSet<LocationInventoryGoodsInTransit> LocationInventoryGoodsInTransits { get; set; }
+
+    public virtual DbSet<LocationInventoryMovement> LocationInventoryMovements { get; set; }
+
     public virtual DbSet<LocationType> LocationTypes { get; set; }
 
+    public virtual DbSet<MeasurementType> MeasurementTypes { get; set; }
+
     public virtual DbSet<Module> Modules { get; set; }
+
+    public virtual DbSet<MovementType> MovementTypes { get; set; }
 
     public virtual DbSet<PaymentMode> PaymentModes { get; set; }
 
@@ -122,6 +134,8 @@ public partial class ErpSystemContext : DbContext
     public virtual DbSet<Unit> Units { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
+
+    public virtual DbSet<UserLocation> UserLocations { get; set; }
 
     public virtual DbSet<UserPermission> UserPermissions { get; set; }
 
@@ -385,6 +399,25 @@ public partial class ErpSystemContext : DbContext
                 .HasConstraintName("FK_Customer_Company");
         });
 
+        modelBuilder.Entity<DailyStockBalance>(entity =>
+        {
+            entity.HasKey(e => e.DailyStockBalanceId).HasName("PK__DailySto__3A2A0CB7073089A4");
+
+            entity.ToTable("DailyStockBalance");
+
+            entity.Property(e => e.Date).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Location).WithMany(p => p.DailyStockBalances)
+                .HasForeignKey(d => d.LocationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DailyStockBalance_Location");
+
+            entity.HasOne(d => d.ItemBatch).WithMany(p => p.DailyStockBalances)
+                .HasForeignKey(d => new { d.ItemMasterId, d.BatchId })
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DailyStockBalance_ItemMaster_Batch");
+        });
+
         modelBuilder.Entity<ExpenseOutRequisition>(entity =>
         {
             entity.HasKey(e => e.ExpenseOutRequisitionId).HasName("PK__ExpenseO__A207C4EAC69BB0C3");
@@ -432,14 +465,18 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.ApprovedDate).HasColumnType("datetime");
             entity.Property(e => e.CreatedDate).HasColumnType("datetime");
             entity.Property(e => e.GrnDate).HasColumnType("date");
+            entity.Property(e => e.GrnType).HasMaxLength(50);
             entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
             entity.Property(e => e.ReceivedBy).HasMaxLength(50);
             entity.Property(e => e.ReceivedDate).HasColumnType("date");
 
             entity.HasOne(d => d.PurchaseOrder).WithMany(p => p.GrnMasters)
                 .HasForeignKey(d => d.PurchaseOrderId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_GrnMaster_PurchaseOrder");
+
+            entity.HasOne(d => d.WarehouseLocation).WithMany(p => p.GrnMasters)
+                .HasForeignKey(d => d.WarehouseLocationId)
+                .HasConstraintName("FK_GrnMaster_WarehouseLocationId");
         });
 
         modelBuilder.Entity<IssueDetail>(entity =>
@@ -532,7 +569,9 @@ public partial class ErpSystemContext : DbContext
 
             entity.ToTable("ItemMaster");
 
+            entity.Property(e => e.ConversionRate).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.CreatedBy).HasMaxLength(50);
+            entity.Property(e => e.ItemCode).HasMaxLength(50);
             entity.Property(e => e.ItemName).HasMaxLength(50);
 
             entity.HasOne(d => d.Category).WithMany(p => p.ItemMasters)
@@ -540,11 +579,19 @@ public partial class ErpSystemContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__ItemMaste__Categ__72910220");
 
+            entity.HasOne(d => d.InventoryUnit).WithMany(p => p.ItemMasterInventoryUnits)
+                .HasForeignKey(d => d.InventoryUnitId)
+                .HasConstraintName("FK_ItemMaster_InventoryUnitId");
+
             entity.HasOne(d => d.ItemType).WithMany(p => p.ItemMasters)
                 .HasForeignKey(d => d.ItemTypeId)
                 .HasConstraintName("FK_ItemType_ItemMaster");
 
-            entity.HasOne(d => d.Unit).WithMany(p => p.ItemMasters)
+            entity.HasOne(d => d.Parent).WithMany(p => p.InverseParent)
+                .HasForeignKey(d => d.ParentId)
+                .HasConstraintName("FK_ItemMaster_ParentId");
+
+            entity.HasOne(d => d.Unit).WithMany(p => p.ItemMasterUnits)
                 .HasForeignKey(d => d.UnitId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__ItemMaste__UnitI__73852659");
@@ -583,6 +630,76 @@ public partial class ErpSystemContext : DbContext
                 .HasConstraintName("FK_Parent_Location");
         });
 
+        modelBuilder.Entity<LocationInventory>(entity =>
+        {
+            entity.HasKey(e => e.LocationInventoryId).HasName("PK__Location__9ACB0EFF6BF02352");
+
+            entity.ToTable("LocationInventory");
+
+            entity.HasOne(d => d.Location).WithMany(p => p.LocationInventories)
+                .HasForeignKey(d => d.LocationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_LocationInventory_Location");
+
+            entity.HasOne(d => d.ItemBatch).WithMany(p => p.LocationInventories)
+                .HasForeignKey(d => new { d.ItemMasterId, d.BatchId })
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_LocationInventory_ItemMaster_Batch");
+        });
+
+        modelBuilder.Entity<LocationInventoryGoodsInTransit>(entity =>
+        {
+            entity.HasKey(e => e.LocationInventoryGoodsInTransitId).HasName("PK__Location__CB0D5797AC2E8F9E");
+
+            entity.ToTable("LocationInventoryGoodsInTransit");
+
+            entity.Property(e => e.Date).HasColumnType("date");
+
+            entity.HasOne(d => d.FromLocation).WithMany(p => p.LocationInventoryGoodsInTransitFromLocations)
+                .HasForeignKey(d => d.FromLocationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_LocationInventoryGoodsInTransit_FromLocation");
+
+            entity.HasOne(d => d.ToLocation).WithMany(p => p.LocationInventoryGoodsInTransitToLocations)
+                .HasForeignKey(d => d.ToLocationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_LocationInventoryGoodsInTransit_ToLocation");
+
+            entity.HasOne(d => d.ItemBatch).WithMany(p => p.LocationInventoryGoodsInTransits)
+                .HasForeignKey(d => new { d.ItemMasterId, d.BatchId })
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_LocationInventoryGoodsInTransit_ItemMaster_Batch");
+        });
+
+        modelBuilder.Entity<LocationInventoryMovement>(entity =>
+        {
+            entity.HasKey(e => e.LocationInventoryMovementId).HasName("PK__Location__A274056759FDB309");
+
+            entity.ToTable("LocationInventoryMovement");
+
+            entity.Property(e => e.Date).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Location).WithMany(p => p.LocationInventoryMovements)
+                .HasForeignKey(d => d.LocationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_LocationInventoryMovement_Location");
+
+            entity.HasOne(d => d.MovementType).WithMany(p => p.LocationInventoryMovements)
+                .HasForeignKey(d => d.MovementTypeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_LocationInventoryMovement_MovementType");
+
+            entity.HasOne(d => d.TransactionType).WithMany(p => p.LocationInventoryMovements)
+                .HasForeignKey(d => d.TransactionTypeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_LocationInventoryMovement_TransactionType");
+
+            entity.HasOne(d => d.ItemBatch).WithMany(p => p.LocationInventoryMovements)
+                .HasForeignKey(d => new { d.ItemMasterId, d.BatchId })
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_LocationInventoryMovement_ItemMaster_Batch");
+        });
+
         modelBuilder.Entity<LocationType>(entity =>
         {
             entity.HasKey(e => e.LocationTypeId).HasName("PK__Location__737D32F95DE8DC0C");
@@ -594,11 +711,30 @@ public partial class ErpSystemContext : DbContext
                 .IsUnicode(false);
         });
 
+        modelBuilder.Entity<MeasurementType>(entity =>
+        {
+            entity.HasKey(e => e.MeasurementTypeId).HasName("PK__Measurem__167933E78448B79A");
+
+            entity.ToTable("MeasurementType");
+
+            entity.Property(e => e.Name).HasMaxLength(50);
+        });
+
         modelBuilder.Entity<Module>(entity =>
         {
             entity.ToTable("Module");
 
             entity.Property(e => e.ModuleName).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<MovementType>(entity =>
+        {
+            entity.HasKey(e => e.MovementTypeId).HasName("PK__Movement__74FB1F11EC2FC108");
+
+            entity.ToTable("MovementType");
+
+            entity.Property(e => e.Description).HasMaxLength(255);
+            entity.Property(e => e.Name).HasMaxLength(50);
         });
 
         modelBuilder.Entity<PaymentMode>(entity =>
@@ -1026,6 +1162,10 @@ public partial class ErpSystemContext : DbContext
             entity.ToTable("Unit");
 
             entity.Property(e => e.UnitName).HasMaxLength(50);
+
+            entity.HasOne(d => d.MeasurementType).WithMany(p => p.Units)
+                .HasForeignKey(d => d.MeasurementTypeId)
+                .HasConstraintName("FK_Unit_MeasurementTypeId");
         });
 
         modelBuilder.Entity<User>(entity =>
@@ -1049,6 +1189,23 @@ public partial class ErpSystemContext : DbContext
             entity.HasOne(d => d.Location).WithMany(p => p.Users)
                 .HasForeignKey(d => d.LocationId)
                 .HasConstraintName("FK_User_Location");
+        });
+
+        modelBuilder.Entity<UserLocation>(entity =>
+        {
+            entity.HasKey(e => e.UserLocationId).HasName("PK__UserLoca__3C542CAAF9B7743C");
+
+            entity.ToTable("UserLocation");
+
+            entity.HasOne(d => d.Location).WithMany(p => p.UserLocations)
+                .HasForeignKey(d => d.LocationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_UserLocation_Location");
+
+            entity.HasOne(d => d.User).WithMany(p => p.UserLocations)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_UserLocation_User");
         });
 
         modelBuilder.Entity<UserPermission>(entity =>
