@@ -1,4 +1,6 @@
-﻿namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
+﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+
+namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 {
     public class ItemMasterDto
     {
@@ -25,7 +27,20 @@
 
         public int? ItemTypeId { get; set; }
 
+        public int? ParentId { get; set; }
+
+        public int? InventoryUnitId { get; set; }
+
+        public virtual UnitDto? InventoryUnit { get; set; }
+
+        public decimal? ConversionRate { get; set; }
+
+        public string? ItemCode { get; set; }
+
+        public int? ReorderLevel { get; set; }
+
         public virtual ItemTypeDto? ItemType { get; set; }
+
 
     }
 }

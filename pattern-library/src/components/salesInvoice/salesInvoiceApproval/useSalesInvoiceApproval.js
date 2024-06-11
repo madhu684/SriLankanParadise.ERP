@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { approve_sales_invoice_api } from "../../../services/salesApi";
 import { get_charges_and_deductions_applied_api } from "../../../services/purchaseApi";
+import { get_company_api } from "../../../services/salesApi";
 import { useQuery } from "@tanstack/react-query";
 
 const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
@@ -127,6 +128,49 @@ const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
     }
   }, [approvalStatus]);
 
+  const fetchCompany = async () => {
+    try {
+      const response = await get_company_api(
+        sessionStorage?.getItem("companyId")
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching company:", error);
+    }
+  };
+
+  const {
+    data: company,
+    isLoading: isCompanyLoading,
+    isError: isCompanyError,
+    error: companyError,
+  } = useQuery({
+    queryKey: ["company"],
+    queryFn: fetchCompany,
+  });
+
+  // Group sales invoice details by item master ID
+  const groupedSalesInvoiceDetails = salesInvoice.salesInvoiceDetails.reduce(
+    (acc, item) => {
+      const itemMasterId = item.itemBatch?.itemMaster?.itemMasterId;
+      if (!acc[itemMasterId]) {
+        acc[itemMasterId] = { ...item, quantity: 0, totalPrice: 0 };
+      }
+      acc[itemMasterId].quantity += item.quantity;
+      acc[itemMasterId].totalPrice += item.totalPrice;
+      return acc;
+    },
+    {}
+  );
+
+  const renderSalesInvoiceDetails = () => {
+    if (company.batchStockType === "FIFO") {
+      return Object.values(groupedSalesInvoiceDetails);
+    } else {
+      return salesInvoice.salesInvoiceDetails;
+    }
+  };
+
   return {
     approvalStatus,
     chargesAndDeductionsApplied,
@@ -139,6 +183,10 @@ const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
     commonChargesAndDeductions,
     loading,
     alertRef,
+    isCompanyLoading,
+    isCompanyError,
+    company,
+    renderSalesInvoiceDetails,
     calculateSubTotal,
     handleApprove,
   };

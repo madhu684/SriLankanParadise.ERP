@@ -44,7 +44,7 @@ const useTinList = () => {
   const fetchData = async () => {
     try {
       if (!isLoadingPermissions && userPermissions) {
-        if (hasPermission("Approve Goods Received Note")) {
+        if (hasPermission("Approve Transfer Issue Note")) {
           const tinWithoutDraftsResponse =
             await get_issue_masters_with_out_drafts_api(
               sessionStorage.getItem("companyId")

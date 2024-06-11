@@ -30,18 +30,41 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
               <strong>Created By:</strong> {itemMaster.createdBy}
             </p>
           </div>
-          <p>
-            <strong>Item name:</strong> {itemMaster.itemName}
-          </p>
-          <p>
-            <strong>Item type:</strong> {itemMaster.itemType?.name}
-          </p>
-          <p>
-            <strong>Category:</strong> {itemMaster.category?.categoryName}
-          </p>
-          <p>
-            <strong>Unit:</strong> {itemMaster.unit?.unitName}
-          </p>
+        </div>
+        <div className="row">
+          <div className="col-md-6">
+            <p>
+              <strong>Item name:</strong> {itemMaster?.itemName}
+            </p>
+            <p>
+              <strong>Item code:</strong> {itemMaster?.itemCode}
+            </p>
+            <p>
+              <strong>Item type:</strong> {itemMaster?.itemType?.name}
+            </p>
+            <p>
+              <strong>Category:</strong> {itemMaster?.category?.categoryName}
+            </p>
+          </div>
+
+          <div className="col-md-6">
+            <p>
+              <strong>Measurement Type:</strong>{" "}
+              {itemMaster.unit?.measurementType?.name}
+            </p>
+            <p>
+              <strong>Unit:</strong> {itemMaster.unit?.unitName}
+            </p>
+            <p>
+              <strong>Reorder Level:</strong> {itemMaster?.reorderLevel}
+            </p>
+            <p>
+              <strong>Hierarchy Type:</strong>{" "}
+              {itemMaster.parentId !== itemMaster.itemMasterId
+                ? "Sub Item"
+                : "Main Item"}
+            </p>
+          </div>
         </div>
       </Modal.Body>
       <Modal.Footer>

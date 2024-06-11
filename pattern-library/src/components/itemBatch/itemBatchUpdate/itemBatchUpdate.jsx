@@ -3,6 +3,7 @@ import useItemBatchUpdate from "./useItemBatchUpdate";
 import CurrentDateTime from "../../currentDateTime/currentDateTime";
 import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 import useCompanyLogoUrl from "../../companyLogo/useCompanyLogoUrl";
+import ConfirmationModal from "../../confirmationModals/confirmationModal/confirmationModal";
 
 const ItemBatchUpdate = ({ handleClose, handleUpdated }) => {
   const {
@@ -21,6 +22,8 @@ const ItemBatchUpdate = ({ handleClose, handleUpdated }) => {
     itemsError,
     loading,
     selectedBatch,
+    showConfirmationModalInParent,
+    showConfirmationModal,
     handleInputChange,
     handleSubmit,
     handleReset,
@@ -28,6 +31,8 @@ const ItemBatchUpdate = ({ handleClose, handleUpdated }) => {
     setSearchTerm,
     handleSelectItem,
     handleBatchSelection,
+    handleShowConfirmationModal,
+    handleCloseConfirmationModal,
   } = useItemBatchUpdate({
     onFormSubmit: () => {},
   });
@@ -53,6 +58,11 @@ const ItemBatchUpdate = ({ handleClose, handleUpdated }) => {
       {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
           Item batch updated successfully!
+        </div>
+      )}
+      {submissionStatus === "successSubmittedAll" && (
+        <div className="alert alert-success mb-3" role="alert">
+          All item batches updated successfully!
         </div>
       )}
       {submissionStatus === "successSavedAsDraft" && (
@@ -264,7 +274,7 @@ const ItemBatchUpdate = ({ handleClose, handleUpdated }) => {
           <button
             type="button"
             className="btn btn-primary me-2"
-            onClick={() => handleSubmit(false)}
+            onClick={handleShowConfirmationModal} //() => handleSubmit(false)
             disabled={
               selectedBatch === null ||
               formData.id === 0 ||
@@ -290,6 +300,23 @@ const ItemBatchUpdate = ({ handleClose, handleUpdated }) => {
           </button>
         </div>
       </form>
+      {showConfirmationModalInParent && (
+        <ConfirmationModal
+          show={showConfirmationModal}
+          handleClose={() => {
+            handleSubmit(false, false);
+            handleCloseConfirmationModal();
+          }}
+          handleConfirm={() => {
+            handleSubmit(false, true);
+            handleCloseConfirmationModal();
+          }}
+          title="Update Confirmation"
+          message="Do you want to update all batches for this item to maintain a same selling price?"
+          confirmButtonText="Update All Batches"
+          cancelButtonText="No"
+        />
+      )}
     </div>
   );
 };

@@ -230,5 +230,55 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpGet("GetItemMasterByItemMasterId/{itemMasterId}")]
+        public async Task<ApiResponseModel> GetItemMasterByItemMasterId(int itemMasterId)
+        {
+            try
+            {
+                var itemMaster = await _itemMasterService.GetItemMasterByItemMasterId(itemMasterId);
+                if (itemMaster != null)
+                {
+                    var itemMasterDto = _mapper.Map<ItemMasterDto>(itemMaster);
+                    AddResponseMessage(Response, LogMessages.ItemMasterRetrieved, itemMasterDto, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.ItemMasterNotFound);
+                    AddResponseMessage(Response, LogMessages.ItemMasterNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("GetSubItemsByItemMasterId/{itemMasterId}")]
+        public async Task<ApiResponseModel> GetSubItemsByItemMasterId(int itemMasterId)
+        {
+            try
+            {
+                var itemMasters = await _itemMasterService.GetSubItemsByItemMasterId(itemMasterId);
+                if (itemMasters != null)
+                {
+                    var itemMasterDtos= _mapper.Map<IEnumerable<ItemMasterDto>>(itemMasters);
+                    AddResponseMessage(Response, LogMessages.SubItemsRetrieved, itemMasterDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.SubItemsNotFound);
+                    AddResponseMessage(Response, LogMessages.SubItemsNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

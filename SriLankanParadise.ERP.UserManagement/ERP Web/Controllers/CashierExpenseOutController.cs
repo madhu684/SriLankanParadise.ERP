@@ -7,6 +7,7 @@ using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using System.Net;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.Shared.Resources;
+using SriLankanParadise.ERP.UserManagement.Business_Service;
 
 namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 {
@@ -56,6 +57,31 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 var CashierExpenseOutDto = _mapper.Map<CashierExpenseOutDto>(cashierExpenseOut);
                 _logger.LogInformation(LogMessages.CashierExpenseOutCreated);
                 AddResponseMessage(Response, LogMessages.CashierExpenseOutCreated, CashierExpenseOutDto, true, HttpStatusCode.Created);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("GetCashierExpenseOutsByUserId/{userId}")]
+        public async Task<ApiResponseModel> GetCashierExpenseOutsByUserId(int userId)
+        {
+            try
+            {
+                var cashierExpenseOuts = await _cashierExpenseOutService.GetCashierExpenseOutsByUserId(userId);
+                if (cashierExpenseOuts != null)
+                {
+                    var cashierExpenseOutsDtos = _mapper.Map<IEnumerable<CashierExpenseOutDto>>(cashierExpenseOuts);
+                    AddResponseMessage(Response, LogMessages.CashierExpenseOutsRetrieved, cashierExpenseOutsDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.CashierExpenseOutsNotFound);
+                    AddResponseMessage(Response, LogMessages.CashierExpenseOutsNotFound, null, true, HttpStatusCode.NotFound);
+                }
             }
             catch (Exception ex)
             {

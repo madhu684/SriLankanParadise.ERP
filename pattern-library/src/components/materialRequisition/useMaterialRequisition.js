@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 
 const useMaterialRequisition = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
-    deliveryLocation: null,
+    deliveryLocation: sessionStorage?.getItem("locationId"),
     warehouseLocation: null,
     itemDetails: [],
     attachments: [],

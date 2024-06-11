@@ -12,7 +12,13 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
   const [loading, setLoading] = useState(false);
   const alertRef = useRef(null);
   const [modGrn, setModGrn] = useState(null);
-
+  const [showManageItemModal, setShowManageItemModal] = useState(false);
+  const [manageItem, setManageItem] = useState(null);
+  const grnTypeDisplayMap = {
+    finishedGoodsIn: "Finished Goods In",
+    directPurchase: "Direct Purchase",
+    goodsReceivedNote: "Goods Received Note",
+  };
   useEffect(() => {
     const deepCopyGrn = JSON.parse(JSON.stringify(grn));
 
@@ -159,7 +165,7 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
       createdBy: sessionStorage.getItem("username"),
       createdUserId: sessionStorage.getItem("userId"),
       tempQuantity: grnDetail.acceptedQuantity + grnDetail.freeQuantity,
-      locationId: 5,
+      locationId: grn?.warehouseLocationId,
       expiryDate: grnDetail.expiryDate,
       permissionId: 1048,
     };
@@ -196,14 +202,33 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
     }));
   };
 
+  const handleOpenManageItemModal = (item) => {
+    setManageItem(item);
+    setShowManageItemModal(true);
+  };
+
+  const handleCloseManageItemModal = () => {
+    setShowManageItemModal(false);
+    setManageItem(null);
+  };
+
+  const handleShowManageItemModal = () => {
+    setShowManageItemModal(true);
+  };
+
   return {
     approvalStatus,
     loading,
     alertRef,
     modGrn,
+    manageItem,
+    showManageItemModal,
+    grnTypeDisplayMap,
     handleApprove,
     handleCostPriceChange,
     handleSellingPriceChange,
+    handleCloseManageItemModal,
+    handleOpenManageItemModal,
   };
 };
 

@@ -7,6 +7,8 @@ import "moment-timezone";
 
 const GrnDetail = ({ show, handleClose, grn }) => {
   const { getStatusLabel, getStatusBadgeClass } = useGrnList();
+  const { grnTypeDisplayMap } = useGrnDetail();
+
   return (
     <Modal show={show} onHide={handleClose} centered scrollable size="lg">
       <Modal.Header closeButton>
@@ -38,6 +40,9 @@ const GrnDetail = ({ show, handleClose, grn }) => {
               <strong>Received Date:</strong> {grn?.receivedDate?.split("T")[0]}
             </p>
             <p>
+              <strong>GRN Type:</strong> {grnTypeDisplayMap[grn?.grnType]}
+            </p>
+            <p>
               <strong>Goods Receiving Status:</strong>{" "}
               <span
                 className={`badge rounded-pill ${getStatusBadgeClass(
@@ -48,6 +53,10 @@ const GrnDetail = ({ show, handleClose, grn }) => {
                   parseInt(`${1}${grn.status.toString().charAt(0)}`, 10)
                 )}
               </span>
+            </p>
+            <p>
+              <strong>Warehouse Location:</strong>{" "}
+              {grn?.warehouseLocation?.locationName}
             </p>
             {parseInt(grn.status.toString().charAt(1), 10) === 2 && (
               <>
@@ -79,40 +88,47 @@ const GrnDetail = ({ show, handleClose, grn }) => {
                 .tz("Asia/Colombo")
                 .format("YYYY-MM-DD hh:mm:ss A")}
             </p>
-            <p>
-              <strong>Purchase Order Reference No:</strong>{" "}
-              {grn.purchaseOrder.referenceNo}
-            </p>
+            {grn?.purchaseOrder?.referenceNo && (
+              <p>
+                <strong>Purchase Order Reference No:</strong>{" "}
+                {grn?.purchaseOrder?.referenceNo}
+              </p>
+            )}
           </div>
         </div>
 
         <h6>Item Details</h6>
-        <table className="table mt-2">
-          <thead>
-            <tr>
-              <th>Item Name</th>
-              <th>Unit</th>
-              <th>Received Quantity</th>
-              <th>Rejected Quantity</th>
-              <th>Free Quantity</th>
-              <th>Expiry Date</th>
-              <th>Unit Price</th>
-            </tr>
-          </thead>
-          <tbody>
-            {grn.grnDetails.map((item, index) => (
-              <tr key={index}>
-                <td>{item.item?.itemName}</td>
-                <td>{item.item?.unit.unitName}</td>
-                <td>{item.receivedQuantity}</td>
-                <td>{item.rejectedQuantity}</td>
-                <td>{item.freeQuantity}</td>
-                <td>{item.expiryDate?.split("T")[0]}</td>
-                <td>{item.unitPrice.toFixed(2)}</td>
+        <div className="table-responsive mb-2">
+          <table
+            className="table mt-2"
+            style={{ minWidth: "1200px", overflowX: "auto" }}
+          >
+            <thead>
+              <tr>
+                <th>Item Name</th>
+                <th>Unit</th>
+                <th>Received Quantity</th>
+                <th>Rejected Quantity</th>
+                <th>Free Quantity</th>
+                <th>Expiry Date</th>
+                <th>Unit Price</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {grn.grnDetails.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.item?.itemName}</td>
+                  <td>{item.item?.unit.unitName}</td>
+                  <td>{item.receivedQuantity}</td>
+                  <td>{item.rejectedQuantity}</td>
+                  <td>{item.freeQuantity}</td>
+                  <td>{item.expiryDate?.split("T")[0]}</td>
+                  <td>{item.unitPrice.toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleClose}>

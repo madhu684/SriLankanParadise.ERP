@@ -106,6 +106,18 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<CashierExpenseOut, CashierExpenseOutDto>();
             CreateMap<UserLocationRequestModel, UserLocation>();
             CreateMap<UserLocation, UserLocationDto>();
+            CreateMap<ExpenseOutRequisitionRequestModel, ExpenseOutRequisition>();
+            CreateMap<ExpenseOutRequisition, ExpenseOutRequisitionDto>();
+            CreateMap<BusinessTypeRequestModel, BusinessType>();
+            CreateMap<BusinessType, BusinessTypeDto>();
+            CreateMap<CompanyTypeRequestModel, CompanyType>();
+            CreateMap<CompanyType, CompanyTypeDto>();
+            CreateMap<SupplierCategoryRequestModel, SupplierCategory>();
+            CreateMap<SupplierCategory, SupplierCategoryDto>();
+            CreateMap<SupplierAttachmentRequestModel, SupplierAttachment>();
+            CreateMap<SupplierAttachment, SupplierAttachmentDto>();
+            CreateMap<MeasurementTypeRequestModel, MeasurementType>();
+            CreateMap<MeasurementType, MeasurementTypeDto>();
             // Add more mapping configurations if needed
         }
     }

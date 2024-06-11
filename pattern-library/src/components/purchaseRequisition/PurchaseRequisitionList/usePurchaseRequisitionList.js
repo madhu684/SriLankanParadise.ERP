@@ -93,7 +93,9 @@ const usePurchaseRequisitionList = () => {
             await get_purchase_requisitions_by_user_id_api(
               sessionStorage.getItem("userId")
             );
-          setPurchaseRequisitions(purchaseRequisitionResponse.data.result);
+          setPurchaseRequisitions(
+            purchaseRequisitionResponse.data.result || []
+          );
         }
       }
     } catch (error) {

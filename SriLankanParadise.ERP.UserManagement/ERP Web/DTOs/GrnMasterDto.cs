@@ -14,7 +14,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public int? Status { get; set; }
 
-        public int PurchaseOrderId { get; set; }
+        public int? PurchaseOrderId { get; set; }
 
         public virtual PurchaseOrderDto? PurchaseOrder { get; set; }
 
@@ -31,6 +31,13 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
         public DateTime? CreatedDate { get; set; }
 
         public DateTime? LastUpdatedDate { get; set; }
+
+        public string? GrnType { get; set; }
+
+        public int? WarehouseLocationId { get; set; }
+
+        public virtual LocationDto? WarehouseLocation { get; set; }
+
         public virtual IEnumerable<GrnDetailDto>? GrnDetails { get; set; }
 
     }

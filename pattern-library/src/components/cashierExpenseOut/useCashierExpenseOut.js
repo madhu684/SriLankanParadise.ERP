@@ -3,7 +3,7 @@ import { post_cashier_expense_out_api } from "../../services/salesApi";
 
 const useCashierExpenseOut = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
-    description: "",
+    reason: "",
     amount: "",
   });
   const [validFields, setValidFields] = useState({});
@@ -57,15 +57,11 @@ const useCashierExpenseOut = ({ onFormSubmit }) => {
   };
 
   const validateForm = () => {
-    const isDescriptionValid = validateField(
-      "description",
-      "Description",
-      formData.description
-    );
+    const isreasonValid = validateField("reason", "Reason", formData.reason);
 
     const isAmountValid = validateField("amount", "Amount", formData.amount);
 
-    return isDescriptionValid && isAmountValid;
+    return isreasonValid && isAmountValid;
   };
 
   const handleSubmit = async () => {
@@ -78,7 +74,7 @@ const useCashierExpenseOut = ({ onFormSubmit }) => {
 
         const cashierExpenseOutData = {
           userId: sessionStorage.getItem("userId"),
-          description: formData.description,
+          reason: formData.reason,
           amount: formData.amount,
           createdDate: currentDate,
           companyId: sessionStorage.getItem("companyId"),
@@ -114,7 +110,7 @@ const useCashierExpenseOut = ({ onFormSubmit }) => {
 
   const handleClose = () => {
     setFormData({
-      description: "",
+      reason: "",
       amount: "",
     });
     setValidFields({});

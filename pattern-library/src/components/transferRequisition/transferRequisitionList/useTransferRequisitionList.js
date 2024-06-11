@@ -98,7 +98,7 @@ const useTransferRequisitionList = () => {
           setTransferRequisitions(
             requisitionMastersResponse.data.result?.filter(
               (rm) => rm.requisitionType === "TRN"
-            )
+            ) || []
           );
         }
       }

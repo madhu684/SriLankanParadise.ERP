@@ -90,6 +90,7 @@ const useSupplier = ({ onFormSubmit }) => {
   const handleSubmit = async () => {
     try {
       const isFormValid = validateForm();
+      const currentDate = new Date().toISOString();
 
       if (isFormValid) {
         setLoading(true);
@@ -100,6 +101,19 @@ const useSupplier = ({ onFormSubmit }) => {
           phone: formData.phone,
           email: formData.email,
           companyId: sessionStorage.getItem("companyId"),
+          addressLine1: "",
+          addressLine2: "",
+          officeContactNo: "",
+          businessRegistrationNo: "",
+          vatregistrationNo: "",
+          companyTypeId: null,
+          businessTypeId: null,
+          supplierLogoPath: "",
+          status: 1,
+          rating: 0,
+          remarks: "",
+          createdDate: currentDate,
+          lastUpdatedDate: currentDate,
           permissionId: 1054,
         };
 

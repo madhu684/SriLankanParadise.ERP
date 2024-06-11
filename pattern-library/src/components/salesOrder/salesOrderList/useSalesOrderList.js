@@ -88,7 +88,7 @@ const useSalesOrderList = () => {
           const SalesOrderResponse = await get_sales_orders_by_user_id_api(
             sessionStorage.getItem("userId")
           );
-          setSalesOrders(SalesOrderResponse.data.result);
+          setSalesOrders(SalesOrderResponse.data.result || []);
         }
       }
     } catch (error) {

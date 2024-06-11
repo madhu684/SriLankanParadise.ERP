@@ -1,4 +1,5 @@
-﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+﻿using Microsoft.EntityFrameworkCore;
+using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
@@ -22,6 +23,22 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             catch (Exception)
             {
 
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<CashierExpenseOut>> GetCashierExpenseOutsByUserId(int userId)
+        {
+            try
+            {
+                var cashierExpenseOuts = await _dbContext.CashierExpenseOuts
+                    .Where(eo => eo.UserId == userId)
+                    .ToListAsync();
+
+                return cashierExpenseOuts.Any() ? cashierExpenseOuts : null;
+            }
+            catch (Exception)
+            {
                 throw;
             }
         }
