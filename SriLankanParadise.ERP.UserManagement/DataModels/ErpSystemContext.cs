@@ -49,6 +49,8 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<Customer> Customers { get; set; }
 
+    public virtual DbSet<DailyStockBalance> DailyStockBalances { get; set; }
+
     public virtual DbSet<ExpenseOutRequisition> ExpenseOutRequisitions { get; set; }
 
     public virtual DbSet<GrnDetail> GrnDetails { get; set; }
@@ -69,11 +71,19 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<Location> Locations { get; set; }
 
+    public virtual DbSet<LocationInventory> LocationInventories { get; set; }
+
+    public virtual DbSet<LocationInventoryGoodsInTransit> LocationInventoryGoodsInTransits { get; set; }
+
+    public virtual DbSet<LocationInventoryMovement> LocationInventoryMovements { get; set; }
+
     public virtual DbSet<LocationType> LocationTypes { get; set; }
 
     public virtual DbSet<MeasurementType> MeasurementTypes { get; set; }
 
     public virtual DbSet<Module> Modules { get; set; }
+
+    public virtual DbSet<MovementType> MovementTypes { get; set; }
 
     public virtual DbSet<PaymentMode> PaymentModes { get; set; }
 
@@ -387,6 +397,25 @@ public partial class ErpSystemContext : DbContext
                 .HasConstraintName("FK_Customer_Company");
         });
 
+        modelBuilder.Entity<DailyStockBalance>(entity =>
+        {
+            entity.HasKey(e => e.DailyStockBalanceId).HasName("PK__DailySto__3A2A0CB7073089A4");
+
+            entity.ToTable("DailyStockBalance");
+
+            entity.Property(e => e.Date).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Location).WithMany(p => p.DailyStockBalances)
+                .HasForeignKey(d => d.LocationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DailyStockBalance_Location");
+
+            entity.HasOne(d => d.ItemBatch).WithMany(p => p.DailyStockBalances)
+                .HasForeignKey(d => new { d.ItemMasterId, d.BatchId })
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_DailyStockBalance_ItemMaster_Batch");
+        });
+
         modelBuilder.Entity<ExpenseOutRequisition>(entity =>
         {
             entity.HasKey(e => e.ExpenseOutRequisitionId).HasName("PK__ExpenseO__A207C4EAC69BB0C3");
@@ -599,6 +628,76 @@ public partial class ErpSystemContext : DbContext
                 .HasConstraintName("FK_Parent_Location");
         });
 
+        modelBuilder.Entity<LocationInventory>(entity =>
+        {
+            entity.HasKey(e => e.LocationInventoryId).HasName("PK__Location__9ACB0EFF6BF02352");
+
+            entity.ToTable("LocationInventory");
+
+            entity.HasOne(d => d.Location).WithMany(p => p.LocationInventories)
+                .HasForeignKey(d => d.LocationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_LocationInventory_Location");
+
+            entity.HasOne(d => d.ItemBatch).WithMany(p => p.LocationInventories)
+                .HasForeignKey(d => new { d.ItemMasterId, d.BatchId })
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_LocationInventory_ItemMaster_Batch");
+        });
+
+        modelBuilder.Entity<LocationInventoryGoodsInTransit>(entity =>
+        {
+            entity.HasKey(e => e.LocationInventoryGoodsInTransitId).HasName("PK__Location__CB0D5797AC2E8F9E");
+
+            entity.ToTable("LocationInventoryGoodsInTransit");
+
+            entity.Property(e => e.Date).HasColumnType("date");
+
+            entity.HasOne(d => d.FromLocation).WithMany(p => p.LocationInventoryGoodsInTransitFromLocations)
+                .HasForeignKey(d => d.FromLocationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_LocationInventoryGoodsInTransit_FromLocation");
+
+            entity.HasOne(d => d.ToLocation).WithMany(p => p.LocationInventoryGoodsInTransitToLocations)
+                .HasForeignKey(d => d.ToLocationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_LocationInventoryGoodsInTransit_ToLocation");
+
+            entity.HasOne(d => d.ItemBatch).WithMany(p => p.LocationInventoryGoodsInTransits)
+                .HasForeignKey(d => new { d.ItemMasterId, d.BatchId })
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_LocationInventoryGoodsInTransit_ItemMaster_Batch");
+        });
+
+        modelBuilder.Entity<LocationInventoryMovement>(entity =>
+        {
+            entity.HasKey(e => e.LocationInventoryMovementId).HasName("PK__Location__A274056759FDB309");
+
+            entity.ToTable("LocationInventoryMovement");
+
+            entity.Property(e => e.Date).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Location).WithMany(p => p.LocationInventoryMovements)
+                .HasForeignKey(d => d.LocationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_LocationInventoryMovement_Location");
+
+            entity.HasOne(d => d.MovementType).WithMany(p => p.LocationInventoryMovements)
+                .HasForeignKey(d => d.MovementTypeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_LocationInventoryMovement_MovementType");
+
+            entity.HasOne(d => d.TransactionType).WithMany(p => p.LocationInventoryMovements)
+                .HasForeignKey(d => d.TransactionTypeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_LocationInventoryMovement_TransactionType");
+
+            entity.HasOne(d => d.ItemBatch).WithMany(p => p.LocationInventoryMovements)
+                .HasForeignKey(d => new { d.ItemMasterId, d.BatchId })
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_LocationInventoryMovement_ItemMaster_Batch");
+        });
+
         modelBuilder.Entity<LocationType>(entity =>
         {
             entity.HasKey(e => e.LocationTypeId).HasName("PK__Location__737D32F95DE8DC0C");
@@ -624,6 +723,16 @@ public partial class ErpSystemContext : DbContext
             entity.ToTable("Module");
 
             entity.Property(e => e.ModuleName).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<MovementType>(entity =>
+        {
+            entity.HasKey(e => e.MovementTypeId).HasName("PK__Movement__74FB1F11EC2FC108");
+
+            entity.ToTable("MovementType");
+
+            entity.Property(e => e.Description).HasMaxLength(255);
+            entity.Property(e => e.Name).HasMaxLength(50);
         });
 
         modelBuilder.Entity<PaymentMode>(entity =>

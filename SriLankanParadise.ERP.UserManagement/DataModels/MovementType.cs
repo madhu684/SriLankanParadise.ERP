@@ -3,15 +3,13 @@ using System.Collections.Generic;
 
 namespace SriLankanParadise.ERP.UserManagement.DataModels;
 
-public partial class TransactionType
+public partial class MovementType
 {
-    public int TransactionTypeId { get; set; }
+    public int MovementTypeId { get; set; }
 
     public string? Name { get; set; }
 
     public string? Description { get; set; }
-
-    public virtual ICollection<ChargesAndDeductionApplied> ChargesAndDeductionApplieds { get; set; } = new List<ChargesAndDeductionApplied>();
 
     public virtual ICollection<LocationInventoryMovement> LocationInventoryMovements { get; set; } = new List<LocationInventoryMovement>();
 }
