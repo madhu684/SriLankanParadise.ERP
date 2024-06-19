@@ -401,7 +401,7 @@ public partial class ErpSystemContext : DbContext
 
         modelBuilder.Entity<DailyStockBalance>(entity =>
         {
-            entity.HasKey(e => e.DailyStockBalanceId).HasName("PK__DailySto__3A2A0CB7073089A4");
+            entity.HasKey(e => e.DailyStockBalanceId).HasName("PK__DailySto__3A2A0CB7BC9199E9");
 
             entity.ToTable("DailyStockBalance");
 
@@ -413,7 +413,7 @@ public partial class ErpSystemContext : DbContext
                 .HasConstraintName("FK_DailyStockBalance_Location");
 
             entity.HasOne(d => d.ItemBatch).WithMany(p => p.DailyStockBalances)
-                .HasForeignKey(d => new { d.ItemMasterId, d.BatchId })
+                .HasForeignKey(d => new { d.BatchId, d.ItemMasterId })
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_DailyStockBalance_ItemMaster_Batch");
         });
@@ -632,7 +632,7 @@ public partial class ErpSystemContext : DbContext
 
         modelBuilder.Entity<LocationInventory>(entity =>
         {
-            entity.HasKey(e => e.LocationInventoryId).HasName("PK__Location__9ACB0EFF6BF02352");
+            entity.HasKey(e => e.LocationInventoryId).HasName("PK__Location__9ACB0EFF6A563B77");
 
             entity.ToTable("LocationInventory");
 
@@ -642,14 +642,14 @@ public partial class ErpSystemContext : DbContext
                 .HasConstraintName("FK_LocationInventory_Location");
 
             entity.HasOne(d => d.ItemBatch).WithMany(p => p.LocationInventories)
-                .HasForeignKey(d => new { d.ItemMasterId, d.BatchId })
+                .HasForeignKey(d => new { d.BatchId, d.ItemMasterId })
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_LocationInventory_ItemMaster_Batch");
         });
 
         modelBuilder.Entity<LocationInventoryGoodsInTransit>(entity =>
         {
-            entity.HasKey(e => e.LocationInventoryGoodsInTransitId).HasName("PK__Location__CB0D5797AC2E8F9E");
+            entity.HasKey(e => e.LocationInventoryGoodsInTransitId).HasName("PK__Location__CB0D5797E531BA90");
 
             entity.ToTable("LocationInventoryGoodsInTransit");
 
@@ -666,14 +666,14 @@ public partial class ErpSystemContext : DbContext
                 .HasConstraintName("FK_LocationInventoryGoodsInTransit_ToLocation");
 
             entity.HasOne(d => d.ItemBatch).WithMany(p => p.LocationInventoryGoodsInTransits)
-                .HasForeignKey(d => new { d.ItemMasterId, d.BatchId })
+                .HasForeignKey(d => new { d.BatchId, d.ItemMasterId })
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_LocationInventoryGoodsInTransit_ItemMaster_Batch");
         });
 
         modelBuilder.Entity<LocationInventoryMovement>(entity =>
         {
-            entity.HasKey(e => e.LocationInventoryMovementId).HasName("PK__Location__A274056759FDB309");
+            entity.HasKey(e => e.LocationInventoryMovementId).HasName("PK__Location__A274056769EF63C5");
 
             entity.ToTable("LocationInventoryMovement");
 
@@ -695,7 +695,7 @@ public partial class ErpSystemContext : DbContext
                 .HasConstraintName("FK_LocationInventoryMovement_TransactionType");
 
             entity.HasOne(d => d.ItemBatch).WithMany(p => p.LocationInventoryMovements)
-                .HasForeignKey(d => new { d.ItemMasterId, d.BatchId })
+                .HasForeignKey(d => new { d.BatchId, d.ItemMasterId })
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_LocationInventoryMovement_ItemMaster_Batch");
         });
@@ -810,7 +810,6 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.ApprovedDate).HasColumnType("datetime");
             entity.Property(e => e.ContactNo).HasMaxLength(12);
             entity.Property(e => e.CreatedDate).HasColumnType("datetime");
-            entity.Property(e => e.Department).HasMaxLength(50);
             entity.Property(e => e.Email).HasMaxLength(100);
             entity.Property(e => e.ExpectedDeliveryDate).HasColumnType("date");
             entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
@@ -820,7 +819,11 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.RequisitionDate).HasColumnType("date");
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
 
-            entity.HasOne(d => d.ExpectedDeliveryLocationNavigation).WithMany(p => p.PurchaseRequisitions)
+            entity.HasOne(d => d.DepartmentNavigation).WithMany(p => p.PurchaseRequisitionDepartmentNavigations)
+                .HasForeignKey(d => d.Department)
+                .HasConstraintName("FK_PurchaseRequisition_Department_Location");
+
+            entity.HasOne(d => d.ExpectedDeliveryLocationNavigation).WithMany(p => p.PurchaseRequisitionExpectedDeliveryLocationNavigations)
                 .HasForeignKey(d => d.ExpectedDeliveryLocation)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PurchaseRequisition_Location");

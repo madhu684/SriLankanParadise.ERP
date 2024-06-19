@@ -261,6 +261,12 @@
   <data name="CustomersRetrieved" xml:space="preserve">
     <value>Customers retrieved</value>
   </data>
+  <data name="DailyStockBalanceCreated" xml:space="preserve">
+    <value>Daily stock balance created successfully</value>
+  </data>
+  <data name="DailyStockBalancesRetrieved" xml:space="preserve">
+    <value>Daily stock balances retrieved</value>
+  </data>
   <data name="ExpenseOutRequisitionCreated" xml:space="preserve">
     <value>Expense out requisition created successfully</value>
   </data>
@@ -380,6 +386,45 @@
   </data>
   <data name="LocationChannelItemBatchCreated" xml:space="preserve">
     <value>LocationChannelItemBatch created successfully</value>
+  </data>
+  <data name="LocationInventoriesNotFound" xml:space="preserve">
+    <value>Location inventories not found</value>
+  </data>
+  <data name="LocationInventoriesRetrieved" xml:space="preserve">
+    <value>Location inventories retrieved</value>
+  </data>
+  <data name="LocationInventoryCreated" xml:space="preserve">
+    <value>Location inventory created successfully</value>
+  </data>
+  <data name="LocationInventoryGoodsInTransitCreated" xml:space="preserve">
+    <value>Location inventory goods in transit created successfully</value>
+  </data>
+  <data name="LocationInventoryGoodsInTransitNotFound" xml:space="preserve">
+    <value>Location inventory goods in transit not found</value>
+  </data>
+  <data name="LocationInventoryGoodsInTransitsRetrieved" xml:space="preserve">
+    <value>Location inventory goods in transits retrieved</value>
+  </data>
+  <data name="LocationInventoryGoodsInTransitUpdated" xml:space="preserve">
+    <value>Location inventory goods in transit updated</value>
+  </data>
+  <data name="LocationInventoryMovementCreated" xml:space="preserve">
+    <value>Location inventory movement created successfully</value>
+  </data>
+  <data name="LocationInventoryMovementNotFound" xml:space="preserve">
+    <value>Location inventory movement not found</value>
+  </data>
+  <data name="LocationInventoryMovementsRetrieved" xml:space="preserve">
+    <value>Location inventory movements retrieved</value>
+  </data>
+  <data name="LocationInventoryMovementUpdated" xml:space="preserve">
+    <value>Location inventory movement updated</value>
+  </data>
+  <data name="LocationInventoryNotFound" xml:space="preserve">
+    <value>Location inventory not found</value>
+  </data>
+  <data name="LocationInventoryUpdated" xml:space="preserve">
+    <value>Location inventory updated</value>
   </data>
   <data name="LocationsNotFound" xml:space="preserve">
     <value>Locations not found</value>
