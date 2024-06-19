@@ -1,5 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { approve_issue_master_api } from "../../../services/purchaseApi";
+import {
+  approve_issue_master_api,
+  patch_item_batch_api,
+  patch_location_inventory_api,
+  post_location_inventory_movement_api,
+} from "../../../services/purchaseApi";
 
 const useMinApproval = ({ min, onFormSubmit }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
@@ -14,12 +19,53 @@ const useMinApproval = ({ min, onFormSubmit }) => {
     }
   }, [approvalStatus, onFormSubmit]);
 
+  console.log(min);
   useEffect(() => {
     if (approvalStatus != null) {
       // Scroll to the success alert when it becomes visible
       alertRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [approvalStatus]);
+
+  const updateInventory = async (details, formattedDate, fromLocationId) => {
+    try {
+      for (const detail of details) {
+        const { itemMasterId, batchId, quantity } = detail;
+
+        // Patch Item Batch API
+        await patch_item_batch_api(batchId, itemMasterId, "subtract", {
+          qty: quantity,
+          permissionId: 1065,
+        });
+
+        // Patch Location Inventory API
+        await patch_location_inventory_api(
+          fromLocationId,
+          itemMasterId,
+          batchId,
+          "subtract",
+          {
+            stockInHand: quantity,
+            permissionId: 1089,
+          }
+        );
+
+        // Post Location Inventory Movement API
+        await post_location_inventory_movement_api({
+          movementTypeId: 2,
+          transactionTypeId: 5,
+          itemMasterId,
+          batchId,
+          locationId: fromLocationId,
+          date: formattedDate,
+          qty: quantity,
+          permissionId: 1090,
+        });
+      }
+    } catch (error) {
+      throw new Error("Error updating inventory: " + error.message);
+    }
+  };
 
   const handleApprove = async (minId) => {
     try {
@@ -42,11 +88,17 @@ const useMinApproval = ({ min, onFormSubmit }) => {
       );
 
       if (approvalResponse.status === 200) {
-        setApprovalStatus("approved");
+        await updateInventory(
+          min.issueDetails,
+          formattedDate,
+          min.requisitionMaster.requestedFromLocationId
+        );
+
         console.log(
-          "Material issue note approved successfully:",
+          "Material issue note approved and inventory updated successfully:",
           approvalResponse
         );
+        setApprovalStatus("approved");
       } else {
         setApprovalStatus("error");
       }

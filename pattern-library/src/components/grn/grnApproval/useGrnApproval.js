@@ -5,6 +5,8 @@ import {
   post_batchHasGrnMaster_api,
   post_itemBatchHasGrnDetail_api,
   post_itemBatch_api,
+  post_location_inventory_api,
+  post_location_inventory_movement_api,
 } from "../../../services/purchaseApi";
 
 const useGrnApproval = ({ grn, onFormSubmit }) => {
@@ -150,6 +152,31 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
       };
 
       await post_itemBatchHasGrnDetail_api(itemBatchHasGrnDetailData);
+
+      // Add to location inventory
+      const locationInventoryData = {
+        itemMasterId: itemBatchResponse.data.result?.itemMasterId,
+        batchId: batchId,
+        locationId: grn?.warehouseLocationId,
+        stockInHand: grnDetail.acceptedQuantity + grnDetail.freeQuantity,
+        permissionId: 1088,
+      };
+
+      await post_location_inventory_api(locationInventoryData);
+
+      // Add to location inventory movement
+      const locationInventoryMovementData = {
+        movementTypeId: 1,
+        transactionTypeId: 4,
+        itemMasterId: itemBatchResponse.data.result?.itemMasterId,
+        batchId: batchId,
+        locationId: grn?.warehouseLocationId,
+        date: new Date().toISOString(), // Current date and time
+        qty: grnDetail.acceptedQuantity + grnDetail.freeQuantity,
+        permissionId: 1090,
+      };
+
+      await post_location_inventory_movement_api(locationInventoryMovementData);
     }
   };
 
@@ -167,6 +194,7 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
       tempQuantity: grnDetail.acceptedQuantity + grnDetail.freeQuantity,
       locationId: grn?.warehouseLocationId,
       expiryDate: grnDetail.expiryDate,
+      qty: grnDetail.acceptedQuantity + grnDetail.freeQuantity,
       permissionId: 1048,
     };
   };

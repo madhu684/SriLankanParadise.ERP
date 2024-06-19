@@ -3,14 +3,16 @@ import {
   get_company_locations_api,
   post_requisition_master_api,
   post_requisition_detail_api,
+  get_user_locations_by_user_id_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
 
 const useTransferRequisition = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
-    deliveryLocation: sessionStorage?.getItem("locationId"),
-    warehouseLocation: null,
+    deliveryLocation: "",
+    toWarehouseLocation: null,
+    fromWarehouseLocation: null,
     itemDetails: [],
     attachments: [],
   });
@@ -41,6 +43,40 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     queryKey: ["locations"],
     queryFn: fetchLocations,
   });
+
+  const fetchUserLocations = async () => {
+    try {
+      const response = await get_user_locations_by_user_id_api(
+        sessionStorage.getItem("userId")
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching user locations:", error);
+    }
+  };
+
+  const {
+    data: userLocations,
+    isLoading: isUserLocationsLoading,
+    isError: isUserLocationsError,
+    error: userLocationsError,
+  } = useQuery({
+    queryKey: ["userLocations", sessionStorage.getItem("userId")],
+    queryFn: fetchUserLocations,
+  });
+
+  useEffect(() => {
+    if (!isUserLocationsLoading && userLocations) {
+      const location = userLocations?.find(
+        (location) => location?.location?.locationTypeId === 3
+      );
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        department: location?.location.locationName,
+        deliveryLocation: location?.locationId,
+      }));
+    }
+  }, [isUserLocationsLoading, userLocations]);
 
   const fetchItems = async (companyId, searchQuery, itemType) => {
     try {
@@ -179,10 +215,10 @@ const useTransferRequisition = ({ onFormSubmit }) => {
       formData.purposeOfRequest
     );
 
-    const isWarehouseLocationValid = validateField(
-      "warehouseLocation",
-      "Warehouse location",
-      formData.warehouseLocation
+    const isToWarehouseLocationValid = validateField(
+      "toWarehouseLocation",
+      "To warehouse location",
+      formData.toWarehouseLocation
     );
 
     let isItemQuantityValid = true;
@@ -206,12 +242,19 @@ const useTransferRequisition = ({ onFormSubmit }) => {
       isItemQuantityValid = isItemQuantityValid && isValidQuantity;
     });
 
+    const isFromWarehouseLocationValid = validateField(
+      "fromWarehouseLocation",
+      "From warehouse location",
+      formData.fromWarehouseLocation
+    );
+
     return (
       isDeliveryLocationValid &&
       isPurposeOfRequestValid &&
       isAttachmentsValid &&
-      isWarehouseLocationValid &&
-      isItemQuantityValid
+      isToWarehouseLocationValid &&
+      isItemQuantityValid &&
+      isFromWarehouseLocationValid
     );
   };
 
@@ -255,8 +298,8 @@ const useTransferRequisition = ({ onFormSubmit }) => {
           approvedDate: null,
           companyId: sessionStorage.getItem("companyId"),
           requisitionType: "TRN",
-          requestedFromLocationId: formData.deliveryLocation,
-          requestedToLocationId: formData.warehouseLocation,
+          requestedFromLocationId: formData.fromWarehouseLocation,
+          requestedToLocationId: formData.toWarehouseLocation,
           referenceNumber: generateReferenceNumber(),
           permissionId: 1052,
         };

@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { get_requisition_masters_with_out_drafts_api } from "../../../services/purchaseApi";
-import { get_requisition_masters_by_user_id_api } from "../../../services/purchaseApi";
+import {
+  get_requisition_masters_by_user_id_api,
+  get_user_locations_by_user_id_api,
+} from "../../../services/purchaseApi";
 import { get_user_permissions_api } from "../../../services/userManagementApi";
 import { useQuery } from "@tanstack/react-query";
 
@@ -18,6 +21,11 @@ const useTransferRequisitionList = () => {
     useState(false);
   const [showCreateTRForm, setShowCreateTRForm] = useState(false);
   const [TRDetail, setTRDetail] = useState("");
+  const [filter, setFilter] = useState("all"); // 'all', 'incoming', 'outgoing'
+  const [userWarehouses, setUserWarehouses] = useState([]);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(
+    userWarehouses[0]?.id || ""
+  );
 
   const fetchUserPermissions = async () => {
     try {
@@ -108,6 +116,36 @@ const useTransferRequisitionList = () => {
       setIsLoadingData(false);
     }
   };
+
+  const fetchUserLocations = async () => {
+    try {
+      const response = await get_user_locations_by_user_id_api(
+        sessionStorage.getItem("userId")
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching user locations:", error);
+    }
+  };
+
+  const {
+    data: userLocations,
+    isLoading: isUserLocationsLoading,
+    isError: isUserLocationsError,
+    error: userLocationsError,
+  } = useQuery({
+    queryKey: ["userLocations", sessionStorage.getItem("userId")],
+    queryFn: fetchUserLocations,
+  });
+
+  useEffect(() => {
+    if (!isUserLocationsLoading && userLocations) {
+      const locations = userLocations?.filter(
+        (location) => location?.location?.locationType.name === "Warehouse"
+      );
+      setUserWarehouses(locations);
+    }
+  }, [isUserLocationsLoading, userLocations]);
 
   useEffect(() => {
     fetchData();
@@ -262,6 +300,18 @@ const useTransferRequisitionList = () => {
     return formattedDate;
   };
 
+  const filteredRequisitions = transferRequisitions.filter((tr) => {
+    if (filter === "incoming") {
+      return tr.requestedFromLocationId === parseInt(selectedWarehouse);
+    } else if (filter === "outgoing") {
+      return tr.requestedToLocationId === parseInt(selectedWarehouse);
+    } else
+      return (
+        tr.requestedFromLocationId === parseInt(selectedWarehouse) ||
+        tr.requestedToLocationId === parseInt(selectedWarehouse)
+      ); // 'all' filter
+  });
+
   return {
     transferRequisitions,
     isLoadingData,
@@ -278,6 +328,10 @@ const useTransferRequisitionList = () => {
     TRDetail,
     isPermissionsError,
     permissionError,
+    selectedWarehouse,
+    userWarehouses,
+    filter,
+    filteredRequisitions,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleViewDetails,
@@ -294,6 +348,8 @@ const useTransferRequisitionList = () => {
     handleUpdated,
     handleClose,
     formatDateInTimezone,
+    setSelectedWarehouse,
+    setFilter,
   };
 };
 

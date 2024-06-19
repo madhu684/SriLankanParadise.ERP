@@ -66,12 +66,12 @@ const TransferRequisitionDetail = ({
           </div>
           <div className="col-md-6">
             <p>
-              <strong>Delivery Location:</strong>{" "}
-              {transferRequisition.requestedFromLocation?.locationName}
+              <strong>To Warehouse Location:</strong>{" "}
+              {transferRequisition.requestedToLocation?.locationName}
             </p>
             <p>
-              <strong>Warehouse Location:</strong>{" "}
-              {transferRequisition.requestedToLocation?.locationName}
+              <strong>From Warehouse Location:</strong>{" "}
+              {transferRequisition.requestedFromLocation?.locationName}
             </p>
           </div>
         </div>

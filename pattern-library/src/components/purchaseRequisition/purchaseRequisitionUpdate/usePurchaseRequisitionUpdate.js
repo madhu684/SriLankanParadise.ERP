@@ -5,6 +5,7 @@ import {
   put_purchase_requisition_detail_api,
   post_purchase_requisition_detail_api,
   delete_purchase_requisition_detail_api,
+  get_user_locations_by_user_id_api,
 } from "../../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
@@ -17,6 +18,7 @@ const usePurchaseRequisitionUpdate = ({
     PurchaseRequisitionId: "",
     requestorName: "",
     department: "",
+    departmentLocation: "",
     email: "",
     contactNumber: "",
     expectedDeliveryLocation: null,
@@ -59,6 +61,27 @@ const usePurchaseRequisitionUpdate = ({
     queryFn: fetchLocations,
   });
 
+  const fetchUserLocations = async () => {
+    try {
+      const response = await get_user_locations_by_user_id_api(
+        sessionStorage.getItem("userId")
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching user locations:", error);
+    }
+  };
+
+  const {
+    data: userLocations,
+    isLoading: isUserLocationsLoading,
+    isError: isUserLocationsError,
+    error: userLocationsError,
+  } = useQuery({
+    queryKey: ["userLocations", sessionStorage.getItem("userId")],
+    queryFn: fetchUserLocations,
+  });
+
   const fetchItems = async (companyId, searchQuery, itemType) => {
     try {
       const response = await get_item_masters_by_company_id_with_query_api(
@@ -82,6 +105,19 @@ const usePurchaseRequisitionUpdate = ({
     queryFn: () =>
       fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"),
   });
+
+  useEffect(() => {
+    if (!isUserLocationsLoading && userLocations) {
+      const location = userLocations?.find(
+        (location) => location?.location?.locationTypeId === 3
+      );
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        department: location?.location.locationName,
+        departmentLocation: location?.locationId,
+      }));
+    }
+  }, [isUserLocationsLoading, userLocations]);
 
   useEffect(() => {
     const deepCopyPurchaseRequisition = JSON.parse(
@@ -111,17 +147,17 @@ const usePurchaseRequisitionUpdate = ({
   }, [purchaseRequisition]);
 
   useEffect(() => {
-    if (!isLoading && locations) {
-      const location = locations.find(
-        (location) =>
-          location.locationId === parseInt(sessionStorage.getItem("locationId"))
+    if (!isUserLocationsLoading && userLocations) {
+      const location = userLocations?.find(
+        (location) => location?.location?.locationTypeId === 3
       );
       setFormData((prevFormData) => ({
         ...prevFormData,
-        department: location.locationName,
+        department: location?.location.locationName,
+        departmentLocation: location?.locationId,
       }));
     }
-  }, [isLoading, locations]);
+  }, [isUserLocationsLoading, userLocations]);
 
   useEffect(() => {
     if (submissionStatus != null) {
@@ -349,7 +385,7 @@ const usePurchaseRequisitionUpdate = ({
         const purchaseRequisitionData = {
           requestedBy: formData.requestorName,
           requestedUserId: sessionStorage.getItem("userId"),
-          department: formData.department,
+          department: purchaseRequisition?.department,
           email: formData.email,
           contactNo: formData.contactNumber,
           requisitionDate: formData.requisitionDate,

@@ -25,6 +25,10 @@ const TransferRequisitionList = () => {
     TRDetail,
     isPermissionsError,
     permissionError,
+    selectedWarehouse,
+    userWarehouses,
+    filter,
+    filteredRequisitions,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleRowSelect,
@@ -40,7 +44,8 @@ const TransferRequisitionList = () => {
     hasPermission,
     handleUpdated,
     handleClose,
-    formatDateInTimezone,
+    setSelectedWarehouse,
+    setFilter,
   } = useTransferRequisitionList();
 
   if (error || isPermissionsError) {
@@ -117,8 +122,57 @@ const TransferRequisitionList = () => {
             )}
         </div>
       </div>
+
+      <div className="d-flex flex-column flex-md-row align-items-md-center mb-3 mt-3">
+        <div className="me-3 mb-2 mb-md-0">
+          <select
+            className="form-select"
+            value={selectedWarehouse}
+            onChange={(e) => setSelectedWarehouse(e.target.value)}
+          >
+            <option value="">Select Current Warehouse</option>
+            {userWarehouses.map((warehouse) => (
+              <option key={warehouse.locationId} value={warehouse.locationId}>
+                {warehouse.location.locationName}
+              </option>
+            ))}
+          </select>
+        </div>
+        {selectedWarehouse && (
+          <div className="filter-buttons">
+            <button
+              className={`btn ${
+                filter === "all" ? "btn-primary" : "btn-outline-primary"
+              } me-2 mb-2 mb-md-0`}
+              onClick={() => setFilter("all")}
+            >
+              All
+            </button>
+            <button
+              className={`btn ${
+                filter === "incoming" ? "btn-primary" : "btn-outline-primary"
+              } me-2 mb-2 mb-md-0`}
+              onClick={() => setFilter("incoming")}
+            >
+              Incoming
+            </button>
+            <button
+              className={`btn ${
+                filter === "outgoing" ? "btn-primary" : "btn-outline-primary"
+              } mb-2 mb-md-0`}
+              onClick={() => setFilter("outgoing")}
+            >
+              Outgoing
+            </button>
+          </div>
+        )}
+      </div>
+
       <div className="table-responsive">
-        <table className="table mt-2">
+        <table
+          className="table mt-2"
+          style={{ minWidth: "1000px", overflowX: "auto" }}
+        >
           <thead>
             <tr>
               <th>
@@ -128,11 +182,12 @@ const TransferRequisitionList = () => {
               <th>Requested By</th>
               <th>TRN Date</th>
               <th>Status</th>
+              <th>Direction</th>
               <th>Details</th>
             </tr>
           </thead>
           <tbody>
-            {transferRequisitions.map((mr) => (
+            {filteredRequisitions?.map((mr) => (
               <tr key={mr.requisitionMasterId}>
                 <td>
                   <input
@@ -157,6 +212,14 @@ const TransferRequisitionList = () => {
                   >
                     {getStatusLabel(mr.status)}
                   </span>
+                </td>
+                <td>
+                  {mr.requestedFromLocationId ===
+                  parseInt(selectedWarehouse) ? (
+                    <span className="bi bi-arrow-down"></span>
+                  ) : (
+                    <span className="bi bi-arrow-up"></span>
+                  )}
                 </td>
                 <td>
                   <button
