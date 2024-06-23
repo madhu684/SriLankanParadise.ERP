@@ -475,3 +475,91 @@ export const post_cashier_expense_out_api = async (formData) => {
     throw error;
   }
 };
+
+export const get_company_api = async (companyId) => {
+  try {
+    const response = await api.get(`/company/${companyId}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+//expense out requisition apis
+export const post_expense_out_requisition_api = async (formData) => {
+  try {
+    const response = await api.post("/expenseOutRequisition", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_expense_out_requisitions_api = async (companyId) => {
+  try {
+    const response = await api.get(
+      `/expenseOutRequisition/GetExpenseOutRequisitionsByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_expense_out_requisitions_by_user_id_api = async (userId) => {
+  try {
+    const response = await api.get(
+      `/expenseOutRequisition/GetExpenseOutRequisitionsByUserId/${userId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const put_expense_out_requisition_api = async (
+  expenseOutRequisitionId,
+  expenseOutRequisitionData
+) => {
+  try {
+    const response = await api.put(
+      `/expenseOutRequisition/${expenseOutRequisitionId}`,
+      expenseOutRequisitionData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const get_cashier_expense_outs_by_user_id_api = async (userId) => {
+  try {
+    const response = await api.get(
+      `/cashierExpenseOut/GetCashierExpenseOutsByUserId/${userId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

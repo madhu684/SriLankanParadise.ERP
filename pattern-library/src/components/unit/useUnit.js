@@ -1,16 +1,42 @@
 import { useState, useEffect, useRef } from "react";
-import { post_unit_api } from "../../services/inventoryApi";
+import {
+  post_unit_api,
+  get_measurement_types_by_company_id_api,
+} from "../../services/inventoryApi";
+import { useQuery } from "@tanstack/react-query";
 
 const useUnit = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
     unitName: "",
     status: "",
+    measurementType: "",
   });
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const alertRef = useRef(null);
   const [loading, setLoading] = useState(false);
+
+  const fetchMeasurementTypes = async () => {
+    try {
+      const response = await get_measurement_types_by_company_id_api(
+        sessionStorage.getItem("companyId")
+      );
+      return response.data.result || [];
+    } catch (error) {
+      console.error("Error fetching measurement types:", error);
+    }
+  };
+
+  const {
+    data: measurementTypes,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["measurementTypes"],
+    queryFn: () => fetchMeasurementTypes(),
+  });
 
   const handleInputChange = (field, value) => {
     setFormData({
@@ -65,7 +91,13 @@ const useUnit = ({ onFormSubmit }) => {
 
     const isStatusValid = validateField("status", "Status", formData.status);
 
-    return isUnitNameValid && isStatusValid;
+    const isMeasurementTypeValid = validateField(
+      "measurementType",
+      "Measurement type",
+      formData.measurementType
+    );
+
+    return isUnitNameValid && isStatusValid && isMeasurementTypeValid;
   };
 
   const handleSubmit = async () => {
@@ -79,6 +111,7 @@ const useUnit = ({ onFormSubmit }) => {
           unitName: formData.unitName,
           status: status,
           companyId: sessionStorage.getItem("companyId"),
+          measurementTypeId: formData.measurementType,
           permissionId: 1037,
         };
 
@@ -119,6 +152,9 @@ const useUnit = ({ onFormSubmit }) => {
     submissionStatus,
     alertRef,
     loading,
+    isLoading,
+    isError,
+    measurementTypes,
     handleInputChange,
     handleSubmit,
   };

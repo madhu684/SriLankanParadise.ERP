@@ -129,8 +129,20 @@
   <data name="BatchHasGrnMasterCreated" xml:space="preserve">
     <value>BatchHasGrnMaster created successfully</value>
   </data>
+  <data name="BusinessTypeCreated" xml:space="preserve">
+    <value>Business type created successfully</value>
+  </data>
+  <data name="BusinessTypesRetrieved" xml:space="preserve">
+    <value>Business types retrieved</value>
+  </data>
   <data name="CashierExpenseOutCreated" xml:space="preserve">
     <value>Cashier expense out created successfully</value>
+  </data>
+  <data name="CashierExpenseOutsNotFound" xml:space="preserve">
+    <value>Cashier expense outs not found</value>
+  </data>
+  <data name="CashierExpenseOutsRetrieved" xml:space="preserve">
+    <value>Cashier expense outs Retrieved</value>
   </data>
   <data name="CashierSessionCreated" xml:space="preserve">
     <value>Cashier session created successfully</value>
@@ -231,6 +243,12 @@
   <data name="CompanySubscriptionModuleUserCreated" xml:space="preserve">
     <value>Company subscription module user created successfully</value>
   </data>
+  <data name="CompanyTypeCreated" xml:space="preserve">
+    <value>Company type created successfully</value>
+  </data>
+  <data name="CompanyTypesRetrieved" xml:space="preserve">
+    <value>Company types retrieved</value>
+  </data>
   <data name="CompanyUpdated" xml:space="preserve">
     <value>Company updated successfully</value>
   </data>
@@ -242,6 +260,24 @@
   </data>
   <data name="CustomersRetrieved" xml:space="preserve">
     <value>Customers retrieved</value>
+  </data>
+  <data name="ExpenseOutRequisitionCreated" xml:space="preserve">
+    <value>Expense out requisition created successfully</value>
+  </data>
+  <data name="ExpenseOutRequisitionNotFound" xml:space="preserve">
+    <value>Expense out requisition not found</value>
+  </data>
+  <data name="ExpenseOutRequisitionRetrieved" xml:space="preserve">
+    <value>Expense out requisition retrieved</value>
+  </data>
+  <data name="ExpenseOutRequisitionsNotFound" xml:space="preserve">
+    <value>Expense out requisitions not found</value>
+  </data>
+  <data name="ExpenseOutRequisitionsRetrieved" xml:space="preserve">
+    <value>Expense out requisitions retrieved</value>
+  </data>
+  <data name="ExpenseOutRequisitionUpdated" xml:space="preserve">
+    <value>Expense out requisition updated successfully</value>
   </data>
   <data name="GrnDetailCreated" xml:space="preserve">
     <value>Grn detail created successfully</value>
@@ -324,6 +360,9 @@
   <data name="ItemMasterNotFound" xml:space="preserve">
     <value>Item master not found</value>
   </data>
+  <data name="ItemMasterRetrieved" xml:space="preserve">
+    <value>Item master retrieved</value>
+  </data>
   <data name="ItemMastersNotFound" xml:space="preserve">
     <value>Item masters not found</value>
   </data>
@@ -347,6 +386,15 @@
   </data>
   <data name="LocationsRetrieved" xml:space="preserve">
     <value>Locations retrieved</value>
+  </data>
+  <data name="MeasurementTypeCreated" xml:space="preserve">
+    <value>Measurement type created successfully</value>
+  </data>
+  <data name="MeasurementTypesNotFound" xml:space="preserve">
+    <value>Measurement types not found</value>
+  </data>
+  <data name="MeasurementTypesRetrieved" xml:space="preserve">
+    <value>Measurement types retrieved</value>
   </data>
   <data name="ModuleCreated" xml:space="preserve">
     <value>Module created successfully</value>
@@ -588,6 +636,12 @@
   <data name="SalesReceiptUpdated" xml:space="preserve">
     <value>Sales receipt updated successfully</value>
   </data>
+  <data name="SubItemsNotFound" xml:space="preserve">
+    <value>Sub items not found</value>
+  </data>
+  <data name="SubItemsRetrieved" xml:space="preserve">
+    <value>Sub items retrieved</value>
+  </data>
   <data name="SubModuleCreated" xml:space="preserve">
     <value>Sub module created successfully</value>
   </data>
@@ -615,8 +669,53 @@
   <data name="SubscriptionUpdated" xml:space="preserve">
     <value>Subscription updated successfully</value>
   </data>
+  <data name="SupplierAttachmentCreated" xml:space="preserve">
+    <value>Supplier attachment created successfully</value>
+  </data>
+  <data name="SupplierAttachmentDeleted" xml:space="preserve">
+    <value>Supplier attachment deleted successfully</value>
+  </data>
+  <data name="SupplierAttachmentNotFound" xml:space="preserve">
+    <value>Supplier attachment not found</value>
+  </data>
+  <data name="SupplierAttachmentsNotFound" xml:space="preserve">
+    <value>Supplier attachments not found</value>
+  </data>
+  <data name="SupplierAttachmentsRetrieved" xml:space="preserve">
+    <value>Supplier attachments retrieved</value>
+  </data>
+  <data name="SupplierAttachmentUpdated" xml:space="preserve">
+    <value>Supplier attachment updated successfully</value>
+  </data>
+  <data name="SupplierAttachmentUploaded" xml:space="preserve">
+    <value>Supplier attachment uploaded successfully</value>
+  </data>
+  <data name="SupplierCategoryCreated" xml:space="preserve">
+    <value>Supplier category created successfully</value>
+  </data>
+  <data name="SupplierCategoryDeleted" xml:space="preserve">
+    <value>Supplier category deleted successfully</value>
+  </data>
+  <data name="SupplierCategoryNotFound" xml:space="preserve">
+    <value>Supplier category not found</value>
+  </data>
   <data name="SupplierCreated" xml:space="preserve">
     <value>Supplier created successfully</value>
+  </data>
+  <data name="SupplierDeleted" xml:space="preserve">
+    <value>Supplier deleted  successfully</value>
+  </data>
+  <data name="SupplierLogoNotFound" xml:space="preserve">
+    <value>Supplier logo not found</value>
+  </data>
+  <data name="SupplierLogoRetrieved" xml:space="preserve">
+    <value>Supplier logo retrieved</value>
+  </data>
+  <data name="SupplierLogoUploaded" xml:space="preserve">
+    <value>Supplier logo uploaded successfully</value>
+  </data>
+  <data name="SupplierNotFound" xml:space="preserve">
+    <value>Supplier not found</value>
   </data>
   <data name="SuppliersNotFound" xml:space="preserve">
     <value>Suppliers not found</value>
@@ -624,11 +723,14 @@
   <data name="SuppliersRetrieved" xml:space="preserve">
     <value>Suppliers retrieved</value>
   </data>
+  <data name="SupplierUpdated" xml:space="preserve">
+    <value>Supplier updated successfully</value>
+  </data>
   <data name="TransactionTypesNotFound" xml:space="preserve">
     <value>Transaction types not found</value>
   </data>
   <data name="TransactionTypesRetrieved" xml:space="preserve">
-    <value>TransactionTypesRetrieved </value>
+    <value>Transaction types retrieved </value>
   </data>
   <data name="UnitCreated" xml:space="preserve">
     <value>Unit created successfully</value>

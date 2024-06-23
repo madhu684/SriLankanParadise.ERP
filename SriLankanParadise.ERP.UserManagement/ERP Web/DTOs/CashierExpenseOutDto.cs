@@ -13,5 +13,7 @@
         public DateTime? CreatedDate { get; set; }
 
         public int? CompanyId { get; set; }
+
+        public int? ExpenseOutRequisitionId { get; set; }
     }
 }

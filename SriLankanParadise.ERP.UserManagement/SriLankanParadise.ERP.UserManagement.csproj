@@ -23,6 +23,7 @@
   <ItemGroup>
     <Folder Include="Shared\Models\" />
     <Folder Include="wwwroot\images\companylogos\" />
+    <Folder Include="wwwroot\images\supplierlogos\" />
   </ItemGroup>
 
   <ItemGroup>

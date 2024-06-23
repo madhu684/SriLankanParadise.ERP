@@ -34,7 +34,7 @@ const TinApproval = ({ show, handleClose, handleApproved, tin }) => {
             Details for Transfer Issue Note Ref Number: {tin.referenceNumber}
           </h6>
           <div>
-            Tin Status :{" "}
+            TIN Status :{" "}
             <span
               className={`badge rounded-pill ${getStatusBadgeClass(
                 tin.status

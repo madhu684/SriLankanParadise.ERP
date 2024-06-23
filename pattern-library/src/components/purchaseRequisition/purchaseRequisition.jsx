@@ -125,6 +125,7 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
                   handleInputChange("department", e.target.value)
                 }
                 required
+                disabled
               />
               {validationErrors.department && (
                 <div className="invalid-feedback">
@@ -267,7 +268,10 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
                 <option value="">Select Location</option>
                 {locations
                   .filter(
-                    (location) => location.locationType.name === "Warehouse"
+                    (location) =>
+                      location.locationType.name === "Warehouse" &&
+                      location.parentId ===
+                        parseInt(sessionStorage.getItem("locationId"))
                   )
                   .map((location) => (
                     <option

@@ -14,7 +14,10 @@ import TransferRequisitionList from "../transferRequisition/transferRequisitionL
 import MinList from "../min/minList/minList.jsx";
 import TinList from "../tin/tinList/tinList.jsx";
 import ItemBatchUpdate from "../itemBatch/itemBatchUpdate/itemBatchUpdate.jsx";
+import ExpenseOutRequisitionList from "../expenseOutRequisition/expenseOutRequisitionList/expenseOutRequisitionList.jsx";
 import CashierExpenseOut from "../cashierExpenseOut/cashierExpenseOut.jsx";
+import SupplierList from "../supplier/supplierMain/supplierList/supplierList.jsx";
+import StockReport from "../stockReport/stockReport.jsx";
 
 const useMain = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -101,8 +104,14 @@ const useMain = () => {
         return <TinList />;
       case "Update Item Batches":
         return <ItemBatchUpdate />;
+      case "Expense Out Requisitions":
+        return <ExpenseOutRequisitionList />;
       case "Cashier Expense Out":
         return <CashierExpenseOut />;
+      case "Suppliers":
+        return <SupplierList />;
+      case "Stock Report":
+        return <StockReport />;
       default:
         return null;
     }

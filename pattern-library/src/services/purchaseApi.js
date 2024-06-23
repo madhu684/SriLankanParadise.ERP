@@ -188,6 +188,21 @@ export const get_purchase_orders_with_out_drafts_api = async (companyId) => {
   }
 };
 
+export const get_purchase_orders_api = async (companyId) => {
+  try {
+    const response = await api.get(
+      `/purchaseOrder/GetPurchaseOrdersByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const get_purchase_orders_by_user_id_api = async (userId) => {
   try {
     const response = await api.get(
@@ -832,6 +847,175 @@ export const put_item_batch_api = async (
         withCredentials: true,
       }
     );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+//supplier ralated apis
+export const get_company_types_api = async () => {
+  try {
+    const response = await api.get("/companyType", {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_business_types_api = async () => {
+  try {
+    const response = await api.get("/businessType", {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const post_supplier_logo_api = async (uploadData) => {
+  try {
+    const formData = new FormData();
+    formData.append("permissionId", uploadData.permissionId);
+    formData.append("logoFile", uploadData.logoFile);
+
+    const response = await api.post("/supplier/upload/logo", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      withCredentials: true,
+    });
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const post_supplier_attachment_api = async (uploadData) => {
+  try {
+    const formData = new FormData();
+    formData.append("permissionId", uploadData.permissionId);
+    formData.append("attachmentFile", uploadData.attachmentFile);
+
+    const response = await api.post("/supplier/upload/attachment", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      withCredentials: true,
+    });
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const post_supplier_category_api = async (formData) => {
+  try {
+    const response = await api.post("/supplierCategory", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const post_supplier_attachment_info_api = async (formData) => {
+  try {
+    const response = await api.post("/supplierAttachment", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_supplier_logo_api = async (supplierId) => {
+  try {
+    const response = await api.get(`/supplier/logo/${supplierId}`, {
+      responseType: "blob", // Specify response type as blob
+      withCredentials: true,
+    });
+
+    // Convert blob to base64
+    const logoBlob = response.data;
+    const reader = new FileReader();
+    reader.readAsDataURL(logoBlob);
+
+    return new Promise((resolve, reject) => {
+      reader.onloadend = () => {
+        const logoSrc = reader.result;
+        resolve(logoSrc);
+      };
+      reader.onerror = (error) => {
+        console.error("Error reading the logo blob:", error);
+        reject(error);
+      };
+    });
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
+export const put_supplier_api = async (supplierId, supplierData) => {
+  try {
+    const response = await api.put(`/supplier/${supplierId}`, supplierData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const delete_supplier_category_api = async (supplierCategoryId) => {
+  try {
+    const response = await api.delete(
+      `/supplierCategory/${supplierCategoryId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const put_supplier_attachment_api = async (
+  supplierAttachmentId,
+  supplierAttachmentData
+) => {
+  try {
+    const response = await api.put(
+      `/supplierAttachment/${supplierAttachmentId}`,
+      supplierAttachmentData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const delete_supplier_api = async (supplierId) => {
+  try {
+    const response = await api.delete(`/supplier/${supplierId}`, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     throw error;

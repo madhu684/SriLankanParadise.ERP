@@ -19,6 +19,9 @@ const useItemBatchUpdate = ({ onFormSubmit }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedBatch, setSelectedBatch] = useState(null);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [showConfirmationModalInParent, setshowConfirmationModalInParent] =
+    useState(false);
 
   const fetchItemBatches = async (itemMasterId) => {
     try {
@@ -128,15 +131,13 @@ const useItemBatchUpdate = ({ onFormSubmit }) => {
     return isSellingPriceValid && isExpiryDateValid;
   };
 
-  const handleSubmit = async (isSaveAsDraft) => {
+  const handleSubmit = async (isSaveAsDraft, isUpdateAllBatches) => {
     try {
       const status = isSaveAsDraft ? false : true;
 
-      // Get the current date and time in UTC timezone in the specified format
-      const requisitionDate = new Date().toISOString();
-
       const isFormValid = validateForm(isSaveAsDraft);
-      if (isFormValid) {
+
+      if (isFormValid && !isUpdateAllBatches) {
         setLoading(true);
 
         const itemBatchUpdateData = {
@@ -168,6 +169,53 @@ const useItemBatchUpdate = ({ onFormSubmit }) => {
             setSubmissionStatus("successSubmitted");
             console.log("Item batch updated successfully!", formData);
           }
+
+          setTimeout(() => {
+            setSubmissionStatus(null);
+            setLoading(false);
+            onFormSubmit();
+            handleReset();
+          }, 3000);
+        } else {
+          setSubmissionStatus("error");
+        }
+      } else if (isFormValid && isUpdateAllBatches) {
+        setLoading(true);
+
+        // Update all batches
+        const updatedBatches = itemBatches.map((batch) => {
+          return {
+            batchId: batch.batchId,
+            itemMasterId: batch.itemMasterId,
+            costPrice: batch.costPrice,
+            sellingPrice: formData.sellingPrice, // Update selling price for all batches
+            status: status,
+            companyId: sessionStorage.getItem("companyId"),
+            createdBy: sessionStorage.getItem("username"),
+            createdUserId: sessionStorage.getItem("userId"),
+            tempQuantity: batch.tempQuantity,
+            locationId: batch.locationId,
+            expiryDate: batch.expiryDate,
+            permissionId: 1065,
+          };
+        });
+
+        // Submit updates for all batches
+        const batchUpdatePromises = updatedBatches.map((batch) => {
+          return put_item_batch_api(batch.batchId, batch.itemMasterId, batch);
+        });
+
+        // Wait for all batch updates to complete
+        const batchUpdateResponses = await Promise.all(batchUpdatePromises);
+
+        // Check if all batch updates were successful
+        const allBatchUpdatesSuccessful = batchUpdateResponses.every(
+          (response) => response.status === 200
+        );
+
+        if (allBatchUpdatesSuccessful) {
+          setSubmissionStatus("successSubmittedAll");
+          console.log("All item batches updated successfully!");
 
           setTimeout(() => {
             setSubmissionStatus(null);
@@ -250,6 +298,23 @@ const useItemBatchUpdate = ({ onFormSubmit }) => {
     }
   };
 
+  const handleShowConfirmationModal = () => {
+    setShowConfirmationModal(true);
+    setshowConfirmationModalInParent(true);
+  };
+
+  const handleCloseConfirmationModal = () => {
+    setShowConfirmationModal(false);
+    handleCloseConfirmationModalInParent();
+  };
+
+  const handleCloseConfirmationModalInParent = () => {
+    const delay = 300;
+    setTimeout(() => {
+      setshowConfirmationModalInParent(false);
+    }, delay);
+  };
+
   return {
     formData,
     itemBatches,
@@ -267,6 +332,8 @@ const useItemBatchUpdate = ({ onFormSubmit }) => {
     itemsError,
     loading,
     selectedBatch,
+    showConfirmationModalInParent,
+    showConfirmationModal,
     handleInputChange,
     handleReset,
     handlePrint,
@@ -275,6 +342,8 @@ const useItemBatchUpdate = ({ onFormSubmit }) => {
     handleSelectItem,
     handleBatchSelection,
     handleSubmit,
+    handleShowConfirmationModal,
+    handleCloseConfirmationModal,
   };
 };
 

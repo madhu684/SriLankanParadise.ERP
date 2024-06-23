@@ -47,5 +47,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             await _purchaseOrderRepository.UpdatePurchaseOrder(purchaseOrderId, purchaseOrder);
         }
+
+        public async Task<IEnumerable<PurchaseOrder>> GetPurchaseOrdersByCompanyId(int companyId)
+        {
+            return await _purchaseOrderRepository.GetPurchaseOrdersByCompanyId(companyId);
+        }
     }
 }

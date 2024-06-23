@@ -34,6 +34,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 return await _dbContext.ItemMasters
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
+                    .ThenInclude(u => u.MeasurementType)
                     .Include(im => im.ItemType)
                     .ToListAsync();
             }
@@ -53,7 +54,10 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Where(im => im.Status == true && im.CompanyId == companyId)
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
+                    .ThenInclude(u => u.MeasurementType)
                     .Include(im => im.ItemType)
+                    .Include(im => im.InventoryUnit)
+                    .ThenInclude(u => u.MeasurementType)
                     .ToListAsync();
 
                 return itemMasters.Any() ? itemMasters : null;
@@ -86,14 +90,21 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 {
                     query = query.Include(im => im.Category)
                         .Include(im => im.Unit)
+                        .ThenInclude(u => u.MeasurementType)
                         .Include(im => im.ItemType)
+                        .Include(im => im.InventoryUnit)
+                        .ThenInclude(u => u.MeasurementType)
                         .Where(im => im.ItemType.Name == itemType);
                 }
                 else
                 {
                     query = query.Include(im => im.Category)
                         .Include(im => im.Unit)
-                        .Include(im => im.ItemType);
+                        .ThenInclude(u => u.MeasurementType)
+                        .Include(im => im.ItemType)
+                        .Include(im => im.InventoryUnit)
+                        .ThenInclude(u => u.MeasurementType);
+
                 }
 
                 var itemMasters = await query.ToListAsync();
@@ -117,7 +128,10 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Where(im => im.ItemMasterId == itemMasterId)
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
+                    .ThenInclude(u => u.MeasurementType)
                     .Include(im => im.ItemType)
+                    .Include(im => im.InventoryUnit)
+                    .ThenInclude(u => u.MeasurementType)
                     .FirstOrDefaultAsync();
 
                 return itemMaster;
@@ -174,7 +188,10 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Where(im => im.CreatedUserId == userId)
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
+                    .ThenInclude(u => u.MeasurementType)
                     .Include(im => im.ItemType)
+                    .Include(im => im.InventoryUnit)
+                    .ThenInclude(u => u.MeasurementType)
                     .ToListAsync();
 
                 return itemMasters.Any() ? itemMasters : null;
@@ -186,5 +203,24 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
+        public async Task<IEnumerable<ItemMaster>> GetSubItemsByItemMasterId(int itemMasterId)
+        {
+            try
+            {
+                var itemMasters = await _dbContext.ItemMasters
+                    .Where(im => im.ItemMasterId != itemMasterId && im.ParentId == itemMasterId)
+                    .Include(im => im.Category)
+                    .Include(im => im.Unit)
+                    .ThenInclude(u => u.MeasurementType)
+                    .Include(im => im.ItemType)
+                    .ToListAsync();
+
+                return itemMasters.Any() ? itemMasters : null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
