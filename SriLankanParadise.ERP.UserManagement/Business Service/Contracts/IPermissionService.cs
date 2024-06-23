@@ -5,5 +5,15 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
     public interface IPermissionService
     {
         Task<Dictionary<int, List<Permission>>> GetPermissionsByModuleIds(int[] moduleIds);
+
+        Task AddPermission(Permission permission);
+
+        Task<IEnumerable<Permission>> GetAll();
+
+        // Task<IEnumerable<Permission>> GetRolesByCompanyId(int companyId);
+
+        Task<Permission> GetPermissionByPermissionId(int permissionId);
+
+        Task UpdatePermission(int permissionId, Permission permission);
     }
 }

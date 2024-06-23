@@ -5,6 +5,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
     public interface IUserRepository
     {
         Task<User> GetUserByUsername(string username);
+
         Task RegisterUser(User newUser);
+
+        Task<IEnumerable<User>> GetAllUsersByCompanyId(int companyId);
     }
 }

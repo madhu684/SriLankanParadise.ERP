@@ -16,5 +16,30 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             return await _permissionRepository.GetPermissionsByModuleIds(moduleIds);
         }
+
+        public async Task AddPermission(Permission permission)
+        {
+            await _permissionRepository.AddPermission(permission);
+        }
+
+        public async Task<IEnumerable<Permission>> GetAll()
+        {
+            return await _permissionRepository.GetAll();
+        }
+
+        /*public async Task<IEnumerable<Permission>> GetPermissionsByCompanyId(int companyId)
+        {
+            return await _permissionRepository.GetPermissionsByCompanyId(companyId);
+        }*/
+
+        public async Task<Permission> GetPermissionByPermissionId(int permissionId)
+        {
+            return await _permissionRepository.GetPermissionByPermissionId(permissionId);
+        }
+
+        public async Task UpdatePermission(int permissionId, Permission permission)
+        {
+            await _permissionRepository.UpdatePermission(permissionId, permission);
+        }
     }
 }

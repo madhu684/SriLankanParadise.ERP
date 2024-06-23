@@ -46,7 +46,88 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
+        public async Task AddRole(Role role)
+        {
+            try
+            {
+                _dbContext.Roles.Add(role);
+                await _dbContext.SaveChangesAsync();
 
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<Role>> GetAll()
+        {
+            try
+            {
+                return await _dbContext.Roles.ToListAsync();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+
+        public async Task<IEnumerable<Role>> GetRolesByCompanyId(int companyId)
+        {
+            try
+            {
+                var roles = await _dbContext.Roles
+                    .Where(r => r.Status == true && r.CompanyId == companyId)
+                    .Include(r => r.Module)
+                    .ToListAsync();
+
+                return roles.Any() ? roles : null;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        
+        public async Task<Role> GetRoleByRoleId(int roleId)
+        {
+            try
+            {
+                var unit = await _dbContext.Roles
+                    .Where(r => r.RoleId == roleId)
+                    .FirstOrDefaultAsync();
+
+                return unit;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task UpdateRole(int roleId, Role role)
+        {
+            try
+            {
+                var existRole = await _dbContext.Roles.FindAsync(roleId);
+
+                if (existRole != null)
+                {
+                    _dbContext.Entry(existRole).CurrentValues.SetValues(role);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
 
     }
 }

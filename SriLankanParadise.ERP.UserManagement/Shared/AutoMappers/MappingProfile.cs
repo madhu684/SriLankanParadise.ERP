@@ -21,7 +21,9 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<ModuleRequestModel, Module>();
             CreateMap<CompanySubscriptionModuleRequestModel, CompanySubscriptionModule>();
             CreateMap<Module, ModuleWithIdDto>();
+            CreateMap<RoleRequestModel, Role>();
             CreateMap<Role, RoleDto>();
+            CreateMap<PermissionRequestModel, Permission>();
             CreateMap<Permission, PermissionDto>();
             CreateMap<UserRoleRequestModel, UserRole>();
             CreateMap<UserPermissionRequestModel, UserPermission>();

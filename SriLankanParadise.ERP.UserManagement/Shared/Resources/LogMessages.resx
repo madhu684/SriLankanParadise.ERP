@@ -375,11 +375,20 @@
   <data name="PaymentModesRetrieved" xml:space="preserve">
     <value>Payment modes retrieved</value>
   </data>
+  <data name="PermissionCreated" xml:space="preserve">
+    <value>Permission created successfully</value>
+  </data>
+  <data name="PermissionNotFound" xml:space="preserve">
+    <value>Permission not found</value>
+  </data>
   <data name="PermissionsNotFound" xml:space="preserve">
     <value>Permissions not found</value>
   </data>
   <data name="PermissionsRetrieved" xml:space="preserve">
     <value>Permissions retrieved</value>
+  </data>
+  <data name="PermissionUpdated" xml:space="preserve">
+    <value>Permission updated successfully</value>
   </data>
   <data name="PurchaseOrderApproved" xml:space="preserve">
     <value>Purchase order approved</value>
@@ -465,6 +474,12 @@
   <data name="RequisitionMastersRetrieved" xml:space="preserve">
     <value>Requisition masters retrieved</value>
   </data>
+  <data name="RoleCreated" xml:space="preserve">
+    <value>Role created successfully</value>
+  </data>
+  <data name="RoleNotFound" xml:space="preserve">
+    <value>Role not found</value>
+  </data>
   <data name="RolePermissionCreated" xml:space="preserve">
     <value>Role permission created successfully</value>
   </data>
@@ -473,6 +488,9 @@
   </data>
   <data name="RolesRetrieved" xml:space="preserve">
     <value>Roles retrieved</value>
+  </data>
+  <data name="RoleUpdated" xml:space="preserve">
+    <value>Role updated successfully</value>
   </data>
   <data name="SalesInvoiceApproved" xml:space="preserve">
     <value>Sales invoice approved</value>
@@ -668,5 +686,11 @@
   </data>
   <data name="UserRegistered" xml:space="preserve">
     <value>User registered successfully</value>
+  </data>
+  <data name="UsersNotFound" xml:space="preserve">
+    <value>Users not found</value>
+  </data>
+  <data name="UsersRetrieved" xml:space="preserve">
+    <value>Users retrieved</value>
   </data>
 </root>

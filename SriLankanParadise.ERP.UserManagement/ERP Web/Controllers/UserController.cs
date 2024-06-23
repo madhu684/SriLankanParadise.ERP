@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using SriLankanParadise.ERP.UserManagement.Business_Service;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
@@ -168,6 +169,31 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return Ok("Logged out");
+        }
+
+        [HttpGet("GetAllUsersByCompanyId/{companyId}")]
+        public async Task<ApiResponseModel> GetAllUsersByCompanyId(int companyId)
+        {
+            try
+            {
+                var users = await _userService.GetAllUsersByCompanyId(companyId);
+                if (users != null)
+                {
+                    var userDtos = _mapper.Map<IEnumerable<UserDto>>(users);
+                    AddResponseMessage(Response, LogMessages.UsersRetrieved, userDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.UsersNotFound);
+                    AddResponseMessage(Response, LogMessages.UsersNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
         }
     }
 }

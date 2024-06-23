@@ -17,5 +17,30 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             return await _roleRepository.GetRolesByModuleIds(moduleIds);
         }
+
+        public async Task AddRole(Role role)
+        {
+            await _roleRepository.AddRole(role);
+        }
+
+        public async Task<IEnumerable<Role>> GetAll()
+        {
+            return await _roleRepository.GetAll();
+        }
+
+        public async Task<IEnumerable<Role>> GetRolesByCompanyId(int companyId)
+        {
+            return await _roleRepository.GetRolesByCompanyId(companyId);
+        }
+
+        public async Task<Role> GetRoleByRoleId(int roleId)
+        {
+            return await _roleRepository.GetRoleByRoleId(roleId);
+        }
+
+        public async Task UpdateRole(int roleId, Role role)
+        {
+            await _roleRepository.UpdateRole(roleId, role);
+        }
     }
 }
