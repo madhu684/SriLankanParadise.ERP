@@ -9,6 +9,7 @@ using SriLankanParadise.ERP.UserManagement.Shared.AutoMappers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore.Query;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Middlewares;
+using Consul;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -197,3 +198,26 @@ app.UseMiddleware<AuditMiddleware>();
 app.MapControllers();
 
 app.Run();
+
+// Register with Consul
+var consulClient = new ConsulClient(config =>
+{
+    config.Address = new Uri("http://localhost:8500"); // Consul server address
+});
+
+var registration = new AgentServiceRegistration()
+{
+    ID = $"service1-{Guid.NewGuid()}", // Unique ID for this instance
+    Name = "service1", // Service name
+    Address = "localhost", // Service address
+    Port = 5001, // Service port
+    Tags = new[] { "service1" }
+};
+
+consulClient.Agent.ServiceDeregister(registration.ID).Wait(); // De-register in case it's already registered
+consulClient.Agent.ServiceRegister(registration).Wait(); // Register the service
+
+app.Lifetime.ApplicationStopping.Register(() =>
+{
+    consulClient.Agent.ServiceDeregister(registration.ID).Wait(); // De-register the service on shutdown
+});
