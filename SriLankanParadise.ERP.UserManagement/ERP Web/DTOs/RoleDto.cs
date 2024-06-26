@@ -9,5 +9,9 @@
         public int ModuleId { get; set; }
 
         public virtual ModuleDto? Module { get; set; } = null!;
+
+        public bool? Status { get; set; }
+
+        public int? CompanyId { get; set; }
     }
 }

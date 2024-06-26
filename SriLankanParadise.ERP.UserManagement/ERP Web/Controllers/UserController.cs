@@ -195,5 +195,42 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpPut("{userId}")]
+        public async Task<ApiResponseModel> UpdateUser(int userId, UserUpdateRequestModel userUpdateRequest)
+        {
+            try
+            {
+                var existingUser = await _userService.GetUserByUserId(userId);
+                if (existingUser == null)
+                {
+                    _logger.LogWarning(LogMessages.UserNotFound);
+                    return AddResponseMessage(Response, LogMessages.UserNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+                var updatedUser = _mapper.Map<User>(userUpdateRequest);
+                updatedUser.UserId = userId; // Ensure the ID is not changed
+
+                await _userService.UpdateUser(existingUser.UserId, updatedUser);
+
+                // Create action log
+                var actionLog = new ActionLogModel()
+                {
+                    ActionId = userUpdateRequest.PermissionId,
+                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                    Timestamp = DateTime.UtcNow
+                };
+                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+
+                _logger.LogInformation(LogMessages.UserUpdated);
+                return AddResponseMessage(Response, LogMessages.UserUpdated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
     }
 }

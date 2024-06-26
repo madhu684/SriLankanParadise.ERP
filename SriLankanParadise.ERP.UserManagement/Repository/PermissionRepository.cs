@@ -78,22 +78,23 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         }
 
 
-        /*public async Task<IEnumerable<Permission>> GetPermissionsByCompanyId(int companyId)
+        public async Task<IEnumerable<Permission>> GetPermissionsByCompanyId(int companyId)
         {
             try
             {
-                var roles = await _dbContext.Permissions
-                    .Where(p => p.PermissionStatus == true && p.CompanyId == companyId)
+                var permissions = await _dbContext.Permissions
+                    .Where(p => p.CompanyId == companyId || p.CompanyId == null)
+                    .Include(p => p.Module)
                     .ToListAsync();
 
-                return roles.Any() ? roles : null;
+                return permissions.Any() ? permissions : null;
             }
             catch (Exception)
             {
 
                 throw;
             }
-        }*/
+        }
 
 
         public async Task<Permission> GetPermissionByPermissionId(int permissionId)

@@ -774,6 +774,9 @@
   <data name="UserLocationUpdated" xml:space="preserve">
     <value>User location updated successfully</value>
   </data>
+  <data name="UserNotFound" xml:space="preserve">
+    <value>User not found</value>
+  </data>
   <data name="UseRoleCreated" xml:space="preserve">
     <value>User role created successfully</value>
   </data>
@@ -794,5 +797,8 @@
   </data>
   <data name="UsersRetrieved" xml:space="preserve">
     <value>Users retrieved</value>
+  </data>
+  <data name="UserUpdated" xml:space="preserve">
+    <value>User updated successfully</value>
   </data>
 </root>

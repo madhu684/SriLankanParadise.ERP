@@ -9,5 +9,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task RegisterUser(User newUser);
 
         Task<IEnumerable<User>> GetAllUsersByCompanyId(int companyId);
+
+        Task<User> GetUserByUserId(int userId);
+
+        Task UpdateUser(int UserId, User user);
     }
 }

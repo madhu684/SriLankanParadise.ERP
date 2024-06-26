@@ -80,7 +80,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             try
             {
                 var roles = await _dbContext.Roles
-                    .Where(r => r.Status == true && r.CompanyId == companyId)
+                    .Where(r => r.CompanyId == companyId || r.CompanyId == null)
                     .Include(r => r.Module)
                     .ToListAsync();
 

@@ -38,5 +38,15 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             return await _userRepository.GetAllUsersByCompanyId(companyId);
         }
+
+        public async Task<User> GetUserByUserId(int userId)
+        {
+            return await _userRepository.GetUserByUserId(userId);
+        }
+
+        public async Task UpdateUser(int userId, User user)
+        {
+            await _userRepository.UpdateUser(userId, user);
+        }
     }
 }

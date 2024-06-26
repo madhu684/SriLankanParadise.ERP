@@ -113,21 +113,21 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
-        /*[HttpGet("GetRolesByCompanyId/{companyId}")]
-        public async Task<ApiResponseModel> GetRolesByCompanyId(int companyId)
+        [HttpGet("GetPermissionsByCompanyId/{companyId}")]
+        public async Task<ApiResponseModel> GetPermissionsByCompanyId(int companyId)
         {
             try
             {
-                var roles = await _roleService.GetRolesByCompanyId(companyId);
-                if (roles != null)
+                var permissions = await _permissionService.GetPermissionsByCompanyId(companyId);
+                if (permissions != null)
                 {
-                    var roleDtos = _mapper.Map<IEnumerable<RoleDto>>(roles);
-                    AddResponseMessage(Response, LogMessages.RolesRetrieved, roleDtos, true, HttpStatusCode.OK);
+                    var permissionDtos = _mapper.Map<IEnumerable<PermissionDto>>(permissions);
+                    AddResponseMessage(Response, LogMessages.PermissionsRetrieved, permissionDtos, true, HttpStatusCode.OK);
                 }
                 else
                 {
-                    _logger.LogWarning(LogMessages.RolesNotFound);
-                    AddResponseMessage(Response, LogMessages.RolesNotFound, null, true, HttpStatusCode.NotFound);
+                    _logger.LogWarning(LogMessages.PermissionsNotFound);
+                    AddResponseMessage(Response, LogMessages.PermissionsNotFound, null, true, HttpStatusCode.NotFound);
                 }
             }
             catch (Exception ex)
@@ -136,7 +136,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
             return Response;
-        }*/
+        }
 
 
         [HttpPut("{permissionId}")]

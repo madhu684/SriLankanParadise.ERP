@@ -10,7 +10,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
 
         Task<IEnumerable<Permission>> GetAll();
 
-        // Task<IEnumerable<Permission>> GetRolesByCompanyId(int companyId);
+        Task<IEnumerable<Permission>> GetPermissionsByCompanyId(int companyId);
 
         Task<Permission> GetPermissionByPermissionId(int permissionId);
 

@@ -27,10 +27,11 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             return await _permissionRepository.GetAll();
         }
 
-        /*public async Task<IEnumerable<Permission>> GetPermissionsByCompanyId(int companyId)
+        public async Task<IEnumerable<Permission>> GetPermissionsByCompanyId(int companyId)
         {
-            return await _permissionRepository.GetPermissionsByCompanyId(companyId);
-        }*/
+            var permissions = await _permissionRepository.GetPermissionsByCompanyId(companyId);
+            return permissions?.Where(p => p.PermissionName.ToLower() != "login" && p.PermissionName.ToLower() != "logout").ToList(); // Filter the permissions
+        }
 
         public async Task<Permission> GetPermissionByPermissionId(int permissionId)
         {

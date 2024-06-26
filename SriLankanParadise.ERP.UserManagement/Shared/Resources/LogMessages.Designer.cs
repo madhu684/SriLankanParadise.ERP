@@ -2032,6 +2032,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to User not found.
+        /// </summary>
+        public static string UserNotFound {
+            get {
+                return ResourceManager.GetString("UserNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to User role created successfully.
         /// </summary>
         public static string UseRoleCreated {
@@ -2091,6 +2100,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string UsersRetrieved {
             get {
                 return ResourceManager.GetString("UsersRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User updated successfully.
+        /// </summary>
+        public static string UserUpdated {
+            get {
+                return ResourceManager.GetString("UserUpdated", resourceCulture);
             }
         }
     }
