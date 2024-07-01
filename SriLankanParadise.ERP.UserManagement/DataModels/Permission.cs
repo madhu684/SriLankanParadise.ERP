@@ -13,6 +13,8 @@ public partial class Permission
 
     public int ModuleId { get; set; }
 
+    public int? CompanyId { get; set; }
+
     public virtual ICollection<ActionLog> ActionLogs { get; set; } = new List<ActionLog>();
 
     public virtual Module Module { get; set; } = null!;

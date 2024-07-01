@@ -387,6 +387,9 @@
   <data name="LocationChannelItemBatchCreated" xml:space="preserve">
     <value>LocationChannelItemBatch created successfully</value>
   </data>
+  <data name="LocationCreated" xml:space="preserve">
+    <value>Location created successfully</value>
+  </data>
   <data name="LocationInventoriesNotFound" xml:space="preserve">
     <value>Location inventories not found</value>
   </data>
@@ -426,11 +429,26 @@
   <data name="LocationInventoryUpdated" xml:space="preserve">
     <value>Location inventory updated</value>
   </data>
+  <data name="LocationNotFound" xml:space="preserve">
+    <value>Location not found</value>
+  </data>
+  <data name="LocationRetrieved" xml:space="preserve">
+    <value>Location retrieved</value>
+  </data>
   <data name="LocationsNotFound" xml:space="preserve">
     <value>Locations not found</value>
   </data>
   <data name="LocationsRetrieved" xml:space="preserve">
     <value>Locations retrieved</value>
+  </data>
+  <data name="LocationTypesNotFound" xml:space="preserve">
+    <value>Location types not found</value>
+  </data>
+  <data name="LocationTypesRetrieved" xml:space="preserve">
+    <value>Location types retrieved</value>
+  </data>
+  <data name="LocationUpdated" xml:space="preserve">
+    <value>Location updated successfully</value>
   </data>
   <data name="MeasurementTypeCreated" xml:space="preserve">
     <value>Measurement type created successfully</value>

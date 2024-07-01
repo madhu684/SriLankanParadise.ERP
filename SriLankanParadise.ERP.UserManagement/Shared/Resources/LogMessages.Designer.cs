@@ -871,6 +871,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Location created successfully.
+        /// </summary>
+        public static string LocationCreated {
+            get {
+                return ResourceManager.GetString("LocationCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Location inventories not found.
         /// </summary>
         public static string LocationInventoriesNotFound {
@@ -988,6 +997,24 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Location not found.
+        /// </summary>
+        public static string LocationNotFound {
+            get {
+                return ResourceManager.GetString("LocationNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Location retrieved.
+        /// </summary>
+        public static string LocationRetrieved {
+            get {
+                return ResourceManager.GetString("LocationRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Locations not found.
         /// </summary>
         public static string LocationsNotFound {
@@ -1002,6 +1029,33 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string LocationsRetrieved {
             get {
                 return ResourceManager.GetString("LocationsRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Location types not found.
+        /// </summary>
+        public static string LocationTypesNotFound {
+            get {
+                return ResourceManager.GetString("LocationTypesNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Location types retrieved.
+        /// </summary>
+        public static string LocationTypesRetrieved {
+            get {
+                return ResourceManager.GetString("LocationTypesRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Location updated successfully.
+        /// </summary>
+        public static string LocationUpdated {
+            get {
+                return ResourceManager.GetString("LocationUpdated", resourceCulture);
             }
         }
         

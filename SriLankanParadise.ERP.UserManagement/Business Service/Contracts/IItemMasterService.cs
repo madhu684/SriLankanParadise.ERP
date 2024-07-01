@@ -22,5 +22,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
 
         Task<IEnumerable<ItemMaster>> GetSubItemsByItemMasterId(int itemMaster);
 
+        Task<IEnumerable<ItemMaster>> GetItemMastersByItemMasterIds(int[] itemMasterIds);
+
     }
 }

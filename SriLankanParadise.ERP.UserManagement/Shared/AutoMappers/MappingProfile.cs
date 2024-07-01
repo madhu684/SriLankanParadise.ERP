@@ -46,6 +46,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<ApproveGrnMasterRequestModel, GrnMaster>();
             CreateMap<GrnDetailRequestModel, GrnDetail>();
             CreateMap<GrnDetail, GrnDetailDto>();
+            CreateMap<LocationRequestModel, Location>();
             CreateMap<Location, LocationDto>();
             CreateMap<Supplier, SupplierDto>();
             CreateMap<CustomerRequestModel, Customer>();
