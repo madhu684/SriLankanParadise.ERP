@@ -5,6 +5,8 @@ import {
   post_batchHasGrnMaster_api,
   post_itemBatchHasGrnDetail_api,
   post_itemBatch_api,
+  post_location_inventory_api,
+  post_location_inventory_movement_api,
 } from "../../../services/purchaseApi";
 
 const useGrnApproval = ({ grn, onFormSubmit }) => {
@@ -12,7 +14,13 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
   const [loading, setLoading] = useState(false);
   const alertRef = useRef(null);
   const [modGrn, setModGrn] = useState(null);
-
+  const [showManageItemModal, setShowManageItemModal] = useState(false);
+  const [manageItem, setManageItem] = useState(null);
+  const grnTypeDisplayMap = {
+    finishedGoodsIn: "Finished Goods In",
+    directPurchase: "Direct Purchase",
+    goodsReceivedNote: "Goods Received Note",
+  };
   useEffect(() => {
     const deepCopyGrn = JSON.parse(JSON.stringify(grn));
 
@@ -144,6 +152,31 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
       };
 
       await post_itemBatchHasGrnDetail_api(itemBatchHasGrnDetailData);
+
+      // Add to location inventory
+      const locationInventoryData = {
+        itemMasterId: itemBatchResponse.data.result?.itemMasterId,
+        batchId: batchId,
+        locationId: grn?.warehouseLocationId,
+        stockInHand: grnDetail.acceptedQuantity + grnDetail.freeQuantity,
+        permissionId: 1088,
+      };
+
+      await post_location_inventory_api(locationInventoryData);
+
+      // Add to location inventory movement
+      const locationInventoryMovementData = {
+        movementTypeId: 1,
+        transactionTypeId: 4,
+        itemMasterId: itemBatchResponse.data.result?.itemMasterId,
+        batchId: batchId,
+        locationId: grn?.warehouseLocationId,
+        date: new Date().toISOString(), // Current date and time
+        qty: grnDetail.acceptedQuantity + grnDetail.freeQuantity,
+        permissionId: 1090,
+      };
+
+      await post_location_inventory_movement_api(locationInventoryMovementData);
     }
   };
 
@@ -159,8 +192,9 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
       createdBy: sessionStorage.getItem("username"),
       createdUserId: sessionStorage.getItem("userId"),
       tempQuantity: grnDetail.acceptedQuantity + grnDetail.freeQuantity,
-      locationId: sessionStorage?.getItem("locationId"),
+      locationId: grn?.warehouseLocationId,
       expiryDate: grnDetail.expiryDate,
+      qty: grnDetail.acceptedQuantity + grnDetail.freeQuantity,
       permissionId: 1048,
     };
   };
@@ -196,14 +230,33 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
     }));
   };
 
+  const handleOpenManageItemModal = (item) => {
+    setManageItem(item);
+    setShowManageItemModal(true);
+  };
+
+  const handleCloseManageItemModal = () => {
+    setShowManageItemModal(false);
+    setManageItem(null);
+  };
+
+  const handleShowManageItemModal = () => {
+    setShowManageItemModal(true);
+  };
+
   return {
     approvalStatus,
     loading,
     alertRef,
     modGrn,
+    manageItem,
+    showManageItemModal,
+    grnTypeDisplayMap,
     handleApprove,
     handleCostPriceChange,
     handleSellingPriceChange,
+    handleCloseManageItemModal,
+    handleOpenManageItemModal,
   };
 };
 

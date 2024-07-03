@@ -157,7 +157,7 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
                         }}
                       >
                         {suppliers
-                          .filter(
+                          ?.filter(
                             (supplier) =>
                               supplier.supplierName
                                 .toLowerCase()
@@ -179,7 +179,7 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
                               </button>
                             </li>
                           ))}
-                        {suppliers.filter(
+                        {suppliers?.filter(
                           (supplier) =>
                             supplier.supplierName
                               .toLowerCase()

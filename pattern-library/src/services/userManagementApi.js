@@ -40,7 +40,10 @@ export const logout_api = async () => {
 export const company_modules_api = async (companyId) => {
   try {
     const response = await api.get(
-      `/companySubscriptionModule/modules/company/${companyId}`
+      `/companySubscriptionModule/modules/company/${companyId}`,
+      {
+        withCredentials: true,
+      }
     );
     return response.data;
   } catch (error) {
@@ -56,7 +59,10 @@ export const module_roles_api = async (moduleIds) => {
       .join("&");
 
     const response = await api.get(
-      `/role/GetRolesByModuleIds?${formattedModuleIds}`
+      `/role/GetRolesByModuleIds?${formattedModuleIds}`,
+      {
+        withCredentials: true,
+      }
     );
 
     return response.data;
@@ -73,7 +79,10 @@ export const module_permissions_api = async (moduleIds) => {
       .join("&");
 
     const response = await api.get(
-      `/permission/GetPermissionsByModuleIds?${formattedModuleIds}`
+      `/permission/GetPermissionsByModuleIds?${formattedModuleIds}`,
+      {
+        withCredentials: true,
+      }
     );
     return response.data;
   } catch (error) {
@@ -84,7 +93,9 @@ export const module_permissions_api = async (moduleIds) => {
 
 export const user_registration_api = async (userFromData) => {
   try {
-    const response = await api.post("/user/register", userFromData);
+    const response = await api.post("/user/register", userFromData, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);
@@ -94,7 +105,9 @@ export const user_registration_api = async (userFromData) => {
 
 export const user_role_api = async (userRoleFromData) => {
   try {
-    const response = await api.post("/userRole", userRoleFromData);
+    const response = await api.post("/userRole", userRoleFromData, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);
@@ -104,7 +117,9 @@ export const user_role_api = async (userRoleFromData) => {
 
 export const user_permission_api = async (userPermissionFromData) => {
   try {
-    const response = await api.post("/userPermission", userPermissionFromData);
+    const response = await api.post("/userPermission", userPermissionFromData, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);
@@ -114,7 +129,9 @@ export const user_permission_api = async (userPermissionFromData) => {
 
 export const role_permission_api = async (rolePermissionFromData) => {
   try {
-    const response = await api.post("/rolePermission", rolePermissionFromData);
+    const response = await api.post("/rolePermission", rolePermissionFromData, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);
@@ -128,7 +145,10 @@ export const company_subscription_module_user_api = async (
   try {
     const response = await api.post(
       "/companySubscriptionModuleUser",
-      userModulesFromData
+      userModulesFromData,
+      {
+        withCredentials: true,
+      }
     );
     return response.data;
   } catch (error) {
@@ -141,7 +161,26 @@ export const user_modules_api = async (userId) => {
   try {
     const response = await api.get("/module/GetModulesByUserId", {
       params: { userId: userId },
+      withCredentials: true,
     });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_company_subscription_module_id_api = async (
+  companyId,
+  moduleId
+) => {
+  try {
+    const response = await api.get(
+      `/companySubscriptionModule/companySubscriptionModuleId/${companyId}/${moduleId}`,
+      {
+        withCredentials: true,
+      }
+    );
     return response.data;
   } catch (error) {
     console.log(error);
@@ -151,7 +190,9 @@ export const user_modules_api = async (userId) => {
 
 export const submodules_api = async (moduleId) => {
   try {
-    const response = await api.get(`/submodule/${moduleId}`);
+    const response = await api.get(`/submodule/${moduleId}`, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);
@@ -162,7 +203,9 @@ export const submodules_api = async (moduleId) => {
 //company apis
 export const get_companies_api = async () => {
   try {
-    const response = await api.get("/company");
+    const response = await api.get("/company", {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);
@@ -172,7 +215,9 @@ export const get_companies_api = async () => {
 
 export const get_company_api = async (companyId) => {
   try {
-    const response = await api.get(`/company/${companyId}`);
+    const response = await api.get(`/company/${companyId}`, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);
@@ -235,7 +280,9 @@ export const delete_company_api = async (companyId) => {
 //subscription apis
 export const get_subscriptions_api = async () => {
   try {
-    const response = await api.get("/subscription");
+    const response = await api.get("/subscription", {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);
@@ -245,7 +292,9 @@ export const get_subscriptions_api = async () => {
 
 export const get_subscription_api = async (subscriptionId) => {
   try {
-    const response = await api.get(`/subscription/${subscriptionId}`);
+    const response = await api.get(`/subscription/${subscriptionId}`, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);
@@ -255,7 +304,9 @@ export const get_subscription_api = async (subscriptionId) => {
 
 export const post_subscription_api = async (subscriptionData) => {
   try {
-    const response = await api.post("/subscription", subscriptionData);
+    const response = await api.post("/subscription", subscriptionData, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     throw error;
@@ -269,7 +320,10 @@ export const put_subscription_api = async (
   try {
     const response = await api.put(
       `/subscription/${subscriptionId}`,
-      subscriptionData
+      subscriptionData,
+      {
+        withCredentials: true,
+      }
     );
     return response.data;
   } catch (error) {
@@ -280,7 +334,9 @@ export const put_subscription_api = async (
 //modules apis
 export const get_modules_api = async () => {
   try {
-    const response = await api.get("/module");
+    const response = await api.get("/module", {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);
@@ -290,7 +346,9 @@ export const get_modules_api = async () => {
 
 export const get_module_api = async (moduleId) => {
   try {
-    const response = await api.get(`/module/${moduleId}`);
+    const response = await api.get(`/module/${moduleId}`, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);
@@ -300,7 +358,9 @@ export const get_module_api = async (moduleId) => {
 
 export const post_module_api = async (moduleData) => {
   try {
-    const response = await api.post("/module", moduleData);
+    const response = await api.post("/module", moduleData, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     throw error;
@@ -309,7 +369,9 @@ export const post_module_api = async (moduleData) => {
 
 export const put_module_api = async (moduleId, moduleData) => {
   try {
-    const response = await api.put(`/module/${moduleId}`, moduleData);
+    const response = await api.put(`/module/${moduleId}`, moduleData, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     throw error;
@@ -329,6 +391,40 @@ export const get_user_permissions_api = async (userId) => {
     return response.data;
   } catch (error) {
     console.log(error);
+    throw error;
+  }
+};
+
+//user location apis
+export const post_user_location_api = async (userLocationData) => {
+  try {
+    const response = await api.post("/userLocation", userLocationData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const put_user_location_api = async (userId, locationId) => {
+  try {
+    const response = await api.put(`/userLocation/${userId}/${locationId}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const delete_user_location_api = async (userId, locationId) => {
+  try {
+    const response = await api.delete(`/userLocation/${userId}/${locationId}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
     throw error;
   }
 };

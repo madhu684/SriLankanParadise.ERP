@@ -11,6 +11,10 @@ public partial class Role
 
     public int ModuleId { get; set; }
 
+    public int? CompanyId { get; set; }
+
+    public bool? Status { get; set; }
+
     public virtual Module Module { get; set; } = null!;
 
     public virtual ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();

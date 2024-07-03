@@ -222,6 +222,12 @@
   <data name="CompanySubscriptionModuleCreated" xml:space="preserve">
     <value>Company subscription module created successfully</value>
   </data>
+  <data name="CompanySubscriptionModuleIdNotFound" xml:space="preserve">
+    <value>Company subscription module id not found</value>
+  </data>
+  <data name="CompanySubscriptionModuleIdRetrieved" xml:space="preserve">
+    <value>Company subscription module id retrieved</value>
+  </data>
   <data name="CompanySubscriptionModuleNotFound" xml:space="preserve">
     <value>Company subscription module not found</value>
   </data>
@@ -254,6 +260,12 @@
   </data>
   <data name="CustomersRetrieved" xml:space="preserve">
     <value>Customers retrieved</value>
+  </data>
+  <data name="DailyStockBalanceCreated" xml:space="preserve">
+    <value>Daily stock balance created successfully</value>
+  </data>
+  <data name="DailyStockBalancesRetrieved" xml:space="preserve">
+    <value>Daily stock balances retrieved</value>
   </data>
   <data name="ExpenseOutRequisitionCreated" xml:space="preserve">
     <value>Expense out requisition created successfully</value>
@@ -375,11 +387,68 @@
   <data name="LocationChannelItemBatchCreated" xml:space="preserve">
     <value>LocationChannelItemBatch created successfully</value>
   </data>
+  <data name="LocationCreated" xml:space="preserve">
+    <value>Location created successfully</value>
+  </data>
+  <data name="LocationInventoriesNotFound" xml:space="preserve">
+    <value>Location inventories not found</value>
+  </data>
+  <data name="LocationInventoriesRetrieved" xml:space="preserve">
+    <value>Location inventories retrieved</value>
+  </data>
+  <data name="LocationInventoryCreated" xml:space="preserve">
+    <value>Location inventory created successfully</value>
+  </data>
+  <data name="LocationInventoryGoodsInTransitCreated" xml:space="preserve">
+    <value>Location inventory goods in transit created successfully</value>
+  </data>
+  <data name="LocationInventoryGoodsInTransitNotFound" xml:space="preserve">
+    <value>Location inventory goods in transit not found</value>
+  </data>
+  <data name="LocationInventoryGoodsInTransitsRetrieved" xml:space="preserve">
+    <value>Location inventory goods in transits retrieved</value>
+  </data>
+  <data name="LocationInventoryGoodsInTransitUpdated" xml:space="preserve">
+    <value>Location inventory goods in transit updated</value>
+  </data>
+  <data name="LocationInventoryMovementCreated" xml:space="preserve">
+    <value>Location inventory movement created successfully</value>
+  </data>
+  <data name="LocationInventoryMovementNotFound" xml:space="preserve">
+    <value>Location inventory movement not found</value>
+  </data>
+  <data name="LocationInventoryMovementsRetrieved" xml:space="preserve">
+    <value>Location inventory movements retrieved</value>
+  </data>
+  <data name="LocationInventoryMovementUpdated" xml:space="preserve">
+    <value>Location inventory movement updated</value>
+  </data>
+  <data name="LocationInventoryNotFound" xml:space="preserve">
+    <value>Location inventory not found</value>
+  </data>
+  <data name="LocationInventoryUpdated" xml:space="preserve">
+    <value>Location inventory updated</value>
+  </data>
+  <data name="LocationNotFound" xml:space="preserve">
+    <value>Location not found</value>
+  </data>
+  <data name="LocationRetrieved" xml:space="preserve">
+    <value>Location retrieved</value>
+  </data>
   <data name="LocationsNotFound" xml:space="preserve">
     <value>Locations not found</value>
   </data>
   <data name="LocationsRetrieved" xml:space="preserve">
     <value>Locations retrieved</value>
+  </data>
+  <data name="LocationTypesNotFound" xml:space="preserve">
+    <value>Location types not found</value>
+  </data>
+  <data name="LocationTypesRetrieved" xml:space="preserve">
+    <value>Location types retrieved</value>
+  </data>
+  <data name="LocationUpdated" xml:space="preserve">
+    <value>Location updated successfully</value>
   </data>
   <data name="MeasurementTypeCreated" xml:space="preserve">
     <value>Measurement type created successfully</value>
@@ -417,11 +486,20 @@
   <data name="PaymentModesRetrieved" xml:space="preserve">
     <value>Payment modes retrieved</value>
   </data>
+  <data name="PermissionCreated" xml:space="preserve">
+    <value>Permission created successfully</value>
+  </data>
+  <data name="PermissionNotFound" xml:space="preserve">
+    <value>Permission not found</value>
+  </data>
   <data name="PermissionsNotFound" xml:space="preserve">
     <value>Permissions not found</value>
   </data>
   <data name="PermissionsRetrieved" xml:space="preserve">
     <value>Permissions retrieved</value>
+  </data>
+  <data name="PermissionUpdated" xml:space="preserve">
+    <value>Permission updated successfully</value>
   </data>
   <data name="PurchaseOrderApproved" xml:space="preserve">
     <value>Purchase order approved</value>
@@ -507,6 +585,12 @@
   <data name="RequisitionMastersRetrieved" xml:space="preserve">
     <value>Requisition masters retrieved</value>
   </data>
+  <data name="RoleCreated" xml:space="preserve">
+    <value>Role created successfully</value>
+  </data>
+  <data name="RoleNotFound" xml:space="preserve">
+    <value>Role not found</value>
+  </data>
   <data name="RolePermissionCreated" xml:space="preserve">
     <value>Role permission created successfully</value>
   </data>
@@ -515,6 +599,9 @@
   </data>
   <data name="RolesRetrieved" xml:space="preserve">
     <value>Roles retrieved</value>
+  </data>
+  <data name="RoleUpdated" xml:space="preserve">
+    <value>Role updated successfully</value>
   </data>
   <data name="SalesInvoiceApproved" xml:space="preserve">
     <value>Sales invoice approved</value>
@@ -611,6 +698,12 @@
   </data>
   <data name="SalesReceiptUpdated" xml:space="preserve">
     <value>Sales receipt updated successfully</value>
+  </data>
+  <data name="SubItemsNotFound" xml:space="preserve">
+    <value>Sub items not found</value>
+  </data>
+  <data name="SubItemsRetrieved" xml:space="preserve">
+    <value>Sub items retrieved</value>
   </data>
   <data name="SubModuleCreated" xml:space="preserve">
     <value>Sub module created successfully</value>
@@ -726,6 +819,27 @@
   <data name="UserAuthenticated" xml:space="preserve">
     <value>User authenticated successfully</value>
   </data>
+  <data name="UserLocationCreated" xml:space="preserve">
+    <value>User location created successfully</value>
+  </data>
+  <data name="UserLocationDeleted" xml:space="preserve">
+    <value>User location deleted successfully</value>
+  </data>
+  <data name="UserLocationNotFound" xml:space="preserve">
+    <value>User location not found</value>
+  </data>
+  <data name="UserLocationsNotFound" xml:space="preserve">
+    <value>User locations not found</value>
+  </data>
+  <data name="UserLocationsRetrieved" xml:space="preserve">
+    <value>User locations retrieved</value>
+  </data>
+  <data name="UserLocationUpdated" xml:space="preserve">
+    <value>User location updated successfully</value>
+  </data>
+  <data name="UserNotFound" xml:space="preserve">
+    <value>User not found</value>
+  </data>
   <data name="UseRoleCreated" xml:space="preserve">
     <value>User role created successfully</value>
   </data>
@@ -740,5 +854,14 @@
   </data>
   <data name="UserRegistered" xml:space="preserve">
     <value>User registered successfully</value>
+  </data>
+  <data name="UsersNotFound" xml:space="preserve">
+    <value>Users not found</value>
+  </data>
+  <data name="UsersRetrieved" xml:space="preserve">
+    <value>Users retrieved</value>
+  </data>
+  <data name="UserUpdated" xml:space="preserve">
+    <value>User updated successfully</value>
   </data>
 </root>

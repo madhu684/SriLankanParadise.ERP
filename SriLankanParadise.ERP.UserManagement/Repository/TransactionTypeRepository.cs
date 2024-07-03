@@ -4,7 +4,7 @@ using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
 {
-    public class TransactionTypeRepository :ITransactionTypeRepository
+    public class TransactionTypeRepository : ITransactionTypeRepository
     {
         private readonly ErpSystemContext _dbContext;
 

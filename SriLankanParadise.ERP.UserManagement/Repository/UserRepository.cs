@@ -44,5 +44,57 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task<IEnumerable<User>> GetAllUsersByCompanyId(int companyId)
+        {
+            try
+            {
+                var users = await _dbContext.Users
+                    .Where(u => u.CompanyId == companyId)
+                    .ToListAsync();
+
+                return users.Any() ? users : null;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<User> GetUserByUserId(int userId)
+        {
+            try
+            {
+                var user = await _dbContext.Users
+                    .Where(u => u.UserId == userId)
+                    .FirstOrDefaultAsync();
+
+                return user;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task UpdateUser(int userId, User user)
+        {
+            try
+            {
+                var existUser = await _dbContext.Users.FindAsync(userId);
+
+                if (existUser != null)
+                {
+                    _dbContext.Entry(existUser).CurrentValues.SetValues(user);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }

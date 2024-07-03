@@ -135,6 +135,8 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
+    public virtual DbSet<UserLocation> UserLocations { get; set; }
+
     public virtual DbSet<UserPermission> UserPermissions { get; set; }
 
     public virtual DbSet<UserRole> UserRoles { get; set; }
@@ -412,6 +414,7 @@ public partial class ErpSystemContext : DbContext
 
             entity.HasOne(d => d.ItemBatch).WithMany(p => p.DailyStockBalances)
                 .HasForeignKey(d => new { d.ItemMasterId, d.BatchId })
+
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_DailyStockBalance_ItemMaster_Batch");
         });
@@ -641,6 +644,7 @@ public partial class ErpSystemContext : DbContext
 
             entity.HasOne(d => d.ItemBatch).WithMany(p => p.LocationInventories)
                 .HasForeignKey(d => new { d.ItemMasterId, d.BatchId })
+                
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_LocationInventory_ItemMaster_Batch");
         });
@@ -665,6 +669,7 @@ public partial class ErpSystemContext : DbContext
 
             entity.HasOne(d => d.ItemBatch).WithMany(p => p.LocationInventoryGoodsInTransits)
                 .HasForeignKey(d => new { d.ItemMasterId, d.BatchId })
+                
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_LocationInventoryGoodsInTransit_ItemMaster_Batch");
         });
@@ -693,6 +698,7 @@ public partial class ErpSystemContext : DbContext
                 .HasConstraintName("FK_LocationInventoryMovement_TransactionType");
 
             entity.HasOne(d => d.ItemBatch).WithMany(p => p.LocationInventoryMovements)
+
                 .HasForeignKey(d => new { d.ItemMasterId, d.BatchId })
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_LocationInventoryMovement_ItemMaster_Batch");
@@ -808,7 +814,6 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.ApprovedDate).HasColumnType("datetime");
             entity.Property(e => e.ContactNo).HasMaxLength(12);
             entity.Property(e => e.CreatedDate).HasColumnType("datetime");
-            entity.Property(e => e.Department).HasMaxLength(50);
             entity.Property(e => e.Email).HasMaxLength(100);
             entity.Property(e => e.ExpectedDeliveryDate).HasColumnType("date");
             entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
@@ -818,7 +823,11 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.RequisitionDate).HasColumnType("date");
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
 
-            entity.HasOne(d => d.ExpectedDeliveryLocationNavigation).WithMany(p => p.PurchaseRequisitions)
+            entity.HasOne(d => d.DepartmentNavigation).WithMany(p => p.PurchaseRequisitionDepartmentNavigations)
+                .HasForeignKey(d => d.Department)
+                .HasConstraintName("FK_PurchaseRequisition_Department_Location");
+
+            entity.HasOne(d => d.ExpectedDeliveryLocationNavigation).WithMany(p => p.PurchaseRequisitionExpectedDeliveryLocationNavigations)
                 .HasForeignKey(d => d.ExpectedDeliveryLocation)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PurchaseRequisition_Location");
@@ -1187,6 +1196,23 @@ public partial class ErpSystemContext : DbContext
             entity.HasOne(d => d.Location).WithMany(p => p.Users)
                 .HasForeignKey(d => d.LocationId)
                 .HasConstraintName("FK_User_Location");
+        });
+
+        modelBuilder.Entity<UserLocation>(entity =>
+        {
+            entity.HasKey(e => e.UserLocationId).HasName("PK__UserLoca__3C542CAAF9B7743C");
+
+            entity.ToTable("UserLocation");
+
+            entity.HasOne(d => d.Location).WithMany(p => p.UserLocations)
+                .HasForeignKey(d => d.LocationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_UserLocation_Location");
+
+            entity.HasOne(d => d.User).WithMany(p => p.UserLocations)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_UserLocation_User");
         });
 
         modelBuilder.Entity<UserPermission>(entity =>

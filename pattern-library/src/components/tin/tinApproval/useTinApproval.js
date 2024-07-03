@@ -1,5 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { approve_issue_master_api } from "../../../services/purchaseApi";
+import {
+  approve_issue_master_api,
+  patch_location_inventory_api,
+  post_location_inventory_api,
+  post_location_inventory_movement_api,
+  post_location_inventory_goods_in_transit_api,
+} from "../../../services/purchaseApi";
 
 const useTinApproval = ({ tin, onFormSubmit }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
@@ -20,6 +26,99 @@ const useTinApproval = ({ tin, onFormSubmit }) => {
       alertRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [approvalStatus]);
+
+  const updateInventory = async (
+    details,
+    formattedDate,
+    fromLocationId,
+    toLocationId
+  ) => {
+    try {
+      for (const detail of details) {
+        const { itemMasterId, batchId, quantity } = detail;
+
+        // Patch Location Inventory API
+        await patch_location_inventory_api(
+          fromLocationId,
+          itemMasterId,
+          batchId,
+          "subtract",
+          {
+            stockInHand: quantity,
+            permissionId: 1089,
+          }
+        );
+
+        // Patch Location Inventory API (add stock to toLocation)
+
+        const patchLocationInventoryResponse =
+          await patch_location_inventory_api(
+            toLocationId,
+            itemMasterId,
+            batchId,
+            "add",
+            {
+              stockInHand: quantity,
+              permissionId: 1089,
+            }
+          );
+
+        if (
+          patchLocationInventoryResponse &&
+          patchLocationInventoryResponse.status === 404
+        ) {
+          // Location inventory not found, create it
+          await post_location_inventory_api({
+            itemMasterId,
+            batchId,
+            locationId: toLocationId,
+            stockInHand: quantity,
+            permissionId: 1088,
+          });
+        }
+
+        // Post Location Inventory Movement API
+        await post_location_inventory_movement_api({
+          movementTypeId: 2,
+          transactionTypeId: 6,
+          itemMasterId,
+          batchId,
+          locationId: fromLocationId,
+          date: formattedDate,
+          qty: quantity,
+          permissionId: 1090,
+        });
+
+        await post_location_inventory_movement_api({
+          movementTypeId: 1,
+          transactionTypeId: 6,
+          itemMasterId,
+          batchId,
+          locationId: toLocationId,
+          date: formattedDate,
+          qty: quantity,
+          permissionId: 1090,
+        });
+
+        // Prepare the data for post_location_inventory_goods_in_transit_api
+        const transitData = {
+          toLocationId: toLocationId,
+          fromLocationId: fromLocationId,
+          itemMasterId: itemMasterId,
+          batchId: batchId,
+          date: formattedDate,
+          status: 0,
+          qty: quantity,
+          permissionId: 1092,
+        };
+
+        //post_location_inventory_goods_in_transit_api for each item
+        await post_location_inventory_goods_in_transit_api(transitData);
+      }
+    } catch (error) {
+      throw new Error("Error updating inventory: " + error.message);
+    }
+  };
 
   const handleApprove = async (tinId) => {
     try {
@@ -42,6 +141,13 @@ const useTinApproval = ({ tin, onFormSubmit }) => {
       );
 
       if (approvalResponse.status === 200) {
+        await updateInventory(
+          tin.issueDetails,
+          formattedDate,
+          tin.requisitionMaster.requestedFromLocationId,
+          tin.requisitionMaster.requestedToLocationId
+        );
+
         setApprovalStatus("approved");
         console.log(
           "Material issue note approved successfully:",

@@ -1,13 +1,17 @@
 import React from "react";
 import template from "./registration.jsx";
-import { company_modules_api } from "../../services/userManagementApi.js";
-import { module_roles_api } from "../../services/userManagementApi.js";
-import { module_permissions_api } from "../../services/userManagementApi.js";
-import { user_registration_api } from "../../services/userManagementApi.js";
-import { company_subscription_module_user_api } from "../../services/userManagementApi.js";
-import { user_role_api } from "../../services/userManagementApi.js";
-import { user_permission_api } from "../../services/userManagementApi.js";
-import { role_permission_api } from "../../services/userManagementApi.js";
+import {
+  company_modules_api,
+  post_user_location_api,
+  module_roles_api,
+  module_permissions_api,
+  user_registration_api,
+  company_subscription_module_user_api,
+  get_company_subscription_module_id_api,
+  user_role_api,
+  user_permission_api,
+  role_permission_api,
+} from "../../services/userManagementApi.js";
 import { get_company_locations_api } from "../../services/purchaseApi";
 
 class registration extends React.Component {
@@ -25,6 +29,7 @@ class registration extends React.Component {
           lastname: "",
           companyId: sessionStorage.getItem("companyId"),
           department: "",
+          warehouse: [],
         },
         "user-module": {
           assignedModules: [], // Array to store assigned modules
@@ -66,6 +71,7 @@ class registration extends React.Component {
         "role-permission": {},
       },
       locations: [],
+      loading: false, // Flag to indicate loading state
     };
   }
 
@@ -257,16 +263,18 @@ class registration extends React.Component {
       isUserRoleValid &&
       isRolePermissionValid
     ) {
+      // Set loading to true to show loading spinner
+      this.setState({ loading: true });
       const saveSuccessful = await this.saveRegistrationData();
       if (saveSuccessful) {
-        this.setState({ showSuccessAlert: true });
+        this.setState({ showSuccessAlert: true, loading: false });
 
         setTimeout(() => {
           this.setState({ showSuccessAlert: false, showFailureAlert: false });
           this.resetState();
         }, 3000);
       } else {
-        this.setState({ showFailureAlert: true });
+        this.setState({ showFailureAlert: true, loading: false });
 
         setTimeout(() => {
           this.setState({ showFailureAlert: false });
@@ -502,7 +510,7 @@ class registration extends React.Component {
       const assignedModuleIds = this.state.formData[
         "user-module"
       ].assignedModules.map((module) => module.id);
-      const permissionId = parseInt(assignedModuleIds.join(""));
+      const permissionId = 3;
 
       // Extract basic user information
       const basicUserData = {
@@ -529,17 +537,29 @@ class registration extends React.Component {
       ) {
         const userId = registrationResponse.data.result.userId;
 
+        const permissionId = 1085;
+
+        await this.postUserLocationData(userId, permissionId);
+
         // Extract assigned module IDs
         const assignedModuleIds = this.state.formData[
           "user-module"
         ].assignedModules.map((module) => module.id);
 
-        // Prepare data for company_subscription_module_user_api
-        const userModulesFromData = assignedModuleIds.map((module, index) => ({
-          companySubscriptionModuleId: module,
-          userId: userId,
-          permissionId: permissionId,
-        }));
+        // Fetch company subscription module IDs and prepare data
+        const userModulesFromData = await Promise.all(
+          assignedModuleIds.map(async (module) => {
+            const response = await get_company_subscription_module_id_api(
+              sessionStorage.getItem("companyId"),
+              module
+            );
+            return {
+              companySubscriptionModuleId: response.data.result,
+              userId: userId,
+              permissionId: permissionId,
+            };
+          })
+        );
 
         // Loop through the prepared data and call the API for each row
         for (const userModuleData of userModulesFromData) {
@@ -751,6 +771,7 @@ class registration extends React.Component {
   componentDidMount() {
     // Fetch locations when the component mounts
     this.fetchLocations();
+    window.addEventListener("beforeunload", this.handleBeforeUnload);
   }
 
   fetchLocations = () => {
@@ -799,6 +820,53 @@ class registration extends React.Component {
         "role-permission": {},
       },
     });
+  };
+
+  prepareUserLocationData = (userId, permissionId) => {
+    const { department, warehouse } = this.state.formData.basic;
+
+    // Gather all location IDs
+    const locationIds = [];
+    if (department) {
+      locationIds.push(department);
+    }
+    if (warehouse.length > 0) {
+      locationIds.push(...warehouse);
+    }
+
+    // Format the data
+    const userLocationData = locationIds.map((locationId) => ({
+      locationId: locationId,
+      userId: userId,
+      permissionId: permissionId,
+    }));
+
+    return userLocationData;
+  };
+
+  postUserLocationData = async (userId, permissionId) => {
+    const userLocationData = this.prepareUserLocationData(userId, permissionId);
+
+    try {
+      // Post each location data individually
+      for (const data of userLocationData) {
+        const response = await post_user_location_api(data);
+        console.log("User location data posted successfully:", response);
+      }
+    } catch (error) {
+      console.error("Error posting user location data:", error);
+    }
+  };
+
+  componentWillUnmount() {
+    window.removeEventListener("beforeunload", this.handleBeforeUnload);
+  }
+
+  handleBeforeUnload = (e) => {
+    if (this.state.loading) {
+      e.preventDefault();
+      e.returnValue = "";
+    }
   };
 
   render() {

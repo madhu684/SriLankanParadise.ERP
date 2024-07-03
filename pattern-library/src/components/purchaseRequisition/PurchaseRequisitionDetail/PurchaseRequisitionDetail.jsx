@@ -53,7 +53,8 @@ const PurchaseRequisitionDetail = ({
               <strong>Requested By:</strong> {purchaseRequisition.requestedBy}
             </p>
             <p>
-              <strong>Department:</strong> {purchaseRequisition.department}
+              <strong>Department:</strong>{" "}
+              {purchaseRequisition?.departmentNavigation?.locationName}
             </p>
             <p>
               <strong>Email:</strong> {purchaseRequisition.email}

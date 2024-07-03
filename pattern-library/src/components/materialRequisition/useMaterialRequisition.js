@@ -3,13 +3,14 @@ import {
   get_company_locations_api,
   post_requisition_master_api,
   post_requisition_detail_api,
+  get_user_locations_by_user_id_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
 
 const useMaterialRequisition = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
-    deliveryLocation: sessionStorage?.getItem("locationId"),
+    deliveryLocation: "",
     warehouseLocation: null,
     itemDetails: [],
     attachments: [],
@@ -41,6 +42,40 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
     queryKey: ["locations"],
     queryFn: fetchLocations,
   });
+
+  const fetchUserLocations = async () => {
+    try {
+      const response = await get_user_locations_by_user_id_api(
+        sessionStorage.getItem("userId")
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching user locations:", error);
+    }
+  };
+
+  const {
+    data: userLocations,
+    isLoading: isUserLocationsLoading,
+    isError: isUserLocationsError,
+    error: userLocationsError,
+  } = useQuery({
+    queryKey: ["userLocations", sessionStorage.getItem("userId")],
+    queryFn: fetchUserLocations,
+  });
+
+  useEffect(() => {
+    if (!isUserLocationsLoading && userLocations) {
+      const location = userLocations?.find(
+        (location) => location?.location?.locationTypeId === 3
+      );
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        department: location?.location.locationName,
+        deliveryLocation: location?.locationId,
+      }));
+    }
+  }, [isUserLocationsLoading, userLocations]);
 
   const fetchItems = async (companyId, searchQuery, itemType) => {
     try {
@@ -255,8 +290,8 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
           approvedDate: null,
           companyId: sessionStorage.getItem("companyId"),
           requisitionType: "MRN",
-          requestedFromLocationId: formData.deliveryLocation,
-          requestedToLocationId: formData.warehouseLocation,
+          requestedFromLocationId: formData.warehouseLocation,
+          requestedToLocationId: formData.deliveryLocation,
           referenceNumber: generateReferenceNumber(),
           permissionId: 1052,
         };

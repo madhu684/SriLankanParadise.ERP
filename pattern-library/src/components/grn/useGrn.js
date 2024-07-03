@@ -4,7 +4,9 @@ import {
   post_grn_master_api,
   post_grn_detail_api,
   get_grn_masters_by_purchase_order_id_api,
+  get_company_locations_api,
 } from "../../services/purchaseApi";
+import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
 
 const useGrn = ({ onFormSubmit }) => {
@@ -15,6 +17,8 @@ const useGrn = ({ onFormSubmit }) => {
     itemDetails: [],
     status: "",
     purchaseOrderId: "",
+    grnType: "goodsReceivedNote",
+    warehouseLocation: null,
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -28,16 +32,67 @@ const useGrn = ({ onFormSubmit }) => {
   const [purchaseOrderSearchTerm, setPurchaseOrderSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
+  const grnTypeOptions = [
+    { id: "goodsReceivedNote", label: "Goods Received Note" },
+    { id: "finishedGoodsIn", label: "Finished Goods In" },
+    { id: "directPurchase", label: "Direct Purchase" },
+  ];
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const fetchLocations = async () => {
+    try {
+      const response = await get_company_locations_api(
+        sessionStorage.getItem("companyId")
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching locations:", error);
+    }
+  };
+
+  const {
+    data: locations,
+    isLoading: isLocationsLoading,
+    isError: isLocationsError,
+    error: locationsError,
+  } = useQuery({
+    queryKey: ["locations"],
+    queryFn: fetchLocations,
+  });
+
+  const fetchItems = async (companyId, searchQuery, itemType) => {
+    try {
+      const response = await get_item_masters_by_company_id_with_query_api(
+        companyId,
+        searchQuery,
+        itemType
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching items:", error);
+    }
+  };
+
+  const {
+    data: availableItems,
+    isLoading: isItemsLoading,
+    isError: isItemsError,
+    error: itemsError,
+  } = useQuery({
+    queryKey: ["items", searchTerm],
+    queryFn: () =>
+      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"),
+  });
 
   const fetchPurchaseOrders = async () => {
     try {
       const response = await get_purchase_orders_with_out_drafts_api(
         sessionStorage?.getItem("companyId")
       );
-      const filteredPurchaseOrders = response.data.result.filter(
+      const filteredPurchaseOrders = response.data.result?.filter(
         (po) => po.status === 2
       );
-      return filteredPurchaseOrders;
+      return filteredPurchaseOrders || [];
     } catch (error) {
       console.error("Error fetching purchase orders:", error);
     }
@@ -198,11 +253,14 @@ const useGrn = ({ onFormSubmit }) => {
 
     const isStatusValid = validateField("status", "Status", formData.status);
 
-    const isPurchaseOrderIdValid = validateField(
-      "purchaseOrderId",
-      "Purchase order reference number",
-      formData.purchaseOrderId
-    );
+    let isPurchaseOrderIdValid = true;
+    if (!["finishedGoodsIn", "directPurchase"].includes(formData?.grnType)) {
+      isPurchaseOrderIdValid = validateField(
+        "purchaseOrderId",
+        "Purchase order reference number",
+        formData.purchaseOrderId
+      );
+    }
 
     let isItemQuantityValid = true;
     // Validate item details
@@ -210,11 +268,23 @@ const useGrn = ({ onFormSubmit }) => {
       const fieldName = `receivedQuantity_${index}`;
       const fieldDisplayName = `Received Quantity for ${item.name}`;
 
-      const additionalRules = {
-        validationFunction: (value) =>
-          parseFloat(value) > 0 && parseFloat(value) <= item.remainingQuantity,
-        errorMessage: `${fieldDisplayName} must be greater than 0 and less than or equal to remaining quantity ${item.remainingQuantity}`,
-      };
+      let additionalRules = {};
+
+      if (["finishedGoodsIn", "directPurchase"].includes(formData?.grnType)) {
+        // Rule for finishedGoodsIn or directPurchase
+        additionalRules = {
+          validationFunction: (value) => parseFloat(value) > 0,
+          errorMessage: `${fieldDisplayName} must be greater than 0`,
+        };
+      } else {
+        // Default rule
+        additionalRules = {
+          validationFunction: (value) =>
+            parseFloat(value) > 0 &&
+            parseFloat(value) <= item.remainingQuantity,
+          errorMessage: `${fieldDisplayName} must be greater than 0 and less than or equal to remaining quantity ${item.remainingQuantity}`,
+        };
+      }
 
       const isValidQuantity = validateField(
         fieldName,
@@ -289,6 +359,18 @@ const useGrn = ({ onFormSubmit }) => {
       isItemExpiryDateValid = isItemExpiryDateValid && isValidExpiryDate;
     });
 
+    const isGrnTypeValid = validateField(
+      "grnType",
+      "GRN type",
+      formData.grnType
+    );
+
+    const isWarehouseLocationValid = validateField(
+      "warehouseLocation",
+      "Warehouse location",
+      formData.warehouseLocation
+    );
+
     return (
       isGrnDateValid &&
       isReceivedByValid &&
@@ -298,7 +380,9 @@ const useGrn = ({ onFormSubmit }) => {
       isItemQuantityValid &&
       isItemUnitPriceValid &&
       isItemExpiryDateValid &&
-      isRejectedQuantityValid
+      isRejectedQuantityValid &&
+      isGrnTypeValid &&
+      isWarehouseLocationValid
     );
   };
 
@@ -310,6 +394,12 @@ const useGrn = ({ onFormSubmit }) => {
 
       const currentDate = new Date().toISOString();
 
+      const purchaseOrderId = ["finishedGoodsIn", "directPurchase"].includes(
+        formData?.grnType
+      )
+        ? null
+        : formData?.purchaseOrderId;
+
       const isFormValid = validateForm();
       if (isFormValid) {
         if (isSaveAsDraft) {
@@ -319,7 +409,7 @@ const useGrn = ({ onFormSubmit }) => {
         }
 
         const grnData = {
-          purchaseOrderId: formData.purchaseOrderId,
+          purchaseOrderId: purchaseOrderId,
           grnDate: formData.grnDate,
           receivedBy: formData.receivedBy,
           receivedDate: formData.receivedDate,
@@ -331,6 +421,8 @@ const useGrn = ({ onFormSubmit }) => {
           approvedDate: null,
           createdDate: currentDate,
           lastUpdatedDate: currentDate,
+          grnType: formData.grnType,
+          warehouseLocationId: formData.warehouseLocation,
           permissionId: 20,
         };
 
@@ -399,6 +491,10 @@ const useGrn = ({ onFormSubmit }) => {
       ...prevFormData,
       [field]: value,
     }));
+
+    if (field === "grnType") {
+      handleResetPurchaseOrder();
+    }
   };
 
   const handleItemDetailsChange = (index, field, value) => {
@@ -489,6 +585,28 @@ const useGrn = ({ onFormSubmit }) => {
     setValidationErrors({});
   };
 
+  const handleSelectItem = (item) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      itemDetails: [
+        ...prevFormData.itemDetails,
+        {
+          id: item.itemMasterId,
+          name: item.itemName,
+          unit: item.unit.unitName,
+          quantity: 0,
+          remainingQuantity: 0,
+          receivedQuantity: 0,
+          rejectedQuantity: 0,
+          freeQuantity: 0,
+          expiryDate: "",
+          unitPrice: 0.0,
+        },
+      ],
+    }));
+    setSearchTerm(""); // Clear the search term
+  };
+
   return {
     formData,
     validFields,
@@ -503,6 +621,16 @@ const useGrn = ({ onFormSubmit }) => {
     purchaseOrderSearchTerm,
     loading,
     loadingDraft,
+    grnTypeOptions,
+    searchTerm,
+    availableItems,
+    isItemsLoading,
+    isItemsError,
+    itemsError,
+    locations,
+    isLocationsLoading,
+    isLocationsError,
+    locationsError,
     handleInputChange,
     handleItemDetailsChange,
     handleRemoveItem,
@@ -513,6 +641,8 @@ const useGrn = ({ onFormSubmit }) => {
     setPurchaseOrderSearchTerm,
     setSelectedPurchaseOrder,
     handleResetPurchaseOrder,
+    setSearchTerm,
+    handleSelectItem,
   };
 };
 

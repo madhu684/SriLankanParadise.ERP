@@ -26,6 +26,9 @@ const Tin = ({ handleClose, handleUpdated }) => {
     itemBatches,
     isItemBatchesLoading,
     isItemBatchesError,
+    isLocationInventoriesLoading,
+    isLocationInventoriesError,
+    locationInventories,
     handleInputChange,
     handleItemDetailsChange,
     handleRemoveItem,
@@ -246,12 +249,12 @@ const Tin = ({ handleClose, handleUpdated }) => {
                       .format("YYYY-MM-DD hh:mm:ss A")}
                   </p>
                   <p>
-                    Delivery Location:{" "}
-                    {selectedTrn?.requestedFromLocation.locationName}
+                    To Warehouse Location:{" "}
+                    {selectedTrn?.requestedToLocation.locationName}
                   </p>
                   <p>
-                    Warehouse Location:{" "}
-                    {selectedTrn?.requestedToLocation.locationName}
+                    From Warehouse Location:{" "}
+                    {selectedTrn?.requestedFromLocation.locationName}
                   </p>
                   <button
                     type="button"
@@ -302,11 +305,16 @@ const Tin = ({ handleClose, handleUpdated }) => {
                         }
                       >
                         <option value="">Select item batch</option>
-                        {itemBatches
-                          //  .filter((batch) => batch.itemMasterId === item.id)
-                          .map((batch, batchIndex) => (
-                            <option key={batchIndex} value={batch.batchId}>
-                              {batch.batch.batchRef}
+                        {locationInventories
+                          ?.filter((batch) => batch.itemMasterId === item.id)
+                          ?.map((batch, batchIndex) => (
+                            <option
+                              key={batchIndex}
+                              value={batch.batchId}
+                              disabled={batch.stockInHand === 0}
+                            >
+                              {batch.itemBatch.batch.batchRef} - Stock in hand{" "}
+                              {batch.stockInHand}
                             </option>
                           ))}
                       </select>

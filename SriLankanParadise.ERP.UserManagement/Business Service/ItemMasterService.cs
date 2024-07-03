@@ -1,6 +1,5 @@
 ﻿using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
-using SriLankanParadise.ERP.UserManagement.Repository;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Business_Service
@@ -51,6 +50,16 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         public async Task<IEnumerable<ItemMaster>> GetItemMastersByUserId(int userId)
         {
             return await _itemMasterRepository.GetItemMastersByUserId(userId);
+        }
+
+        public async Task<IEnumerable<ItemMaster>> GetSubItemsByItemMasterId(int itemMaster)
+        {
+            return await _itemMasterRepository.GetSubItemsByItemMasterId(itemMaster);
+        }
+
+        public async Task<IEnumerable<ItemMaster>> GetItemMastersByItemMasterIds(int[] itemMasterIds)
+        {
+            return await _itemMasterRepository.GetItemMastersByItemMasterIds(itemMasterIds);
         }
     }
 }

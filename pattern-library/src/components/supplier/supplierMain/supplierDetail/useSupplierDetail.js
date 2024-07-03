@@ -8,6 +8,7 @@ const useSupplierDetail = (supplier) => {
       return response;
     } catch (error) {
       console.error("Error fetching supplier logo:", error);
+      return [];
     }
   };
 

@@ -96,7 +96,9 @@ const useExpenseOutRequisitionList = () => {
             await get_expense_out_requisitions_by_user_id_api(
               sessionStorage.getItem("userId")
             );
-          setExpenseOutRequisitions(ExpenseOutRequisitionResponse.data.result);
+          setExpenseOutRequisitions(
+            ExpenseOutRequisitionResponse.data.result || []
+          );
         }
       }
     } catch (error) {

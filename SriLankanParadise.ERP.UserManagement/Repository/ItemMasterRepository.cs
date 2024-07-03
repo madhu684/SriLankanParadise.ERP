@@ -203,5 +203,46 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
+        public async Task<IEnumerable<ItemMaster>> GetSubItemsByItemMasterId(int itemMasterId)
+        {
+            try
+            {
+                var itemMasters = await _dbContext.ItemMasters
+                    .Where(im => im.ItemMasterId != itemMasterId && im.ParentId == itemMasterId)
+                    .Include(im => im.Category)
+                    .Include(im => im.Unit)
+                    .ThenInclude(u => u.MeasurementType)
+                    .Include(im => im.ItemType)
+                    .ToListAsync();
+
+                return itemMasters.Any() ? itemMasters : null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<ItemMaster>> GetItemMastersByItemMasterIds(int[] itemMasterIds)
+        {
+            try
+            {
+                var itemMaster = await _dbContext.ItemMasters
+                    .Where(im => itemMasterIds.Contains(im.ItemMasterId))
+                    .Include(im => im.Category)
+                    .Include(im => im.Unit)
+                    .ThenInclude(u => u.MeasurementType)
+                    .Include(im => im.ItemType)
+                    .Include(im => im.InventoryUnit)
+                    .ThenInclude(u => u.MeasurementType)
+                    .ToListAsync();
+
+                return itemMaster;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using SriLankanParadise.ERP.UserManagement.Business_Service;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
@@ -168,6 +169,68 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return Ok("Logged out");
+        }
+
+        [HttpGet("GetAllUsersByCompanyId/{companyId}")]
+        public async Task<ApiResponseModel> GetAllUsersByCompanyId(int companyId)
+        {
+            try
+            {
+                var users = await _userService.GetAllUsersByCompanyId(companyId);
+                if (users != null)
+                {
+                    var userDtos = _mapper.Map<IEnumerable<UserDto>>(users);
+                    AddResponseMessage(Response, LogMessages.UsersRetrieved, userDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.UsersNotFound);
+                    AddResponseMessage(Response, LogMessages.UsersNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpPut("{userId}")]
+        public async Task<ApiResponseModel> UpdateUser(int userId, UserUpdateRequestModel userUpdateRequest)
+        {
+            try
+            {
+                var existingUser = await _userService.GetUserByUserId(userId);
+                if (existingUser == null)
+                {
+                    _logger.LogWarning(LogMessages.UserNotFound);
+                    return AddResponseMessage(Response, LogMessages.UserNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+                var updatedUser = _mapper.Map<User>(userUpdateRequest);
+                updatedUser.UserId = userId; // Ensure the ID is not changed
+
+                await _userService.UpdateUser(existingUser.UserId, updatedUser);
+
+                // Create action log
+                var actionLog = new ActionLogModel()
+                {
+                    ActionId = userUpdateRequest.PermissionId,
+                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                    Timestamp = DateTime.UtcNow
+                };
+                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+
+                _logger.LogInformation(LogMessages.UserUpdated);
+                return AddResponseMessage(Response, LogMessages.UserUpdated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
         }
     }
 }

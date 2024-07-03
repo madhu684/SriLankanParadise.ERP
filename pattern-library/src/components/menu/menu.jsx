@@ -27,7 +27,9 @@ function template() {
             <a
               href="#"
               className={`d-flex align-items-center ${
-                isSmallScreen ? "justify-content-between" : ""
+                isSmallScreen
+                  ? "justify-content-between"
+                  : "justify-content-center"
               } mb-0 mb-md-0 me-md-auto link-dark text-decoration-none`}
             >
               <img
@@ -35,7 +37,7 @@ function template() {
                 src={companyLogoUrl}
                 alt="Company Logo"
               />
-              <span className="fs-4">{companyName}</span>
+
               {isSmallScreen && (
                 <button
                   type="button"
@@ -82,12 +84,15 @@ function template() {
                                   : submodule.name.toLowerCase()
                               }`}
                               className="nav-link link-dark smaller-text"
-                              onClick={() =>
+                              onClick={() => {
                                 this.handleSubmoduleClick(
                                   module.id,
                                   submodule.name
-                                )
-                              }
+                                );
+                                if (isSmallScreen) {
+                                  onToggleSidebar();
+                                }
+                              }}
                             >
                               <span
                                 className={`p-1 nav-link-hover-lite rounded ${
@@ -113,7 +118,6 @@ function template() {
             className={`nav-item dropdown ${isDropdownOpen ? "dropup" : ""}`}
           >
             <a
-              href="#"
               className="d-flex align-items-center nav-link dropdown-toggle link-dark text-decoration-none"
               role="button"
               aria-expanded={isDropdownOpen}
@@ -154,7 +158,7 @@ function template() {
               <li>
                 <a
                   className="dropdown-item"
-                  href="#"
+                  role="button"
                   onClick={(e) => {
                     e.preventDefault();
                     this.handleLogout();
@@ -169,7 +173,9 @@ function template() {
           </div>
         </div>
       </nav>
-      {isSidebarOpen && isSmallScreen && <div className="overlay"></div>}
+      {isSidebarOpen && isSmallScreen && (
+        <div className="overlay" onClick={() => onToggleSidebar()}></div>
+      )}
     </>
   );
 }

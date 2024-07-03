@@ -39,11 +39,15 @@ public partial class Location
 
     public virtual Location? Parent { get; set; }
 
-    public virtual ICollection<PurchaseRequisition> PurchaseRequisitions { get; set; } = new List<PurchaseRequisition>();
+    public virtual ICollection<PurchaseRequisition> PurchaseRequisitionDepartmentNavigations { get; set; } = new List<PurchaseRequisition>();
+
+    public virtual ICollection<PurchaseRequisition> PurchaseRequisitionExpectedDeliveryLocationNavigations { get; set; } = new List<PurchaseRequisition>();
 
     public virtual ICollection<RequisitionMaster> RequisitionMasterRequestedFromLocations { get; set; } = new List<RequisitionMaster>();
 
     public virtual ICollection<RequisitionMaster> RequisitionMasterRequestedToLocations { get; set; } = new List<RequisitionMaster>();
+
+    public virtual ICollection<UserLocation> UserLocations { get; set; } = new List<UserLocation>();
 
     public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

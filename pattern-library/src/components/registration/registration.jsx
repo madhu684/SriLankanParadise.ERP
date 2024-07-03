@@ -1,6 +1,7 @@
 import "./registration.css";
 import React from "react";
 import AssignItems from "../assignItems/assignItems.js";
+import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 
 function template() {
   const { showSuccessAlert, showFailureAlert } = this.state;
@@ -341,13 +342,23 @@ function template() {
                           }`}
                           id="department"
                           value={this.state.formData.basic.department}
-                          onChange={(e) =>
+                          onChange={(e) => {
                             this.handleInputChange(
                               "basic",
                               "department",
                               e.target.value
-                            )
-                          }
+                            );
+                            // Reset warehouseLocation in formData
+                            this.setState((prevState) => ({
+                              formData: {
+                                ...prevState.formData,
+                                basic: {
+                                  ...prevState.formData["basic"],
+                                  warehouse: "",
+                                },
+                              },
+                            }));
+                          }}
                           required
                         >
                           <option value="">Select Department</option>
@@ -368,6 +379,63 @@ function template() {
                         {this.state.validationErrors.basic?.department && (
                           <div className="invalid-feedback">
                             {this.state.validationErrors.basic.department}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="form-group col-md-6">
+                        <label htmlFor="warehouse" className="form-label">
+                          Warehouse
+                        </label>
+                        <select
+                          className={`form-select focus-ring input-registration ${
+                            this.state.validFields.basic?.warehouse
+                              ? "is-valid"
+                              : ""
+                          } ${
+                            this.state.validationErrors.basic?.warehouse
+                              ? "is-invalid"
+                              : ""
+                          }`}
+                          id="warehouse"
+                          value={this.state.formData.basic.warehouse}
+                          onChange={(e) =>
+                            this.handleInputChange(
+                              "basic",
+                              "warehouse",
+                              Array.from(
+                                e.target.selectedOptions,
+                                (option) => option.value
+                              )
+                            )
+                          }
+                          required
+                          disabled={!this.state.formData.basic.department}
+                          multiple
+                          size={3}
+                        >
+                          <option value="">Select Warehouses</option>
+                          {this.state.locations
+                            .filter(
+                              (location) =>
+                                location.parentId ===
+                                  parseInt(
+                                    this.state.formData.basic.department
+                                  ) &&
+                                location.locationType.name === "Warehouse"
+                            )
+                            .map((location) => (
+                              <option
+                                key={location.locationId}
+                                value={location.locationId}
+                              >
+                                {location.locationName}
+                              </option>
+                            ))}
+                        </select>
+                        {this.state.validationErrors.basic?.warehouse && (
+                          <div className="invalid-feedback">
+                            {this.state.validationErrors.basic.warehouse}
                           </div>
                         )}
                       </div>
@@ -514,6 +582,11 @@ function template() {
                           Registration failed! Please try again.
                         </div>
                       )}
+                      {this.state.loading && (
+                        <div className="alert alert-primary" role="alert">
+                          Please wait until we save your data...
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -545,13 +618,17 @@ function template() {
                     </button>
                   </div>
                 ) : (
-                  <div className="btn-width-reg">
+                  <div className={this.state.loading ? "" : "btn-width-reg"}>
                     <button
                       className="btn btn-primary btn-block"
                       onClick={this.handleSave}
                       disabled={this.state.registrationSuccessful}
                     >
-                      Save
+                      {this.state.loading ? (
+                        <ButtonLoadingSpinner text="Saving..." />
+                      ) : (
+                        "Save"
+                      )}
                     </button>
                   </div>
                 )}
@@ -560,6 +637,13 @@ function template() {
           </div>
         </div>
       </div>
+      {/* {this.state.loading && (
+        <div className="position-fixed top-0 start-0 w-100 h-100 bg-white bg-opacity-75 d-flex justify-content-center align-items-center">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      )} */}
     </div>
   );
 }

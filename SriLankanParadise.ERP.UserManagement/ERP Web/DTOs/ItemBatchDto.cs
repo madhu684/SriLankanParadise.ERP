@@ -26,6 +26,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public DateTime? ExpiryDate { get; set; }
 
+        public int? Qty { get; set; }
+
         public virtual BatchDto? Batch { get; set; }
 
         public virtual ItemMasterDto? ItemMaster { get; set; }

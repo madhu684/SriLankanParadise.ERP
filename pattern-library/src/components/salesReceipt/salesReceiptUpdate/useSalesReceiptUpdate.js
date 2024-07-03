@@ -52,7 +52,7 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
       const filteredsalesInvoices = response.data.result.filter(
         (sr) => sr.status === 2 || sr.status === 5
       );
-      return filteredsalesInvoices;
+      return filteredsalesInvoices || [];
     } catch (error) {
       console.error("Error fetching slaes invoices:", error);
     }
@@ -73,7 +73,7 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
       const response = await get_payment_modes_api(
         sessionStorage?.getItem("companyId")
       );
-      return response.data.result;
+      return response.data.result || [];
     } catch (error) {
       console.error("Error fetching payment modes:", error);
     }

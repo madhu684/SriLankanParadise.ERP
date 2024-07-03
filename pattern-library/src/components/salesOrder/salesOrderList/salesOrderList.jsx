@@ -55,7 +55,7 @@ const SalesOrderList = () => {
   if (
     isLoadingData ||
     isLoadingPermissions ||
-    (salesOrders && !salesOrders.length > 0)
+    (salesOrders && !(salesOrders.length >= 0))
   ) {
     return <LoadingSpinner />;
   }
@@ -89,7 +89,7 @@ const SalesOrderList = () => {
     );
   }
 
-  if (!salesOrders) {
+  if (salesOrders.length === 0) {
     return (
       <div className="container mt-4">
         <h2>Sales Orders</h2>

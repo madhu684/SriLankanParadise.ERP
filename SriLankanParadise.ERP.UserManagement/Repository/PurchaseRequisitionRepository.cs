@@ -54,6 +54,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(prd =>prd.ItemMaster)
                     .ThenInclude(im => im.Unit)
                     .Include(pr => pr.ExpectedDeliveryLocationNavigation)
+                    .Include(pr => pr.DepartmentNavigation)
                     .ToListAsync();
 
                 if (purchaseRequisitions.Any())
@@ -103,6 +104,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(prd => prd.ItemMaster)
                     .ThenInclude(im => im.Unit)
                     .Include(pr => pr.ExpectedDeliveryLocationNavigation)
+                    .Include(pr => pr.DepartmentNavigation)
                     .FirstOrDefaultAsync();
 
                 return purchaseRequisition;
@@ -123,6 +125,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(prd => prd.ItemMaster)
                     .ThenInclude(im => im.Unit)
                     .Include(pr => pr.ExpectedDeliveryLocationNavigation)
+                    .Include(pr => pr.DepartmentNavigation)
                     .ToListAsync();
 
                 if (purchaseRequisitions.Any())

@@ -350,7 +350,10 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
 
         {formData.itemDetails.length > 0 && (
           <div className="table-responsive mb-2">
-            <table className="table">
+            <table
+              className="table"
+              style={{ minWidth: "1000px", overflowX: "auto" }}
+            >
               <thead>
                 <tr>
                   <th>Item Name</th>

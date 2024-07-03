@@ -154,18 +154,18 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
             </div>
 
             <div className="mb-3 mt-3">
-              <label htmlFor="warehouseLocation" className="form-label">
-                Warehouse Location
+              <label htmlFor="toWarehouseLocation" className="form-label">
+                To Warehouse Location
               </label>
               <select
                 className={`form-select ${
-                  validFields.warehouseLocation ? "is-valid" : ""
-                } ${validationErrors.warehouseLocation ? "is-invalid" : ""}`}
-                id="warehouseLocation"
-                value={formData?.warehouseLocation ?? ""}
+                  validFields.toWarehouseLocation ? "is-valid" : ""
+                } ${validationErrors.toWarehouseLocation ? "is-invalid" : ""}`}
+                id="toWarehouseLocation"
+                value={formData?.toWarehouseLocation ?? ""}
                 disabled={!formData.deliveryLocation}
                 onChange={(e) =>
-                  handleInputChange("warehouseLocation", e.target.value)
+                  handleInputChange("toWarehouseLocation", e.target.value)
                 }
               >
                 <option value="">Select Warehouse</option>
@@ -186,9 +186,48 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
                     </option>
                   ))}
               </select>
-              {validationErrors.warehouseLocation && (
+              {validationErrors.toWarehouseLocation && (
                 <div className="invalid-feedback">
-                  {validationErrors.warehouseLocation}
+                  {validationErrors.toWarehouseLocation}
+                </div>
+              )}
+            </div>
+
+            <div className="mb-3 mt-3">
+              <label htmlFor="fromWarehouseLocation" className="form-label">
+                From Warehouse Location
+              </label>
+              <select
+                className={`form-select ${
+                  validFields.fromWarehouseLocation ? "is-valid" : ""
+                } ${
+                  validationErrors.fromWarehouseLocation ? "is-invalid" : ""
+                }`}
+                id="fromWarehouseLocation"
+                value={formData?.fromWarehouseLocation ?? ""}
+                disabled={!formData.deliveryLocation}
+                onChange={(e) =>
+                  handleInputChange("fromWarehouseLocation", e.target.value)
+                }
+              >
+                <option value="">Select Warehouse</option>
+                {/* Filter out warehouse locations based on the locationType being "Warehouse" */}
+                {locations
+                  .filter(
+                    (location) => location.locationType.name === "Warehouse"
+                  )
+                  .map((location) => (
+                    <option
+                      key={location.locationId}
+                      value={location.locationId}
+                    >
+                      {location.locationName}
+                    </option>
+                  ))}
+              </select>
+              {validationErrors.fromWarehouseLocation && (
+                <div className="invalid-feedback">
+                  {validationErrors.fromWarehouseLocation}
                 </div>
               )}
             </div>

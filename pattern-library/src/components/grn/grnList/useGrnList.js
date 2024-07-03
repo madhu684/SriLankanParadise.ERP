@@ -80,7 +80,7 @@ const useGrnList = () => {
           const GrnResponse = await get_grn_masters_by_user_id_api(
             sessionStorage.getItem("userId")
           );
-          setGrns(GrnResponse.data.result);
+          setGrns(GrnResponse.data.result || []);
         }
       }
     } catch (error) {

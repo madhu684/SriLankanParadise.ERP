@@ -46,15 +46,16 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             try
             {
-                var purchaseOrders = await _dbContext.GrnMasters
+                var grnMasters = await _dbContext.GrnMasters
                     .Where(gm => !gm.Status.ToString().EndsWith("0") && gm.CompanyId == companyId)
                     .Include(gm => gm.PurchaseOrder)
                     .Include(gm => gm.GrnDetails)
                     .ThenInclude(gd => gd.Item)
                     .ThenInclude(im => im.Unit)
+                    .Include(gm => gm.WarehouseLocation)
                     .ToListAsync();
 
-                return purchaseOrders.Any() ? purchaseOrders : null;
+                return grnMasters.Any() ? grnMasters : null;
             }
             catch (Exception)
             {
@@ -73,6 +74,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(gm => gm.GrnDetails)
                     .ThenInclude(gd => gd.Item)
                     .ThenInclude(im => im.Unit)
+                    .Include(gm => gm.WarehouseLocation)
                     .ToListAsync();
 
 
@@ -88,15 +90,16 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             try
             {
-                var purchaseOrder = await _dbContext.GrnMasters
+                var grnMaster = await _dbContext.GrnMasters
                     .Where(gm => gm.GrnMasterId == grnMasterId)
                     .Include(gm => gm.PurchaseOrder)
                     .Include(gm => gm.GrnDetails)
                     .ThenInclude(gd => gd.Item)
                     .ThenInclude(im => im.Unit)
+                    .Include(gm => gm.WarehouseLocation)
                     .FirstOrDefaultAsync();
 
-                return purchaseOrder;
+                return grnMaster;
             }
             catch (Exception)
             {
@@ -156,6 +159,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                      .Include(gm => gm.GrnDetails)
                      .ThenInclude(gd => gd.Item)
                      .ThenInclude(im => im.Unit)
+                     .Include(gm => gm.WarehouseLocation)
                      .ToListAsync();
 
                  return grnMasters.Any() ? grnMasters : null;

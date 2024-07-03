@@ -46,5 +46,90 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
+        public async Task AddPermission(Permission permission)
+        {
+            try
+            {
+                _dbContext.Permissions.Add(permission);
+                await _dbContext.SaveChangesAsync();
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<Permission>> GetAll()
+        {
+            try
+            {
+                return await _dbContext.Permissions
+                    .Where(p => p.PermissionStatus == true)
+                    .Include(p => p.Module)
+                    .ToListAsync();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+
+        public async Task<IEnumerable<Permission>> GetPermissionsByCompanyId(int companyId)
+        {
+            try
+            {
+                var permissions = await _dbContext.Permissions
+                    .Where(p => p.CompanyId == companyId || p.CompanyId == null)
+                    .Include(p => p.Module)
+                    .ToListAsync();
+
+                return permissions.Any() ? permissions : null;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+
+        public async Task<Permission> GetPermissionByPermissionId(int permissionId)
+        {
+            try
+            {
+                var permission = await _dbContext.Permissions
+                    .Where(p => p.PermissionId == permissionId)
+                    .FirstOrDefaultAsync();
+
+                return permission;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task UpdatePermission(int permissionId, Permission permission)
+        {
+            try
+            {
+                var existPermission = await _dbContext.Permissions.FindAsync(permissionId);
+
+                if (existPermission != null)
+                {
+                    _dbContext.Entry(existPermission).CurrentValues.SetValues(permission);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }

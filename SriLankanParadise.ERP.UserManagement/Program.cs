@@ -154,6 +154,8 @@ builder.Services.AddScoped<ICashierSessionService, CashierSessionService>();
 builder.Services.AddScoped<ICashierSessionRepository, CashierSessionRepository>();
 builder.Services.AddScoped<ICashierExpenseOutService, CashierExpenseOutService>();
 builder.Services.AddScoped<ICashierExpenseOutRepository, CashierExpenseOutRepository>();
+builder.Services.AddScoped<IUserLocationService, UserLocationService>();
+builder.Services.AddScoped<IUserLocationRepository, UserLocationRepository>();
 builder.Services.AddScoped<IExpenseOutRequisitionService, ExpenseOutRequisitionService>();
 builder.Services.AddScoped<IExpenseOutRequisitionRepository, ExpenseOutRequisitionRepository>();
 builder.Services.AddScoped<IBusinessTypeService, BusinessTypeService>();
@@ -166,7 +168,16 @@ builder.Services.AddScoped<ISupplierAttachmentService, SupplierAttachmentService
 builder.Services.AddScoped<ISupplierAttachmentRepository, SupplierAttachmentRepository>();
 builder.Services.AddScoped<IMeasurementTypeService, MeasurementTypeService>();
 builder.Services.AddScoped<IMeasurementTypeRepository, MeasurementTypeRepository>();
-
+builder.Services.AddScoped<ILocationInventoryService, LocationInventoryService>();
+builder.Services.AddScoped<ILocationInventoryRepository, LocationInventoryRepository>();
+builder.Services.AddScoped<ILocationInventoryMovementService, LocationInventoryMovementService>();
+builder.Services.AddScoped<ILocationInventoryMovementRepository, LocationInventoryMovementRepository>();
+builder.Services.AddScoped<ILocationInventoryGoodsInTransitService, LocationInventoryGoodsInTransitService>();
+builder.Services.AddScoped<ILocationInventoryGoodsInTransitRepository, LocationInventoryGoodsInTransitRepository>();
+builder.Services.AddScoped<IDailyStockBalanceService, DailyStockBalanceService>();
+builder.Services.AddScoped<IDailyStockBalanceRepository, DailyStockBalanceRepository>();
+builder.Services.AddScoped<ILocationTypeService, LocationTypeService>();
+builder.Services.AddScoped<ILocationTypeRepository, LocationTypeRepository>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

@@ -20,11 +20,23 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
     isError,
     loading,
     loadingDraft,
+    grnTypeOptions,
+    searchTerm,
+    availableItems,
+    isItemsLoading,
+    isItemsError,
+    itemsError,
+    locations,
+    isLocationsLoading,
+    isLocationsError,
+    locationsError,
     handleInputChange,
     handleItemDetailsChange,
     handleSubmit,
     handlePrint,
     handleStatusChange,
+    setSearchTerm,
+    handleSelectItem,
   } = useGrnUpdate({
     grn,
     onFormSubmit: () => {
@@ -146,6 +158,35 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                 </div>
               )}
             </div>
+            {/* GRN Type Dropdown */}
+            <div className="mb-3">
+              <label htmlFor="grnType" className="form-label">
+                GRN Type
+              </label>
+              <select
+                id="grnType"
+                className={`form-select ${
+                  validFields.grnType ? "is-valid" : ""
+                } ${validationErrors.grnType ? "is-invalid" : ""}`}
+                value={formData.grnType}
+                onChange={(e) => handleInputChange("grnType", e.target.value)}
+                required
+                disabled
+              >
+                <option value="">Select GRN Type</option>
+                {grnTypeOptions.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              {validationErrors.grnType && (
+                <div className="invalid-feedback">
+                  {validationErrors.grnType}
+                </div>
+              )}
+            </div>
+
             {/* Status Dropdown */}
             <div className="mb-3">
               <label htmlFor="status" className="form-label">
@@ -177,6 +218,42 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                 </div>
               )}
             </div>
+
+            <div className="mb-3 mt-3">
+              <label htmlFor="warehouseLocation" className="form-label">
+                Warehouse Location
+              </label>
+              <select
+                className={`form-select ${
+                  validFields.warehouseLocation ? "is-valid" : ""
+                } ${validationErrors.warehouseLocation ? "is-invalid" : ""}`}
+                id="warehouseLocation"
+                value={formData?.warehouseLocation ?? ""}
+                onChange={(e) =>
+                  handleInputChange("warehouseLocation", e.target.value)
+                }
+              >
+                <option value="">Select Warehouse</option>
+                {/* Filter out warehouse locations based on the locationType being "Warehouse" */}
+                {locations
+                  ?.filter(
+                    (location) => location.locationType.name === "Warehouse"
+                  )
+                  ?.map((location) => (
+                    <option
+                      key={location.locationId}
+                      value={location.locationId}
+                    >
+                      {location.locationName}
+                    </option>
+                  ))}
+              </select>
+              {validationErrors.warehouseLocation && (
+                <div className="invalid-feedback">
+                  {validationErrors.warehouseLocation}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Purchase Order ID Selection */}
@@ -189,29 +266,142 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
             </div>
 
             {/* Additional Purchase Order Information */}
-            {selectedPurchaseOrder && (
-              <div className="card mb-3">
-                <div className="card-header">Selected Purchase Order</div>
-                <div className="card-body">
-                  <p>
-                    Purchase Order Reference No:{" "}
-                    {selectedPurchaseOrder?.referenceNo}
-                  </p>
-                  <p>
-                    Supplier: {selectedPurchaseOrder?.supplier?.supplierName}
-                  </p>
-                  <p>
-                    Order Date:{" "}
-                    {selectedPurchaseOrder?.orderDate?.split("T")[0] ?? ""}
-                  </p>
+            {!["finishedGoodsIn", "directPurchase"].includes(
+              formData?.grnType
+            ) &&
+              selectedPurchaseOrder && (
+                <div className="card mb-3">
+                  <div className="card-header">Selected Purchase Order</div>
+                  <div className="card-body">
+                    <p>
+                      Purchase Order Reference No:{" "}
+                      {selectedPurchaseOrder?.referenceNo}
+                    </p>
+                    <p>
+                      Supplier: {selectedPurchaseOrder?.supplier?.supplierName}
+                    </p>
+                    <p>
+                      Order Date:{" "}
+                      {selectedPurchaseOrder?.orderDate?.split("T")[0] ?? ""}
+                    </p>
+                  </div>
                 </div>
+              )}
+            {formData.grnType === "finishedGoodsIn" && (
+              <div className="alert alert-warning" role="alert">
+                This is a "Finished Goods In", no need a purchase order.
+              </div>
+            )}
+            {formData.grnType === "directPurchase" && (
+              <div className="alert alert-warning" role="alert">
+                This is a "Direct Purchase", no need a purchase order.
               </div>
             )}
           </div>
         </div>
 
-        {/* Item Details */}
-        <h4>3. Item Details</h4>
+        <div className="row mb-3 d-flex justify-content-between">
+          <div className="col-md-5">
+            {/* Item Details */}
+            <h4>3. Item Details</h4>
+            {/* Item Search */}
+            {false && (
+              <div className="mb-0 mt-3">
+                <div className="input-group">
+                  <span className="input-group-text bg-transparent">
+                    <i className="bi bi-search"></i>
+                  </span>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search for an item..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  {searchTerm && (
+                    <span
+                      className="input-group-text bg-transparent"
+                      style={{
+                        cursor: "pointer",
+                      }}
+                      onClick={() => setSearchTerm("")}
+                    >
+                      <i className="bi bi-x"></i>
+                    </span>
+                  )}
+                </div>
+
+                {/* Dropdown for filtered items */}
+                {searchTerm && (
+                  <div className="dropdown" style={{ width: "100%" }}>
+                    <ul
+                      className="dropdown-menu"
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        maxHeight: "200px",
+                        overflowY: "auto",
+                      }}
+                    >
+                      {isItemsLoading ? (
+                        <li className="dropdown-item">
+                          <ButtonLoadingSpinner text="Searching..." />
+                        </li>
+                      ) : isItemsError ? (
+                        <li className="dropdown-item">
+                          Error: {itemsError.message}
+                        </li>
+                      ) : availableItems === null ||
+                        availableItems?.filter(
+                          (item) =>
+                            !formData.itemDetails.some(
+                              (detail) => detail.id === item.itemMasterId
+                            )
+                        ).length === 0 ? (
+                        <li className="dropdown-item">
+                          <span className="me-3">
+                            <i className="bi bi-emoji-frown"></i>
+                          </span>
+                          No items found
+                        </li>
+                      ) : (
+                        availableItems
+                          ?.filter(
+                            (item) =>
+                              !formData.itemDetails.some(
+                                (detail) => detail.id === item.itemMasterId
+                              )
+                          ) // Filter out items that are already in itemDetails
+                          .map((item) => (
+                            <li key={item.itemMasterId}>
+                              <button
+                                className="dropdown-item"
+                                onClick={() => handleSelectItem(item)}
+                              >
+                                <span className="me-3">
+                                  <i className="bi bi-cart4"></i>
+                                </span>{" "}
+                                {item.itemName}
+                              </button>
+                            </li>
+                          ))
+                      )}
+                    </ul>
+                  </div>
+                )}
+
+                {!formData.itemDetails.length > 0 && (
+                  <div className="mb-3">
+                    <small className="form-text text-muted">
+                      Please search for an item and add it
+                    </small>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
         {formData.itemDetails.length > 0 && formData.itemDetails.length > 0 && (
           <div className="table-responsive mb-2">
             <table className="table">
@@ -219,8 +409,14 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                 <tr>
                   <th>Item Name</th>
                   <th>Unit</th>
-                  <th>Ordered Quantity</th>
-                  <th>Remaining Quantity</th>
+                  {!["finishedGoodsIn", "directPurchase"].includes(
+                    formData?.grnType
+                  ) && (
+                    <>
+                      <th>Ordered Quantity</th>
+                      <th>Remaining Quantity</th>
+                    </>
+                  )}
                   <th>Received Quantity</th>
                   <th>Rejected Quantity</th>
                   <th>Free Quantity</th>
@@ -233,8 +429,14 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                   <tr key={index}>
                     <td>{item.name}</td>
                     <td>{item.unit}</td>
-                    <td>{item.quantity}</td>
-                    <td>{item.remainingQuantity}</td>
+                    {!["finishedGoodsIn", "directPurchase"].includes(
+                      formData?.grnType
+                    ) && (
+                      <>
+                        <td>{item.quantity}</td>
+                        <td>{item.remainingQuantity}</td>
+                      </>
+                    )}
                     <td>
                       <input
                         type="number"

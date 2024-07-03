@@ -5,6 +5,7 @@ import {
   post_issue_detail_api,
   get_issue_masters_by_requisition_master_id_api,
   get_item_batches_api,
+  get_locations_inventories_by_location_id_api,
 } from "../../services/purchaseApi";
 import { useQuery } from "@tanstack/react-query";
 
@@ -32,10 +33,10 @@ const useTin = ({ onFormSubmit }) => {
       const response = await get_requisition_masters_with_out_drafts_api(
         sessionStorage?.getItem("companyId")
       );
-      const filteredTrns = response.data.result.filter(
+      const filteredTrns = response.data.result?.filter(
         (rm) => rm.requisitionType === "TRN" && rm.status === 2
       );
-      return filteredTrns;
+      return filteredTrns || [];
     } catch (error) {
       console.error("Error fetching Trns:", error);
     }
@@ -104,6 +105,35 @@ const useTin = ({ onFormSubmit }) => {
     queryKey: ["itemBatches"],
     queryFn: fetchItemBatches,
   });
+
+  const fetchLocationInventories = async () => {
+    try {
+      const response = await get_locations_inventories_by_location_id_api(
+        selectedTrn?.requestedFromLocationId
+      );
+      return response.data.result || [];
+    } catch (error) {
+      console.error("Error fetching user location inventories:", error);
+    }
+  };
+
+  const {
+    data: locationInventories,
+    isLoading: isLocationInventoriesLoading,
+    isError: isLocationInventoriesError,
+    error: locationInventoriesError,
+    refetch: refetchLocationInventories,
+  } = useQuery({
+    queryKey: ["locationInventories", selectedTrn?.requestedFromLocationId],
+    queryFn: fetchLocationInventories,
+    enabled: !!selectedTrn?.requestedFromLocationId,
+  });
+
+  useEffect(() => {
+    if (selectedTrn?.requestedFromLocationId) {
+      refetchLocationInventories();
+    }
+  }, [selectedTrn, refetchLocationInventories]);
 
   useEffect(() => {
     if (tins && selectedTrn) {
@@ -394,7 +424,7 @@ const useTin = ({ onFormSubmit }) => {
       ...prevFormData,
       TrnId: selectedTrn?.requisitionMasterId ?? "",
     }));
-    // Refetch Tins for the selected PO
+    // Refetch Tins
     refetchTins();
     setTrnSearchTerm("");
   };
@@ -436,6 +466,9 @@ const useTin = ({ onFormSubmit }) => {
     itemBatches,
     isItemBatchesLoading,
     isItemBatchesError,
+    isLocationInventoriesLoading,
+    isLocationInventoriesError,
+    locationInventories,
     handleInputChange,
     handleItemDetailsChange,
     handleRemoveItem,

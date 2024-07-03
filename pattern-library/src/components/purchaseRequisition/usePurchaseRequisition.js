@@ -3,6 +3,7 @@ import {
   get_company_locations_api,
   post_purchase_requisition_api,
   post_purchase_requisition_detail_api,
+  get_user_locations_by_user_id_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
@@ -12,6 +13,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
     requestorName: "",
     department: "",
+    departmentLocation: "",
     email: "",
     contactNumber: "",
     expectedDeliveryLocation: null,
@@ -50,6 +52,27 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
   } = useQuery({
     queryKey: ["locations"],
     queryFn: fetchLocations,
+  });
+
+  const fetchUserLocations = async () => {
+    try {
+      const response = await get_user_locations_by_user_id_api(
+        sessionStorage.getItem("userId")
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching user locations:", error);
+    }
+  };
+
+  const {
+    data: userLocations,
+    isLoading: isUserLocationsLoading,
+    isError: isUserLocationsError,
+    error: userLocationsError,
+  } = useQuery({
+    queryKey: ["userLocations", sessionStorage.getItem("userId")],
+    queryFn: fetchUserLocations,
   });
 
   const fetchItems = async (companyId, searchQuery, itemType) => {
@@ -91,17 +114,17 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
   }, [formData.itemDetails]);
 
   useEffect(() => {
-    if (!isLoading && locations) {
-      const location = locations.find(
-        (location) =>
-          location.locationId === parseInt(sessionStorage.getItem("locationId"))
+    if (!isUserLocationsLoading && userLocations) {
+      const location = userLocations?.find(
+        (location) => location?.location?.locationTypeId === 3
       );
       setFormData((prevFormData) => ({
         ...prevFormData,
-        department: location.locationName,
+        department: location?.location.locationName,
+        departmentLocation: location?.locationId,
       }));
     }
-  }, [isLoading, locations]);
+  }, [isUserLocationsLoading, userLocations]);
 
   const validateField = (
     fieldName,
@@ -315,7 +338,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
         const purchaseRequisitionData = {
           requestedBy: formData.requestorName,
           requestedUserId: sessionStorage.getItem("userId"),
-          department: formData.department,
+          department: formData.departmentLocation,
           email: formData.email,
           contactNo: formData.contactNumber,
           requisitionDate: formData.requisitionDate,

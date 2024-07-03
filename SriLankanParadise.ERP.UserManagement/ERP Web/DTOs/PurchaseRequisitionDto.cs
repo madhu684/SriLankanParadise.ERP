@@ -1,4 +1,6 @@
-﻿namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
+﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+
+namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 {
     public class PurchaseRequisitionDto
     {
@@ -8,7 +10,9 @@
 
         public int? RequestedUserId { get; set; }
 
-        public string Department { get; set; } = null!;
+        public int? Department { get; set; }
+
+        public virtual LocationDto? DepartmentNavigation { get; set; }
 
         public string Email { get; set; } = null!;
 

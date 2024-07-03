@@ -5,6 +5,8 @@ import {
   post_issue_detail_api,
   get_issue_masters_by_requisition_master_id_api,
   get_item_batches_api,
+  get_locations_inventories_by_location_id_api,
+  post_location_inventory_goods_in_transit_api,
 } from "../../services/purchaseApi";
 import { useQuery } from "@tanstack/react-query";
 
@@ -32,10 +34,10 @@ const useMin = ({ onFormSubmit }) => {
       const response = await get_requisition_masters_with_out_drafts_api(
         sessionStorage?.getItem("companyId")
       );
-      const filteredMrns = response.data.result.filter(
+      const filteredMrns = response.data.result?.filter(
         (rm) => rm.requisitionType === "MRN" && rm.status === 2
       );
-      return filteredMrns;
+      return filteredMrns || [];
     } catch (error) {
       console.error("Error fetching mrns:", error);
     }
@@ -104,6 +106,35 @@ const useMin = ({ onFormSubmit }) => {
     queryKey: ["itemBatches"],
     queryFn: fetchItemBatches,
   });
+
+  const fetchLocationInventories = async () => {
+    try {
+      const response = await get_locations_inventories_by_location_id_api(
+        selectedMrn?.requestedFromLocationId
+      );
+      return response.data.result || [];
+    } catch (error) {
+      console.error("Error fetching user location inventories:", error);
+    }
+  };
+
+  const {
+    data: locationInventories,
+    isLoading: isLocationInventoriesLoading,
+    isError: isLocationInventoriesError,
+    error: locationInventoriesError,
+    refetch: refetchLocationInventories,
+  } = useQuery({
+    queryKey: ["locationInventories", selectedMrn?.requestedFromLocationId],
+    queryFn: fetchLocationInventories,
+    enabled: !!selectedMrn?.requestedFromLocationId,
+  });
+
+  useEffect(() => {
+    if (selectedMrn?.requestedFromLocationId) {
+      refetchLocationInventories();
+    }
+  }, [selectedMrn, refetchLocationInventories]);
 
   useEffect(() => {
     if (mins && selectedMrn) {
@@ -394,7 +425,7 @@ const useMin = ({ onFormSubmit }) => {
       ...prevFormData,
       mrnId: selectedMrn?.requisitionMasterId ?? "",
     }));
-    // Refetch Mins for the selected PO
+    // Refetch Mins
     refetchMins();
     setMrnSearchTerm("");
   };
@@ -436,6 +467,9 @@ const useMin = ({ onFormSubmit }) => {
     itemBatches,
     isItemBatchesLoading,
     isItemBatchesError,
+    isLocationInventoriesLoading,
+    isLocationInventoriesError,
+    locationInventories,
     handleInputChange,
     handleItemDetailsChange,
     handleRemoveItem,

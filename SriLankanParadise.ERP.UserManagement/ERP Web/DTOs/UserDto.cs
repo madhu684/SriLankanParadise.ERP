@@ -20,6 +20,8 @@
 
         public virtual CompanyDto Company { get; set; } = null!;
 
+        public bool Status { get; set; }
+
         public int? LocationId { get; set; }
     }
 }
