@@ -11,7 +11,7 @@ public partial class PurchaseRequisition
 
     public string RequestedBy { get; set; } = null!;
 
-    public string Department { get; set; } = null!;
+    public int? Department { get; set; }
 
     public string Email { get; set; } = null!;
 
@@ -42,6 +42,8 @@ public partial class PurchaseRequisition
     public DateTime? CreatedDate { get; set; }
 
     public DateTime? LastUpdatedDate { get; set; }
+
+    public virtual Location? DepartmentNavigation { get; set; }
 
     public virtual Location ExpectedDeliveryLocationNavigation { get; set; } = null!;
 

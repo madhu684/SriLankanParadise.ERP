@@ -5,7 +5,7 @@
         public string RequestedBy { get; set; } = null!;
 
         public int? RequestedUserId { get; set; }
-        public string Department { get; set; } = null!;
+        public int? Department { get; set; }
 
         public string Email { get; set; } = null!;
 

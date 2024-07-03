@@ -8,5 +8,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         bool VerifyPassword(string inputPassword, string storedHash);
         bool VerifyExpiryDate(DateTime? subscriptionExpiredDate);
         Task RegisterUser(User newUser);
+        Task<IEnumerable<User>> GetAllUsersByCompanyId(int companyId);
+        Task<User> GetUserByUserId(int userId);
+        Task UpdateUser(int UserId, User user);
+
     }
 }

@@ -1,5 +1,6 @@
 ﻿using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.Repository;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Business_Service
@@ -31,6 +32,21 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             //string hashedPassword = BCrypt.Net.BCrypt.HashPassword(inputPassword, BCrypt.Net.BCrypt.GenerateSalt(12));
 
             return BCrypt.Net.BCrypt.Verify(inputPassword, storedHash);
+        }
+
+        public async Task<IEnumerable<User>> GetAllUsersByCompanyId(int companyId)
+        {
+            return await _userRepository.GetAllUsersByCompanyId(companyId);
+        }
+
+        public async Task<User> GetUserByUserId(int userId)
+        {
+            return await _userRepository.GetUserByUserId(userId);
+        }
+
+        public async Task UpdateUser(int userId, User user)
+        {
+            await _userRepository.UpdateUser(userId, user);
         }
     }
 }

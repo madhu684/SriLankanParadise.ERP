@@ -9,5 +9,9 @@
         public bool PermissionStatus { get; set; }
 
         public int ModuleId { get; set; }
+
+        public virtual ModuleDto? Module { get; set; } = null!;
+
+        public int? CompanyId { get; set; }
     }
 }
