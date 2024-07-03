@@ -33,5 +33,64 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task AddLocation(Location location)
+        {
+            try
+            {
+                _dbContext.Locations.Add(location);
+                await _dbContext.SaveChangesAsync();
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<Location> GetLocationByLocationId(int locationId)
+        {
+            try
+            {
+                var location = await _dbContext.Locations
+                    .Where(l => l.LocationId == locationId)
+                    .Include(l => l.LocationType)
+                    .FirstOrDefaultAsync();
+
+                return location;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task UpdateLocation(int locationId, Location location)
+        {
+            try
+            {
+                var existLocation = await _dbContext.Locations.FindAsync(locationId);
+
+                if (existLocation != null)
+                {
+                    _dbContext.Entry(existLocation).CurrentValues.SetValues(location);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<Location>> GetLocationsByLocationIds(int[] locationIds)
+        {
+            return await _dbContext.Locations
+                .Where(l => locationIds.Contains(l.LocationId))
+                .ToListAsync();
+        }
+
     }
 }

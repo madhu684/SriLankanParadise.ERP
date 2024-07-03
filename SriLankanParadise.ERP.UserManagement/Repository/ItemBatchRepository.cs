@@ -12,6 +12,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             _dbContext = dbContext;
         }
+
         public async Task AddItemBatch(ItemBatch itemBatch)
         {
             try
@@ -94,8 +95,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        
-        
+
+
         public async Task DeleteItemMaster(int itemMasterId)
         {
             try
@@ -156,7 +157,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             try
             {
-                var existItemBatch = await _dbContext.ItemBatches.FindAsync( batchId, itemMasterId);
+                var existItemBatch = await _dbContext.ItemBatches.FindAsync(batchId, itemMasterId);
 
                 if (existItemBatch != null)
                 {
@@ -170,6 +171,28 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
 
+        }
+
+        public async Task UpdateItemBatchQty(int batchId, int itemMasterId, ItemBatch itemBatch, string operation)
+        {
+            var existItemBatch = await _dbContext.ItemBatches.FindAsync(batchId, itemMasterId);
+            if (existItemBatch != null)
+            {
+                if (operation.ToLower() == "set")
+                {
+                    existItemBatch.Qty = itemBatch.Qty;
+                }
+                else if (operation.ToLower() == "add")
+                {
+                    existItemBatch.Qty += itemBatch.Qty;
+                }
+                else if (operation.ToLower() == "subtract")
+                {
+                    existItemBatch.Qty -= itemBatch.Qty;
+                }
+
+                await _dbContext.SaveChangesAsync();
+            }
         }
     }
 }

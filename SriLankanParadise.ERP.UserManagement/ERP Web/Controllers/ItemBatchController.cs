@@ -196,5 +196,43 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
         }
+
+        [HttpPatch("updateQty/{batchId}/{itemMasterId}/{operation}")]
+        public async Task<ApiResponseModel> UpdateItemBatchQty(int batchId, int itemMasterId, string operation, UpdateItemBatchQtyRequestModel itemBatchQtyRequest)
+        {
+            try
+            {
+                var existingItemBatch = await _itemBatchService.GetItemBatchByBatchIdAndItemMasterId(batchId, itemMasterId);
+                if (existingItemBatch == null)
+                {
+                    _logger.LogWarning(LogMessages.ItemBatchNotFound);
+                    return AddResponseMessage(Response, LogMessages.ItemBatchNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+                var updatedItemBatch = _mapper.Map<ItemBatch>(itemBatchQtyRequest);
+                updatedItemBatch.BatchId = batchId; // Ensure the ID is not changed
+                updatedItemBatch.ItemMasterId = itemMasterId;
+
+                await _itemBatchService.UpdateItemBatchQty(existingItemBatch.BatchId, existingItemBatch.ItemMasterId, updatedItemBatch, operation);
+
+                // Create action log
+                var actionLog = new ActionLogModel()
+                {
+                    ActionId = itemBatchQtyRequest.PermissionId,
+                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                    Timestamp = DateTime.UtcNow
+                };
+                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+
+                _logger.LogInformation(LogMessages.ItemBatchUpdated);
+                return AddResponseMessage(Response, LogMessages.ItemBatchUpdated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
     }
 }

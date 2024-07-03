@@ -853,6 +853,26 @@ export const put_item_batch_api = async (
   }
 };
 
+export const patch_item_batch_api = async (
+  batchId,
+  itemMasterId,
+  operation,
+  itemBatchData
+) => {
+  try {
+    const response = await api.patch(
+      `/itemBatch/updateQty/${batchId}/${itemMasterId}/${operation}`,
+      itemBatchData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 //supplier ralated apis
 export const get_company_types_api = async () => {
   try {
@@ -1016,6 +1036,124 @@ export const delete_supplier_api = async (supplierId) => {
     const response = await api.delete(`/supplier/${supplierId}`, {
       withCredentials: true,
     });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+//user location apis
+export const get_user_locations_by_user_id_api = async (userId) => {
+  try {
+    const response = await api.get(
+      `/userLocation/GetUserLocationsByUserId/${userId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+//location inventory apis
+export const post_location_inventory_api = async (formData) => {
+  try {
+    const response = await api.post("/locationInventory", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const post_location_inventory_movement_api = async (formData) => {
+  try {
+    const response = await api.post("/locationInventoryMovement", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const post_location_inventory_goods_in_transit_api = async (
+  formData
+) => {
+  try {
+    const response = await api.post(
+      "/locationInventoryGoodsInTransit",
+      formData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_locations_inventories_by_location_id_api = async (
+  locationId
+) => {
+  try {
+    const response = await api.get(
+      `/locationInventory/GetLocationInventoriesByLocationId/${locationId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const patch_location_inventory_api = async (
+  locationId,
+  itemMasterId,
+  batchId,
+  operation,
+  locationInventoryData
+) => {
+  try {
+    const response = await api.patch(
+      `/locationInventory/updateStockInHand/${locationId}/${itemMasterId}/${batchId}/${operation}`,
+      locationInventoryData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const patch_location_inventory_goods_in_transit_api = async (
+  toLocationId,
+  fromLocationId,
+  itemMasterId,
+  batchId,
+  locationInventoryGoodsInTransitData
+) => {
+  try {
+    const response = await api.patch(
+      `/locationInventoryGoodsInTransit/${toLocationId}/${fromLocationId}/${itemMasterId}/${batchId}`,
+      locationInventoryGoodsInTransitData,
+      {
+        withCredentials: true,
+      }
+    );
     return response.data;
   } catch (error) {
     throw error;

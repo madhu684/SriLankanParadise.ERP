@@ -23,5 +23,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task<IEnumerable<ItemBatch>> GetItemBatchesByItemMasterId(int itemMasterId, int companyId);
 
         Task UpdateItemBatch(int batchId, int itemMasterId, ItemBatch itemBatch);
+
+        Task UpdateItemBatchQty(int batchId, int itemMasterId, ItemBatch itemBatch, string operation);
     }
 }

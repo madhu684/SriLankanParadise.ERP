@@ -56,5 +56,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             return await _itemMasterRepository.GetSubItemsByItemMasterId(itemMaster);
         }
+
+        public async Task<IEnumerable<ItemMaster>> GetItemMastersByItemMasterIds(int[] itemMasterIds)
+        {
+            return await _itemMasterRepository.GetItemMastersByItemMasterIds(itemMasterIds);
+        }
     }
 }

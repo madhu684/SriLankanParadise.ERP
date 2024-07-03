@@ -48,6 +48,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<ApproveGrnMasterRequestModel, GrnMaster>();
             CreateMap<GrnDetailRequestModel, GrnDetail>();
             CreateMap<GrnDetail, GrnDetailDto>();
+            CreateMap<LocationRequestModel, Location>();
             CreateMap<Location, LocationDto>();
             CreateMap<Supplier, SupplierDto>();
             CreateMap<CustomerRequestModel, Customer>();
@@ -120,6 +121,16 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<SupplierAttachment, SupplierAttachmentDto>();
             CreateMap<MeasurementTypeRequestModel, MeasurementType>();
             CreateMap<MeasurementType, MeasurementTypeDto>();
+            CreateMap<LocationInventoryRequestModel, LocationInventory>();
+            CreateMap<LocationInventory, LocationInventoryDto>();
+            CreateMap<LocationInventoryMovementRequestModel, LocationInventoryMovement>();
+            CreateMap<LocationInventoryMovement, LocationInventoryMovementDto>();
+            CreateMap<LocationInventoryGoodsInTransitRequestModel, LocationInventoryGoodsInTransit>();
+            CreateMap<LocationInventoryGoodsInTransit, LocationInventoryGoodsInTransitDto>();
+            CreateMap<DailyStockBalanceRequestModel, DailyStockBalance>();
+            CreateMap<DailyStockBalance, DailyStockBalanceDto>();
+            CreateMap<UpdateItemBatchQtyRequestModel, ItemBatch>();
+            CreateMap<UpdateLocationInventoryStockInHandRequestModel, LocationInventory>();
             // Add more mapping configurations if needed
         }
     }

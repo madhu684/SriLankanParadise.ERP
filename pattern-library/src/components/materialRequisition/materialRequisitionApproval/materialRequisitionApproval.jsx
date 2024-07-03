@@ -70,11 +70,11 @@ const MaterialRequisitionApproval = ({
           <div className="col-md-6">
             <p>
               <strong>Delivery Location:</strong>{" "}
-              {materialRequisition.requestedFromLocation?.locationName}
+              {materialRequisition.requestedToLocation?.locationName}
             </p>
             <p>
               <strong>Warehouse Location:</strong>{" "}
-              {materialRequisition.requestedToLocation?.locationName}
+              {materialRequisition.requestedFromLocation?.locationName}
             </p>
           </div>
         </div>

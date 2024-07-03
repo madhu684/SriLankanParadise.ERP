@@ -24,6 +24,8 @@
 
         public DateTime? ExpiryDate { get; set; }
 
+        public int? Qty { get; set; }
+
         public int PermissionId { get; set; }
     }
 }

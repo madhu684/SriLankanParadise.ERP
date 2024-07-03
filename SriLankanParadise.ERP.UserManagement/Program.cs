@@ -168,6 +168,16 @@ builder.Services.AddScoped<ISupplierAttachmentService, SupplierAttachmentService
 builder.Services.AddScoped<ISupplierAttachmentRepository, SupplierAttachmentRepository>();
 builder.Services.AddScoped<IMeasurementTypeService, MeasurementTypeService>();
 builder.Services.AddScoped<IMeasurementTypeRepository, MeasurementTypeRepository>();
+builder.Services.AddScoped<ILocationInventoryService, LocationInventoryService>();
+builder.Services.AddScoped<ILocationInventoryRepository, LocationInventoryRepository>();
+builder.Services.AddScoped<ILocationInventoryMovementService, LocationInventoryMovementService>();
+builder.Services.AddScoped<ILocationInventoryMovementRepository, LocationInventoryMovementRepository>();
+builder.Services.AddScoped<ILocationInventoryGoodsInTransitService, LocationInventoryGoodsInTransitService>();
+builder.Services.AddScoped<ILocationInventoryGoodsInTransitRepository, LocationInventoryGoodsInTransitRepository>();
+builder.Services.AddScoped<IDailyStockBalanceService, DailyStockBalanceService>();
+builder.Services.AddScoped<IDailyStockBalanceRepository, DailyStockBalanceRepository>();
+builder.Services.AddScoped<ILocationTypeService, LocationTypeService>();
+builder.Services.AddScoped<ILocationTypeRepository, LocationTypeRepository>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
