@@ -66,7 +66,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                         else
                         {
                             var actionLog = await UserAuthentication(userRequestModel, user);
-                            await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                            //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                             // Send response
                             var userDto = _mapper.Map<UserDto>(user);
