@@ -45,14 +45,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _issueMasterService.AddIssueMaster(issueMaster);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = issueMasterRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = issueMasterRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 // send response
                 var issueMasterDto = _mapper.Map<IssueMasterDto>(issueMaster);
@@ -179,6 +179,31 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             try
             {
                 var issueMasters = await _issueMasterService.GetIssueMastersByRequisitionMasterId(requisitionMasterId);
+                if (issueMasters != null)
+                {
+                    var issueMasterDtos = _mapper.Map<IEnumerable<IssueMasterDto>>(issueMasters);
+                    AddResponseMessage(Response, LogMessages.IssueMastersRetrieved, issueMasterDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.IssueMastersNotFound);
+                    AddResponseMessage(Response, LogMessages.IssueMastersNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }        
+        
+        [HttpGet("getIssueMastersById/{id}")]
+        public async Task<ApiResponseModel> GetIssueMastersById(int id)
+        {
+            try
+            {
+                var issueMasters = await _issueMasterService.GetIssueMastersById(id);
                 if (issueMasters != null)
                 {
                     var issueMasterDtos = _mapper.Map<IEnumerable<IssueMasterDto>>(issueMasters);
