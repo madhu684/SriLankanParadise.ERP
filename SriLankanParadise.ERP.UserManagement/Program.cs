@@ -9,6 +9,7 @@ using SriLankanParadise.ERP.UserManagement.Shared.AutoMappers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore.Query;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Middlewares;
+using Consul;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,7 +46,12 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 var connectionString = builder.Configuration.GetConnectionString("LocalSqlServerConnection");
 
 builder.Services.AddDbContext<ErpSystemContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString,
+            sqlServerOptions => sqlServerOptions.EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(30),
+                errorNumbersToAdd: null
+            )));
 
 // Register AutoMapper and create a mapping configuration
 var mappingConfig = new MapperConfiguration(mc =>
@@ -205,5 +211,30 @@ app.UseMiddleware<AuditMiddleware>();
 
 
 app.MapControllers();
+
+//app.Lifetime.ApplicationStarted.Register(() =>
+//{
+//    var consulClient = app.Services.GetRequiredService<IConsulClient>();
+//    var registration = new AgentServiceRegistration()
+//    {
+//        ID = $"auth-service-api-{Guid.NewGuid()}",
+//        Name = "auth-service-api",
+//        Address = "localhost",
+//        Port = 7273,
+//        Check = new AgentServiceCheck()
+//        {
+//            HTTP = "https://localhost:7273/api/health/health",
+//            Interval = TimeSpan.FromSeconds(30),
+//            Timeout = TimeSpan.FromSeconds(5)
+//        }
+//    };
+//    consulClient.Agent.ServiceRegister(registration).Wait();
+//});
+
+//app.Lifetime.ApplicationStopping.Register(() =>
+//{
+//    var consulClient = app.Services.GetRequiredService<IConsulClient>();
+//    consulClient.Agent.ServiceDeregister("auth-service-api").Wait();
+//});
 
 app.Run();
