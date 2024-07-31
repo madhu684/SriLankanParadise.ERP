@@ -44,14 +44,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _locationInventoryService.AddLocationInventory(locationInventory);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = locationInventoryRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = locationInventoryRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 // send response
                 var locationInventoryDto = _mapper.Map<LocationInventoryDto>(locationInventory);
@@ -128,14 +128,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _locationInventoryService.UpdateLocationInventory(existingLocationInventory.LocationInventoryId, updatedLocationInventory);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = locationInventoryRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = locationInventoryRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.LocationInventoryUpdated);
                 return AddResponseMessage(Response, LogMessages.LocationInventoryUpdated, null, true, HttpStatusCode.OK);
@@ -165,14 +165,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _locationInventoryService.UpdateLocationInventoryStockInHand(locationId, itemMasterId, batchId, updatedLocationInventory, operation);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = locationInventoryStockInHandRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = locationInventoryStockInHandRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.LocationInventoryUpdated);
                 return AddResponseMessage(Response, LogMessages.LocationInventoryUpdated, null, true, HttpStatusCode.OK);

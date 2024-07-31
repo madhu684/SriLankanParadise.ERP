@@ -44,14 +44,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _grnMasterService.AddGrnMaster(grnMaster);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = grnMasterRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = grnMasterRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 // send response
                 var grnMasterDto = _mapper.Map<GrnMasterDto>(grnMaster);
@@ -177,14 +177,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _grnMasterService.ApproveGrnMaster(existingGrnMaster.GrnMasterId, approvedGrnMaster);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = approveGrnMasterRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = approveGrnMasterRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.GrnMasterApproved);
                 return AddResponseMessage(Response, LogMessages.GrnMasterApproved, null, true, HttpStatusCode.OK);
@@ -215,14 +215,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _grnMasterService.UpdateGrnMaster(existingGrnMaster.GrnMasterId, updatedGrnMaster);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = grnMasterRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = grnMasterRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.GrnMasterUpdated);
                 return AddResponseMessage(Response, LogMessages.GrnMasterUpdated, null, true, HttpStatusCode.OK);

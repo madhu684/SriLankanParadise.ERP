@@ -43,14 +43,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _companyTypeService.AddCompanyType(companyType);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = companyTypeRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = companyTypeRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 // send response
                 var companyTypeDto = _mapper.Map<CompanyTypeDto>(companyType);

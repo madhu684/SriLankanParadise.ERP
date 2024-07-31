@@ -43,14 +43,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _salesOrderService.AddSalesOrder(salesOrder);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = salesOrderRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = salesOrderRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 // send response
                 var salesOrderDto = _mapper.Map<SalesOrderDto>(salesOrder);
@@ -178,14 +178,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _salesOrderService.ApproveSalesOrder(existingSalesOrder.SalesOrderId, approvedSalesOrder);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = approveSalesOrderRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = approveSalesOrderRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.SalesOrderApproved);
                 return AddResponseMessage(Response, LogMessages.SalesOrderApproved, null, true, HttpStatusCode.OK);
@@ -216,14 +216,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _salesOrderService.UpdateSalesOrder(existingSalesOrder.SalesOrderId, updatedSalesOrder);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = salesOrderRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = salesOrderRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.SalesOrderUpdated);
                 return AddResponseMessage(Response, LogMessages.SalesOrderUpdated, null, true, HttpStatusCode.OK);

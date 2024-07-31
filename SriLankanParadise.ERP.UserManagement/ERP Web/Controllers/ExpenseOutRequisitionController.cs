@@ -44,14 +44,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _expenseOutRequisitionService.AddExpenseOutRequisition(expenseOutRequisition);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = expenseOutRequisitionRequestModel.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = expenseOutRequisitionRequestModel.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 // send response
                 var expenseOutRequisitionDto = _mapper.Map<ExpenseOutRequisitionDto>(expenseOutRequisition);
@@ -179,14 +179,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _expenseOutRequisitionService.UpdateExpenseOutRequisition(existingExpenseOutRequisition.ExpenseOutRequisitionId, updatedExpenseOutRequisition);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = expenseOutRequisitionRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = expenseOutRequisitionRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.ExpenseOutRequisitionUpdated);
                 return AddResponseMessage(Response, LogMessages.ExpenseOutRequisitionUpdated, null, true, HttpStatusCode.OK);

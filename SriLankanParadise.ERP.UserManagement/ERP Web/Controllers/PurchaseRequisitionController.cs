@@ -44,14 +44,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _purchaseRequisitionService.AddPurchaseRequisition(purchaseRequisition);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = purchaseRequisitionRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = purchaseRequisitionRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 // send response
                 var purchaseRequisitionDto = _mapper.Map<PurchaseRequisitionDto>(purchaseRequisition);
@@ -152,16 +152,16 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _purchaseRequisitionService.ApprovePurchaseRequisition(existingPurchaseRequisition.PurchaseRequisitionId, approvedPurchaseRequisition);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = approvePurchaseRequisitionRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = approvePurchaseRequisitionRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
-                _logger.LogInformation(LogMessages.PurchaseRequisitionApproved);
+                //_logger.LogInformation(LogMessages.PurchaseRequisitionApproved);
                 return AddResponseMessage(Response, LogMessages.PurchaseRequisitionApproved, null, true, HttpStatusCode.OK);
             }
             catch (Exception ex)
@@ -214,14 +214,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _purchaseRequisitionService.UpdatePurchaseRequisition(existingPurchaseRequisition.PurchaseRequisitionId, updatedPurchaseRequisition);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = purchaseRequisitionRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = purchaseRequisitionRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.PurchaseRequisitionUpdated);
                 return AddResponseMessage(Response, LogMessages.PurchaseRequisitionUpdated, null, true, HttpStatusCode.OK);

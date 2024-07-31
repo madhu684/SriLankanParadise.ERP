@@ -46,14 +46,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _supplierAttachmentService.AddSupplierAttachment(supplierAttachment);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = supplierAttachmentRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = supplierAttachmentRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 // send response
                 var supplierAttachmentDto = _mapper.Map<SupplierAttachmentDto>(supplierAttachment);
@@ -85,14 +85,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _supplierAttachmentService.DeleteSupplierAttachment(supplierAttachmentId);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = 1076,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = 1076,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.SupplierAttachmentDeleted);
                 return AddResponseMessage(Response, LogMessages.SupplierAttachmentDeleted, null, true, HttpStatusCode.NoContent);
@@ -148,14 +148,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _supplierAttachmentService.UpdateSupplierAttachment(existingSupplierAttachment.SupplierAttachmentId, updatedSupplierAttachment);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = supplierAttachmentRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = supplierAttachmentRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.SupplierAttachmentUpdated);
                 return AddResponseMessage(Response, LogMessages.SupplierAttachmentUpdated, null, true, HttpStatusCode.OK);

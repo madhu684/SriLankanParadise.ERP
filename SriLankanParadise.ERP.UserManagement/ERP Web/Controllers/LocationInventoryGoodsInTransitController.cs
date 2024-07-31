@@ -43,14 +43,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _locationInventoryGoodsInTransitService.AddLocationInventoryGoodsInTransit(locationInventoryGoodsInTransit);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = locationInventoryGoodsInTransitRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = locationInventoryGoodsInTransitRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 // send response
                 var locationInventoryGoodsInTransitDto = _mapper.Map<LocationInventoryGoodsInTransitDto>(locationInventoryGoodsInTransit);
@@ -102,14 +102,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _locationInventoryGoodsInTransitService.UpdateLocationInventoryGoodsInTransit(existingLocationInventoryGoodsInTransit.LocationInventoryGoodsInTransitId, updatedLocationInventoryGoodsInTransit);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = locationInventoryGoodsInTransitRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = locationInventoryGoodsInTransitRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.LocationInventoryGoodsInTransitUpdated);
                 return AddResponseMessage(Response, LogMessages.LocationInventoryGoodsInTransitUpdated, null, true, HttpStatusCode.OK);
@@ -139,14 +139,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _locationInventoryGoodsInTransitService.UpdateLocationInventoryGoodsInTransitStatus(toLocationId, fromLocationId, itemMasterId, batchId, updatedLocationInventoryGoodsInTransit);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = locationInventoryGoodsInTransitRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = locationInventoryGoodsInTransitRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.LocationInventoryGoodsInTransitUpdated);
                 return AddResponseMessage(Response, LogMessages.LocationInventoryGoodsInTransitUpdated, null, true, HttpStatusCode.OK);

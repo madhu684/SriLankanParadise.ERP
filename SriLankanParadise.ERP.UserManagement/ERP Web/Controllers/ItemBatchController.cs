@@ -44,14 +44,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _itemBatchService.AddItemBatch(itemBatch);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = itemBatchRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = itemBatchRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 // send response
                 var itemBatchDto = _mapper.Map<ItemBatchDto>(itemBatch);
@@ -178,14 +178,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _itemBatchService.UpdateItemBatch(existingItemBatch.BatchId, existingItemBatch.ItemMasterId, updatedItemBatch);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = itemBatchRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = itemBatchRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.ItemBatchUpdated);
                 return AddResponseMessage(Response, LogMessages.ItemBatchUpdated, null, true, HttpStatusCode.OK);
@@ -216,14 +216,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _itemBatchService.UpdateItemBatchQty(existingItemBatch.BatchId, existingItemBatch.ItemMasterId, updatedItemBatch, operation);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = itemBatchQtyRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = itemBatchQtyRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.ItemBatchUpdated);
                 return AddResponseMessage(Response, LogMessages.ItemBatchUpdated, null, true, HttpStatusCode.OK);
