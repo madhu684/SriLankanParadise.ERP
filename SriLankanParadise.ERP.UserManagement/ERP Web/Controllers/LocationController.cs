@@ -94,14 +94,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _locationService.AddLocation(location);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = locationRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = locationRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 // send response
                 var locationDto = _mapper.Map<LocationDto>(location);
@@ -135,14 +135,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _locationService.UpdateLocation(existingLocation.LocationId, updatedLocation);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = locationRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = locationRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.LocationUpdated);
                 return AddResponseMessage(Response, LogMessages.LocationUpdated, null, true, HttpStatusCode.OK);

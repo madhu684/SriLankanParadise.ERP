@@ -44,14 +44,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _categoryService.AddCategory(category);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = categoryRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = categoryRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 // send response
                 var categoryDto = _mapper.Map<CategoryDto>(category);
@@ -151,14 +151,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _categoryService.UpdateCategory(existingCategory.CategoryId, updatedCategory);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = categoryRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = categoryRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.CategoryUpdated);
                 return AddResponseMessage(Response, LogMessages.CategoryUpdated, null, true, HttpStatusCode.OK);
@@ -185,14 +185,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _categoryService.DeleteCategory(categoryId);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = 1044,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = 1044,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.CategoryDeleted);
                 return AddResponseMessage(Response, LogMessages.CategoryDeleted, null, true, HttpStatusCode.NoContent);

@@ -43,14 +43,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _cashierSessionService.AddCashierSession(cashierSession);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = cashierSessionRequestModel.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = cashierSessionRequestModel.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 // send response
                 var cashierSessionDto = _mapper.Map<CashierSessionDto>(cashierSession);
@@ -101,14 +101,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _cashierSessionService.UpdateCashierSession(existingCashierSession.CashierSessionId, updatedCashierSession);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = cashierSessionRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = cashierSessionRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.CashierSessionUpdated);
                 return AddResponseMessage(Response, LogMessages.CashierSessionUpdated, null, true, HttpStatusCode.OK);

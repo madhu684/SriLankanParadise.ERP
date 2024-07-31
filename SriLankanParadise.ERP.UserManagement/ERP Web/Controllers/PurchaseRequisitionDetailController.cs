@@ -44,14 +44,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _purchaseRequisitionDetailService.AddPurchaseRequisitionDetail(purchaseRequisitionDetail);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = purchaseRequisitionDetailRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = purchaseRequisitionDetailRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 // send response
                 var purchaseRequisitionDetailDto = _mapper.Map<PurchaseRequisitionDetailDto>(purchaseRequisitionDetail);
@@ -84,14 +84,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _purchaseRequisitionDetailService.UpdatePurchaseRequisitionDetail(existingPurchaseRequisitionDetail.PurchaseRequisitionDetailId, updatedPurchaseRequisitionDetail);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = purchaseRequisitionDetailRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = purchaseRequisitionDetailRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.PurchaseRequisitionDetailUpdated);
                 return AddResponseMessage(Response, LogMessages.PurchaseRequisitionDetailUpdated, null, true, HttpStatusCode.OK);
@@ -118,14 +118,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _purchaseRequisitionDetailService.DeletePurchaseRequisitionDetail(purchaseRequisitionDetailId);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = 17,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = 17,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.PurchaseRequisitionDetailDeleted);
                 return AddResponseMessage(Response, LogMessages.PurchaseRequisitionDetailDeleted, null, true, HttpStatusCode.NoContent);

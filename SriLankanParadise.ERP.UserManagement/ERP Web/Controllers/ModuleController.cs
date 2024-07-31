@@ -85,14 +85,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _moduleService.AddModule(module);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = moduleRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = moduleRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.ModuleCreated);
                 AddResponseMessage(Response, LogMessages.ModuleCreated, null, true, HttpStatusCode.Created);
@@ -123,14 +123,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _moduleService.UpdateModule(existingModule.ModuleId, updatedModule);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = moduleRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = moduleRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.ModuleUpdated);
                 return AddResponseMessage(Response, LogMessages.ModuleUpdated, null, true, HttpStatusCode.OK);

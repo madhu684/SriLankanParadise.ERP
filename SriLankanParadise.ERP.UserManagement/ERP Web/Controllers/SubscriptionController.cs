@@ -85,14 +85,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _subscriptionService.AddSubscription(Subscription);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = subscriptionRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = subscriptionRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.SubscriptionCreated);
                 AddResponseMessage(Response, LogMessages.SubscriptionCreated, null, true, HttpStatusCode.Created);
@@ -123,14 +123,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _subscriptionService.UpdateSubscription(existingSubscription.SubscriptionId, updatedSubscription);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = subscriptionRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = subscriptionRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.SubscriptionUpdated);
                 return AddResponseMessage(Response, LogMessages.SubscriptionUpdated, null, true, HttpStatusCode.OK);

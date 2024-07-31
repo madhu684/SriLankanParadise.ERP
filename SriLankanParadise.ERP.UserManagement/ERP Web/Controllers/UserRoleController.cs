@@ -42,14 +42,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _userRoleService.AddUserRole(userRole);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = userRoleRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = userRoleRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.UseRoleCreated);
                 AddResponseMessage(Response, LogMessages.UseRoleCreated, null, true, HttpStatusCode.Created);

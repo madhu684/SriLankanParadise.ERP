@@ -44,14 +44,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _salesReceiptService.AddSalesReceipt(salesReceipt);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = salesReceiptRequestModel.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = salesReceiptRequestModel.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 // send response
                 var salesReceiptDto = _mapper.Map<SalesReceiptDto>(salesReceipt);
@@ -179,14 +179,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _salesReceiptService.UpdateSalesReceipt(existingSalesReceipt.SalesReceiptId, updatedSalesReceipt);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = salesReceiptRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = salesReceiptRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.SalesReceiptUpdated);
                 return AddResponseMessage(Response, LogMessages.SalesReceiptUpdated, null, true, HttpStatusCode.OK);

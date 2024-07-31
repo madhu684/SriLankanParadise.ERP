@@ -69,14 +69,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _supplierService.AddSupplier(supplier);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = supplierRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = supplierRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 // send response
                 var supplierDto= _mapper.Map<SupplierDto>(supplier);
@@ -110,14 +110,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _supplierService.UpdateSupplier(existingSupplier.SupplierId, updatedSupplier);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = supplierRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = supplierRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.SupplierUpdated);
                 return AddResponseMessage(Response, LogMessages.SupplierUpdated, null, true, HttpStatusCode.OK);
@@ -144,14 +144,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _supplierService.DeleteSupplier(supplierId);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = 1070,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = 1070,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.SupplierDeleted);
                 return AddResponseMessage(Response, LogMessages.SupplierDeleted, null, true, HttpStatusCode.NoContent);
@@ -172,14 +172,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 var filePath = await _supplierService.UploadSupplierLogo(supplierLogo);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = supplierLogoRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = supplierLogoRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.SupplierLogoUploaded);
                 return AddResponseMessage(Response, LogMessages.SupplierLogoUploaded, filePath, true, HttpStatusCode.Created);
@@ -200,14 +200,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 var filePath = await _supplierService.UploadSupplierAttachment(supplierAttachment);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = supplierAttachmentRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = supplierAttachmentRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.SupplierAttachmentUploaded);
                 return AddResponseMessage(Response, LogMessages.SupplierAttachmentUploaded, filePath, true, HttpStatusCode.Created);

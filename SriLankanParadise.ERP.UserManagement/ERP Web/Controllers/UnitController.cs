@@ -45,14 +45,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _unitService.AddUnit(unit);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = unitRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = unitRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 // send response
                 var unitDto = _mapper.Map<UnitDto>(unit);
@@ -152,14 +152,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _unitService.UpdateUnit(existingUnit.UnitId, updatedUnit);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = unitRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = unitRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.UnitUpdated);
                 return AddResponseMessage(Response, LogMessages.UnitUpdated, null, true, HttpStatusCode.OK);
@@ -186,14 +186,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _unitService.DeleteUnit(unitId);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = 1046,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = 1046,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.UnitDeleted);
                 return AddResponseMessage(Response, LogMessages.UnitDeleted, null, true, HttpStatusCode.NoContent);

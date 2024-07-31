@@ -129,14 +129,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _issueMasterService.ApproveIssueMaster(existingIssueMaster.IssueMasterId, approvedIssueMaster);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = approveIssueMasterRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = approveIssueMasterRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.IssueMasterApproved);
                 return AddResponseMessage(Response, LogMessages.IssueMasterApproved, null, true, HttpStatusCode.OK);

@@ -44,14 +44,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _chargesAndDeductionAppliedService.AddChargesAndDeductionApplied(chargesAndDeductionApplied);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = chargesAndDeductionAppliedRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = chargesAndDeductionAppliedRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 // send response
                 var chargesAndDeductionAppliedDto = _mapper.Map<ChargesAndDeductionAppliedDto>(chargesAndDeductionApplied);
@@ -109,14 +109,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _chargesAndDeductionAppliedService.UpdateChargesAndDeductionApplied(existingChargesAndDeductionApplied.ChargesAndDeductionAppliedId, updatedChargesAndDeductionApplied);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = chargesAndDeductionAppliedRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = chargesAndDeductionAppliedRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.ChargesAndDeductionAppliedUpdated);
                 return AddResponseMessage(Response, LogMessages.ChargesAndDeductionAppliedUpdated, null, true, HttpStatusCode.OK);
@@ -143,14 +143,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _chargesAndDeductionAppliedService.DeleteChargesAndDeductionApplied(chargesAndDeductionAppliedId);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = 1058,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = 1058,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.ChargesAndDeductionAppliedDeleted);
                 return AddResponseMessage(Response, LogMessages.ChargesAndDeductionAppliedDeleted, null, true, HttpStatusCode.NoContent);

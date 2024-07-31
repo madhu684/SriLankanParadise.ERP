@@ -74,14 +74,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _permissionService.AddPermission(permission);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = permissionRequest.PermissionRequestId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = permissionRequest.PermissionRequestId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 // send response
                 var permissionDto = _mapper.Map<PermissionDto>(permission);
@@ -157,14 +157,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _permissionService.UpdatePermission(existingPermission.PermissionId, updatedPermission);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = permissionRequest.PermissionRequestId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = permissionRequest.PermissionRequestId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.PermissionUpdated);
                 return AddResponseMessage(Response, LogMessages.PermissionUpdated, null, true, HttpStatusCode.OK);

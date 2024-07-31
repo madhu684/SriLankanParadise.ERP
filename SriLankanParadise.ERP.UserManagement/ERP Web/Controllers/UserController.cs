@@ -135,14 +135,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     await _userService.RegisterUser(newUser);
 
                     // Create action log
-                    var actionLog = new ActionLogModel()
-                    {
-                        ActionId = userRegistrationModel.PermissionId,
-                        UserId = newUser.UserId,
-                        Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                        Timestamp = DateTime.UtcNow
-                    };
-                    await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                    //var actionLog = new ActionLogModel()
+                    //{
+                    //    ActionId = userRegistrationModel.PermissionId,
+                    //    UserId = newUser.UserId,
+                    //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                    //    Timestamp = DateTime.UtcNow
+                    //};
+                    //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                     var userDto = _mapper.Map<UserDto>(newUser);
                     _logger.LogInformation(LogMessages.UserRegistered);
@@ -214,14 +214,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _userService.UpdateUser(existingUser.UserId, updatedUser);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = userUpdateRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = userUpdateRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.UserUpdated);
                 return AddResponseMessage(Response, LogMessages.UserUpdated, null, true, HttpStatusCode.OK);

@@ -85,14 +85,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _companyService.AddCompany(company);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = companyRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = companyRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.CompanyCreated);
                 AddResponseMessage(Response, LogMessages.CompanyCreated, null, true, HttpStatusCode.Created);
@@ -123,14 +123,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _companyService.UpdateCompany(existingCompany.CompanyId, updatedCompany);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = companyRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = companyRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.CompanyUpdated);
                 return AddResponseMessage(Response, LogMessages.CompanyUpdated, null, true, HttpStatusCode.OK);
@@ -157,14 +157,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _companyService.DeleteCompany(companyId);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = 8,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = 8,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.CompanyDeleted);
                 return AddResponseMessage(Response, LogMessages.CompanyDeleted, null, true, HttpStatusCode.NoContent);
@@ -185,14 +185,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 var filePath = await _companyService.UploadCompanyLogo(companyLogo);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = companyLogoRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = companyLogoRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.CompanyLogoUploaded);
                 return AddResponseMessage(Response, LogMessages.CompanyLogoUploaded, filePath, true, HttpStatusCode.Created);

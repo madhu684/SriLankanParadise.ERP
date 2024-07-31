@@ -44,14 +44,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _salesOrderDetailService.AddSalesOrderDetail(salesOrderDetail);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = salesOrderDetailRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = salesOrderDetailRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 // send response
                 var salesOrderDetailDto = _mapper.Map<SalesOrderDetailDto>(salesOrderDetail);
@@ -84,14 +84,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _salesOrderDetailService.UpdateSalesOrderDetail(existingSalesOrderDetail.SalesOrderDetailId, updatedSalesOrderDetail);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = salesOrderDetailRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = salesOrderDetailRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.SalesOrderDetailUpdated);
                 return AddResponseMessage(Response, LogMessages.SalesOrderDetailUpdated, null, true, HttpStatusCode.OK);
@@ -118,14 +118,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _salesOrderDetailService.DeleteSalesOrderDetail(salesOrderDetailId);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = 28,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = 28,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.SalesOrderDetailDeleted);
                 return AddResponseMessage(Response, LogMessages.SalesOrderDetailDeleted, null, true, HttpStatusCode.NoContent);

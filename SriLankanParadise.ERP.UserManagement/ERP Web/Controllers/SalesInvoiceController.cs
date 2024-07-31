@@ -45,14 +45,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _salesInvoiceService.AddSalesInvoice(salesInvoice);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = salesInvoiceRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = salesInvoiceRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 // send response
                 var salesInvoiceDto = _mapper.Map<SalesInvoiceDto>(salesInvoice);
@@ -180,14 +180,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _salesInvoiceService.ApproveSalesInvoice(existingSalesInvoice.SalesInvoiceId, approvedSalesInvoice);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = approveSalesInvoiceRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = approveSalesInvoiceRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.SalesInvoiceApproved);
                 return AddResponseMessage(Response, LogMessages.SalesInvoiceApproved, null, true, HttpStatusCode.OK);
@@ -218,14 +218,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _salesInvoiceService.UpdateSalesInvoice(existingSalesInvoice.SalesInvoiceId, updatedSalesInvoice);
 
                 // Create action log
-                var actionLog = new ActionLogModel()
-                {
-                    ActionId = salesInvoiceRequest.PermissionId,
-                    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                    Timestamp = DateTime.UtcNow
-                };
-                await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = salesInvoiceRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.SalesInvoiceUpdated);
                 return AddResponseMessage(Response, LogMessages.SalesInvoiceUpdated, null, true, HttpStatusCode.OK);
