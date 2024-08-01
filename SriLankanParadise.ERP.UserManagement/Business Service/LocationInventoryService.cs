@@ -12,9 +12,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             _locationInventoryRepository = locationInventoryRepository;
         }
 
-        public async Task AddLocationInventory(LocationInventory locationInventory)
+        public async Task AddLocationInventory(LocationInventory locationInventory, int m)
         {
-            await _locationInventoryRepository.AddLocationInventory(locationInventory);
+            await _locationInventoryRepository.AddLocationInventory(locationInventory, m);
         }
 
         public async Task<IEnumerable<LocationInventory>> GetAll()

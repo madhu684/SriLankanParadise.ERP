@@ -13,7 +13,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             _dbContext = dbContext;
         }
-        public async Task AddLocationInventory(LocationInventory locationInventory)
+        public async Task AddLocationInventory(LocationInventory locationInventory, int m)
         {
             try
             {
@@ -26,7 +26,13 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 if (existingInventory != null)
                 {
                     // Update the StockInHand
-                    existingInventory.StockInHand = locationInventory.StockInHand;
+                    if (m == 1)
+                    {
+                        existingInventory.StockInHand = existingInventory.StockInHand + locationInventory.StockInHand;
+                    } else
+                    {
+                        existingInventory.StockInHand = existingInventory.StockInHand - locationInventory.StockInHand;
+                    }
                 }
                 else
                 {
