@@ -17,13 +17,29 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             try
             {
-                _dbContext.LocationInventories.Add(locationInventory);
-                await _dbContext.SaveChangesAsync();
+                // Check if a record with the same ItemMasterId, BatchId, and LocationId exists
+                var existingInventory = await _dbContext.LocationInventories
+                    .FirstOrDefaultAsync(li => li.ItemMasterId == locationInventory.ItemMasterId
+                                            && li.BatchId == locationInventory.BatchId
+                                            && li.LocationId == locationInventory.LocationId);
 
+                if (existingInventory != null)
+                {
+                    // Update the StockInHand
+                    existingInventory.StockInHand = locationInventory.StockInHand;
+                }
+                else
+                {
+                    // Insert a new record
+                    _dbContext.LocationInventories.Add(locationInventory);
+                }
+
+                // Save changes
+                await _dbContext.SaveChangesAsync();
             }
             catch (Exception)
             {
-
+                // Handle exception (optional: log the exception, etc.)
                 throw;
             }
         }
