@@ -15,5 +15,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
         public int LocationId { get; set; }
 
         public int? StockInHand { get; set; }
+        public string? BatchNo { get; set; }
     }
 }

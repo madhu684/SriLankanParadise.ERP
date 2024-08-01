@@ -29,7 +29,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     if (m == 1)
                     {
                         existingInventory.StockInHand = existingInventory.StockInHand + locationInventory.StockInHand;
-                    } else
+                    } else if (m == 2)
                     {
                         existingInventory.StockInHand = existingInventory.StockInHand - locationInventory.StockInHand;
                     }
