@@ -20,7 +20,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 // Check if a record with the same ItemMasterId, BatchId, and LocationId exists
                 var existingInventory = await _dbContext.LocationInventories
                     .FirstOrDefaultAsync(li => li.ItemMasterId == locationInventory.ItemMasterId
-                                            && li.BatchId == locationInventory.BatchId
+                                            && li.BatchNo == locationInventory.BatchNo
                                             && li.LocationId == locationInventory.LocationId);
 
                 if (existingInventory != null)

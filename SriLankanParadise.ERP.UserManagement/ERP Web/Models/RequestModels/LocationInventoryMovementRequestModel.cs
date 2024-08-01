@@ -15,6 +15,8 @@
         public DateTime? Date { get; set; }
 
         public int? Qty { get; set; }
+        public int? ReferenceNo { get; set; }
+        public string? BatchNo { get; set; }
 
         public int PermissionId { get; set; }
     }
