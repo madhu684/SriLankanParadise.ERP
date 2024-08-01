@@ -7,6 +7,7 @@
         public int BatchId { get; set; }
 
         public int LocationId { get; set; }
+        public int MovementTypeId { get; set; }
 
         public int? StockInHand { get; set; }
         public string? BatchNo { get; set; }

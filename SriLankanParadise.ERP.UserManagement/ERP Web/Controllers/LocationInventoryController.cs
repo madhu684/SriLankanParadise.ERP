@@ -41,7 +41,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             try
             {
                 var locationInventory = _mapper.Map<LocationInventory>(locationInventoryRequest);
-                await _locationInventoryService.AddLocationInventory(locationInventory);
+                await _locationInventoryService.AddLocationInventory(locationInventory, locationInventoryRequest.MovementTypeId);
 
                 // Create action log
                 //var actionLog = new ActionLogModel()

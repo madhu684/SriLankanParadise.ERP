@@ -4,7 +4,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
 {
     public interface ILocationInventoryService
     {
-        Task AddLocationInventory(LocationInventory locationInventory);
+        Task AddLocationInventory(LocationInventory locationInventory, int movementTypeId);
 
         Task<IEnumerable<LocationInventory>> GetAll();
 
