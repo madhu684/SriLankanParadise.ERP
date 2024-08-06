@@ -7,6 +7,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task AddLocationInventoryMovement(LocationInventoryMovement locationInventoryMovement);
 
         Task<IEnumerable<LocationInventoryMovement>> GetAll();
+        Task<IEnumerable<LocationInventoryMovement>> Get(int IssueMasterId);
 
         Task<LocationInventoryMovement> GetLocationInventoryMovementByLocationInventoryMovementId(int locationInventoryMovementId);
 

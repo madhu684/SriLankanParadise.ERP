@@ -39,6 +39,23 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+        
+        public async Task<IEnumerable<LocationInventoryMovement>> Get(int IssueMasterId)
+        {
+            try
+            {
+                return await _dbContext.LocationInventoryMovements
+                    .Where(l => l.ReferenceNo == IssueMasterId)
+                    .Where(l => l.TransactionTypeId == 4)
+                    .Where(l => l.MovementTypeId == 1)
+                    .ToListAsync();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
 
 
 
