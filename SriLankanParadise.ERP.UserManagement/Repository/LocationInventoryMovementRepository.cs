@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
@@ -73,8 +74,34 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+        
+        public async Task<IEnumerable<LocationInventoryMovement>> ByDateRange(DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                var query = await _dbContext.LocationInventoryMovements
+                            .Where(l => l.Date.HasValue && l.Date.Value.Date >= fromDate.Date && l.Date.Value.Date <= toDate.Date)
+                            .Where(l => l.Location.LocationTypeId == 2)
+                            .Where(l => l.TransactionTypeId == 4 || l.TransactionTypeId == 8)
+                            .GroupBy(l => new { l.ItemMasterId, l.TransactionTypeId, l.BatchNo, l.LocationId })
+                            .Select(g => new LocationInventoryMovement
+                            {
+                                ItemMasterId = g.Key.ItemMasterId,
+                                TransactionTypeId = g.Key.TransactionTypeId,
+                                BatchNo = g.Key.BatchNo,
+                                LocationId = g.Key.LocationId,
+                                Qty = g.Sum(x => x.Qty) // Sum the quantities
+                            })
+                            .ToListAsync();
 
+                return query;
+            }
+            catch (Exception)
+            {
 
+                throw;
+            }
+        }
 
         public async Task<LocationInventoryMovement> GetLocationInventoryMovementByLocationInventoryMovementId(int locationInventoryMovementId)
         {

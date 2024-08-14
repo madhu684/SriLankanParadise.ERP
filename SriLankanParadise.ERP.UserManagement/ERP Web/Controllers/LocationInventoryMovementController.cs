@@ -7,6 +7,7 @@ using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using System.Net;
 using SriLankanParadise.ERP.UserManagement.Shared.Resources;
+using SriLankanParadise.ERP.UserManagement.Business_Service;
 
 namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 {
@@ -15,6 +16,9 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
     public class LocationInventoryMovementController : BaseApiController
     {
         private readonly ILocationInventoryMovementService _locationInventoryMovementService;
+        private readonly IItemMasterService _itemMasterService;
+        private readonly ILocationService _locationService;
+        private readonly ILocationInventoryService _locationInventoryService;
         private readonly IActionLogService _actionLogService;
         private readonly IMapper _mapper;
         private readonly ILogger<LocationInventoryMovementController> _logger;
@@ -22,12 +26,18 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
         public LocationInventoryMovementController(
             ILocationInventoryMovementService locationInventoryMovementService,
+            IItemMasterService itemMasterService,
+            ILocationService locationService,
+            ILocationInventoryService locationInventoryService,
             IActionLogService actionLogService,
             IMapper mapper,
             ILogger<LocationInventoryMovementController> logger,
             IHttpContextAccessor httpContextAccessor)
         {
             _locationInventoryMovementService = locationInventoryMovementService;
+            _itemMasterService = itemMasterService;
+            _locationService = locationService;
+            _locationInventoryService = locationInventoryService;
             _actionLogService = actionLogService;
             _mapper = mapper;
             _logger = logger;
@@ -113,6 +123,74 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 _logger.LogError(ex, ErrorMessages.InternalServerError);
                 AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
+            return Response;
+        }
+
+        [HttpGet("ByDateRange")]
+        public async Task<ApiResponseModel> ByDateRange(DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                var locationInventoryAnalysisReportList = new List<InventoryAnalysisReportDto>();
+                // Call the service method to get location inventory movements by date range
+                var locationInventoryMovements = await _locationInventoryMovementService.ByDateRange(fromDate, toDate);
+
+                foreach (var item in locationInventoryMovements)
+                {
+                    var itemMaster = await _itemMasterService.GetItemMasterByItemMasterId(item.ItemMasterId);
+                    var location = await _locationService.GetLocationByLocationId(item.LocationId);
+
+                    // Calculate ReceivedQty and ActualUsage
+                    var receivedQty = locationInventoryMovements
+                                        .Where(l => l.ItemMasterId == item.ItemMasterId &&
+                                                    l.BatchNo == item.BatchNo &&
+                                                    l.LocationId == item.LocationId &&
+                                                    l.TransactionTypeId == 4)
+                                        .Sum(l => l.Qty);
+
+                    var actualUsage = locationInventoryMovements
+                                        .Where(l => l.ItemMasterId == item.ItemMasterId &&
+                                                    l.BatchNo == item.BatchNo &&
+                                                    l.LocationId == item.LocationId &&
+                                                    l.TransactionTypeId == 8)
+                                        .Sum(l => l.Qty);
+
+
+                    var locationInventory = await _locationInventoryService.GetLocationInventoriesByLocationId(item.LocationId);
+
+                    var closingBalance = locationInventory?.Where(l => l.BatchNo == item.BatchNo &&
+                        l.LocationId == item.LocationId &&
+                        l.ItemMasterId == item.ItemMasterId).FirstOrDefault().StockInHand;
+
+                    // Create the InventoryAnalysisReportDto
+                    var locationInventoryAnalysisReport = new InventoryAnalysisReportDto()
+                    {
+                        Inventory = location.LocationName,
+                        RawMaterial = itemMaster.ItemName,
+                        UOM = itemMaster.Unit.UnitName,
+                        BatchNo = item.BatchNo,
+                        OpeningBalance = (double)(closingBalance + actualUsage - receivedQty),
+                        ReceivedQty = (double)receivedQty, // Set ReceivedQty
+                        ActualUsage = (double)actualUsage, // Set ActualUsage
+                        ClosingBalance = (double)closingBalance,
+
+                    };
+                    locationInventoryAnalysisReportList.Add(locationInventoryAnalysisReport);
+                }
+
+                // Map the result to DTOs
+                //var locationInventoryMovementDtos = _mapper.Map<IEnumerable<LocationInventoryMovementDto>>(locationInventoryMovements);
+
+                // Add a successful response message
+                AddResponseMessage(Response, LogMessages.LocationInventoriesRetrieved, locationInventoryAnalysisReportList, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                // Log the error and add an error response message
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+
             return Response;
         }
 

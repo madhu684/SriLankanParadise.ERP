@@ -1,4 +1,5 @@
 ﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 
 namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
 {
@@ -9,6 +10,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task<IEnumerable<LocationInventoryMovement>> GetAll();
         Task<IEnumerable<LocationInventoryMovement>> Get(int IssueMasterId);
         Task<IEnumerable<LocationInventoryMovement>> ByWorkOrder(int workOrderId);
+        Task<IEnumerable<LocationInventoryMovement>> ByDateRange(DateTime fromDate, DateTime toDate);
 
         Task<LocationInventoryMovement> GetLocationInventoryMovementByLocationInventoryMovementId(int locationInventoryMovementId);
 
