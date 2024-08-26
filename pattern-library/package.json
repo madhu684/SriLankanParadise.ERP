@@ -29,6 +29,7 @@
     "build:dev": "react-scripts build",
     "build:uat": "env-cmd -f .env.uat react-scripts build",
     "build:prod": "env-cmd -f .env.production react-scripts build",
+    "build:dcsluat": "env-cmd -f .env.dcsluat react-scripts build",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
