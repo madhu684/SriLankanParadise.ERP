@@ -119,6 +119,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             try
             {
+
+
                 var purchaseRequisitions = await _dbContext.PurchaseRequisitions
                     .Where(pr => pr.RequestedUserId == userId)
                     .Include(pr => pr.PurchaseRequisitionDetails)
@@ -127,6 +129,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(pr => pr.ExpectedDeliveryLocationNavigation)
                     .Include(pr => pr.DepartmentNavigation)
                     .ToListAsync();
+
+                
 
                 if (purchaseRequisitions.Any())
                 {

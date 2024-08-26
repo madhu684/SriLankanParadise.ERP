@@ -21,7 +21,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 await _dbContext.SaveChangesAsync();
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
 
                 throw;

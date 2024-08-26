@@ -84,17 +84,22 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
 
                 // Apply search query
                 query = query.Where(im => im.ItemName.Contains(searchQuery));
+                var itemMastersTemp = await query.ToListAsync();
 
-                // Apply item type filter conditionally
+                // Process itemType to handle multiple types separated by commas
                 if (!string.IsNullOrEmpty(itemType) && itemType.ToUpper() != "ALL")
                 {
+                    string[] itemTypes = itemType.Split(',')
+                                                 .Select(it => it.Trim())
+                                                 .ToArray();
+
                     query = query.Include(im => im.Category)
                         .Include(im => im.Unit)
                         .ThenInclude(u => u.MeasurementType)
                         .Include(im => im.ItemType)
                         .Include(im => im.InventoryUnit)
                         .ThenInclude(u => u.MeasurementType)
-                        .Where(im => im.ItemType.Name == itemType);
+                        .Where(im => itemTypes.Contains(im.ItemType.Name));
                 }
                 else
                 {
@@ -104,7 +109,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         .Include(im => im.ItemType)
                         .Include(im => im.InventoryUnit)
                         .ThenInclude(u => u.MeasurementType);
-
                 }
 
                 var itemMasters = await query.ToListAsync();

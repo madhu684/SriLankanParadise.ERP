@@ -642,9 +642,10 @@ public partial class ErpSystemContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_LocationInventory_Location");
 
-            entity.HasOne(d => d.ItemBatch).WithMany(p => p.LocationInventories)
-                .HasForeignKey(d => new { d.ItemMasterId, d.BatchId })
-                
+            entity.HasOne(d => d.ItemBatch)
+                .WithMany(p => p.LocationInventories)
+                .HasForeignKey(d => new { d.BatchId, d.ItemMasterId })
+                .HasPrincipalKey(i => new { i.BatchId, i.ItemMasterId }) // Ensure that this maps to the correct composite key
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_LocationInventory_ItemMaster_Batch");
         });

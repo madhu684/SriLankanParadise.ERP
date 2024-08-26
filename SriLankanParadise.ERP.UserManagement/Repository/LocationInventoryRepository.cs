@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
 {
@@ -20,7 +21,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 // Check if a record with the same ItemMasterId, BatchId, and LocationId exists
                 var existingInventory = await _dbContext.LocationInventories
                     .FirstOrDefaultAsync(li => li.ItemMasterId == locationInventory.ItemMasterId
-                                            && li.BatchNo == locationInventory.BatchNo
+                                            && li.BatchId == locationInventory.BatchId
                                             && li.LocationId == locationInventory.LocationId);
 
                 if (existingInventory != null)
@@ -86,9 +87,10 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var locationInventories = await _dbContext.LocationInventories
                     .Where(li => li.LocationId == locationId)
+                    .Include(li => li.ItemBatch)
+                    .ThenInclude(ib => ib.Batch)
                     .ToListAsync();
 
-               
                 return locationInventories.Any() ? locationInventories : null;
             }
             catch (Exception)
