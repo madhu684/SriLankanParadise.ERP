@@ -178,15 +178,15 @@ const usePurchaseOrderUpdate = ({ purchaseOrder, onFormSubmit }) => {
             )
             .map((charge) => {
               let value;
-              if (charge.chargesAndDeduction.percentage) {
+              //if (charge.chargesAndDeduction.percentage) {
                 // Calculate percentage value
                 value =
                   (Math.abs(charge.appliedValue) /
                     (item.unitPrice * item.quantity)) *
                   100;
-              } else {
-                value = Math.abs(charge.appliedValue);
-              }
+              //} else {
+                //value = Math.abs(charge.appliedValue);
+              //}
               return {
                 id: charge.chargesAndDeduction.chargesAndDeductionId,
                 name: charge.chargesAndDeduction.displayName,
@@ -228,12 +228,12 @@ const usePurchaseOrderUpdate = ({ purchaseOrder, onFormSubmit }) => {
         ?.filter((charge) => !charge.lineItemId)
         .map((charge) => {
           let value;
-          if (charge.chargesAndDeduction.percentage) {
+          //if (charge.chargesAndDeduction.percentage) {
             // Calculate percentage value based on subtotal
             value = (Math.abs(charge.appliedValue) / subTotal) * 100;
-          } else {
-            value = Math.abs(charge.appliedValue);
-          }
+          //} else {
+            //value = Math.abs(charge.appliedValue);
+          //}
           console.log(value);
           return {
             id: charge.chargesAndDeduction.chargesAndDeductionId,

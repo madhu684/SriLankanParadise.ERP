@@ -533,6 +533,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     handleAttachmentChange,
     calculateTotalPrice,
     setSearchTerm,
+    userLocations,
   };
 };
 

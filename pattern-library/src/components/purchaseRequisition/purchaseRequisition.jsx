@@ -33,6 +33,7 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
     handleAttachmentChange,
     calculateTotalPrice,
     setSearchTerm,
+    userLocations,
   } = usePurchaseRequisition({
     onFormSubmit: () => {
       handleClose();
@@ -270,8 +271,8 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
                   .filter(
                     (location) =>
                       location.locationType.name === "Warehouse" &&
-                      location.parentId ===
-                        parseInt(sessionStorage.getItem("locationId"))
+                    location.parentId ===
+                      parseInt(sessionStorage.getItem("locationId"))
                   )
                   .map((location) => (
                     <option
