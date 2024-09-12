@@ -160,7 +160,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                     var closingBalance = locationInventory?.Where(l => l.BatchNo == item.BatchNo &&
                         l.LocationId == item.LocationId &&
-                        l.ItemMasterId == item.ItemMasterId).FirstOrDefault().StockInHand;
+                        l.ItemMasterId == item.ItemMasterId).FirstOrDefault()?.StockInHand ?? 0;
 
                     // Create the InventoryAnalysisReportDto
                     var locationInventoryAnalysisReport = new InventoryAnalysisReportDto()
