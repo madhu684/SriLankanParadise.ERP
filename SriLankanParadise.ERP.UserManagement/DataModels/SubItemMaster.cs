@@ -2,6 +2,7 @@
 {
     public class SubItemMaster
     {
+        public int Id { get; set; }
         public int ParentItemMasterId { get; set; }
         public int SubItemMasterId { get; set; }
         public int Quantity { get; set; }
