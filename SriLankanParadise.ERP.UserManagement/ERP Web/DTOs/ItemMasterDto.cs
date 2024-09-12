@@ -41,6 +41,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public virtual ItemTypeDto? ItemType { get; set; }
 
+        public ICollection<SubItemMasterDto>? SubItems { get; set; }
 
     }
 }

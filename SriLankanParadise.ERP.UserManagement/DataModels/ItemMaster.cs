@@ -56,4 +56,6 @@ public partial class ItemMaster
     public virtual ICollection<RequisitionDetail> RequisitionDetails { get; set; } = new List<RequisitionDetail>();
 
     public virtual Unit Unit { get; set; } = null!;
+
+    public virtual ICollection<SubItemMaster>? SubItems { get; set; }
 }

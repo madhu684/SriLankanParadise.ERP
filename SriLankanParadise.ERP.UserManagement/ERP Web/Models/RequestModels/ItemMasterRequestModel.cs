@@ -29,5 +29,8 @@
         public int? ReorderLevel { get; set; }
 
         public int PermissionId { get; set; }
+        
+        public List<SubItemMasterRequestModel>? SubItems { get; set; }
+
     }
 }
