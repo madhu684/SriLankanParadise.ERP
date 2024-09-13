@@ -8,6 +8,7 @@ using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using System.Net;
 using SriLankanParadise.ERP.UserManagement.Shared.Resources;
 using SriLankanParadise.ERP.UserManagement.Business_Service;
+using System.Transactions;
 
 namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 {
@@ -16,6 +17,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
     public class ItemMasterController : BaseApiController
     {
         private readonly IItemMasterService _itemMasterService;
+        private readonly ISubItemMasterService _subItemMasterService;
         private readonly IActionLogService _actionLogService;
         private readonly IMapper _mapper;
         private readonly ILogger<ItemMasterController> _logger;
@@ -23,12 +25,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
         public ItemMasterController(
             IItemMasterService itemMasterService,
+            ISubItemMasterService subItemMasterService,
             IActionLogService actionLogService,
             IMapper mapper,
             ILogger<ItemMasterController> logger,
             IHttpContextAccessor httpContextAccessor)
         {
             _itemMasterService = itemMasterService;
+            _subItemMasterService = subItemMasterService;
             _actionLogService = actionLogService;
             _mapper = mapper;
             _logger = logger;
@@ -38,10 +42,21 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         [HttpPost]
         public async Task<ApiResponseModel> AddItemMaster(ItemMasterRequestModel itemMasterRequest)
         {
+            //using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
             try
             {
                 var itemMaster = _mapper.Map<ItemMaster>(itemMasterRequest);
                 await _itemMasterService.AddItemMaster(itemMaster);
+
+                // Save each SubItems
+                foreach (var subItemRequest in itemMasterRequest.SubItems)
+                {
+                    var subItemMaster = _mapper.Map<SubItemMaster>(subItemRequest);
+                    subItemMaster.ItemMasterId = itemMaster.ItemMasterId; // Set the parent ItemMasterId
+                    await _subItemMasterService.AddSubItemMaster(subItemMaster);
+                }
+
+                //transaction.Complete();
 
                 // Create action log
                 //var actionLog = new ActionLogModel()

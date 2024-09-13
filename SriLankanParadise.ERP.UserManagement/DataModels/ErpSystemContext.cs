@@ -141,6 +141,8 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<UserRole> UserRoles { get; set; }
 
+    public virtual DbSet<SubItemMaster> SubItemMasters { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:LocalSqlServerConnection");
 
