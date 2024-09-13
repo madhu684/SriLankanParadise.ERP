@@ -7,5 +7,6 @@
         public int SubItemMasterId { get; set; }
         public int Quantity { get; set; }
         public int UnitId { get; set; }
+        public virtual ItemMaster? ItemMaster { get; set; }
     }
 }
