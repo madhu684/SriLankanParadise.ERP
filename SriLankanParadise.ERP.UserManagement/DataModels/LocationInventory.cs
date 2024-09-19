@@ -13,7 +13,7 @@ public partial class LocationInventory
 
     public int LocationId { get; set; }
 
-    public int? StockInHand { get; set; }
+    public decimal? StockInHand { get; set; }
     public string? BatchNo { get; set; }
 
     public virtual ItemBatch ItemBatch { get; set; } = null!;

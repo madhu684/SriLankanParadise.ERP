@@ -6,7 +6,7 @@
 
         public int ItemMasterId { get; set; }
 
-        public int? Quantity { get; set; }
+        public decimal? Quantity { get; set; }
 
         public int PermissionId { get; set; }
     }

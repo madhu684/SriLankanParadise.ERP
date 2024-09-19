@@ -13,7 +13,7 @@ public partial class IssueDetail
 
     public int BatchId { get; set; }
 
-    public int? Quantity { get; set; }
+    public decimal? Quantity { get; set; }
 
     public virtual Batch Batch { get; set; } = null!;
 
