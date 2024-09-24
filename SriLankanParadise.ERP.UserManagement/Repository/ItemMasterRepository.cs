@@ -117,15 +117,13 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-
-
-
         public async Task<ItemMaster> GetItemMasterByItemMasterId(int itemMasterId)
         {
             try
             {
                 var itemMaster = await _dbContext.ItemMasters
                     .Where(im => im.ItemMasterId == itemMasterId)
+                    .Include(im => im.SubItemMasters)
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
                     .ThenInclude(u => u.MeasurementType)
@@ -186,6 +184,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var itemMasters = await _dbContext.ItemMasters
                     .Where(im => im.CreatedUserId == userId)
+                    .Include(im => im.SubItemMasters)
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
                     .ThenInclude(u => u.MeasurementType)

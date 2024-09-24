@@ -2,9 +2,9 @@
 {
     public class SubItemMasterDto
     {
-        public int ItemMasterId { get; set; }
+        public int Id { get; set; }
+        public int MainItemMasterId { get; set; }
         public int SubItemMasterId { get; set; }
-        public int Quantity { get; set; }
-        public int UnitId { get; set; }
+        public ItemMasterDto ItemMaster { get; set; }
     }
 }

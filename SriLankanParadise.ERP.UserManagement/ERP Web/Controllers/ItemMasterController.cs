@@ -42,21 +42,21 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         [HttpPost]
         public async Task<ApiResponseModel> AddItemMaster(ItemMasterRequestModel itemMasterRequest)
         {
-            //using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
             try
             {
                 var itemMaster = _mapper.Map<ItemMaster>(itemMasterRequest);
                 await _itemMasterService.AddItemMaster(itemMaster);
 
                 // Save each SubItems
-                foreach (var subItemRequest in itemMasterRequest.SubItems)
+                foreach (var subItemId in itemMasterRequest.SubItemIds)
                 {
-                    var subItemMaster = _mapper.Map<SubItemMaster>(subItemRequest);
-                    subItemMaster.ItemMasterId = itemMaster.ItemMasterId; // Set the parent ItemMasterId
+                    var subItemMaster = new SubItemMaster()
+                    {
+                        SubItemMasterId = subItemId,
+                        MainItemMasterId = itemMaster.ItemMasterId,
+                    };
                     await _subItemMasterService.AddSubItemMaster(subItemMaster);
                 }
-
-                //transaction.Complete();
 
                 // Create action log
                 //var actionLog = new ActionLogModel()
@@ -165,6 +165,31 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 var updatedItemMaster = _mapper.Map<ItemMaster>(itemMasterRequest);
                 updatedItemMaster.ItemMasterId = itemMasterId; // Ensure the ID is not changed
 
+                // Retrieve existing SubItemMaster records
+                var existingSubItemMasters = await _subItemMasterService.GetSubItemMastersByItemMasterId(itemMasterId);
+
+                // Compare existing and new SubItemIds
+                var existingSubItemIds = existingSubItemMasters.Select(s => s.SubItemMasterId).ToList();
+                var newSubItemIds = itemMasterRequest.SubItemIds.Except(existingSubItemIds).ToList();
+                var removedSubItemIds = existingSubItemIds.Except(itemMasterRequest.SubItemIds).ToList();
+
+                // Create new SubItemMaster records
+                foreach (var subItemId in newSubItemIds)
+                {
+                    var subItemMaster = new SubItemMaster()
+                    {
+                        SubItemMasterId = subItemId,
+                        MainItemMasterId = itemMasterId,
+                    };
+                    await _subItemMasterService.AddSubItemMaster(subItemMaster);
+                }
+
+                // Delete removed SubItemMaster records
+                foreach (var subItemId in removedSubItemIds)
+                {
+                    await _subItemMasterService.DeleteSubItemMaster(itemMasterId, subItemId);
+                }
+
                 await _itemMasterService.UpdateItemMaster(existingItemMaster.ItemMasterId, updatedItemMaster);
 
                 // Create action log
@@ -252,6 +277,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             try
             {
                 var itemMaster = await _itemMasterService.GetItemMasterByItemMasterId(itemMasterId);
+
                 if (itemMaster != null)
                 {
                     var itemMasterDto = _mapper.Map<ItemMasterDto>(itemMaster);
@@ -314,6 +340,41 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 }
             }
             catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("GetSubItemMastersByItemMasterId/{itemMasterId}")]
+        public async Task<ApiResponseModel> GetSubItemMastersByItemMasterId(int itemMasterId)
+        {
+            try
+            {
+                var subItemMasterIds = await _subItemMasterService.GetSubItemMastersByItemMasterId(itemMasterId);
+                var subItemMasters = new List<ItemMasterDto>();
+
+               
+                foreach(var item in subItemMasterIds)
+                {
+                    var subItemInfo = _itemMasterService.GetItemMasterByItemMasterId(item.SubItemMasterId).Result;
+                    var subItemInfoDto = _mapper.Map<ItemMasterDto>(subItemInfo);
+
+                    subItemMasters.Add(subItemInfoDto);
+                }
+
+                if (subItemMasters.Any())
+                {
+                    AddResponseMessage(Response, LogMessages.SubItemMastersRetrieved, subItemMasters, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    AddResponseMessage(Response, LogMessages.SubItemMastersNotFound, subItemMasters, true, HttpStatusCode.NotFound);
+                }
+               
+            }
+            catch(Exception ex)
             {
                 _logger.LogError(ex, ErrorMessages.InternalServerError);
                 AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);

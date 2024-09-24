@@ -17,5 +17,15 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             await _subItemMasterRepository.AddSubItemMaster(subItemMaster);
         }
+
+        public async Task<IEnumerable<SubItemMaster>> GetSubItemMastersByItemMasterId(int itemMasterId)
+        {
+            return await _subItemMasterRepository.GetSubItemMastersByItemMasterId(itemMasterId);
+        }
+
+        public async Task DeleteSubItemMaster(int mainItemMaster, int subItemMaster)
+        {
+            await _subItemMasterRepository.DeleteSubItemMaster(mainItemMaster, subItemMaster);
+        }
     }
 }

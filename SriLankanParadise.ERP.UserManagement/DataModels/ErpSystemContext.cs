@@ -1250,6 +1250,16 @@ public partial class ErpSystemContext : DbContext
         modelBuilder.HasSequence("SalesInvoiceReferenceNoSeq").StartsAt(1000L);
         modelBuilder.HasSequence("SalesOrderReferenceNoSeq").StartsAt(1000L);
 
+        modelBuilder.Entity<SubItemMaster>(entity =>
+        {
+            entity.ToTable("SubItemMaster");
+
+            entity.HasOne(d => d.ItemMaster).WithMany(p => p.SubItemMasters)
+                .HasForeignKey(d => d.MainItemMasterId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_SubItemMaster_ItemMaster");
+        });
+
         OnModelCreatingPartial(modelBuilder);
     }
 
