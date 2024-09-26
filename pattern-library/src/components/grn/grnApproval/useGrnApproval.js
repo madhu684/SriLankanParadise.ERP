@@ -160,6 +160,7 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
         locationId: grn?.warehouseLocationId,
         stockInHand: grnDetail.acceptedQuantity + grnDetail.freeQuantity,
         permissionId: 1088,
+        movementTypeId: 2
       };
 
       await post_location_inventory_api(locationInventoryData);

@@ -33,5 +33,6 @@
         public string? ReferenceNumber { get; set; }
 
         public int PermissionId { get; set; }
+        public int? LocationId { get; set; }
     }
 }
