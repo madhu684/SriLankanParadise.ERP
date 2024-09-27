@@ -1118,6 +1118,24 @@ export const get_locations_inventories_by_location_id_api = async (
   }
 };
 
+export const get_locations_inventories_by_location_id_item_master_id_api = async (
+  locationId,
+  itemMasterId
+) => {
+  try {
+    const response = await api.get(
+      `/locationInventory/GetLocationInventoriesByLocationIdItemMasterId/${locationId}/${itemMasterId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const patch_location_inventory_api = async (
   locationId,
   itemMasterId,

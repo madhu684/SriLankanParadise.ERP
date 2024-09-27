@@ -12,6 +12,8 @@ import {
   post_charges_and_deductions_applied_api,
   get_charges_and_deductions_applied_api,
   get_transaction_types_api,
+  get_user_locations_by_user_id_api,
+  get_locations_inventories_by_location_id_item_master_id_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
@@ -45,29 +47,49 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   const [initialized, setInitialized] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  const fetchItemBatches = async (itemMasterId) => {
+  const fetchItemBatches = async (storeLocation,itemMasterId) => {
     try {
-      const response = await get_item_batches_by_item_master_id_api(
-        itemMasterId,
-        sessionStorage.getItem("companyId")
+      const response = await get_locations_inventories_by_location_id_item_master_id_api(
+        storeLocation,
+        itemMasterId
       );
       return response.data.result;
     } catch (error) {
       console.error("Error fetching item batches:", error);
     }
   };
-
+  const fetchUserLocations = async () => {
+    try {
+      const response = await get_user_locations_by_user_id_api(
+        sessionStorage.getItem("userId")
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching user locations:", error);
+    }
+  };
   const {
-    data: itemBatches,
-    isLoading,
-    isError,
-    error,
-    refetch: refetchItemBatches,
+    data: userLocations,
+    isLoading: isUserLocationsLoading,
+    isError: isUserLocationsError,
+    error: userLocationsError,
   } = useQuery({
-    queryKey: ["itemBatches", formData.itemMasterId],
-    queryFn: () => fetchItemBatches(formData.itemMasterId),
+    queryKey: ["userLocations", sessionStorage.getItem("userId")],
+    queryFn: fetchUserLocations,
   });
 
+  const {
+      data: itemBatches,
+      isLoading,
+      isError,
+      error,
+      refetch: refetchItemBatches,
+    } = useQuery({
+      queryKey: ["itemBatches", formData.storeLocation,formData.itemMasterId],
+      queryFn: () => fetchItemBatches(formData.storeLocation,formData.itemMasterId),
+      enabled: !!formData.storeLocation && !!formData.itemMasterId,
+  });
+  
   const fetchItems = async (companyId, searchQuery, itemType) => {
     try {
       const response = await get_item_masters_by_company_id_with_query_api(
@@ -192,6 +214,30 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
       totalAmount: calculateTotalAmount(),
     }));
   }, [formData.itemDetails, formData.commonChargesAndDeductions]);
+
+  useEffect(() => {
+    const today = new Date().toISOString().split("T")[0]; // Get YYYY-MM-DD format
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      invoiceDate: today,
+      dueDate: today
+    }));
+  }, []);
+
+    // Set the first available warehouse location as the default value
+    useEffect(() => {
+      if (userLocations && userLocations.length > 0) {
+        const filteredLocations = userLocations.filter(
+          (location) => location.location.locationType.name === "Warehouse"
+        );
+        if (filteredLocations.length > 0) {
+          setFormData((prevFormData) => ({
+            ...prevFormData,
+            storeLocation: filteredLocations[0].location.locationId, // Set the first location's ID
+          }));
+        }
+      }
+    }, [userLocations]);
 
   useEffect(() => {
     if (
@@ -557,6 +603,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
           lastUpdatedDate: currentDate,
           referenceNumber: formData.referenceNumber,
           permissionId: 29,
+          locationId:formData.storeLocation,
         };
 
         const response = await post_sales_invoice_api(salesInvoiceData);
@@ -634,20 +681,22 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
             (response) => response.status === 201
           );
         } else {
+          console.log(formData.itemDetails);
           const itemDetailsBatchData = formData.itemDetails.map(
             async (item) => {
               const itemBatchUpdateData = {
                 batchId: item.batch.batchId,
                 itemMasterId: item.batch.itemMasterId,
-                costPrice: item.batch.costPrice,
-                sellingPrice: item.batch.sellingPrice,
-                status: item.batch.status,
-                companyId: item.batch.companyId,
-                createdBy: item.batch.createdBy,
-                createdUserId: item.batch.createdUserId,
-                tempQuantity: item.batch.tempQuantity - item.quantity,
-                locationId: item.batch.locationId,
-                expiryDate: item.batch.expiryDate,
+                costPrice: item.batch.itemBatch.costPrice,
+                sellingPrice: item.batch.itemBatch.sellingPrice,
+                status: item.batch.itemBatch.status,
+                companyId: item.batch.itemBatch.companyId,
+                createdBy: item.batch.itemBatch.createdBy,
+                createdUserId: item.batch.itemBatch.createdUserId,
+                tempQuantity: item.batch.itemBatch.tempQuantity - item.quantity,
+                locationId: item.batch.itemBatch.locationId,
+                expiryDate: item.batch.itemBatch.expiryDate,
+                qty:item.batch.itemBatch.qty,
                 permissionId: 1065,
               };
 
@@ -962,13 +1011,13 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
             itemBatchId: batch.batchId,
             name: formData.itemMaster.itemName,
             unit: formData.itemMaster.unit.unitName,
-            batchRef: batch.batch.batchRef,
+            batchRef: batch.itemBatch.batch.batchRef,
             quantity: 0,
-            unitPrice: batch.sellingPrice,
+            unitPrice: batch.itemBatch.sellingPrice,
             totalPrice: 0.0,
             chargesAndDeductions: initializedCharges,
             batch: batch,
-            tempQuantity: batch.tempQuantity,
+            tempQuantity: batch.stockInHand,
           },
         ],
       }));
@@ -1204,6 +1253,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     calculateSubTotal,
     renderColumns,
     renderSubColumns,
+    userLocations,
   };
 };
 
