@@ -2273,7 +2273,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
                 return ResourceManager.GetString("UserRegistered", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to Users not found.
         /// </summary>
@@ -2284,14 +2284,25 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to User retrieved.
+        /// </summary>
+        public static string UserRetrieved {
+            get {
+                return ResourceManager.GetString("UserRetrieved", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Users retrieved.
         /// </summary>
-        public static string UsersRetrieved {
-            get {
+        public static string UsersRetrieved
+        {
+            get
+            {
                 return ResourceManager.GetString("UsersRetrieved", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to User updated successfully.
         /// </summary>
