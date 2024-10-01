@@ -1,11 +1,13 @@
-﻿namespace SriLankanParadise.ERP.UserManagement.DataModels
+﻿using System.Text.Json.Serialization;
+
+namespace SriLankanParadise.ERP.UserManagement.DataModels;
+
+public partial class SubItemMaster
 {
-    public class SubItemMaster
-    {
-        public int Id { get; set; }
-        public int ParentItemMasterId { get; set; }
-        public int SubItemMasterId { get; set; }
-        public int Quantity { get; set; }
-        public int UnitId { get; set; }
-    }
+    public int Id { get; set; }
+    public int MainItemMasterId { get; set; }
+    public int SubItemMasterId { get; set; }
+
+    [JsonIgnore]
+    public virtual ItemMaster ItemMaster { get; set; } 
 }

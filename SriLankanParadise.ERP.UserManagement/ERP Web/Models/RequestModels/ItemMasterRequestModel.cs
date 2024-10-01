@@ -30,7 +30,7 @@
 
         public int PermissionId { get; set; }
         
-        public List<SubItemMasterRequestModel>? SubItems { get; set; }
+        public List<int>? SubItemIds { get; set; }
 
     }
 }

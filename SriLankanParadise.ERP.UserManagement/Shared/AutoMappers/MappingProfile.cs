@@ -131,6 +131,9 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<DailyStockBalance, DailyStockBalanceDto>();
             CreateMap<UpdateItemBatchQtyRequestModel, ItemBatch>();
             CreateMap<UpdateLocationInventoryStockInHandRequestModel, LocationInventory>();
+            CreateMap<ItemMasterRequestModel, ItemMaster>()
+                .ForMember(dest => dest.SubItemMasters, opt => opt.Ignore());
+            CreateMap<SubItemMaster, SubItemMasterDto>();
             // Add more mapping configurations if needed
         }
     }

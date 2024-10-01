@@ -57,5 +57,5 @@ public partial class ItemMaster
 
     public virtual Unit Unit { get; set; } = null!;
 
-    public virtual ICollection<SubItemMaster>? SubItems { get; set; }
+    public virtual ICollection<SubItemMaster> SubItemMasters { get; set; } = new List<SubItemMaster>();
 }

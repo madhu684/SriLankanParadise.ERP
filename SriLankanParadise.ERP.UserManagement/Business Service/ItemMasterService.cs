@@ -7,9 +7,12 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
     public class ItemMasterService : IItemMasterService
     {
         private readonly IItemMasterRepository _itemMasterRepository;
-        public ItemMasterService(IItemMasterRepository itemMasterRepository)
+        private readonly ISubItemMasterRepository _subItemMasterRepository;
+
+        public ItemMasterService(IItemMasterRepository itemMasterRepository, ISubItemMasterRepository subItemMasterRepository)
         {
             _itemMasterRepository = itemMasterRepository;
+            _subItemMasterRepository = subItemMasterRepository;
         }
 
         public async Task AddItemMaster(ItemMaster itemMaster)

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore.Query;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Middlewares;
 using Consul;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +35,9 @@ builder.Services.AddCors(options =>
                .AllowCredentials(); // Allow cookies
     });
 });
+
+builder.Services.AddControllers().AddNewtonsoftJson(x =>
+ x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -184,6 +188,8 @@ builder.Services.AddScoped<IDailyStockBalanceService, DailyStockBalanceService>(
 builder.Services.AddScoped<IDailyStockBalanceRepository, DailyStockBalanceRepository>();
 builder.Services.AddScoped<ILocationTypeService, LocationTypeService>();
 builder.Services.AddScoped<ILocationTypeRepository, LocationTypeRepository>();
+builder.Services.AddScoped<ISubItemMasterService, SubItemMasterService>();
+builder.Services.AddScoped<ISubItemMasterRepository, SubItemMasterRepository>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

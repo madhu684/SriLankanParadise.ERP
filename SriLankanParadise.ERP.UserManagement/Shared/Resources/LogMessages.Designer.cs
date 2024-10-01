@@ -2300,5 +2300,82 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
                 return ResourceManager.GetString("UserUpdated", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Item master created successfully.
+        /// </summary>
+        public static string SubItemMasterCreated
+        {
+            get
+            {
+                return ResourceManager.GetString("SubItemMasterCreated", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Item master deleted successfully.
+        /// </summary>
+        public static string SubItemMasterDeleted
+        {
+            get
+            {
+                return ResourceManager.GetString("SubItemMasterDeleted", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Item master not found.
+        /// </summary>
+        public static string SubItemMasterNotFound
+        {
+            get
+            {
+                return ResourceManager.GetString("SubItemMasterNotFound", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Item master retrieved.
+        /// </summary>
+        public static string SubItemMasterRetrieved
+        {
+            get
+            {
+                return ResourceManager.GetString("SubItemMasterRetrieved", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Item masters not found.
+        /// </summary>
+        public static string SubItemMastersNotFound
+        {
+            get
+            {
+                return ResourceManager.GetString("SubItemMastersNotFound", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Item masters retrieved.
+        /// </summary>
+        public static string SubItemMastersRetrieved
+        {
+            get
+            {
+                return ResourceManager.GetString("SubItemMastersRetrieved", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Item master updated successfully.
+        /// </summary>
+        public static string SubItemMasterUpdated
+        {
+            get
+            {
+                return ResourceManager.GetString("SubItemMasterUpdated", resourceCulture);
+            }
+        }
     }
 }
