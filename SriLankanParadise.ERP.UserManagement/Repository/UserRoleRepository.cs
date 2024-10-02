@@ -27,15 +27,29 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<UserRole>> GetByUserId(int userId)
+        public async Task<IEnumerable<Role>> GetUserRolesByUserId(int userId)
         {
             try
             {
-                return await _dbContext.UserRoles
-                    .Where(ur => ur.UserId == userId)
-                    .Include(ur => ur.User)
-                    .Include(ur => ur.Role)
+                var roles = new List<Role>();
+
+                var userRoles = await _dbContext.UserRoles
+                    .Where(x => x.UserId == userId)
                     .ToListAsync();
+
+                foreach (var userRole in userRoles)
+                {
+                    var role = await _dbContext.Roles
+                        .Where(x => x.RoleId == userRole.RoleId)
+                        .FirstOrDefaultAsync();
+
+                    if (role != null)
+                    {
+                        roles.Add(role);
+                    }
+
+                }
+                return roles;
             }
             catch (Exception)
             {

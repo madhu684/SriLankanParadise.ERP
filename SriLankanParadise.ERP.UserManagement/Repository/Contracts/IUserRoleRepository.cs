@@ -6,6 +6,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
     {
         Task AddUserRole(UserRole userRole);
 
-        Task<IEnumerable<UserRole>> GetByUserId(int userId);
+        Task<IEnumerable<Role>> GetUserRolesByUserId(int userId);
     }
 }

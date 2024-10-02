@@ -134,7 +134,6 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<ItemMasterRequestModel, ItemMaster>()
                 .ForMember(dest => dest.SubItemMasters, opt => opt.Ignore());
             CreateMap<SubItemMaster, SubItemMasterDto>();
-            CreateMap<UserRole, UserRoleDto>();
             // Add more mapping configurations if needed
         }
     }

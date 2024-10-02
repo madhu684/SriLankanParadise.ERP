@@ -71,16 +71,16 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         {
             try
             {
-                var userRoles = await _userRoleService.GetByUserId(userId);
-                if (userRoles != null)
+                var roles = await _userRoleService.GetUserRolesByUserId(userId);
+                if (roles != null)
                 {
-                    var userRolesDto = _mapper.Map<IEnumerable<UserRoleDto>>(userRoles);
-                    AddResponseMessage(Response, LogMessages.UserRolesRetrieved, userRolesDto, true, HttpStatusCode.OK);
+                    var rolesDto = _mapper.Map<IEnumerable<RoleDto>>(roles);
+                    AddResponseMessage(Response, LogMessages.RolesRetrieved, rolesDto, true, HttpStatusCode.OK);
                 }
                 else
                 {
-                    _logger.LogWarning(LogMessages.UserRolesNotFound);
-                    AddResponseMessage(Response, LogMessages.UserRolesNotFound, null, true, HttpStatusCode.NotFound);
+                    _logger.LogWarning(LogMessages.RolesNotFound);
+                    AddResponseMessage(Response, LogMessages.RolesNotFound, null, true, HttpStatusCode.NotFound);
                 }
             }
             catch (Exception ex)
