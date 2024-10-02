@@ -41,6 +41,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 {
                     var role = await _dbContext.Roles
                         .Where(x => x.RoleId == userRole.RoleId)
+                        .Include(x => x.Module)
                         .FirstOrDefaultAsync();
 
                     if (role != null)
@@ -53,7 +54,37 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
             catch (Exception)
             {
+                throw;
+            }
+        }
 
+        public async Task<IEnumerable<RolePermission>> GetUserRolePermissionsByUserId(int userId)
+        {
+            try
+            {
+                var rolePermissions = new List<RolePermission>();
+
+                var userRoles = await _dbContext.UserRoles
+                    .Where(x => x.UserId == userId)
+                    .ToListAsync();
+
+                foreach (var userRole in userRoles)
+                {
+                    var rolePermission = await _dbContext.RolePermissions
+                        .Where(x => x.RoleId == userRole.RoleId)
+                        .Include(x => x.Permission)
+                        .Include(x => x.Role)
+                        .ToListAsync();
+
+                    if (rolePermission != null) { 
+                        rolePermissions.AddRange(rolePermission);
+                    }
+                }
+
+                return rolePermissions;
+            }
+            catch (Exception)
+            {
                 throw;
             }
         }

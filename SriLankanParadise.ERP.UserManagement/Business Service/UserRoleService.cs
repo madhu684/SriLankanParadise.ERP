@@ -21,5 +21,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             return await _userRoleRepository.GetUserRolesByUserId(userId);
         }
+
+        public async Task<IEnumerable<RolePermission>> GetUserRolePermissionsByUserId(int userId)
+        {
+            return await _userRoleRepository.GetUserRolePermissionsByUserId(userId);
+        }
     }
 }

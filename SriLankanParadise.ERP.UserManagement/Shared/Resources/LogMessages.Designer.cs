@@ -2410,5 +2410,27 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
                 return ResourceManager.GetString("SubItemMasterUpdated", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Role permissions retrieved successfully.
+        /// </summary>
+        public static string RolePermissionsRetrieved
+        {
+            get
+            {
+                return ResourceManager.GetString("RolePermissionsRetrieved", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Role permissions not found.
+        /// </summary>
+        public static string RolePermissionsNotFound
+        {
+            get
+            {
+                return ResourceManager.GetString("RolePermissionsNotFound", resourceCulture);
+            }
+        }
     }
 }

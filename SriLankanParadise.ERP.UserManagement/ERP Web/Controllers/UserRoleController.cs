@@ -9,6 +9,7 @@ using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Shared.Resources;
 using System.ComponentModel.Design;
 using System.Net;
+using System.Security;
 
 namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 {
@@ -67,7 +68,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
 
         [HttpGet("GetUserRolesByUserId/{userId}")]
-        public async Task<ApiResponseModel> GetByUserId(int userId)
+        public async Task<ApiResponseModel> GetUserRolesByUserId(int userId)
         {
             try
             {
@@ -81,6 +82,32 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 {
                     _logger.LogWarning(LogMessages.RolesNotFound);
                     AddResponseMessage(Response, LogMessages.RolesNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+
+        [HttpGet("GetUserRolePermissionssByUserId/{userId}")]
+        public async Task<ApiResponseModel> GetUserRolePermissionssByUserId(int userId)
+        {
+            try
+            {
+                var rolePermissions = await _userRoleService.GetUserRolePermissionsByUserId(userId);
+                if (rolePermissions != null)
+                {
+                    var rolePermissionsDto = _mapper.Map<IEnumerable<RolePermissionDto>>(rolePermissions);
+                    AddResponseMessage(Response, LogMessages.RolePermissionsRetrieved, rolePermissionsDto, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.RolePermissionsNotFound);
+                    AddResponseMessage(Response, LogMessages.RolePermissionsNotFound, null, true, HttpStatusCode.NotFound);
                 }
             }
             catch (Exception ex)
