@@ -1,10 +1,13 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using SriLankanParadise.ERP.UserManagement.Business_Service;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Shared.Resources;
+using System.ComponentModel.Design;
 using System.Net;
 
 namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
@@ -61,5 +64,32 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+
+        [HttpGet("GetUserRolesByUserId/{userId}")]
+        public async Task<ApiResponseModel> GetByUserId(int userId)
+        {
+            try
+            {
+                var userRoles = await _userRoleService.GetByUserId(userId);
+                if (userRoles != null)
+                {
+                    var userRolesDto = _mapper.Map<IEnumerable<UserRoleDto>>(userRoles);
+                    AddResponseMessage(Response, LogMessages.UserRolesRetrieved, userRolesDto, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.UserRolesNotFound);
+                    AddResponseMessage(Response, LogMessages.UserRolesNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
     }
 }
