@@ -118,5 +118,26 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpPut("{userId}")]
+        public async Task<ApiResponseModel> UpdateUserRole(UserRoleRequestModel userRoleRequest)
+        {
+            try
+            {
+                var userRole = _mapper.Map<UserRole>(userRoleRequest);
+                await _userRoleService.UpdateUserRole(userRole);
+
+
+                _logger.LogInformation(LogMessages.UserRoleUpdated);
+                AddResponseMessage(Response, LogMessages.UserRoleUpdated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+
     }
 }

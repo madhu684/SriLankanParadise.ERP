@@ -2250,6 +2250,17 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to User role updated successfully.
+        /// </summary>
+        public static string UserRoleUpdated
+        {
+            get
+            {
+                return ResourceManager.GetString("UserRoleUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to User roles retrieved successfully.
         /// </summary>
         public static string UserRolesRetrieved

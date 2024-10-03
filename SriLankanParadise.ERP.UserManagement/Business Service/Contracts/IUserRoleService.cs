@@ -9,5 +9,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task<IEnumerable<Role>> GetUserRolesByUserId(int userId);
 
         Task<IEnumerable<RolePermission>> GetUserRolePermissionsByUserId(int userId);
+
+        Task UpdateUserRole(UserRole userRole);
     }
 }
