@@ -47,26 +47,27 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 var itemMaster = _mapper.Map<ItemMaster>(itemMasterRequest);
                 await _itemMasterService.AddItemMaster(itemMaster);
 
-                // Save each SubItems
-                foreach (var subItemId in itemMasterRequest.SubItemIds)
-                {
-                    var subItemMaster = new SubItemMaster()
-                    {
-                        SubItemMasterId = subItemId,
-                        MainItemMasterId = itemMaster.ItemMasterId,
-                    };
-                    await _subItemMasterService.AddSubItemMaster(subItemMaster);
-                }
+                var subItemMasters = new List<SubItemMaster>();
 
-                // Create action log
-                //var actionLog = new ActionLogModel()
-                //{
-                //    ActionId = itemMasterRequest.PermissionId,
-                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                //    Timestamp = DateTime.UtcNow
-                //};
-                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                if (itemMasterRequest.SubItemMasters != null)
+                {
+                    foreach (var sim in itemMasterRequest.SubItemMasters)
+                    {
+                        var subItemMaster = new SubItemMaster()
+                        {
+                            MainItemMasterId = itemMaster.ItemMasterId,
+                            SubItemMasterId = sim.SubItemMasterId,
+                            Quantity = sim.Quantity
+                        };
+                        subItemMasters.Add(subItemMaster);
+                    }
+
+                    // Add new sub item masters
+                    foreach (var subItemMaster in subItemMasters)
+                    {
+                        await _subItemMasterService.AddSubItemMaster(subItemMaster);
+                    }
+                }
 
                 // send response
                 var itemMasterDto = _mapper.Map<ItemMasterDto>(itemMaster);
@@ -149,7 +150,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
-
         [HttpPut("{itemMasterId}")]
         public async Task<ApiResponseModel> UpdateItemMaster(int itemMasterId, ItemMasterRequestModel itemMasterRequest)
         {
@@ -163,53 +163,44 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 }
 
                 var updatedItemMaster = _mapper.Map<ItemMaster>(itemMasterRequest);
-                updatedItemMaster.ItemMasterId = itemMasterId; // Ensure the ID is not changed
+                // Update item master
+                await _itemMasterService.UpdateItemMaster(itemMasterId, updatedItemMaster);
 
-                // Retrieve existing SubItemMaster records
-                var existingSubItemMasters = await _subItemMasterService.GetSubItemMastersByItemMasterId(itemMasterId);
+                var subItemMasters = new List<SubItemMaster>();
 
-                // Compare existing and new SubItemIds
-                var existingSubItemIds = existingSubItemMasters.Select(s => s.SubItemMasterId).ToList();
-                var newSubItemIds = itemMasterRequest.SubItemIds.Except(existingSubItemIds).ToList();
-                var removedSubItemIds = existingSubItemIds.Except(itemMasterRequest.SubItemIds).ToList();
-
-                // Create new SubItemMaster records
-                foreach (var subItemId in newSubItemIds)
+                if (itemMasterRequest.SubItemMasters != null )
                 {
-                    var subItemMaster = new SubItemMaster()
+                    // Delete existing sub item masters
+                    await _subItemMasterService.DeleteSubItemMastersByMainItemMasterId(itemMasterId);
+
+                    foreach (var sim in itemMasterRequest.SubItemMasters)
                     {
-                        SubItemMasterId = subItemId,
-                        MainItemMasterId = itemMasterId,
-                    };
-                    await _subItemMasterService.AddSubItemMaster(subItemMaster);
+                        var subItemMaster = new SubItemMaster()
+                        {
+                            MainItemMasterId = itemMasterId,
+                            SubItemMasterId = sim.SubItemMasterId,
+                            Quantity = sim.Quantity
+                        };
+                        subItemMasters.Add(subItemMaster);
+                    }
+
+                    // Add new sub item masters
+                    foreach (var subItemMaster in subItemMasters)
+                    {
+                        await _subItemMasterService.AddSubItemMaster(subItemMaster);
+                    }
                 }
 
-                // Delete removed SubItemMaster records
-                foreach (var subItemId in removedSubItemIds)
-                {
-                    await _subItemMasterService.DeleteSubItemMaster(itemMasterId, subItemId);
-                }
-
-                await _itemMasterService.UpdateItemMaster(existingItemMaster.ItemMasterId, updatedItemMaster);
-
-                // Create action log
-                //var actionLog = new ActionLogModel()
-                //{
-                //    ActionId = itemMasterRequest.PermissionId,
-                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                //    Timestamp = DateTime.UtcNow
-                //};
-                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
-
+                var itemMasterDto = _mapper.Map<ItemMasterDto>(updatedItemMaster);
                 _logger.LogInformation(LogMessages.ItemMasterUpdated);
-                return AddResponseMessage(Response, LogMessages.ItemMasterUpdated, null, true, HttpStatusCode.OK);
+                AddResponseMessage(Response, LogMessages.ItemMasterUpdated, itemMasterDto, true, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ErrorMessages.InternalServerError);
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
+            return Response;
         }
 
         [HttpDelete("{itemMasterId}")]
@@ -225,16 +216,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 }
 
                 await _itemMasterService.DeleteItemMaster(itemMasterId);
-
-                // Create action log
-                //var actionLog = new ActionLogModel()
-                //{
-                //    ActionId = 1041,
-                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                //    Timestamp = DateTime.UtcNow
-                //};
-                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.ItemMasterDeleted);
                 return AddResponseMessage(Response, LogMessages.ItemMasterDeleted, null, true, HttpStatusCode.NoContent);

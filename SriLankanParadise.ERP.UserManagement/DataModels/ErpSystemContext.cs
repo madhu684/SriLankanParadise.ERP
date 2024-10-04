@@ -1256,7 +1256,7 @@ public partial class ErpSystemContext : DbContext
 
             entity.HasOne(d => d.ItemMaster).WithMany(p => p.SubItemMasters)
                 .HasForeignKey(d => d.MainItemMasterId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_SubItemMaster_ItemMaster");
         });
 
