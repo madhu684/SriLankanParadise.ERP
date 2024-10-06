@@ -327,40 +327,5 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
-
-        [HttpGet("GetSubItemMastersByItemMasterId/{itemMasterId}")]
-        public async Task<ApiResponseModel> GetSubItemMastersByItemMasterId(int itemMasterId)
-        {
-            try
-            {
-                var subItemMasterIds = await _subItemMasterService.GetSubItemMastersByItemMasterId(itemMasterId);
-                var subItemMasters = new List<ItemMasterDto>();
-
-               
-                foreach(var item in subItemMasterIds)
-                {
-                    var subItemInfo = _itemMasterService.GetItemMasterByItemMasterId(item.SubItemMasterId).Result;
-                    var subItemInfoDto = _mapper.Map<ItemMasterDto>(subItemInfo);
-
-                    subItemMasters.Add(subItemInfoDto);
-                }
-
-                if (subItemMasters.Any())
-                {
-                    AddResponseMessage(Response, LogMessages.SubItemMastersRetrieved, subItemMasters, true, HttpStatusCode.OK);
-                }
-                else
-                {
-                    AddResponseMessage(Response, LogMessages.SubItemMastersNotFound, subItemMasters, true, HttpStatusCode.NotFound);
-                }
-               
-            }
-            catch(Exception ex)
-            {
-                _logger.LogError(ex, ErrorMessages.InternalServerError);
-                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
-            }
-            return Response;
-        }
     }
 }

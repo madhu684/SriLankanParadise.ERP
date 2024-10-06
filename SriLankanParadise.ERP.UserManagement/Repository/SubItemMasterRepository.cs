@@ -33,6 +33,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var subItemMasters = await _dbContext.SubItemMasters
                     .Where(x => x.MainItemMasterId == itemMasterId)
+                    .Include(x => x.ItemMaster)
                     .ToListAsync();
 
                 return subItemMasters;
