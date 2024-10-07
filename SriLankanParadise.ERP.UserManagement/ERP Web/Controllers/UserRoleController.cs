@@ -118,14 +118,22 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
-        [HttpPut("{userId}")]
-        public async Task<ApiResponseModel> UpdateUserRole(UserRoleRequestModel userRoleRequest)
+        [HttpPut("UpdateUserRole/{userId}")]
+        public async Task<ApiResponseModel> UpdateUserRole([FromRoute] int userId, [FromBody] int[] roleIds)
         {
             try
             {
-                var userRole = _mapper.Map<UserRole>(userRoleRequest);
-                await _userRoleService.UpdateUserRole(userRole);
+                await _userRoleService.DeleteUserRoles(userId);
 
+                foreach (var roleId in roleIds)
+                {
+                    var role = new UserRole()
+                    {
+                        UserId = userId,
+                        RoleId = roleId
+                    };
+                    await _userRoleService.AddUserRole(role);
+                }
 
                 _logger.LogInformation(LogMessages.UserRoleUpdated);
                 AddResponseMessage(Response, LogMessages.UserRoleUpdated, null, true, HttpStatusCode.OK);

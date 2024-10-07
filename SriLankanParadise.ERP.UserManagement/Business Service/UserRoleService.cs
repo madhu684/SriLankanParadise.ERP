@@ -27,9 +27,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             return await _userRoleRepository.GetUserRolePermissionsByUserId(userId);
         }
 
-        public async Task UpdateUserRole(UserRole userRole)
+        public async Task DeleteUserRoles(int userId)
         {
-            await _userRoleRepository.UpdateUserRole(userRole);
+            await _userRoleRepository.DeleteUserRoles(userId);
         }
     }
 }

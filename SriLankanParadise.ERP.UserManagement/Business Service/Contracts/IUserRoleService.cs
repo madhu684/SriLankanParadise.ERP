@@ -10,6 +10,6 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
 
         Task<IEnumerable<RolePermission>> GetUserRolePermissionsByUserId(int userId);
 
-        Task UpdateUserRole(UserRole userRole);
+        Task DeleteUserRoles(int userId);
     }
 }

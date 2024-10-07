@@ -89,11 +89,15 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task UpdateUserRole(UserRole userRole)
+        public async Task DeleteUserRoles(int userId)
         {
             try
             {
-                _dbContext.UserRoles.Update(userRole);
+                var userRoles = await _dbContext.UserRoles
+                    .Where(x => x.UserId == userId)
+                    .ToListAsync();
+
+                _dbContext.UserRoles.RemoveRange(userRoles);
                 await _dbContext.SaveChangesAsync();
             }
             catch (Exception)
