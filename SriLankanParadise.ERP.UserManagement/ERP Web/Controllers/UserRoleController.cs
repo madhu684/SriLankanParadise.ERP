@@ -92,32 +92,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
-
-        [HttpGet("GetUserRolePermissionssByUserId/{userId}")]
-        public async Task<ApiResponseModel> GetUserRolePermissionssByUserId(int userId)
-        {
-            try
-            {
-                var rolePermissions = await _userRoleService.GetUserRolePermissionsByUserId(userId);
-                if (rolePermissions != null)
-                {
-                    var rolePermissionsDto = _mapper.Map<IEnumerable<RolePermissionDto>>(rolePermissions);
-                    AddResponseMessage(Response, LogMessages.RolePermissionsRetrieved, rolePermissionsDto, true, HttpStatusCode.OK);
-                }
-                else
-                {
-                    _logger.LogWarning(LogMessages.RolePermissionsNotFound);
-                    AddResponseMessage(Response, LogMessages.RolePermissionsNotFound, null, true, HttpStatusCode.NotFound);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ErrorMessages.InternalServerError);
-                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
-            }
-            return Response;
-        }
-
         [HttpPut("UpdateUserRole/{userId}")]
         public async Task<ApiResponseModel> UpdateUserRole([FromRoute] int userId, [FromBody] int[] roleIds)
         {

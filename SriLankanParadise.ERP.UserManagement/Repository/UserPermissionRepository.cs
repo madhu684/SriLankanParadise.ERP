@@ -17,12 +17,11 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             try
             {
-                _dbContext.UserPermissions.Add(userPermission);
+                await _dbContext.UserPermissions.AddAsync(userPermission);
                 await _dbContext.SaveChangesAsync();
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -41,6 +40,26 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     return userPermissions;
                 }
                 return null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task DeleteUserPermissions(int userId)
+        {
+            try
+            {
+                var userPermissions = await _dbContext.UserPermissions
+                    .Where(up => up.UserId == userId)
+                    .ToListAsync();
+
+                if (userPermissions.Any())
+                {
+                    _dbContext.UserPermissions.RemoveRange(userPermissions);
+                    await _dbContext.SaveChangesAsync();
+                }
             }
             catch (Exception)
             {

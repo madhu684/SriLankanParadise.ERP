@@ -89,12 +89,11 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
-        [HttpPut("UpdateUserRole")]
-        public async Task<ApiResponseModel> UpdateUserRole([FromQuery] int userId, [FromQuery] int roleId, [FromBody] int[] permissionIds)
+        [HttpPut("UpdateUserPermissions")]
+        public async Task<ApiResponseModel> UpdateUserPermissions([FromQuery] int userId, [FromQuery] int roleId, [FromBody] int[] permissionIds)
         {
             try
             {
-
                 _logger.LogInformation(LogMessages.UserRoleUpdated);
                 AddResponseMessage(Response, LogMessages.UserRoleUpdated, null, true, HttpStatusCode.OK);
             }

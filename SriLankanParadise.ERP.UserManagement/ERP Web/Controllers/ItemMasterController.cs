@@ -328,7 +328,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             try
             {
                 var itemMasters = await _itemMasterService.GetItemMastersByItemMasterIds(itemMasterIds);
-                if (itemMasters != null)
+                if (itemMasters.Any())
                 {
                     var itemMasterDtos = _mapper.Map<IEnumerable<ItemMasterDto>>(itemMasters);
                     AddResponseMessage(Response, LogMessages.ItemMastersRetrieved, itemMasterDtos, true, HttpStatusCode.OK);
