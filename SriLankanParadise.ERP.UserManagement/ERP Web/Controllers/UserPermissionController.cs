@@ -89,13 +89,26 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
-        [HttpPut("UpdateUserPermissions")]
-        public async Task<ApiResponseModel> UpdateUserPermissions([FromQuery] int userId, [FromQuery] int roleId, [FromBody] int[] permissionIds)
+        [HttpPut("UpdateUserPermissions/{userId}")]
+        public async Task<ApiResponseModel> UpdateUserPermissions([FromRoute] int userId, [FromBody] int[] permissionIds)
         {
             try
             {
-                _logger.LogInformation(LogMessages.UserRoleUpdated);
-                AddResponseMessage(Response, LogMessages.UserRoleUpdated, null, true, HttpStatusCode.OK);
+                await _userPermissionService.DeleteUserPermissions(userId);
+
+                foreach (var permissionId in permissionIds)
+                {
+                    var userPermission = new UserPermission()
+                    {
+                        UserId = userId,
+                        PermissionId = permissionId
+                    };
+
+                    await _userPermissionService.AddUserPermission(userPermission);
+                }
+
+                _logger.LogInformation(LogMessages.UserPermissionsUpdated);
+                AddResponseMessage(Response, LogMessages.UserPermissionsUpdated, null, true, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {

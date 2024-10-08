@@ -1490,7 +1490,18 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
                 return ResourceManager.GetString("RolePermissionCreated", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Role permissions updated successfully.
+        /// </summary>
+        public static string RolePermissionsUpdated
+        {
+            get
+            {
+                return ResourceManager.GetString("RolePermissionsUpdated", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Roles not found.
         /// </summary>
@@ -2277,6 +2288,17 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string UserPermissionCreated {
             get {
                 return ResourceManager.GetString("UserPermissionCreated", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to User permissions updated successfully.
+        /// </summary>
+        public static string UserPermissionsUpdated
+        {
+            get
+            {
+                return ResourceManager.GetString("UserPermissionsUpdated", resourceCulture);
             }
         }
         

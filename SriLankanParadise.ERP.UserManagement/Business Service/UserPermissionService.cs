@@ -8,6 +8,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
     public class UserPermissionService :IUserPermissionService
     {
         private readonly IUserPermissionRepository _userPermissionRepository;
+
         public UserPermissionService(IUserPermissionRepository userPermissionRepository)
         {
             _userPermissionRepository = userPermissionRepository;
