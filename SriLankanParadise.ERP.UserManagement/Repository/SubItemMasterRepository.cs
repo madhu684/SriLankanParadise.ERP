@@ -33,6 +33,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var subItemMasters = await _dbContext.SubItemMasters
                     .Where(x => x.MainItemMasterId == itemMasterId)
+                    .Include(x => x.ItemMaster)
                     .ToListAsync();
 
                 return subItemMasters;
@@ -43,16 +44,17 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task DeleteSubItemMaster(int mainItemMasterId, int subItemMasterId)
+        public async Task DeleteSubItemMastersByMainItemMasterId(int mainItemMasterId)
         {
             try
             {
-                var subItemMaster = await _dbContext.SubItemMasters
-                    .FirstOrDefaultAsync(s => s.SubItemMasterId == subItemMasterId && s.MainItemMasterId == mainItemMasterId);
+                var subItemMasters = await _dbContext.SubItemMasters
+                    .Where(x => x.MainItemMasterId == mainItemMasterId)
+                    .ToListAsync();
 
-                if (subItemMaster != null)
+                if (subItemMasters != null)
                 {
-                    _dbContext.SubItemMasters.Remove(subItemMaster);
+                    _dbContext.SubItemMasters.RemoveRange(subItemMasters);
                     await _dbContext.SaveChangesAsync();
                 }
             }

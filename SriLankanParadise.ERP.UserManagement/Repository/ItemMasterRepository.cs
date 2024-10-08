@@ -148,6 +148,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
 
                 if (existItemMaster != null)
                 {
+                    itemMaster.ItemMasterId = existItemMaster.ItemMasterId;
+
                     _dbContext.Entry(existItemMaster).CurrentValues.SetValues(itemMaster);
                     await _dbContext.SaveChangesAsync();
                 }
