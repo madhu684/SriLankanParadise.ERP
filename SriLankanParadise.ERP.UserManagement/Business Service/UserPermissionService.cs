@@ -8,6 +8,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
     public class UserPermissionService :IUserPermissionService
     {
         private readonly IUserPermissionRepository _userPermissionRepository;
+
         public UserPermissionService(IUserPermissionRepository userPermissionRepository)
         {
             _userPermissionRepository = userPermissionRepository;
@@ -21,6 +22,11 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         public async Task<IEnumerable<UserPermission>> GetUserPermissionsByUserId(int userId)
         {
             return await _userPermissionRepository.GetUserPermissionsByUserId(userId);
+        }
+
+        public async Task DeleteUserPermissions(int userId)
+        {
+            await _userPermissionRepository.DeleteUserPermissions(userId);
         }
     }
 }

@@ -57,7 +57,24 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
-        
+
+        public async Task<IEnumerable<LocationInventoryMovement>> Get(int itemMasterId, int workOrderId)
+        {
+            try
+            {
+                return await _dbContext.LocationInventoryMovements
+                    .Where(l => l.ItemMasterId == itemMasterId)
+                    .Where(l => l.ReferenceNo == workOrderId)
+                    .Where(l => l.MovementTypeId == 2)
+                    .ToListAsync();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
         public async Task<IEnumerable<LocationInventoryMovement>> ByWorkOrder(int workOrderId)
         {
             try

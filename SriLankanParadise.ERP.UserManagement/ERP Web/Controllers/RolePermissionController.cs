@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using SriLankanParadise.ERP.UserManagement.Business_Service;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
@@ -53,6 +54,60 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                 _logger.LogInformation(LogMessages.RolePermissionCreated);
                 AddResponseMessage(Response, LogMessages.RolePermissionCreated, null, true, HttpStatusCode.Created);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpPut("UpdateRolePermissions/{roleId}")]
+        public async Task<ApiResponseModel> UpdateRolePermissions([FromRoute] int roleId, [FromBody] int[] permissionIds)
+        {
+            try
+            {
+                // get existing role permission
+                var existingRolePermission = await _rolePermissionService.GetRolePermissionsByRoleId(roleId);
+
+                // reduced permissionIds
+                var reducedPermissionIds = existingRolePermission
+                    .Select(rp => rp.PermissionId)
+                    .Except(permissionIds)
+                    .ToList();
+
+                // newly added permissionIds
+                var newlyAddedPermissionIds = permissionIds
+                    .Except(existingRolePermission
+                        .Select(rp => rp.PermissionId)
+                        .ToList()
+                    );
+
+                // remove reduced role permissions
+                foreach (var permissionId in reducedPermissionIds)
+                {
+                    var isRolePermissionAlreadyAssigned = await _rolePermissionService.IsRolePermissionAlreadyAssigned(permissionId);
+
+                    if (!isRolePermissionAlreadyAssigned)
+                    {
+                        await _rolePermissionService.DeleteRolePermission(roleId, permissionId);
+                    }
+                }
+                    
+                // create newly added role permissions
+                foreach (var permissionId in permissionIds)
+                {
+                    var rolePermission = new RolePermission()
+                    {
+                        RoleId = roleId,
+                        PermissionId = permissionId
+                    };
+                    await _rolePermissionService.AddRolePermission(rolePermission);
+                }
+
+                _logger.LogInformation(LogMessages.RolePermissionsUpdated);
+                AddResponseMessage(Response, LogMessages.RolePermissionsUpdated, null, true, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {

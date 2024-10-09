@@ -1,11 +1,15 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using SriLankanParadise.ERP.UserManagement.Business_Service;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Shared.Resources;
+using System.ComponentModel.Design;
 using System.Net;
+using System.Security;
 
 namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 {
@@ -61,5 +65,61 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+
+        [HttpGet("GetUserRolesByUserId/{userId}")]
+        public async Task<ApiResponseModel> GetUserRolesByUserId(int userId)
+        {
+            try
+            {
+                var roles = await _userRoleService.GetUserRolesByUserId(userId);
+                if (roles != null)
+                {
+                    var rolesDto = _mapper.Map<IEnumerable<RoleDto>>(roles);
+                    AddResponseMessage(Response, LogMessages.RolesRetrieved, rolesDto, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.RolesNotFound);
+                    AddResponseMessage(Response, LogMessages.RolesNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpPut("UpdateUserRole/{userId}")]
+        public async Task<ApiResponseModel> UpdateUserRole([FromRoute] int userId, [FromBody] int[] roleIds)
+        {
+            try
+            {
+                await _userRoleService.DeleteUserRoles(userId);
+
+                foreach (var roleId in roleIds)
+                {
+                    var role = new UserRole()
+                    {
+                        UserId = userId,
+                        RoleId = roleId
+                    };
+                    await _userRoleService.AddUserRole(role);
+                }
+
+                _logger.LogInformation(LogMessages.UserRoleUpdated);
+                AddResponseMessage(Response, LogMessages.UserRoleUpdated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+
     }
 }
