@@ -9,7 +9,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
 
         Task<IEnumerable<LocationInventoryMovement>> GetAll();
         Task<IEnumerable<LocationInventoryMovement>> Get(int IssueMasterId);
-        Task<IEnumerable<LocationInventoryMovement>> Get(int itemMasterId, int workOrderId);
+        Task<IEnumerable<LocationInventoryMovement>> Get(int itemMasterId, int referenceNo, int movementTypeId);
         Task<IEnumerable<LocationInventoryMovement>> ByWorkOrder(int workOrderId);
         Task<IEnumerable<LocationInventoryMovement>> ByDateRange(DateTime fromDate, DateTime toDate);
 
