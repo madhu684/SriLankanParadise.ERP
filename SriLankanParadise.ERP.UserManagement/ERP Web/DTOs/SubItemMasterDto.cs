@@ -5,6 +5,8 @@
         public int Id { get; set; }
         public int MainItemMasterId { get; set; }
         public int SubItemMasterId { get; set; }
+        public decimal Quantity { get; set; }
         public ItemMasterDto ItemMaster { get; set; }
+        public ItemMasterDto SubItemMaster { get; set; }
     }
 }

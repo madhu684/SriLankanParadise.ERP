@@ -8,6 +8,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
 
         Task<IEnumerable<SubItemMaster>> GetSubItemMastersByItemMasterId(int itemMasterId);
 
-        Task DeleteSubItemMaster(int mainItemMaster, int subItemMaster);
+        Task DeleteSubItemMastersByMainItemMasterId(int mainItemMaster);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SriLankanParadise.ERP.UserManagement.DataModels;
 
@@ -27,6 +28,7 @@ public partial class ItemMaster
 
     public int? InventoryUnitId { get; set; }
 
+    [Column(TypeName = "decimal(10, 6)")]
     public decimal? ConversionRate { get; set; }
 
     public string? ItemCode { get; set; }

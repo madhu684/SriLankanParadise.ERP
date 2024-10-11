@@ -572,7 +572,7 @@ public partial class ErpSystemContext : DbContext
 
             entity.ToTable("ItemMaster");
 
-            entity.Property(e => e.ConversionRate).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.ConversionRate).HasColumnType("decimal(18, 6)");
             entity.Property(e => e.CreatedBy).HasMaxLength(50);
             entity.Property(e => e.ItemCode).HasMaxLength(50);
             entity.Property(e => e.ItemName).HasMaxLength(50);
@@ -1256,7 +1256,7 @@ public partial class ErpSystemContext : DbContext
 
             entity.HasOne(d => d.ItemMaster).WithMany(p => p.SubItemMasters)
                 .HasForeignKey(d => d.MainItemMasterId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_SubItemMaster_ItemMaster");
         });
 

@@ -23,9 +23,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             return await _subItemMasterRepository.GetSubItemMastersByItemMasterId(itemMasterId);
         }
 
-        public async Task DeleteSubItemMaster(int mainItemMaster, int subItemMaster)
+        public async Task DeleteSubItemMastersByMainItemMasterId(int mainItemMaster)
         {
-            await _subItemMasterRepository.DeleteSubItemMaster(mainItemMaster, subItemMaster);
+            await _subItemMasterRepository.DeleteSubItemMastersByMainItemMasterId(mainItemMaster);
         }
     }
 }
