@@ -76,8 +76,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             try
             {
-                var unapprovedRequisitionMasters = new List<RequisitionMaster>();
-
                 var requisitionMasters = await _dbContext.RequisitionMasters
                     .Where(rm => rm.ReferenceNumber == referenceNumber)
                     .Include(rm => rm.RequisitionDetails)
@@ -87,27 +85,24 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(rm => rm.RequestedToLocation)
                     .ToListAsync();
 
-                foreach (var rm in requisitionMasters)
-                {
-                    var issueMasters = await _dbContext.IssueMasters
-                        .Where(im => im.RequisitionMasterId == rm.RequisitionMasterId)
-                        .ToListAsync();
+                var nullReferencedIssueMasters = await _dbContext.IssueMasters
+                    .Where(im => im.ReferenceNumber == null)
+                    .ToListAsync();
 
-                    if (!issueMasters.Any())
-                    {
-                        unapprovedRequisitionMasters.Add(rm);
-                    }
-                }
+                var unapprovedRequisitionMasters = new List<RequisitionMaster>();
 
                 if (requisitionMasters.Any())
                 {
-                    return requisitionMasters;
+                    unapprovedRequisitionMasters = requisitionMasters
+                        .Where(rm => !nullReferencedIssueMasters
+                            .Any(im => im.RequisitionMasterId == rm.RequisitionMasterId))
+                        .ToList();
                 }
-                return null;
+                
+                return unapprovedRequisitionMasters;
             }
             catch (Exception)
             {
-
                 throw;
             }
         }

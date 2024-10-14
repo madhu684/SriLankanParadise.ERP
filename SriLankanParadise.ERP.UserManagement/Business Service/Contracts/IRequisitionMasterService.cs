@@ -10,6 +10,8 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
 
         Task<IEnumerable<RequisitionMaster>> GetRequisitionMastersWithoutDraftsByCompanyId(int companyId);
 
+        Task<IEnumerable<RequisitionMaster>> GetUnapprovedRequisitionMasters(string referenceNumber);
+
         Task ApproveRequisitionMaster(int requisitionMasterId, RequisitionMaster requisitionMaster);
 
         Task<RequisitionMaster> GetRequisitionMasterByRequisitionMasterId(int requisitionMasterId);
