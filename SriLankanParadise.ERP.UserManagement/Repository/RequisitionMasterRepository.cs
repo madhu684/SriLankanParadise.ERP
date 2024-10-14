@@ -72,6 +72,46 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
+        public async Task<IEnumerable<RequisitionMaster>> GetUnapprovedRequisitionMasters(string referenceNumber)
+        {
+            try
+            {
+                var unapprovedRequisitionMasters = new List<RequisitionMaster>();
+
+                var requisitionMasters = await _dbContext.RequisitionMasters
+                    .Where(rm => rm.ReferenceNumber == referenceNumber)
+                    .Include(rm => rm.RequisitionDetails)
+                    .ThenInclude(rd => rd.ItemMaster)
+                    .ThenInclude(im => im.Unit)
+                    .Include(rm => rm.RequestedFromLocation)
+                    .Include(rm => rm.RequestedToLocation)
+                    .ToListAsync();
+
+                foreach (var rm in requisitionMasters)
+                {
+                    var issueMasters = await _dbContext.IssueMasters
+                        .Where(im => im.RequisitionMasterId == rm.RequisitionMasterId)
+                        .ToListAsync();
+
+                    if (!issueMasters.Any())
+                    {
+                        unapprovedRequisitionMasters.Add(rm);
+                    }
+                }
+
+                if (requisitionMasters.Any())
+                {
+                    return requisitionMasters;
+                }
+                return null;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
         public async Task ApproveRequisitionMaster(int requisitionMasterId, RequisitionMaster requisitionMaster)
         {
             try
