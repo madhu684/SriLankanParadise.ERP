@@ -1,4 +1,5 @@
-﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+﻿using Microsoft.EntityFrameworkCore;
+using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
@@ -19,6 +20,21 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 _dbContext.IssueDetails.Add(issueDetail);
                 await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<IssueDetail>> GetIssueDetails(int issueMasterId)
+        {
+            try
+            {
+                return await _dbContext.IssueDetails
+                    .Where(x => x.IssueMasterId == issueMasterId)
+                    .ToListAsync();
             }
             catch (Exception)
             {

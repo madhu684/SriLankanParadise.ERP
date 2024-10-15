@@ -11,6 +11,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task<IEnumerable<User>> GetAllUsersByCompanyId(int companyId);
         Task<User> GetUserByUserId(int userId);
         Task UpdateUser(int UserId, User user);
+        Task Delete(int userId);
 
     }
 }

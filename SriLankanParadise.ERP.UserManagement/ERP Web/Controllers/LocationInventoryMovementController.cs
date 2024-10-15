@@ -109,12 +109,12 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
-        [HttpGet("{itemMasterId}/{workOrderId}")]
-        public async Task<ApiResponseModel> Get(int itemMasterId, int workOrderId)
+        [HttpGet("{itemMasterId}/{referenceNo}/{movementTypeId}")]
+        public async Task<ApiResponseModel> Get(int itemMasterId, int referenceNo, int movementTypeId)
         {
             try
             {
-                var locationInventoryMovements = await _locationInventoryMovementService.Get(itemMasterId, workOrderId);
+                var locationInventoryMovements = await _locationInventoryMovementService.Get(itemMasterId, referenceNo, movementTypeId);
                 var locationInventoryMovementDtos = _mapper.Map<IEnumerable<LocationInventoryMovementDto>>(locationInventoryMovements);
                 AddResponseMessage(Response, LogMessages.LocationInventoriesRetrieved, locationInventoryMovementDtos, true, HttpStatusCode.OK);
             }

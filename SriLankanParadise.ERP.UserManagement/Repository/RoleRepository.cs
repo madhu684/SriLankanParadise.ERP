@@ -129,5 +129,34 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
+        public async Task Delete(int roleId)
+        {
+            try
+            {
+                var userRoles = await _dbContext.UserRoles
+                    .Where(ur => ur.RoleId == roleId)
+                    .ToListAsync();
+
+                if (userRoles.Any())
+                {
+                    throw new Exception("Role cannot be deleted because it is assigned to at least one user.");
+                }
+
+                var role = await _dbContext.Roles
+                    .Where(r => r.RoleId == roleId)
+                    .FirstOrDefaultAsync();
+
+                if (role != null)
+                {
+                    _dbContext.Roles.Remove(role);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

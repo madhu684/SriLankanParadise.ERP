@@ -680,7 +680,19 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
                 return ResourceManager.GetString("IssueDetailCreated", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Issue details retrieved successfully.
+        /// </summary>
+        public static string IssueDetailsRetrieved
+        {
+            get
+            {
+                return ResourceManager.GetString("IssueDetailsRetrieved", resourceCulture);
+            }
+        }
         
+
         /// <summary>
         ///   Looks up a localized string similar to Issue master approved.
         /// </summary>
@@ -1211,7 +1223,18 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
                 return ResourceManager.GetString("PermissionUpdated", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Permission deleted successfully.
+        /// </summary>
+        public static string PermissionDeleted
+        {
+            get
+            {
+                return ResourceManager.GetString("PermissionDeleted", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Purchase order approved.
         /// </summary>
@@ -1529,6 +1552,18 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
             }
         }
         
+
+        /// <summary>
+        ///   Looks up a localized string similar to Role deleted successfully.
+        /// </summary>
+        public static string RoleDeleted
+        {
+            get
+            {
+                return ResourceManager.GetString("RoleDeleted", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Sales invoice approved.
         /// </summary>
@@ -2335,6 +2370,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string UsersNotFound {
             get {
                 return ResourceManager.GetString("UsersNotFound", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to User deleted successfully.
+        /// </summary>
+        public static string UserDeleted {
+            get {
+                return ResourceManager.GetString("UserDeleted", resourceCulture);
             }
         }
         

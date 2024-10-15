@@ -13,5 +13,7 @@
         public int? ParentId { get; set; }
 
         public int PermissionId { get; set; }
+
+        public string? Alias { get; set; }
     }
 }

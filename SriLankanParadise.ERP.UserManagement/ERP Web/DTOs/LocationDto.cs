@@ -15,5 +15,7 @@
         public virtual LocationTypeDto? LocationType { get; set; }
 
         public int? ParentId { get; set; }
+
+        public string? Alias { get; set; }
     }
 }

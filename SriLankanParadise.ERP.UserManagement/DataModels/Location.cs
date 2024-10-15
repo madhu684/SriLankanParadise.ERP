@@ -17,6 +17,8 @@ public partial class Location
 
     public int? ParentId { get; set; }
 
+    public string? Alias { get; set; }
+
     public virtual Company Company { get; set; } = null!;
 
     public virtual ICollection<DailyStockBalance> DailyStockBalances { get; set; } = new List<DailyStockBalance>();
