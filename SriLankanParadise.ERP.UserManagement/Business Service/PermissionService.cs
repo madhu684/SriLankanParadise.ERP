@@ -42,5 +42,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             await _permissionRepository.UpdatePermission(permissionId, permission);
         }
+
+        public async Task Delete(int permissionId)
+        {
+            await _permissionRepository.Delete(permissionId);
+        }
     }
 }

@@ -139,7 +139,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
 
                 if (userRoles.Any())
                 {
-                    throw new Exception("Role cannot be deleted because it is assigned to one or more users.");
+                    throw new Exception("Role cannot be deleted because it is assigned to at least one user.");
                 }
 
                 var role = await _dbContext.Roles

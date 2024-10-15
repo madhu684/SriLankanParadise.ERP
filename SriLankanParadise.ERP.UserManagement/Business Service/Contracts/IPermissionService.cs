@@ -15,5 +15,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task<Permission> GetPermissionByPermissionId(int permissionId);
 
         Task UpdatePermission(int permissionId, Permission permission);
+
+        Task Delete(int permissionId);
     }
 }

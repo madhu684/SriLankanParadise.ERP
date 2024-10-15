@@ -1223,7 +1223,18 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
                 return ResourceManager.GetString("PermissionUpdated", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Permission deleted successfully.
+        /// </summary>
+        public static string PermissionDeleted
+        {
+            get
+            {
+                return ResourceManager.GetString("PermissionDeleted", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Purchase order approved.
         /// </summary>

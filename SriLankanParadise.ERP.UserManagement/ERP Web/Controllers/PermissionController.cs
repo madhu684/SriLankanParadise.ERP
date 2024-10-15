@@ -175,5 +175,28 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
         }
+
+        [HttpDelete("{permissionId}")]
+        public async Task<ApiResponseModel> Delete(int permissionId)
+        {
+            try
+            {
+                var existingPermission = await _permissionService.GetPermissionByPermissionId(permissionId);
+                if (existingPermission == null)
+                {
+                    _logger.LogWarning(LogMessages.PermissionNotFound);
+                    return AddResponseMessage(Response, LogMessages.PermissionNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+                await _permissionService.Delete(permissionId);
+
+                _logger.LogInformation(LogMessages.PermissionDeleted);
+                return AddResponseMessage(Response, LogMessages.PermissionDeleted, null, true, HttpStatusCode.NoContent);
+            }
+            catch (Exception ex) {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
     }
 }

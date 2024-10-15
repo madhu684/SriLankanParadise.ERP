@@ -131,5 +131,33 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task Delete(int permissionId)
+        {
+            try
+            {
+                var rolePermissions = await _dbContext.RolePermissions
+                    .Where(rp => rp.PermissionId == permissionId)
+                    .ToListAsync();
+
+                if (rolePermissions.Any())
+                {
+                    throw new Exception("Permission cannot be deleted as it is being used by at least one role.");
+                }
+
+                var existingPermission = await _dbContext.Permissions
+                    .FindAsync(permissionId);
+
+                if (existingPermission != null)
+                {
+                    _dbContext.Permissions.Remove(existingPermission);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
