@@ -1541,6 +1541,18 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
             }
         }
         
+
+        /// <summary>
+        ///   Looks up a localized string similar to Role deleted successfully.
+        /// </summary>
+        public static string RoleDeleted
+        {
+            get
+            {
+                return ResourceManager.GetString("RoleDeleted", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Sales invoice approved.
         /// </summary>

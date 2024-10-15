@@ -175,5 +175,29 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
         }
+
+        [HttpDelete("{roleId}")]
+        public async Task<ApiResponseModel> Delete(int roleId)
+        {
+            try
+            {
+                var existingRole = await _roleService.GetRoleByRoleId(roleId);
+                if (existingRole == null)
+                {
+                    _logger.LogWarning(LogMessages.RoleNotFound);
+                    return AddResponseMessage(Response, LogMessages.RoleNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+                await _roleService.Delete(roleId);
+
+                _logger.LogInformation(LogMessages.RoleDeleted);
+                return AddResponseMessage(Response, LogMessages.RoleDeleted, null, true, HttpStatusCode.NoContent);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
     }
 }
