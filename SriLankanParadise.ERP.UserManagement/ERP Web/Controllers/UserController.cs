@@ -256,5 +256,29 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
         }
+
+        [HttpDelete("{userId}")]
+        public async Task<ApiResponseModel> Delete(int userId)
+        {
+            try
+            {
+                var user = await _userService.GetUserByUserId(userId);
+
+                if (user == null)
+                {
+                    _logger.LogWarning(LogMessages.UserNotFound);
+                    return AddResponseMessage(Response, LogMessages.UserNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+                await _userService.Delete(userId);
+                _logger.LogInformation(LogMessages.UserDeleted);
+                return AddResponseMessage(Response, LogMessages.UserDeleted, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
     }
 }
