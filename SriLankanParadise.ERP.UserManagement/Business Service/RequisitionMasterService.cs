@@ -27,6 +27,11 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             return await _requisitionMasterRepository.GetRequisitionMastersWithoutDraftsByCompanyId(companyId);
         }
 
+        public async Task<IEnumerable<RequisitionMaster>> GetUnapprovedRequisitionMasters(string referenceNumber)
+        {
+            return await _requisitionMasterRepository.GetUnapprovedRequisitionMasters(referenceNumber);
+        }
+
         public async Task ApproveRequisitionMaster(int requisitionMasterId, RequisitionMaster requisitionMaster)
         {
             await _requisitionMasterRepository.ApproveRequisitionMaster(requisitionMasterId, requisitionMaster);

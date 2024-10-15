@@ -108,7 +108,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
-
         
         [HttpPatch("approve/{requisitionMasterId}")]
         public async Task<ApiResponseModel> ApproveRequisitionMaster(int requisitionMasterId, ApproveRequisitionMasterRequestModel approveRequisitionMasterRequest)
@@ -153,6 +152,31 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             try
             {
                 var requisitionMasters = await _requisitionMasterService.GetRequisitionMastersByUserId(userId);
+                if (requisitionMasters != null)
+                {
+                    var requisitionMasterDtos = _mapper.Map<IEnumerable<RequisitionMasterDto>>(requisitionMasters);
+                    AddResponseMessage(Response, LogMessages.RequisitionMastersRetrieved, requisitionMasterDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.RequisitionMastersNotFound);
+                    AddResponseMessage(Response, LogMessages.RequisitionMastersNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("GetUnApprovedRequisitionMasters/{referenceNumber}")]
+        public async Task<ApiResponseModel> GetUnApprovedRequisitionMasters(string referenceNumber)
+        {
+            try
+            {
+                var requisitionMasters = await _requisitionMasterService.GetUnapprovedRequisitionMasters(referenceNumber);
                 if (requisitionMasters != null)
                 {
                     var requisitionMasterDtos = _mapper.Map<IEnumerable<RequisitionMasterDto>>(requisitionMasters);
