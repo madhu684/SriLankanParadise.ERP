@@ -178,5 +178,30 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+        
+        [HttpGet("GetWarehousesForSpecifcDepartment/{departmentLocId}")]
+        public async Task<ApiResponseModel> GetWarehousesForSpecifcDepartment(int departmentLocId)
+        {
+            try
+            {
+                var locations = await _locationService.GetWarehousesForSpecifcDepartment(departmentLocId);
+                if (locations != null)
+                {
+                    var locationDtos = _mapper.Map<IEnumerable<LocationDto>>(locations);
+                    AddResponseMessage(Response, LogMessages.LocationsRetrieved, locationDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.LocationsNotFound);
+                    AddResponseMessage(Response, LogMessages.LocationsNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

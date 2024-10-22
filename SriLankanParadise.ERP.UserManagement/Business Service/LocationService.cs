@@ -37,5 +37,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             return await _locationRepository.GetLocationsByLocationIds(locationIds);
         }
+
+        public async Task<IEnumerable<Location>> GetWarehousesForSpecifcDepartment(int departmentLocId)
+        {
+            return await _locationRepository.GetWarehousesForSpecifcDepartment(departmentLocId);
+        }
     }
 }

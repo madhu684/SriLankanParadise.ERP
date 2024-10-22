@@ -13,5 +13,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task UpdateLocation(int locationId, Location location);
 
         Task<IEnumerable<Location>> GetLocationsByLocationIds(int[] locationIds);
+
+        Task<IEnumerable<Location>> GetWarehousesForSpecifcDepartment(int departmentLocId);
     }
 }

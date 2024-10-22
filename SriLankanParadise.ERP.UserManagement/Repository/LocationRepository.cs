@@ -92,5 +92,11 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<Location>> GetWarehousesForSpecifcDepartment(int departmentLocId)
+        {
+            return await _dbContext.Locations
+                .Where(l => l.ParentId == departmentLocId && l.LocationTypeId ==2 )
+                .ToListAsync();
+        }
     }
 }
