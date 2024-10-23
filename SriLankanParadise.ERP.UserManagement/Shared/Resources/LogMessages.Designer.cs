@@ -1468,7 +1468,18 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
                 return ResourceManager.GetString("RequisitionMasterNotFound", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Requisition master retrieved.
+        /// </summary>
+        public static string RequisitionMasterRetrieved
+        {
+            get
+            {
+                return ResourceManager.GetString("RequisitionMasterRetrieved", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Requisition masters not found.
         /// </summary>
