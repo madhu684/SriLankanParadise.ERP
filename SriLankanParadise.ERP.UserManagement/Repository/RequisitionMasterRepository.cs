@@ -177,5 +177,29 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
+        public async Task<RequisitionMaster> GetRequisitionMaster(int requistionMasterId)
+        {
+            try
+            {
+                var requisitionMaster = await _dbContext.RequisitionMasters
+                    .Where(rm => rm.RequisitionMasterId == requistionMasterId)
+                    .Include(rm => rm.RequisitionDetails)
+                    .ThenInclude(rd => rd.ItemMaster)
+                    .ThenInclude(im => im.Unit)
+                    .Include(rm => rm.RequestedFromLocation)
+                    .Include(rm => rm.RequestedToLocation)
+                    .FirstOrDefaultAsync();
+                if(requisitionMaster != null)
+                {
+                    return requisitionMaster;
+                }
+                return null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

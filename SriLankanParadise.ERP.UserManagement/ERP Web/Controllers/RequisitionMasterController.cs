@@ -196,5 +196,30 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpGet("{requisitionMasterId}")]
+        public async Task<ApiResponseModel> GetRequisitionMaster(int requisitionMasterId)
+        {
+            try
+            {
+                var requisitionMaster = await _requisitionMasterService.GetRequisitionMaster(requisitionMasterId);
+                if (requisitionMaster != null)
+                {
+                    var requisitionMasterDtos = _mapper.Map<RequisitionMasterDto>(requisitionMaster);
+                    AddResponseMessage(Response, LogMessages.RequisitionMasterRetrieved, requisitionMasterDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.RequisitionMastersNotFound);
+                    AddResponseMessage(Response, LogMessages.RequisitionMasterNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
     }
 }
