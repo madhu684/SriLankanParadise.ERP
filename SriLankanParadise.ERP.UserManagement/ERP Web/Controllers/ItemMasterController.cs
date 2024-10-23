@@ -303,8 +303,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
-        [HttpGet("GetItemMastersByItemMasterIds")]
-        public async Task<ApiResponseModel> GetItemMastersByItemMasterIds([FromQuery] int[] itemMasterIds)
+        [HttpPost("GetItemMastersByItemMasterIds")]
+        public async Task<ApiResponseModel> GetItemMastersByItemMasterIds([FromBody] int[] itemMasterIds)
         {
             try
             {
