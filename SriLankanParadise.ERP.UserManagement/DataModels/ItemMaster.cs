@@ -60,4 +60,7 @@ public partial class ItemMaster
     public virtual Unit Unit { get; set; } = null!;
 
     public virtual ICollection<SubItemMaster> SubItemMasters { get; set; } = new List<SubItemMaster>();
+
+    public virtual ICollection<DailyLocationInventory> DailyLocationInventories { get; set; } = new List<DailyLocationInventory>();
+
 }

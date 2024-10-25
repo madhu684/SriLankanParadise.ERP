@@ -142,6 +142,8 @@ public partial class ErpSystemContext : DbContext
     public virtual DbSet<UserRole> UserRoles { get; set; }
 
     public virtual DbSet<SubItemMaster> SubItemMasters { get; set; }
+    
+    public virtual DbSet<DailyLocationInventory> DailyLocationInventories { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:LocalSqlServerConnection");
@@ -1258,6 +1260,33 @@ public partial class ErpSystemContext : DbContext
                 .HasForeignKey(d => d.MainItemMasterId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_SubItemMaster_ItemMaster");
+        });
+
+        modelBuilder.Entity<DailyLocationInventory>(entity =>
+        {
+            entity.HasKey(e => e.RunDate).HasName("PK_DailyLocationInventory");
+
+            entity.ToTable("DailyLocationInventory");
+
+            entity.HasOne(d => d.LocationInventory).WithMany(p => p.DailyLocationInventories)
+                .HasForeignKey(d => d.LocationInventoryId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_DailyLocationInventory_LocationInventory");
+
+            entity.HasOne(d => d.ItemMaster).WithMany(p => p.DailyLocationInventories)
+                .HasForeignKey(d => d.ItemMasterId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_DailyLocationInventory_ItemMaster");
+
+            entity.HasOne(d => d.Batch).WithMany(p => p.DailyLocationInventories)
+                .HasForeignKey(d => d.BatchId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_DailyLocationInventory_Batch");
+
+            entity.HasOne(d => d.Location).WithMany(p => p.DailyLocationInventories)
+                .HasForeignKey(d => d.LocationId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_DailyLocationInventory_Location");
         });
 
         OnModelCreatingPartial(modelBuilder);
