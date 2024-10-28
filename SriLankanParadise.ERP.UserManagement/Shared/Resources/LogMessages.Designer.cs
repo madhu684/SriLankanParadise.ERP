@@ -2520,5 +2520,27 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
                 return ResourceManager.GetString("RolePermissionsNotFound", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Daily location inventory retrieved successfully.
+        /// </summary>
+        public static string DailyLocationInventoryRetrieved
+        {
+            get
+            {
+                return ResourceManager.GetString("DailyLocationInventoryRetrieved", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Daily location inventory not found.
+        /// </summary>
+        public static string DailyLocationInventoryNotFound
+        {
+            get
+            {
+                return ResourceManager.GetString("DailyLocationInventoryNotFound", resourceCulture);
+            }
+        }
     }
 }

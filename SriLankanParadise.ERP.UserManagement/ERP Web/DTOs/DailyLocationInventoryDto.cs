@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SriLankanParadise.ERP.UserManagement.DataModels
+namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 {
-    public class DailyLocationInventory
+    public class DailyLocationInventoryDto
     {
         public DateOnly RunDate { get; set; }
 
@@ -16,7 +17,6 @@ namespace SriLankanParadise.ERP.UserManagement.DataModels
 
         public int LocationId { get; set; }
 
-        [Column(TypeName = "decimal(18, 8)")]
         public decimal? StockInHand { get; set; }
 
         public string? BatchNo { get; set; }
