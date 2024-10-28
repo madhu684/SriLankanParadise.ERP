@@ -30,7 +30,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         }
 
         [HttpGet("{runDate}/{locationId}")]
-        public async Task<ApiResponseModel> Get([FromRoute] DateOnly runDate, [FromRoute] int locationId)
+        public async Task<ApiResponseModel> Get([FromRoute] DateTime runDate, [FromRoute] int locationId)
         {
             try
             {

@@ -13,7 +13,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             this.dbContext = dbContext;
         }
 
-        public async Task<DailyLocationInventory> Get(DateOnly runDate, int locationId)
+        public async Task<DailyLocationInventory> Get(DateTime runDate, int locationId)
         {
            var dailyLocationInventory = await dbContext.DailyLocationInventories
                 .Where(d => d.RunDate == runDate && d.LocationId == locationId)

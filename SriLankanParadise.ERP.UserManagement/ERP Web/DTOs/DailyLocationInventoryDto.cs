@@ -5,7 +5,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 {
     public class DailyLocationInventoryDto
     {
-        public DateOnly RunDate { get; set; }
+        public DateTime RunDate { get; set; }
 
         public DateTime CreatedDate { get; set; }
 

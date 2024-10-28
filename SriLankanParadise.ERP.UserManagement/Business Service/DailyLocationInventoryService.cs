@@ -13,7 +13,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             this.dailyLocationInventoryRepository = dailyLocationInventoryRepository;
         }
 
-        public async Task<DailyLocationInventory> Get(DateOnly runDate, int locationId)
+        public async Task<DailyLocationInventory> Get(DateTime runDate, int locationId)
         {
             return await dailyLocationInventoryRepository.Get(runDate, locationId);
         }
