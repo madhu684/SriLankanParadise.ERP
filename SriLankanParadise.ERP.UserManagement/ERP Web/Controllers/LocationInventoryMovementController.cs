@@ -211,7 +211,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
-
         [HttpPut("{locationInventoryMovementId}")]
         public async Task<ApiResponseModel> UpdateLocationInventoryMovement(int locationInventoryMovementId, LocationInventoryMovementRequestModel locationInventoryMovementRequest)
         {
@@ -249,5 +248,23 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
         }
+
+        [HttpGet("GetByBatchNumber/{movementTypeId}/{itemMasterId}/{BatchNo}")]
+        public async Task<ApiResponseModel> Get(int movementTypeId, int itemMasterId, string batchNo)
+        {
+            try
+            {
+                var locationInventoryMovement = await _locationInventoryMovementService.Get(movementTypeId, itemMasterId, batchNo);
+                var locationInventoryMovementDto = _mapper.Map<LocationInventoryMovementDto>(locationInventoryMovement);
+                AddResponseMessage(Response, LogMessages.LocationInventoryMovementRetrieved, locationInventoryMovementDto, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
+           
 }
