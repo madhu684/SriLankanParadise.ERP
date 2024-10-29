@@ -5,6 +5,7 @@ using SriLankanParadise.ERP.UserManagement.Business_Service;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Shared.Resources;
 using System.Net;
@@ -29,6 +30,26 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             this.logger = logger;
         }
 
+        [HttpPost()]
+        public async Task<ApiResponseModel> Get([FromBody] DailyLocationInventoryRequestModel dailyLocationInventoryRequest)
+        {
+            try
+            {
+                var dailyLocationInventory = mapper.Map<DailyLocationInventory>(dailyLocationInventoryRequest);
+                await dailyLocationInventoryService.Add(dailyLocationInventory);
+
+                var dailyLocationInventoryDto = mapper.Map<DailyLocationInventoryDto>(dailyLocationInventory);
+                logger.LogInformation(LogMessages.DailyLocationInventoryCreated);
+                AddResponseMessage(Response, LogMessages.DailyLocationInventoryCreated, dailyLocationInventoryDto, true, HttpStatusCode.Created);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+        
         [HttpGet("{runDate}/{locationId}")]
         public async Task<ApiResponseModel> Get([FromRoute] DateTime runDate, [FromRoute] int locationId)
         {

@@ -13,6 +13,13 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             this.dbContext = dbContext;
         }
 
+        public async Task Add(DailyLocationInventory dailyLocationInventory)
+        {
+            dailyLocationInventory.RunDate = DateTime.Now;
+            await dbContext.AddAsync(dailyLocationInventory);
+            await dbContext.SaveChangesAsync();
+        }
+
         public async Task<DailyLocationInventory> Get(DateTime runDate, int locationId)
         {
            var dailyLocationInventory = await dbContext.DailyLocationInventories

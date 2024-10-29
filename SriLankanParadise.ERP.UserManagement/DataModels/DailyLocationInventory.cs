@@ -25,8 +25,6 @@ namespace SriLankanParadise.ERP.UserManagement.DataModels
 
         public virtual ItemMaster ItemMaster { get; set; } = null!;
 
-        public virtual Batch Batch { get; set; } = null!;
-
         public virtual Location Location { get; set; } = null!;
     }
 }

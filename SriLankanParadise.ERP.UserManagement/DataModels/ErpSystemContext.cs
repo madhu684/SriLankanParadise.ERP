@@ -1278,11 +1278,6 @@ public partial class ErpSystemContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_DailyLocationInventory_ItemMaster");
 
-            entity.HasOne(d => d.Batch).WithMany(p => p.DailyLocationInventories)
-                .HasForeignKey(d => d.BatchId)
-                .OnDelete(DeleteBehavior.Cascade)
-                .HasConstraintName("FK_DailyLocationInventory_Batch");
-
             entity.HasOne(d => d.Location).WithMany(p => p.DailyLocationInventories)
                 .HasForeignKey(d => d.LocationId)
                 .OnDelete(DeleteBehavior.Cascade)
