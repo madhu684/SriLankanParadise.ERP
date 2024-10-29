@@ -45,7 +45,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 var locationInventoryMovements = await locationInventoryMovementService.ByDateRange(fromDate, toDate);
                 if (locationInventoryMovements.Any())
                 {
-                    locationInventoryMovements
+                    var uniqueLocationInventoryMovements = locationInventoryMovements
                         .GroupBy(l => new { l.ItemMasterId, l.BatchNo, l.LocationId })
                         .Select(g => new
                         {
