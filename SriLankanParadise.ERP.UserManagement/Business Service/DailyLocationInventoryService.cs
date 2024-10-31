@@ -18,7 +18,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             await dailyLocationInventoryRepository.Add(dailyLocationInventory);
         }
 
-        public async Task<DailyLocationInventory> Get(DateTime runDate, int locationId)
+        public async Task<IEnumerable<DailyLocationInventory>> Get(DateOnly runDate, int locationId)
         {
             return await dailyLocationInventoryRepository.Get(runDate, locationId);
         }

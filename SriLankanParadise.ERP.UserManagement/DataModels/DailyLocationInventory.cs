@@ -6,7 +6,7 @@ namespace SriLankanParadise.ERP.UserManagement.DataModels
     {
         public int Id { get; set; }
 
-        public DateTime RunDate { get; set; }
+        public DateOnly RunDate { get; set; }
 
         public DateTime CreatedDate { get; set; }
 

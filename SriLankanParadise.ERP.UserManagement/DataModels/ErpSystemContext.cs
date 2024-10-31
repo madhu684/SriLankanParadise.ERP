@@ -1268,6 +1268,12 @@ public partial class ErpSystemContext : DbContext
 
             entity.ToTable("DailyLocationInventory");
 
+            entity.Property(e => e.RunDate)
+                .HasConversion(
+                    dateOnly => dateOnly.ToDateTime(TimeOnly.MinValue), // Convert DateOnly to DateTime for storage
+                    dateTime => DateOnly.FromDateTime(dateTime)         // Convert DateTime back to DateOnly on retrieval
+                );
+
             entity.HasOne(d => d.LocationInventory).WithMany(p => p.DailyLocationInventories)
                 .HasForeignKey(d => d.LocationInventoryId)
                 .OnDelete(DeleteBehavior.Cascade)

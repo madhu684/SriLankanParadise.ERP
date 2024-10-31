@@ -6,6 +6,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
     {
         Task Add(DailyLocationInventory dailyLocationInventory);
 
-        Task<DailyLocationInventory> Get(DateTime runDate, int locationId);
+        Task<IEnumerable<DailyLocationInventory>> Get(DateOnly runDate, int locationId);
     }
 }

@@ -51,15 +51,15 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         }
         
         [HttpGet("{runDate}/{locationId}")]
-        public async Task<ApiResponseModel> Get([FromRoute] DateTime runDate, [FromRoute] int locationId)
+        public async Task<ApiResponseModel> Get([FromRoute] DateOnly runDate, [FromRoute] int locationId)
         {
             try
             {
-                var dailyLocationInventory = await dailyLocationInventoryService.Get(runDate, locationId);
-                if (dailyLocationInventory != null)
+                var dailyLocationInventories = await dailyLocationInventoryService.Get(runDate, locationId);
+                if (dailyLocationInventories != null)
                 {
-                    var dailyLocationInventoryDto = mapper.Map<DailyLocationInventoryDto>(dailyLocationInventory);
-                    AddResponseMessage(Response, LogMessages.DailyLocationInventoryRetrieved, dailyLocationInventoryDto, true, HttpStatusCode.OK);
+                    var dailyLocationInventoriesDto = mapper.Map<IEnumerable<DailyLocationInventoryDto>>(dailyLocationInventories);
+                    AddResponseMessage(Response, LogMessages.DailyLocationInventoriesRetrieved, dailyLocationInventoriesDto, true, HttpStatusCode.OK);
                 }
                 else
                 {

@@ -19,16 +19,15 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             await dbContext.SaveChangesAsync();
         }
 
-        public async Task<DailyLocationInventory> Get(DateTime runDate, int locationId)
+        public async Task<IEnumerable<DailyLocationInventory>> Get(DateOnly runDate, int locationId)
         {
-           var dailyLocationInventory = await dbContext.DailyLocationInventories
-                .Where(d => d.RunDate == runDate && d.LocationId == locationId)
-                .FirstOrDefaultAsync();
 
-            if(dailyLocationInventory == null) {
-                return null;
-            }
-            return dailyLocationInventory;
+            var dailyLocationInventories = await dbContext.DailyLocationInventories
+                .AsNoTracking()
+                .Where(d => d.LocationId == locationId && d.RunDate == runDate)
+                .ToListAsync();
+
+            return dailyLocationInventories;
         }
     }
 }

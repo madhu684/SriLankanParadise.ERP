@@ -2,7 +2,7 @@
 {
     public class DailyLocationInventoryRequestModel
     {
-        public DateTime RunDate { get; set; }
+        public DateOnly RunDate { get; set; }
 
         public DateTime CreatedDate { get; set; }
 

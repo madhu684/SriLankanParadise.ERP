@@ -2533,6 +2533,17 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Daily location inventories retrieved successfully.
+        /// </summary>
+        public static string DailyLocationInventoriesRetrieved
+        {
+            get
+            {
+                return ResourceManager.GetString("DailyLocationInventoriesRetrieved", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Daily location inventory not found.
         /// </summary>
         public static string DailyLocationInventoryNotFound
@@ -2540,6 +2551,17 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
             get
             {
                 return ResourceManager.GetString("DailyLocationInventoryNotFound", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Daily location inventories not found.
+        /// </summary>
+        public static string DailyLocationInventoriesNotFound
+        {
+            get
+            {
+                return ResourceManager.GetString("DailyLocationInventoriesNotFound", resourceCulture);
             }
         }
 
