@@ -15,7 +15,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
 
         public async Task Add(DailyLocationInventory dailyLocationInventory)
         {
-            dailyLocationInventory.RunDate = DateTime.Now;
             await dbContext.AddAsync(dailyLocationInventory);
             await dbContext.SaveChangesAsync();
         }

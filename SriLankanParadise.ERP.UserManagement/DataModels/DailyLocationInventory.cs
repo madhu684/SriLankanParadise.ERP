@@ -4,6 +4,8 @@ namespace SriLankanParadise.ERP.UserManagement.DataModels
 {
     public class DailyLocationInventory
     {
+        public int Id { get; set; }
+
         public DateTime RunDate { get; set; }
 
         public DateTime CreatedDate { get; set; }
