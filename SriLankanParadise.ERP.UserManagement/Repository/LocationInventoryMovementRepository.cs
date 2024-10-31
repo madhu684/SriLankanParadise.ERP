@@ -154,5 +154,28 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task<LocationInventoryMovement> Get(int movementTypeId, int itemMasterId, string batchNo)
+        {
+            try
+            {
+                var locationInventoryMovement = await _dbContext.LocationInventoryMovements
+                    .Where(l => l.MovementTypeId == movementTypeId)
+                    .Where(l => l.ItemMasterId == itemMasterId)
+                    .Where(l => l.BatchNo == batchNo)
+                    .FirstOrDefaultAsync();
+
+                if(locationInventoryMovement != null)
+                {
+                    return locationInventoryMovement;
+                }
+
+                return null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
