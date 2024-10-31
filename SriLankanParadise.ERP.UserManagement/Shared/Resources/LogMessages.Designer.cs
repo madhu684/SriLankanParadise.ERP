@@ -971,7 +971,19 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
                 return ResourceManager.GetString("LocationInventoryMovementNotFound", resourceCulture);
             }
         }
-        
+
+
+        /// <summary>
+        ///   Looks up a localized string similar to Location inventory movement retrieved.
+        /// </summary>
+        public static string LocationInventoryMovementRetrieved
+        {
+            get
+            {
+                return ResourceManager.GetString("LocationInventoryMovementRetrieved", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Location inventory movements retrieved.
         /// </summary>
