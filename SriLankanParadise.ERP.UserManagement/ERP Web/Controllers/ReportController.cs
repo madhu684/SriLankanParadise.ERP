@@ -19,22 +19,25 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         private readonly ILocationInventoryMovementService locationInventoryMovementService;
         private readonly ILocationInventoryService locationInventoryService;
         private readonly IItemMasterService itemMasterService;
+        private readonly ILocationService locationService;
         private readonly IMapper mapper;
-        private readonly ILogger<Report> logger;
+        private readonly ILogger<ReportController> logger;
 
         public ReportController(
             IDailyLocationInventoryService dailyLocationInventoryService,
             ILocationInventoryMovementService locationInventoryMovementService,
             ILocationInventoryService locationInventoryService,
             IItemMasterService itemMasterService,
+            ILocationService locationService,
             IMapper mapper,
-            ILogger<Report> logger
+            ILogger<ReportController> logger
         )
         {
             this.dailyLocationInventoryService = dailyLocationInventoryService;
             this.locationInventoryMovementService = locationInventoryMovementService;
             this.locationInventoryService = locationInventoryService;
             this.itemMasterService = itemMasterService;
+            this.locationService = locationService;
             this.mapper = mapper;
             this.logger = logger;
         }
@@ -88,12 +91,13 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                         else
                         {
                             var itemMaster = await itemMasterService.GetItemMasterByItemMasterId(in_Item.ItemMasterId);
+                            var location = await locationService.GetLocationByLocationId(in_Item.LocationId);
 
                             inventoryItems.Add(new InventoryItemInfo
                             {
                                 itemId = in_Item.ItemMasterId,
                                 batchNumber = in_Item.BatchNo,
-                                location = in_Item.Location.LocationName,
+                                location = location.LocationName,
                                 ItemMaster = itemMaster,
                                 openingBalance = 0,
                                 receivedQty = in_Item.Qty ?? 0,
@@ -125,13 +129,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                 if (inventoryItems!=null && inventoryItems.Any())
                 {
-                    var reportData = new List<Report>();
+                    var reportData = new List<ReportDto>();
 
                     foreach (var item in inventoryItems) {
-                        var report = new Report
+                        var report = new ReportDto
                         {
                             Inventory = item.location,
                             RawMaterial = item.ItemMaster.ItemName,
+                            BatchNo = item.batchNumber,
                             UOM = item.ItemMaster.Unit.UnitName,
                             OpeningBalance = (double)item.openingBalance,
                             ReceivedQty = (double)item.receivedQty,
@@ -141,8 +146,11 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                         reportData.Add(report);
                     }
 
-                    var reportDataDto = mapper.Map<IEnumerable<Report>>(reportData);
-                    AddResponseMessage(Response, LogMessages.ReportRetrieved, reportDataDto, true, HttpStatusCode.OK);
+                    AddResponseMessage(Response, LogMessages.ReportRetrieved, reportData, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    AddResponseMessage(Response, LogMessages.ReportNoResultFound, new List<ReportDto>(), true, HttpStatusCode.OK);
                 }
             }
             catch (Exception ex)

@@ -149,7 +149,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-
         public async Task<LocationInventoryMovement> GetLocationInventoryMovementByLocationInventoryMovementId(int locationInventoryMovementId)
         {
             try

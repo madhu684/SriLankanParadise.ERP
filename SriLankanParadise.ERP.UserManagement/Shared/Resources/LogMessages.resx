@@ -864,4 +864,88 @@
   <data name="UserUpdated" xml:space="preserve">
     <value>User updated successfully</value>
   </data>
+  <data name="SubItemMastersRetrieved" xml:space="preserve">
+    <value>Sub Item masters retrieved</value>
+  </data>
+  <data name="SubItemMasterCreated" xml:space="preserve">
+    <value>Sub Item master created</value>
+  </data>
+  <data name="SubItemMasterDeleted" xml:space="preserve">
+    <value>SubItem master deleted</value>
+  </data>
+  <data name="SubItemMasterNotFound" xml:space="preserve">
+    <value>SubItem master not found</value>
+  </data>
+  <data name="SubItemMastersNotFound" xml:space="preserve">
+    <value>Sub Item masters not found</value>
+  </data>
+  <data name="SubItemMasterRetrieved" xml:space="preserve">
+    <value>Sub Item master retrieved</value>
+  </data>
+  <data name="SubItemMasterUpdated" xml:space="preserve">
+    <value>Sub Item master updated</value>
+  </data>
+  <data name="UserRetrieved" xml:space="preserve">
+    <value>User retrieved</value>
+  </data>
+  <data name="UserRolesNotFound" xml:space="preserve">
+    <value>User roles not found</value>
+  </data>
+  <data name="UserRolesRetrieved" xml:space="preserve">
+    <value>User roles retrieved</value>
+  </data>
+  <data name="RolePermissionsRetrieved" xml:space="preserve">
+    <value>Role permissions retrieved</value>
+  </data>
+  <data name="RolePermissionsNotFound" xml:space="preserve">
+    <value>Role permissions not found</value>
+  </data>
+  <data name="UserRoleUpdated" xml:space="preserve">
+    <value>User role updated</value>
+  </data>
+  <data name="RolePermissionsUpdated" xml:space="preserve">
+    <value>Role permissions updated</value>
+  </data>
+  <data name="IssueDetailsRetrieved" xml:space="preserve">
+    <value>Issue details retrieved</value>
+  </data>
+  <data name="UserDeleted" xml:space="preserve">
+    <value>User deleted</value>
+  </data>
+  <data name="RoleDeleted" xml:space="preserve">
+    <value>Role deleted</value>
+  </data>
+  <data name="PermissionDeleted" xml:space="preserve">
+    <value>Permission deleted</value>
+  </data>
+  <data name="RequisitionMasterRetrieved" xml:space="preserve">
+    <value>Requisition master retrieved</value>
+  </data>
+  <data name="LocationInventoryMovementRetrieved" xml:space="preserve">
+    <value>Location inventory movement retrieved</value>
+  </data>
+  <data name="UserPermissionsUpdated" xml:space="preserve">
+    <value>User permissions updated</value>
+  </data>
+  <data name="UserRoleCreated" xml:space="preserve">
+    <value>User role created</value>
+  </data>
+  <data name="ReportNotFound" xml:space="preserve">
+    <value>Report not found</value>
+  </data>
+  <data name="ReportRetrieved" xml:space="preserve">
+    <value>Report retrieved</value>
+  </data>
+  <data name="DailyLocationInventoryCreated" xml:space="preserve">
+    <value>Daily location inventory created</value>
+  </data>
+  <data name="DailyLocationInventoriesRetrieved" xml:space="preserve">
+    <value>Daily location inventories retrieved</value>
+  </data>
+  <data name="DailyLocationInventoryNotFound" xml:space="preserve">
+    <value>Daily location inventory not found</value>
+  </data>
+  <data name="ReportNoResultFound" xml:space="preserve">
+    <value>Report no result found</value>
+  </data>
 </root>

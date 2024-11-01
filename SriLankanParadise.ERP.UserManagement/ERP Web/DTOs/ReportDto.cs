@@ -1,6 +1,6 @@
-﻿namespace SriLankanParadise.ERP.UserManagement.DataModels
+﻿namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 {
-    public class Report
+    public class ReportDto
     {
         public string Inventory { get; set; }
         public string RawMaterial { get; set; }

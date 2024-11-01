@@ -27,6 +27,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 .Where(d => d.LocationId == locationId && d.RunDate == runDate)
                 .Include(d => d.Location)
                 .Include(d => d.ItemMaster)
+                    .ThenInclude(im => im.Unit)
                 .ToListAsync();
 
             return dailyLocationInventories;
