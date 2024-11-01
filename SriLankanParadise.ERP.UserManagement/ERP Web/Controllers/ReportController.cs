@@ -58,12 +58,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 {
                     foreach (var item in alreadyStockedItemsLocInv)
                     {
+
                         inventoryItems.Add(new InventoryItemInfo
                         {
                             itemId = item.ItemMasterId,
                             batchNumber = item.BatchNo,
+                            location = item.Location?.LocationName,
                             ItemMaster = item.ItemMaster,
-                            startingBalance = item.StockInHand ?? 0,
+                            openingBalance = item.StockInHand ?? 0,
                             receivedQty = 0,
                             actualUsage = 0,
                             closingBalance = 0
@@ -91,8 +93,9 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                             {
                                 itemId = in_Item.ItemMasterId,
                                 batchNumber = in_Item.BatchNo,
+                                location = in_Item.Location.LocationName,
                                 ItemMaster = itemMaster,
-                                startingBalance = 0,
+                                openingBalance = 0,
                                 receivedQty = in_Item.Qty ?? 0,
                                 actualUsage = 0,
                                 closingBalance = 0
@@ -117,16 +120,29 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 // calculate closing balance
                 foreach (var item in inventoryItems)
                 {
-                    item.closingBalance = item.startingBalance + item.receivedQty - item.actualUsage;
+                    item.closingBalance = item.openingBalance + item.receivedQty - item.actualUsage;
                 }
 
                 if (inventoryItems!=null && inventoryItems.Any())
                 {
-                   
+                    var reportData = new List<Report>();
 
-                    
-                    //var dailyLocationInventoryDto = mapper.Map<DailyLocationInventoryDto>(dailyLocationInventory);
-                    //AddResponseMessage(Response, LogMessages.ReportRetrieved, dailyLocationInventoryDto, true, HttpStatusCode.OK);
+                    foreach (var item in inventoryItems) {
+                        var report = new Report
+                        {
+                            Inventory = item.location,
+                            RawMaterial = item.ItemMaster.ItemName,
+                            UOM = item.ItemMaster.Unit.UnitName,
+                            OpeningBalance = (double)item.openingBalance,
+                            ReceivedQty = (double)item.receivedQty,
+                            ActualUsage = (double)item.actualUsage,
+                            ClosingBalance = (double)item.closingBalance
+                        };
+                        reportData.Add(report);
+                    }
+
+                    var reportDataDto = mapper.Map<IEnumerable<Report>>(reportData);
+                    AddResponseMessage(Response, LogMessages.ReportRetrieved, reportDataDto, true, HttpStatusCode.OK);
                 }
             }
             catch (Exception ex)
@@ -140,9 +156,10 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         private class InventoryItemInfo
         {
             public int itemId { get; set; }
-            public string batchNumber { get; set; }
+            public string? batchNumber { get; set; }
+            public string? location { get; set; }
             public ItemMaster ItemMaster { get; set; }
-            public decimal startingBalance { get; set; }
+            public decimal openingBalance { get; set; }
             public decimal receivedQty { get; set; }
             public decimal actualUsage { get; set; }
             public decimal closingBalance { get; set; }

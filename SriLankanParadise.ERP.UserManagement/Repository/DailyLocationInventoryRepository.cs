@@ -25,6 +25,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             var dailyLocationInventories = await dbContext.DailyLocationInventories
                 .AsNoTracking()
                 .Where(d => d.LocationId == locationId && d.RunDate == runDate)
+                .Include(d => d.Location)
+                .Include(d => d.ItemMaster)
                 .ToListAsync();
 
             return dailyLocationInventories;
