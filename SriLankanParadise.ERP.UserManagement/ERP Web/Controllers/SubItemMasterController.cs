@@ -16,9 +16,9 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         private readonly ISubItemMasterService subItemMasterService;
         private readonly IItemMasterService itemMasterService;
         private readonly IMapper mapper;
-        private readonly ILogger<ItemMasterController> logger;
+        private readonly ILogger<SubItemMasterController> logger;
 
-        public SubItemMasterController(ISubItemMasterService subItemMasterService, IItemMasterService itemMasterService, IMapper mapper, ILogger<ItemMasterController> logger)
+        public SubItemMasterController(ISubItemMasterService subItemMasterService, IItemMasterService itemMasterService, IMapper mapper, ILogger<SubItemMasterController> logger)
         {
             this.subItemMasterService = subItemMasterService;
             this.itemMasterService = itemMasterService;
