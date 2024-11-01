@@ -317,14 +317,20 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
         }
 
-        [HttpGet("GetByBatchNumber/{movementTypeId}/{itemMasterId}/{BatchNo}")]
+        [HttpGet("GetByBatchNumber/{movementTypeId}/{itemMasterId}/{batchNo}")]
         public async Task<ApiResponseModel> Get(int movementTypeId, int itemMasterId, string batchNo)
         {
             try
             {
                 var locationInventoryMovement = await _locationInventoryMovementService.Get(movementTypeId, itemMasterId, batchNo);
-                var locationInventoryMovementDto = _mapper.Map<LocationInventoryMovementDto>(locationInventoryMovement);
-                AddResponseMessage(Response, LogMessages.LocationInventoryMovementRetrieved, locationInventoryMovementDto, true, HttpStatusCode.OK);
+
+                if (locationInventoryMovement != null)
+                {
+                    var locationInventoryMovementDto = _mapper.Map<LocationInventoryMovementDto>(locationInventoryMovement);
+                    return AddResponseMessage(Response, LogMessages.LocationInventoryMovementRetrieved, locationInventoryMovementDto, true, HttpStatusCode.OK);
+                }
+                _logger.LogInformation(LogMessages.LocationInventoryMovementNotFound);
+                return AddResponseMessage(Response, LogMessages.LocationInventoryMovementNotFound, null, true, HttpStatusCode.NotFound);
             }
             catch (Exception ex)
             {
