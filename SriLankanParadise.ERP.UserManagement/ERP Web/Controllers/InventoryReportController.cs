@@ -13,7 +13,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ReportController : BaseApiController
+    public class InventoryReportController : BaseApiController
     {
         private readonly IDailyLocationInventoryService dailyLocationInventoryService;
         private readonly ILocationInventoryMovementService locationInventoryMovementService;
@@ -21,16 +21,16 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         private readonly IItemMasterService itemMasterService;
         private readonly ILocationService locationService;
         private readonly IMapper mapper;
-        private readonly ILogger<ReportController> logger;
+        private readonly ILogger<InventoryReportController> logger;
 
-        public ReportController(
+        public InventoryReportController(
             IDailyLocationInventoryService dailyLocationInventoryService,
             ILocationInventoryMovementService locationInventoryMovementService,
             ILocationInventoryService locationInventoryService,
             IItemMasterService itemMasterService,
             ILocationService locationService,
             IMapper mapper,
-            ILogger<ReportController> logger
+            ILogger<InventoryReportController> logger
         )
         {
             this.dailyLocationInventoryService = dailyLocationInventoryService;
@@ -129,13 +129,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                 if (inventoryItems!=null && inventoryItems.Any())
                 {
-                    var reportData = new List<ReportDto>();
+                    var reportData = new List<InventoryReportDto>();
 
                     foreach (var item in inventoryItems) {
-                        var report = new ReportDto
+                        var report = new InventoryReportDto
                         {
                             Inventory = item.location,
                             RawMaterial = item.ItemMaster.ItemName,
+                            MaterialId = item.ItemMaster.ItemMasterId,
                             BatchNo = item.batchNumber,
                             UOM = item.ItemMaster.Unit.UnitName,
                             OpeningBalance = (double)item.openingBalance,
@@ -150,7 +151,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 }
                 else
                 {
-                    AddResponseMessage(Response, LogMessages.ReportNoResultFound, new List<ReportDto>(), true, HttpStatusCode.OK);
+                    AddResponseMessage(Response, LogMessages.ReportNoResultFound, new List<InventoryReportDto>(), true, HttpStatusCode.OK);
                 }
             }
             catch (Exception ex)
