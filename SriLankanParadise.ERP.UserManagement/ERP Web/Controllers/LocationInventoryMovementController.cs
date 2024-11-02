@@ -211,6 +211,74 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpGet("ByDateRangeAndMovementType")]
+        public async Task<ApiResponseModel> ByDateRange(DateTime fromDate, DateTime toDate, int movementTypeId)
+        {
+            try
+            {
+                var locationInventoryAnalysisReportList = new List<InventoryAnalysisReportDto>();
+                // Call the service method to get location inventory movements by date range
+                var locationInventoryMovements = await _locationInventoryMovementService.ByDateRange(fromDate, toDate, movementTypeId);
+
+                foreach (var item in locationInventoryMovements)
+                {
+                    var itemMaster = await _itemMasterService.GetItemMasterByItemMasterId(item.ItemMasterId);
+                    var location = await _locationService.GetLocationByLocationId(item.LocationId);
+
+                    // Calculate ReceivedQty and ActualUsage
+                    var receivedQty = locationInventoryMovements
+                                        .Where(l => l.ItemMasterId == item.ItemMasterId &&
+                                                    l.BatchNo == item.BatchNo &&
+                                                    l.LocationId == item.LocationId &&
+                                                    l.TransactionTypeId == 4)
+                                        .Sum(l => l.Qty);
+
+                    var actualUsage = locationInventoryMovements
+                                        .Where(l => l.ItemMasterId == item.ItemMasterId &&
+                                                    l.BatchNo == item.BatchNo &&
+                                                    l.LocationId == item.LocationId &&
+                                                    l.TransactionTypeId == 8)
+                                        .Sum(l => l.Qty);
+
+
+                    var locationInventory = await _locationInventoryService.GetLocationInventoriesByLocationId(item.LocationId);
+
+                    var closingBalance = locationInventory?.Where(l => l.BatchNo == item.BatchNo &&
+                        l.LocationId == item.LocationId &&
+                        l.ItemMasterId == item.ItemMasterId).FirstOrDefault()?.StockInHand ?? 0;
+
+                    // Create the InventoryAnalysisReportDto
+                    var locationInventoryAnalysisReport = new InventoryAnalysisReportDto()
+                    {
+                        Inventory = location.LocationName,
+                        RawMaterial = itemMaster.ItemName,
+                        UOM = itemMaster.Unit.UnitName,
+                        BatchNo = item.BatchNo,
+                        OpeningBalance = (double)(closingBalance + actualUsage - receivedQty),
+                        ReceivedQty = (double)receivedQty, // Set ReceivedQty
+                        ActualUsage = (double)actualUsage, // Set ActualUsage
+                        ClosingBalance = (double)closingBalance,
+
+                    };
+                    locationInventoryAnalysisReportList.Add(locationInventoryAnalysisReport);
+                }
+
+                // Map the result to DTOs
+                //var locationInventoryMovementDtos = _mapper.Map<IEnumerable<LocationInventoryMovementDto>>(locationInventoryMovements);
+
+                // Add a successful response message
+                AddResponseMessage(Response, LogMessages.LocationInventoriesRetrieved, locationInventoryAnalysisReportList, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                // Log the error and add an error response message
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+
+            return Response;
+        }
+
         [HttpPut("{locationInventoryMovementId}")]
         public async Task<ApiResponseModel> UpdateLocationInventoryMovement(int locationInventoryMovementId, LocationInventoryMovementRequestModel locationInventoryMovementRequest)
         {
@@ -249,14 +317,20 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
         }
 
-        [HttpGet("GetByBatchNumber/{movementTypeId}/{itemMasterId}/{BatchNo}")]
+        [HttpGet("GetByBatchNumber/{movementTypeId}/{itemMasterId}/{batchNo}")]
         public async Task<ApiResponseModel> Get(int movementTypeId, int itemMasterId, string batchNo)
         {
             try
             {
                 var locationInventoryMovement = await _locationInventoryMovementService.Get(movementTypeId, itemMasterId, batchNo);
-                var locationInventoryMovementDto = _mapper.Map<LocationInventoryMovementDto>(locationInventoryMovement);
-                AddResponseMessage(Response, LogMessages.LocationInventoryMovementRetrieved, locationInventoryMovementDto, true, HttpStatusCode.OK);
+
+                if (locationInventoryMovement != null)
+                {
+                    var locationInventoryMovementDto = _mapper.Map<LocationInventoryMovementDto>(locationInventoryMovement);
+                    return AddResponseMessage(Response, LogMessages.LocationInventoryMovementRetrieved, locationInventoryMovementDto, true, HttpStatusCode.OK);
+                }
+                _logger.LogInformation(LogMessages.LocationInventoryMovementNotFound);
+                return AddResponseMessage(Response, LogMessages.LocationInventoryMovementNotFound, null, true, HttpStatusCode.NotFound);
             }
             catch (Exception ex)
             {

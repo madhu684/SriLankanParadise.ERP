@@ -6,12 +6,12 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
     public interface ILocationInventoryMovementRepository
     {
         Task AddLocationInventoryMovement(LocationInventoryMovement locationInventoryMovement);
-
         Task<IEnumerable<LocationInventoryMovement>> GetAll();
         Task<IEnumerable<LocationInventoryMovement>> Get(int IssueMasterId);
         Task<IEnumerable<LocationInventoryMovement>> Get(int itemMasterId, int referenceNo, int movementTypeId);
         Task<IEnumerable<LocationInventoryMovement>> ByWorkOrder(int workOrderId);
         Task<IEnumerable<LocationInventoryMovement>> ByDateRange(DateTime fromDate, DateTime toDate);
+        Task<IEnumerable<LocationInventoryMovement>> ByDateRange(DateTime fromDate, DateTime toDate, int movementTypeId);
         Task<LocationInventoryMovement> GetLocationInventoryMovementByLocationInventoryMovementId(int locationInventoryMovementId);
         Task UpdateLocationInventoryMovement(int locationInventoryMovementId, LocationInventoryMovement locationInventoryMovement);
         Task<LocationInventoryMovement> Get(int movementTypeId, int itemMasterId, string batchNo);
