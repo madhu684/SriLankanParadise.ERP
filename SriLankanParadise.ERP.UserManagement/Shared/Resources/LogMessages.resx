@@ -930,4 +930,22 @@
   <data name="UserRoleCreated" xml:space="preserve">
     <value>User role created</value>
   </data>
+  <data name="ReportNotFound" xml:space="preserve">
+    <value>Report not found</value>
+  </data>
+  <data name="ReportRetrieved" xml:space="preserve">
+    <value>Report retrieved</value>
+  </data>
+  <data name="DailyLocationInventoryCreated" xml:space="preserve">
+    <value>Daily location inventory created</value>
+  </data>
+  <data name="DailyLocationInventoriesRetrieved" xml:space="preserve">
+    <value>Daily location inventories retrieved</value>
+  </data>
+  <data name="DailyLocationInventoryNotFound" xml:space="preserve">
+    <value>Daily location inventory not found</value>
+  </data>
+  <data name="ReportNoResultFound" xml:space="preserve">
+    <value>Report no result found</value>
+  </data>
 </root>

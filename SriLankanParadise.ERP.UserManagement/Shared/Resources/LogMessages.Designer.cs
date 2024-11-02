@@ -493,6 +493,33 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Daily location inventories retrieved.
+        /// </summary>
+        public static string DailyLocationInventoriesRetrieved {
+            get {
+                return ResourceManager.GetString("DailyLocationInventoriesRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Daily location inventory created.
+        /// </summary>
+        public static string DailyLocationInventoryCreated {
+            get {
+                return ResourceManager.GetString("DailyLocationInventoryCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Daily location inventory not found.
+        /// </summary>
+        public static string DailyLocationInventoryNotFound {
+            get {
+                return ResourceManager.GetString("DailyLocationInventoryNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Daily stock balance created successfully.
         /// </summary>
         public static string DailyStockBalanceCreated {
@@ -1434,6 +1461,33 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string PurchaseRequisitionUpdated {
             get {
                 return ResourceManager.GetString("PurchaseRequisitionUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Report no result found.
+        /// </summary>
+        public static string ReportNoResultFound {
+            get {
+                return ResourceManager.GetString("ReportNoResultFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Report not found.
+        /// </summary>
+        public static string ReportNotFound {
+            get {
+                return ResourceManager.GetString("ReportNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Report retrieved.
+        /// </summary>
+        public static string ReportRetrieved {
+            get {
+                return ResourceManager.GetString("ReportRetrieved", resourceCulture);
             }
         }
         
