@@ -55,8 +55,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 //};
                 //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
-                _logger.LogInformation(LogMessages.UseRoleCreated);
-                AddResponseMessage(Response, LogMessages.UseRoleCreated, null, true, HttpStatusCode.Created);
+                _logger.LogInformation(LogMessages.UserRoleCreated);
+                AddResponseMessage(Response, LogMessages.UserRoleCreated, null, true, HttpStatusCode.Created);
             }
             catch (Exception ex)
             {
