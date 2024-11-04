@@ -13,7 +13,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ReportController : BaseApiController
+    public class InventoryReportController : BaseApiController
     {
         private readonly IDailyLocationInventoryService dailyLocationInventoryService;
         private readonly ILocationInventoryMovementService locationInventoryMovementService;
@@ -21,16 +21,16 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         private readonly IItemMasterService itemMasterService;
         private readonly ILocationService locationService;
         private readonly IMapper mapper;
-        private readonly ILogger<ReportController> logger;
+        private readonly ILogger<InventoryReportController> logger;
 
-        public ReportController(
+        public InventoryReportController(
             IDailyLocationInventoryService dailyLocationInventoryService,
             ILocationInventoryMovementService locationInventoryMovementService,
             ILocationInventoryService locationInventoryService,
             IItemMasterService itemMasterService,
             ILocationService locationService,
             IMapper mapper,
-            ILogger<ReportController> logger
+            ILogger<InventoryReportController> logger
         )
         {
             this.dailyLocationInventoryService = dailyLocationInventoryService;
@@ -129,13 +129,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                 if (inventoryItems!=null && inventoryItems.Any())
                 {
-                    var reportData = new List<ReportDto>();
+                    var reportData = new List<InventoryReportDto>();
 
                     foreach (var item in inventoryItems) {
-                        var report = new ReportDto
+                        var report = new InventoryReportDto
                         {
                             Inventory = item.location,
                             RawMaterial = item.ItemMaster.ItemName,
+                            MaterialId = item.ItemMaster.ItemMasterId,
                             BatchNo = item.batchNumber,
                             UOM = item.ItemMaster.Unit.UnitName,
                             OpeningBalance = (double)item.openingBalance,
@@ -150,7 +151,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 }
                 else
                 {
-                    AddResponseMessage(Response, LogMessages.ReportNoResultFound, new List<ReportDto>(), true, HttpStatusCode.OK);
+                    AddResponseMessage(Response, LogMessages.ReportNoResultFound, new List<InventoryReportDto>(), true, HttpStatusCode.OK);
                 }
             }
             catch (Exception ex)
@@ -160,6 +161,76 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+
+        [HttpGet("InventoryAsAtDateReport/{date}/{locationId}")]
+        public async Task<ApiResponseModel> InventoryAsAtDateReport([FromRoute] DateTime date, [FromRoute] int locationId)
+        {
+            try
+            {
+                var inventoryItems = new List<InventoryItemInfo>(); //all inventory items
+
+                var previousDate = date.AddDays(-1);
+                var previousDateOnly = new DateOnly(previousDate.Year, previousDate.Month, previousDate.Day);
+
+                var alreadyStockedItemsLocInv = await dailyLocationInventoryService.Get(previousDateOnly, locationId);
+
+                // add already stocked items on selecting fromDate (Inventory Up)
+                if (alreadyStockedItemsLocInv != null && alreadyStockedItemsLocInv.Any())
+                {
+                    foreach (var item in alreadyStockedItemsLocInv)
+                    {
+
+                        inventoryItems.Add(new InventoryItemInfo
+                        {
+                            itemId = item.ItemMasterId,
+                            batchNumber = item.BatchNo,
+                            location = item.Location?.LocationName,
+                            ItemMaster = item.ItemMaster,
+                            openingBalance = item.StockInHand ?? 0,
+                            receivedQty = 0,
+                            actualUsage = 0,
+                            closingBalance = item.StockInHand ?? 0
+                        });
+                    }
+                }
+
+                if (inventoryItems != null && inventoryItems.Any())
+                {
+                    var reportData = new List<InventoryReportDto>();
+
+                    foreach (var item in inventoryItems)
+                    {
+                        var report = new InventoryReportDto
+                        {
+                            Inventory = item.location,
+                            RawMaterial = item.ItemMaster.ItemName,
+                            MaterialId = item.ItemMaster.ItemMasterId,
+                            BatchNo = item.batchNumber,
+                            UOM = item.ItemMaster.Unit.UnitName,
+                            OpeningBalance = (double)item.openingBalance,
+                            ReceivedQty = (double)item.receivedQty,
+                            ActualUsage = (double)item.actualUsage,
+                            ClosingBalance = (double)item.closingBalance
+                        };
+                        reportData.Add(report);
+                    }
+
+                    AddResponseMessage(Response, LogMessages.ReportRetrieved, reportData, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    AddResponseMessage(Response, LogMessages.ReportNoResultFound, new List<InventoryReportDto>(), true, HttpStatusCode.OK);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
 
         private class InventoryItemInfo
         {

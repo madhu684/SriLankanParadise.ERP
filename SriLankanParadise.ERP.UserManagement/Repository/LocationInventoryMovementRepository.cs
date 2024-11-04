@@ -127,8 +127,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var query = await _dbContext.LocationInventoryMovements
                             .Where(l => l.Date.HasValue && l.Date.Value.Date >= fromDate.Date && l.Date.Value.Date <= toDate.Date)
                             .Where(l => l.MovementTypeId == movementTypeId)
-                            .Where(l => l.Location.LocationTypeId == 2)
-                            .Where(l => l.TransactionTypeId == 4 || l.TransactionTypeId == 8)
                             .GroupBy(l => new { l.ItemMasterId, l.TransactionTypeId, l.BatchNo, l.LocationId })
                             .Select(g => new LocationInventoryMovement
                             {
