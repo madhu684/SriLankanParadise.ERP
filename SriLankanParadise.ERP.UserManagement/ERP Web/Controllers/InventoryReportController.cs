@@ -53,8 +53,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 var previousDateOnly = new DateOnly(previousDate.Year, previousDate.Month, previousDate.Day);
 
                 var alreadyStockedItemsLocInv = await dailyLocationInventoryService.Get(previousDateOnly, locationId);
-                var in_ItemsLocInv = await locationInventoryMovementService.ByDateRange(fromDate, toDate, 1);
-                var out_ItemsLocInv = await locationInventoryMovementService.ByDateRange(fromDate, toDate, 2);
+                var in_ItemsLocInv = await locationInventoryMovementService.ByDateRange(fromDate, toDate, locationId, 1);
+                var out_ItemsLocInv = await locationInventoryMovementService.ByDateRange(fromDate, toDate, locationId, 2);
 
                 // add already stocked items on selecting fromDate (Inventory Up)
                 if (alreadyStockedItemsLocInv != null && alreadyStockedItemsLocInv.Any())
@@ -86,6 +86,9 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                         {
                             var index = inventoryItems.FindIndex(i => i.itemId == in_Item.ItemMasterId && i.batchNumber == in_Item.BatchNo);
                             inventoryItems[index].receivedQty += in_Item.Qty ?? 0;
+                            inventoryItems[index].GRNQty += in_Item.GRNQty ?? 0;
+                            inventoryItems[index].ProductionInQty += in_Item.ProductionInQty ?? 0;
+                            inventoryItems[index].ReturnInQty += in_Item.ReturnInQty ?? 0;
                         }
                         // new items
                         else
@@ -102,7 +105,10 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                                 openingBalance = 0,
                                 receivedQty = in_Item.Qty ?? 0,
                                 actualUsage = 0,
-                                closingBalance = 0
+                                closingBalance = 0,
+                                GRNQty = in_Item.GRNQty ?? 0,
+                                ProductionInQty = in_Item.ProductionInQty ?? 0,
+                                ReturnInQty = in_Item.ReturnInQty ?? 0
                             });
                         }
                     }
@@ -117,6 +123,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                         {
                             var index = inventoryItems.FindIndex(i => i.itemId == out_Item.ItemMasterId && i.batchNumber == out_Item.BatchNo);
                             inventoryItems[index].actualUsage += out_Item.Qty ?? 0;
+                            inventoryItems[index].ProductionOutQty += out_Item.ProductionOutQty ?? 0;
+                            inventoryItems[index].ReturnQty += out_Item.ReturnQty ?? 0;
                         }
                     }
                 }
@@ -136,13 +144,18 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                         {
                             Inventory = item.location,
                             RawMaterial = item.ItemMaster.ItemName,
-                            MaterialId = item.ItemMaster.ItemMasterId,
+                            ItemCode = item.ItemMaster.ItemCode,
                             BatchNo = item.batchNumber,
                             UOM = item.ItemMaster.Unit.UnitName,
-                            OpeningBalance = (double)item.openingBalance,
-                            ReceivedQty = (double)item.receivedQty,
-                            ActualUsage = (double)item.actualUsage,
-                            ClosingBalance = (double)item.closingBalance
+                            OpeningBalance = item.openingBalance,
+                            ReceivedQty = item.receivedQty,
+                            ActualUsage = item.actualUsage,
+                            ClosingBalance = item.closingBalance,
+                            GRNQty = item.GRNQty,
+                            ProductionInQty = item.ProductionInQty ,
+                            ReturnInQty = item.ReturnInQty,
+                            ProductionOutQty =item.ProductionOutQty,
+                            ReturnQty = item.ReturnQty
                         };
                         reportData.Add(report);
                     }
@@ -205,13 +218,13 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                         {
                             Inventory = item.location,
                             RawMaterial = item.ItemMaster.ItemName,
-                            MaterialId = item.ItemMaster.ItemMasterId,
+                            ItemCode = item.ItemMaster.ItemCode,
                             BatchNo = item.batchNumber,
                             UOM = item.ItemMaster.Unit.UnitName,
-                            OpeningBalance = (double)item.openingBalance,
-                            ReceivedQty = (double)item.receivedQty,
-                            ActualUsage = (double)item.actualUsage,
-                            ClosingBalance = (double)item.closingBalance
+                            OpeningBalance = item.openingBalance,
+                            ReceivedQty = item.receivedQty,
+                            ActualUsage = item.actualUsage,
+                            ClosingBalance = item.closingBalance
                         };
                         reportData.Add(report);
                     }
@@ -242,6 +255,12 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             public decimal receivedQty { get; set; }
             public decimal actualUsage { get; set; }
             public decimal closingBalance { get; set; }
+
+            public decimal GRNQty { get; set; }
+            public decimal ProductionInQty { get; set; }
+            public decimal ReturnInQty { get; set; }
+            public decimal ProductionOutQty { get; set; }
+            public decimal ReturnQty { get; set; }
         }
     }
 }

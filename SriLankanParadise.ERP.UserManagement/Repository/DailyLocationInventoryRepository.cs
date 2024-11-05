@@ -21,14 +21,27 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
 
         public async Task<IEnumerable<DailyLocationInventory>> Get(DateOnly runDate, int locationId)
         {
+            var dailyLocationInventories = new List<DailyLocationInventory>();
 
-            var dailyLocationInventories = await dbContext.DailyLocationInventories
-                .AsNoTracking()
-                .Where(d => d.LocationId == locationId && d.RunDate == runDate)
-                .Include(d => d.Location)
-                .Include(d => d.ItemMaster)
-                    .ThenInclude(im => im.Unit)
-                .ToListAsync();
+            if (locationId != 0)
+            {
+                dailyLocationInventories = await dbContext.DailyLocationInventories
+                    .AsNoTracking()
+                   .Where(d => d.LocationId == locationId && d.RunDate == runDate)
+                    .Include(d => d.Location)
+                    .Include(d => d.ItemMaster)
+                        .ThenInclude(im => im.Unit)
+                    .ToListAsync();
+            }
+            else {
+                dailyLocationInventories = await dbContext.DailyLocationInventories
+                   .AsNoTracking()
+                   .Where(d => d.RunDate == runDate)
+                   .Include(d => d.Location)
+                   .Include(d => d.ItemMaster)
+                       .ThenInclude(im => im.Unit)
+                   .ToListAsync();
+            }
 
             return dailyLocationInventories;
         }

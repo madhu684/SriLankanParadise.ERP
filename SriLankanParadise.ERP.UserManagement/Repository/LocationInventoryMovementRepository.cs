@@ -134,7 +134,45 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                                 TransactionTypeId = g.Key.TransactionTypeId,
                                 BatchNo = g.Key.BatchNo,
                                 LocationId = g.Key.LocationId,
-                                Qty = g.Sum(x => x.Qty) // Sum the quantities
+                                Qty = g.Sum(x => x.Qty), // Sum the quantities
+                                GRNQty = g.Sum(x => x.TransactionTypeId == 4 ? x.Qty : 0),
+                                ProductionInQty = g.Sum(x => x.TransactionTypeId == 7 ? x.Qty : 0),
+                                ReturnInQty = g.Sum(x => x.TransactionTypeId == 8 ? x.Qty : 0),
+                                ProductionOutQty = g.Sum(x => x.TransactionTypeId == 9 ? x.Qty : 0),
+                                ReturnQty = g.Sum(x => x.TransactionTypeId == 10 ? x.Qty : 0),
+                            })
+                            .ToListAsync();
+
+                return query;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<LocationInventoryMovement>> ByDateRange(DateTime fromDate, DateTime toDate, int locationId, int movementTypeId)
+        {
+            try
+            {
+                var query = await _dbContext.LocationInventoryMovements
+                            .Where(l => l.Date.HasValue && l.Date.Value.Date >= fromDate.Date && l.Date.Value.Date <= toDate.Date)
+                            .Where(l => l.MovementTypeId == movementTypeId)
+                            .Where(l => l.LocationId == locationId)
+                            .GroupBy(l => new { l.ItemMasterId, l.TransactionTypeId, l.BatchNo, l.LocationId })
+                            .Select(g => new LocationInventoryMovement
+                            {
+                                ItemMasterId = g.Key.ItemMasterId,
+                                TransactionTypeId = g.Key.TransactionTypeId,
+                                BatchNo = g.Key.BatchNo,
+                                LocationId = g.Key.LocationId,
+                                Qty = g.Sum(x => x.Qty), // Sum the quantities
+                                GRNQty = g.Sum(x => x.TransactionTypeId == 4 ? x.Qty : 0),
+                                ProductionInQty = g.Sum(x => x.TransactionTypeId == 7 ? x.Qty : 0),
+                                ReturnInQty = g.Sum(x => x.TransactionTypeId == 10 ? x.Qty : 0),
+                                ProductionOutQty = g.Sum(x => x.TransactionTypeId == 8 ? x.Qty : 0),
+                                ReturnQty = g.Sum(x => x.TransactionTypeId == 9 ? x.Qty : 0),
                             })
                             .ToListAsync();
 
