@@ -71,7 +71,12 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                             openingBalance = item.StockInHand ?? 0,
                             receivedQty = 0,
                             actualUsage = 0,
-                            closingBalance = 0
+                            closingBalance = 0,
+                            GRNQty = 0,
+                            ProductionInQty = 0,
+                            ReturnInQty = 0,
+                            ProductionOutQty = 0,
+                            ReturnQty = 0
                         });
                     }
                 }
@@ -89,6 +94,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                             inventoryItems[index].GRNQty += in_Item.GRNQty ?? 0;
                             inventoryItems[index].ProductionInQty += in_Item.ProductionInQty ?? 0;
                             inventoryItems[index].ReturnInQty += in_Item.ReturnInQty ?? 0;
+                            inventoryItems[index].ProductionOutQty += in_Item.ProductionOutQty ?? 0;
+                            inventoryItems[index].ReturnQty += in_Item.ReturnQty ?? 0;
                         }
                         // new items
                         else
@@ -108,7 +115,9 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                                 closingBalance = 0,
                                 GRNQty = in_Item.GRNQty ?? 0,
                                 ProductionInQty = in_Item.ProductionInQty ?? 0,
-                                ReturnInQty = in_Item.ReturnInQty ?? 0
+                                ReturnInQty = in_Item.ReturnInQty ?? 0,
+                                ProductionOutQty = in_Item.ProductionOutQty ?? 0,
+                                ReturnQty = in_Item.ReturnQty ?? 0
                             });
                         }
                     }
@@ -122,9 +131,13 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                         if (inventoryItems.Any(i => i.itemId == out_Item.ItemMasterId && i.batchNumber == out_Item.BatchNo))
                         {
                             var index = inventoryItems.FindIndex(i => i.itemId == out_Item.ItemMasterId && i.batchNumber == out_Item.BatchNo);
+                            
                             inventoryItems[index].actualUsage += out_Item.Qty ?? 0;
                             inventoryItems[index].ProductionOutQty += out_Item.ProductionOutQty ?? 0;
                             inventoryItems[index].ReturnQty += out_Item.ReturnQty ?? 0;
+                            inventoryItems[index].GRNQty += out_Item.GRNQty ?? 0;
+                            inventoryItems[index].ProductionInQty += out_Item.ProductionInQty ?? 0;
+                            inventoryItems[index].ReturnInQty += out_Item.ReturnInQty ?? 0;
                         }
                     }
                 }

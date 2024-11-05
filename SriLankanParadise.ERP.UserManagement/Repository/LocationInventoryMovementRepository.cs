@@ -137,9 +137,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                                 Qty = g.Sum(x => x.Qty), // Sum the quantities
                                 GRNQty = g.Sum(x => x.TransactionTypeId == 4 ? x.Qty : 0),
                                 ProductionInQty = g.Sum(x => x.TransactionTypeId == 7 ? x.Qty : 0),
-                                ReturnInQty = g.Sum(x => x.TransactionTypeId == 8 ? x.Qty : 0),
-                                ProductionOutQty = g.Sum(x => x.TransactionTypeId == 9 ? x.Qty : 0),
-                                ReturnQty = g.Sum(x => x.TransactionTypeId == 10 ? x.Qty : 0),
+                                ReturnInQty = g.Sum(x => x.TransactionTypeId == 10 ? x.Qty : 0),
+                                ProductionOutQty = g.Sum(x => x.TransactionTypeId == 8 ? x.Qty : 0),
+                                ReturnQty = g.Sum(x => x.TransactionTypeId == 9 ? x.Qty : 0),
                             })
                             .ToListAsync();
 
