@@ -19,5 +19,10 @@
         public DateTime? Date { get; set; }
 
         public decimal? Qty { get; set; }
+        public decimal? GRNQty { get; set; }
+        public decimal? ProductionInQty { get; set; }
+        public decimal? ReturnInQty { get; set; }
+        public decimal? ProductionOutQty { get; set; }
+        public decimal? ReturnQty { get; set; }
     }
 }
