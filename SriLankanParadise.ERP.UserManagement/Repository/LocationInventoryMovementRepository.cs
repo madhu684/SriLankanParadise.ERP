@@ -120,7 +120,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
         
-        public async Task<IEnumerable<LocationInventoryMovement>> ByDateRange(DateTime fromDate, DateTime toDate, int movementTypeId)
+        public async Task<IEnumerable<LocationInventoryMovementExtended>> ByDateRange(DateTime fromDate, DateTime toDate, int movementTypeId)
         {
             try
             {
@@ -128,7 +128,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                             .Where(l => l.Date.HasValue && l.Date.Value.Date >= fromDate.Date && l.Date.Value.Date <= toDate.Date)
                             .Where(l => l.MovementTypeId == movementTypeId)
                             .GroupBy(l => new { l.ItemMasterId, l.TransactionTypeId, l.BatchNo, l.LocationId })
-                            .Select(g => new LocationInventoryMovement
+                            .Select(g => new LocationInventoryMovementExtended
                             {
                                 ItemMasterId = g.Key.ItemMasterId,
                                 TransactionTypeId = g.Key.TransactionTypeId,
@@ -152,7 +152,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<LocationInventoryMovement>> ByDateRange(DateTime fromDate, DateTime toDate, int locationId, int movementTypeId)
+        public async Task<IEnumerable<LocationInventoryMovementExtended>> ByDateRange(DateTime fromDate, DateTime toDate, int locationId, int movementTypeId)
         {
             try
             {
@@ -161,7 +161,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                             .Where(l => l.MovementTypeId == movementTypeId)
                             .Where(l => l.LocationId == locationId)
                             .GroupBy(l => new { l.ItemMasterId, l.TransactionTypeId, l.BatchNo, l.LocationId })
-                            .Select(g => new LocationInventoryMovement
+                            .Select(g => new LocationInventoryMovementExtended
                             {
                                 ItemMasterId = g.Key.ItemMasterId,
                                 TransactionTypeId = g.Key.TransactionTypeId,
