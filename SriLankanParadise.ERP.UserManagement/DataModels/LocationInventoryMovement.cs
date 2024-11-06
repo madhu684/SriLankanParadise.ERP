@@ -23,6 +23,12 @@ public partial class LocationInventoryMovement
 
     public decimal? Qty { get; set; }
 
+    public decimal? GRNQty { get; set; }
+    public decimal? ProductionInQty { get; set; }
+    public decimal? ReturnInQty { get; set; }
+    public decimal? ProductionOutQty { get; set; }
+    public decimal? ReturnQty { get; set; }
+
     public virtual ItemBatch ItemBatch { get; set; } = null!;
 
     public virtual Location Location { get; set; } = null!;
