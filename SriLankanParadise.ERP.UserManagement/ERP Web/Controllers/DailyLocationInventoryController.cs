@@ -63,6 +63,31 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 }
                 else
                 {
+                    logger.LogWarning(LogMessages.DailyLocationInventoriesNotFound);
+                    AddResponseMessage(Response, LogMessages.DailyLocationInventoriesNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("{runDate}/{itemMasterId}/{batchNo}/{locationId}")]
+        public async Task<ApiResponseModel> Get([FromRoute] DateOnly runDate, [FromRoute] int itemMasterId, [FromRoute] string batchNo, [FromRoute] int locationId)
+        {
+            try
+            {
+                var dailyLocationInventory = await dailyLocationInventoryService.Get(runDate, itemMasterId, batchNo, locationId);
+                if (dailyLocationInventory != null)
+                {
+                    var dailyLocationInventoryDto = mapper.Map<DailyLocationInventoryDto>(dailyLocationInventory);
+                    AddResponseMessage(Response, LogMessages.DailyLocationInventoryRetrieved, dailyLocationInventoryDto, true, HttpStatusCode.OK);
+                }
+                else
+                {
                     logger.LogWarning(LogMessages.DailyLocationInventoryNotFound);
                     AddResponseMessage(Response, LogMessages.DailyLocationInventoryNotFound, null, true, HttpStatusCode.NotFound);
                 }

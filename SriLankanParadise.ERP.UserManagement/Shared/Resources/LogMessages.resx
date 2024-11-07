@@ -948,4 +948,13 @@
   <data name="ReportNoResultFound" xml:space="preserve">
     <value>Report no result found</value>
   </data>
+  <data name="DailyLocationInventoriesNotFound" xml:space="preserve">
+    <value>Daily Location Inventories not found</value>
+  </data>
+  <data name="DailyLocationInventoryRetrieved" xml:space="preserve">
+    <value>Daily Location Inventory retrieved</value>
+  </data>
+  <data name="LocationInventoryMovementsNotFound" xml:space="preserve">
+    <value>Location Inventory Movements not found</value>
+  </data>
 </root>

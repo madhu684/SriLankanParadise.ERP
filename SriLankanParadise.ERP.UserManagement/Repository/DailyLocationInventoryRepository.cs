@@ -45,5 +45,23 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
 
             return dailyLocationInventories;
         }
+
+        public async Task<DailyLocationInventory> Get(DateOnly runDate, int itemMasterId, string batchNo, int locationId)
+        {
+             var dailyLocationInventory = await dbContext.DailyLocationInventories
+                .AsNoTracking()
+                .Where(d => d.RunDate == runDate)
+                .Where(d => d.LocationId == locationId && d.ItemMasterId == itemMasterId && d.BatchNo == batchNo)
+                .Include(d => d.Location)
+                .Include(d => d.ItemMaster)
+                    .ThenInclude(im => im.Unit)
+                .FirstOrDefaultAsync();
+
+            if(dailyLocationInventory != null)
+            {
+                return dailyLocationInventory;
+            }
+            return null;
+        }
     }
 }
