@@ -196,10 +196,9 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             {
                 var inventoryItems = new List<InventoryItemInfo>(); //all inventory items
 
-                var previousDate = date.AddDays(-1);
-                var previousDateOnly = new DateOnly(previousDate.Year, previousDate.Month, previousDate.Day);
+                var currentDateOnly = new DateOnly(date.Year, date.Month, date.Day);
 
-                var alreadyStockedItemsLocInv = await dailyLocationInventoryService.Get(previousDateOnly, locationId);
+                var alreadyStockedItemsLocInv = await dailyLocationInventoryService.Get(currentDateOnly, locationId);
 
                 // add already stocked items on selecting fromDate (Inventory Up)
                 if (alreadyStockedItemsLocInv != null && alreadyStockedItemsLocInv.Any())

@@ -196,6 +196,7 @@ builder.Services.AddScoped<IDailyLocationInventoryRepository, DailyLocationInven
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddDateOnlyTimeOnlyStringConverters();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();

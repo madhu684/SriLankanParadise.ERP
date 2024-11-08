@@ -23,12 +23,12 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public string? BatchNo { get; set; }
 
-        public virtual LocationInventory LocationInventory { get; set; } = null!;
+        public virtual LocationInventoryDto LocationInventory { get; set; } = null!;
 
-        public virtual ItemMaster ItemMaster { get; set; } = null!;
+        public virtual ItemMasterDto ItemMaster { get; set; } = null!;
 
-        public virtual Batch Batch { get; set; } = null!;
+        public virtual BatchDto Batch { get; set; } = null!;
 
-        public virtual Location Location { get; set; } = null!;
+        public virtual LocationDto Location { get; set; } = null!;
     }
 }

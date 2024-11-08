@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SriLankanParadise.ERP.UserManagement.DataModels;
 
-public partial class LocationInventoryMovement
+public partial class LocationInventoryMovementExtended
 {
     public int LocationInventoryMovementId { get; set; }
 
@@ -22,6 +22,12 @@ public partial class LocationInventoryMovement
     public DateTime? Date { get; set; }
 
     public decimal? Qty { get; set; }
+
+    public decimal? GRNQty { get; set; }
+    public decimal? ProductionInQty { get; set; }
+    public decimal? ReturnInQty { get; set; }
+    public decimal? ProductionOutQty { get; set; }
+    public decimal? ReturnQty { get; set; }
 
     public virtual ItemBatch ItemBatch { get; set; } = null!;
 

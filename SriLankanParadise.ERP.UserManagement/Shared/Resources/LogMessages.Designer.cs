@@ -493,6 +493,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Daily Location Inventories not found.
+        /// </summary>
+        public static string DailyLocationInventoriesNotFound {
+            get {
+                return ResourceManager.GetString("DailyLocationInventoriesNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Daily location inventories retrieved.
         /// </summary>
         public static string DailyLocationInventoriesRetrieved {
@@ -516,6 +525,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string DailyLocationInventoryNotFound {
             get {
                 return ResourceManager.GetString("DailyLocationInventoryNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Daily Location Inventory retrieved.
+        /// </summary>
+        public static string DailyLocationInventoryRetrieved {
+            get {
+                return ResourceManager.GetString("DailyLocationInventoryRetrieved", resourceCulture);
             }
         }
         
@@ -1002,6 +1020,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string LocationInventoryMovementRetrieved {
             get {
                 return ResourceManager.GetString("LocationInventoryMovementRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Location Inventory Movements not found.
+        /// </summary>
+        public static string LocationInventoryMovementsNotFound {
+            get {
+                return ResourceManager.GetString("LocationInventoryMovementsNotFound", resourceCulture);
             }
         }
         

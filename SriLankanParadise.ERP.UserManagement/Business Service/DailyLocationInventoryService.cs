@@ -22,5 +22,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             return await dailyLocationInventoryRepository.Get(runDate, locationId);
         }
+
+        public async Task<DailyLocationInventory> Get(DateOnly runDate, int itemMasterId, string batchNo, int locationId)
+        {
+            return await dailyLocationInventoryRepository.Get(runDate, itemMasterId, batchNo, locationId);
+        }
     }
 }
