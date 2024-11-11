@@ -82,7 +82,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             {
                 var locationInventoryMovements = await _locationInventoryMovementService.GetAll();
                 var locationInventoryMovementDtos = _mapper.Map<IEnumerable<LocationInventoryMovementDto>>(locationInventoryMovements);
-                AddResponseMessage(Response, LogMessages.LocationInventoriesRetrieved, locationInventoryMovementDtos, true, HttpStatusCode.OK);
+                AddResponseMessage(Response, LogMessages.LocationInventoryMovementsRetrieved, locationInventoryMovementDtos, true, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {
@@ -99,7 +99,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             {
                 var locationInventoryMovements = await _locationInventoryMovementService.Get(IssueMasterId);
                 var locationInventoryMovementDtos = _mapper.Map<IEnumerable<LocationInventoryMovementDto>>(locationInventoryMovements);
-                AddResponseMessage(Response, LogMessages.LocationInventoriesRetrieved, locationInventoryMovementDtos, true, HttpStatusCode.OK);
+                AddResponseMessage(Response, LogMessages.LocationInventoryMovementsRetrieved, locationInventoryMovementDtos, true, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {
@@ -116,7 +116,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             {
                 var locationInventoryMovements = await _locationInventoryMovementService.Get(itemMasterId, referenceNo, movementTypeId);
                 var locationInventoryMovementDtos = _mapper.Map<IEnumerable<LocationInventoryMovementDto>>(locationInventoryMovements);
-                AddResponseMessage(Response, LogMessages.LocationInventoriesRetrieved, locationInventoryMovementDtos, true, HttpStatusCode.OK);
+                AddResponseMessage(Response, LogMessages.LocationInventoryMovementsRetrieved, locationInventoryMovementDtos, true, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {
@@ -133,7 +133,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             {
                 var locationInventoryMovements = await _locationInventoryMovementService.ByWorkOrder(workOrderId);
                 var locationInventoryMovementDtos = _mapper.Map<IEnumerable<LocationInventoryMovementDto>>(locationInventoryMovements);
-                AddResponseMessage(Response, LogMessages.LocationInventoriesRetrieved, locationInventoryMovementDtos, true, HttpStatusCode.OK);
+                AddResponseMessage(Response, LogMessages.LocationInventoryMovementsRetrieved, locationInventoryMovementDtos, true, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {
@@ -150,7 +150,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             {
                 var locationInventoryMovements = await _locationInventoryMovementService.GetOnOrBeforeSpecificDate(date, movementTypeId, transactionTypeId);
                 var locationInventoryMovementDtos = _mapper.Map<IEnumerable<LocationInventoryMovementDto>>(locationInventoryMovements);
-                AddResponseMessage(Response, LogMessages.LocationInventoriesRetrieved, locationInventoryMovementDtos, true, HttpStatusCode.OK);
+                AddResponseMessage(Response, LogMessages.LocationInventoryMovementsRetrieved, locationInventoryMovementDtos, true, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {
@@ -178,16 +178,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                 await _locationInventoryMovementService.UpdateLocationInventoryMovement(existingLocationInventoryMovement.LocationInventoryMovementId, updatedLocationInventoryMovement);
 
-                // Create action log
-                //var actionLog = new ActionLogModel()
-                //{
-                //    ActionId = locationInventoryMovementRequest.PermissionId,
-                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                //    Timestamp = DateTime.UtcNow
-                //};
-                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
-
                 _logger.LogInformation(LogMessages.LocationInventoryMovementUpdated);
                 return AddResponseMessage(Response, LogMessages.LocationInventoryMovementUpdated, null, true, HttpStatusCode.OK);
             }
@@ -198,20 +188,20 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
         }
 
-        [HttpGet("GetByBatchNumber/{movementTypeId}/{itemMasterId}/{batchNo}")]
-        public async Task<ApiResponseModel> Get(int movementTypeId, int itemMasterId, string batchNo)
+        [HttpGet("GetUnique/{movementTypeId}/{transactionTypeId}/{itemMasterId}/{batchNo}/{locationId}/{referenceId}")]
+        public async Task<ApiResponseModel> GetUnique(int movementTypeId, int transactionTypeId, int itemMasterId, string batchNo, int locationId, int referenceId)
         {
             try
             {
-                var locationInventoryMovement = await _locationInventoryMovementService.Get(movementTypeId, itemMasterId, batchNo);
+                var locationInventoryMovements = await _locationInventoryMovementService.GetUnique(movementTypeId, transactionTypeId, itemMasterId, batchNo, locationId, referenceId);
 
-                if (locationInventoryMovement != null)
+                if (locationInventoryMovements != null)
                 {
-                    var locationInventoryMovementDto = _mapper.Map<LocationInventoryMovementDto>(locationInventoryMovement);
-                    return AddResponseMessage(Response, LogMessages.LocationInventoryMovementRetrieved, locationInventoryMovementDto, true, HttpStatusCode.OK);
+                    var locationInventoryMovementsDto = _mapper.Map<IEnumerable<LocationInventoryMovementDto>>(locationInventoryMovements);
+                    return AddResponseMessage(Response, LogMessages.LocationInventoryMovementsRetrieved, locationInventoryMovementsDto, true, HttpStatusCode.OK);
                 }
-                _logger.LogInformation(LogMessages.LocationInventoryMovementNotFound);
-                return AddResponseMessage(Response, LogMessages.LocationInventoryMovementNotFound, null, true, HttpStatusCode.NotFound);
+                _logger.LogInformation(LogMessages.LocationInventoryMovementsNotFound);
+                return AddResponseMessage(Response, LogMessages.LocationInventoryMovementsNotFound, null, true, HttpStatusCode.NotFound);
             }
             catch (Exception ex)
             {
@@ -237,6 +227,54 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 locationInventoryMovements = new List<LocationInventoryMovement>();
                 _logger.LogInformation(LogMessages.LocationInventoryMovementsNotFound);
                 return AddResponseMessage(Response, LogMessages.LocationInventoryMovementsNotFound, locationInventoryMovements, true, HttpStatusCode.NotFound);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("GetWithoutBatchNo/{movementTypeId}/{transactionTypeId}/{itemMasterId}/{locationId}/{referenceId}")]
+        public async Task<ApiResponseModel> GetWithoutBatchNo(int movementTypeId, int transactionTypeId, int itemMasterId, int locationId, int referenceId)
+        {
+            try
+            {
+                var locationInventoryMovements = await _locationInventoryMovementService.GetWithoutBatchNo(movementTypeId, transactionTypeId, itemMasterId, locationId, referenceId);
+
+                if (locationInventoryMovements != null)
+                {
+                    var locationInventoryMovementsDto = _mapper.Map<IEnumerable<LocationInventoryMovementDto>>(locationInventoryMovements);
+                    return AddResponseMessage(Response, LogMessages.LocationInventoryMovementsRetrieved, locationInventoryMovementsDto, true, HttpStatusCode.OK);
+                }
+
+                locationInventoryMovements = new List<LocationInventoryMovement>();
+                _logger.LogInformation(LogMessages.LocationInventoryMovementsNotFound);
+                return AddResponseMessage(Response, LogMessages.LocationInventoryMovementsNotFound, locationInventoryMovements, true, HttpStatusCode.NotFound);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("GetUnique/{movementTypeId}/{transactionTypeId}/{itemMasterId}/{batchNo}/{locationId}/{fromDate}/{toDate}")]
+        public async Task<ApiResponseModel> GetWithoutReferenceNo(int movementTypeId, int transactionTypeId, int itemMasterId, string batchNo, int locationId, DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                var locationInventoryMovements = await _locationInventoryMovementService.GetWithoutReferenceNo(movementTypeId, transactionTypeId, itemMasterId, batchNo, locationId, fromDate, toDate);
+
+                if (locationInventoryMovements != null)
+                {
+                    var locationInventoryMovementsDto = _mapper.Map<IEnumerable<LocationInventoryMovementDto>>(locationInventoryMovements);
+                    return AddResponseMessage(Response, LogMessages.LocationInventoryMovementsRetrieved, locationInventoryMovementsDto, true, HttpStatusCode.OK);
+                }
+                _logger.LogInformation(LogMessages.LocationInventoryMovementsNotFound);
+                return AddResponseMessage(Response, LogMessages.LocationInventoryMovementsNotFound, null, true, HttpStatusCode.NotFound);
             }
             catch (Exception ex)
             {

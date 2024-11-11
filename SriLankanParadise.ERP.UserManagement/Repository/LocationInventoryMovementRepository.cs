@@ -233,6 +233,28 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
+        public async Task<IEnumerable<LocationInventoryMovement>> GetWithoutBatchNo(int movementTypeId, int transactionTypeId, int itemMasterId, int locationId, int referenceId)
+        {
+            try
+            {
+                var locationInventoryMovement = await _dbContext.LocationInventoryMovements
+                    .Where(l => l.MovementTypeId == movementTypeId && l.TransactionTypeId == transactionTypeId
+                    && l.ItemMasterId == itemMasterId && l.LocationId == locationId && l.ReferenceNo == referenceId)
+                    .ToListAsync();
+
+                if (locationInventoryMovement != null)
+                {
+                    return locationInventoryMovement;
+                }
+
+                return null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<LocationInventoryMovement> GetLocationInventoryMovementByLocationInventoryMovementId(int locationInventoryMovementId)
         {
             try
@@ -268,15 +290,14 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<LocationInventoryMovement> Get(int movementTypeId, int itemMasterId, string batchNo)
+        public async Task<IEnumerable<LocationInventoryMovement>> GetUnique(int movementTypeId, int transactionTypeId, int itemMasterId, string batchNo, int locationId, int referenceId)
         {
             try
             {
                 var locationInventoryMovement = await _dbContext.LocationInventoryMovements
-                    .Where(l => l.MovementTypeId == movementTypeId)
-                    .Where(l => l.ItemMasterId == itemMasterId)
-                    .Where(l => l.BatchNo == batchNo)
-                    .FirstOrDefaultAsync();
+                    .Where(l => l.MovementTypeId == movementTypeId && l.TransactionTypeId == transactionTypeId
+                    && l.ItemMasterId == itemMasterId && l.BatchNo == batchNo && l.LocationId == locationId && l.ReferenceNo == referenceId)
+                    .ToListAsync();
 
                 if(locationInventoryMovement != null)
                 {
@@ -290,5 +311,29 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task<IEnumerable<LocationInventoryMovement>> GetWithoutReferenceNo(int movementTypeId, int transactionTypeId, int itemMasterId, string batchNo, int locationId, DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                var locationInventoryMovement = await _dbContext.LocationInventoryMovements
+                    .Where(l => l.Date.HasValue && l.Date.Value.Date >= fromDate.Date && l.Date.Value.Date <= toDate.Date)
+                    .Where(l => l.MovementTypeId == movementTypeId && l.TransactionTypeId == transactionTypeId
+                    && l.ItemMasterId == itemMasterId && l.BatchNo == batchNo && l.LocationId == locationId)
+                    .ToListAsync();
+
+                if (locationInventoryMovement != null)
+                {
+                    return locationInventoryMovement;
+                }
+
+                return null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }

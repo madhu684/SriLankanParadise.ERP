@@ -63,5 +63,20 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
             return null;
         }
+
+        public async Task<IEnumerable<DailyLocationInventory>> GetByItemId(DateOnly runDate, int itemMasterId)
+        {
+            var dailyLocationInventories = new List<DailyLocationInventory>();
+            
+            dailyLocationInventories = await dbContext.DailyLocationInventories
+                .AsNoTracking()
+                .Where(d => d.RunDate == runDate && d.ItemMasterId == itemMasterId)
+                .Include(d => d.Location)
+                .Include(d => d.ItemMaster)
+                    .ThenInclude(im => im.Unit)
+                .ToListAsync();
+
+            return dailyLocationInventories;
+        }
     }
 }
