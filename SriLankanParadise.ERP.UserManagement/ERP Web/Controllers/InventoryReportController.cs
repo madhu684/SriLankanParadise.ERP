@@ -189,8 +189,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         }
 
 
-        [HttpGet("InventoryAsAtDateReport/{date}/{locationId}")]
-        public async Task<ApiResponseModel> InventoryAsAtDateReport([FromRoute] DateTime date, [FromRoute] int locationId)
+        [HttpGet("InventoryAsAtDateReport/{date}/{locationTypeId}/{locationId}")]
+        public async Task<ApiResponseModel> InventoryAsAtDateReport([FromRoute] DateTime date, [FromRoute] int locationTypeId, [FromRoute] int locationId)
         {
             try
             {
@@ -198,7 +198,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                 var currentDateOnly = new DateOnly(date.Year, date.Month, date.Day);
 
-                var alreadyStockedItemsLocInv = await dailyLocationInventoryService.Get(currentDateOnly, locationId);
+                var alreadyStockedItemsLocInv = await dailyLocationInventoryService.Get(currentDateOnly, locationTypeId, locationId);
 
                 // add already stocked items on selecting fromDate (Inventory Up)
                 if (alreadyStockedItemsLocInv != null && alreadyStockedItemsLocInv.Any())
