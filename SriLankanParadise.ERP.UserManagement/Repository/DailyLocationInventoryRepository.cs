@@ -33,10 +33,39 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         .ThenInclude(im => im.Unit)
                     .ToListAsync();
             }
-            else {
+            else
+            {
                 dailyLocationInventories = await dbContext.DailyLocationInventories
                    .AsNoTracking()
                    .Where(d => d.RunDate == runDate)
+                   .Include(d => d.Location)
+                   .Include(d => d.ItemMaster)
+                       .ThenInclude(im => im.Unit)
+                   .ToListAsync();
+            }
+
+            return dailyLocationInventories;
+        }
+
+
+        public async Task<IEnumerable<DailyLocationInventory>> Get(DateOnly runDate, int locationTypeId, int locationId)
+        {
+            var dailyLocationInventories = new List<DailyLocationInventory>();
+
+            if (locationId != 0)
+            {
+                dailyLocationInventories = await dbContext.DailyLocationInventories
+                    .AsNoTracking()
+                    .Include(d => d.Location)
+                    .Where(d => d.Location.LocationTypeId == locationTypeId && d.LocationId == locationId && d.RunDate == runDate)
+                    .Include(d => d.ItemMaster)
+                        .ThenInclude(im => im.Unit)
+                    .ToListAsync();
+            }
+            else {
+                dailyLocationInventories = await dbContext.DailyLocationInventories
+                   .AsNoTracking()
+                   .Where(d => d.Location.LocationTypeId == locationTypeId && d.RunDate == runDate)
                    .Include(d => d.Location)
                    .Include(d => d.ItemMaster)
                        .ThenInclude(im => im.Unit)
@@ -62,6 +91,21 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 return dailyLocationInventory;
             }
             return null;
+        }
+
+        public async Task<IEnumerable<DailyLocationInventory>> GetByItemId(DateOnly runDate, int itemMasterId)
+        {
+            var dailyLocationInventories = new List<DailyLocationInventory>();
+            
+            dailyLocationInventories = await dbContext.DailyLocationInventories
+                .AsNoTracking()
+                .Where(d => d.RunDate == runDate && d.ItemMasterId == itemMasterId)
+                .Include(d => d.Location)
+                .Include(d => d.ItemMaster)
+                    .ThenInclude(im => im.Unit)
+                .ToListAsync();
+
+            return dailyLocationInventories;
         }
     }
 }
