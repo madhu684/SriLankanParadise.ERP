@@ -2,9 +2,7 @@
 {
     public class UserUpdateRequestModel
     {
-        public string Username { get; set; } = null!;
-
-        public string Password { get; set; } = null!;
+        public string? Username { get; set; } = null!;
 
         public string Email { get; set; } = null!;
 
@@ -19,7 +17,6 @@
         public int? LocationId { get; set; }
 
         public bool Status { get; set; }
-
 
         public int PermissionId { get; set; }
     }

@@ -202,6 +202,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             try
             {
                 var existingUser = await _userService.GetUserByUserId(userId);
+
                 if (existingUser == null)
                 {
                     _logger.LogWarning(LogMessages.UserNotFound);
@@ -210,6 +211,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                 var updatedUser = _mapper.Map<User>(userUpdateRequest);
                 updatedUser.UserId = userId; // Ensure the ID is not changed
+                updatedUser.PasswordHash = existingUser.PasswordHash;
 
                 await _userService.UpdateUser(existingUser.UserId, updatedUser);
 
