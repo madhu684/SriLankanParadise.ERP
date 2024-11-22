@@ -138,6 +138,8 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<DailyLocationInventoryRequestModel, DailyLocationInventory>();
             CreateMap<DailyLocationInventory, DailyLocationInventoryDto>();
             CreateMap<UserUpdateRequestModel, User>();
+            CreateMap<CompanySubscriptionModuleUser, CompanySubscriptionModuleUserDto>();
+            CreateMap<SubscriptionModule, SubscriptionModuleDto>();
             // Add more mapping configurations if needed
         }
     }

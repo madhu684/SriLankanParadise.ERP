@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace SriLankanParadise.ERP.UserManagement.DataModels;
+﻿namespace SriLankanParadise.ERP.UserManagement.DataModels;
 
 public partial class CompanySubscriptionModuleUser
 {

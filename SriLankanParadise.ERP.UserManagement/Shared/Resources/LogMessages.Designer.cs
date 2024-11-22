@@ -412,6 +412,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Company Subscription Modules Not Found.
+        /// </summary>
+        public static string CompanySubscriptionModulesNotFound {
+            get {
+                return ResourceManager.GetString("CompanySubscriptionModulesNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Company subscription modules retrieved.
         /// </summary>
         public static string CompanySubscriptionModulesRetrieved {
@@ -435,6 +444,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string CompanySubscriptionModuleUserCreated {
             get {
                 return ResourceManager.GetString("CompanySubscriptionModuleUserCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Company Subscription Module User Updated.
+        /// </summary>
+        public static string CompanySubscriptionModuleUserUpdated {
+            get {
+                return ResourceManager.GetString("CompanySubscriptionModuleUserUpdated", resourceCulture);
             }
         }
         
