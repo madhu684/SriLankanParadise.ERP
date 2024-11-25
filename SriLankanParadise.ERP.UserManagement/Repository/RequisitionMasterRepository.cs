@@ -85,20 +85,16 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(rm => rm.RequestedToLocation)
                     .ToListAsync();
 
-                var nullReferencedIssueMasters = await _dbContext.IssueMasters
-                    .Where(im => im.ReferenceNumber == null)
+                var issueMasterIds = await _dbContext.IssueMasters
+                    .Where(im => im.RequisitionMasterId != null)
+                    .Select(im => im.RequisitionMasterId)
                     .ToListAsync();
 
-                var unapprovedRequisitionMasters = new List<RequisitionMaster>();
+                // Filter out RequisitionMasters whose IDs are present in IssueMasters
+                var unapprovedRequisitionMasters = requisitionMasters
+                    .Where(rm => !issueMasterIds.Contains(rm.RequisitionMasterId))
+                    .ToList();
 
-                if (requisitionMasters.Any())
-                {
-                    unapprovedRequisitionMasters = requisitionMasters
-                        .Where(rm => !nullReferencedIssueMasters
-                            .Any(im => im.RequisitionMasterId == rm.RequisitionMasterId))
-                        .ToList();
-                }
-                
                 return unapprovedRequisitionMasters;
             }
             catch (Exception)
@@ -138,7 +134,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var requisitionMaster = await _dbContext.RequisitionMasters
                     .Where(rm => rm.RequisitionMasterId == requisitionMasterId)
                     .Include(rm => rm.RequisitionDetails)
-                    .ThenInclude( rd => rd.ItemMaster)
+                    .ThenInclude(rd => rd.ItemMaster)
                     .ThenInclude(im => im.Unit)
                     .Include(rm => rm.RequestedFromLocation)
                     .Include(rm => rm.RequestedToLocation)
@@ -189,7 +185,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(rm => rm.RequestedFromLocation)
                     .Include(rm => rm.RequestedToLocation)
                     .FirstOrDefaultAsync();
-                if(requisitionMaster != null)
+                if (requisitionMaster != null)
                 {
                     return requisitionMaster;
                 }
