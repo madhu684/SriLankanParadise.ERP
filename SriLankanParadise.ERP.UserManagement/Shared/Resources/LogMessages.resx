@@ -963,4 +963,10 @@
   <data name="CompanySubscriptionModulesNotFound" xml:space="preserve">
     <value>Company Subscription Modules Not Found</value>
   </data>
+  <data name="UserDeactivated" xml:space="preserve">
+    <value>User Deactivated</value>
+  </data>
+  <data name="UserActivated" xml:space="preserve">
+    <value>User Activated</value>
+  </data>
 </root>

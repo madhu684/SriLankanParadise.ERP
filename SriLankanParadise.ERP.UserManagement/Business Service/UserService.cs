@@ -49,9 +49,14 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             await _userRepository.UpdateUser(userId, user);
         }
 
-        public async Task Delete(int userId)
+        public async Task Deactivate(int userId)
         {
-            await _userRepository.Delete(userId);
+            await _userRepository.Deactivate(userId);
+        }
+
+        public async Task Activate(int userId)
+        {
+            await _userRepository.Activate(userId);
         }
     }
 }

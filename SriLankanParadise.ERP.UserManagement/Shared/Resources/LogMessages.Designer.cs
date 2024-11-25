@@ -2383,6 +2383,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to User Activated.
+        /// </summary>
+        public static string UserActivated {
+            get {
+                return ResourceManager.GetString("UserActivated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to User already exists.
         /// </summary>
         public static string UserAlreadyExists {
@@ -2397,6 +2406,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string UserAuthenticated {
             get {
                 return ResourceManager.GetString("UserAuthenticated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User Deactivated.
+        /// </summary>
+        public static string UserDeactivated {
+            get {
+                return ResourceManager.GetString("UserDeactivated", resourceCulture);
             }
         }
         

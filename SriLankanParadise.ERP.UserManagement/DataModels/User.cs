@@ -25,6 +25,8 @@ public partial class User
 
     public int? LocationId { get; set; }
 
+    public bool IsDeleted { get; set; }
+
     public virtual ICollection<ActionLog> ActionLogs { get; set; } = new List<ActionLog>();
 
     public virtual ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();

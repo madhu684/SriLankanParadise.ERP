@@ -14,6 +14,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
 
         Task UpdateUser(int UserId, User user);
 
-        Task Delete(int userId);
+        Task Deactivate(int userId);
+
+        Task Activate(int userId);
+
     }
 }
