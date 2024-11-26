@@ -245,5 +245,17 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task<IEnumerable<ItemMaster>> GetChildItemMastersByItemMasterId(int itemMasterId)
+        {
+            try
+            {
+                var childItemMaster = await _dbContext.ItemMasters.Where(im => im.ParentId == itemMasterId).ToListAsync();
+                return childItemMaster.Any() ? childItemMaster : null;
+            }
+            catch (Exception) {
+                throw;
+            }
+        }
     }
 }
