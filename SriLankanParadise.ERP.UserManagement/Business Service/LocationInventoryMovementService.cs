@@ -63,6 +63,11 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             return await _locationInventoryMovementRepository.ByDateRangeAndTransactionType(fromDate, toDate, movementTypeId, transactionTypeId);
         }
 
+        public async Task<IEnumerable<LocationInventoryMovement>> GetWithoutBatchNo(int movementTypeId, int transactionTypeId, int itemMasterId, int locationId, int referenceId)
+        {
+            return await _locationInventoryMovementRepository.GetWithoutBatchNo(movementTypeId, transactionTypeId, itemMasterId, locationId, referenceId);
+        }
+
         public async Task<LocationInventoryMovement> GetLocationInventoryMovementByLocationInventoryMovementId(int locationInventoryMovementId)
         {
             return await _locationInventoryMovementRepository.GetLocationInventoryMovementByLocationInventoryMovementId(locationInventoryMovementId);
@@ -73,9 +78,14 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             await _locationInventoryMovementRepository.UpdateLocationInventoryMovement(locationInventoryMovementId, locationInventoryMovement);
         }
 
-        public async Task<LocationInventoryMovement> Get(int movementTypeId, int itemMasterId, string batchNo)
+        public async Task<IEnumerable<LocationInventoryMovement>> GetUnique(int movementTypeId, int transactionTypeId, int itemMasterId, string batchNo, int locationId, int referenceId)
         {
-            return await _locationInventoryMovementRepository.Get(movementTypeId, itemMasterId, batchNo);
+            return await _locationInventoryMovementRepository.GetUnique(movementTypeId, transactionTypeId, itemMasterId, batchNo, locationId, referenceId);
+        }
+
+        public async Task<IEnumerable<LocationInventoryMovement>> GetWithoutReferenceNo(int movementTypeId, int transactionTypeId, int itemMasterId, string batchNo, int locationId, DateTime fromDate, DateTime toDate)
+        {
+            return await _locationInventoryMovementRepository.GetWithoutReferenceNo(movementTypeId, transactionTypeId, itemMasterId, batchNo, locationId, fromDate, toDate);
         }
     }
 }

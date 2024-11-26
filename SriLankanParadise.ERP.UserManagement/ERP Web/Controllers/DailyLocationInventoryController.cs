@@ -100,5 +100,30 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpGet("GetByItemId/{runDate}/{itemMasterId}")]
+        public async Task<ApiResponseModel> GetByItemId(DateOnly runDate, int itemMasterId)
+        {
+            try
+            {
+                var dailyLocationInventories = await dailyLocationInventoryService.GetByItemId(runDate, itemMasterId);
+                if (dailyLocationInventories != null)
+                {
+                    var dailyLocationInventoriesDto = mapper.Map<IEnumerable<DailyLocationInventoryDto>>(dailyLocationInventories);
+                    AddResponseMessage(Response, LogMessages.DailyLocationInventoriesRetrieved, dailyLocationInventoriesDto, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    logger.LogWarning(LogMessages.DailyLocationInventoriesNotFound);
+                    AddResponseMessage(Response, LogMessages.DailyLocationInventoriesNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
     }
 }

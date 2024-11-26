@@ -1,5 +1,4 @@
 ﻿using SriLankanParadise.ERP.UserManagement.DataModels;
-using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 
 namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
 {
@@ -15,8 +14,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task<IEnumerable<LocationInventoryMovement>> GetOnOrBeforeSpecificDate(DateTime date, int movementTypeId, int transactionTypeId);
         Task<IEnumerable<LocationInventoryMovementExtended>> ByDateRange(DateTime fromDate, DateTime toDate, int locationId, int movementTypeId);
         Task<IEnumerable<LocationInventoryMovement>> ByDateRangeAndTransactionType(DateTime fromDate, DateTime toDate, int movementTypeId, int transactionTypeId);
+        Task<IEnumerable<LocationInventoryMovement>> GetWithoutBatchNo(int movementTypeId, int transactionTypeId, int itemMasterId, int locationId, int referenceId);
         Task<LocationInventoryMovement> GetLocationInventoryMovementByLocationInventoryMovementId(int locationInventoryMovementId);
         Task UpdateLocationInventoryMovement(int locationInventoryMovementId, LocationInventoryMovement locationInventoryMovement);
-        Task<LocationInventoryMovement> Get(int movementTypeId, int itemMasterId, string batchNo);
+        Task<IEnumerable<LocationInventoryMovement>> GetUnique(int movementTypeId, int transactionTypeId, int itemMasterId, string batchNo, int locationId, int referenceId);
+        Task<IEnumerable<LocationInventoryMovement>> GetWithoutReferenceNo(int movementTypeId, int transactionTypeId, int itemMasterId, string batchNo, int locationId, DateTime fromDate, DateTime toDate);
     }
 }

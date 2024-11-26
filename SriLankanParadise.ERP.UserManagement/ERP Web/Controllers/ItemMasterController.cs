@@ -328,6 +328,31 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpGet("GetItemMastersByItemTypeId/{itemTypeId}")]
+        public async Task<ApiResponseModel> GetItemMastersByItemTypeId(int itemTypeId)
+        {
+            try
+            {
+                var itemMasters = await _itemMasterService.GetItemMastersByItemTypeId(itemTypeId);
+                if (itemMasters != null)
+                {
+                    var itemMastersDto = _mapper.Map<IEnumerable<ItemMasterDto>>(itemMasters);
+                    AddResponseMessage(Response, LogMessages.ItemMastersRetrieved, itemMastersDto, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.ItemMastersNotFound);
+                    AddResponseMessage(Response, LogMessages.ItemMastersNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
         [HttpGet("GetChildItemMastersByItemMasterId/{itemMasterId}")]
         public async Task<ApiResponseModel> GetChildItemMastersByItemMasterId(int itemMasterId)
         {
