@@ -70,5 +70,39 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task<Dictionary<int, List<RolePermission>>> GetRolePermissionsByRoleIds(int[] roleIds)
+        {
+            try
+            {
+                if (roleIds == null || roleIds.Length == 0)
+                {
+                    throw new ArgumentException("RoleIds cannot be null or empty.");
+                }
+
+                var rolePermissionsByRole = new Dictionary<int, List<RolePermission>>();
+
+                foreach (var roleId in roleIds)
+                {
+                    var rolePermissions = await _dbContext.RolePermissions
+                        .Where(p => p.RoleId == roleId)
+                        .Include(rp => rp.Permission)
+                        .ToListAsync();
+
+                    rolePermissionsByRole[roleId] = rolePermissions;
+                }
+
+                if (rolePermissionsByRole.Any())
+                {
+                    return rolePermissionsByRole;
+                }
+
+                return null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

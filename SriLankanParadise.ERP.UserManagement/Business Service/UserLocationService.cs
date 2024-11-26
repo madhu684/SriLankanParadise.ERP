@@ -33,14 +33,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             return await _userLocationRepository.GetUserLocationByUserLocationId(userLocationId);
         }
 
-        public async Task UpdateUserLocation(int userLocationId, UserLocation userLocation)
+        public async Task DeleteUserLocations(int userId)
         {
-            await _userLocationRepository.UpdateUserLocation(userLocationId, userLocation);
-        }
-
-        public async Task DeleteUserLocation(int userLocationId)
-        {
-            await _userLocationRepository.DeleteUserLocation(userLocationId);
+            await _userLocationRepository.DeleteUserLocations(userId);
         }
     }
 }

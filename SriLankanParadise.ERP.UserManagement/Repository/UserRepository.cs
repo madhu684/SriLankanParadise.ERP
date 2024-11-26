@@ -68,6 +68,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var user = await _dbContext.Users
                     .Where(u => u.UserId == userId)
+                    .Include(u => u.Location)
                     .FirstOrDefaultAsync();
 
                 return user;

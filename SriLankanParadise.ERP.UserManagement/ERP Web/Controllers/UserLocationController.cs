@@ -108,78 +108,33 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
-        
-        [HttpPut("{userLocationId}")]
-        public async Task<ApiResponseModel> UpdateUserLocation(int userLocationId, UserLocationRequestModel userLocationRequest)
+        [HttpPut("UpdateUserLocations/{userId}")]
+        public async Task<ApiResponseModel> UpdateUserPermissions([FromRoute] int userId, [FromBody] int[] locationIds)
         {
             try
             {
-                var existinguUserLocation = await _userLocationService.GetUserLocationByUserLocationId(userLocationId);
-                if (existinguUserLocation == null)
+                await _userLocationService.DeleteUserLocations(userId);
+
+                foreach (var locationId in locationIds)
                 {
-                    _logger.LogWarning(LogMessages.UserLocationNotFound);
-                    return AddResponseMessage(Response, LogMessages.UserLocationNotFound, null, true, HttpStatusCode.NotFound);
+                    var userLocation = new UserLocation()
+                    {
+                        UserId = userId,
+                        LocationId = locationId
+                    };
+
+                    await _userLocationService.AddUserLocation(userLocation);
                 }
-
-                var updatedUserLocation = _mapper.Map<UserLocation>(userLocationRequest);
-                updatedUserLocation.UserLocationId = userLocationId; // Ensure the ID is not changed
-
-
-                await _userLocationService.UpdateUserLocation(existinguUserLocation.UserLocationId,  updatedUserLocation);
-
-                // Create action log
-                //var actionLog = new ActionLogModel()
-                //{
-                //    ActionId = userLocationRequest.PermissionId,
-                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                //    Timestamp = DateTime.UtcNow
-                //};
-                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 _logger.LogInformation(LogMessages.UserLocationUpdated);
-                return AddResponseMessage(Response, LogMessages.UserLocationUpdated, null, true, HttpStatusCode.OK);
+                AddResponseMessage(Response, LogMessages.UserLocationUpdated, null, true, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ErrorMessages.InternalServerError);
-                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
+            return Response;
         }
-
-        [HttpDelete("{userLocationId}")]
-        public async Task<ApiResponseModel> DeleteUserLocation(int userLocationId)
-        {
-            try
-            {
-                var existingUserLocation = await _userLocationService.GetUserLocationByUserLocationId(userLocationId);
-                if (existingUserLocation == null)
-                {
-                    _logger.LogWarning(LogMessages.UserLocationNotFound);
-                    return AddResponseMessage(Response, LogMessages.UserLocationNotFound, null, true, HttpStatusCode.NotFound);
-                }
-
-                await _userLocationService.DeleteUserLocation(userLocationId);
-
-                // Create action log
-                //var actionLog = new ActionLogModel()
-                //{
-                //    ActionId = 1087,
-                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                //    Timestamp = DateTime.UtcNow
-                //};
-                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
-
-                _logger.LogInformation(LogMessages.UserLocationDeleted);
-                return AddResponseMessage(Response, LogMessages.UserLocationDeleted, null, true, HttpStatusCode.NoContent);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ErrorMessages.InternalServerError);
-                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
-            }
-        }
-
     }
 }

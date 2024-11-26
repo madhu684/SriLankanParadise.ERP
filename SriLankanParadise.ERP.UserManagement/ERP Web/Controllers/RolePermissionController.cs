@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SriLankanParadise.ERP.UserManagement.Business_Service;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Shared.Resources;
@@ -116,5 +117,36 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpGet("GetRolePermissionsByRoleIds")]
+        public async Task<ApiResponseModel> GetPermissionsByModuleIds([FromQuery] int[] roleIds)
+        {
+            try
+            {
+                var rolePermissions = await _rolePermissionService.GetRolePermissionsByRoleIds(roleIds);
+
+                if (rolePermissions != null && rolePermissions.Count > 0)
+                {
+                    var rolePermissionsDtoByRole = rolePermissions.ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => _mapper.Map<List<RolePermissionDto>>(kvp.Value));
+                    AddResponseMessage(Response, LogMessages.RolePermissionsRetrieved, rolePermissionsDtoByRole, true, HttpStatusCode.OK);
+
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.RolePermissionsNotFound);
+                    AddResponseMessage(Response, LogMessages.RolePermissionsNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+
+            return Response;
+        }
+
     }
 }

@@ -12,6 +12,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             _dbContext = dbContext;
         }
+
         public async Task AddUserLocation(UserLocation userLocation)
         {
             try
@@ -40,7 +41,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-
         public async Task<IEnumerable<UserLocation>> GetUserLocationsByUserId(int userId)
         {
             try
@@ -59,7 +59,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
-
         
         public async Task<UserLocation> GetUserLocationByUserLocationId(int userLocationId)
         {
@@ -77,34 +76,17 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task UpdateUserLocation(int userLocationId, UserLocation userLocation)
+        public async Task DeleteUserLocations(int userId)
         {
             try
             {
-                var existUserLocation = await _dbContext.UserLocations.FindAsync(userLocationId);
+                var userLocations = await _dbContext.UserLocations
+                    .Where(ul => ul.UserId == userId)
+                    .ToListAsync();
 
-                if (existUserLocation != null)
+                if (userLocations.Any())
                 {
-                    _dbContext.Entry(existUserLocation).CurrentValues.SetValues(userLocation);
-                    await _dbContext.SaveChangesAsync();
-                }
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-        }
-
-        public async Task DeleteUserLocation(int userLocationId)
-        {
-            try
-            {
-                var userLocation = await _dbContext.UserLocations.FindAsync(userLocationId);
-
-                if (userLocation != null)
-                {
-                    _dbContext.UserLocations.Remove(userLocation);
+                    _dbContext.UserLocations.RemoveRange(userLocations);
                     await _dbContext.SaveChangesAsync();
                 }
             }
