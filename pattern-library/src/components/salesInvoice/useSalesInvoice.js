@@ -1072,7 +1072,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
           unit: formData.itemMaster.unit.unitName,
           batchRef: null,
           quantity: 0,
-          unitPrice: highestSellingPrice,
+          unitPrice: formData.itemMaster.sellingPrice,
           totalPrice: 0.0,
           chargesAndDeductions: initializedCharges,
           batch: sortedBatches,
