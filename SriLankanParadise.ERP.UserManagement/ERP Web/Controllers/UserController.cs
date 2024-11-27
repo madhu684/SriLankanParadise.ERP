@@ -202,6 +202,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             try
             {
                 var existingUser = await _userService.GetUserByUserId(userId);
+
                 if (existingUser == null)
                 {
                     _logger.LogWarning(LogMessages.UserNotFound);
@@ -210,6 +211,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                 var updatedUser = _mapper.Map<User>(userUpdateRequest);
                 updatedUser.UserId = userId; // Ensure the ID is not changed
+                updatedUser.PasswordHash = existingUser.PasswordHash;
 
                 await _userService.UpdateUser(existingUser.UserId, updatedUser);
 
@@ -257,8 +259,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
         }
 
-        [HttpDelete("{userId}")]
-        public async Task<ApiResponseModel> Delete(int userId)
+        [HttpPut("{userId}/deactivate")]
+        public async Task<ApiResponseModel> Deactivate(int userId)
         {
             try
             {
@@ -270,9 +272,33 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     return AddResponseMessage(Response, LogMessages.UserNotFound, null, true, HttpStatusCode.NotFound);
                 }
 
-                await _userService.Delete(userId);
-                _logger.LogInformation(LogMessages.UserDeleted);
-                return AddResponseMessage(Response, LogMessages.UserDeleted, null, true, HttpStatusCode.OK);
+                await _userService.Deactivate(userId);
+                _logger.LogInformation(LogMessages.UserDeactivated);
+                return AddResponseMessage(Response, LogMessages.UserDeactivated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
+
+        [HttpPut("{userId}/activate")]
+        public async Task<ApiResponseModel> Activate(int userId)
+        {
+            try
+            {
+                var user = await _userService.GetUserByUserId(userId);
+
+                if (user == null)
+                {
+                    _logger.LogWarning(LogMessages.UserNotFound);
+                    return AddResponseMessage(Response, LogMessages.UserNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+                await _userService.Activate(userId);
+                _logger.LogInformation(LogMessages.UserActivated);
+                return AddResponseMessage(Response, LogMessages.UserActivated, null, true, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {

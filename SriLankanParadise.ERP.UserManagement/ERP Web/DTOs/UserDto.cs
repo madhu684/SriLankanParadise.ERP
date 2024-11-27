@@ -1,4 +1,6 @@
-﻿namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
+﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+
+namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 {
     public class UserDto
     {
@@ -18,10 +20,14 @@
 
         public int CompanyId { get; set; }
 
+        public bool IsDeleted { get; set; }
+
         public virtual CompanyDto Company { get; set; } = null!;
 
         public bool Status { get; set; }
 
         public int? LocationId { get; set; }
+
+        public Location? Location { get; set; }
     }
 }

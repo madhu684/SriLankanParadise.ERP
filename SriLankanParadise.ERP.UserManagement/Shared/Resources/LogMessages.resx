@@ -957,4 +957,16 @@
   <data name="LocationInventoryMovementsNotFound" xml:space="preserve">
     <value>Location Inventory Movements not found</value>
   </data>
+  <data name="CompanySubscriptionModuleUserUpdated" xml:space="preserve">
+    <value>Company Subscription Module User Updated</value>
+  </data>
+  <data name="CompanySubscriptionModulesNotFound" xml:space="preserve">
+    <value>Company Subscription Modules Not Found</value>
+  </data>
+  <data name="UserDeactivated" xml:space="preserve">
+    <value>User Deactivated</value>
+  </data>
+  <data name="UserActivated" xml:space="preserve">
+    <value>User Activated</value>
+  </data>
 </root>

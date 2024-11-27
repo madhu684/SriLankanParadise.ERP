@@ -33,5 +33,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             await _rolePermissionRepository.DeleteRolePermission(roleId, permissionId);
         }
 
+        public async Task<Dictionary<int, List<RolePermission>>> GetRolePermissionsByRoleIds(int[] roleIds)
+        {
+            return await _rolePermissionRepository.GetRolePermissionsByRoleIds(roleIds);
+        }
+
     }
 }

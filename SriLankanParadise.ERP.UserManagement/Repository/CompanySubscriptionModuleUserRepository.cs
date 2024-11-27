@@ -1,4 +1,5 @@
-﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+﻿using Microsoft.EntityFrameworkCore;
+using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
@@ -22,6 +23,24 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             catch (Exception)
             {
 
+                throw;
+            }
+        }
+
+        public async Task DeleteCompanySubscriptionModulesByUserId(int UserId)
+        {
+            try
+            {
+                var companySubscriptionModuleUser = await _dbContext.CompanySubscriptionModuleUsers
+                    .Where(x => x.UserId == UserId).ToListAsync();
+
+                if(companySubscriptionModuleUser != null && companySubscriptionModuleUser.Count > 0) {
+                    _dbContext.CompanySubscriptionModuleUsers.RemoveRange(companySubscriptionModuleUser);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
                 throw;
             }
         }

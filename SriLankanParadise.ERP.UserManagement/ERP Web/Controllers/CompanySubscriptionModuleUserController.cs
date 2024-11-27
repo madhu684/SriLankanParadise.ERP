@@ -61,5 +61,35 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpPut]
+        public async Task<ApiResponseModel> UpdateCompanySubscriptionModuleUser(UpdateCompanySubscriptionModuleUserRequestModel updateCompanySubscriptionModuleUserRequest)
+        {
+            try
+            {
+                await _companySubscriptionModuleUserService.DeleteCompanySubscriptionModulesByUserId(updateCompanySubscriptionModuleUserRequest.UserId);
+
+                if(updateCompanySubscriptionModuleUserRequest.CompanySubscriptionModuleIds != null && updateCompanySubscriptionModuleUserRequest.CompanySubscriptionModuleIds.Any())
+                {
+                    foreach (var CompanySubscriptionModuleId in updateCompanySubscriptionModuleUserRequest.CompanySubscriptionModuleIds)
+                    {
+                        await _companySubscriptionModuleUserService.AddCompanySubscriptionModuleUser(new CompanySubscriptionModuleUser() 
+                        { 
+                            CompanySubscriptionModuleId = CompanySubscriptionModuleId,
+                            UserId = updateCompanySubscriptionModuleUserRequest.UserId 
+                        });
+                    }
+                }
+
+                _logger.LogInformation(LogMessages.CompanySubscriptionModuleUserUpdated);
+                AddResponseMessage(Response, LogMessages.CompanySubscriptionModuleUserUpdated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

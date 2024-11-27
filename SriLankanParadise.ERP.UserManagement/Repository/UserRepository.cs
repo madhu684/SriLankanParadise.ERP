@@ -68,6 +68,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var user = await _dbContext.Users
                     .Where(u => u.UserId == userId)
+                    .Include(u => u.Location)
                     .FirstOrDefaultAsync();
 
                 return user;
@@ -97,7 +98,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task Delete(int userId)
+        public async Task Deactivate(int userId)
         {
             try
             {
@@ -107,7 +108,27 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
 
                 if (user != null)
                 {
-                    _dbContext.Users.Remove(user);
+                    user.IsDeleted = true;
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task Activate(int userId)
+        {
+            try
+            {
+                var user = await _dbContext.Users
+                    .Where(u => u.UserId == userId)
+                    .FirstOrDefaultAsync();
+
+                if (user != null)
+                {
+                    user.IsDeleted = false;
                     await _dbContext.SaveChangesAsync();
                 }
             }
