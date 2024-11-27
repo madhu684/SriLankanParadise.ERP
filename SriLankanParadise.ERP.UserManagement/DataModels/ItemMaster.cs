@@ -32,6 +32,8 @@ public partial class ItemMaster
     public string? ItemCode { get; set; }
 
     public int? ReorderLevel { get; set; }
+    public bool? IsInventoryItem { get; set; }
+    public decimal? SellingPrice { get; set; }
 
     public virtual Category Category { get; set; } = null!;
 
