@@ -11,6 +11,7 @@ const BatchSelectionModal = ({
   itemIdsToBeDeleted,
   handleBatchSelect,
 }) => {
+  // Filter remaining batches
   const remainingBatches = itemBatches?.filter(
     (batch) =>
       !itemDetails.some((detail) => detail.itemBatchId === batch.batchId) &&
@@ -19,6 +20,9 @@ const BatchSelectionModal = ({
           itemIdToBeDeleted.itemBatch.batchId === batch.batchId
       )
   );
+console.log(itemBatches);
+  // Safely get item name from the first itemBatch
+  const itemName = itemBatches?.[0]?.itemBatch?.itemMaster?.itemName || "Unknown Item";
 
   return (
     <Modal show={show} onHide={handleClose} centered size="lg">
@@ -27,13 +31,13 @@ const BatchSelectionModal = ({
       </Modal.Header>
       <Modal.Body>
         <div className="mb-3">
-          Please select a batch for the item:{" "}
-          {itemBatches[0].itemMaster.itemName}
+          Please select a batch for the item: <strong>{itemName}</strong>
         </div>
+
         {/* Display item batches here */}
         <ListGroup>
-          {remainingBatches.length > 0 ? (
-            remainingBatches.map((batch) => (
+          {itemBatches?.length > 0 ? (
+            itemBatches.map((batch) => (
               <ListGroup.Item
                 key={batch.batchId}
                 action
@@ -45,32 +49,33 @@ const BatchSelectionModal = ({
                     style={{ marginRight: "5px", color: "#007bff" }}
                   ></i>{" "}
                   {/* Bootstrap 5 icon */}
-                  <strong>Batch Reference:</strong> {batch.batch.batchRef} |{" "}
-                  <strong>Temp Qty:</strong> {batch.tempQuantity} |{" "}
-                  <strong>Unit Price:</strong> {batch.sellingPrice} |{" "}
-                  <strong>Expiry Date:</strong>{" "}
-                  {batch.expiryDate?.split("T")[0]}
-                </div>
-              </ListGroup.Item>
-            ))
-          ) : (
-            <div className="text-danger">
-              You have selected all batches for this item.
-            </div>
-          )}
-        </ListGroup>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
-          Close
-        </Button>
-      </Modal.Footer>
-    </Modal>
-  );
+                  <strong>Batch Reference:</strong> {batch.itemBatch?.batch?.
+batchRef || "No batch reference available"} |{" "}
+<strong>Temp Qty:</strong> {batch.stockInHand} |{" "}
+<strong>Unit Price:</strong> {batch.itemBatch?.sellingPrice} |{" "}
+<strong>Expiry Date:</strong>{" "}
+{batch.itemBatch?.expiryDate?.split("T")[0] || "No expiry date"}
+</div>
+</ListGroup.Item>
+))
+) : (
+<div className="text-danger">
+You have selected all batches for this item.
+</div>
+)}
+</ListGroup>
+</Modal.Body>
+<Modal.Footer>
+<Button variant="secondary" onClick={handleClose}>
+Close
+</Button>
+</Modal.Footer>
+</Modal>
+);
 };
 
 BatchSelectionModal.defaultProps = {
-  itemIdsToBeDeleted: [],
+itemIdsToBeDeleted: [],
 };
 
 export default BatchSelectionModal;

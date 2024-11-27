@@ -50,6 +50,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
     renderColumns,
     renderSubColumns,
     calculateSubTotal,
+    userLocations,
   } = useSalesInvoice({
     onFormSubmit: () => {
       handleClose();
@@ -182,6 +183,46 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                   </div>
                 )}
               </div>
+            </div>
+            <div className="mb-3">
+              <label htmlFor="storeLocation" className="form-label">
+                Store Location
+              </label>
+              <select
+                className={`form-select ${
+                  validFields.storeLocation ? "is-valid" : ""
+                } ${
+                  validationErrors.storeLocation ? "is-invalid" : ""
+                }`}
+                id="storeLocation"
+                value={formData?.storeLocation ?? ""}
+                onChange={(e) =>
+                  handleInputChange("storeLocation", e.target.value)
+                }
+              >
+                <option value="">Select Location</option>
+                { userLocations && userLocations != null ? (
+                  userLocations
+                  .filter(
+                    (location) =>
+                      location.location.locationType.name === "Warehouse" 
+                  )
+                  .map((location) => (
+                    <option
+                      key={location.location.locationId}
+                      value={location.location.locationId}
+                    >
+                      {location.location.locationName}
+                    </option>
+                  ))
+                ):""
+                }
+              </select>
+              {validationErrors.storeLocation && (
+                <div className="invalid-feedback">
+                  {validationErrors.storeLocation}
+                </div>
+              )}
             </div>
           </div>
 
@@ -427,7 +468,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                         </div>
                       )}
                     </td>
-                    <td>{item.unitPrice.toFixed(2)}</td>
+                    <td>{item.unitPrice ? item.unitPrice.toFixed(2) : '0.00'}</td>
                     {item.chargesAndDeductions.map((charge, chargeIndex) => (
                       <td key={chargeIndex}>
                         <input

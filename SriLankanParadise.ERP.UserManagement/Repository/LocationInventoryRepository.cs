@@ -99,6 +99,35 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
+        public async Task<IEnumerable<LocationInventory>> GetLocationInventoriesByLocationIdItemMasterId(int locationId , int itemMasterId)
+        {
+            try
+            {
+                var query = _dbContext.LocationInventories
+    .Where(li => li.LocationId == locationId && li.ItemMasterId == itemMasterId)
+    .Include(li => li.ItemBatch)
+    .ThenInclude(ib => ib.Batch)
+    .Include(li => li.ItemBatch)
+    .ThenInclude(ib => ib.ItemMaster);
+
+                var sqlQuery = query.ToQueryString();
+
+                var locationInventories = await _dbContext.LocationInventories
+                    .Where(li => li.LocationId == locationId && li.ItemMasterId == itemMasterId)
+                    .Include(li => li.ItemBatch)
+                        .ThenInclude(ib => ib.Batch)        // Include Batch details
+                    .Include(li => li.ItemBatch)
+                        .ThenInclude(ib => ib.ItemMaster)   // Include ItemMaster details
+                    .ToListAsync();
+
+                return locationInventories.Any() ? locationInventories : null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<LocationInventory> GetLocationInventoryByDetails(int locationId, int itemMasterId, int batchId)
         {
             try
