@@ -61,14 +61,14 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
 
   const companyLogoUrl = useCompanyLogoUrl();
 
-  if (
-    isLoading ||
-    isLoadingchargesAndDeductions ||
-    isLoadingTransactionTypes ||
-    isCompanyLoading
-  ) {
-    return <LoadingSpinner />;
-  }
+  // if (
+  //   isLoading ||
+  //   isLoadingchargesAndDeductions ||
+  //   isLoadingTransactionTypes ||
+  //   isCompanyLoading
+  // ) {
+  //   return <LoadingSpinner />;
+  // }
 
   if (
     isError ||
