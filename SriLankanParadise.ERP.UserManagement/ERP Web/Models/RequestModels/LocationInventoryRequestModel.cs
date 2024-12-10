@@ -13,5 +13,6 @@
         public string? BatchNo { get; set; }
 
         public int PermissionId { get; set; }
+        public DateTime? ExpirationDate { get; set; }
     }
 }
