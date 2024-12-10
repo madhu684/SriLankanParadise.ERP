@@ -16,5 +16,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public decimal? StockInHand { get; set; }
         public string? BatchNo { get; set; }
+        public DateTime? ExpirationDate { get; set; }
     }
 }

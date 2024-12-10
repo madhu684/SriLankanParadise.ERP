@@ -170,5 +170,21 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task<LocationInventory> GetUniqueLocationInventory(int locationId, int itemMasterId, string batchNo)
+        {
+            try
+            {
+                var locationInventory = await _dbContext.LocationInventories
+                   .Where(li => li.LocationId == locationId && li.ItemMasterId == itemMasterId && li.BatchNo == batchNo)
+                   .FirstOrDefaultAsync();
+
+                return locationInventory;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
