@@ -15,6 +15,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task UpdateLocationInventory(int locationInventoryId, LocationInventory locationInventory);
 
         Task<LocationInventory> GetLocationInventoryByDetails(int locationId, int itemMasterId, int batchId);
+        Task<LocationInventory> GetUniqueLocationInventory(int locationId, int itemMasterId, string batchNo);
 
         Task UpdateLocationInventoryStockInHand(int locationId, int itemMasterId, int batchId, LocationInventory locationInventory, string operation);
     }

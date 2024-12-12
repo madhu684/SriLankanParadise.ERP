@@ -17,7 +17,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             try
             {
-                // Check if a record with the same ItemMasterId, BatchId, and LocationId exists
+                // Check if a record with the same ItemMasterId, BatchNo, and LocationId exists
                 var existingInventory = await _dbContext.LocationInventories
                     .FirstOrDefaultAsync(li => li.ItemMasterId == locationInventory.ItemMasterId
                                             && li.BatchNo == locationInventory.BatchNo
@@ -25,27 +25,33 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
 
                 if (existingInventory != null)
                 {
-                    // Update the StockInHand
                     if (m == 1)
                     {
-                        existingInventory.StockInHand = existingInventory.StockInHand + locationInventory.StockInHand;
-                    } else if (m == 2)
+                        existingInventory.StockInHand += locationInventory.StockInHand;
+                    }
+                    else if (m == 2)
                     {
-                        existingInventory.StockInHand = existingInventory.StockInHand - locationInventory.StockInHand;
+                        existingInventory.StockInHand -= locationInventory.StockInHand;
                     }
                 }
                 else
                 {
-                    // Insert a new record
+                    // If a record with the same ItemMasterId and BatchNo exists (regardless of LocationId)
+                    var batchInventory = await _dbContext.LocationInventories
+                        .FirstOrDefaultAsync(li => li.ItemMasterId == locationInventory.ItemMasterId
+                                                && li.BatchNo == locationInventory.BatchNo);
+
+                    if (batchInventory != null && batchInventory.ExpirationDate != null)
+                    {
+                        // Add the existing record's ExpireDate to the new record's ExpireDate
+                        locationInventory.ExpirationDate = batchInventory.ExpirationDate;
+                    }
                     _dbContext.LocationInventories.Add(locationInventory);
                 }
-
-                // Save changes
                 await _dbContext.SaveChangesAsync();
             }
             catch (Exception)
             {
-                // Handle exception (optional: log the exception, etc.)
                 throw;
             }
         }
@@ -167,6 +173,22 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             catch (Exception)
             {
 
+                throw;
+            }
+        }
+
+        public async Task<LocationInventory> GetUniqueLocationInventory(int locationId, int itemMasterId, string batchNo)
+        {
+            try
+            {
+                var locationInventory = await _dbContext.LocationInventories
+                   .Where(li => li.LocationId == locationId && li.ItemMasterId == itemMasterId && li.BatchNo == batchNo)
+                   .FirstOrDefaultAsync();
+
+                return locationInventory;
+            }
+            catch (Exception)
+            {
                 throw;
             }
         }

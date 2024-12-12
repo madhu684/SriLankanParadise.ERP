@@ -22,6 +22,7 @@ namespace SriLankanParadise.ERP.UserManagement.DataModels
         public decimal? StockInHand { get; set; }
 
         public string? BatchNo { get; set; }
+        public DateTime? ExpirationDate { get; set; }
 
         public virtual LocationInventory LocationInventory { get; set; } = null!;
 
