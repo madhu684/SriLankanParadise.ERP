@@ -270,12 +270,25 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         }
 
 
-        public async Task<IEnumerable<ItemMaster>> GetChildItemMastersByItemMasterId(int itemMasterId)
+        public async Task<IEnumerable<ItemMaster>> GetItemMastersWithSameParentItemMasterByItemMasterId(int itemMasterId)
         {
             try
             {
-                var childItemMaster = await _dbContext.ItemMasters.Where(im => im.ParentId == itemMasterId).ToListAsync();
-                return childItemMaster.Any() ? childItemMaster : null;
+                var parentItemMasterId = await _dbContext.ItemMasters
+                    .Where(im => im.ItemMasterId == itemMasterId)
+                    .Select(im => im.ParentId)
+                    .FirstOrDefaultAsync();
+
+                if (parentItemMasterId == null)
+                {
+                    return Enumerable.Empty<ItemMaster>();
+                }
+
+                var itemMastersWithSameParent = await _dbContext.ItemMasters
+                    .Where(im => im.ParentId == parentItemMasterId && im.ItemMasterId != itemMasterId && im.ItemMasterId != parentItemMasterId)
+                    .ToListAsync();
+
+                return itemMastersWithSameParent.Any() ? itemMastersWithSameParent : null;
             }
             catch (Exception) {
                 throw;
