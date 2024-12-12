@@ -353,12 +353,12 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
-        [HttpGet("GetChildItemMastersByItemMasterId/{itemMasterId}")]
-        public async Task<ApiResponseModel> GetChildItemMastersByItemMasterId(int itemMasterId)
+        [HttpGet("GetItemMastersWithSameParentItemMasterByItemMasterId/{itemMasterId}")]
+        public async Task<ApiResponseModel> GetItemMastersWithSameParentItemMasterByItemMasterId(int itemMasterId)
         {
             try
             {
-                var itemMasters = await _itemMasterService.GetChildItemMastersByItemMasterId(itemMasterId);
+                var itemMasters = await _itemMasterService.GetItemMastersWithSameParentItemMasterByItemMasterId(itemMasterId);
                 if (itemMasters != null)
                 {
                     var itemMasterDto = _mapper.Map<IEnumerable<ItemMasterDto>>(itemMasters);
