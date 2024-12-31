@@ -104,5 +104,25 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task DeleteRolePermissionByRoleId(int roleId)
+        {
+            try
+            {
+                var rolePermissions = await _dbContext.RolePermissions
+                    .Where(rp => rp.RoleId == roleId)
+                    .ToListAsync();
+
+                if (rolePermissions.Any())
+                {
+                    _dbContext.RolePermissions.RemoveRange(rolePermissions);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
