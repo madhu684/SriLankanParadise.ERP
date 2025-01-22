@@ -33,6 +33,10 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     {
                         existingInventory.StockInHand -= locationInventory.StockInHand;
                     }
+                    else
+                    {
+                        existingInventory.StockInHand = locationInventory.StockInHand;
+                    }
                 }
                 else
                 {
@@ -94,7 +98,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Where(li => li.LocationId == locationId)
                     .ToListAsync();
 
-               
+
                 return locationInventories.Any() ? locationInventories : null;
             }
             catch (Exception)
@@ -114,12 +118,12 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 return locationInventory;
 
             }
-            catch (Exception )
+            catch (Exception)
             {
-                
+
                 throw;
             }
-           
+
         }
 
         public async Task UpdateLocationInventory(int locationInventoryId, LocationInventory locationInventory)
@@ -141,7 +145,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task UpdateLocationInventoryStockInHand(int locationId, int itemMasterId, int batchId, LocationInventory locationInventory, string operation )
+        public async Task UpdateLocationInventoryStockInHand(int locationId, int itemMasterId, int batchId, LocationInventory locationInventory, string operation)
         {
             try
             {
@@ -162,9 +166,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     }
                     else if (operation.ToLower() == "subtract")
                     {
-                        
+
                         existLocationInventory.StockInHand -= locationInventory.StockInHand;
-                        
+
                     }
 
                     await _dbContext.SaveChangesAsync();
