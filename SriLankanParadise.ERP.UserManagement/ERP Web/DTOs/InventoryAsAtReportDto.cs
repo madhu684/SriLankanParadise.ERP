@@ -1,6 +1,6 @@
 ﻿namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 {
-    public class InventoryReportDto
+    public class InventoryAsAtReportDto
     {
         public string Inventory { get; set; }
         public string RawMaterial { get; set; }
@@ -16,8 +16,5 @@
         public decimal ReturnInQty { get; set; }
         public decimal ProductionOutQty { get; set; }
         public decimal ReturnQty { get; set; }
-        public decimal StAdjIn { get; set; }
-        public decimal StAdjOut { get; set; }
-        public decimal StDisOut { get; set; }
     }
 }

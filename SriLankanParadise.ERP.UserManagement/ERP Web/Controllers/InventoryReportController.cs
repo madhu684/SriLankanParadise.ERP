@@ -56,6 +56,10 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 var in_ItemsLocInv = await locationInventoryMovementService.ByDateRange(fromDate, toDate, locationId, 1);
                 var out_ItemsLocInv = await locationInventoryMovementService.ByDateRange(fromDate, toDate, locationId, 2);
 
+                var st_adj_in = await locationInventoryMovementService.ByDateRangeAndTransactionType(fromDate, toDate, 1, 11);
+                var st_adj_out = await locationInventoryMovementService.ByDateRangeAndTransactionType(fromDate, toDate, 2, 12);
+                var st_dis_out = await locationInventoryMovementService.ByDateRangeAndTransactionType(fromDate, toDate, 2, 13);
+
                 // add already stocked items on selecting fromDate (Inventory Up)
                 if (alreadyStockedItemsLocInv != null && alreadyStockedItemsLocInv.Any())
                 {
@@ -76,7 +80,10 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                             ProductionInQty = 0,
                             ReturnInQty = 0,
                             ProductionOutQty = 0,
-                            ReturnQty = 0
+                            ReturnQty = 0,
+                            StAdjIn = 0,
+                            StAdjOut = 0,
+                            StDisOut = 0
                         });
                     }
                 }
@@ -87,7 +94,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     foreach (var in_Item in in_ItemsLocInv)
                     {
                         // already stocked items
-                        if(inventoryItems.Any(i => i.itemId == in_Item.ItemMasterId && i.batchNumber == in_Item.BatchNo))
+                        if (inventoryItems.Any(i => i.itemId == in_Item.ItemMasterId && i.batchNumber == in_Item.BatchNo))
                         {
                             var index = inventoryItems.FindIndex(i => i.itemId == in_Item.ItemMasterId && i.batchNumber == in_Item.BatchNo);
                             inventoryItems[index].receivedQty += in_Item.Qty ?? 0;
@@ -131,7 +138,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                         if (inventoryItems.Any(i => i.itemId == out_Item.ItemMasterId && i.batchNumber == out_Item.BatchNo))
                         {
                             var index = inventoryItems.FindIndex(i => i.itemId == out_Item.ItemMasterId && i.batchNumber == out_Item.BatchNo);
-                            
+
                             inventoryItems[index].actualUsage += out_Item.Qty ?? 0;
                             inventoryItems[index].ProductionOutQty += out_Item.ProductionOutQty ?? 0;
                             inventoryItems[index].ReturnQty += out_Item.ReturnQty ?? 0;
@@ -142,38 +149,98 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     }
                 }
 
+                // add stock adjustment in
+                if (st_adj_in != null && st_adj_in.Any())
+                {
+                    foreach (var st_in in st_adj_in)
+                    {
+                        if (inventoryItems.Any(i => i.itemId == st_in.ItemMasterId && i.batchNumber == st_in.BatchNo))
+                        {
+                            var index = inventoryItems.FindIndex(i => i.itemId == st_in.ItemMasterId && i.batchNumber == st_in.BatchNo);
+                            inventoryItems[index].StAdjIn += st_in.Qty ?? 0;
+                        }
+                    }
+                }
+
+                // add stock adjustment out
+                if (st_adj_out != null && st_adj_out.Any())
+                {
+                    foreach (var st_out in st_adj_out)
+                    {
+                        if (inventoryItems.Any(i => i.itemId == st_out.ItemMasterId && i.batchNumber == st_out.BatchNo))
+                        {
+                            var index = inventoryItems.FindIndex(i => i.itemId == st_out.ItemMasterId && i.batchNumber == st_out.BatchNo);
+                            inventoryItems[index].StAdjOut += st_out.Qty ?? 0;
+                        }
+                    }
+                }
+
+                // add stock disposal out
+                if (st_dis_out != null && st_dis_out.Any())
+                {
+                    foreach (var st_dis in st_dis_out)
+                    {
+                        if (inventoryItems.Any(i => i.itemId == st_dis.ItemMasterId && i.batchNumber == st_dis.BatchNo))
+                        {
+                            var index = inventoryItems.FindIndex(i => i.itemId == st_dis.ItemMasterId && i.batchNumber == st_dis.BatchNo);
+                            inventoryItems[index].StDisOut += st_dis.Qty ?? 0;
+                        }
+                    }
+                }
+
                 // calculate closing balance
                 foreach (var item in inventoryItems)
                 {
                     item.closingBalance = item.openingBalance + item.receivedQty - item.actualUsage;
                 }
 
-                if (inventoryItems!=null && inventoryItems.Any())
+                // calculate closing balance
+                foreach (var item in inventoryItems)
+                {
+                    item.closingBalance = item.openingBalance + item.receivedQty - item.actualUsage;
+                }
+
+                if (inventoryItems != null && inventoryItems.Any())
                 {
                     var reportData = new List<InventoryReportDto>();
 
-                    foreach (var item in inventoryItems) {
-                        var report = new InventoryReportDto
+                    foreach (var item in inventoryItems)
+                    {
+                        // Exclude items where both opening balance and closing balance are zero
+                        if (!(item.openingBalance == 0 && item.closingBalance == 0))
                         {
-                            Inventory = item.location,
-                            RawMaterial = item.ItemMaster.ItemName,
-                            ItemCode = item.ItemMaster.ItemCode,
-                            BatchNo = item.batchNumber,
-                            UOM = item.ItemMaster.Unit.UnitName,
-                            OpeningBalance = item.openingBalance,
-                            ReceivedQty = item.receivedQty,
-                            ActualUsage = item.actualUsage,
-                            ClosingBalance = item.closingBalance,
-                            GRNQty = item.GRNQty,
-                            ProductionInQty = item.ProductionInQty ,
-                            ReturnInQty = item.ReturnInQty,
-                            ProductionOutQty =item.ProductionOutQty,
-                            ReturnQty = item.ReturnQty
-                        };
-                        reportData.Add(report);
+                            var report = new InventoryReportDto
+                            {
+                                Inventory = item.location,
+                                RawMaterial = item.ItemMaster.ItemName,
+                                ItemCode = item.ItemMaster.ItemCode,
+                                BatchNo = item.batchNumber,
+                                UOM = item.ItemMaster.Unit.UnitName,
+                                OpeningBalance = item.openingBalance,
+                                ReceivedQty = item.receivedQty - item.StAdjIn,
+                                ActualUsage = item.actualUsage - item.StAdjOut - item.StDisOut,
+                                ClosingBalance = item.closingBalance,
+                                GRNQty = item.GRNQty,
+                                ProductionInQty = item.ProductionInQty,
+                                ReturnInQty = item.ReturnInQty,
+                                ProductionOutQty = item.ProductionOutQty,
+                                ReturnQty = item.ReturnQty,
+                                StAdjIn = item.StAdjIn,
+                                StAdjOut = item.StAdjOut,
+                                StDisOut = item.StDisOut
+                            };
+                            reportData.Add(report);
+                        }
                     }
 
-                    AddResponseMessage(Response, LogMessages.ReportRetrieved, reportData, true, HttpStatusCode.OK);
+                    if (reportData.Any())
+                    {
+                        AddResponseMessage(Response, LogMessages.ReportRetrieved, reportData, true, HttpStatusCode.OK);
+                    }
+                    else
+                    {
+                        AddResponseMessage(Response, LogMessages.ReportNoResultFound, new List<InventoryReportDto>(), true, HttpStatusCode.OK);
+                    }
                 }
                 else
                 {
@@ -194,7 +261,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         {
             try
             {
-                var inventoryItems = new List<InventoryItemInfo>(); //all inventory items
+                var inventoryItems = new List<InventoryAsAtItemInfo>(); //all inventory items
 
                 var currentDateOnly = new DateOnly(date.Year, date.Month, date.Day);
 
@@ -206,7 +273,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     foreach (var item in alreadyStockedItemsLocInv)
                     {
 
-                        inventoryItems.Add(new InventoryItemInfo
+                        inventoryItems.Add(new InventoryAsAtItemInfo
                         {
                             itemId = item.ItemMasterId,
                             batchNumber = item.BatchNo,
@@ -226,27 +293,39 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                     foreach (var item in inventoryItems)
                     {
-                        var report = new InventoryReportDto
+                        // Exclude items with zero closing balance
+                        if (item.closingBalance > 0)
                         {
-                            Inventory = item.location,
-                            RawMaterial = item.ItemMaster.ItemName,
-                            ItemCode = item.ItemMaster.ItemCode,
-                            BatchNo = item.batchNumber,
-                            UOM = item.ItemMaster.Unit.UnitName,
-                            OpeningBalance = item.openingBalance,
-                            ReceivedQty = item.receivedQty,
-                            ActualUsage = item.actualUsage,
-                            ClosingBalance = item.closingBalance
-                        };
-                        reportData.Add(report);
+                            var report = new InventoryReportDto
+                            {
+                                Inventory = item.location,
+                                RawMaterial = item.ItemMaster.ItemName,
+                                ItemCode = item.ItemMaster.ItemCode,
+                                BatchNo = item.batchNumber,
+                                UOM = item.ItemMaster.Unit.UnitName,
+                                OpeningBalance = item.openingBalance,
+                                ReceivedQty = item.receivedQty,
+                                ActualUsage = item.actualUsage,
+                                ClosingBalance = item.closingBalance
+                            };
+                            reportData.Add(report);
+                        }
                     }
 
-                    AddResponseMessage(Response, LogMessages.ReportRetrieved, reportData, true, HttpStatusCode.OK);
+                    if (reportData.Any())
+                    {
+                        AddResponseMessage(Response, LogMessages.ReportRetrieved, reportData, true, HttpStatusCode.OK);
+                    }
+                    else
+                    {
+                        AddResponseMessage(Response, LogMessages.ReportNoResultFound, new List<InventoryReportDto>(), true, HttpStatusCode.OK);
+                    }
                 }
                 else
                 {
                     AddResponseMessage(Response, LogMessages.ReportNoResultFound, new List<InventoryReportDto>(), true, HttpStatusCode.OK);
                 }
+
             }
             catch (Exception ex)
             {
@@ -267,7 +346,26 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             public decimal receivedQty { get; set; }
             public decimal actualUsage { get; set; }
             public decimal closingBalance { get; set; }
+            public decimal GRNQty { get; set; }
+            public decimal ProductionInQty { get; set; }
+            public decimal ReturnInQty { get; set; }
+            public decimal ProductionOutQty { get; set; }
+            public decimal ReturnQty { get; set; }
+            public decimal StAdjIn { get; set; }
+            public decimal StAdjOut { get; set; }
+            public decimal StDisOut { get; set; }
+        }
 
+        private class InventoryAsAtItemInfo
+        {
+            public int itemId { get; set; }
+            public string? batchNumber { get; set; }
+            public string? location { get; set; }
+            public ItemMaster ItemMaster { get; set; }
+            public decimal openingBalance { get; set; }
+            public decimal receivedQty { get; set; }
+            public decimal actualUsage { get; set; }
+            public decimal closingBalance { get; set; }
             public decimal GRNQty { get; set; }
             public decimal ProductionInQty { get; set; }
             public decimal ReturnInQty { get; set; }
