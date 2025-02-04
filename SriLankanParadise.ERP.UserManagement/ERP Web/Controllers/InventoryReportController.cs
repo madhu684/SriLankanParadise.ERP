@@ -294,7 +294,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     foreach (var item in inventoryItems)
                     {
                         // Exclude items with zero closing balance
-                        if (item.closingBalance > 0)
+                        if (item.closingBalance != 0)
                         {
                             var report = new InventoryReportDto
                             {
