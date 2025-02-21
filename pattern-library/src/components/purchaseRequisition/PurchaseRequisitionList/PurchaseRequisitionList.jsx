@@ -1,12 +1,12 @@
-import React from "react";
-import usePurchaseRequisitionList from "./usePurchaseRequisitionList";
-import PurchaseRequisitionApproval from "../PurchaseRequisitionApproval/PurchaseRequisitionApproval";
-import PurchaseRequisition from "../purchaseRequisition";
-import PurchaseRequisitionDetail from "../PurchaseRequisitionDetail/PurchaseRequisitionDetail";
-import PurchaseRequisitionUpdate from "../purchaseRequisitionUpdate/purchaseRequisitionUpdate";
-import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
-import ErrorComponent from "../../errorComponent/errorComponent";
-import PurchaseOrder from "../../purchaseOrder/purchaseOrder";
+import React from 'react'
+import usePurchaseRequisitionList from './usePurchaseRequisitionList'
+import PurchaseRequisitionApproval from '../PurchaseRequisitionApproval/PurchaseRequisitionApproval'
+import PurchaseRequisition from '../purchaseRequisition'
+import PurchaseRequisitionDetail from '../PurchaseRequisitionDetail/PurchaseRequisitionDetail'
+import PurchaseRequisitionUpdate from '../purchaseRequisitionUpdate/purchaseRequisitionUpdate'
+import LoadingSpinner from '../../loadingSpinner/loadingSpinner'
+import ErrorComponent from '../../errorComponent/errorComponent'
+import PurchaseOrder from '../../purchaseOrder/purchaseOrder'
 
 const PurchaseRequisitionList = () => {
   const {
@@ -47,10 +47,10 @@ const PurchaseRequisitionList = () => {
     handleClose,
     handleConvert,
     setShowConvertPRForm,
-  } = usePurchaseRequisitionList();
+  } = usePurchaseRequisitionList()
 
   if (error || isPermissionsError) {
-    return <ErrorComponent error={error || permissionError.message} />;
+    return <ErrorComponent error={error || permissionError.message} />
   }
 
   if (
@@ -58,7 +58,7 @@ const PurchaseRequisitionList = () => {
     isLoadingPermissions ||
     (purchaseRequisitions && !(purchaseRequisitions.length >= 0))
   ) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner />
   }
 
   if (showCreatePRForm) {
@@ -66,8 +66,9 @@ const PurchaseRequisitionList = () => {
       <PurchaseRequisition
         handleClose={() => setShowCreatePRForm(false)}
         handleUpdated={handleUpdated}
+        setShowCreatePRForm={setShowCreatePRForm}
       />
-    );
+    )
   }
 
   if (showUpdatePRForm) {
@@ -77,7 +78,7 @@ const PurchaseRequisitionList = () => {
         purchaseRequisition={PRDetail || selectedRowData[0]}
         handleUpdated={handleUpdated}
       />
-    );
+    )
   }
 
   if (showConvertPRForm) {
@@ -87,7 +88,7 @@ const PurchaseRequisitionList = () => {
         purchaseRequisition={PRDetail || selectedRowData[0]}
         handleUpdated={handleUpdated}
       />
-    );
+    )
   }
 
   if (purchaseRequisitions.length === 0) {
@@ -96,10 +97,10 @@ const PurchaseRequisitionList = () => {
         <h2>Purchase Requisitions</h2>
         <div
           className="d-flex flex-column justify-content-center align-items-center text-center vh-100"
-          style={{ maxHeight: "80vh" }}
+          style={{ maxHeight: '80vh' }}
         >
           <p>You haven't created any purchase requisition. Create a new one.</p>
-          {hasPermission("Create Purchase Requisition") && (
+          {hasPermission('Create Purchase Requisition') && (
             <button
               type="button"
               className="btn btn-primary"
@@ -110,7 +111,7 @@ const PurchaseRequisitionList = () => {
           )}
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -118,7 +119,7 @@ const PurchaseRequisitionList = () => {
       <h2>Purchase Requisitions</h2>
       <div className="mt-3 d-flex justify-content-start align-items-center">
         <div className="btn-group" role="group">
-          {hasPermission("Create Purchase Requisition") && (
+          {hasPermission('Create Purchase Requisition') && (
             <button
               type="button"
               className="btn btn-primary"
@@ -127,9 +128,9 @@ const PurchaseRequisitionList = () => {
               Create
             </button>
           )}
-          {hasPermission("Approve Purchase Requisition") &&
+          {hasPermission('Approve Purchase Requisition') &&
             selectedRowData[0]?.requestedUserId !==
-              parseInt(sessionStorage.getItem("userId")) &&
+              parseInt(sessionStorage.getItem('userId')) &&
             isAnyRowSelected &&
             areAnySelectedRowsPending(selectedRows) && (
               <button
@@ -139,7 +140,7 @@ const PurchaseRequisitionList = () => {
                 Approve
               </button>
             )}
-          {hasPermission("Convert Purchase Requisition") &&
+          {hasPermission('Convert Purchase Requisition') &&
             isAnyRowSelected &&
             areAnySelectedRowsApproved(selectedRows) && (
               <button
@@ -149,7 +150,7 @@ const PurchaseRequisitionList = () => {
                 Convert
               </button>
             )}
-          {hasPermission("Update Purchase Requisition") && isAnyRowSelected && (
+          {hasPermission('Update Purchase Requisition') && isAnyRowSelected && (
             <button
               className="btn btn-warning"
               onClick={() => setShowUpdatePRForm(true)}
@@ -185,7 +186,7 @@ const PurchaseRequisitionList = () => {
                 </td>
                 <td>{pr.purchaseRequisitionId}</td>
                 <td>{pr.requestedBy}</td>
-                <td>{pr.expectedDeliveryDate?.split("T")[0]}</td>
+                <td>{pr.expectedDeliveryDate?.split('T')[0]}</td>
                 <td>
                   <span
                     className={`badge rounded-pill ${getStatusBadgeClass(
@@ -210,7 +211,7 @@ const PurchaseRequisitionList = () => {
                         viewBox="0 0 16 16"
                       >
                         <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z" />
-                      </svg>{" "}
+                      </svg>{' '}
                       Edit
                     </button>
                   ) : (
@@ -230,7 +231,7 @@ const PurchaseRequisitionList = () => {
                           fillRule="evenodd"
                           d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"
                         />
-                      </svg>{" "}
+                      </svg>{' '}
                       View
                     </button>
                   )}
@@ -256,7 +257,7 @@ const PurchaseRequisitionList = () => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default PurchaseRequisitionList;
+export default PurchaseRequisitionList

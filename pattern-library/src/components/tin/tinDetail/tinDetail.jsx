@@ -1,14 +1,29 @@
-import React from "react";
-import { Modal, Button } from "react-bootstrap";
-import useTinDetail from "./useTinDetail";
-import useTinList from "../tinList/useTinList";
-import moment from "moment";
-import "moment-timezone";
+import React from 'react'
+import { Modal, Button, Form } from 'react-bootstrap'
+import useTinDetail from './useTinDetail'
+import useTinList from '../tinList/useTinList'
+import moment from 'moment'
+import 'moment-timezone'
 
 const TinDetail = ({ show, handleClose, tin }) => {
-  const { getStatusLabel, getStatusBadgeClass } = useTinList();
+  const { getStatusLabel, getStatusBadgeClass } = useTinList()
+  const {
+    receivedQuantities,
+    isRequester,
+    handleQuantityChange,
+    handleAccept,
+  } = useTinDetail(tin, handleClose)
+
+
   return (
-    <Modal show={show} onHide={handleClose} centered scrollable size="lg">
+    <Modal
+      show={show}
+      onHide={handleClose}
+      backdrop="static"
+      centered
+      scrollable
+      size="lg"
+    >
       <Modal.Header closeButton>
         <Modal.Title>Transfer Issue Note</Modal.Title>
       </Modal.Header>
@@ -18,7 +33,7 @@ const TinDetail = ({ show, handleClose, tin }) => {
             Details for Transfer Issue Note Ref Number: {tin.referenceNumber}
           </h6>
           <div>
-            TIN Status :{" "}
+            TIN Status :{' '}
             <span
               className={`badge rounded-pill ${getStatusBadgeClass(
                 tin.status
@@ -34,14 +49,14 @@ const TinDetail = ({ show, handleClose, tin }) => {
               <strong>Issued By:</strong> {tin.createdBy}
             </p>
             <p>
-              <strong>Dispatched Date:</strong>{" "}
+              <strong>Dispatched Date:</strong>{' '}
               {moment
                 .utc(tin?.issueDate)
-                .tz("Asia/Colombo")
-                .format("YYYY-MM-DD hh:mm:ss A")}
+                .tz('Asia/Colombo')
+                .format('YYYY-MM-DD hh:mm:ss A')}
             </p>
             <p>
-              <strong>Transfer Dispatching Status:</strong>{" "}
+              <strong>Transfer Dispatching Status:</strong>{' '}
               <span
                 className={`badge rounded-pill ${getStatusBadgeClass(
                   parseInt(`${1}${tin.status.toString().charAt(0)}`, 10)
@@ -58,18 +73,18 @@ const TinDetail = ({ show, handleClose, tin }) => {
                   <strong>Approved By:</strong> {tin.approvedBy}
                 </p>
                 <p>
-                  <strong>Approved Date:</strong>{" "}
+                  <strong>Approved Date:</strong>{' '}
                   {moment
                     .utc(tin?.approvedDate)
-                    .tz("Asia/Colombo")
-                    .format("YYYY-MM-DD hh:mm:ss A")}
+                    .tz('Asia/Colombo')
+                    .format('YYYY-MM-DD hh:mm:ss A')}
                 </p>
               </>
             )}
           </div>
           <div className="col-md-6">
             <p>
-              <strong>Transfer Requisition Reference No:</strong>{" "}
+              <strong>Transfer Requisition Reference No:</strong>{' '}
               {tin.requisitionMaster.referenceNumber}
             </p>
           </div>
@@ -83,6 +98,7 @@ const TinDetail = ({ show, handleClose, tin }) => {
               <th>Unit</th>
               <th>Item Batch</th>
               <th>Dispatched Quantity</th>
+              <th>Received Quantity</th>
             </tr>
           </thead>
           <tbody>
@@ -92,6 +108,26 @@ const TinDetail = ({ show, handleClose, tin }) => {
                 <td>{item.itemMaster?.unit.unitName}</td>
                 <td>{item.batch?.batchRef}</td>
                 <td>{item.quantity}</td>
+                <td>
+                  {isRequester ? (
+                    <Form.Control
+                      type="number"
+                      min="0"
+                      value={
+                        receivedQuantities[item.issueDetailId] !== undefined
+                          ? receivedQuantities[item.issueDetailId]
+                          : item.receivedQuantity || ''
+                      }
+                      onChange={(e) =>
+                        handleQuantityChange(item.issueDetailId, e.target.value)
+                      }
+                    />
+                  ) : item.receivedQuantity ? (
+                    <span>{item.receivedQuantity}</span>
+                  ) : (
+                    <span>-</span>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -101,9 +137,14 @@ const TinDetail = ({ show, handleClose, tin }) => {
         <Button variant="secondary" onClick={handleClose}>
           Close
         </Button>
+        {isRequester && (
+          <Button variant="primary" onClick={handleAccept}>
+            Accept
+          </Button>
+        )}
       </Modal.Footer>
     </Modal>
-  );
-};
+  )
+}
 
-export default TinDetail;
+export default TinDetail

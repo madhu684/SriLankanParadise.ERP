@@ -1,12 +1,16 @@
-import React from "react";
-import usePurchaseRequisition from "./usePurchaseRequisition";
-import CurrentDateTime from "../currentDateTime/currentDateTime";
-import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
-import LoadingSpinner from "../loadingSpinner/loadingSpinner";
-import ErrorComponent from "../errorComponent/errorComponent";
-import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
+import React from 'react'
+import usePurchaseRequisition from './usePurchaseRequisition'
+import CurrentDateTime from '../currentDateTime/currentDateTime'
+import useCompanyLogoUrl from '../companyLogo/useCompanyLogoUrl'
+import LoadingSpinner from '../loadingSpinner/loadingSpinner'
+import ErrorComponent from '../errorComponent/errorComponent'
+import ButtonLoadingSpinner from '../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner'
 
-const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
+const PurchaseRequisition = ({
+  handleClose,
+  handleUpdated,
+  setShowCreatePRForm,
+}) => {
   const {
     formData,
     locations,
@@ -35,18 +39,21 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
     setSearchTerm,
   } = usePurchaseRequisition({
     onFormSubmit: () => {
-      handleClose();
-      handleUpdated();
+      handleClose()
+      handleUpdated()
     },
-  });
-  const companyLogoUrl = useCompanyLogoUrl();
+  })
 
   if (isLoading) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner />
   }
 
   if (isError) {
-    return <ErrorComponent error={"Error fetching data"} />;
+    return <ErrorComponent error={'Error fetching data'} />
+  }
+
+  const handleBack = () => {
+    setShowCreatePRForm(false)
   }
 
   return (
@@ -55,7 +62,12 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img src={companyLogoUrl} alt="Company Logo" height={30} />
+          <button
+            onClick={handleBack}
+            className="btn btn-dark d-flex align-items-center"
+          >
+            Back
+          </button>
           <p>
             <CurrentDateTime />
           </p>
@@ -65,17 +77,17 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
       </div>
 
       {/* Display success or error messages */}
-      {submissionStatus === "successSubmitted" && (
+      {submissionStatus === 'successSubmitted' && (
         <div className="alert alert-success mb-3" role="alert">
           Purchase requisition submitted successfully!
         </div>
       )}
-      {submissionStatus === "successSavedAsDraft" && (
+      {submissionStatus === 'successSavedAsDraft' && (
         <div className="alert alert-success mb-3" role="alert">
           Purchase requisition saved as draft, you can edit and submit it later!
         </div>
       )}
-      {submissionStatus === "error" && (
+      {submissionStatus === 'error' && (
         <div className="alert alert-danger mb-3" role="alert">
           Error submitting purchase requisition. Please try again.
         </div>
@@ -93,13 +105,13 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.requestorName ? "is-valid" : ""
-                } ${validationErrors.requestorName ? "is-invalid" : ""}`}
+                  validFields.requestorName ? 'is-valid' : ''
+                } ${validationErrors.requestorName ? 'is-invalid' : ''}`}
                 id="requestorName"
                 placeholder="Enter requestor name"
                 value={formData.requestorName}
                 onChange={(e) =>
-                  handleInputChange("requestorName", e.target.value)
+                  handleInputChange('requestorName', e.target.value)
                 }
                 required
               />
@@ -116,13 +128,13 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.department ? "is-valid" : ""
-                } ${validationErrors.department ? "is-invalid" : ""}`}
+                  validFields.department ? 'is-valid' : ''
+                } ${validationErrors.department ? 'is-invalid' : ''}`}
                 id="department"
                 placeholder="Enter department"
                 value={formData.department}
                 onChange={(e) =>
-                  handleInputChange("department", e.target.value)
+                  handleInputChange('department', e.target.value)
                 }
                 required
                 disabled
@@ -140,12 +152,12 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
               <input
                 type="email"
                 className={`form-control ${
-                  validFields.email ? "is-valid" : ""
-                } ${validationErrors.email ? "is-invalid" : ""}`}
+                  validFields.email ? 'is-valid' : ''
+                } ${validationErrors.email ? 'is-invalid' : ''}`}
                 id="email"
                 placeholder="Enter email address"
                 value={formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
+                onChange={(e) => handleInputChange('email', e.target.value)}
                 required
               />
               {validationErrors.email && (
@@ -159,13 +171,13 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.contactNumber ? "is-valid" : ""
-                } ${validationErrors.contactNumber ? "is-invalid" : ""}`}
+                  validFields.contactNumber ? 'is-valid' : ''
+                } ${validationErrors.contactNumber ? 'is-invalid' : ''}`}
                 id="contactNumber"
                 placeholder="Enter contact number"
                 value={formData.contactNumber}
                 onChange={(e) =>
-                  handleInputChange("contactNumber", e.target.value)
+                  handleInputChange('contactNumber', e.target.value)
                 }
                 required
               />
@@ -186,13 +198,13 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
               <input
                 type="date"
                 className={`form-control ${
-                  validFields.requisitionDate ? "is-valid" : ""
-                } ${validationErrors.requisitionDate ? "is-invalid" : ""}`}
+                  validFields.requisitionDate ? 'is-valid' : ''
+                } ${validationErrors.requisitionDate ? 'is-invalid' : ''}`}
                 id="requisitionDate"
                 placeholder="Enter requisition date"
                 value={formData.requisitionDate}
                 onChange={(e) =>
-                  handleInputChange("requisitionDate", e.target.value)
+                  handleInputChange('requisitionDate', e.target.value)
                 }
                 required
               />
@@ -208,13 +220,13 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
               </label>
               <textarea
                 className={`form-control ${
-                  validFields.purposeOfRequest ? "is-valid" : ""
-                } ${validationErrors.purposeOfRequest ? "is-invalid" : ""}`}
+                  validFields.purposeOfRequest ? 'is-valid' : ''
+                } ${validationErrors.purposeOfRequest ? 'is-invalid' : ''}`}
                 placeholder="Enter purpose of request"
                 id="purposeOfRequest"
                 value={formData.purposeOfRequest}
                 onChange={(e) =>
-                  handleInputChange("purposeOfRequest", e.target.value)
+                  handleInputChange('purposeOfRequest', e.target.value)
                 }
                 rows="2"
                 maxLength="200"
@@ -233,13 +245,13 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
               <input
                 type="date"
                 className={`form-control ${
-                  validFields.expectedDeliveryDate ? "is-valid" : ""
-                } ${validationErrors.expectedDeliveryDate ? "is-invalid" : ""}`}
+                  validFields.expectedDeliveryDate ? 'is-valid' : ''
+                } ${validationErrors.expectedDeliveryDate ? 'is-invalid' : ''}`}
                 id="expectedDeliveryDate"
                 placeholder="Enter delivery date"
                 value={formData.expectedDeliveryDate}
                 onChange={(e) =>
-                  handleInputChange("expectedDeliveryDate", e.target.value)
+                  handleInputChange('expectedDeliveryDate', e.target.value)
                 }
                 required
               />
@@ -255,23 +267,23 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
               </label>
               <select
                 className={`form-select ${
-                  validFields.expectedDeliveryLocation ? "is-valid" : ""
+                  validFields.expectedDeliveryLocation ? 'is-valid' : ''
                 } ${
-                  validationErrors.expectedDeliveryLocation ? "is-invalid" : ""
+                  validationErrors.expectedDeliveryLocation ? 'is-invalid' : ''
                 }`}
                 id="expectedDeliveryLocation"
-                value={formData?.expectedDeliveryLocation ?? ""}
+                value={formData?.expectedDeliveryLocation ?? ''}
                 onChange={(e) =>
-                  handleInputChange("expectedDeliveryLocation", e.target.value)
+                  handleInputChange('expectedDeliveryLocation', e.target.value)
                 }
               >
                 <option value="">Select Location</option>
                 {locations
                   .filter(
                     (location) =>
-                      location.locationType.name === "Warehouse" &&
+                      location.locationType.name === 'Warehouse' &&
                       location.parentId ===
-                        parseInt(sessionStorage.getItem("locationId"))
+                        parseInt(sessionStorage.getItem('locationId'))
                   )
                   .map((location) => (
                     <option
@@ -299,7 +311,7 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
                 placeholder="Enter reference number"
                 value={formData.referenceNumber}
                 onChange={(e) =>
-                  handleInputChange("referenceNumber", e.target.value)
+                  handleInputChange('referenceNumber', e.target.value)
                 }
               />
             </div>
@@ -326,9 +338,9 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
                 <span
                   className="input-group-text bg-transparent"
                   style={{
-                    cursor: "pointer",
+                    cursor: 'pointer',
                   }}
-                  onClick={() => setSearchTerm("")}
+                  onClick={() => setSearchTerm('')}
                 >
                   <i className="bi bi-x"></i>
                 </span>
@@ -336,14 +348,14 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
             </div>
             {/* Dropdown for filtered items */}
             {searchTerm && (
-              <div className="dropdown" style={{ width: "100%" }}>
+              <div className="dropdown" style={{ width: '100%' }}>
                 <ul
                   className="dropdown-menu"
                   style={{
-                    display: "block",
-                    width: "100%",
-                    maxHeight: "200px",
-                    overflowY: "auto",
+                    display: 'block',
+                    width: '100%',
+                    maxHeight: '200px',
+                    overflowY: 'auto',
                   }}
                 >
                   {isItemsLoading ? (
@@ -425,17 +437,17 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
                       <input
                         type="number"
                         className={`form-control ${
-                          validFields[`quantity_${index}`] ? "is-valid" : ""
+                          validFields[`quantity_${index}`] ? 'is-valid' : ''
                         } ${
                           validationErrors[`quantity_${index}`]
-                            ? "is-invalid"
-                            : ""
+                            ? 'is-invalid'
+                            : ''
                         }`}
                         value={item.quantity}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            "quantity",
+                            'quantity',
                             e.target.value
                           )
                         }
@@ -454,7 +466,7 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            "unitPrice",
+                            'unitPrice',
                             e.target.value
                           )
                         }
@@ -496,8 +508,8 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
           <input
             type="file"
             className={`form-control ${
-              validFields.attachments ? "is-valid" : ""
-            } ${validationErrors.attachments ? "is-invalid" : ""}`}
+              validFields.attachments ? 'is-valid' : ''
+            } ${validationErrors.attachments ? 'is-invalid' : ''}`}
             id="attachment"
             onChange={(e) => handleAttachmentChange(e.target.files)}
             multiple
@@ -526,7 +538,7 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Submitting..." />
             ) : (
-              "Submit"
+              'Submit'
             )}
           </button>
           <button
@@ -538,7 +550,7 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
             {loadingDraft && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Saving as Draft..." />
             ) : (
-              "Save as Draft"
+              'Save as Draft'
             )}
           </button>
           <button
@@ -560,7 +572,7 @@ const PurchaseRequisition = ({ handleClose, handleUpdated }) => {
         </div>
       </form>
     </div>
-  );
-};
+  )
+}
 
-export default PurchaseRequisition;
+export default PurchaseRequisition

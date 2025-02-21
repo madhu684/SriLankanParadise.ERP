@@ -1,16 +1,16 @@
-import React from "react";
-import { Modal, Button } from "react-bootstrap";
-import useMaterialRequisitionDetial from "./useMaterialRequisitionDetail";
-import useMaterialRequisitionList from "../materialRequisitionList/useMaterialRequisitionList";
-import moment from "moment";
-import "moment-timezone";
+import { React } from 'react'
+import { Modal, Button, Form } from 'react-bootstrap'
+import useMaterialRequisitionList from '../materialRequisitionList/useMaterialRequisitionList'
+import moment from 'moment'
+import 'moment-timezone'
 
 const MaterialRequisitionDetail = ({
   show,
   handleClose,
   materialRequisition,
 }) => {
-  const { getStatusLabel, getStatusBadgeClass } = useMaterialRequisitionList();
+  const { getStatusLabel, getStatusBadgeClass } = useMaterialRequisitionList()
+
   return (
     <Modal show={show} onHide={handleClose} centered scrollable size="lg">
       <Modal.Header closeButton>
@@ -19,11 +19,11 @@ const MaterialRequisitionDetail = ({
       <Modal.Body>
         <div className="mb-3 d-flex justify-content-between">
           <h6>
-            Details for Material Requisition Ref Number:{" "}
+            Details for Material Requisition Ref Number:{' '}
             {materialRequisition.referenceNumber}
           </h6>
           <div>
-            Status :{" "}
+            Status :{' '}
             <span
               className={`badge rounded-pill ${getStatusBadgeClass(
                 materialRequisition.status
@@ -39,14 +39,14 @@ const MaterialRequisitionDetail = ({
               <strong>Requested By:</strong> {materialRequisition.requestedBy}
             </p>
             <p>
-              <strong>Requisition Date:</strong>{" "}
+              <strong>Requisition Date:</strong>{' '}
               {moment
                 .utc(materialRequisition?.requisitionDate)
-                .tz("Asia/Colombo")
-                .format("YYYY-MM-DD hh:mm:ss A")}
+                .tz('Asia/Colombo')
+                .format('YYYY-MM-DD hh:mm:ss A')}
             </p>
             <p>
-              <strong>Purpose of Request:</strong>{" "}
+              <strong>Purpose of Request:</strong>{' '}
               {materialRequisition.purposeOfRequest}
             </p>
             {materialRequisition.status === 2 && (
@@ -55,22 +55,22 @@ const MaterialRequisitionDetail = ({
                   <strong>Approved By:</strong> {materialRequisition.approvedBy}
                 </p>
                 <p>
-                  <strong>Approved Date:</strong>{" "}
+                  <strong>Approved Date:</strong>{' '}
                   {moment
                     .utc(materialRequisition?.approvedDate)
-                    .tz("Asia/Colombo")
-                    .format("YYYY-MM-DD hh:mm:ss A")}
+                    .tz('Asia/Colombo')
+                    .format('YYYY-MM-DD hh:mm:ss A')}
                 </p>
               </>
             )}
           </div>
           <div className="col-md-6">
             <p>
-              <strong>Delivery Location:</strong>{" "}
+              <strong>Delivery Location:</strong>{' '}
               {materialRequisition.requestedToLocation?.locationName}
             </p>
             <p>
-              <strong>Warehouse Location:</strong>{" "}
+              <strong>Warehouse Location:</strong>{' '}
               {materialRequisition.requestedFromLocation?.locationName}
             </p>
           </div>
@@ -82,7 +82,7 @@ const MaterialRequisitionDetail = ({
             <tr>
               <th>Item Name</th>
               <th>Unit</th>
-              <th>Quantity</th>
+              <th>Requested Quantity</th>
             </tr>
           </thead>
           <tbody>
@@ -102,7 +102,7 @@ const MaterialRequisitionDetail = ({
         </Button>
       </Modal.Footer>
     </Modal>
-  );
-};
+  )
+}
 
-export default MaterialRequisitionDetail;
+export default MaterialRequisitionDetail

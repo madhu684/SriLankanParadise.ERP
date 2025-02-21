@@ -1,12 +1,12 @@
-import React from "react";
-import useMinList from "./useMinList.js";
-import MinApproval from "../minApproval/minApproval.jsx";
-import Min from "../min.jsx";
-import MinDetails from "../minDetail/minDetail.jsx";
-import LoadingSpinner from "../../loadingSpinner/loadingSpinner.jsx";
-import ErrorComponent from "../../errorComponent/errorComponent.jsx";
-import moment from "moment";
-import "moment-timezone";
+import React from 'react'
+import useMinList from './useMinList.js'
+import MinApproval from '../minApproval/minApproval.jsx'
+import Min from '../min.jsx'
+import MinDetails from '../minDetail/minDetail.jsx'
+import LoadingSpinner from '../../loadingSpinner/loadingSpinner.jsx'
+import ErrorComponent from '../../errorComponent/errorComponent.jsx'
+import moment from 'moment'
+import 'moment-timezone'
 
 const MinList = () => {
   const {
@@ -41,14 +41,14 @@ const MinList = () => {
     hasPermission,
     handleUpdated,
     handleClose,
-  } = useMinList();
+  } = useMinList()
 
   if (error || isPermissionsError) {
-    return <ErrorComponent error={error || "Error fetching data"} />;
+    return <ErrorComponent error={error || 'Error fetching data'} />
   }
 
   if (isLoadingData || isLoadingPermissions || (mins && !(mins?.length >= 0))) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner />
   }
 
   if (showCreateMinForm) {
@@ -56,8 +56,9 @@ const MinList = () => {
       <Min
         handleClose={() => setShowCreateMinForm(false)}
         handleUpdated={handleUpdated}
+        setShowCreateMinForm={setShowCreateMinForm}
       />
-    );
+    )
   }
 
   if (mins?.length === 0) {
@@ -66,10 +67,10 @@ const MinList = () => {
         <h2>Material Issue Notes</h2>
         <div
           className="d-flex flex-column justify-content-center align-items-center text-center vh-100"
-          style={{ maxHeight: "80vh" }}
+          style={{ maxHeight: '80vh' }}
         >
           <p>You haven't created any material issue note. Create a new one.</p>
-          {hasPermission("Create Material Issue Note") && (
+          {hasPermission('Create Material Issue Note') && (
             <button
               type="button"
               className="btn btn-primary"
@@ -80,7 +81,7 @@ const MinList = () => {
           )}
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -88,7 +89,7 @@ const MinList = () => {
       <h2>Material Issue Notes</h2>
       <div className="mt-3 d-flex justify-content-start align-items-center">
         <div className="btn-group" role="group">
-          {hasPermission("Create Material Issue Note") && (
+          {hasPermission('Create Material Issue Note') && (
             <button
               type="button"
               className="btn btn-primary"
@@ -97,9 +98,9 @@ const MinList = () => {
               Create
             </button>
           )}
-          {hasPermission("Approve Material Issue Note") &&
+          {hasPermission('Approve Material Issue Note') &&
             selectedRowData[0]?.createdUserId !==
-              parseInt(sessionStorage.getItem("userId")) &&
+              parseInt(sessionStorage.getItem('userId')) &&
             isAnyRowSelected &&
             areAnySelectedRowsPending(selectedRows) && (
               <button
@@ -140,8 +141,8 @@ const MinList = () => {
                 <td>
                   {moment
                     .utc(min?.issueDate)
-                    .tz("Asia/Colombo")
-                    .format("YYYY-MM-DD hh:mm:ss A")}
+                    .tz('Asia/Colombo')
+                    .format('YYYY-MM-DD hh:mm:ss A')}
                 </td>
                 <td>
                   <span
@@ -169,7 +170,7 @@ const MinList = () => {
                         fillRule="evenodd"
                         d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"
                       />
-                    </svg>{" "}
+                    </svg>{' '}
                     View
                   </button>
                 </td>
@@ -194,7 +195,7 @@ const MinList = () => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default MinList;
+export default MinList
