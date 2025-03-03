@@ -8,6 +8,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
 
         Task<IEnumerable<IssueDetail>> GetIssueDetails(int issueMasterId);
 
-        Task<List<IssueDetail>> UpdateIssueDetailReceivedQuantity(int issueMasterId, List<IssueDetail> issueDetails);
+        Task<List<IssueDetail>> UpdateIssueDetailReceivedAndReturnedQuantity(int issueMasterId, List<IssueDetail> issueDetails);
     }
 }

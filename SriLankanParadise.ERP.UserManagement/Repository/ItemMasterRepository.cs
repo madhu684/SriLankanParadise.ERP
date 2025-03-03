@@ -123,7 +123,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var itemMaster = await _dbContext.ItemMasters
                     .Where(im => im.ItemMasterId == itemMasterId)
-                    .Include(im => im.SubItemMasters)
+                    //.Include(im => im.SubItemMasters)
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
                     .ThenInclude(u => u.MeasurementType)
@@ -131,6 +131,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(im => im.InventoryUnit)
                     .ThenInclude(u => u.MeasurementType)
                     .FirstOrDefaultAsync();
+
 
                 return itemMaster;
             }
@@ -214,6 +215,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(im => im.Unit)
                     .ThenInclude(u => u.MeasurementType)
                     .Include(im => im.ItemType)
+                    .Include(im => im.SubItemMasters)
                     .ToListAsync();
 
                 return itemMasters.Any() ? itemMasters : null;

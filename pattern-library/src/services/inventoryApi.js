@@ -256,6 +256,21 @@ export const get_sub_items_by_item_master_id_api = async (itemMasterId) => {
   }
 };
 
+export const get_sub_item_masters_by_item_master_id_api = async (itemMasterId) => {
+  try {
+    const response = await api.get(
+      `/SubItemMaster/GetSubItemMastersByItemMasterId/${itemMasterId}`,
+      {
+        withCredentials: true,
+      }
+    )
+    return response.data
+  } catch (error) {
+    console.log(error)
+    throw error
+  }
+}
+
 //item types api
 export const get_item_types_by_company_id_api = async (companyId) => {
   try {

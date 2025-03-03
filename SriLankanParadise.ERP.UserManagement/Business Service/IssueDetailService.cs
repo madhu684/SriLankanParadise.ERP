@@ -25,7 +25,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
 
         public async Task<List<IssueDetail>> UpdateIssueDetailReceivedQuantity(int issueMasterId,List<IssueDetail> issueDetailReceivedQtyUpdate)
         {
-            return await _issueDetailRepository.UpdateIssueDetailReceivedQuantity(issueMasterId, issueDetailReceivedQtyUpdate);
+            return await _issueDetailRepository.UpdateIssueDetailReceivedAndReturnedQuantity(issueMasterId, issueDetailReceivedQtyUpdate);
         }
     }
 }

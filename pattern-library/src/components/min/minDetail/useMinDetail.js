@@ -18,22 +18,42 @@ const useMinDetail = (min, handleClose) => {
     select: (r) => r?.data?.result || [],
   })
 
-  const handleQuantityChange = (issueDetailId, newQuantity) => {
+  const handleReceivedQuantityChange = (issueDetailId, newQuantity) => {
     setReceivedQuantities((prev) => ({
       ...prev,
       [issueDetailId]: newQuantity,
     }))
   }
 
+  const handleReturnedQuantityChange = (issueDetailId, newQuantity) => {
+    setReturnedQuantities((prev) => ({
+      ...prev,
+      [issueDetailId]: newQuantity,
+    }))
+  }
+
   const [receivedQuantities, setReceivedQuantities] = useState({})
+  const [returnedQuantities, setReturnedQuantities] = useState({})
 
   useEffect(() => {
     if (issuedetails?.length > 0) {
-      const updatedQuantities = issuedetails.reduce((acc, item) => {
-        acc[item.issueDetailId] = item.receivedQuantity || ''
+      const updatedReceivedQuantities = issuedetails.reduce((acc, item) => {
+        acc[item.issueDetailId] =
+          item.receivedQuantity !== undefined ? item.receivedQuantity : ''
         return acc
       }, {})
-      setReceivedQuantities(updatedQuantities)
+      setReceivedQuantities(updatedReceivedQuantities)
+    }
+  }, [issuedetails])
+
+  useEffect(() => {
+    if (issuedetails?.length > 0) {
+      const updatedReturnedQuantities = issuedetails.reduce((acc, item) => {
+        acc[item.issueDetailId] =
+          item.returnedQuantity !== undefined ? item.returnedQuantity : ''
+        return acc
+      }, {})
+      setReturnedQuantities(updatedReturnedQuantities)
     }
   }, [issuedetails])
 
@@ -53,6 +73,7 @@ const useMinDetail = (min, handleClose) => {
     const updatedDetails = issuedetails.map((item) => ({
       issueDetailId: item.issueDetailId,
       receivedQuantity: receivedQuantities[item.issueDetailId] || 0, 
+      returnedQuantity: returnedQuantities[item.issueDetailId] || 0
     }))
 
     mutation.mutate({ issuemasterid: min.issueMasterId, updatedDetails })
@@ -60,8 +81,10 @@ const useMinDetail = (min, handleClose) => {
 
   return {
     receivedQuantities,
+    returnedQuantities,
     isRequester,
-    handleQuantityChange,
+    handleReceivedQuantityChange,
+    handleReturnedQuantityChange,
     handleAccept,
   }
 }

@@ -48,7 +48,7 @@ const TinsListDetail = ({ trnId, handleBack }) => {
             <CurrentDateTime />
           </p>
         </div>
-        <h1 className="mt-2 text-center">Material Issue Notes</h1>
+        <h1 className="mt-2 text-center">Transfer Issue Notes</h1>
         <hr />
       </div>
 
@@ -58,7 +58,7 @@ const TinsListDetail = ({ trnId, handleBack }) => {
             <tr>
               <th>Reference Number</th>
               <th>Issued By</th>
-              <th>MIN Date</th>
+              <th>TIN Date</th>
               <th>Status</th>
               <th>Details</th>
             </tr>

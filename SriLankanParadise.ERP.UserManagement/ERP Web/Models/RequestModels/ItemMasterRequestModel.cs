@@ -29,7 +29,8 @@
         public int? ReorderLevel { get; set; }
 
         public int PermissionId { get; set; }
-        
+        public decimal? UnitPrice { get; set; }
+
         public IEnumerable<SubItemMasterRequestModel>? SubItemMasters { get; set; }
 
     }

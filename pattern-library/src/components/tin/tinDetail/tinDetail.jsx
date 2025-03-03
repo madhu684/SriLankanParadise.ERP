@@ -9,8 +9,10 @@ const TinDetail = ({ show, handleClose, tin }) => {
   const { getStatusLabel, getStatusBadgeClass } = useTinList()
   const {
     receivedQuantities,
+    returnedQuantities,
     isRequester,
-    handleQuantityChange,
+    handleReceivedQuantityChange,
+    handleReturnedQuantityChange,
     handleAccept,
   } = useTinDetail(tin, handleClose)
 
@@ -99,6 +101,7 @@ const TinDetail = ({ show, handleClose, tin }) => {
               <th>Item Batch</th>
               <th>Dispatched Quantity</th>
               <th>Received Quantity</th>
+              <th>Returned Quantity</th>
             </tr>
           </thead>
           <tbody>
@@ -116,14 +119,42 @@ const TinDetail = ({ show, handleClose, tin }) => {
                       value={
                         receivedQuantities[item.issueDetailId] !== undefined
                           ? receivedQuantities[item.issueDetailId]
-                          : item.receivedQuantity || ''
+                          : item.receivedQuantity ?? ''
                       }
                       onChange={(e) =>
-                        handleQuantityChange(item.issueDetailId, e.target.value)
+                        handleReceivedQuantityChange(
+                          item.issueDetailId,
+                          e.target.value
+                        )
                       }
+                      placeholder="Enter received qty"
                     />
                   ) : item.receivedQuantity ? (
                     <span>{item.receivedQuantity}</span>
+                  ) : (
+                    <span>-</span>
+                  )}
+                </td>
+                <td>
+                  {isRequester ? (
+                    <Form.Control
+                      type="number"
+                      min="0"
+                      value={
+                        returnedQuantities[item.issueDetailId] !== undefined
+                          ? returnedQuantities[item.issueDetailId]
+                          : item.returnedQuantity ?? ''
+                      }
+                      onChange={(e) =>
+                        handleReturnedQuantityChange(
+                          item.issueDetailId,
+                          e.target.value
+                        )
+                      }
+                      placeholder="Enter returned qty"
+                    />
+                  ) : item.returnedQuantity ? (
+                    <span>{item.returnedQuantity}</span>
                   ) : (
                     <span>-</span>
                   )}

@@ -2,7 +2,6 @@ import React from "react";
 import useCategoryUpdate from "./useCategoryUpdate";
 import CurrentDateTime from "../../currentDateTime/currentDateTime";
 import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
-import useCompanyLogoUrl from "../../companyLogo/useCompanyLogoUrl";
 
 const CategoryUpdate = ({ handleClose, category, handleUpdated }) => {
   const {
@@ -22,17 +21,20 @@ const CategoryUpdate = ({ handleClose, category, handleUpdated }) => {
     },
   });
 
-  const companyLogoUrl = useCompanyLogoUrl();
-
   return (
     <div className="container mt-4">
       {/* Header */}
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img src={companyLogoUrl} alt="Company Logo" height={30} />
+          <button
+            onClick={handleClose}
+            className="btn btn-dark d-flex align-items-center"
+          >
+            Back
+          </button>
           <p>
-            {" "}
+            {' '}
             <CurrentDateTime />
           </p>
         </div>
@@ -41,17 +43,17 @@ const CategoryUpdate = ({ handleClose, category, handleUpdated }) => {
       </div>
 
       {/* Display success or error messages */}
-      {submissionStatus === "successSubmitted" && (
+      {submissionStatus === 'successSubmitted' && (
         <div className="alert alert-success mb-3" role="alert">
           Category updated successfully!
         </div>
       )}
-      {submissionStatus === "successSavedAsDraft" && (
+      {submissionStatus === 'successSavedAsDraft' && (
         <div className="alert alert-success mb-3" role="alert">
           Category updated as inactive, you can edit and active it later!
         </div>
       )}
-      {submissionStatus === "error" && (
+      {submissionStatus === 'error' && (
         <div className="alert alert-danger mb-3" role="alert">
           Error creating category. Please try again.
         </div>
@@ -70,13 +72,13 @@ const CategoryUpdate = ({ handleClose, category, handleUpdated }) => {
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.categoryName ? "is-valid" : ""
-                } ${validationErrors.categoryName ? "is-invalid" : ""}`}
+                  validFields.categoryName ? 'is-valid' : ''
+                } ${validationErrors.categoryName ? 'is-invalid' : ''}`}
                 id="categoryName"
                 placeholder="Enter Category Name"
                 value={formData.categoryName}
                 onChange={(e) =>
-                  handleInputChange("categoryName", e.target.value)
+                  handleInputChange('categoryName', e.target.value)
                 }
                 required
               />
@@ -93,11 +95,11 @@ const CategoryUpdate = ({ handleClose, category, handleUpdated }) => {
               </label>
               <select
                 className={`form-select ${
-                  validFields.status ? "is-valid" : ""
-                } ${validationErrors.status ? "is-invalid" : ""}`}
+                  validFields.status ? 'is-valid' : ''
+                } ${validationErrors.status ? 'is-invalid' : ''}`}
                 id="status"
                 value={formData.status}
-                onChange={(e) => handleInputChange("status", e.target.value)}
+                onChange={(e) => handleInputChange('status', e.target.value)}
                 required
               >
                 <option value="">Select Status</option>
@@ -124,7 +126,7 @@ const CategoryUpdate = ({ handleClose, category, handleUpdated }) => {
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Updating..." />
             ) : (
-              "Update"
+              'Update'
             )}
           </button>
           <button
@@ -138,7 +140,7 @@ const CategoryUpdate = ({ handleClose, category, handleUpdated }) => {
         </div>
       </form>
     </div>
-  );
+  )
 };
 
 export default CategoryUpdate;
