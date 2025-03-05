@@ -13,5 +13,9 @@
         public int CompanyId { get; set; }
 
         public int PermissionId { get; set; }
+
+        public double? Latitude { get; set; }
+
+        public double? Longitude { get; set; }
     }
 }
