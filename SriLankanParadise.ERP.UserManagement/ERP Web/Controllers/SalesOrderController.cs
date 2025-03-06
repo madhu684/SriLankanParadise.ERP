@@ -234,5 +234,38 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
         }
+
+        [HttpGet("SalesOrderDetailsByOrderDateRange")]
+        public async Task<ApiResponseModel> GetSalesOrderDetailsByOrderDateRange([FromQuery]DateTime fromDate, [FromQuery] DateTime toDate)
+        {
+            try
+            {
+                var salesOrderDetails = await _salesOrderService.GetSalesOrderDetailsByOrderDateRange(fromDate, toDate);
+                var salesOrderDto = _mapper.Map<IEnumerable<SalesOrderDto>>(salesOrderDetails);
+                AddResponseMessage(Response, LogMessages.SalesOrderRetrieved, salesOrderDto, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("SalesOrderCountPerDateRange")]
+        public async Task<ApiResponseModel> GetSalesOrderCountPerDate([FromQuery] DateTime fromDate, [FromQuery] DateTime toDate)
+        {
+            try
+            {
+                var salesOrderCount = await _salesOrderService.GetSalesOrderCountPerDateRange(fromDate, toDate);
+                AddResponseMessage(Response, LogMessages.SalesOrderRetrieved, salesOrderCount, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }   
     }
 }

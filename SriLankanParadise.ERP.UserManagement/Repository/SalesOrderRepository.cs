@@ -158,5 +158,34 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task<IEnumerable<SalesOrder>> GetSalesOrderDetailsByOrderDateRange(DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                var salesOrderMasters = await _dbContext.SalesOrders
+                    .Where(so => so.OrderDate >= fromDate && so.OrderDate <= toDate)
+                    .Include(so => so.SalesOrderDetails)
+                    .ThenInclude(ib => ib.ItemBatch)
+                    .ThenInclude(im => im.ItemMaster)
+                    .Include(so => so.Customer)
+                    .ToListAsync();
+
+                return salesOrderMasters.Any() ? salesOrderMasters : null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<int> GetSalesOrderCountPerDateRange(DateTime fromDate, DateTime toDate)
+        {
+            return await _dbContext.SalesOrders
+                .Where(so => so.OrderDate >= fromDate && so.OrderDate <= toDate)
+                .CountAsync();
+        }
+
+       
     }
 }

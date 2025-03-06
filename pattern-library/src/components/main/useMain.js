@@ -18,6 +18,7 @@ import ExpenseOutRequisitionList from "../expenseOutRequisition/expenseOutRequis
 import CashierExpenseOut from "../cashierExpenseOut/cashierExpenseOut.jsx";
 import SupplierList from "../supplier/supplierMain/supplierList/supplierList.jsx";
 import StockReport from "../stockReport/stockReport.jsx";
+import SalesOrderReport from "../salesOrderReport/salesOrderReport.jsx";
 
 const useMain = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -112,6 +113,8 @@ const useMain = () => {
         return <SupplierList />;
       case "Stock Report":
         return <StockReport />;
+      case "Sales Order Report":
+        return <SalesOrderReport/>;
       default:
         return null;
     }

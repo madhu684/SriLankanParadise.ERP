@@ -17,5 +17,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task<SalesOrder> GetSalesOrderBySalesOrderId(int salesOrderId);
 
         Task UpdateSalesOrder(int salesOrderId, SalesOrder salesOrder);
+        Task<IEnumerable<SalesOrder>> GetSalesOrderDetailsByOrderDateRange(DateTime fromDate, DateTime toDate);
+
+        Task<int> GetSalesOrderCountPerDateRange(DateTime fromDate, DateTime toDate);
     }
 }

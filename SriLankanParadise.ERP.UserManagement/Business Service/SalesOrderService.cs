@@ -46,5 +46,15 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             await _salesOrderRepository.UpdateSalesOrder(salesOrderId, salesOrder);
         }
+
+        public async Task<IEnumerable<SalesOrder>> GetSalesOrderDetailsByOrderDateRange(DateTime fromDate, DateTime toDate)
+        {
+            return await _salesOrderRepository.GetSalesOrderDetailsByOrderDateRange(fromDate, toDate);
+        }
+
+        public async Task<int> GetSalesOrderCountPerDateRange(DateTime fromDate, DateTime toDate)
+        {
+            return await _salesOrderRepository.GetSalesOrderCountPerDateRange(fromDate, toDate);
+        }
     }
 }
