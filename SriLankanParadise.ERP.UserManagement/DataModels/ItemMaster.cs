@@ -28,6 +28,8 @@ public partial class ItemMaster
 
     public int? InventoryUnitId { get; set; }
 
+    public decimal? UnitPrice { get; set; }
+
     [Column(TypeName = "decimal(10, 6)")]
     public decimal? ConversionRate { get; set; }
 

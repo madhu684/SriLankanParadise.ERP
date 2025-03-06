@@ -140,6 +140,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<UserUpdateRequestModel, User>();
             CreateMap<CompanySubscriptionModuleUser, CompanySubscriptionModuleUserDto>();
             CreateMap<SubscriptionModule, SubscriptionModuleDto>();
+            CreateMap<UpdateIssueDetailRequestModel, IssueDetail>();
             // Add more mapping configurations if needed
         }
     }

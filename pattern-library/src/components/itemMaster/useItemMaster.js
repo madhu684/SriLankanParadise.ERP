@@ -12,18 +12,19 @@ import { useQuery } from "@tanstack/react-query";
 
 const useItemMaster = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
-    unitId: "",
-    categoryId: "",
-    itemName: "",
-    itemCode: "",
-    itemTypeId: "",
-    measurementType: "",
-    itemHierarchy: "main",
-    inventoryMeasurementType: "",
-    inventoryUnitId: "",
-    conversionValue: "",
-    reorderLevel: "",
-  });
+    unitId: '',
+    categoryId: '',
+    itemName: '',
+    itemCode: '',
+    itemTypeId: '',
+    measurementType: '',
+    itemHierarchy: 'main',
+    inventoryMeasurementType: '',
+    inventoryUnitId: '',
+    conversionValue: '',
+    reorderLevel: '',
+    unitPrice: '',
+  })
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
   const [unitOptions, setUnitOptions] = useState([]);
@@ -33,7 +34,9 @@ const useItemMaster = ({ onFormSubmit }) => {
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchChildTerm, setSearchChildTerm] = useState('')
   const [selectedParentItem, setSelectedParentItem] = useState("");
+  const [selectedChildItems, setSelectedChildItems] = useState([]);
 
   const fetchItems = async (companyId, searchQuery, itemType) => {
     try {
@@ -58,6 +61,17 @@ const useItemMaster = ({ onFormSubmit }) => {
     queryFn: () =>
       fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"),
   });
+
+  const {
+    data: availableChildItems,
+    isLoading: isChildItemsLoading,
+    isError: isChildItemsError,
+    error: childItemsError,
+  } = useQuery({
+    queryKey: ['childItems', searchChildTerm],
+    queryFn: () =>
+      fetchItems(sessionStorage.getItem('companyId'), searchChildTerm, 'All'),
+  })
 
   const fetchItemTypes = async () => {
     try {
@@ -288,6 +302,12 @@ const useItemMaster = ({ onFormSubmit }) => {
       formData.reorderLevel
     );
 
+    const isUnitPriceValid = validateField(
+      'unitPrice',
+      'Unit price',
+      formData.unitPrice
+    )
+    
     return (
       isUnitValid &&
       isCategoryValid &&
@@ -298,7 +318,8 @@ const useItemMaster = ({ onFormSubmit }) => {
       isInventoryUnitValid &&
       isConversionValueValid &&
       isItemCodeValid &&
-      isReorderLevelValid
+      isReorderLevelValid &&
+      isUnitPriceValid
     );
   };
 
@@ -320,17 +341,26 @@ const useItemMaster = ({ onFormSubmit }) => {
           categoryId: formData.categoryId,
           itemName: formData.itemName,
           status: status,
-          companyId: sessionStorage.getItem("companyId"),
-          createdBy: sessionStorage.getItem("username"),
-          createdUserId: sessionStorage.getItem("userId"),
+          companyId: sessionStorage.getItem('companyId'),
+          createdBy: sessionStorage.getItem('username'),
+          createdUserId: sessionStorage.getItem('userId'),
           itemTypeId: formData.itemTypeId,
           parentId: selectedParentItem?.itemMasterId || null,
+          SubItemMasters: selectedChildItems.map((item) => ({
+            SubItemMasterId: item.itemMasterId,
+            Quantity: parseFloat(item.quantity) || 0,
+          })),
           inventoryUnitId: formData.inventoryUnitId,
           conversionRate: formData.conversionValue,
+          itemCode: formData.itemCode,
+          reorderLevel: formData.reorderLevel,
           permissionId: 1039,
-        };
-
+          unitPrice: formData.unitPrice,
+        }
+        console.log('Item Master Data', itemMasterData)
         const response = await post_item_master_api(itemMasterData);
+        console.log('API Response:', response)
+
         const itemMasterId = response.data.result.itemMasterId;
 
         if (formData.itemHierarchy === "main") {
@@ -339,17 +369,22 @@ const useItemMaster = ({ onFormSubmit }) => {
             categoryId: formData.categoryId,
             itemName: formData.itemName,
             status: status,
-            companyId: sessionStorage.getItem("companyId"),
-            createdBy: sessionStorage.getItem("username"),
-            createdUserId: sessionStorage.getItem("userId"),
+            companyId: sessionStorage.getItem('companyId'),
+            createdBy: sessionStorage.getItem('username'),
+            createdUserId: sessionStorage.getItem('userId'),
             itemTypeId: formData.itemTypeId,
             parentId: itemMasterId,
+            SubItemMasters: selectedChildItems.map((item) => ({
+              SubItemMasterId: item.itemMasterId,
+              Quantity: parseFloat(item.quantity) || 0,
+            })),
             inventoryUnitId: formData.inventoryUnitId,
             conversionRate: formData.conversionValue,
             itemCode: formData.itemCode,
             reorderLevel: formData.reorderLevel,
             permissionId: 1040,
-          };
+            unitPrice: formData.unitPrice,
+          }
 
           putResponse = await put_item_master_api(itemMasterId, itemMasterData);
         }
@@ -394,6 +429,24 @@ const useItemMaster = ({ onFormSubmit }) => {
     });
   };
 
+  const handleSelectSubItem = (item) => {
+    setSelectedChildItems((val) => [...val, { ...item, quantity: 0 }])
+    setSearchChildTerm('')
+  }
+
+  const handleRemoveChildItem = (index) => {
+    setSelectedChildItems(selectedChildItems.filter((item, i) => i !== index))
+  }
+
+  const handleChildItemQuantityChange = (itemMasterId, value) => {
+    setSelectedChildItems(
+      selectedChildItems.map((i) =>
+        i.itemMasterId === itemMasterId
+          ? { ...i, quantity: value ? parseFloat(value, 10).toString() : 0 }
+          : i
+      )
+    )
+  }
   const handleResetParentItem = () => {
     setSelectedParentItem("");
     setFormData({
@@ -422,18 +475,28 @@ const useItemMaster = ({ onFormSubmit }) => {
     isMeasurementTypesError,
     measurementTypes,
     availableItems,
+    availableChildItems,
     isItemsLoading,
+    isChildItemsLoading,
     isItemsError,
+    isChildItemsError,
     itemsError,
+    childItemsError,
     searchTerm,
+    searchChildTerm,
     selectedParentItem,
+    selectedChildItems,
     setSearchTerm,
+    setSearchChildTerm,
     setFormData,
     handleInputChange,
     handleSubmit,
     handleSelectItem,
     handleResetParentItem,
-  };
+    handleSelectSubItem,
+    handleRemoveChildItem,
+    handleChildItemQuantityChange
+  }
 };
 
 export default useItemMaster;

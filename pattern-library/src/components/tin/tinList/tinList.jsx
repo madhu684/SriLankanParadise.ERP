@@ -1,12 +1,12 @@
-import React from "react";
-import useTinList from "./useTinList.js";
-import TinApproval from "../tinApproval/tinApproval.jsx";
-import Tin from "../tin.jsx";
-import TinDetails from "../tinDetail/tinDetail.jsx";
-import LoadingSpinner from "../../loadingSpinner/loadingSpinner.jsx";
-import ErrorComponent from "../../errorComponent/errorComponent.jsx";
-import moment from "moment";
-import "moment-timezone";
+import React from 'react'
+import useTinList from './useTinList.js'
+import TinApproval from '../tinApproval/tinApproval.jsx'
+import Tin from '../tin.jsx'
+import TinDetails from '../tinDetail/tinDetail.jsx'
+import LoadingSpinner from '../../loadingSpinner/loadingSpinner.jsx'
+import ErrorComponent from '../../errorComponent/errorComponent.jsx'
+import moment from 'moment'
+import 'moment-timezone'
 
 const TinList = () => {
   const {
@@ -41,14 +41,14 @@ const TinList = () => {
     hasPermission,
     handleUpdated,
     handleClose,
-  } = useTinList();
+  } = useTinList()
 
   if (error || isPermissionsError) {
-    return <ErrorComponent error={error || "Error fetching data"} />;
+    return <ErrorComponent error={error || 'Error fetching data'} />
   }
 
   if (isLoadingData || isLoadingPermissions || (Tins && !(Tins?.length >= 0))) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner />
   }
 
   if (showCreateTinForm) {
@@ -56,8 +56,9 @@ const TinList = () => {
       <Tin
         handleClose={() => setShowCreateTinForm(false)}
         handleUpdated={handleUpdated}
+        setShowCreateTinForm={setShowCreateTinForm}
       />
-    );
+    )
   }
 
   if (Tins?.length === 0) {
@@ -66,10 +67,10 @@ const TinList = () => {
         <h2>Transfer Issue Notes</h2>
         <div
           className="d-flex flex-column justify-content-center align-items-center text-center vh-100"
-          style={{ maxHeight: "80vh" }}
+          style={{ maxHeight: '80vh' }}
         >
           <p>You haven't created any transfer issue note. Create a new one.</p>
-          {hasPermission("Create Transfer Issue Note") && (
+          {hasPermission('Create Transfer Issue Note') && (
             <button
               type="button"
               className="btn btn-primary"
@@ -80,7 +81,7 @@ const TinList = () => {
           )}
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -88,7 +89,7 @@ const TinList = () => {
       <h2>Transfer Issue Notes</h2>
       <div className="mt-3 d-flex justify-content-start align-items-center">
         <div className="btn-group" role="group">
-          {hasPermission("Create Transfer Issue Note") && (
+          {hasPermission('Create Transfer Issue Note') && (
             <button
               type="button"
               className="btn btn-primary"
@@ -97,9 +98,9 @@ const TinList = () => {
               Create
             </button>
           )}
-          {hasPermission("Approve Transfer Issue Note") &&
+          {hasPermission('Approve Transfer Issue Note') &&
             selectedRowData[0]?.createdUserId !==
-              parseInt(sessionStorage.getItem("userId")) &&
+              parseInt(sessionStorage.getItem('userId')) &&
             isAnyRowSelected &&
             areAnySelectedRowsPending(selectedRows) && (
               <button
@@ -140,8 +141,8 @@ const TinList = () => {
                 <td>
                   {moment
                     .utc(Tin?.issueDate)
-                    .tz("Asia/Colombo")
-                    .format("YYYY-MM-DD hh:mm:ss A")}
+                    .tz('Asia/Colombo')
+                    .format('YYYY-MM-DD hh:mm:ss A')}
                 </td>
                 <td>
                   <span
@@ -169,7 +170,7 @@ const TinList = () => {
                         fillRule="evenodd"
                         d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"
                       />
-                    </svg>{" "}
+                    </svg>{' '}
                     View
                   </button>
                 </td>
@@ -194,7 +195,7 @@ const TinList = () => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default TinList;
+export default TinList

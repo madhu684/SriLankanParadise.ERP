@@ -7,7 +7,9 @@ import {
   get_measurement_types_by_company_id_api,
   get_item_masters_by_company_id_with_query_api,
   get_item_master_by_item_master_id_api,
-} from "../../../services/inventoryApi";
+  get_sub_items_by_item_master_id_api,
+  get_sub_item_masters_by_item_master_id_api,
+} from '../../../services/inventoryApi'
 import { useQuery } from "@tanstack/react-query";
 
 const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
@@ -23,6 +25,7 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     inventoryUnitId: "",
     conversionValue: "",
     reorderLevel: "",
+    unitPrice: "",
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -32,7 +35,9 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchChildTerm, setSearchChildTerm] = useState('')
   const [selectedParentItem, setSelectedParentItem] = useState("");
+  const [selectedChildItems, setSelectedChildItems] = useState([])
 
   const fetchItems = async (companyId, searchQuery, itemType) => {
     try {
@@ -57,6 +62,17 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     queryFn: () =>
       fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"),
   });
+
+  const {
+    data: availableChildItems,
+    isLoading: isChildItemsLoading,
+    isError: isChildItemsError,
+    error: childItemsError,
+  } = useQuery({
+    queryKey: ['childItems', searchChildTerm],
+    queryFn: () =>
+      fetchItems(sessionStorage.getItem('companyId'), searchChildTerm, 'All'),
+  })
 
   const fetchUnits = async () => {
     try {
@@ -157,6 +173,7 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       conversionValue: deepCopyItemMaster?.conversionRate,
       itemCode: deepCopyItemMaster?.itemCode ?? "",
       reorderLevel: deepCopyItemMaster?.reorderLevel ?? "",
+      unitPrice: deepCopyItemMaster?.unitPrice ?? "",
     });
 
     const fetchParentItem = async () => {
@@ -165,11 +182,37 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
           deepCopyItemMaster?.parentId
         );
         setSelectedParentItem(response.data.result);
+        console.log('response data', response.data.result)
       } catch (error) {
         console.error("Error fetching parent item:", error);
       }
     };
 
+    const fetchChildItems = async () => {
+      try {
+        const response = await get_sub_item_masters_by_item_master_id_api(
+          deepCopyItemMaster.itemMasterId
+        )
+
+        let childItems = response.data.result
+        console.log('childItems', childItems)
+        if (childItems.length > 0) {
+          childItems = childItems.map((item) => {
+            return {
+              id: item.subItemMaster.itemMasterId,
+              name: item.subItemMaster.itemName,
+              unit: item.subItemMaster.unit.unitName,
+              quantity: item.quantity,
+            }
+          })
+          setSelectedChildItems(childItems)
+        }
+      } catch (error) {
+        console.error('Error fetching child item:', error)
+      }
+    }
+
+    fetchChildItems()
     if (itemHierarchy === "sub") {
       fetchParentItem();
     }
@@ -251,7 +294,7 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
         selectedParentItem
       );
     }
-
+    
     const isInventoryUnitValid = validateField(
       "inventoryUnitId",
       "Inventory unit",
@@ -280,6 +323,12 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       formData.reorderLevel
     );
 
+    const isUnitPriceValid = validateField(
+      "unitPrice",
+      "Unit price",
+      formData.unitPrice
+    );
+   
     return (
       isUnitValid &&
       isCategoryValid &&
@@ -290,14 +339,16 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       isInventoryUnitValid &&
       isConversionValueValid &&
       isItemCodeValid &&
-      isReorderLevelValid
+      isReorderLevelValid &&
+      isUnitPriceValid
     );
   };
   const handleSubmit = async (isSaveAsDraft) => {
     try {
+      console.log('handleSubmit triggered!', isSaveAsDraft)
       const status = isSaveAsDraft ? false : true;
 
-      const isFormValid = validateForm(isSaveAsDraft);
+      const isFormValid = validateForm();
       if (isFormValid) {
         if (isSaveAsDraft) {
           setLoadingDraft(true);
@@ -310,26 +361,32 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
           categoryId: formData.categoryId,
           itemName: formData.itemName,
           status: status,
-          companyId: sessionStorage.getItem("companyId"),
-          createdBy: sessionStorage.getItem("username"),
-          createdUserId: sessionStorage.getItem("userId"),
+          companyId: sessionStorage.getItem('companyId'),
+          createdBy: sessionStorage.getItem('username'),
+          createdUserId: sessionStorage.getItem('userId'),
           itemTypeId: formData.itemTypeId,
           parentId:
-            formData.itemHierarchy === "sub"
+            formData.itemHierarchy === 'sub'
               ? selectedParentItem?.itemMasterId
               : itemMaster.itemMasterId,
+          SubItemMasters: selectedChildItems.map((item) => ({
+            SubItemMasterId: item.id,
+            Quantity: parseFloat(item.quantity) || 0,
+          })),
           inventoryUnitId: formData.inventoryUnitId,
           conversionRate: formData.conversionValue,
           itemCode: formData.itemCode,
           reorderLevel: formData.reorderLevel,
           permissionId: 1040,
-        };
+          unitPrice: formData.unitPrice,
+        }
+        
 
         const putResponse = await put_item_master_api(
           itemMaster.itemMasterId,
           ItemMasterData
         );
-
+        
         if (putResponse.status === 200) {
           if (isSaveAsDraft) {
             setSubmissionStatus("successSavedAsDraft");
@@ -408,6 +465,50 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     });
   };
 
+  const handleSelectSubItem = (item) => {
+    const subItem = {
+      id: item.itemMasterId,
+      name: item.itemName,
+      unit: item.unit.unitName,
+      quantity: item.quantity,
+    }
+
+    setSelectedChildItems((val) => [...val, subItem])
+    setSearchChildTerm('')
+  }
+
+  const handleChildItemDetailsChange = (index, field, value) => {
+    setFormData((prevFormData) => {
+      const updatedItemDetails = [...prevFormData.itemDetails]
+      updatedItemDetails[index][field] = value
+
+      // Ensure positive values for Quantities and Unit Prices
+      updatedItemDetails[index].quantity = Math.max(
+        0,
+        updatedItemDetails[index].quantity
+      )
+
+      return {
+        ...prevFormData,
+        itemDetails: updatedItemDetails,
+      }
+    })
+  }
+
+  const handleRemoveChildItem = (index) => {
+    setSelectedChildItems(selectedChildItems.filter((item, i) => i !== index))
+  }
+
+  const handleChildItemQuantityChange = (id, value) => {
+    setSelectedChildItems(
+      selectedChildItems.map((i) =>
+        i.id === id
+          ? { ...i, quantity: value ? parseFloat(value, 10).toString() : 0 }
+          : i
+      )
+    )
+  }
+
   const handleResetParentItem = () => {
     setSelectedParentItem("");
     setFormData({
@@ -433,22 +534,34 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     isMeasurementTypesError,
     measurementTypes,
     availableItems,
+    availableChildItems,
     isItemsLoading,
+    isChildItemsLoading,
     isItemsError,
     itemsError,
+    childItemsError,
     searchTerm,
+    searchChildTerm,
     selectedParentItem,
+    selectedChildItems,
     isUnitOptionsLoading,
     isUnitOptionsError,
     isLoading,
     isError,
     setSearchTerm,
+    setSearchChildTerm,
     setFormData,
+    setSelectedParentItem,
+    setSelectedChildItems,
     handleInputChange,
     handleSubmit,
     handleSelectItem,
+    handleSelectSubItem,
+    handleChildItemDetailsChange,
+    handleRemoveChildItem,
     handleResetParentItem,
-  };
+    handleChildItemQuantityChange,
+  }
 };
 
 export default useItemMasterUpdate;

@@ -31,6 +31,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public int? InventoryUnitId { get; set; }
 
+        public decimal? UnitPrice { get; set; }
+
         public virtual UnitDto? InventoryUnit { get; set; }
 
         public decimal? ConversionRate { get; set; }

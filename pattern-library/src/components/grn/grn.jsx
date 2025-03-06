@@ -1,12 +1,12 @@
-import React from "react";
-import useGrn from "./useGrn";
-import CurrentDateTime from "../currentDateTime/currentDateTime";
-import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
-import LoadingSpinner from "../loadingSpinner/loadingSpinner";
-import ErrorComponent from "../errorComponent/errorComponent";
-import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
+import React from 'react'
+import useGrn from './useGrn'
+import CurrentDateTime from '../currentDateTime/currentDateTime'
+import useCompanyLogoUrl from '../companyLogo/useCompanyLogoUrl'
+import LoadingSpinner from '../loadingSpinner/loadingSpinner'
+import ErrorComponent from '../errorComponent/errorComponent'
+import ButtonLoadingSpinner from '../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner'
 
-const Grn = ({ handleClose, handleUpdated }) => {
+const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
   const {
     formData,
     submissionStatus,
@@ -44,18 +44,21 @@ const Grn = ({ handleClose, handleUpdated }) => {
     handleSelectItem,
   } = useGrn({
     onFormSubmit: () => {
-      handleClose();
-      handleUpdated();
+      handleClose()
+      handleUpdated()
     },
-  });
-  const companyLogoUrl = useCompanyLogoUrl();
+  })
 
   if (isLoading) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner />
   }
 
   if (isError) {
-    return <ErrorComponent error={"Error fetching data"} />;
+    return <ErrorComponent error={'Error fetching data'} />
+  }
+
+  const handleBack = () => {
+    setShowCreateGrnForm(false)
   }
 
   return (
@@ -64,7 +67,12 @@ const Grn = ({ handleClose, handleUpdated }) => {
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img src={companyLogoUrl} alt="Company Logo" height={30} />
+          <button
+            onClick={handleBack}
+            className="btn btn-dark d-flex align-items-center"
+          >
+            Back
+          </button>
           <p>
             <CurrentDateTime />
           </p>
@@ -74,17 +82,17 @@ const Grn = ({ handleClose, handleUpdated }) => {
       </div>
 
       {/* Display success or error message */}
-      {submissionStatus === "successSubmitted" && (
+      {submissionStatus === 'successSubmitted' && (
         <div className="alert alert-success mb-3" role="alert">
           GRN submitted successfully!
         </div>
       )}
-      {submissionStatus === "successSavedAsDraft" && (
+      {submissionStatus === 'successSavedAsDraft' && (
         <div className="alert alert-success mb-3" role="alert">
           GRN saved as draft, you can edit and submit it later!
         </div>
       )}
-      {submissionStatus === "error" && (
+      {submissionStatus === 'error' && (
         <div className="alert alert-danger mb-3" role="alert">
           Error submitting GRN. Please try again.
         </div>
@@ -102,12 +110,12 @@ const Grn = ({ handleClose, handleUpdated }) => {
               <input
                 type="date"
                 className={`form-control ${
-                  validFields.grnDate ? "is-valid" : ""
-                } ${validationErrors.grnDate ? "is-invalid" : ""}`}
+                  validFields.grnDate ? 'is-valid' : ''
+                } ${validationErrors.grnDate ? 'is-invalid' : ''}`}
                 id="grnDate"
                 placeholder="Enter GRN date"
                 value={formData.grnDate}
-                onChange={(e) => handleInputChange("grnDate", e.target.value)}
+                onChange={(e) => handleInputChange('grnDate', e.target.value)}
                 required
               />
               {validationErrors.grnDate && (
@@ -123,13 +131,13 @@ const Grn = ({ handleClose, handleUpdated }) => {
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.receivedBy ? "is-valid" : ""
-                } ${validationErrors.receivedBy ? "is-invalid" : ""}`}
+                  validFields.receivedBy ? 'is-valid' : ''
+                } ${validationErrors.receivedBy ? 'is-invalid' : ''}`}
                 id="receivedBy"
                 placeholder="Enter name"
                 value={formData.receivedBy}
                 onChange={(e) =>
-                  handleInputChange("receivedBy", e.target.value)
+                  handleInputChange('receivedBy', e.target.value)
                 }
                 required
               />
@@ -146,13 +154,13 @@ const Grn = ({ handleClose, handleUpdated }) => {
               <input
                 type="date"
                 className={`form-control ${
-                  validFields.receivedDate ? "is-valid" : ""
-                } ${validationErrors.receivedDate ? "is-invalid" : ""}`}
+                  validFields.receivedDate ? 'is-valid' : ''
+                } ${validationErrors.receivedDate ? 'is-invalid' : ''}`}
                 id="receivedDate"
                 placeholder="Enter received date"
                 value={formData.receivedDate}
                 onChange={(e) =>
-                  handleInputChange("receivedDate", e.target.value)
+                  handleInputChange('receivedDate', e.target.value)
                 }
                 required
               />
@@ -171,10 +179,10 @@ const Grn = ({ handleClose, handleUpdated }) => {
               <select
                 id="grnType"
                 className={`form-select ${
-                  validFields.grnType ? "is-valid" : ""
-                } ${validationErrors.grnType ? "is-invalid" : ""}`}
+                  validFields.grnType ? 'is-valid' : ''
+                } ${validationErrors.grnType ? 'is-invalid' : ''}`}
                 value={formData.grnType}
-                onChange={(e) => handleInputChange("grnType", e.target.value)}
+                onChange={(e) => handleInputChange('grnType', e.target.value)}
                 required
               >
                 <option value="">Select GRN Type</option>
@@ -199,8 +207,8 @@ const Grn = ({ handleClose, handleUpdated }) => {
               <select
                 id="status"
                 className={`form-select ${
-                  validFields.status ? "is-valid" : ""
-                } ${validationErrors.status ? "is-invalid" : ""}`}
+                  validFields.status ? 'is-valid' : ''
+                } ${validationErrors.status ? 'is-invalid' : ''}`}
                 value={formData.status}
                 onChange={(e) =>
                   handleStatusChange(
@@ -229,19 +237,19 @@ const Grn = ({ handleClose, handleUpdated }) => {
               </label>
               <select
                 className={`form-select ${
-                  validFields.warehouseLocation ? "is-valid" : ""
-                } ${validationErrors.warehouseLocation ? "is-invalid" : ""}`}
+                  validFields.warehouseLocation ? 'is-valid' : ''
+                } ${validationErrors.warehouseLocation ? 'is-invalid' : ''}`}
                 id="warehouseLocation"
-                value={formData?.warehouseLocation ?? ""}
+                value={formData?.warehouseLocation ?? ''}
                 onChange={(e) =>
-                  handleInputChange("warehouseLocation", e.target.value)
+                  handleInputChange('warehouseLocation', e.target.value)
                 }
               >
                 <option value="">Select Warehouse</option>
                 {/* Filter out warehouse locations based on the locationType being "Warehouse" */}
                 {locations
                   ?.filter(
-                    (location) => location.locationType.name === "Warehouse"
+                    (location) => location.locationType.name === 'Warehouse'
                   )
                   ?.map((location) => (
                     <option
@@ -268,7 +276,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
                 Purchase Order
               </label>
 
-              {!["finishedGoodsIn", "directPurchase"].includes(
+              {!['finishedGoodsIn', 'directPurchase'].includes(
                 formData?.grnType
               ) &&
                 selectedPurchaseOrder === null && (
@@ -280,9 +288,9 @@ const Grn = ({ handleClose, handleUpdated }) => {
                       <input
                         type="text"
                         className={`form-control ${
-                          validFields.purchaseOrderId ? "is-valid" : ""
+                          validFields.purchaseOrderId ? 'is-valid' : ''
                         } ${
-                          validationErrors.purchaseOrderId ? "is-invalid" : ""
+                          validationErrors.purchaseOrderId ? 'is-invalid' : ''
                         }`}
                         placeholder="Search for a purchase order..."
                         value={purchaseOrderSearchTerm}
@@ -295,9 +303,9 @@ const Grn = ({ handleClose, handleUpdated }) => {
                         <span
                           className="input-group-text bg-transparent"
                           style={{
-                            cursor: "pointer",
+                            cursor: 'pointer',
                           }}
-                          onClick={() => setPurchaseOrderSearchTerm("")}
+                          onClick={() => setPurchaseOrderSearchTerm('')}
                         >
                           <i className="bi bi-x"></i>
                         </span>
@@ -306,25 +314,25 @@ const Grn = ({ handleClose, handleUpdated }) => {
 
                     {/* Dropdown for filtered suppliers */}
                     {purchaseOrderSearchTerm && (
-                      <div className="dropdown" style={{ width: "100%" }}>
+                      <div className="dropdown" style={{ width: '100%' }}>
                         <ul
                           className="dropdown-menu"
                           style={{
-                            display: "block",
-                            width: "100%",
-                            maxHeight: "200px",
-                            overflowY: "auto",
+                            display: 'block',
+                            width: '100%',
+                            maxHeight: '200px',
+                            overflowY: 'auto',
                           }}
                         >
                           {purchaseOrders
                             .filter((purchaseOrder) =>
                               purchaseOrder.referenceNo
-                                ?.replace(/\s/g, "")
+                                ?.replace(/\s/g, '')
                                 ?.toLowerCase()
                                 .includes(
                                   purchaseOrderSearchTerm
                                     .toLowerCase()
-                                    .replace(/\s/g, "")
+                                    .replace(/\s/g, '')
                                 )
                             )
                             .map((purchaseOrder) => (
@@ -339,19 +347,19 @@ const Grn = ({ handleClose, handleUpdated }) => {
                                 >
                                   <span className="me-3">
                                     <i className="bi bi-file-earmark-text"></i>
-                                  </span>{" "}
+                                  </span>{' '}
                                   {purchaseOrder?.referenceNo}
                                 </button>
                               </li>
                             ))}
                           {purchaseOrders.filter((purchaseOrder) =>
                             purchaseOrder.referenceNo
-                              ?.replace(/\s/g, "")
+                              ?.replace(/\s/g, '')
                               ?.toLowerCase()
                               .includes(
                                 purchaseOrderSearchTerm
                                   .toLowerCase()
-                                  .replace(/\s/g, "")
+                                  .replace(/\s/g, '')
                               )
                           ).length === 0 && (
                             <li className="dropdown-item text-center">
@@ -378,12 +386,12 @@ const Grn = ({ handleClose, handleUpdated }) => {
                     )}
                   </div>
                 )}
-              {formData.grnType === "finishedGoodsIn" && (
+              {formData.grnType === 'finishedGoodsIn' && (
                 <div className="alert alert-warning" role="alert">
                   This is a "Finished Goods In", no need a purchase order.
                 </div>
               )}
-              {formData.grnType === "directPurchase" && (
+              {formData.grnType === 'directPurchase' && (
                 <div className="alert alert-warning" role="alert">
                   This is a "Direct Purchase", no need a purchase order.
                 </div>
@@ -396,15 +404,15 @@ const Grn = ({ handleClose, handleUpdated }) => {
                 <div className="card-header">Selected Purchase Order</div>
                 <div className="card-body">
                   <p>
-                    Purchase Order Reference No:{" "}
+                    Purchase Order Reference No:{' '}
                     {selectedPurchaseOrder?.referenceNo}
                   </p>
                   <p>
                     Supplier: {selectedPurchaseOrder?.supplier?.supplierName}
                   </p>
                   <p>
-                    Order Date:{" "}
-                    {selectedPurchaseOrder?.orderDate?.split("T")[0] ?? ""}
+                    Order Date:{' '}
+                    {selectedPurchaseOrder?.orderDate?.split('T')[0] ?? ''}
                   </p>
                   <button
                     type="button"
@@ -424,7 +432,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
             {/* Item Details */}
             <h4>3. Item Details</h4>
             {/* Item Search */}
-            {["finishedGoodsIn", "directPurchase"].includes(
+            {['finishedGoodsIn', 'directPurchase'].includes(
               formData?.grnType
             ) && (
               <div className="mb-0 mt-3">
@@ -443,9 +451,9 @@ const Grn = ({ handleClose, handleUpdated }) => {
                     <span
                       className="input-group-text bg-transparent"
                       style={{
-                        cursor: "pointer",
+                        cursor: 'pointer',
                       }}
-                      onClick={() => setSearchTerm("")}
+                      onClick={() => setSearchTerm('')}
                     >
                       <i className="bi bi-x"></i>
                     </span>
@@ -454,14 +462,14 @@ const Grn = ({ handleClose, handleUpdated }) => {
 
                 {/* Dropdown for filtered items */}
                 {searchTerm && (
-                  <div className="dropdown" style={{ width: "100%" }}>
+                  <div className="dropdown" style={{ width: '100%' }}>
                     <ul
                       className="dropdown-menu"
                       style={{
-                        display: "block",
-                        width: "100%",
-                        maxHeight: "200px",
-                        overflowY: "auto",
+                        display: 'block',
+                        width: '100%',
+                        maxHeight: '200px',
+                        overflowY: 'auto',
                       }}
                     >
                       {isItemsLoading ? (
@@ -501,7 +509,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
                               >
                                 <span className="me-3">
                                   <i className="bi bi-cart4"></i>
-                                </span>{" "}
+                                </span>{' '}
                                 {item.itemName}
                               </button>
                             </li>
@@ -530,7 +538,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
                 <tr>
                   <th>Item Name</th>
                   <th>Unit</th>
-                  {!["finishedGoodsIn", "directPurchase"].includes(
+                  {!['finishedGoodsIn', 'directPurchase'].includes(
                     formData?.grnType
                   ) && (
                     <>
@@ -551,7 +559,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
                   <tr key={index}>
                     <td>{item.name}</td>
                     <td>{item.unit}</td>
-                    {!["finishedGoodsIn", "directPurchase"].includes(
+                    {!['finishedGoodsIn', 'directPurchase'].includes(
                       formData?.grnType
                     ) && (
                       <>
@@ -564,18 +572,18 @@ const Grn = ({ handleClose, handleUpdated }) => {
                         type="number"
                         className={`form-control ${
                           validFields[`receivedQuantity_${index}`]
-                            ? "is-valid"
-                            : ""
+                            ? 'is-valid'
+                            : ''
                         } ${
                           validationErrors[`receivedQuantity_${index}`]
-                            ? "is-invalid"
-                            : ""
+                            ? 'is-invalid'
+                            : ''
                         }`}
                         value={item.receivedQuantity}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            "receivedQuantity",
+                            'receivedQuantity',
                             e.target.value
                           )
                         }
@@ -591,18 +599,18 @@ const Grn = ({ handleClose, handleUpdated }) => {
                         type="number"
                         className={`form-control ${
                           validFields[`rejectedQuantity_${index}`]
-                            ? "is-valid"
-                            : ""
+                            ? 'is-valid'
+                            : ''
                         } ${
                           validationErrors[`rejectedQuantity_${index}`]
-                            ? "is-invalid"
-                            : ""
+                            ? 'is-invalid'
+                            : ''
                         }`}
                         value={item.rejectedQuantity}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            "rejectedQuantity",
+                            'rejectedQuantity',
                             e.target.value
                           )
                         }
@@ -621,7 +629,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            "freeQuantity",
+                            'freeQuantity',
                             e.target.value
                           )
                         }
@@ -631,17 +639,17 @@ const Grn = ({ handleClose, handleUpdated }) => {
                       <input
                         type="date"
                         className={`form-control ${
-                          validFields[`expiryDate_${index}`] ? "is-valid" : ""
+                          validFields[`expiryDate_${index}`] ? 'is-valid' : ''
                         } ${
                           validationErrors[`expiryDate_${index}`]
-                            ? "is-invalid"
-                            : ""
+                            ? 'is-invalid'
+                            : ''
                         }`}
                         value={item.expiryDate}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            "expiryDate",
+                            'expiryDate',
                             e.target.value
                           )
                         }
@@ -656,17 +664,17 @@ const Grn = ({ handleClose, handleUpdated }) => {
                       <input
                         type="number"
                         className={`form-control ${
-                          validFields[`unitPrice_${index}`] ? "is-valid" : ""
+                          validFields[`unitPrice_${index}`] ? 'is-valid' : ''
                         } ${
                           validationErrors[`unitPrice_${index}`]
-                            ? "is-invalid"
-                            : ""
+                            ? 'is-invalid'
+                            : ''
                         }`}
                         value={item.unitPrice}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            "unitPrice",
+                            'unitPrice',
                             e.target.value
                           )
                         }
@@ -693,7 +701,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
           </div>
         )}
 
-        {!["finishedGoodsIn", "directPurchase"].includes(formData?.grnType) &&
+        {!['finishedGoodsIn', 'directPurchase'].includes(formData?.grnType) &&
           selectedPurchaseOrder === null && (
             <div className="mb-3">
               <small className="form-text text-muted">
@@ -727,7 +735,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Submitting..." />
             ) : (
-              "Submit"
+              'Submit'
             )}
           </button>
           <button
@@ -744,7 +752,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
             {loadingDraft && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Saving as Draft..." />
             ) : (
-              "Save as Draft"
+              'Save as Draft'
             )}
           </button>
           <button
@@ -766,7 +774,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
         </div>
       </form>
     </div>
-  );
-};
+  )
+}
 
-export default Grn;
+export default Grn

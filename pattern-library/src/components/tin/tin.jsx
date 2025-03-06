@@ -1,14 +1,14 @@
-import React from "react";
-import useTin from "./useTin";
-import CurrentDateTime from "../currentDateTime/currentDateTime";
-import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
-import LoadingSpinner from "../loadingSpinner/loadingSpinner";
-import ErrorComponent from "../errorComponent/errorComponent";
-import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
-import moment from "moment";
-import "moment-timezone";
+import React from 'react'
+import useTin from './useTin'
+import CurrentDateTime from '../currentDateTime/currentDateTime'
+import useCompanyLogoUrl from '../companyLogo/useCompanyLogoUrl'
+import LoadingSpinner from '../loadingSpinner/loadingSpinner'
+import ErrorComponent from '../errorComponent/errorComponent'
+import ButtonLoadingSpinner from '../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner'
+import moment from 'moment'
+import 'moment-timezone'
 
-const Tin = ({ handleClose, handleUpdated }) => {
+const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
   const {
     formData,
     submissionStatus,
@@ -41,27 +41,34 @@ const Tin = ({ handleClose, handleUpdated }) => {
     handleResetTrn,
   } = useTin({
     onFormSubmit: () => {
-      handleClose();
-      handleUpdated();
+      handleClose()
+      handleUpdated()
     },
-  });
-  const companyLogoUrl = useCompanyLogoUrl();
+  })
 
   if (isLoading || isItemBatchesLoading) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner />
   }
 
   if (isError || isItemBatchesError) {
-    return <ErrorComponent error={"Error fetching data"} />;
+    return <ErrorComponent error={'Error fetching data'} />
   }
 
+  const handleBack = () => {
+    setShowCreateTinForm(false)
+  }
   return (
     <div className="container mt-4">
       {/* Header */}
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img src={companyLogoUrl} alt="Company Logo" height={30} />
+          <button
+            onClick={handleBack}
+            className="btn btn-dark d-flex align-items-center"
+          >
+            Back
+          </button>
           <p>
             <CurrentDateTime />
           </p>
@@ -71,17 +78,17 @@ const Tin = ({ handleClose, handleUpdated }) => {
       </div>
 
       {/* Display success or error message */}
-      {submissionStatus === "successSubmitted" && (
+      {submissionStatus === 'successSubmitted' && (
         <div className="alert alert-success mb-3" role="alert">
           Transfer issue note submitted successfully!
         </div>
       )}
-      {submissionStatus === "successSavedAsDraft" && (
+      {submissionStatus === 'successSavedAsDraft' && (
         <div className="alert alert-success mb-3" role="alert">
           Transfer issue note saved as draft, you can edit and submit it later!
         </div>
       )}
-      {submissionStatus === "error" && (
+      {submissionStatus === 'error' && (
         <div className="alert alert-danger mb-3" role="alert">
           Error submitting transfer issue note. Please try again.
         </div>
@@ -100,8 +107,8 @@ const Tin = ({ handleClose, handleUpdated }) => {
               <select
                 id="status"
                 className={`form-select ${
-                  validFields.status ? "is-valid" : ""
-                } ${validationErrors.status ? "is-invalid" : ""}`}
+                  validFields.status ? 'is-valid' : ''
+                } ${validationErrors.status ? 'is-invalid' : ''}`}
                 value={formData.status}
                 onChange={(e) =>
                   handleStatusChange(
@@ -141,8 +148,8 @@ const Tin = ({ handleClose, handleUpdated }) => {
                     <input
                       type="text"
                       className={`form-control ${
-                        validFields.trnId ? "is-valid" : ""
-                      } ${validationErrors.trnId ? "is-invalid" : ""}`}
+                        validFields.trnId ? 'is-valid' : ''
+                      } ${validationErrors.trnId ? 'is-invalid' : ''}`}
                       placeholder="Search for a transfer requisition..."
                       value={trnSearchTerm}
                       onChange={(e) => setTrnSearchTerm(e.target.value)}
@@ -152,9 +159,9 @@ const Tin = ({ handleClose, handleUpdated }) => {
                       <span
                         className="input-group-text bg-transparent"
                         style={{
-                          cursor: "pointer",
+                          cursor: 'pointer',
                         }}
-                        onClick={() => setTrnSearchTerm("")}
+                        onClick={() => setTrnSearchTerm('')}
                       >
                         <i className="bi bi-x"></i>
                       </span>
@@ -163,23 +170,23 @@ const Tin = ({ handleClose, handleUpdated }) => {
 
                   {/* Dropdown for filtered suppliers */}
                   {trnSearchTerm && (
-                    <div className="dropdown" style={{ width: "100%" }}>
+                    <div className="dropdown" style={{ width: '100%' }}>
                       <ul
                         className="dropdown-menu"
                         style={{
-                          display: "block",
-                          width: "100%",
-                          maxHeight: "200px",
-                          overflowY: "auto",
+                          display: 'block',
+                          width: '100%',
+                          maxHeight: '200px',
+                          overflowY: 'auto',
                         }}
                       >
                         {trns
                           .filter((trn) =>
                             trn.referenceNumber
-                              ?.replace(/\s/g, "")
+                              ?.replace(/\s/g, '')
                               ?.toLowerCase()
                               .includes(
-                                trnSearchTerm.toLowerCase().replace(/\s/g, "")
+                                trnSearchTerm.toLowerCase().replace(/\s/g, '')
                               )
                           )
                           .map((trn) => (
@@ -192,17 +199,17 @@ const Tin = ({ handleClose, handleUpdated }) => {
                               >
                                 <span className="me-3">
                                   <i className="bi bi-file-earmark-text"></i>
-                                </span>{" "}
+                                </span>{' '}
                                 {trn?.referenceNumber}
                               </button>
                             </li>
                           ))}
                         {trns.filter((trn) =>
                           trn.referenceNumber
-                            ?.replace(/\s/g, "")
+                            ?.replace(/\s/g, '')
                             ?.toLowerCase()
                             .includes(
-                              trnSearchTerm.toLowerCase().replace(/\s/g, "")
+                              trnSearchTerm.toLowerCase().replace(/\s/g, '')
                             )
                         ).length === 0 && (
                           <li className="dropdown-item text-center">
@@ -237,23 +244,23 @@ const Tin = ({ handleClose, handleUpdated }) => {
                 <div className="card-header">Selected Transfer Requisition</div>
                 <div className="card-body">
                   <p>
-                    Transfer Requisition Reference No:{" "}
+                    Transfer Requisition Reference No:{' '}
                     {selectedTrn?.referenceNumber}
                   </p>
                   <p>Requested By: {selectedTrn?.requestedBy}</p>
                   <p>
-                    Trn Date:{" "}
+                    Trn Date:{' '}
                     {moment
                       .utc(selectedTrn?.requisitionDate)
-                      .tz("Asia/Colombo")
-                      .format("YYYY-MM-DD hh:mm:ss A")}
+                      .tz('Asia/Colombo')
+                      .format('YYYY-MM-DD hh:mm:ss A')}
                   </p>
                   <p>
-                    To Warehouse Location:{" "}
+                    To Warehouse Location:{' '}
                     {selectedTrn?.requestedToLocation.locationName}
                   </p>
                   <p>
-                    From Warehouse Location:{" "}
+                    From Warehouse Location:{' '}
                     {selectedTrn?.requestedFromLocation.locationName}
                   </p>
                   <button
@@ -299,7 +306,7 @@ const Tin = ({ handleClose, handleUpdated }) => {
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            "batchId",
+                            'batchId',
                             e.target.value
                           )
                         }
@@ -313,7 +320,7 @@ const Tin = ({ handleClose, handleUpdated }) => {
                               value={batch.batchId}
                               disabled={batch.stockInHand === 0}
                             >
-                              {batch.itemBatch.batch.batchRef} - Stock in hand{" "}
+                              {batch.itemBatch.batch.batchRef} - Stock in hand{' '}
                               {batch.stockInHand}
                             </option>
                           ))}
@@ -324,18 +331,18 @@ const Tin = ({ handleClose, handleUpdated }) => {
                         type="number"
                         className={`form-control ${
                           validFields[`issuedQuantity_${index}`]
-                            ? "is-valid"
-                            : ""
+                            ? 'is-valid'
+                            : ''
                         } ${
                           validationErrors[`issuedQuantity_${index}`]
-                            ? "is-invalid"
-                            : ""
+                            ? 'is-invalid'
+                            : ''
                         }`}
                         value={item.issuedQuantity}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            "issuedQuantity",
+                            'issuedQuantity',
                             e.target.value
                           )
                         }
@@ -394,7 +401,7 @@ const Tin = ({ handleClose, handleUpdated }) => {
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Submitting..." />
             ) : (
-              "Submit"
+              'Submit'
             )}
           </button>
           <button
@@ -416,7 +423,7 @@ const Tin = ({ handleClose, handleUpdated }) => {
         </div>
       </form>
     </div>
-  );
-};
+  )
+}
 
-export default Tin;
+export default Tin

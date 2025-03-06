@@ -153,11 +153,13 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var issueMasters = await _dbContext.IssueMasters
                     .Where(rm => rm.RequisitionMasterId == requisitionMasterId)
                     .Include(im => im.RequisitionMaster)
+                        .ThenInclude(rm => rm.RequisitionDetails) 
+                        .ThenInclude(rd => rd.ItemMaster)
                     .Include(im=> im.IssueDetails)
-                    .ThenInclude(id=>id.ItemMaster)
-                    .ThenInclude(im => im.Unit)
+                        .ThenInclude(id=>id.ItemMaster)
+                        .ThenInclude(im => im.Unit)
                     .Include(im=> im.IssueDetails)
-                    .ThenInclude(id => id.Batch)
+                        .ThenInclude(id => id.Batch)
                     .ToListAsync();
 
                 return issueMasters.Any() ? issueMasters : null;

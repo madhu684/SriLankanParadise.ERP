@@ -1,5 +1,5 @@
 const useMaterialRequisitionDetail = () => {
-  return {};
-};
+  return {}
+}
 
-export default useMaterialRequisitionDetail;
+export default useMaterialRequisitionDetail

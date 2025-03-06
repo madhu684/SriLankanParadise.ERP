@@ -55,6 +55,7 @@ const CategoryList = () => {
       <Category
         handleClose={() => setShowCreateCategoryForm(false)}
         handleUpdated={handleUpdated}
+        setShowCreateCategoryForm={setShowCreateCategoryForm}
       />
     );
   }

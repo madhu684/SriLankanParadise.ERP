@@ -1,38 +1,38 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from 'react'
 import {
   get_company_locations_api,
   post_requisition_master_api,
   post_requisition_detail_api,
   get_user_locations_by_user_id_api,
-} from "../../services/purchaseApi";
-import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
-import { useQuery } from "@tanstack/react-query";
+} from '../../services/purchaseApi'
+import { get_item_masters_by_company_id_with_query_api } from '../../services/inventoryApi'
+import { useQuery } from '@tanstack/react-query'
 
 const useTransferRequisition = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
-    deliveryLocation: "",
+    deliveryLocation: '',
     toWarehouseLocation: null,
     fromWarehouseLocation: null,
     itemDetails: [],
     attachments: [],
-  });
-  const [submissionStatus, setSubmissionStatus] = useState(null);
-  const [validFields, setValidFields] = useState({});
-  const [validationErrors, setValidationErrors] = useState({});
-  const alertRef = useRef(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(false);
+  })
+  const [submissionStatus, setSubmissionStatus] = useState(null)
+  const [validFields, setValidFields] = useState({})
+  const [validationErrors, setValidationErrors] = useState({})
+  const alertRef = useRef(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const fetchLocations = async () => {
     try {
       const response = await get_company_locations_api(
-        sessionStorage.getItem("companyId")
-      );
-      return response.data.result;
+        sessionStorage.getItem('companyId')
+      )
+      return response.data.result
     } catch (error) {
-      console.error("Error fetching locations:", error);
+      console.error('Error fetching locations:', error)
     }
-  };
+  }
 
   const {
     data: locations,
@@ -40,20 +40,20 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     isError,
     error,
   } = useQuery({
-    queryKey: ["locations"],
+    queryKey: ['locations'],
     queryFn: fetchLocations,
-  });
+  })
 
   const fetchUserLocations = async () => {
     try {
       const response = await get_user_locations_by_user_id_api(
-        sessionStorage.getItem("userId")
-      );
-      return response.data.result;
+        sessionStorage.getItem('userId')
+      )
+      return response.data.result
     } catch (error) {
-      console.error("Error fetching user locations:", error);
+      console.error('Error fetching user locations:', error)
     }
-  };
+  }
 
   const {
     data: userLocations,
@@ -61,22 +61,22 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     isError: isUserLocationsError,
     error: userLocationsError,
   } = useQuery({
-    queryKey: ["userLocations", sessionStorage.getItem("userId")],
+    queryKey: ['userLocations', sessionStorage.getItem('userId')],
     queryFn: fetchUserLocations,
-  });
+  })
 
   useEffect(() => {
     if (!isUserLocationsLoading && userLocations) {
       const location = userLocations?.find(
         (location) => location?.location?.locationTypeId === 3
-      );
+      )
       setFormData((prevFormData) => ({
         ...prevFormData,
         department: location?.location.locationName,
         deliveryLocation: location?.locationId,
-      }));
+      }))
     }
-  }, [isUserLocationsLoading, userLocations]);
+  }, [isUserLocationsLoading, userLocations])
 
   const fetchItems = async (companyId, searchQuery, itemType) => {
     try {
@@ -84,12 +84,12 @@ const useTransferRequisition = ({ onFormSubmit }) => {
         companyId,
         searchQuery,
         itemType
-      );
-      return response.data.result;
+      )
+      return response.data.result
     } catch (error) {
-      console.error("Error fetching items:", error);
+      console.error('Error fetching items:', error)
     }
-  };
+  }
 
   const {
     data: availableItems,
@@ -97,17 +97,21 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     isError: isItemsError,
     error: itemsError,
   } = useQuery({
-    queryKey: ["items", searchTerm],
+    queryKey: ['items', searchTerm],
     queryFn: () =>
-      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "Sellable"),
-  });
+      fetchItems(
+        sessionStorage.getItem('companyId'),
+        searchTerm,
+        'Raw Material'
+      ),
+  })
 
   useEffect(() => {
     if (submissionStatus != null) {
       // Scroll to the success alert when it becomes visible
-      alertRef.current.scrollIntoView({ behavior: "smooth" });
+      alertRef.current.scrollIntoView({ behavior: 'smooth' })
     }
-  }, [submissionStatus]);
+  }, [submissionStatus])
 
   const validateField = (
     fieldName,
@@ -115,13 +119,13 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     value,
     additionalRules = {}
   ) => {
-    let isFieldValid = true;
-    let errorMessage = "";
+    let isFieldValid = true
+    let errorMessage = ''
 
     // Required validation
-    if (value === null || value === undefined || `${value}`.trim() === "") {
-      isFieldValid = false;
-      errorMessage = `${fieldDisplayName} is required`;
+    if (value === null || value === undefined || `${value}`.trim() === '') {
+      isFieldValid = false
+      errorMessage = `${fieldDisplayName} is required`
     }
 
     // Additional validation
@@ -130,123 +134,123 @@ const useTransferRequisition = ({ onFormSubmit }) => {
       additionalRules.validationFunction &&
       !additionalRules.validationFunction(value)
     ) {
-      isFieldValid = false;
-      errorMessage = additionalRules.errorMessage;
+      isFieldValid = false
+      errorMessage = additionalRules.errorMessage
     }
 
-    setValidFields((prev) => ({ ...prev, [fieldName]: isFieldValid }));
-    setValidationErrors((prev) => ({ ...prev, [fieldName]: errorMessage }));
+    setValidFields((prev) => ({ ...prev, [fieldName]: isFieldValid }))
+    setValidationErrors((prev) => ({ ...prev, [fieldName]: errorMessage }))
 
-    return isFieldValid;
-  };
+    return isFieldValid
+  }
 
   const validateAttachments = (files) => {
-    let isAttachmentsValid = true;
-    let errorMessage = "";
-    const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
+    let isAttachmentsValid = true
+    let errorMessage = ''
+    const maxSizeInBytes = 10 * 1024 * 1024 // 10MB
     const allowedTypes = [
-      "image/jpeg",
-      "image/png",
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ];
+      'image/jpeg',
+      'image/png',
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ]
 
     if (!files || files.length === 0) {
-      isAttachmentsValid = true; // Attachments are optional, so it's considered valid if there are none.
-      errorMessage = "";
+      isAttachmentsValid = true // Attachments are optional, so it's considered valid if there are none.
+      errorMessage = ''
     }
 
     for (const file of files) {
       if (file.size > maxSizeInBytes) {
-        isAttachmentsValid = false;
-        errorMessage = "Attachment size exceeds the limit (10MB)";
+        isAttachmentsValid = false
+        errorMessage = 'Attachment size exceeds the limit (10MB)'
       }
 
       if (!allowedTypes.includes(file.type)) {
-        isAttachmentsValid = false;
+        isAttachmentsValid = false
         errorMessage =
-          "Invalid file type. Allowed types: JPEG, PNG, PDF, Word documents";
+          'Invalid file type. Allowed types: JPEG, PNG, PDF, Word documents'
       }
     }
 
-    setValidFields((prev) => ({ ...prev, attachments: isAttachmentsValid }));
-    setValidationErrors((prev) => ({ ...prev, attachments: errorMessage }));
+    setValidFields((prev) => ({ ...prev, attachments: isAttachmentsValid }))
+    setValidationErrors((prev) => ({ ...prev, attachments: errorMessage }))
 
-    return isAttachmentsValid;
-  };
+    return isAttachmentsValid
+  }
 
   const validateForm = (isSaveAsDraft) => {
     if (isSaveAsDraft) {
-      setValidFields({});
-      setValidationErrors({});
+      setValidFields({})
+      setValidationErrors({})
 
       const isDeliveryLocationValid = validateField(
-        "deliveryLocation",
-        "Delivery location",
+        'deliveryLocation',
+        'Delivery location',
         formData.deliveryLocation
-      );
+      )
 
       const isWarehouseLocationValid = validateField(
-        "warehouseLocation",
-        "Warehouse location",
+        'warehouseLocation',
+        'Warehouse location',
         formData.warehouseLocation
-      );
+      )
 
-      const isAttachmentsValid = validateAttachments(formData.attachments);
+      const isAttachmentsValid = validateAttachments(formData.attachments)
       return (
         isAttachmentsValid &&
         isDeliveryLocationValid &&
         isWarehouseLocationValid
-      );
+      )
     }
 
     const isDeliveryLocationValid = validateField(
-      "deliveryLocation",
-      "Delivery location",
+      'deliveryLocation',
+      'Delivery location',
       formData.deliveryLocation
-    );
+    )
 
-    const isAttachmentsValid = validateAttachments(formData.attachments);
+    const isAttachmentsValid = validateAttachments(formData.attachments)
 
     const isPurposeOfRequestValid = validateField(
-      "purposeOfRequest",
-      "Purpose of request",
+      'purposeOfRequest',
+      'Purpose of request',
       formData.purposeOfRequest
-    );
+    )
 
     const isToWarehouseLocationValid = validateField(
-      "toWarehouseLocation",
-      "To warehouse location",
+      'toWarehouseLocation',
+      'To warehouse location',
       formData.toWarehouseLocation
-    );
+    )
 
-    let isItemQuantityValid = true;
+    let isItemQuantityValid = true
     // Validate item details
     formData.itemDetails.forEach((item, index) => {
-      const fieldName = `quantity_${index}`;
-      const fieldDisplayName = `Quantity for ${item.name}`;
+      const fieldName = `quantity_${index}`
+      const fieldDisplayName = `Quantity for ${item.name}`
 
       const additionalRules = {
         validationFunction: (value) => parseFloat(value) > 0,
         errorMessage: `${fieldDisplayName} must be greater than 0`,
-      };
+      }
 
       const isValidQuantity = validateField(
         fieldName,
         fieldDisplayName,
         item.quantity,
         additionalRules
-      );
+      )
 
-      isItemQuantityValid = isItemQuantityValid && isValidQuantity;
-    });
+      isItemQuantityValid = isItemQuantityValid && isValidQuantity
+    })
 
     const isFromWarehouseLocationValid = validateField(
-      "fromWarehouseLocation",
-      "From warehouse location",
+      'fromWarehouseLocation',
+      'From warehouse location',
       formData.fromWarehouseLocation
-    );
+    )
 
     return (
       isDeliveryLocationValid &&
@@ -255,60 +259,60 @@ const useTransferRequisition = ({ onFormSubmit }) => {
       isToWarehouseLocationValid &&
       isItemQuantityValid &&
       isFromWarehouseLocationValid
-    );
-  };
+    )
+  }
 
   const generateReferenceNumber = () => {
-    const currentDate = new Date();
+    const currentDate = new Date()
 
     // Format the date as needed (e.g., YYYYMMDDHHMMSS)
     const formattedDate = currentDate
       .toISOString()
-      .replace(/\D/g, "")
-      .slice(0, 14);
+      .replace(/\D/g, '')
+      .slice(0, 14)
 
     // Generate a random number (e.g., 4 digits)
-    const randomNumber = Math.floor(1000 + Math.random() * 9000);
+    const randomNumber = Math.floor(1000 + Math.random() * 9000)
 
     // Combine the date and random number
-    const referenceNumber = `TRN_${formattedDate}_${randomNumber}`;
+    const referenceNumber = `TRN_${formattedDate}_${randomNumber}`
 
-    return referenceNumber;
-  };
+    return referenceNumber
+  }
 
   const handleSubmit = async (isSaveAsDraft) => {
     try {
-      const status = isSaveAsDraft ? 0 : 1;
+      const status = isSaveAsDraft ? 0 : 1
 
       // Get the current date and time in UTC timezone in the specified format
-      const requisitionDate = new Date().toISOString();
+      const requisitionDate = new Date().toISOString()
 
-      const isFormValid = validateForm(isSaveAsDraft);
+      const isFormValid = validateForm(isSaveAsDraft)
       if (isFormValid) {
-        setLoading(true);
+        setLoading(true)
 
         const transferRequisitionData = {
-          requestedUserId: sessionStorage.getItem("userId"),
-          requestedBy: sessionStorage.getItem("username"),
+          requestedUserId: sessionStorage.getItem('userId'),
+          requestedBy: sessionStorage.getItem('username'),
           requisitionDate: requisitionDate,
           purposeOfRequest: formData.purposeOfRequest,
           status: status,
           approvedBy: null,
           approvedUserId: null,
           approvedDate: null,
-          companyId: sessionStorage.getItem("companyId"),
-          requisitionType: "TRN",
+          companyId: sessionStorage.getItem('companyId'),
+          requisitionType: 'TRN',
           requestedFromLocationId: formData.fromWarehouseLocation,
           requestedToLocationId: formData.toWarehouseLocation,
           referenceNumber: generateReferenceNumber(),
           permissionId: 1052,
-        };
+        }
 
         const response = await post_requisition_master_api(
           transferRequisitionData
-        );
+        )
 
-        const requisitionMasterId = response.data.result.requisitionMasterId;
+        const requisitionMasterId = response.data.result.requisitionMasterId
 
         // Extract itemDetails from formData
         const itemDetailsData = formData.itemDetails.map(async (item) => {
@@ -317,101 +321,101 @@ const useTransferRequisition = ({ onFormSubmit }) => {
             itemMasterId: item.id,
             quantity: item.quantity,
             permissionId: 1052,
-          };
+          }
 
           // Call post_purchase_requisition_detail_api for each item
           const detailsApiResponse = await post_requisition_detail_api(
             detailsData
-          );
+          )
 
-          return detailsApiResponse;
-        });
+          return detailsApiResponse
+        })
 
-        const detailsResponses = await Promise.all(itemDetailsData);
+        const detailsResponses = await Promise.all(itemDetailsData)
 
         const allDetailsSuccessful = detailsResponses.every(
           (detailsResponse) => detailsResponse.status === 201
-        );
+        )
 
         if (allDetailsSuccessful) {
           if (isSaveAsDraft) {
-            setSubmissionStatus("successSavedAsDraft");
-            console.log("Transfer requisition saved as draft!", formData);
+            setSubmissionStatus('successSavedAsDraft')
+            console.log('Transfer requisition saved as draft!', formData)
           } else {
-            setSubmissionStatus("successSubmitted");
+            setSubmissionStatus('successSubmitted')
             console.log(
-              "Transfer requisition submitted successfully!",
+              'Transfer requisition submitted successfully!',
               formData
-            );
+            )
           }
 
           setTimeout(() => {
-            setSubmissionStatus(null);
-            setLoading(false);
-            onFormSubmit();
-          }, 3000);
+            setSubmissionStatus(null)
+            setLoading(false)
+            onFormSubmit()
+          }, 3000)
         } else {
-          setSubmissionStatus("error");
+          setSubmissionStatus('error')
         }
       }
     } catch (error) {
-      console.error("Error submitting form:", error);
-      setSubmissionStatus("error");
+      console.error('Error submitting form:', error)
+      setSubmissionStatus('error')
       setTimeout(() => {
-        setSubmissionStatus(null);
-        setLoading(false);
-      }, 3000);
+        setSubmissionStatus(null)
+        setLoading(false)
+      }, 3000)
     }
-  };
+  }
 
   const handleInputChange = (field, value) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
       [field]: value,
-    }));
-  };
+    }))
+  }
 
   const handleItemDetailsChange = (index, field, value) => {
     setFormData((prevFormData) => {
-      const updatedItemDetails = [...prevFormData.itemDetails];
-      updatedItemDetails[index][field] = value;
+      const updatedItemDetails = [...prevFormData.itemDetails]
+      updatedItemDetails[index][field] = value
 
       // Ensure positive values for Quantities and Unit Prices
       updatedItemDetails[index].quantity = Math.max(
         0,
         updatedItemDetails[index].quantity
-      );
+      )
 
       return {
         ...prevFormData,
         itemDetails: updatedItemDetails,
-      };
-    });
-  };
+      }
+    })
+  }
 
   const handleRemoveItem = (index) => {
     setFormData((prevFormData) => {
-      const updatedItemDetails = [...prevFormData.itemDetails];
-      updatedItemDetails.splice(index, 1);
+      const updatedItemDetails = [...prevFormData.itemDetails]
+      updatedItemDetails.splice(index, 1)
       return {
         ...prevFormData,
         itemDetails: updatedItemDetails,
-      };
-    });
-    setValidFields({});
-    setValidationErrors({});
-  };
+      }
+    })
+    setValidFields({})
+    setValidationErrors({})
+  }
 
   const handlePrint = () => {
-    window.print();
-  };
+    window.print()
+  }
 
   const handleAttachmentChange = (files) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
       attachments: files,
-    }));
-  };
+    }))
+  }
 
   // Handler to add the selected item to itemDetails
   const handleSelectItem = (item) => {
@@ -426,9 +430,9 @@ const useTransferRequisition = ({ onFormSubmit }) => {
           quantity: 0, // You can set a default quantity here
         },
       ],
-    }));
-    setSearchTerm(""); // Clear the search term
-  };
+    }))
+    setSearchTerm('') // Clear the search term
+  }
 
   return {
     formData,
@@ -455,7 +459,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     setFormData,
     setSearchTerm,
     handleSelectItem,
-  };
-};
+  }
+}
 
-export default useTransferRequisition;
+export default useTransferRequisition

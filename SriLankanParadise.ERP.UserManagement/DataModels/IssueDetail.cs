@@ -14,6 +14,8 @@ public partial class IssueDetail
     public int BatchId { get; set; }
 
     public decimal? Quantity { get; set; }
+    public decimal? ReceivedQuantity { get; set; }
+    public decimal? ReturnedQuantity { get; set; }
 
     public virtual Batch Batch { get; set; } = null!;
 

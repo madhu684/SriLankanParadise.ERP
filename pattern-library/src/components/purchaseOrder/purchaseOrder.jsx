@@ -1,13 +1,18 @@
-import React from "react";
-import usePurchaseOrder from "./usePurchaseOrder";
-import CurrentDateTime from "../currentDateTime/currentDateTime";
-import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
-import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
-import LoadingSpinner from "../loadingSpinner/loadingSpinner";
-import ErrorComponent from "../errorComponent/errorComponent";
-import Supplier from "../supplier/supplier";
+import React from 'react'
+import usePurchaseOrder from './usePurchaseOrder'
+import CurrentDateTime from '../currentDateTime/currentDateTime'
+import useCompanyLogoUrl from '../companyLogo/useCompanyLogoUrl'
+import ButtonLoadingSpinner from '../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner'
+import LoadingSpinner from '../loadingSpinner/loadingSpinner'
+import ErrorComponent from '../errorComponent/errorComponent'
+import Supplier from '../supplier/supplier'
 
-const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
+const PurchaseOrder = ({
+  handleClose,
+  handleUpdated,
+  purchaseRequisition,
+  setShowCreatePOForm,
+}) => {
   const {
     formData,
     suppliers,
@@ -57,20 +62,21 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
     calculateTotalAmount,
   } = usePurchaseOrder({
     onFormSubmit: () => {
-      handleClose();
-      handleUpdated();
+      handleClose()
+      handleUpdated()
     },
     purchaseRequisition,
-  });
-
-  const companyLogoUrl = useCompanyLogoUrl();
+  })
 
   if (isLoading || isLoadingchargesAndDeductions || isLoadingTransactionTypes) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner />
   }
 
   if (isError || ischargesAndDeductionsError || transactionTypesError) {
-    return <ErrorComponent error={"Error fetching data"} />;
+    return <ErrorComponent error={'Error fetching data'} />
+  }
+  const handleBack = () => {
+    setShowCreatePOForm(false)
   }
 
   return (
@@ -79,7 +85,12 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img src={companyLogoUrl} alt="Company Logo" height={30} />
+          <button
+            onClick={handleBack}
+            className="btn btn-dark d-flex align-items-center"
+          >
+            Back
+          </button>
           <p>
             <CurrentDateTime />
           </p>
@@ -89,18 +100,18 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
       </div>
 
       {/* Display success or error messages */}
-      {submissionStatus === "successSubmitted" && (
+      {submissionStatus === 'successSubmitted' && (
         <div className="alert alert-success mb-3" role="alert">
           Purchase order submitted successfully! Reference Number: {referenceNo}
         </div>
       )}
-      {submissionStatus === "successSavedAsDraft" && (
+      {submissionStatus === 'successSavedAsDraft' && (
         <div className="alert alert-success mb-3" role="alert">
           Purchase order saved as draft, you can edit and submit it later!
           Reference Number: {referenceNo}
         </div>
       )}
-      {submissionStatus === "error" && (
+      {submissionStatus === 'error' && (
         <div className="alert alert-danger mb-3" role="alert">
           Error submitting purchase order. Please try again.
         </div>
@@ -115,7 +126,7 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
               <label htmlFor="supplierId" className="form-label">
                 Supplier
               </label>
-              {formData.selectedSupplier === "" && (
+              {formData.selectedSupplier === '' && (
                 <div className="mb-3 position-relative">
                   <div className="input-group">
                     <span className="input-group-text bg-transparent ">
@@ -124,8 +135,8 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
                     <input
                       type="text"
                       className={`form-control ${
-                        validFields.supplierId ? "is-valid" : ""
-                      } ${validationErrors.supplierId ? "is-invalid" : ""}`}
+                        validFields.supplierId ? 'is-valid' : ''
+                      } ${validationErrors.supplierId ? 'is-invalid' : ''}`}
                       placeholder="Search for a supplier..."
                       value={supplierSearchTerm}
                       onChange={(e) => setSupplierSearchTerm(e.target.value)}
@@ -135,9 +146,9 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
                       <span
                         className="input-group-text bg-transparent"
                         style={{
-                          cursor: "pointer",
+                          cursor: 'pointer',
                         }}
-                        onClick={() => setSupplierSearchTerm("")}
+                        onClick={() => setSupplierSearchTerm('')}
                       >
                         <i className="bi bi-x"></i>
                       </span>
@@ -146,14 +157,14 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
 
                   {/* Dropdown for filtered suppliers */}
                   {supplierSearchTerm && (
-                    <div className="dropdown" style={{ width: "100%" }}>
+                    <div className="dropdown" style={{ width: '100%' }}>
                       <ul
                         className="dropdown-menu"
                         style={{
-                          display: "block",
-                          width: "100%",
-                          maxHeight: "200px",
-                          overflowY: "auto",
+                          display: 'block',
+                          width: '100%',
+                          maxHeight: '200px',
+                          overflowY: 'auto',
                         }}
                       >
                         {suppliers
@@ -163,8 +174,8 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
                                 .toLowerCase()
                                 .includes(supplierSearchTerm.toLowerCase()) ||
                               supplier.phone
-                                .replace(/\s/g, "")
-                                .includes(supplierSearchTerm.replace(/\s/g, ""))
+                                .replace(/\s/g, '')
+                                .includes(supplierSearchTerm.replace(/\s/g, ''))
                           )
                           .map((supplier) => (
                             <li key={supplier.supplierId}>
@@ -174,7 +185,7 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
                               >
                                 <span className="me-3">
                                   <i className="bi bi-shop"></i>
-                                </span>{" "}
+                                </span>{' '}
                                 {supplier?.supplierName} - {supplier?.phone}
                               </button>
                             </li>
@@ -185,8 +196,8 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
                               .toLowerCase()
                               .includes(supplierSearchTerm.toLowerCase()) ||
                             supplier.phone
-                              .replace(/\s/g, "")
-                              .includes(supplierSearchTerm.replace(/\s/g, ""))
+                              .replace(/\s/g, '')
+                              .includes(supplierSearchTerm.replace(/\s/g, ''))
                         ).length === 0 && (
                           <>
                             <li className="dropdown-item text-center">
@@ -213,7 +224,7 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
                       </ul>
                     </div>
                   )}
-                  {formData.selectedSupplier === "" && (
+                  {formData.selectedSupplier === '' && (
                     <div className="mb-3">
                       <small className="form-text text-muted">
                         {validationErrors.supplierId && (
@@ -262,12 +273,12 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
               <input
                 type="date"
                 className={`form-control ${
-                  validFields.orderDate ? "is-valid" : ""
-                } ${validationErrors.orderDate ? "is-invalid" : ""}`}
+                  validFields.orderDate ? 'is-valid' : ''
+                } ${validationErrors.orderDate ? 'is-invalid' : ''}`}
                 id="orderDate"
                 placeholder="Enter order date"
                 value={formData.orderDate}
-                onChange={(e) => handleInputChange("orderDate", e.target.value)}
+                onChange={(e) => handleInputChange('orderDate', e.target.value)}
                 disabled
                 required
               />
@@ -301,9 +312,9 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
                   <span
                     className="input-group-text bg-transparent"
                     style={{
-                      cursor: "pointer",
+                      cursor: 'pointer',
                     }}
-                    onClick={() => setSearchTerm("")}
+                    onClick={() => setSearchTerm('')}
                   >
                     <i className="bi bi-x"></i>
                   </span>
@@ -312,14 +323,14 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
 
               {/* Dropdown for filtered items */}
               {searchTerm && (
-                <div className="dropdown" style={{ width: "100%" }}>
+                <div className="dropdown" style={{ width: '100%' }}>
                   <ul
                     className="dropdown-menu"
                     style={{
-                      display: "block",
-                      width: "100%",
-                      maxHeight: "200px",
-                      overflowY: "auto",
+                      display: 'block',
+                      width: '100%',
+                      maxHeight: '200px',
+                      overflowY: 'auto',
                     }}
                   >
                     {isItemsLoading ? (
@@ -359,7 +370,7 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
                             >
                               <span className="me-3">
                                 <i className="bi bi-cart4"></i>
-                              </span>{" "}
+                              </span>{' '}
                               {item.itemName}
                             </button>
                           </li>
@@ -384,7 +395,7 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
           <div className="table-responsive mb-2">
             <table
               className="table mt-0"
-              style={{ minWidth: "1000px", overflowX: "auto" }}
+              style={{ minWidth: '1000px', overflowX: 'auto' }}
             >
               <thead>
                 <tr>
@@ -406,17 +417,17 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
                       <input
                         type="number"
                         className={`form-control ${
-                          validFields[`quantity_${index}`] ? "is-valid" : ""
+                          validFields[`quantity_${index}`] ? 'is-valid' : ''
                         } ${
                           validationErrors[`quantity_${index}`]
-                            ? "is-invalid"
-                            : ""
+                            ? 'is-invalid'
+                            : ''
                         }`}
                         value={item.quantity}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            "quantity",
+                            'quantity',
                             e.target.value
                           )
                         }
@@ -431,17 +442,17 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
                       <input
                         type="number"
                         className={`form-control ${
-                          validFields[`unitPrice_${index}`] ? "is-valid" : ""
+                          validFields[`unitPrice_${index}`] ? 'is-valid' : ''
                         } ${
                           validationErrors[`unitPrice_${index}`]
-                            ? "is-invalid"
-                            : ""
+                            ? 'is-invalid'
+                            : ''
                         }`}
                         value={item.unitPrice}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            "unitPrice",
+                            'unitPrice',
                             e.target.value
                           )
                         }
@@ -459,18 +470,18 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
                           type="number"
                           value={charge.value}
                           onChange={(e) => {
-                            let newValue = parseFloat(e.target.value);
+                            let newValue = parseFloat(e.target.value)
 
                             // If the entered value is not a valid number, set it to 0
                             if (isNaN(newValue)) {
-                              newValue = 0;
+                              newValue = 0
                             } else {
                               // If the charge is a percentage, ensure the value is between 0 and 100
                               if (charge.isPercentage) {
-                                newValue = Math.min(100, Math.max(0, newValue)); // Clamp the value between 0 and 100
+                                newValue = Math.min(100, Math.max(0, newValue)) // Clamp the value between 0 and 100
                               } else {
                                 // For non-percentage charges, ensure the value is positive
-                                newValue = Math.max(0, newValue);
+                                newValue = Math.max(0, newValue)
                               }
                             }
 
@@ -478,7 +489,7 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
                               index,
                               `chargesAndDeductions_${chargeIndex}_value`,
                               newValue
-                            );
+                            )
                           }}
                         />
                       </td>
@@ -539,8 +550,8 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
           <input
             type="file"
             className={`form-control ${
-              validFields.attachments ? "is-valid" : ""
-            } ${validationErrors.attachments ? "is-invalid" : ""}`}
+              validFields.attachments ? 'is-valid' : ''
+            } ${validationErrors.attachments ? 'is-invalid' : ''}`}
             id="attachment"
             onChange={(e) => handleAttachmentChange(e.target.files)}
             multiple
@@ -568,7 +579,7 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Submitting..." />
             ) : (
-              "Submit"
+              'Submit'
             )}
           </button>
           <button
@@ -585,7 +596,7 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
             {loadingDraft && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Saving as Draft..." />
             ) : (
-              "Save as Draft"
+              'Save as Draft'
             )}
           </button>
 
@@ -615,11 +626,11 @@ const PurchaseOrder = ({ handleClose, handleUpdated, purchaseRequisition }) => {
         />
       )}
     </div>
-  );
-};
+  )
+}
 
 PurchaseOrder.defaultProps = {
   purchaseRequisition: null,
-};
+}
 
-export default PurchaseOrder;
+export default PurchaseOrder

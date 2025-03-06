@@ -1,27 +1,31 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React from 'react'
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom'
 
-import Home from "./components/home";
-import Login from "./components/login";
-import Main from "./components/main";
-import Admin from "./components/admin";
-import PurchaseRequisition from "./components/purchaseRequisition/purchaseRequisition";
-import PurchaseOrder from "./components/purchaseOrder/purchaseOrder";
-import Grn from "./components/grn/grn";
-import SalesOrder from "./components/salesOrder/salesOrder";
-import SalesInvoice from "./components/salesInvoice/salesInvoice";
-import SalesReceipt from "./components/salesReceipt/salesReceipt";
-import PurchaseRequisitionList from "./components/purchaseRequisition/PurchaseRequisitionList/PurchaseRequisitionList";
-import ItemMaster from "./components/itemMaster/itemMaster";
-import Category from "./components/category/category";
-import Unit from "./components/unit/unit";
-import Supplier from "./components/supplier/supplierMain/supplier";
+import Login from './components/login'
+import Main from './components/main'
+import Admin from './components/admin'
+import PurchaseRequisition from './components/purchaseRequisition/purchaseRequisition'
+import PurchaseOrder from './components/purchaseOrder/purchaseOrder'
+import Grn from './components/grn/grn'
+import SalesOrder from './components/salesOrder/salesOrder'
+import SalesInvoice from './components/salesInvoice/salesInvoice'
+import SalesReceipt from './components/salesReceipt/salesReceipt'
+import PurchaseRequisitionList from './components/purchaseRequisition/PurchaseRequisitionList/PurchaseRequisitionList'
+import ItemMaster from './components/itemMaster/itemMaster'
+import Category from './components/category/category'
+import Unit from './components/unit/unit'
+import Supplier from './components/supplier/supplierMain/supplier'
 
 const Routers = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/main" element={<Main />} />
         <Route path="/admin" element={<Admin />} />
@@ -44,7 +48,7 @@ const Routers = () => {
         <Route path="/supplier" element={<Supplier />} />
       </Routes>
     </Router>
-  );
-};
+  )
+}
 
-export default Routers;
+export default Routers

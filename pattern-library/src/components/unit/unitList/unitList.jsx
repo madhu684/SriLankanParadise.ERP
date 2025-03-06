@@ -55,6 +55,7 @@ const UnitList = () => {
       <Unit
         handleClose={() => setShowCreateUnitForm(false)}
         handleUpdated={handleUpdated}
+        setShowCreateUnitForm={setShowCreateUnitForm}
       />
     );
   }
