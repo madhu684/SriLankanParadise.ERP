@@ -985,6 +985,12 @@ public partial class ErpSystemContext : DbContext
             entity.HasOne(d => d.Customer).WithMany(p => p.SalesOrders)
                 .HasForeignKey(d => d.CustomerId)
                 .HasConstraintName("FK__SalesOrde__Custo__1F63A897");
+
+            entity.HasOne(d => d.SalesPerson)
+                .WithMany(p => p.SalesOrders)
+                .HasForeignKey(d => d.SalesPersonId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_SalesOrder_SalesPerson");
         });
 
         modelBuilder.Entity<SalesOrderDetail>(entity =>

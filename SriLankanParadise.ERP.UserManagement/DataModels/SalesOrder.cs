@@ -34,8 +34,15 @@ public partial class SalesOrder
     public DateTime? CreatedDate { get; set; }
 
     public DateTime? LastUpdatedDate { get; set; }
+    public int SalesPersonId { get; set; }
+
+    public double? Latitude { get; set; }
+
+    public double? Longitude { get; set; }
 
     public virtual Customer? Customer { get; set; }
+
+    public virtual User SalesPerson { get; set; }
 
     public virtual ICollection<SalesInvoice> SalesInvoices { get; set; } = new List<SalesInvoice>();
 

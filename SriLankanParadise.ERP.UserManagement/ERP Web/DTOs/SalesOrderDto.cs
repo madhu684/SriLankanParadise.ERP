@@ -33,6 +33,11 @@
         public DateTime? CreatedDate { get; set; }
 
         public DateTime? LastUpdatedDate { get; set; }
+        public int SalesPersonId { get; set; }
+
+        public double? Latitude { get; set; }
+
+        public double? Longitude { get; set; }
 
         public virtual IEnumerable<SalesOrderDetailDto>? SalesOrderDetails { get; set; }
     }
