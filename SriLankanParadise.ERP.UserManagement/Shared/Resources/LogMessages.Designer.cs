@@ -1663,6 +1663,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Sales order details retrieved for the sales order.
+        /// </summary>
+        public static string SalesOrderDetailsRetrieved {
+            get {
+                return ResourceManager.GetString("SalesOrderDetailsRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Sales order detail updated successfully.
         /// </summary>
         public static string SalesOrderDetailUpdated {

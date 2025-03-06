@@ -4,6 +4,7 @@ import {
   post_sales_order_api,
   post_sales_order_detail_api,
   get_company_api,
+  get_sales_persons_by_company_id_api,
 } from "../../services/salesApi";
 import {
   get_item_batches_by_item_master_id_api,
@@ -29,6 +30,8 @@ const useSalesOrder = ({ onFormSubmit }) => {
     subTotal: 0,
     selectedCustomer: "",
     customerId: "",
+    salesPersonId: "",
+    selectedSalesPerson: "",
     commonChargesAndDeductions: [],
   });
 
@@ -44,6 +47,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBatch, setSelectedBatch] = useState(null);
   const [customerSearchTerm, setCustomerSearchTerm] = useState("");
+  const [salesPersonSearchTerm, setSalesPersonSearchTerm] = useState('')
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -123,6 +127,28 @@ const useSalesOrder = ({ onFormSubmit }) => {
     queryKey: ["customers"],
     queryFn: fetchCustomers,
   });
+
+  const fetchSalesPersons = async () => {
+    try {
+      const response = await get_sales_persons_by_company_id_api(
+        sessionStorage?.getItem('companyId')
+      )
+      return response.data.result || []
+    } catch (error) {
+      console.error('Error fetching sales persons:', error)
+    }
+  }
+
+  const {
+    data: salesPersons,
+    isLoading: isSalesPersonsLoading,
+    isError: isSalesPersonsError,
+    error: salesPersonsError,
+    
+  } = useQuery({
+    queryKey: ['salesPersons'],
+    queryFn: fetchSalesPersons,
+  })
 
   const fetchCompany = async () => {
     try {
@@ -278,6 +304,13 @@ const useSalesOrder = ({ onFormSubmit }) => {
         formData.customerId
       );
     }
+    
+    const isSalesPersonValid = validateField(
+      'salesPersonId',
+      'Sales Person',
+      formData.salesPersonId
+    )
+
 
     const isOrderDateValid = validateField(
       "orderDate",
@@ -317,6 +350,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
 
     return (
       isCustomerValid &&
+      isSalesPersonValid &&
       isOrderDateValid &&
       isDeliveryDateValid &&
       isAttachmentsValid &&
@@ -430,6 +464,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
 
   const handleSubmit = async (isSaveAsDraft) => {
     try {
+      console.log('handleSubmit triggered')
       const customerId = directOrder ? null : formData.customerId;
       const status = isSaveAsDraft ? 0 : 1;
       const isFormValid = validateForm();
@@ -450,17 +485,19 @@ const useSalesOrder = ({ onFormSubmit }) => {
           deliveryDate: formData.deliveryDate,
           totalAmount: formData.totalAmount,
           status: status,
-          createdBy: sessionStorage?.getItem("username") ?? null,
-          createdUserId: sessionStorage?.getItem("userId") ?? null,
+          createdBy: sessionStorage?.getItem('username') ?? null,
+          createdUserId: sessionStorage?.getItem('userId') ?? null,
           approvedBy: null,
           approvedUserId: null,
           approvedDate: null,
-          companyId: sessionStorage?.getItem("companyId") ?? null,
+          companyId: sessionStorage?.getItem('companyId') ?? null,
           createdDate: currentDate,
           lastUpdatedDate: currentDate,
           permissionId: 25,
-        };
+          salesPersonId: formData.salesPersonId
+        }
 
+        console.log("Sale order data", salesOrderData)
         const response = await post_sales_order_api(salesOrderData);
         setReferenceNo(response.data.result.referenceNo);
 
@@ -992,6 +1029,14 @@ const useSalesOrder = ({ onFormSubmit }) => {
     }));
   };
 
+  const handleResetSalesPerson = () => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      selectedSalesPerson: '',
+      salesPersonId: '',
+    }))
+  }
+
   const handleSelectCustomer = (selectedCustomer) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
@@ -1003,6 +1048,20 @@ const useSalesOrder = ({ onFormSubmit }) => {
     setValidFields({});
     setValidationErrors({});
   };
+
+  const handleSelectSalesPerson = (selectedSalesPerson) => {
+    
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      salesPersonId: selectedSalesPerson.userId,
+      selectedSalesPerson: selectedSalesPerson,
+      
+    }))
+
+    setSalesPersonSearchTerm('') // Clear the supplier search term
+    setValidFields({})
+    setValidationErrors({})
+  }
 
   const renderColumns = () => {
     return chargesAndDeductions.map((charge) => {
@@ -1119,6 +1178,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
   return {
     formData,
     customers,
+    salesPersons,
     submissionStatus,
     validFields,
     validationErrors,
@@ -1138,9 +1198,13 @@ const useSalesOrder = ({ onFormSubmit }) => {
     selectedBatch,
     itemBatches,
     customerSearchTerm,
+    salesPersonSearchTerm,
     isCustomersLoading,
+    isSalesPersonsLoading,
     isCustomersError,
+    isSalesPersonsError,
     customersError,
+    salesPersonsError,
     isLoadingchargesAndDeductions,
     ischargesAndDeductionsError,
     chargesAndDeductionsError,
@@ -1171,8 +1235,11 @@ const useSalesOrder = ({ onFormSubmit }) => {
     handleSelectItem,
     handleBatchSelection,
     handleSelectCustomer,
+    handleSelectSalesPerson,
     handleResetCustomer,
+    handleResetSalesPerson,
     setCustomerSearchTerm,
+    setSalesPersonSearchTerm,
     calculateSubTotal,
     renderColumns,
     renderSubColumns,
