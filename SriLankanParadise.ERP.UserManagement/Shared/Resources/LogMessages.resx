@@ -651,6 +651,9 @@
   <data name="SalesOrderDetailNotFound" xml:space="preserve">
     <value>Sales order detail not found</value>
   </data>
+  <data name="SalesOrderDetailsRetrieved" xml:space="preserve">
+    <value>Sales order details retrieved for the sales order</value>
+  </data>
   <data name="SalesOrderDetailUpdated" xml:space="preserve">
     <value>Sales order detail updated successfully</value>
   </data>

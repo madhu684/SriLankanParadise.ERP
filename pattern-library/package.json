@@ -20,7 +20,8 @@
     "react-router-dom": "^6.17.0",
     "react-scripts": "^5.0.1",
     "redux": "^5.0.0",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -30,6 +31,8 @@
     "build:uat": "env-cmd -f .env.uat react-scripts build",
     "build:prod": "env-cmd -f .env.production react-scripts build",
     "build:dcsluat": "env-cmd -f .env.dcsluat react-scripts build",
+    "build:powerlineprod": "env-cmd -f .env.powerlineprod react-scripts build",
+    "build:powerlinedev": "env-cmd -f .env.powerlinedev react-scripts build",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

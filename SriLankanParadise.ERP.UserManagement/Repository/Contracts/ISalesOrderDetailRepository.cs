@@ -11,5 +11,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task UpdateSalesOrderDetail(int salesOrderDetailId, SalesOrderDetail salesOrderDetail);
 
         Task DeleteSalesOrderDetail(int salesOrderDetailId);
+
+        Task<IEnumerable<SalesOrderDetail>> GetSalesOrderDetailsBySalesOrderId(int salesOrderId);
     }
 }

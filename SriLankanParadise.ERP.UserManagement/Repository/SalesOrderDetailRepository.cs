@@ -80,5 +80,24 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task<IEnumerable<SalesOrderDetail>> GetSalesOrderDetailsBySalesOrderId(int salesOrderId)
+        {
+            try
+            {
+                var salesOrderDetails = await _dbContext.SalesOrderDetails
+                    .Where(sod => sod.SalesOrderId == salesOrderId)
+                    .Include(sod => sod.ItemBatch) 
+                    .ThenInclude(ib => ib.ItemMaster)
+                    .ToListAsync();
+
+                return salesOrderDetails;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }

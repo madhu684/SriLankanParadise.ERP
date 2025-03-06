@@ -35,6 +35,33 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             _httpContextAccessor = httpContextAccessor;
         }
 
+        [HttpGet("GetSalesOrderDetailsBySalesOrderId/{salesOrderId}")]
+        public async Task<ApiResponseModel> GetSalesOrderDetailsBySalesOrderId(int salesOrderId)
+        {
+            try
+            {
+                var salesOrderDetails = await _salesOrderDetailService.GetSalesOrderDetailsBySalesOrderId(salesOrderId);
+                if (salesOrderDetails != null)
+                {
+                    var salesOrderDetailsDto = _mapper.Map<List<SalesOrderDetailDto>>(salesOrderDetails);
+                    AddResponseMessage(Response, LogMessages.SalesOrderDetailsRetrieved, salesOrderDetailsDto, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.SalesOrderDetailNotFound);
+                    AddResponseMessage(Response, LogMessages.SalesOrderDetailNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+
+            return Response;
+        }
+
+
         [HttpPost]
         public async Task<ApiResponseModel> AddSalesOrderDetail(SalesOrderDetailRequestModel salesOrderDetailRequest)
         {

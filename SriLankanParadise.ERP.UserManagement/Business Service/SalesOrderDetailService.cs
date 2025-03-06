@@ -31,5 +31,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             await _salesOrderDetailRepository.DeleteSalesOrderDetail(salesOrderDetailId);
         }
+
+        public async Task<IEnumerable<SalesOrderDetail>> GetSalesOrderDetailsBySalesOrderId(int salesOrderId)
+        {
+            return await _salesOrderDetailRepository.GetSalesOrderDetailsBySalesOrderId(salesOrderId);
+        }
     }
 }
