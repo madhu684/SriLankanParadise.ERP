@@ -50,6 +50,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var itemBatches = await _dbContext.ItemBatches
                     .Where(ib => ib.Status == true && ib.CompanyId == companyId)
                     .Include(ib => ib.Batch)
+                    .Include(ib => ib.ItemMaster)
                     .ToListAsync();
 
                 return itemBatches.Any() ? itemBatches : null;
