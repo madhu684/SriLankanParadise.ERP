@@ -8,7 +8,12 @@ import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
 import BatchSelectionModal from "../../batchSelectionModal/batchSelectionModal";
 
-const SalesOrderUpdate = ({ handleClose, salesOrder, handleUpdated }) => {
+const SalesOrderUpdate = ({
+  handleClose,
+  salesOrder,
+  handleUpdated,
+  setShowUpdateSOForm,
+}) => {
   const {
     formData,
     customers,
@@ -76,11 +81,11 @@ const SalesOrderUpdate = ({ handleClose, salesOrder, handleUpdated }) => {
   } = useSalesOrderUpdate({
     salesOrder,
     onFormSubmit: () => {
-      handleClose();
-      handleUpdated();
+      handleClose()
+      handleUpdated()
     },
-  });
-  const companyLogoUrl = useCompanyLogoUrl();
+  })
+
 
   if (
     isCustomersLoading ||
@@ -88,7 +93,7 @@ const SalesOrderUpdate = ({ handleClose, salesOrder, handleUpdated }) => {
     isLoadingTransactionTypes ||
     isCompanyLoading
   ) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner />
   }
 
   if (
@@ -97,7 +102,13 @@ const SalesOrderUpdate = ({ handleClose, salesOrder, handleUpdated }) => {
     isTransactionTypesError ||
     isCompanyError
   ) {
-    return <ErrorComponent error={"Error fetching data"} />;
+    return <ErrorComponent error={'Error fetching data'} />
+  }
+
+  console.log('Available Items', availableItems)
+
+  const handleBack = () => {
+    setShowUpdateSOForm(false)
   }
 
   return (
@@ -106,7 +117,12 @@ const SalesOrderUpdate = ({ handleClose, salesOrder, handleUpdated }) => {
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img src={companyLogoUrl} alt="Company Logo" height={30} />
+          <button
+            onClick={handleBack}
+            className="btn btn-dark d-flex align-items-center"
+          >
+            Back
+          </button>
           <p>
             <CurrentDateTime />
           </p>
@@ -862,6 +878,6 @@ const SalesOrderUpdate = ({ handleClose, salesOrder, handleUpdated }) => {
       )}
     </div>
   )
-};
+}
 
 export default SalesOrderUpdate;
