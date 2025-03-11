@@ -10,6 +10,8 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
 
         Task<IEnumerable<ItemBatch>> GetItemBatchesByCompanyId(int companyId);
 
+        Task<IEnumerable<ItemBatch>> GetItemBatchesByLocationIdCompanyId(int locationId, int companyId);
+
         Task<IEnumerable<ItemBatch>> GetItemBatchesByUserId(int userId);
 
         Task<ItemBatch> GetItemBatchByBatchIdAndItemMasterId(int batchId, int itemMasterId);

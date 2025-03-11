@@ -4,6 +4,7 @@ import {
   get_item_batches_api,
   get_grn_masters_with_out_drafts_api,
   get_issue_masters_with_out_drafts_api,
+  get_company_locations_api,
 } from "../../services/purchaseApi";
 import {
   get_sales_orders_with_out_drafts_api,
@@ -27,6 +28,22 @@ const useStockReport = () => {
   const [generateReport, setGenerateReport] = useState(false);
   const [generatedDateTime, setGeneratedDateTime] = useState(null);
   const [isReportGenerated, setIsReportGenerated] = useState(false);
+
+  const { data: companyLocations, isLoading: companyLocationsLoading } =
+      useQuery({
+        queryKey: ["companyLocations"],
+        queryFn: async () => {
+          try {
+            const response = await get_company_locations_api(
+              sessionStorage.getItem("companyId")
+            );
+            return response.data.result;
+          } catch (error) {
+            console.error("Error fetching production companyLocations:", error);
+            return [];
+          }
+        },
+      });
 
   const fetchItemBatches = async () => {
     try {
@@ -349,6 +366,7 @@ const useStockReport = () => {
     endDate,
     alertRef,
     reportData,
+    companyLocations,
     isitemMastersLoading,
     isItemBatchesLoading,
     searchTerm,

@@ -31,10 +31,19 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             try
             {
-                return await _dbContext.SalesOrders
+                var salesOrders = await _dbContext.SalesOrders
                     .Include(so => so.SalesOrderDetails)
+                    .ThenInclude(sod => sod.ItemBatch)
+                    .ThenInclude(ib => ib.Batch)
+                    .Include(so => so.SalesOrderDetails)
+                    .ThenInclude(sod => sod.ItemBatch)
+                    .ThenInclude(ib => ib.ItemMaster)
+                    .ThenInclude(im => im.Unit)
                     .Include(so => so.Customer)
                     .ToListAsync();
+
+
+                return salesOrders.Any() ? salesOrders : null;
             }
             catch (Exception)
             {

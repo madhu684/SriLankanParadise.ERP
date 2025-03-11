@@ -159,6 +159,31 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpGet("GetItemBatchesByLocationIdCompanyId/{locationId}/{companyId}")]
+        public async Task<ApiResponseModel> GetItemBatchesByLocationIdCompanyId(int locationId, int companyId)
+        {
+            try
+            {
+                var itemBatches = await _itemBatchService.GetItemBatchesByLocationIdCompanyId(locationId, companyId);
+                if (itemBatches != null)
+                {
+                    var itemBatchDtos = _mapper.Map<IEnumerable<ItemBatchDto>>(itemBatches);
+                    AddResponseMessage(Response, LogMessages.ItemBatchesRetrieved, itemBatchDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.ItemBatchesNotFound);
+                    AddResponseMessage(Response, LogMessages.ItemBatchesNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
         [HttpPut("{batchId}/{itemMasterId}")]
         public async Task<ApiResponseModel> UpdateItemBatch(int batchId, int itemMasterId, ItemBatchRequestModel itemBatchRequest)
         {

@@ -13,5 +13,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task<User> GetUserByUserId(int userId);
 
         Task UpdateUser(int UserId, User user);
+        Task Deactivate(int userId);
+
+        Task Activate(int userId);
     }
 }

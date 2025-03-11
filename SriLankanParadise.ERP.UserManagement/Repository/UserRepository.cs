@@ -96,5 +96,30 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task Deactivate(int userId)
+        {
+            try
+            {
+                var user = await _dbContext.Users
+                    .Where(u => u.UserId == userId)
+                    .FirstOrDefaultAsync();
+
+                if (user != null)
+                {
+                    user.IsDeleted = true;
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public Task Activate(int userId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

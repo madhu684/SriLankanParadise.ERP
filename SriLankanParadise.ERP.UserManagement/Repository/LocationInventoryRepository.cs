@@ -87,6 +87,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var locationInventories = await _dbContext.LocationInventories
                     .Where(li => li.LocationId == locationId)
+                    .Include(li => li.ItemMaster)
                     .Include(li => li.ItemBatch)
                     .ThenInclude(ib => ib.Batch)
                     .ToListAsync();
@@ -198,6 +199,23 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             catch (Exception)
             {
 
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<LocationInventory>> GetItemLocationInventoriesByLocationId(int locationId)
+        {
+            try
+            {
+                var inventories = await _dbContext.LocationInventories
+                    .Where(li => li.LocationId == locationId)
+                    .Include(li => li.ItemMaster)
+                    .ToListAsync();
+
+                return inventories.Any() ? inventories : null;
+            }
+            catch (Exception)
+            {
                 throw;
             }
         }

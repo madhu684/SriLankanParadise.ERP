@@ -12,6 +12,7 @@ const StockReport = () => {
     startDate,
     endDate,
     reportData,
+    companyLocations,
     searchTerm,
     generatedDateTime,
     isReportGenerated,
@@ -30,7 +31,7 @@ const StockReport = () => {
   } = useStockReport();
 
   const companyLogoUrl = useCompanyLogoUrl();
-
+  console.log("reportData", reportData);
   if (
     isitemMastersError ||
     isItemBatchesError ||
@@ -86,6 +87,31 @@ const StockReport = () => {
               max={getCurrentDate()}
               min={startDate}
             />
+          </div>
+          <div className="col-md-3">
+            <label htmlFor="warehouse" className="form-label">
+              Warehouse
+            </label>
+            <select
+              className="form-select"
+              id="warehouse"
+              //onChange={handleLocationChange}
+            >
+              <option value="" disabled selected>
+                All Warehouses
+              </option>
+              {companyLocations && companyLocations.length > 0 ? (
+                companyLocations
+                  .filter((l) => l.locationTypeId === 2)
+                  .map((item) => (
+                    <option key={item.id} value={item.locationId}>
+                      {item.locationName}
+                    </option>
+                  ))
+              ) : (
+                <option>No warehouses available</option>
+              )}
+            </select>
           </div>
           <div className="col-md-2 d-flex align-items-end">
             <button
