@@ -2329,6 +2329,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to User retrieved.
+        /// </summary>
+        public static string UserRetrieved {
+            get {
+                return ResourceManager.GetString("UserRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Users not found.
         /// </summary>
         public static string UsersNotFound {

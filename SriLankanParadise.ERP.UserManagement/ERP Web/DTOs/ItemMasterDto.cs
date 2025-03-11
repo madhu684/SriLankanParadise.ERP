@@ -30,6 +30,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
         public int? ParentId { get; set; }
 
         public int? InventoryUnitId { get; set; }
+        public decimal? UnitPrice { get; set; }
 
         public virtual UnitDto? InventoryUnit { get; set; }
 
@@ -42,6 +43,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
         public decimal? SellingPrice { get; set; }
 
         public virtual ItemTypeDto? ItemType { get; set; }
+
+        public ICollection<SubItemMasterDto>? SubItemMasters { get; set; }
 
 
     }

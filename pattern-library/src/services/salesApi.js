@@ -39,6 +39,7 @@ export const get_customers_by_company_id_api = async (companyId) => {
   }
 }
 
+//sales person apis
 export const get_sales_persons_by_company_id_api = async (companyId) => {
   try {
     const response = await api.get(
@@ -47,6 +48,18 @@ export const get_sales_persons_by_company_id_api = async (companyId) => {
         withCredentials: true,
       }
     )
+    return response.data
+  } catch (error) {
+    console.log(error)
+    throw error
+  }
+}
+
+export const get_sales_persons_by_user_id_api = async (userId) => {
+  try {
+    const response = await api.get(`/user/GetUserByUserId/${userId}`, {
+      withCredentials: true,
+    })
     return response.data
   } catch (error) {
     console.log(error)
@@ -65,7 +78,7 @@ export const get_sales_order_details_by_sales_order_id = async (
         withCredentials: true,
       }
     )
-      return response.data
+    return response.data
   } catch (error) {
     console.log(error)
     throw error

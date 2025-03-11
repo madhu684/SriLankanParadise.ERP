@@ -76,6 +76,7 @@ const SalesOrderList = () => {
         handleClose={handleClose}
         salesOrder={SODetail || selectedRowData[0]}
         handleUpdated={handleUpdated}
+        setShowUpdateSOForm={setShowUpdateSOForm}
       />
     );
   }

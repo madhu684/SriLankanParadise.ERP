@@ -97,6 +97,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         searchQuery,
         itemType
       );
+      console.log("Response : ", response)
       return response.data.result;
     } catch (error) {
       console.error("Error fetching items:", error);

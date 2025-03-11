@@ -120,4 +120,10 @@
   <data name="InternalServerError" xml:space="preserve">
     <value>An error occurred while processing the request</value>
   </data>
+  <data name="SubItemMastersNotFound" xml:space="preserve">
+    <value>Sub Item masters not found</value>
+  </data>
+  <data name="SubItemMastersRetrieved" xml:space="preserve">
+    <value>Sub Item masters retrieved</value>
+  </data>
 </root>
