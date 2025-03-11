@@ -102,6 +102,7 @@ const SalesOrder = ({ handleClose, handleUpdated, setShowCreateSOForm }) => {
     return <ErrorComponent error={'Error fetching data'} />
   }
 
+  
   const handleBack = () => {
     setShowCreateSOForm(false)
   }

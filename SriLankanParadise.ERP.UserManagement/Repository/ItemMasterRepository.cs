@@ -130,6 +130,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var itemMaster = await _dbContext.ItemMasters
                     .Where(im => im.ItemMasterId == itemMasterId)
+                    .Include(im => im.SubItemMasters)
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
                     .ThenInclude(u => u.MeasurementType)
@@ -154,6 +155,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
 
                 if (existItemMaster != null)
                 {
+                    itemMaster.ItemMasterId = existItemMaster.ItemMasterId;
+
                     _dbContext.Entry(existItemMaster).CurrentValues.SetValues(itemMaster);
                     await _dbContext.SaveChangesAsync();
                 }
@@ -190,6 +193,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var itemMasters = await _dbContext.ItemMasters
                     .Where(im => im.CreatedUserId == userId)
+                    .Include(im => im.SubItemMasters)
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
                     .ThenInclude(u => u.MeasurementType)
@@ -217,6 +221,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(im => im.Unit)
                     .ThenInclude(u => u.MeasurementType)
                     .Include(im => im.ItemType)
+                    .Include(im => im.SubItemMasters)
                     .ToListAsync();
 
                 return itemMasters.Any() ? itemMasters : null;

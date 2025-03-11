@@ -196,6 +196,30 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpGet("GetUserByUserId/{userId}")]
+        public async Task<ApiResponseModel> GetUserByUserId(int userId)
+        {
+            try
+            {
+                var user = await _userService.GetUserByUserId(userId);
+                if (user != null)
+                {
+                    var userDto = _mapper.Map<UserDto>(user);
+                    return AddResponseMessage(Response, LogMessages.UserRetrieved, userDto, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.UsersNotFound);
+                    return AddResponseMessage(Response, LogMessages.UserNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
+
         [HttpPut("{userId}")]
         public async Task<ApiResponseModel> UpdateUser(int userId, UserUpdateRequestModel userUpdateRequest)
         {

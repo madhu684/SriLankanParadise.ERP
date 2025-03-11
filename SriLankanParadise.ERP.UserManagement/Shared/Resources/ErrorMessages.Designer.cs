@@ -68,5 +68,23 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
                 return ResourceManager.GetString("InternalServerError", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sub Item masters not found.
+        /// </summary>
+        public static string SubItemMastersNotFound {
+            get {
+                return ResourceManager.GetString("SubItemMastersNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sub Item masters retrieved.
+        /// </summary>
+        public static string SubItemMastersRetrieved {
+            get {
+                return ResourceManager.GetString("SubItemMastersRetrieved", resourceCulture);
+            }
+        }
     }
 }

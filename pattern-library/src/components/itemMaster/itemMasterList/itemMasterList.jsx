@@ -60,6 +60,7 @@ const ItemMasterList = () => {
       <ItemMaster
         handleClose={() => setShowCreateIMForm(false)}
         handleUpdated={handleUpdated}
+        setShowCreateIMForm={setShowCreateIMForm}
       />
     );
   }
@@ -70,6 +71,7 @@ const ItemMasterList = () => {
         handleClose={handleClose}
         itemMaster={IMDetail || selectedRowData[0]}
         handleUpdated={handleUpdated}
+        setShowUpdateIMForm={setShowUpdateIMForm}
       />
     );
   }

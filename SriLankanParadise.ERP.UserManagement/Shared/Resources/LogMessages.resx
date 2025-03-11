@@ -858,6 +858,9 @@
   <data name="UserRegistered" xml:space="preserve">
     <value>User registered successfully</value>
   </data>
+  <data name="UserRetrieved" xml:space="preserve">
+    <value>User retrieved</value>
+  </data>
   <data name="UsersNotFound" xml:space="preserve">
     <value>Users not found</value>
   </data>

@@ -117,6 +117,8 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<SalesReceiptSalesInvoice> SalesReceiptSalesInvoices { get; set; }
 
+    public virtual DbSet<SubItemMaster> SubItemMasters { get; set; }
+
     public virtual DbSet<SubModule> SubModules { get; set; }
 
     public virtual DbSet<Subscription> Subscriptions { get; set; }
@@ -1254,6 +1256,17 @@ public partial class ErpSystemContext : DbContext
         modelBuilder.HasSequence("PurchaseOrderReferenceNoSeq").StartsAt(1000L);
         modelBuilder.HasSequence("SalesInvoiceReferenceNoSeq").StartsAt(1000L);
         modelBuilder.HasSequence("SalesOrderReferenceNoSeq").StartsAt(1000L);
+
+        modelBuilder.Entity<SubItemMaster>(entity =>
+        {
+            entity.ToTable("SubItemMaster");
+
+            entity.HasOne(d => d.ItemMaster).WithMany(p => p.SubItemMasters)
+                .HasForeignKey(d => d.MainItemMasterId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_SubItemMaster_ItemMaster");
+        });
+
 
         OnModelCreatingPartial(modelBuilder);
     }
