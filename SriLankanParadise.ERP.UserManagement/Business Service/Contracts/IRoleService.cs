@@ -15,5 +15,6 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task<Role> GetRoleByRoleId(int roleId);
 
         Task UpdateRole(int roleId, Role role);
+        Task Delete(int roleId);
     }
 }

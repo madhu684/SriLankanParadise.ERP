@@ -16,6 +16,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
     public class LocationInventoryController : BaseApiController
     {
         private readonly ILocationInventoryService _locationInventoryService;
+        private readonly IUnitService _unitService;
         private readonly IActionLogService _actionLogService;
         private readonly IMapper _mapper;
         private readonly ILogger<LocationInventoryController> _logger;
@@ -23,12 +24,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
         public LocationInventoryController(
             ILocationInventoryService locationInventoryService,
+            IUnitService unitService,
             IActionLogService actionLogService,
             IMapper mapper,
             ILogger<LocationInventoryController> logger,
             IHttpContextAccessor httpContextAccessor)
         {
             _locationInventoryService = locationInventoryService;
+            _unitService = unitService;
             _actionLogService = actionLogService;
             _mapper = mapper;
             _logger = logger;
@@ -92,6 +95,48 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 if (locationInventories != null)
                 {
                     var locationInventoryDtos = _mapper.Map<IEnumerable<LocationInventoryDto>>(locationInventories);
+                    AddResponseMessage(Response, LogMessages.LocationInventoriesRetrieved, locationInventoryDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.LocationInventoriesNotFound);
+                    AddResponseMessage(Response, LogMessages.LocationInventoriesNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("GetItemLocationInventoriesByLocationId/{locationId}")]
+        public async Task<ApiResponseModel> GetItemLocationInventoriesByLocationId(int locationId)
+        {
+            try
+            {
+                var locationInventories = await _locationInventoryService.GetItemLocationInventoriesByLocationId(locationId);
+                if (locationInventories != null)
+                {
+                    var locationInventoryDtos = new List<LocationInventoryItemDto>();
+                    foreach (var locationInventory in locationInventories)
+                    {
+                        var unit = _unitService.GetUnitByUnitId(locationInventory.ItemMaster.UnitId);
+                        locationInventoryDtos.Add(new LocationInventoryItemDto
+                        {
+                            LocationInventoryId = locationInventory.LocationInventoryId,
+                            ItemMasterId = locationInventory.ItemMasterId,
+                            ItemName = locationInventory.ItemMaster.ItemName,
+                            ItemCode = locationInventory.ItemMaster.ItemCode,
+                            UnitId = locationInventory.ItemMaster.UnitId,
+                            UnitName = unit.Result.UnitName,
+                            BatchId = locationInventory.BatchId,
+                            LocationId = locationInventory.LocationId,
+                            BatchNo = locationInventory.BatchNo,
+                            StockInHand = locationInventory.StockInHand,
+                        });
+                    }
                     AddResponseMessage(Response, LogMessages.LocationInventoriesRetrieved, locationInventoryDtos, true, HttpStatusCode.OK);
                 }
                 else

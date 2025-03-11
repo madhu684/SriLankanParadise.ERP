@@ -12,6 +12,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
 
         Task<IEnumerable<LocationInventory>> GetLocationInventoriesByLocationId(int locationId);
 
+        Task<IEnumerable<LocationInventory>> GetItemLocationInventoriesByLocationId(int locationId);
+
         Task<IEnumerable<LocationInventory>> GetLocationInventoriesByLocationIdItemMasterId(int locationId, int itemMasterId);
 
         Task UpdateLocationInventory(int locationInventoryId, LocationInventory locationInventory);

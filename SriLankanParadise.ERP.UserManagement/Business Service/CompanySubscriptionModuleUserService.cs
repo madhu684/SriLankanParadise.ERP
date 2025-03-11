@@ -16,5 +16,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             await _companySubscriptionModuleUserRepository.AddCompanySubscriptionModuleUser(companySubscriptionModuleUser);
         }
+
+        public async Task DeleteCompanySubscriptionModulesByUserId(int UserId)
+        {
+            await _companySubscriptionModuleUserRepository.DeleteCompanySubscriptionModulesByUserId(UserId);
+        }
     }
 }

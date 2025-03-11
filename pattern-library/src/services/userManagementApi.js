@@ -428,3 +428,112 @@ export const delete_user_location_api = async (userId, locationId) => {
     throw error;
   }
 };
+
+export const get_roles_by_company_id_api = async (companyId) => {
+  try {
+    const response = await api.get(`/role/GetRolesByCompanyId/${companyId}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const delete_role_api = async (roleId) => {
+  try {
+    const response = await api.delete(`/role/${roleId}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const post_role_api = async (formData) => {
+  try {
+    const response = await api.post("/role", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const put_role_api = async (roleId, roleData) => {
+  try {
+    const response = await api.put(`/role/${roleId}`, roleData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const get_permissions_by_company_id_api = async (companyId) => {
+  try {
+    const response = await api.get(
+      `/permission/GetPermissionsByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const delete_permission_api = async (permissionId) => {
+  try {
+    const response = await api.delete(`/permission/${permissionId}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const get_all_users_by_company_id_api = async (companyId) => {
+  try {
+    const response = await api.get(
+      `/user/GetAllUsersByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const deactivate_user = async (userId) => {
+  try {
+    const response = await api.put(`/user/${userId}/deactivate`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const activate_user = async (userId) => {
+  try {
+    const response = await api.put(`/user/${userId}/activate`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

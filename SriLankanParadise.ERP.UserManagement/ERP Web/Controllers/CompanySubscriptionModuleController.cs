@@ -214,16 +214,16 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         {
             try
             {
-                var modules = await _companySubscriptionModuleService.GetCompanySubscriptionModulesByCompanyId(companyId);
-                if (modules != null)
+                var companySubModules = await _companySubscriptionModuleService.GetCompanySubscriptionModulesByCompanyId(companyId);
+                if (companySubModules != null)
                 {
-                    var ModuleWithIdDto = _mapper.Map<IEnumerable<ModuleWithIdDto>>(modules);
-                    AddResponseMessage(Response, LogMessages.ModulesRetrieved, ModuleWithIdDto, true, HttpStatusCode.OK);
+                    var ModuleWithIdDto = _mapper.Map<IEnumerable<CompanySubscriptionModuleDto>>(companySubModules);
+                    AddResponseMessage(Response, LogMessages.CompanySubscriptionModulesRetrieved, ModuleWithIdDto, true, HttpStatusCode.OK);
                 }
                 else
                 {
-                    _logger.LogWarning(LogMessages.ModulesNotFound);
-                    AddResponseMessage(Response, LogMessages.ModulesNotFound, null, true, HttpStatusCode.NotFound);
+                    _logger.LogWarning(LogMessages.CompanySubscriptionModulesNotFound);
+                    AddResponseMessage(Response, LogMessages.CompanySubscriptionModulesNotFound, null, true, HttpStatusCode.NotFound);
                 }
             }
             catch (Exception ex)

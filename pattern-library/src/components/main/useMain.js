@@ -19,6 +19,13 @@ import CashierExpenseOut from "../cashierExpenseOut/cashierExpenseOut.jsx";
 import SupplierList from "../supplier/supplierMain/supplierList/supplierList.jsx";
 import StockReport from "../stockReport/stockReport.jsx";
 import SalesOrderReport from "../salesOrderReport/salesOrderReport.jsx";
+import UserRoleList from "../userRole/userRoleList/userRoleList.jsx";
+import SystemPrivilegeList from "../systemPrivilages/SystemPrivilageList/SystemPrivilageList.jsx";
+import UserAccountList from "../registration/userAccount/userAccountList.jsx";
+import LocationList from "../location/locationList/locationList.jsx";
+import StockManagement from "../stockManagement/stockManagement.jsx";
+import InventoryAnalysisReport from "../inventoryAnalysisReport/InventoryAnalysisReport.jsx";
+import InventoryAnalysisAsAtDateReport from "../inventoryAnalysisReportAsAtDateReport/InventoryAnalysisAsAtDateReport.jsx";
 
 const useMain = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -114,7 +121,21 @@ const useMain = () => {
       case "Stock Report":
         return <StockReport />;
       case "Sales Order Report":
-        return <SalesOrderReport/>;
+        return <SalesOrderReport />;
+      case "User Roles":
+        return <UserRoleList />;
+      case "User Privileges":
+        return <SystemPrivilegeList />;
+      case "User Accounts":
+        return <UserAccountList />;
+      case "Locations":
+        return <LocationList />;
+      case "Stock Management":
+        return <StockManagement />;
+      case "Inventory Analysis Report":
+        return <InventoryAnalysisReport />;
+      case "Inventory As At Date Report":
+        return <InventoryAnalysisAsAtDateReport />;
       default:
         return null;
     }
