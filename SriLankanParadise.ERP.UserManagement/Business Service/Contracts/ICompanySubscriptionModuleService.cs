@@ -10,7 +10,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task DeleteCompanySubscriptionModule(int companySubscriptionModuleId);
         Task UpdateCompanySubscriptionModule(int companySubscriptionModuleId, CompanySubscriptionModule companySubscriptionModule);
 
-        Task<IEnumerable<Module>> GetCompanySubscriptionModulesByCompanyId(int companyId);
+        Task<IEnumerable<CompanySubscriptionModule>> GetCompanySubscriptionModulesByCompanyId(int companyId);
 
         Task<int?> GetCompanySubscriptionModuleIdByCompanyIdAndModuleId(int companyId, int moduleId);
     }

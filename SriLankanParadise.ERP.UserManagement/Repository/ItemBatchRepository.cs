@@ -195,5 +195,24 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 await _dbContext.SaveChangesAsync();
             }
         }
+
+        public async Task<IEnumerable<ItemBatch>> GetItemBatchesByLocationIdCompanyId(int locationId, int companyId)
+        {
+            try
+            {
+                var itemBatches = await _dbContext.ItemBatches
+                    .Where(ib => ib.Status == true && ib.CompanyId == companyId && ib.LocationId == locationId)
+                    .Include(ib => ib.Batch)
+                    .Include(ib => ib.ItemMaster)
+                    .ToListAsync();
+
+                return itemBatches.Any() ? itemBatches : null;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            };
+        }
     }
 }

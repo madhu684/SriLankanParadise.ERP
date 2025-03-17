@@ -40,6 +40,7 @@ public partial class ItemMaster
     public virtual ICollection<GrnDetail> GrnDetails { get; set; } = new List<GrnDetail>();
 
     public virtual Unit? InventoryUnit { get; set; }
+    public decimal? UnitPrice { get; set; }
 
     public virtual ICollection<ItemMaster> InverseParent { get; set; } = new List<ItemMaster>();
 
@@ -58,4 +59,6 @@ public partial class ItemMaster
     public virtual ICollection<RequisitionDetail> RequisitionDetails { get; set; } = new List<RequisitionDetail>();
 
     public virtual Unit Unit { get; set; } = null!;
+
+    public virtual ICollection<SubItemMaster> SubItemMasters { get; set; } = new List<SubItemMaster>();
 }

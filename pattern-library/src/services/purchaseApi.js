@@ -716,6 +716,24 @@ export const get_item_batches_api = async (companyId) => {
   }
 };
 
+export const get_item_batches_by_locationId_CompanyId = async (
+  locationId,
+  companyId
+) => {
+  try {
+    const response = await api.get(
+      `/itemBatch/GetItemBatchesByLocationIdCompanyId/${locationId}/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 //issue master apis
 export const post_issue_master_api = async (formData) => {
   try {
@@ -1118,13 +1136,12 @@ export const get_locations_inventories_by_location_id_api = async (
   }
 };
 
-export const get_locations_inventories_by_location_id_item_master_id_api = async (
-  locationId,
-  itemMasterId
+export const get_item_locations_inventories_by_location_id_api = async (
+  locationId
 ) => {
   try {
     const response = await api.get(
-      `/locationInventory/GetLocationInventoriesByLocationIdItemMasterId/${locationId}/${itemMasterId}`,
+      `/locationInventory/GetItemLocationInventoriesByLocationId/${locationId}`,
       {
         withCredentials: true,
       }
@@ -1135,6 +1152,22 @@ export const get_locations_inventories_by_location_id_item_master_id_api = async
     throw error;
   }
 };
+
+export const get_locations_inventories_by_location_id_item_master_id_api =
+  async (locationId, itemMasterId) => {
+    try {
+      const response = await api.get(
+        `/locationInventory/GetLocationInventoriesByLocationIdItemMasterId/${locationId}/${itemMasterId}`,
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
 
 export const patch_location_inventory_api = async (
   locationId,
@@ -1172,6 +1205,32 @@ export const patch_location_inventory_goods_in_transit_api = async (
         withCredentials: true,
       }
     );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const get_location_types_by_company_id_api = async (companyId) => {
+  try {
+    const response = await api.get(
+      `/locationType/GetLocationTypesByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const put_company_location_api = async (locationId, locationData) => {
+  try {
+    const response = await api.put(`/location/${locationId}`, locationData, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     throw error;

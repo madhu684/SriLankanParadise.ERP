@@ -11,7 +11,7 @@ public partial class RequisitionDetail
 
     public int ItemMasterId { get; set; }
 
-    public int? Quantity { get; set; }
+    public decimal? Quantity { get; set; }
 
     public virtual ItemMaster ItemMaster { get; set; } = null!;
 

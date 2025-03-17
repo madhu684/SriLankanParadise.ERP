@@ -12,6 +12,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public virtual ItemBatchDto? ItemBatch { get; set; }
 
+        public virtual ItemMasterDto? ItemMaster { get; set; }
+
         public int LocationId { get; set; }
 
         public decimal? StockInHand { get; set; }

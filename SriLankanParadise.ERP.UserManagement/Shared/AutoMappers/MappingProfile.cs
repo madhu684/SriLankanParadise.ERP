@@ -67,7 +67,8 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<Unit, UnitDto>();
             CreateMap<CategoryRequestModel, Category>();
             CreateMap<Category, CategoryDto>();
-            CreateMap<ItemMasterRequestModel, ItemMaster>();
+            CreateMap<ItemMasterRequestModel, ItemMaster>()
+                .ForMember(dest => dest.SubItemMasters, opt => opt.Ignore());
             CreateMap<ItemMaster, ItemMasterDto>();
             CreateMap<PaymentMode, PaymentModeDto>();
             CreateMap<PaymentModeRequestModel, PaymentMode>();
@@ -131,6 +132,9 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<DailyStockBalance, DailyStockBalanceDto>();
             CreateMap<UpdateItemBatchQtyRequestModel, ItemBatch>();
             CreateMap<UpdateLocationInventoryStockInHandRequestModel, LocationInventory>();
+            CreateMap<CompanySubscriptionModuleUser, CompanySubscriptionModuleUserDto>();
+            CreateMap<SubscriptionModule, SubscriptionModuleDto>();
+            CreateMap<SubItemMaster, SubItemMasterDto>();
             // Add more mapping configurations if needed
         }
     }

@@ -529,9 +529,10 @@ const useSalesOrder = ({ onFormSubmit }) => {
                   tempQuantity: batch.tempQuantity - quantityToConsume,
                   locationId: batch.locationId,
                   expiryDate: batch.expiryDate,
+                  qty: batch.qty,
                   permissionId: 1065,
                 };
-
+                console.log('Item Batch Update Data', itemBatchUpdateData)
                 batchUpdates.push(
                   put_item_batch_api(
                     batch.batchId,
@@ -638,7 +639,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
           postChargesAndDeductionsAppliedResponse.every(
             (detailsResponse) => detailsResponse.status === 201
           );
-
+          
         if (
           allDetailsSuccessful &&
           allAppliedSuccessful &&

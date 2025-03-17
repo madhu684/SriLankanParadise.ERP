@@ -9,11 +9,11 @@ public partial class GrnDetail
 
     public int GrnMasterId { get; set; }
 
-    public int? ReceivedQuantity { get; set; }
+    public int? ReceivedQuantity { get; set; }   // need to be decimal
 
-    public int? AcceptedQuantity { get; set; }
+    public int? AcceptedQuantity { get; set; }    // need to be decimal
 
-    public int? RejectedQuantity { get; set; }
+    public int? RejectedQuantity { get; set; }    // need to be decimal
 
     public decimal? UnitPrice { get; set; }
 

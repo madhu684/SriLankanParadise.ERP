@@ -1,8 +1,8 @@
-import { Table, Container, Button } from 'react-bootstrap'
-import SalesOrderReportView from './salesOrderReportView/salesOrderReportView'
-import SalesOrderReportHook from './useSalesOrderReport'
-import CurrentDateTime from '../currentDateTime/currentDateTime'
-import LoadingSpinner from '../loadingSpinner/loadingSpinner'
+import { Table, Container, Button } from "react-bootstrap";
+import SalesOrderReportView from "./salesOrderReportView/salesOrderReportView";
+import SalesOrderReportHook from "./useSalesOrderReport";
+import CurrentDateTime from "../currentDateTime/currentDateTime";
+import LoadingSpinner from "../loadingSpinner/loadingSpinner";
 
 const SalesOrderReport = () => {
   const {
@@ -20,9 +20,9 @@ const SalesOrderReport = () => {
     salesOrderData,
     loading,
     salesOrderId,
-  } = SalesOrderReportHook()
+  } = SalesOrderReportHook();
 
-  console.log("Master data", salesOrderData)
+  console.log("Master data", salesOrderData);
   return (
     <>
       <div className="container mt-4">
@@ -84,7 +84,7 @@ const SalesOrderReport = () => {
             ) : (
               <table
                 className="table table-striped table-bordered text-center"
-                style={{ minWidth: '1000px', overflowX: 'auto' }}
+                style={{ minWidth: "1000px", overflowX: "auto" }}
               >
                 <thead>
                   <tr>
@@ -109,9 +109,11 @@ const SalesOrderReport = () => {
                     salesOrderData.map((data, index) => (
                       <tr key={index}>
                         <td>{data.salesOrderId}</td>
-                        <td>{data.customer.customerName}</td>
-                        <td>{data.orderDate.split('T')[0]}</td>
-                        <td>{data.deliveryDate.split('T')[0]}</td>
+                        <td>
+                          {data.customer ? data.customer.customerName : "N/A"}
+                        </td>
+                        <td>{data.orderDate.split("T")[0]}</td>
+                        <td>{data.deliveryDate.split("T")[0]}</td>
                         <td>{data.referenceNo}</td>
                         <td>
                           <button
@@ -142,7 +144,7 @@ const SalesOrderReport = () => {
         salesOrderId={salesOrderId}
       />
     </>
-  )
-}
+  );
+};
 
-export default SalesOrderReport
+export default SalesOrderReport;

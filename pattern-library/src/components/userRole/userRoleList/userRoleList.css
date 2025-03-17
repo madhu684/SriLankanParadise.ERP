@@ -1,0 +1,58 @@
+/* userRoleList.css */
+
+.container {
+  max-width: 100%;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.search-bar {
+  max-width: 300px;
+}
+
+.search-bar .form-control {
+  background-color: white;
+  border: 1px solid black;
+}
+
+.search-bar .input-group-text {
+  background-color: white;
+  border: 1px solid black;
+}
+
+.btn-login {
+  background-color: #007bff; /* Replace with your login button color */
+  border-color: #007bff; /* Replace with your login button border color */
+  color: white;
+  margin-right: 40px;
+}
+
+@media (max-width: 768px) {
+  .search-bar {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+
+  .btn-login {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  .table {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .table th,
+  .table td {
+    white-space: nowrap;
+  }
+
+  .table th:last-child,
+  .table td:last-child {
+    min-width: 100px;
+  }
+}

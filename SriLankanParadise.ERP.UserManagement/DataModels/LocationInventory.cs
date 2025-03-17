@@ -19,4 +19,7 @@ public partial class LocationInventory
     public virtual ItemBatch ItemBatch { get; set; } = null!;
 
     public virtual Location Location { get; set; } = null!;
+
+    public virtual ItemMaster ItemMaster { get; set; } = null!;
+
 }

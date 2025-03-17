@@ -1,0 +1,172 @@
+/* Container styling */
+.container {
+  max-width: 100%;
+}
+
+/* Table responsiveness */
+.table-responsive {
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+
+/* Search bar styling */
+.search-bar {
+  max-width: 300px;
+}
+
+.search-bar .form-control {
+  background-color: white;
+  border: 1px solid rgb(236, 234, 234);
+}
+
+.search-bar .input-group-text {
+  background-color: white;
+  border: 1px solid rgb(236, 243, 243);
+}
+
+/* Button styling */
+.btn-create {
+  background-color: #a1a09c; /* Create button color */
+  border-color: none;
+  color: rgb(255, 255, 255);
+  width: 80px;
+
+  margin-right: 10px; /* Increase space between buttons */
+  margin-bottom: 1rem;
+  margin-top: 1rem; /* Space below the button */
+}
+
+.btn-create:hover {
+  background-color: #eeeaea;
+}
+
+.btn-edit {
+  background-color: #e7983b; /* Edit button color */
+  border-color: none;
+  color: rgb(255, 255, 255);
+
+  width: 80px;
+  max-height: 40px;
+  margin-right: 10px; /* Increase space between buttons */
+}
+
+.btn-edit:hover {
+  background-color: #eeeaea;
+  opacity: 0.7;
+}
+
+.btn-remove {
+  background-color: red; /* Remove button color */
+  color: rgb(255, 255, 255);
+  width: 80px;
+  max-height: 40px;
+  margin-right: 10px; /* Increase space between buttons */
+}
+
+.btn-remove:hover {
+  background-color: #eeeaea;
+}
+
+.btn-activate {
+  background-color: #01852277; /* Activate button color */
+  border-color: #37673b00;
+  color: rgb(255, 255, 255);
+  width: 100px;
+}
+
+.btn-activate:hover {
+  background-color: #eeeaea;
+}
+
+.btn-deactivate {
+  background-color: #ff000d;
+  width: 100px; /* Activate button color */
+  border-color: #d26666;
+  color: rgb(255, 255, 255);
+}
+
+.btn-deactivate:hover {
+  background-color: #eeeaea;
+}
+
+.btn-view {
+  background-color: #00000058; /* View button color */
+  color: rgb(255, 255, 255);
+  width: 80px;
+  max-height: 40px;
+  margin-right: 10px;
+  font-size: 15px; /* Increase space between buttons */
+}
+
+.btn-view:hover {
+  background-color: #eeeaea;
+}
+
+.btn-create-bom {
+  background-color: #5cb85c; /* Create BOM button color */
+  color: rgb(255, 255, 255);
+  width: 100px;
+  max-height: 40px;
+  margin-right: 10px;
+  font-size: 13px; /* Increase space between buttons */
+}
+
+.btn-create-bom:hover {
+  background-color: #eeeaea;
+}
+
+/* Table styling */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem; /* Default font size */
+}
+
+.table th,
+.table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.table th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+.table .badge-status {
+  font-size: 0.9rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .search-bar {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+
+  .btn-create {
+    max-width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  .table {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .table th,
+  .table td {
+    white-space: nowrap;
+  }
+
+  .table th:last-child,
+  .table td:last-child {
+    min-width: 100px;
+  }
+}
