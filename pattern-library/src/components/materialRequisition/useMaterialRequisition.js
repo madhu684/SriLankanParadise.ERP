@@ -98,7 +98,11 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
   } = useQuery({
     queryKey: ["items", searchTerm],
     queryFn: () =>
-      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "Consumable,Raw Material"),
+      fetchItems(
+        sessionStorage.getItem("companyId"),
+        searchTerm,
+        "Consumable,Raw Material,Sellable"
+      ),
   });
 
   useEffect(() => {
