@@ -26,7 +26,7 @@ import LocationList from "../location/locationList/locationList.jsx";
 import StockManagement from "../stockManagement/stockManagement.jsx";
 import InventoryAnalysisReport from "../inventoryAnalysisReport/InventoryAnalysisReport.jsx";
 import InventoryAnalysisAsAtDateReport from "../inventoryAnalysisReportAsAtDateReport/InventoryAnalysisAsAtDateReport.jsx";
-import SupplierReturn from "../supplierReturn/SupplierReturn.jsx";
+import SupplierReturnList from "../supplierReturn/supplierReturnList/supplierReturnList.jsx";
 
 const useMain = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -138,7 +138,7 @@ const useMain = () => {
       case "Inventory As At Date Report":
         return <InventoryAnalysisAsAtDateReport />;
       case "Supplier Return":
-        return <SupplierReturn />;
+        return <SupplierReturnList />;
       default:
         return null;
     }

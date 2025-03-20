@@ -189,6 +189,10 @@ builder.Services.AddScoped<ILocationTypeService, LocationTypeService>();
 builder.Services.AddScoped<ILocationTypeRepository, LocationTypeRepository>();
 builder.Services.AddScoped<ISubItemMasterService, SubItemMasterService>();
 builder.Services.AddScoped<ISubItemMasterRepository, SubItemMasterRepository>();
+builder.Services.AddScoped<ISupplyReturnMasterService, SupplyReturnMasterService>();
+builder.Services.AddScoped<ISupplyReturnMasterRepository, SupplyReturnMasterRepository>();
+builder.Services.AddScoped<ISupplyReturnDetailService, SupplyReturnDetailService>();
+builder.Services.AddScoped<ISupplyReturnDetailRepository, SupplyReturnDetailRepository>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

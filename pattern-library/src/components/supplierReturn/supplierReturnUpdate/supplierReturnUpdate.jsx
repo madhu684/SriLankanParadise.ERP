@@ -1,10 +1,14 @@
 import React from "react";
-import CurrentDateTime from "../currentDateTime/currentDateTime";
-import useSupplierReturn from "./useSupplierReturn";
-import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
-import ErrorComponent from "../errorComponent/errorComponent";
+import useSupplierReturnUpdate from "./useSupplierReturnUpdate";
+import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
+import ErrorComponent from "../../errorComponent/errorComponent";
+import CurrentDateTime from "../../currentDateTime/currentDateTime";
 
-const SupplierReturn = ({ handleClose, setShowCreateSRForm }) => {
+const SupplierReturnUpdate = ({
+  handleClose,
+  supplyReturnMaster,
+  setShowUpdateSRForm,
+}) => {
   const {
     formData,
     suppliers,
@@ -21,7 +25,9 @@ const SupplierReturn = ({ handleClose, setShowCreateSRForm }) => {
     validFields,
     validationErrors,
     loading,
-    referenceNo,
+    loadingFormData,
+    isFormDataError,
+    formDataError,
     submissionStatus,
     alertRef,
     setSupplierSearchTerm,
@@ -32,14 +38,11 @@ const SupplierReturn = ({ handleClose, setShowCreateSRForm }) => {
     handleInputChange,
     handleRemoveItem,
     handleItemDetailsChange,
-    handleSubmit,
-  } = useSupplierReturn({
-    onFormSubmit: () => {
-      handleClose();
-    },
+  } = useSupplierReturnUpdate({
+    supplyReturnMaster,
   });
 
-  if (isLoadingSuppliers || isLoadingBatches) {
+  if (isLoadingSuppliers || isLoadingBatches || loadingFormData) {
     return (
       <div className="d-flex justify-content-center mt-5">
         <ButtonLoadingSpinner />
@@ -47,8 +50,10 @@ const SupplierReturn = ({ handleClose, setShowCreateSRForm }) => {
     );
   }
 
-  if (isErrorSuppliers || isErrorBatches) {
-    return <ErrorComponent error={errorSuppliers || errorBatches} />;
+  if (isErrorSuppliers || isErrorBatches || isFormDataError) {
+    return (
+      <ErrorComponent error={errorSuppliers || errorBatches || formDataError} />
+    );
   }
 
   return (
@@ -62,14 +67,15 @@ const SupplierReturn = ({ handleClose, setShowCreateSRForm }) => {
             <CurrentDateTime />
           </p>
         </div>
-        <h1 className="mt-2 text-center">Supplier Return</h1>
+        <h1 className="mt-2 text-center">Supplier Return Update</h1>
         <hr />
       </div>
 
       {/* Display success or error messages */}
       {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
-          Supply Return submitted successfully! Reference Number: {referenceNo}
+          Supply Return submitted successfully! Reference Number:{" "}
+          {formData.referenceNo}
         </div>
       )}
       {submissionStatus === "error" && (
@@ -447,13 +453,13 @@ const SupplierReturn = ({ handleClose, setShowCreateSRForm }) => {
           <button
             type="button"
             className="btn btn-primary me-2"
-            onClick={() => handleSubmit()}
+            //onClick={() => handleSubmit()}
             disabled={!formData.itemDetails.length > 0 || loading}
           >
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Submitting..." />
             ) : (
-              "Submit"
+              "Update and Submit"
             )}
           </button>
           <button
@@ -470,4 +476,4 @@ const SupplierReturn = ({ handleClose, setShowCreateSRForm }) => {
   );
 };
 
-export default SupplierReturn;
+export default SupplierReturnUpdate;

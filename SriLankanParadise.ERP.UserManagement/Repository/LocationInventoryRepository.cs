@@ -105,11 +105,11 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             try
             {
                 var query = _dbContext.LocationInventories
-    .Where(li => li.LocationId == locationId && li.ItemMasterId == itemMasterId)
-    .Include(li => li.ItemBatch)
-    .ThenInclude(ib => ib.Batch)
-    .Include(li => li.ItemBatch)
-    .ThenInclude(ib => ib.ItemMaster);
+                    .Where(li => li.LocationId == locationId && li.ItemMasterId == itemMasterId)
+                    .Include(li => li.ItemBatch)
+                    .ThenInclude(ib => ib.Batch)
+                    .Include(li => li.ItemBatch)
+                    .ThenInclude(ib => ib.ItemMaster);
 
                 var sqlQuery = query.ToQueryString();
 
@@ -213,6 +213,24 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ToListAsync();
 
                 return inventories.Any() ? inventories : null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<LocationInventory>> GetLocationInventoryByBatchId(int batchId)
+        {
+            try
+            {
+                var locationInventories = await _dbContext.LocationInventories
+                    .Where(li => li.BatchId == batchId)
+                    .Include(li => li.ItemMaster)
+                    .ThenInclude(im => im.Unit)
+                    .ToListAsync();
+
+                return locationInventories.Any() ? locationInventories : null;
             }
             catch (Exception)
             {

@@ -135,6 +135,11 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<CompanySubscriptionModuleUser, CompanySubscriptionModuleUserDto>();
             CreateMap<SubscriptionModule, SubscriptionModuleDto>();
             CreateMap<SubItemMaster, SubItemMasterDto>();
+            CreateMap<SupplyReturnMasterRequestModel, SupplyReturnMaster>();
+            CreateMap<SupplyReturnMaster, SupplyReturnMasterDto>();
+            CreateMap<ApproveSupplyReturnMasterRequsetModel, SupplyReturnMaster>();
+            CreateMap<SupplyReturnDetailRequestModel, SupplyReturnDetail>();
+            CreateMap<SupplyReturnDetail, SupplyReturnDetailDto>();
             // Add more mapping configurations if needed
         }
     }

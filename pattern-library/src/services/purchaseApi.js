@@ -665,6 +665,21 @@ export const post_batch_api = async (formData) => {
   }
 };
 
+export const get_batches_by_companyId_api = async (companyId) => {
+  try {
+    const response = await api.get(
+      `/batch/GetBatchesByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const post_batchHasGrnMaster_api = async (formData) => {
   try {
     const response = await api.post("/batchHasGrnMaster", formData, {
@@ -1211,6 +1226,21 @@ export const patch_location_inventory_goods_in_transit_api = async (
   }
 };
 
+export const get_location_inventory_by_batch_id_api = async (batchId) => {
+  try {
+    const response = await api.get(
+      `/locationInventory/GetLocationInventoryByBatchId/${batchId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const get_location_types_by_company_id_api = async (companyId) => {
   try {
     const response = await api.get(
@@ -1226,9 +1256,59 @@ export const get_location_types_by_company_id_api = async (companyId) => {
   }
 };
 
+export const get_location_inventory_by_locationInvemtoryId_api = async (
+  locationInventoryId
+) => {
+  try {
+    const response = await api.get(
+      `/locationInventory/GetLocationInventoryByLocationInventoryId/${locationInventoryId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {}
+};
+
 export const put_company_location_api = async (locationId, locationData) => {
   try {
     const response = await api.put(`/location/${locationId}`, locationData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const get_supply_return_masters_by_companyId = async (companyId) => {
+  try {
+    const response = await api.get(
+      `/supplyReturnMaster/GetSupplyReturnMasterByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const create_supply_return_master_api = async (formData) => {
+  try {
+    const response = await api.post("/supplyReturnMaster", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const create_supply_return_detail_api = async (formData) => {
+  try {
+    const response = await api.post("/supplyReturnDetail", formData, {
       withCredentials: true,
     });
     return response.data;

@@ -885,4 +885,34 @@
   <data name="UserActivated" xml:space="preserve">
     <value>User Activated</value>
   </data>
+  <data name="SupplyReturnMasterCreated" xml:space="preserve">
+    <value>Supply return master created successfully</value>
+  </data>
+  <data name="SupplyReturnMasterNotFound" xml:space="preserve">
+    <value>Supply return master not found</value>
+  </data>
+  <data name="SupplyReturnMasterRetrieved" xml:space="preserve">
+    <value>Supply return master retrieved</value>
+  </data>
+  <data name="SupplyReturnMasterUpdated" xml:space="preserve">
+    <value>Supply return master updated</value>
+  </data>
+  <data name="SupplyReturnDetailCreated" xml:space="preserve">
+    <value>Supply return detail created sucessfully</value>
+  </data>
+  <data name="SupplyReturnDetailNotFound" xml:space="preserve">
+    <value>Supply return detail not found</value>
+  </data>
+  <data name="SupplyReturnDetailRetieved" xml:space="preserve">
+    <value>Supply return detail retieved</value>
+  </data>
+  <data name="SupplyReturnDetailUpdated" xml:space="preserve">
+    <value>Supply return detail updated</value>
+  </data>
+  <data name="SupplyReturnMasterApproved" xml:space="preserve">
+    <value>Supply return master approved</value>
+  </data>
+  <data name="SupplyReturnDetailDeleted" xml:space="preserve">
+    <value>Supply return detail deleted</value>
+  </data>
 </root>

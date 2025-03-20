@@ -2113,6 +2113,96 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Supply return detail created sucessfully.
+        /// </summary>
+        public static string SupplyReturnDetailCreated {
+            get {
+                return ResourceManager.GetString("SupplyReturnDetailCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supply return detail deleted.
+        /// </summary>
+        public static string SupplyReturnDetailDeleted {
+            get {
+                return ResourceManager.GetString("SupplyReturnDetailDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supply return detail not found.
+        /// </summary>
+        public static string SupplyReturnDetailNotFound {
+            get {
+                return ResourceManager.GetString("SupplyReturnDetailNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supply return detail retieved.
+        /// </summary>
+        public static string SupplyReturnDetailRetieved {
+            get {
+                return ResourceManager.GetString("SupplyReturnDetailRetieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supply return detail updated.
+        /// </summary>
+        public static string SupplyReturnDetailUpdated {
+            get {
+                return ResourceManager.GetString("SupplyReturnDetailUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supply return master approved.
+        /// </summary>
+        public static string SupplyReturnMasterApproved {
+            get {
+                return ResourceManager.GetString("SupplyReturnMasterApproved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supply return master created successfully.
+        /// </summary>
+        public static string SupplyReturnMasterCreated {
+            get {
+                return ResourceManager.GetString("SupplyReturnMasterCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supply return master not found.
+        /// </summary>
+        public static string SupplyReturnMasterNotFound {
+            get {
+                return ResourceManager.GetString("SupplyReturnMasterNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supply return master retrieved.
+        /// </summary>
+        public static string SupplyReturnMasterRetrieved {
+            get {
+                return ResourceManager.GetString("SupplyReturnMasterRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supply return master updated.
+        /// </summary>
+        public static string SupplyReturnMasterUpdated {
+            get {
+                return ResourceManager.GetString("SupplyReturnMasterUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Transaction types not found.
         /// </summary>
         public static string TransactionTypesNotFound {

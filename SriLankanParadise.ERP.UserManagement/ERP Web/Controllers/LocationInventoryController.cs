@@ -86,6 +86,25 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpGet("GetLocationInventoryByLocationInventoryId/{locationInventoryId}")]
+        public async Task<ApiResponseModel> GetLocationInventoryByLocationInventoryId(int locationInventoryId)
+        {
+            try
+            {
+                var locationInventory = await _locationInventoryService.GetLocationInventoryByLocationInventoryId(locationInventoryId);
+                var locationInventoryDto = _mapper.Map<LocationInventoryDto>(locationInventory);
+
+                _logger.LogInformation(LogMessages.LocationInventoriesRetrieved);
+                AddResponseMessage(Response, LogMessages.LocationInventoriesRetrieved, locationInventoryDto, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
         [HttpGet("GetLocationInventoriesByLocationId/{locationId}")]
         public async Task<ApiResponseModel> GetLocationInventoriesByLocationId(int locationId)
         {
@@ -161,6 +180,30 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 var locationInventories = await _locationInventoryService.GetLocationInventoriesByLocationIdItemMasterId(locationId,itemMasterId);
                 if (locationInventories != null)
                 {
+                    var locationInventoryDtos = _mapper.Map<IEnumerable<LocationInventoryDto>>(locationInventories);
+                    AddResponseMessage(Response, LogMessages.LocationInventoriesRetrieved, locationInventoryDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.LocationInventoriesNotFound);
+                    AddResponseMessage(Response, LogMessages.LocationInventoriesNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("GetLocationInventoryByBatchId/{batchId}")]
+        public async Task<ApiResponseModel> GetLocationInventoryByBatchRefWithQuery(int batchId)
+        {
+            try
+            {
+                var locationInventories = await _locationInventoryService.GetLocationInventoryByBatchId(batchId);
+                if (locationInventories != null) {
                     var locationInventoryDtos = _mapper.Map<IEnumerable<LocationInventoryDto>>(locationInventories);
                     AddResponseMessage(Response, LogMessages.LocationInventoriesRetrieved, locationInventoryDtos, true, HttpStatusCode.OK);
                 }
