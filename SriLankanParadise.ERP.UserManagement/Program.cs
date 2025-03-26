@@ -189,6 +189,10 @@ builder.Services.AddScoped<ILocationTypeService, LocationTypeService>();
 builder.Services.AddScoped<ILocationTypeRepository, LocationTypeRepository>();
 builder.Services.AddScoped<ISubItemMasterService, SubItemMasterService>();
 builder.Services.AddScoped<ISubItemMasterRepository, SubItemMasterRepository>();
+builder.Services.AddScoped<IPackingSlipRepository, PackingSlipRepository>();
+builder.Services.AddScoped<IPackingSlipService, PackingSlipService>();
+builder.Services.AddScoped<IPackingSlipDetailRepository, PackingSlipDetailRepository>();
+builder.Services.AddScoped<IPackingSlipDetailService, PackingSlipDetailService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

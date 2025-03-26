@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { get_purchase_orders_with_out_drafts_api } from "../../../services/purchaseApi";
+import { get_company_suppliers_api, get_purchase_orders_with_out_drafts_api, get_purchase_requisitions_with_out_drafts_api } from "../../../services/purchaseApi";
 import {
   put_grn_master_api,
   put_grn_detail_api,
@@ -13,19 +13,23 @@ import { useQuery } from "@tanstack/react-query";
 
 const useGrnUpdate = ({ grn, onFormSubmit }) => {
   const [formData, setFormData] = useState({
-    grnDate: "",
-    receivedBy: "",
-    receivedDate: "",
+    grnDate: '',
+    receivedBy: '',
+    receivedDate: '',
     itemDetails: [],
-    status: "",
-    purchaseOrderId: "",
-    grnType: "goodsReceivedNote",
+    status: '',
+    purchaseOrderId: '',
+    supplierId: '',
+    purchaseRequisitionId: '',
+    grnType: 'goodsReceivedNote',
     warehouseLocation: null,
-  });
+  })
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
   const [selectedPurchaseOrder, setSelectedPurchaseOrder] = useState(null);
+  const [selectedPurchaseRequisition, setSelectedPurchaseRequisition] =
+    useState(null)
   const statusOptions = [
     { id: "4", label: "In Progress" },
     { id: "5", label: "Completed" },
@@ -38,7 +42,13 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     { id: "finishedGoodsIn", label: "Finished Goods In" },
     { id: "directPurchase", label: "Direct Purchase" },
   ];
+  //const [purchaseOrderSearchTerm, setPurchaseOrderSearchTerm] = useState('')
+  //const [purchaseRequisitionSearchTerm, setPurchaseRequisitionSearchTerm] =
+    useState('')
+  //const [supplierSearchTerm, setSupplierSearchTerm] = useState('')
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchByPO, setSearchByPO] = useState(false)
+  const [searchByPR, setSearchByPR] = useState(true)
 
   const fetchLocations = async () => {
     try {
@@ -110,6 +120,31 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     queryFn: fetchPurchaseOrders,
   });
 
+  const fetchPerchaseRequisitions = async () => {
+    try {
+      const response = await get_purchase_requisitions_with_out_drafts_api(
+        sessionStorage?.getItem('companyId')
+      )
+      const filteredPurchaseRequisitions = response.data.result?.filter(
+        (pr) => pr.status === 2
+      )
+      return filteredPurchaseRequisitions || []
+    } catch (error) {
+      console.error('Error fetching purchase requisitions:', error)
+    }
+  }
+
+  const {
+    data: purchaseRequisitions,
+    isLoadingPurchaseRequisition,
+    isErrorPurchaseRequisition,
+    errorPurchaseRequisition,
+    refetch: refetchPerchaseRequisitions,
+  } = useQuery({
+    queryKey: ['purchaseRequisitions'],
+    queryFn: fetchPerchaseRequisitions,
+  })
+
   const fetchGrnsBypurchaseOrderId = async (purchaseOrderId) => {
     try {
       const response = await get_grn_masters_by_purchase_order_id_api(
@@ -133,6 +168,32 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       fetchGrnsBypurchaseOrderId(selectedPurchaseOrder.purchaseOrderId),
   });
 
+  const fetchSuppliers = async () => {
+    try {
+      const response = await get_company_suppliers_api(
+        sessionStorage.getItem('companyId')
+      )
+
+      const filteredSuppliers = response.data.result?.filter(
+        (supplier) => supplier.status === 1
+      )
+      return filteredSuppliers || []
+    } catch (error) {
+      console.error('Error fetching suppliers:', error)
+    }
+  }
+
+  const {
+    data: suppliers,
+    isLoadingSuppliers,
+    isErrorSuppliers,
+    errorSuppliers,
+    refetch: refetchSuppliers,
+  } = useQuery({
+    queryKey: ['suppliers'],
+    queryFn: fetchSuppliers,
+  })
+
   useEffect(() => {
     const deepCopyGrn = JSON.parse(JSON.stringify(grn));
     setFormData({
@@ -142,13 +203,20 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       itemDetails: [],
       status: deepCopyGrn?.status?.toString().charAt(0) ?? "",
       purchaseOrderId: deepCopyGrn?.purchaseOrderId ?? "",
+      purchaseRequisitionId: deepCopyGrn?.purchaseRequisitionId ?? "",
+      supplierId: deepCopyGrn?.supplierId ?? "",
       attachments: deepCopyGrn?.attachments ?? [],
       grnType: deepCopyGrn?.grnType,
       warehouseLocation: deepCopyGrn?.warehouseLocationId,
     });
 
     if (!isLoading && purchaseOrders) {
-      handlePurchaseOrderChange(deepCopyGrn?.purchaseOrder?.referenceNo);
+      //handlePurchaseOrderChange(deepCopyGrn?.purchaseOrder?.referenceNo);
+      handlePurchaseOrderChange(deepCopyGrn?.purchaseOrderId)
+    }
+    if(!isLoading && purchaseRequisitions){
+      //handlePurchaseRequisitionChange(deepCopyGrn?.purchaseRequisition?.referenceNo)
+      handlePurchaseRequisitionChange(deepCopyGrn?.purchaseRequisitionId)
     }
   }, [grn, isLoading]);
 
@@ -188,9 +256,10 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
             freeQuantity: matchingGrnDetail
               ? matchingGrnDetail.freeQuantity
               : 0,
-            expiryDate: matchingGrnDetail
-              ? matchingGrnDetail.expiryDate?.split("T")[0]
-              : "",
+            // expiryDate: matchingGrnDetail
+            //   ? matchingGrnDetail.expiryDate?.split("T")[0]
+            //   : "",
+            itemBarcode: poItem.itemBarcode,
             unitPrice: poItem.unitPrice,
             grnDetailId: matchingGrnDetail
               ? matchingGrnDetail.grnDetailId
@@ -228,6 +297,88 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       }));
     }
   }, [selectedPurchaseOrder, grns]);
+
+  /* Purchase requisition selected */
+
+  useEffect(() => {
+    if (grns && selectedPurchaseRequisition) {
+      const updatedItemDetails = selectedPurchaseRequisition.purchaseRequisitionDetails
+        .map((prItem) => {
+          const receivedQuantity = grns.reduce((total, grn) => {
+            const grnDetail = grn.grnDetails.find(
+              (detail) => detail.itemId === prItem.itemMaster?.itemMasterId
+            )
+            return total + (grnDetail ? grnDetail.receivedQuantity : 0)
+          }, 0)
+
+          const remainingQuantity = prItem.quantity - receivedQuantity
+
+          const matchingGrnDetail = grn.grnDetails.find(
+            (detail) => detail.itemId === prItem.itemMaster.itemMasterId
+          )
+
+          console.log(matchingGrnDetail)
+
+          return {
+            id: prItem.itemMaster.itemMasterId,
+            name: prItem.itemMaster.itemName,
+            unit: prItem.itemMaster.unit.unitName,
+            quantity: prItem.quantity,
+            remainingQuantity:
+              Math.max(0, remainingQuantity) +
+              (matchingGrnDetail ? matchingGrnDetail.receivedQuantity : 0),
+            receivedQuantity: matchingGrnDetail
+              ? matchingGrnDetail.receivedQuantity
+              : 0,
+            rejectedQuantity: matchingGrnDetail
+              ? matchingGrnDetail.rejectedQuantity
+              : 0,
+            freeQuantity: matchingGrnDetail
+              ? matchingGrnDetail.freeQuantity
+              : 0,
+            // expiryDate: matchingGrnDetail
+            //   ? matchingGrnDetail.expiryDate?.split('T')[0]
+            //   : '',
+            itemBarcode: prItem.itemBarcode,
+            unitPrice: prItem.unitPrice,
+            grnDetailId: matchingGrnDetail
+              ? matchingGrnDetail.grnDetailId
+              : null,
+            grnMasterId: matchingGrnDetail
+              ? matchingGrnDetail.grnMasterId
+              : null,
+          }
+        })
+        .filter((item) => item.grnMasterId === grn.grnMasterId)
+
+      // Update form data with filtered items
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        itemDetails: updatedItemDetails,
+      }))
+    } else {
+      const formattedItemDetails = grn.grnDetails.map((detail) => ({
+        id: detail.item.itemMasterId,
+        name: detail.item.itemName,
+        unit: detail.item.unit.unitName,
+        quantity: detail.receivedQuantity,
+        remainingQuantity: detail.remainingQuantity,
+        receivedQuantity: detail.receivedQuantity,
+        rejectedQuantity: detail.rejectedQuantity,
+        freeQuantity: detail.freeQuantity,
+        //expiryDate: detail.expiryDate ? detail.expiryDate.split('T')[0] : '',
+        itemBarcode: detail.itemBarcode,
+        unitPrice: detail.unitPrice,
+        grnDetailId: detail.grnDetailId,
+      }))
+
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        itemDetails: formattedItemDetails,
+      }))
+    }
+  }, [selectedPurchaseRequisition, grns])
+  /* */
 
   useEffect(() => {
     if (submissionStatus != null) {
@@ -288,6 +439,18 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       "Received date",
       formData.receivedDate
     );
+
+    const isPurchaseRequisitionIdValid = validateField(
+      'purchaseRequisitionId',
+      'Purchase requisition Id',
+      formData.purchaseRequisitionId
+    )
+
+    const isSupplierValid = validateField(
+      'supplierId',
+      'Supplier',
+      formData.supplierId
+    )
 
     const isStatusValid = validateField("status", "Status", formData.status);
 
@@ -380,22 +543,28 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       isItemUnitPriceValid = isItemUnitPriceValid && isValidUnitPrice;
     });
 
-    let isItemExpiryDateValid = true;
+    // let isItemExpiryDateValid = true;
 
-    // Validate item details
-    formData.itemDetails.forEach((item, index) => {
-      // Validation for expiry date
-      const expiryDateFieldName = `expiryDate_${index}`;
-      const expiryDateFieldDisplayName = `Expiry Date for ${item.name}`;
+    // // Validate item details
+    // formData.itemDetails.forEach((item, index) => {
+    //   // Validation for expiry date
+    //   const expiryDateFieldName = `expiryDate_${index}`;
+    //   const expiryDateFieldDisplayName = `Expiry Date for ${item.name}`;
 
-      const isValidExpiryDate = validateField(
-        expiryDateFieldName,
-        expiryDateFieldDisplayName,
-        item.expiryDate
-      );
+    //   const isValidExpiryDate = validateField(
+    //     expiryDateFieldName,
+    //     expiryDateFieldDisplayName,
+    //     item.expiryDate
+    //   );
 
-      isItemExpiryDateValid = isItemExpiryDateValid && isValidExpiryDate;
-    });
+    //   isItemExpiryDateValid = isItemExpiryDateValid && isValidExpiryDate;
+    // });
+
+    const isItemBarcodeValid = validateField(
+      'itemBarcode',
+      'Item Barcode',
+      formData.itemBarcode
+    )
 
     const isGrnTypeValid = validateField(
       "grnType",
@@ -414,14 +583,15 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       isReceivedByValid &&
       isReceivedDateValid &&
       isStatusValid &&
-      isPurchaseOrderIdValid &&
       isItemQuantityValid &&
       isItemUnitPriceValid &&
-      isItemExpiryDateValid &&
+      //isItemExpiryDateValid &&
       isRejectedQuantityValid &&
       isGrnTypeValid &&
-      isWarehouseLocationValid
-    );
+      isWarehouseLocationValid &&
+      (isPurchaseOrderIdValid ||
+        (isPurchaseRequisitionIdValid && isSupplierValid))
+    )
   };
 
   const handleSubmit = async (isSaveAsDraft) => {
@@ -448,11 +618,13 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
 
         const grnData = {
           purchaseOrderId: purchaseOrderId,
+          purchaseRequisitionId: formData.purchaseRequisitionId,
+          supplierId: formData.supplierId,
           grnDate: formData.grnDate,
           receivedBy: formData.receivedBy,
           receivedDate: formData.receivedDate,
           status: combinedStatus,
-          companyId: sessionStorage?.getItem("companyId") ?? null,
+          companyId: sessionStorage?.getItem('companyId') ?? null,
           receivedUserId: grn?.receivedUserId,
           approvedBy: null,
           approvedUserId: null,
@@ -462,9 +634,10 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
           grnType: formData.grnType,
           warehouseLocationId: formData.warehouseLocation,
           permissionId: 22,
-        };
+        }
 
         const response = await put_grn_master_api(grn.grnMasterId, grnData);
+        console.log('GRN Update Response', response)
 
         // Extract itemDetails from formData
         const itemDetailsData = formData.itemDetails.map(async (item) => {
@@ -477,7 +650,8 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
             unitPrice: item.unitPrice,
             itemId: item.id,
             freeQuantity: item.freeQuantity,
-            expiryDate: item.expiryDate,
+            //expiryDate: item.expiryDate,
+            itemBarcode: item.itemBarcode,
             permissionId: 22,
           };
 
@@ -572,10 +746,10 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     window.print();
   };
 
-  const handlePurchaseOrderChange = (referenceId) => {
+  const handlePurchaseOrderChange = (purchaseOrderId) => {
     const selectedPurchaseOrder = purchaseOrders?.find(
-      (purchaseOrder) => purchaseOrder.referenceNo === referenceId
-    );
+      (purchaseOrder) => purchaseOrder.purchaseOrderId === purchaseOrderId
+    )
 
     setSelectedPurchaseOrder(selectedPurchaseOrder);
 
@@ -584,6 +758,21 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       purchaseOrderId: selectedPurchaseOrder?.purchaseOrderId ?? "",
     }));
   };
+
+  const handlePurchaseRequisitionChange = (purchaseRequisitionId) => {
+    const selectedPurchaseRequisition = purchaseRequisitions?.find(
+      (purchaseRequisition) =>
+        purchaseRequisition.purchaseRequisitionId === purchaseRequisitionId
+    )
+
+    setSelectedPurchaseRequisition(selectedPurchaseRequisition)
+
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      purchaseRequisitionId:
+        selectedPurchaseRequisition?.purchaseRequisitionId ?? '',
+    }))
+  }
 
   const handleStatusChange = (selectedOption) => {
     setFormData((prevFormData) => ({
@@ -606,11 +795,12 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
           receivedQuantity: 0,
           rejectedQuantity: 0,
           freeQuantity: 0,
-          expiryDate: "",
+          //expiryDate: "",
+          itemBarcode: '',
           unitPrice: 0.0,
         },
       ],
-    }));
+    }))
     setSearchTerm(""); // Clear the search term
   };
 
@@ -619,12 +809,15 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     validFields,
     validationErrors,
     selectedPurchaseOrder,
+    selectedPurchaseRequisition,
     purchaseOrders,
+    purchaseRequisitions,
     statusOptions,
     submissionStatus,
     alertRef,
     isLoading,
     isError,
+    suppliers,
     loading,
     loadingDraft,
     grnTypeOptions,
@@ -637,14 +830,21 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     isLocationsLoading,
     isLocationsError,
     locationsError,
+    searchByPO,
+    searchByPR,
+    setSearchByPO,
+    setSearchByPR,
     handleInputChange,
+    handlePurchaseRequisitionChange,
     handleItemDetailsChange,
     handlePrint,
     handleSubmit,
     handleStatusChange,
+    setSelectedPurchaseOrder,
+    setSelectedPurchaseRequisition,
     setSearchTerm,
     handleSelectItem,
-  };
+  }
 };
 
 export default useGrnUpdate;

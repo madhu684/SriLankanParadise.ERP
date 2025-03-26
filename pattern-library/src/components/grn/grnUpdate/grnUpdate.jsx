@@ -9,15 +9,18 @@ import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/butt
 const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
   const {
     formData,
-    submissionStatus,
     validFields,
     validationErrors,
     selectedPurchaseOrder,
+    selectedPurchaseRequisition,
     purchaseOrders,
+    purchaseRequisitions,
     statusOptions,
+    submissionStatus,
     alertRef,
     isLoading,
     isError,
+    suppliers,
     loading,
     loadingDraft,
     grnTypeOptions,
@@ -30,20 +33,28 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
     isLocationsLoading,
     isLocationsError,
     locationsError,
+    searchByPO,
+    searchByPR,
+    setSearchByPO,
+    setSearchByPR,
     handleInputChange,
+    handlePurchaseRequisitionChange,
     handleItemDetailsChange,
-    handleSubmit,
     handlePrint,
+    handleSubmit,
     handleStatusChange,
+    setSelectedPurchaseOrder,
+    setSelectedPurchaseRequisition,
     setSearchTerm,
     handleSelectItem,
   } = useGrnUpdate({
     grn,
     onFormSubmit: () => {
-      handleClose();
-      handleUpdated();
+      handleClose()
+      handleUpdated()
     },
-  });
+  })
+
   const companyLogoUrl = useCompanyLogoUrl();
 
   if (isLoading) {
@@ -70,17 +81,17 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
       </div>
 
       {/* Display success or error message */}
-      {submissionStatus === "successSubmitted" && (
+      {submissionStatus === 'successSubmitted' && (
         <div className="alert alert-success mb-3" role="alert">
           GRN submitted successfully!
         </div>
       )}
-      {submissionStatus === "successSavedAsDraft" && (
+      {submissionStatus === 'successSavedAsDraft' && (
         <div className="alert alert-success mb-3" role="alert">
           GRN updated and saved as draft, you can edit and submit it later!
         </div>
       )}
-      {submissionStatus === "error" && (
+      {submissionStatus === 'error' && (
         <div className="alert alert-danger mb-3" role="alert">
           Error submitting GRN. Please try again.
         </div>
@@ -98,12 +109,12 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
               <input
                 type="date"
                 className={`form-control ${
-                  validFields.grnDate ? "is-valid" : ""
-                } ${validationErrors.grnDate ? "is-invalid" : ""}`}
+                  validFields.grnDate ? 'is-valid' : ''
+                } ${validationErrors.grnDate ? 'is-invalid' : ''}`}
                 id="grnDate"
                 placeholder="Enter GRN date"
                 value={formData.grnDate}
-                onChange={(e) => handleInputChange("grnDate", e.target.value)}
+                onChange={(e) => handleInputChange('grnDate', e.target.value)}
                 required
               />
               {validationErrors.grnDate && (
@@ -119,13 +130,13 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.receivedBy ? "is-valid" : ""
-                } ${validationErrors.receivedBy ? "is-invalid" : ""}`}
+                  validFields.receivedBy ? 'is-valid' : ''
+                } ${validationErrors.receivedBy ? 'is-invalid' : ''}`}
                 id="receivedBy"
                 placeholder="Enter name"
                 value={formData.receivedBy}
                 onChange={(e) =>
-                  handleInputChange("receivedBy", e.target.value)
+                  handleInputChange('receivedBy', e.target.value)
                 }
                 required
               />
@@ -142,13 +153,13 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
               <input
                 type="date"
                 className={`form-control ${
-                  validFields.receivedDate ? "is-valid" : ""
-                } ${validationErrors.receivedDate ? "is-invalid" : ""}`}
+                  validFields.receivedDate ? 'is-valid' : ''
+                } ${validationErrors.receivedDate ? 'is-invalid' : ''}`}
                 id="receivedDate"
                 placeholder="Enter received date"
                 value={formData.receivedDate}
                 onChange={(e) =>
-                  handleInputChange("receivedDate", e.target.value)
+                  handleInputChange('receivedDate', e.target.value)
                 }
                 required
               />
@@ -166,10 +177,10 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
               <select
                 id="grnType"
                 className={`form-select ${
-                  validFields.grnType ? "is-valid" : ""
-                } ${validationErrors.grnType ? "is-invalid" : ""}`}
+                  validFields.grnType ? 'is-valid' : ''
+                } ${validationErrors.grnType ? 'is-invalid' : ''}`}
                 value={formData.grnType}
-                onChange={(e) => handleInputChange("grnType", e.target.value)}
+                onChange={(e) => handleInputChange('grnType', e.target.value)}
                 required
                 disabled
               >
@@ -195,8 +206,8 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
               <select
                 id="status"
                 className={`form-select ${
-                  validFields.status ? "is-valid" : ""
-                } ${validationErrors.status ? "is-invalid" : ""}`}
+                  validFields.status ? 'is-valid' : ''
+                } ${validationErrors.status ? 'is-invalid' : ''}`}
                 value={formData.status}
                 onChange={(e) =>
                   handleStatusChange(
@@ -225,19 +236,19 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
               </label>
               <select
                 className={`form-select ${
-                  validFields.warehouseLocation ? "is-valid" : ""
-                } ${validationErrors.warehouseLocation ? "is-invalid" : ""}`}
+                  validFields.warehouseLocation ? 'is-valid' : ''
+                } ${validationErrors.warehouseLocation ? 'is-invalid' : ''}`}
                 id="warehouseLocation"
-                value={formData?.warehouseLocation ?? ""}
+                value={formData?.warehouseLocation ?? ''}
                 onChange={(e) =>
-                  handleInputChange("warehouseLocation", e.target.value)
+                  handleInputChange('warehouseLocation', e.target.value)
                 }
               >
                 <option value="">Select Warehouse</option>
                 {/* Filter out warehouse locations based on the locationType being "Warehouse" */}
                 {locations
                   ?.filter(
-                    (location) => location.locationType.name === "Warehouse"
+                    (location) => location.locationType.name === 'Warehouse'
                   )
                   ?.map((location) => (
                     <option
@@ -258,7 +269,7 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
 
           {/* Purchase Order ID Selection */}
           <div className="col-md-5">
-            <h4>2. Purchase Order Details</h4>
+            <h4>2. Purchase Details</h4>
             <div className="mt-3">
               <label htmlFor="purchaseOrder" className="form-label">
                 Purchase Order
@@ -266,7 +277,7 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
             </div>
 
             {/* Additional Purchase Order Information */}
-            {!["finishedGoodsIn", "directPurchase"].includes(
+            {!['finishedGoodsIn', 'directPurchase'].includes(
               formData?.grnType
             ) &&
               selectedPurchaseOrder && (
@@ -274,25 +285,65 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                   <div className="card-header">Selected Purchase Order</div>
                   <div className="card-body">
                     <p>
-                      Purchase Order Reference No:{" "}
+                      Purchase Order Reference No:{' '}
                       {selectedPurchaseOrder?.referenceNo}
                     </p>
                     <p>
                       Supplier: {selectedPurchaseOrder?.supplier?.supplierName}
                     </p>
                     <p>
-                      Order Date:{" "}
-                      {selectedPurchaseOrder?.orderDate?.split("T")[0] ?? ""}
+                      Order Date:{' '}
+                      {selectedPurchaseOrder?.orderDate?.split('T')[0] ?? ''}
                     </p>
                   </div>
                 </div>
               )}
-            {formData.grnType === "finishedGoodsIn" && (
+            {formData.grnType === 'finishedGoodsIn' && (
               <div className="alert alert-warning" role="alert">
                 This is a "Finished Goods In", no need a purchase order.
               </div>
             )}
-            {formData.grnType === "directPurchase" && (
+            {formData.grnType === 'directPurchase' && (
+              <div className="alert alert-warning" role="alert">
+                This is a "Direct Purchase", no need a purchase order.
+              </div>
+            )}
+
+            {selectedPurchaseRequisition && (
+              <div className="mt-3">
+                <label htmlFor="purchaseRequisition" className="form-label">
+                  Purchase Requisition
+                </label>
+              </div>
+            )}
+
+            {selectedPurchaseRequisition && (
+              <div className="card mb-3">
+                <div className="card-header">Selected Purchase Requisition</div>
+                <div className="card-body">
+                  <p>
+                    Purchase Requisition Reference No:{' '}
+                    {selectedPurchaseRequisition?.referenceNo}
+                  </p>
+                  <p>
+                    Requested By: {selectedPurchaseRequisition?.requestedBy}
+                  </p>
+                  <p>
+                    Requisition Date:{' '}
+                    {selectedPurchaseRequisition?.requisitionDate?.split(
+                      'T'
+                    )[0] ?? ''}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {formData.grnType === 'finishedGoodsIn' && (
+              <div className="alert alert-warning" role="alert">
+                This is a "Finished Goods In", no need a purchase order.
+              </div>
+            )}
+            {formData.grnType === 'directPurchase' && (
               <div className="alert alert-warning" role="alert">
                 This is a "Direct Purchase", no need a purchase order.
               </div>
@@ -322,9 +373,9 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                     <span
                       className="input-group-text bg-transparent"
                       style={{
-                        cursor: "pointer",
+                        cursor: 'pointer',
                       }}
-                      onClick={() => setSearchTerm("")}
+                      onClick={() => setSearchTerm('')}
                     >
                       <i className="bi bi-x"></i>
                     </span>
@@ -333,14 +384,14 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
 
                 {/* Dropdown for filtered items */}
                 {searchTerm && (
-                  <div className="dropdown" style={{ width: "100%" }}>
+                  <div className="dropdown" style={{ width: '100%' }}>
                     <ul
                       className="dropdown-menu"
                       style={{
-                        display: "block",
-                        width: "100%",
-                        maxHeight: "200px",
-                        overflowY: "auto",
+                        display: 'block',
+                        width: '100%',
+                        maxHeight: '200px',
+                        overflowY: 'auto',
                       }}
                     >
                       {isItemsLoading ? (
@@ -380,7 +431,7 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                               >
                                 <span className="me-3">
                                   <i className="bi bi-cart4"></i>
-                                </span>{" "}
+                                </span>{' '}
                                 {item.itemName}
                               </button>
                             </li>
@@ -409,7 +460,7 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                 <tr>
                   <th>Item Name</th>
                   <th>Unit</th>
-                  {!["finishedGoodsIn", "directPurchase"].includes(
+                  {!['finishedGoodsIn', 'directPurchase'].includes(
                     formData?.grnType
                   ) && (
                     <>
@@ -420,7 +471,8 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                   <th>Received Quantity</th>
                   <th>Rejected Quantity</th>
                   <th>Free Quantity</th>
-                  <th>Expiry Date</th>
+                  {/* <th>Expiry Date</th> */}
+                  <th>Item Barcode</th>
                   <th>Unit Price</th>
                 </tr>
               </thead>
@@ -429,7 +481,7 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                   <tr key={index}>
                     <td>{item.name}</td>
                     <td>{item.unit}</td>
-                    {!["finishedGoodsIn", "directPurchase"].includes(
+                    {!['finishedGoodsIn', 'directPurchase'].includes(
                       formData?.grnType
                     ) && (
                       <>
@@ -442,18 +494,18 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                         type="number"
                         className={`form-control ${
                           validFields[`receivedQuantity_${index}`]
-                            ? "is-valid"
-                            : ""
+                            ? 'is-valid'
+                            : ''
                         } ${
                           validationErrors[`receivedQuantity_${index}`]
-                            ? "is-invalid"
-                            : ""
+                            ? 'is-invalid'
+                            : ''
                         }`}
                         value={item.receivedQuantity}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            "receivedQuantity",
+                            'receivedQuantity',
                             e.target.value
                           )
                         }
@@ -469,18 +521,18 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                         type="number"
                         className={`form-control ${
                           validFields[`rejectedQuantity_${index}`]
-                            ? "is-valid"
-                            : ""
+                            ? 'is-valid'
+                            : ''
                         } ${
                           validationErrors[`rejectedQuantity_${index}`]
-                            ? "is-invalid"
-                            : ""
+                            ? 'is-invalid'
+                            : ''
                         }`}
                         value={item.rejectedQuantity}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            "rejectedQuantity",
+                            'rejectedQuantity',
                             e.target.value
                           )
                         }
@@ -499,27 +551,27 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            "freeQuantity",
+                            'freeQuantity',
                             e.target.value
                           )
                         }
                       />
                     </td>
-                    <td>
+                    {/* <td>
                       <input
                         type="date"
                         className={`form-control ${
-                          validFields[`expiryDate_${index}`] ? "is-valid" : ""
+                          validFields[`expiryDate_${index}`] ? 'is-valid' : ''
                         } ${
                           validationErrors[`expiryDate_${index}`]
-                            ? "is-invalid"
-                            : ""
+                            ? 'is-invalid'
+                            : ''
                         }`}
                         value={item.expiryDate}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            "expiryDate",
+                            'expiryDate',
                             e.target.value
                           )
                         }
@@ -529,22 +581,39 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                           {validationErrors[`expiryDate_${index}`]}
                         </div>
                       )}
+                    </td> */}
+                    <td>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="itemBarcode"
+                        placeholder="Enter Item Barcode"
+                        value={item.itemBarcode || ''}
+                        onChange={(e) =>
+                          handleItemDetailsChange(
+                            index,
+                            'itemBarcode',
+                            e.target.value
+                          )
+                        }
+                        required
+                      />
                     </td>
                     <td>
                       <input
                         type="number"
                         className={`form-control ${
-                          validFields[`unitPrice_${index}`] ? "is-valid" : ""
+                          validFields[`unitPrice_${index}`] ? 'is-valid' : ''
                         } ${
                           validationErrors[`unitPrice_${index}`]
-                            ? "is-invalid"
-                            : ""
+                            ? 'is-invalid'
+                            : ''
                         }`}
                         value={item.unitPrice}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            "unitPrice",
+                            'unitPrice',
                             e.target.value
                           )
                         }
@@ -578,7 +647,7 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Updating..." />
             ) : (
-              "Update and Submit"
+              'Update and Submit'
             )}
           </button>
           <button
@@ -595,7 +664,7 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
             {loadingDraft && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Saving as Draft..." />
             ) : (
-              "Save as Draft"
+              'Save as Draft'
             )}
           </button>
           <button
@@ -617,7 +686,7 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
         </div>
       </form>
     </div>
-  );
+  )
 };
 
 export default GrnUpdate;

@@ -24,4 +24,6 @@ public partial class Customer
     public virtual Company Company { get; set; } = null!;
 
     public virtual ICollection<SalesOrder> SalesOrders { get; set; } = new List<SalesOrder>();
+
+    public virtual ICollection<PackingSlip> PackingSlips { get; set; } = new List<PackingSlip>();
 }
