@@ -8,7 +8,6 @@ const SupplierReturn = ({ handleClose, setShowCreateSRForm }) => {
   const {
     formData,
     suppliers,
-    returnTypeOptions,
     isLoadingSuppliers,
     isErrorSuppliers,
     errorSuppliers,
@@ -24,6 +23,7 @@ const SupplierReturn = ({ handleClose, setShowCreateSRForm }) => {
     referenceNo,
     submissionStatus,
     alertRef,
+    checkBoxOption,
     setSupplierSearchTerm,
     setSearchTerm,
     handleSelectSupplier,
@@ -33,6 +33,7 @@ const SupplierReturn = ({ handleClose, setShowCreateSRForm }) => {
     handleRemoveItem,
     handleItemDetailsChange,
     handleSubmit,
+    handleCheckBoxChange,
   } = useSupplierReturn({
     onFormSubmit: () => {
       handleClose();
@@ -232,34 +233,6 @@ const SupplierReturn = ({ handleClose, setShowCreateSRForm }) => {
                 </div>
               )}
             </div>
-            <div className="mb-3 mt-3">
-              <label htmlFor="returnType" className="form-label">
-                Return Type
-              </label>
-              <select
-                className={`form-select ${
-                  validFields.returnType ? "is-valid" : ""
-                } ${validationErrors.returnType ? "is-invalid" : ""}`}
-                id="returnType"
-                value={formData.returnType}
-                onChange={(e) =>
-                  handleInputChange("returnType", e.target.value)
-                }
-                required
-              >
-                <option value="">Select Return Type</option>
-                {returnTypeOptions.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              {validationErrors.returnType && (
-                <div className="invalid-feedback">
-                  {validationErrors.returnType}
-                </div>
-              )}
-            </div>
           </div>
         </div>
 
@@ -267,53 +240,102 @@ const SupplierReturn = ({ handleClose, setShowCreateSRForm }) => {
         <h4>3. Item Details</h4>
 
         <div className="col-md-5">
-          <div className="mb-3 mt-5">
+          <div className="mb-2 mt-3 d-flex align-align-items-center">
+            <input
+              type="checkbox"
+              className="form-check-input me-2"
+              checked={checkBoxOption === "batch"}
+              onChange={() => handleCheckBoxChange("batch")}
+            />
             <label htmlFor="batchId" className="form-label">
-              Select Batch
+              Search by Batch
             </label>
-            <div className="input-group mb-3">
-              <span className="input-group-text bg-transparent ">
-                <i className="bi bi-search"></i>
-              </span>
-              <input
-                type="text"
-                className="form-control"
-                // className={`form-control ${
-                //   validFields.purchaseOrderId ? "is-valid" : ""
-                // } ${
-                //   validationErrors.purchaseOrderId ? "is-invalid" : ""
-                // }`}
-                placeholder="Search for a Batch..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              {searchTerm && (
-                <span
-                  className="input-group-text bg-transparent"
-                  style={{
-                    cursor: "pointer",
-                  }}
-                  onClick={() => setSearchTerm("")}
-                >
-                  <i className="bi bi-x"></i>
-                </span>
-              )}
-            </div>
+          </div>
 
-            {/* Dropdown for filtered batches */}
-            {searchTerm && (
-              <div className="dropdown" style={{ width: "100%" }}>
-                <ul
-                  className="dropdown-menu"
-                  style={{
-                    display: "block",
-                    width: "100%",
-                    maxHeight: "200px",
-                    overflowY: "auto",
-                  }}
-                >
-                  {(batches ?? [])
-                    .filter(
+          <div className="mt-2">
+            <input
+              type="checkbox"
+              className="form-check-input me-2"
+              checked={checkBoxOption === "barcode"}
+              onChange={() => handleCheckBoxChange("barcode")}
+            />
+            <label htmlFor="batchId" className="form-label">
+              Search by Barcode
+            </label>
+          </div>
+
+          {checkBoxOption === "batch" ? (
+            <div className="mb-3 mt-4">
+              <label htmlFor="batchId" className="form-label">
+                Select Batch
+              </label>
+              <div className="input-group mb-3">
+                <span className="input-group-text bg-transparent ">
+                  <i className="bi bi-search"></i>
+                </span>
+                <input
+                  type="text"
+                  className="form-control"
+                  // className={`form-control ${
+                  //   validFields.purchaseOrderId ? "is-valid" : ""
+                  // } ${
+                  //   validationErrors.purchaseOrderId ? "is-invalid" : ""
+                  // }`}
+                  placeholder="Search for a Batch..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                {searchTerm && (
+                  <span
+                    className="input-group-text bg-transparent"
+                    style={{
+                      cursor: "pointer",
+                    }}
+                    onClick={() => setSearchTerm("")}
+                  >
+                    <i className="bi bi-x"></i>
+                  </span>
+                )}
+              </div>
+
+              {/* Dropdown for filtered batches */}
+              {searchTerm && (
+                <div className="dropdown" style={{ width: "100%" }}>
+                  <ul
+                    className="dropdown-menu"
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      maxHeight: "200px",
+                      overflowY: "auto",
+                    }}
+                  >
+                    {(batches ?? [])
+                      .filter(
+                        (batch) =>
+                          batch.batchRef
+                            ?.toLowerCase()
+                            .includes(searchTerm.toLowerCase()) &&
+                          !formData.selectedBatch.some(
+                            (selected) => selected.batchId === batch.batchId
+                          )
+                      )
+                      .map((batch) => (
+                        <li key={batch.batchId}>
+                          <button
+                            className="dropdown-item"
+                            onClick={() => handleSelectBatch(batch)}
+                          >
+                            <span className="me-3">
+                              <i className="bi bi-basket2-fill"></i>
+                            </span>{" "}
+                            {batch?.batchRef}
+                          </button>
+                        </li>
+                      ))}
+
+                    {/* Handle case when no matching batches are found */}
+                    {(batches ?? []).filter(
                       (batch) =>
                         batch.batchRef
                           ?.toLowerCase()
@@ -321,59 +343,55 @@ const SupplierReturn = ({ handleClose, setShowCreateSRForm }) => {
                         !formData.selectedBatch.some(
                           (selected) => selected.batchId === batch.batchId
                         )
-                    )
-                    .map((batch) => (
-                      <li key={batch.batchId}>
-                        <button
-                          className="dropdown-item"
-                          onClick={() => handleSelectBatch(batch)}
-                        >
-                          <span className="me-3">
-                            <i className="bi bi-basket2-fill"></i>
-                          </span>{" "}
-                          {batch?.batchRef}
-                        </button>
+                    ).length === 0 && (
+                      <li className="dropdown-item text-center">
+                        <span className="me-3">
+                          <i className="bi bi-emoji-frown"></i>
+                        </span>
+                        No Batches found
                       </li>
-                    ))}
+                    )}
+                  </ul>
+                </div>
+              )}
 
-                  {/* Handle case when no matching batches are found */}
-                  {(batches ?? []).filter(
-                    (batch) =>
-                      batch.batchRef
-                        ?.toLowerCase()
-                        .includes(searchTerm.toLowerCase()) &&
-                      !formData.selectedBatch.some(
-                        (selected) => selected.batchId === batch.batchId
-                      )
-                  ).length === 0 && (
-                    <li className="dropdown-item text-center">
-                      <span className="me-3">
-                        <i className="bi bi-emoji-frown"></i>
-                      </span>
-                      No Batches found
-                    </li>
-                  )}
-                </ul>
-              </div>
-            )}
-
-            {formData.selectedBatch.length === 0 && (
-              <div className="mb-3">
-                <small className="form-text text-muted">
-                  Please search for a batch
-                </small>
-              </div>
-            )}
-
-            {formData.selectedBatch.length > 0 &&
-              formData.itemDetails.length === 0 && (
+              {formData.selectedBatch.length === 0 && (
                 <div className="mb-3">
-                  <small className="form-text text-danger">
-                    Selected Batch does not have any items
+                  <small className="form-text text-muted">
+                    Please search for a batch
                   </small>
                 </div>
               )}
-          </div>
+
+              {formData.selectedBatch.length > 0 &&
+                formData.itemDetails.length === 0 && (
+                  <div className="mb-3">
+                    <small className="form-text text-danger">
+                      Selected Batch does not have any items
+                    </small>
+                  </div>
+                )}
+            </div>
+          ) : (
+            // TODO:Bar code Implementation
+            <div className="mb-3 mt-4">
+              <label htmlFor="batchId" className="form-label">
+                Search for Barcode
+              </label>
+              <div className="input-group mb-3">
+                <span className="input-group-text bg-transparent ">
+                  <i className="bi bi-search"></i>
+                </span>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Search for Barcode..."
+                  //value={searchTerm}
+                  //onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {formData.itemDetails.length > 0 && (

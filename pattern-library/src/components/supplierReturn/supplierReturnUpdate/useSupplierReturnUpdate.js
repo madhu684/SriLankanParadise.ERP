@@ -1,13 +1,17 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import React, { useEffect, useRef, useState } from "react";
 import {
+  create_supply_return_detail_api,
+  delete_supply_return_detail_api,
   get_batches_by_companyId_api,
   get_company_suppliers_api,
   get_location_inventory_by_batch_id_api,
   get_location_inventory_by_locationInvemtoryId_api,
+  put_supply_return_detail_api,
+  put_supply_return_master_api,
 } from "../../../services/purchaseApi";
 
-const useSupplierReturnUpdate = ({ supplyReturnMaster }) => {
+const useSupplierReturnUpdate = ({ supplyReturnMaster, onFormSubmit }) => {
   const [formData, setFormData] = useState({
     supplyReturnMasterId: "",
     supplierId: "",
@@ -17,7 +21,6 @@ const useSupplierReturnUpdate = ({ supplyReturnMaster }) => {
     returnDate: "",
     status: 0,
     selectedSupplier: "",
-    returnType: "",
     referenceNo: "",
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
@@ -26,10 +29,6 @@ const useSupplierReturnUpdate = ({ supplyReturnMaster }) => {
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
   const [itemIdsToBeDeleted, setItemIdsToBeDeleted] = useState([]);
-  const returnTypeOptions = [
-    { id: "goodsReceivedNote", label: "Goods Received Note" },
-    { id: "creditNote", label: "Credit Note" },
-  ];
   const alertRef = useRef(null);
   const [loadingFormData, setLoadingFormData] = useState(false);
   const [isFormDataError, setIsFormDataError] = useState(false);
@@ -127,6 +126,7 @@ const useSupplierReturnUpdate = ({ supplyReturnMaster }) => {
                 );
 
                 return {
+                  supplyReturnDetailId: item.supplyReturnDetailId || null,
                   inventoryId: item.referenceNo,
                   itemMasterId: item.itemMasterId,
                   batchId: item.batchId,
@@ -135,15 +135,16 @@ const useSupplierReturnUpdate = ({ supplyReturnMaster }) => {
                   itemName: item.itemMaster.itemName,
                   stockInHand: inventory ? inventory.stockInHand : 0,
                   returnQuantity: item.returnedQuantity,
+                  locationId: item.locationId,
                 };
               }
             ),
             returnDate: supplyReturnMaster.returnDate.split("T")[0],
             status: supplyReturnMaster.status,
             selectedSupplier: supplyReturnMaster.supplier,
-            returnType: supplyReturnMaster.returnType,
             referenceNo: supplyReturnMaster.referenceNo,
           });
+          setItemIdsToBeDeleted([]);
         } catch (error) {
           console.error("Error fetching data:", error);
           setIsFormDataError(true);
@@ -208,12 +209,6 @@ const useSupplierReturnUpdate = ({ supplyReturnMaster }) => {
       formData.returnDate
     );
 
-    const isReturnTypeValid = validateField(
-      "returnType",
-      "Return Type",
-      formData.returnType
-    );
-
     let isItemQuantityValid = true;
 
     formData.itemDetails.forEach((item, index) => {
@@ -235,12 +230,7 @@ const useSupplierReturnUpdate = ({ supplyReturnMaster }) => {
       isItemQuantityValid = isItemQuantityValid && isValidQuantity;
     });
 
-    return (
-      isSupplierValid &&
-      isReturnDateValid &&
-      isItemQuantityValid &&
-      isReturnTypeValid
-    );
+    return isSupplierValid && isReturnDateValid && isItemQuantityValid;
   };
 
   const handleSelectSupplier = (selectedSupplier) => {
@@ -268,6 +258,7 @@ const useSupplierReturnUpdate = ({ supplyReturnMaster }) => {
           ? [
               ...prevFormData.itemDetails, // Keep existing items
               ...inventory.map((item) => ({
+                supplyReturnDetailId: null,
                 inventoryId: item.locationInventoryId,
                 itemMasterId: item.itemMasterId,
                 batchId: selectedBatch.batchId,
@@ -276,6 +267,7 @@ const useSupplierReturnUpdate = ({ supplyReturnMaster }) => {
                 itemName: item.itemMaster.itemName,
                 stockInHand: item.stockInHand,
                 returnQuantity: 0,
+                locationId: item.locationId,
               })),
             ]
           : prevFormData.itemDetails, // Keep the existing itemDetails if no inventory
@@ -301,7 +293,7 @@ const useSupplierReturnUpdate = ({ supplyReturnMaster }) => {
     }));
   };
 
-  const handleRemoveItem = (index) => {
+  const handleRemoveItem = (index, item) => {
     setFormData((prevFormData) => {
       const updatedItemDetails = [...prevFormData.itemDetails];
       const removedItem = updatedItemDetails[index]; // Get the item being removed
@@ -322,6 +314,14 @@ const useSupplierReturnUpdate = ({ supplyReturnMaster }) => {
             ), // Remove batch if no items left
       };
     });
+
+    if (
+      item.supplyReturnDetailId !== null &&
+      item.supplyReturnDetailId !== undefined
+    ) {
+      setItemIdsToBeDeleted((prevIds) => [...prevIds, item]);
+    }
+
     setValidFields({});
     setValidationErrors({});
   };
@@ -337,7 +337,169 @@ const useSupplierReturnUpdate = ({ supplyReturnMaster }) => {
     });
   };
 
+  const handleSubmit = async () => {
+    try {
+      const isFormValid = validateForm();
+      const currentDate = new Date().toISOString();
+
+      if (isFormValid) {
+        setLoading(true);
+        const supplierReturnData = {
+          returnDate: formData.returnDate,
+          supplierId: formData.supplierId,
+          status: supplyReturnMaster.status,
+          returnedBy: supplyReturnMaster.returnedBy,
+          returnedUserId: supplyReturnMaster.returnedUserId,
+          createdDate: supplyReturnMaster.createdDate,
+          approvedBy: null,
+          approvedUserId: null,
+          approvedDate: null,
+          lastUpdatedDate: currentDate,
+          companyId: sessionStorage.getItem("companyId"),
+        };
+        console.log("Supplier Return Data:", supplierReturnData);
+        const response = await put_supply_return_master_api(
+          supplyReturnMaster.supplyReturnMasterId,
+          supplierReturnData
+        );
+
+        if (response.status === 200) {
+          let allDeletionsSuccessful = true;
+          let allDetailsUpdatedSuccessful = true;
+          let allDetailsSuccessful = true;
+
+          // Handle Deletions
+          if (itemIdsToBeDeleted.length > 0) {
+            const deletePromises = itemIdsToBeDeleted.map(async (item) => {
+              try {
+                await delete_supply_return_detail_api(
+                  item.supplyReturnDetailId
+                );
+                console.log(
+                  `Successfully deleted item with ID: ${item.supplyReturnDetailId}`
+                );
+                return { status: 201 }; // Treat as success
+              } catch (error) {
+                console.error(
+                  `Failed to delete item with ID: ${item.supplyReturnDetailId}`,
+                  error
+                );
+                return { status: 500 }; // Failure
+              }
+            });
+
+            const deleteResponses = await Promise.all(deletePromises);
+            setItemIdsToBeDeleted([]); // Clear deleted items
+
+            allDeletionsSuccessful = deleteResponses.every(
+              (response) => response.status === 201
+            );
+          }
+
+          // Handle Item Creation
+          if (
+            formData.itemDetails.filter(
+              (item) => item.supplyReturnDetailId == null
+            ).length > 0
+          ) {
+            const itemDetails = formData.itemDetails
+              .filter((item) => item.supplyReturnDetailId == null)
+              .map(async (item) => {
+                const itemData = {
+                  supplyReturnMasterId: supplyReturnMaster.supplyReturnMasterId,
+                  itemMasterId: item.itemMasterId,
+                  batchId: item.batchId,
+                  returnedQuantity: parseFloat(item.returnQuantity),
+                  referenceNo: item.inventoryId,
+                  locationId: item.locationId,
+                };
+
+                const detailApiResponse = await create_supply_return_detail_api(
+                  itemData
+                );
+                return detailApiResponse;
+              });
+
+            const detailsResponses = await Promise.all(itemDetails);
+
+            allDetailsSuccessful = detailsResponses.every(
+              (detailsResponse) => detailsResponse.status === 201
+            );
+          }
+
+          // Handle Item Updates
+          if (
+            formData.itemDetails.filter(
+              (item) => item.supplyReturnDetailId !== null
+            ).length > 0
+          ) {
+            const itemDetails = formData.itemDetails
+              .filter((item) => item.supplyReturnDetailId !== null)
+              .map(async (item) => {
+                const itemData = {
+                  supplyReturnMasterId: supplyReturnMaster.supplyReturnMasterId,
+                  itemMasterId: item.itemMasterId,
+                  batchId: item.batchId,
+                  returnedQuantity: parseFloat(item.returnQuantity),
+                  referenceNo: item.inventoryId,
+                  locationId: item.locationId,
+                };
+
+                const detailApiResponse = await put_supply_return_detail_api(
+                  item.supplyReturnDetailId,
+                  itemData
+                );
+                return detailApiResponse;
+              });
+
+            const detailsResponses = await Promise.all(itemDetails);
+
+            allDetailsUpdatedSuccessful = detailsResponses.every(
+              (detailsResponse) => detailsResponse.status === 200
+            );
+          }
+
+          console.log("Deletions Status:", allDeletionsSuccessful);
+          console.log("Details Status:", allDetailsSuccessful);
+          console.log("Details Updated Status:", allDetailsUpdatedSuccessful);
+
+          // Set Submission Status
+          if (
+            allDeletionsSuccessful &&
+            allDetailsSuccessful &&
+            allDetailsUpdatedSuccessful
+          ) {
+            setSubmissionStatus("successSubmitted");
+            console.log("Supply Return submitted successfully!", formData);
+
+            queryClient.invalidateQueries([
+              "supplierReturns",
+              sessionStorage.getItem("companyId"),
+            ]);
+
+            setTimeout(() => {
+              setSubmissionStatus(null);
+              setLoading(false);
+              onFormSubmit();
+            }, 3000);
+          } else {
+            setSubmissionStatus("error");
+            console.error("Error submitting form!");
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      setSubmissionStatus("error");
+      setTimeout(() => {
+        setSubmissionStatus(null);
+        setLoading(false);
+      }, 3000);
+    }
+  };
+
   console.log("formData in update form: ", formData);
+  console.log("itemIdsToBeDeleted: ", itemIdsToBeDeleted);
 
   return {
     formData,
@@ -353,7 +515,6 @@ const useSupplierReturnUpdate = ({ supplyReturnMaster }) => {
     searchTerm,
     validFields,
     validationErrors,
-    returnTypeOptions,
     loading,
     loadingFormData,
     isFormDataError,
@@ -368,6 +529,7 @@ const useSupplierReturnUpdate = ({ supplyReturnMaster }) => {
     handleInputChange,
     handleRemoveItem,
     handleItemDetailsChange,
+    handleSubmit,
   };
 };
 

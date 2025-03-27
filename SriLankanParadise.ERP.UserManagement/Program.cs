@@ -193,6 +193,8 @@ builder.Services.AddScoped<ISupplyReturnMasterService, SupplyReturnMasterService
 builder.Services.AddScoped<ISupplyReturnMasterRepository, SupplyReturnMasterRepository>();
 builder.Services.AddScoped<ISupplyReturnDetailService, SupplyReturnDetailService>();
 builder.Services.AddScoped<ISupplyReturnDetailRepository, SupplyReturnDetailRepository>();
+builder.Services.AddScoped<IDailyLocationInventoryService, DailyLocationInventoryService>();
+builder.Services.AddScoped<IDailyLocationInventoryRepository, DailyLocationInventoryRepository>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

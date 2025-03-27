@@ -9,8 +9,22 @@ const useSupplierReturnList = () => {
   const [showDetailSRModal, setShowDetailSRModal] = useState(false);
   const [showDetailSRModalInParent, setShowDetailSRModalInParent] =
     useState(false);
+  const [showApproveSRModal, setShowApproveSRModal] = useState(false);
+  const [showApproveSRModalInParent, setShowApproveSRModalInParent] =
+    useState(false);
   const [showUpdateSRForm, setShowUpdateSRForm] = useState(false);
   const [SRDetail, setSRDetail] = useState("");
+
+  const [searchTerm, setSearchTerm] = useState("");
+
+  //set up pagination and search
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   const fetchSupplierReturns = async () => {
     try {
       const response = await get_supply_return_masters_by_companyId(
@@ -31,6 +45,14 @@ const useSupplierReturnList = () => {
     queryKey: ["supplierReturns", sessionStorage.getItem("companyId")],
     queryFn: fetchSupplierReturns,
   });
+
+  const filteredData = supplyReturns?.filter((data) =>
+    data.referenceNo.toString().toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const currentItems = filteredData
+    ? filteredData.slice(indexOfFirstItem, indexOfLastItem)
+    : [];
 
   const handleRowSelect = (id) => {
     const isSelected = selectedRows.includes(id);
@@ -58,11 +80,10 @@ const useSupplierReturnList = () => {
 
   const getStatusLabel = (statusCode) => {
     const statusLabels = {
-      0: "Draft",
       1: "Pending Approval",
       2: "Approved",
       3: "Rejected",
-      4: "In Progress",
+      4: "Goods Received",
       5: "Completed",
       6: "Cancelled",
       7: "On Hold",
@@ -73,7 +94,6 @@ const useSupplierReturnList = () => {
 
   const getStatusBadgeClass = (statusCode) => {
     const statusClasses = {
-      0: "bg-secondary",
       1: "bg-warning",
       2: "bg-success",
       3: "bg-danger",
@@ -118,14 +138,44 @@ const useSupplierReturnList = () => {
     }, delay);
   };
 
-  const handleViewDetails = (salesOrder) => {
-    setSRDetail(salesOrder);
+  const handleViewDetails = (supplyReturnMaster) => {
+    setSRDetail(supplyReturnMaster);
     handleShowDetailSRModal();
+  };
+
+  const handleShowApproveSRModal = (supplyReturnMaster) => {
+    setSRDetail(supplyReturnMaster);
+    setShowApproveSRModal(true);
+    setShowApproveSRModalInParent(true);
+  };
+
+  const handleCloseApproveSRModal = () => {
+    setShowApproveSRModal(false);
+    handleCloseApproveSRModalInParent();
+  };
+
+  const handleCloseApproveSRModalInParent = () => {
+    const delay = 300;
+    setTimeout(() => {
+      setShowApproveSRModalInParent(false);
+    }, delay);
+  };
+
+  const handleApproved = async () => {
+    setSelectedRows([]);
+    const delay = 300;
+    setTimeout(() => {
+      setSelectedRowData([]);
+    }, delay);
   };
 
   const handleUpdate = (supplyReturnMaster) => {
     setSRDetail(supplyReturnMaster);
     setShowUpdateSRForm(true);
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
   };
 
   return {
@@ -141,6 +191,13 @@ const useSupplierReturnList = () => {
     showDetailSRModalInParent,
     SRDetail,
     showUpdateSRForm,
+    showApproveSRModal,
+    showApproveSRModalInParent,
+    currentItems,
+    itemsPerPage,
+    currentPage,
+    filteredData,
+    searchTerm,
     setShowUpdateSRForm,
     setShowCreateSRForm,
     areAnySelectedRowsPending,
@@ -152,7 +209,11 @@ const useSupplierReturnList = () => {
     handleShowDetailSRModal,
     handleCloseDetailSRModal,
     handleViewDetails,
+    handleShowApproveSRModal,
+    handleCloseApproveSRModal,
     handleUpdate,
+    paginate,
+    handleSearchChange,
   };
 };
 

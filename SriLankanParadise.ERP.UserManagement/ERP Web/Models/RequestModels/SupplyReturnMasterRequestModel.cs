@@ -12,7 +12,6 @@
         public int? ApprovedUserId { get; set; }
         public DateTime? ApprovedDate { get; set; }
         public DateTime? LastUpdatedDate { get; set; }
-        public string? ReturnType { get; set; } = null!;
         public int? CompanyId { get; set; }
     }
 }

@@ -12,7 +12,6 @@ const SupplierReturnUpdate = ({
   const {
     formData,
     suppliers,
-    returnTypeOptions,
     isLoadingSuppliers,
     isErrorSuppliers,
     errorSuppliers,
@@ -38,8 +37,10 @@ const SupplierReturnUpdate = ({
     handleInputChange,
     handleRemoveItem,
     handleItemDetailsChange,
+    handleSubmit,
   } = useSupplierReturnUpdate({
     supplyReturnMaster,
+    onFormSubmit: () => handleClose(),
   });
 
   if (isLoadingSuppliers || isLoadingBatches || loadingFormData) {
@@ -238,34 +239,6 @@ const SupplierReturnUpdate = ({
                 </div>
               )}
             </div>
-            <div className="mb-3 mt-3">
-              <label htmlFor="returnType" className="form-label">
-                Return Type
-              </label>
-              <select
-                className={`form-select ${
-                  validFields.returnType ? "is-valid" : ""
-                } ${validationErrors.returnType ? "is-invalid" : ""}`}
-                id="returnType"
-                value={formData.returnType}
-                onChange={(e) =>
-                  handleInputChange("returnType", e.target.value)
-                }
-                required
-              >
-                <option value="">Select Return Type</option>
-                {returnTypeOptions.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              {validationErrors.returnType && (
-                <div className="invalid-feedback">
-                  {validationErrors.returnType}
-                </div>
-              )}
-            </div>
           </div>
         </div>
 
@@ -436,7 +409,7 @@ const SupplierReturnUpdate = ({
                       <button
                         type="button"
                         className="btn btn-outline-danger"
-                        onClick={() => handleRemoveItem(index)}
+                        onClick={() => handleRemoveItem(index, item)}
                       >
                         Delete
                       </button>
@@ -453,7 +426,7 @@ const SupplierReturnUpdate = ({
           <button
             type="button"
             className="btn btn-primary me-2"
-            //onClick={() => handleSubmit()}
+            onClick={() => handleSubmit()}
             disabled={!formData.itemDetails.length > 0 || loading}
           >
             {loading && submissionStatus === null ? (

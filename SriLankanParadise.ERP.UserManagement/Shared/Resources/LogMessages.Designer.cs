@@ -1843,6 +1843,24 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Stock report not found.
+        /// </summary>
+        public static string StockReportNotFound {
+            get {
+                return ResourceManager.GetString("StockReportNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stock report retrieved.
+        /// </summary>
+        public static string StockReportRetrieved {
+            get {
+                return ResourceManager.GetString("StockReportRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Sub items not found.
         /// </summary>
         public static string SubItemsNotFound {

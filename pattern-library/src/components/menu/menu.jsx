@@ -2,6 +2,7 @@ import "./menu.css";
 import React from "react";
 import { Navigate } from "react-router-dom";
 import userImage from "../../assets/images/person-circle.svg";
+import CompanyImage  from "../../assets/images/power-tech-control.png";
 
 function template() {
   const {
@@ -34,7 +35,7 @@ function template() {
             >
               <img
                 className="company-logo"
-                src={companyLogoUrl}
+                src={CompanyImage}
                 alt="Company Logo"
               />
 

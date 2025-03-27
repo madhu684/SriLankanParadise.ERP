@@ -66,7 +66,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     await _supplyReturnDetailService.UpdateSupplyReturnDetail(updatedSupplyReturnDetail.SupplyReturnDetailId, updatedSupplyReturnDetail);
 
                     _logger.LogInformation(LogMessages.SupplyReturnDetailUpdated);
-                    AddResponseMessage(Response, LogMessages.SupplyReturnDetailUpdated, null, true, HttpStatusCode.NoContent);
+                    AddResponseMessage(Response, LogMessages.SupplyReturnDetailUpdated, null, true, HttpStatusCode.OK);
                 }
             }
             catch (Exception ex)

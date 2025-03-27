@@ -915,4 +915,10 @@
   <data name="SupplyReturnDetailDeleted" xml:space="preserve">
     <value>Supply return detail deleted</value>
   </data>
+  <data name="StockReportRetrieved" xml:space="preserve">
+    <value>Stock report retrieved</value>
+  </data>
+  <data name="StockReportNotFound" xml:space="preserve">
+    <value>Stock report not found</value>
+  </data>
 </root>

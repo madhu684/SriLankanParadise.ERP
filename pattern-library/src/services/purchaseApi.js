@@ -1316,3 +1316,51 @@ export const create_supply_return_detail_api = async (formData) => {
     throw error;
   }
 };
+
+export const put_supply_return_master_api = async (id, formData) => {
+  try {
+    const response = await api.put(`/supplyReturnMaster/${id}`, formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const approve_supply_return_master_api = async (id, formData) => {
+  try {
+    const response = await api.patch(
+      `/supplyReturnMaster/approve/${id}`,
+      formData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const delete_supply_return_detail_api = async (id) => {
+  try {
+    const response = await api.delete(`/supplyReturnDetail/${id}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const put_supply_return_detail_api = async (id, formData) => {
+  try {
+    const response = await api.put(`/supplyReturnDetail/${id}`, formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

@@ -133,10 +133,10 @@ const useMain = () => {
         return <LocationList />;
       case "Stock Management":
         return <StockManagement />;
-      case "Inventory Analysis Report":
-        return <InventoryAnalysisReport />;
-      case "Inventory As At Date Report":
-        return <InventoryAnalysisAsAtDateReport />;
+      // case "Inventory Analysis Report":
+      //   return <InventoryAnalysisReport />;
+      // case "Inventory As At Date Report":
+      //   return <InventoryAnalysisAsAtDateReport />;
       case "Supplier Return":
         return <SupplierReturnList />;
       default:

@@ -63,4 +63,6 @@ public partial class ItemMaster
     public virtual ICollection<SubItemMaster> SubItemMasters { get; set; } = new List<SubItemMaster>();
 
     public virtual ICollection<SupplyReturnDetail> SupplyReturnDetails { get; set; } = new List<SupplyReturnDetail>();
+
+    public virtual ICollection<DailyLocationInventory> DailyLocationInventories { get; set; } = new List<DailyLocationInventory>();
 }

@@ -8,6 +8,7 @@
         public int BatchId { get; set; }
         public decimal? ReturnedQuantity { get; set; }
         public string? ReferenceNo { get; set; }
+        public int LocationId { get; set; }
         public ItemMasterDto? ItemMaster { get; set; }
         public BatchDto? Batch { get; set; }
     }

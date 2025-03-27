@@ -11,6 +11,8 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task<IEnumerable<LocationInventoryMovement>> Get(int IssueMasterId);
         Task<IEnumerable<LocationInventoryMovement>> ByWorkOrder(int workOrderId);
         Task<IEnumerable<LocationInventoryMovement>> ByDateRange(DateTime fromDate, DateTime toDate);
+        Task<IEnumerable<LocationInventoryMovement>> ByDateRangeLocationIdMovementTypeId(DateTime fromDate, DateTime toDate, int locationId, int movementTypeId);
+        Task<IEnumerable<LocationInventoryMovement>> ByDateRangeAndTransactionType(DateTime fromDate, DateTime toDate, int movementTypeId, int transactionTypeId);
 
         Task<LocationInventoryMovement> GetLocationInventoryMovementByLocationInventoryMovementId(int locationInventoryMovementId);
 

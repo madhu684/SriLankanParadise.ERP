@@ -88,6 +88,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var locationInventories = await _dbContext.LocationInventories
                     .Where(li => li.LocationId == locationId)
                     .Include(li => li.ItemMaster)
+                    .ThenInclude(im => im.Unit)
                     .Include(li => li.ItemBatch)
                     .ThenInclude(ib => ib.Batch)
                     .ToListAsync();

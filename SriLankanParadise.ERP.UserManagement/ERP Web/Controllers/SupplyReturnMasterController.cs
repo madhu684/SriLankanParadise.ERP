@@ -150,14 +150,17 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     _logger.LogWarning(LogMessages.SupplyReturnMasterNotFound);
                     AddResponseMessage(Response, LogMessages.SupplyReturnMasterNotFound, null, true, HttpStatusCode.NotFound);
                 }
+                else
+                {
+                    var approveSupplyReturnMaster = _mapper.Map<SupplyReturnMaster>(approveSupplyReturnMasterRequsetModel);
+                    approveSupplyReturnMaster.SupplyReturnMasterId = supplyReturnMasterId;
 
-                var approveSupplyReturnMaster = _mapper.Map<SupplyReturnMaster>(approveSupplyReturnMasterRequsetModel);
-                approveSupplyReturnMaster.SupplyReturnMasterId = supplyReturnMasterId;
+                    await _supplyReturnMasterService.ApproveSupplyReturnMaster(existingSupplyReturnMaster.SupplyReturnMasterId, approveSupplyReturnMaster);
 
-                await _supplyReturnMasterService.ApproveSupplyReturnMaster(existingSupplyReturnMaster.SupplyReturnMasterId, approveSupplyReturnMaster);
-               
-                _logger.LogInformation(LogMessages.SupplyReturnMasterApproved);
-                AddResponseMessage(Response, LogMessages.SupplyReturnMasterApproved, null, true, HttpStatusCode.OK);
+                    _logger.LogInformation(LogMessages.SupplyReturnMasterApproved);
+                    AddResponseMessage(Response, LogMessages.SupplyReturnMasterApproved, null, true, HttpStatusCode.OK);
+                }
+                
             }
             catch(Exception ex)
             {
@@ -178,14 +181,18 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     _logger.LogWarning(LogMessages.SupplyReturnMasterNotFound);
                     AddResponseMessage(Response, LogMessages.SupplyReturnMasterNotFound, null, true, HttpStatusCode.NotFound);
                 }
-                 
-                var updatedSupplyReturnMaster = _mapper.Map<SupplyReturnMaster>(supplyReturnMasterRequestModel);
-                updatedSupplyReturnMaster.SupplyReturnMasterId = supplyReturnMasterId;
+                else
+                {
+                    var updatedSupplyReturnMaster = _mapper.Map<SupplyReturnMaster>(supplyReturnMasterRequestModel);
+                    updatedSupplyReturnMaster.SupplyReturnMasterId = supplyReturnMasterId;
+                    updatedSupplyReturnMaster.ReferenceNo = existingSupplyReturnMaster.ReferenceNo;
 
-                await _supplyReturnMasterService.UpdateSupplyReturnMaster(updatedSupplyReturnMaster.SupplyReturnMasterId, updatedSupplyReturnMaster);
+                    await _supplyReturnMasterService.UpdateSupplyReturnMaster(updatedSupplyReturnMaster.SupplyReturnMasterId, updatedSupplyReturnMaster);
 
-                _logger.LogInformation(LogMessages.SupplyReturnMasterUpdated);
-                AddResponseMessage(Response, LogMessages.SupplyReturnMasterUpdated, null, true, HttpStatusCode.OK);
+                    _logger.LogInformation(LogMessages.SupplyReturnMasterUpdated);
+                    AddResponseMessage(Response, LogMessages.SupplyReturnMasterUpdated, null, true, HttpStatusCode.OK);
+                } 
+                
             }
             catch (Exception ex) {
                 _logger.LogError(ex, ErrorMessages.InternalServerError);

@@ -19,15 +19,12 @@ const useSupplierReturn = ({ onFormSubmit }) => {
     selectedSupplier: "",
     returnType: "",
   });
+  const [checkBoxOption, setCheckBoxOption] = useState("batch");
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [supplierSearchTerm, setSupplierSearchTerm] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
-  const returnTypeOptions = [
-    { id: "goodsReceivedNote", label: "Goods Received Note" },
-    { id: "creditNote", label: "Credit Note" },
-  ];
   const alertRef = useRef(null);
   const [referenceNo, setReferenceNo] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -135,12 +132,6 @@ const useSupplierReturn = ({ onFormSubmit }) => {
       formData.returnDate
     );
 
-    const isReturnTypeValid = validateField(
-      "returnType",
-      "Return Type",
-      formData.returnType
-    );
-
     let isItemQuantityValid = true;
 
     formData.itemDetails.forEach((item, index) => {
@@ -162,12 +153,7 @@ const useSupplierReturn = ({ onFormSubmit }) => {
       isItemQuantityValid = isItemQuantityValid && isValidQuantity;
     });
 
-    return (
-      isSupplierValid &&
-      isReturnDateValid &&
-      isItemQuantityValid &&
-      isReturnTypeValid
-    );
+    return isSupplierValid && isReturnDateValid && isItemQuantityValid;
   };
 
   // Handlers
@@ -205,6 +191,7 @@ const useSupplierReturn = ({ onFormSubmit }) => {
                 itemName: item.itemMaster.itemName,
                 stockInHand: item.stockInHand,
                 returnQuantity: 0,
+                locationId: item.locationId,
               })),
             ]
           : prevFormData.itemDetails, // Keep the existing itemDetails if no inventory
@@ -266,6 +253,11 @@ const useSupplierReturn = ({ onFormSubmit }) => {
     });
   };
 
+  const handleCheckBoxChange = (option) => {
+    console.log("option", option);
+    setCheckBoxOption(option);
+  };
+
   const handleSubmit = async () => {
     try {
       const isFormValid = validateForm();
@@ -285,7 +277,6 @@ const useSupplierReturn = ({ onFormSubmit }) => {
           approvedUserId: null,
           approvedDate: null,
           lastUpdatedDate: currentDate,
-          returnType: formData.returnType,
           companyId: sessionStorage.getItem("companyId"),
         };
 
@@ -304,6 +295,7 @@ const useSupplierReturn = ({ onFormSubmit }) => {
             batchId: item.batchId,
             returnedQuantity: item.returnQuantity,
             referenceNo: item.inventoryId,
+            locationId: item.locationId,
           };
 
           const detailApiResponse = await create_supply_return_detail_api(
@@ -363,11 +355,11 @@ const useSupplierReturn = ({ onFormSubmit }) => {
     searchTerm,
     validFields,
     validationErrors,
-    returnTypeOptions,
     loading,
     referenceNo,
     submissionStatus,
     alertRef,
+    checkBoxOption,
     setSupplierSearchTerm,
     setSearchTerm,
     handleSelectSupplier,
@@ -377,6 +369,7 @@ const useSupplierReturn = ({ onFormSubmit }) => {
     handleRemoveItem,
     handleItemDetailsChange,
     handleSubmit,
+    handleCheckBoxChange,
   };
 };
 

@@ -15,7 +15,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
         public int? ApprovedUserId { get; set; }
         public DateTime? ApprovedDate { get; set; }
         public DateTime? LastUpdatedDate { get; set; }
-        public string? ReturnType { get; set; }
         public int? CompanyId { get; set; }
         public string? ReferenceNo { get; set; }
         public SupplierDto? Supplier { get; set; }
