@@ -30,6 +30,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
   const [selectedPurchaseOrder, setSelectedPurchaseOrder] = useState(null);
   const [selectedPurchaseRequisition, setSelectedPurchaseRequisition] =
     useState(null)
+  const [selectedSupplier, setSelectedSupplier] = useState(null)
   const statusOptions = [
     { id: "4", label: "In Progress" },
     { id: "5", label: "Completed" },
@@ -42,10 +43,6 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     { id: "finishedGoodsIn", label: "Finished Goods In" },
     { id: "directPurchase", label: "Direct Purchase" },
   ];
-  //const [purchaseOrderSearchTerm, setPurchaseOrderSearchTerm] = useState('')
-  //const [purchaseRequisitionSearchTerm, setPurchaseRequisitionSearchTerm] =
-    useState('')
-  //const [supplierSearchTerm, setSupplierSearchTerm] = useState('')
   const [searchTerm, setSearchTerm] = useState("");
   const [searchByPO, setSearchByPO] = useState(false)
   const [searchByPR, setSearchByPR] = useState(true)
@@ -218,6 +215,10 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       //handlePurchaseRequisitionChange(deepCopyGrn?.purchaseRequisition?.referenceNo)
       handlePurchaseRequisitionChange(deepCopyGrn?.purchaseRequisitionId)
     }
+
+    if (!isLoading && suppliers) {
+      handleSupplierChange(deepCopyGrn?.supplierId)
+    }
   }, [grn, isLoading]);
 
   useEffect(() => {
@@ -286,7 +287,8 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
         receivedQuantity: detail.receivedQuantity,
         rejectedQuantity: detail.rejectedQuantity,
         freeQuantity: detail.freeQuantity,
-        expiryDate: detail.expiryDate ? detail.expiryDate.split("T")[0] : "",
+        //expiryDate: detail.expiryDate ? detail.expiryDate.split("T")[0] : "",
+        itemBarcode: detail.itemBarcode,
         unitPrice: detail.unitPrice,
         grnDetailId: detail.grnDetailId,
       }));
@@ -774,6 +776,20 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     }))
   }
 
+  const handleSupplierChange = (supplierId) => {
+    const selectedSupplier = suppliers?.find(
+      (supplier) => supplier.supplierId === supplierId
+    )
+
+    setSelectedSupplier(selectedSupplier)
+
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      supplierId:
+      selectedSupplier?.supplierId ?? '',
+    }))
+  }
+
   const handleStatusChange = (selectedOption) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
@@ -810,6 +826,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     validationErrors,
     selectedPurchaseOrder,
     selectedPurchaseRequisition,
+    selectedSupplier,
     purchaseOrders,
     purchaseRequisitions,
     statusOptions,

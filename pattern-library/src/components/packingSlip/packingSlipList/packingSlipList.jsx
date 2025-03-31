@@ -5,6 +5,7 @@ import ErrorComponent from '../../errorComponent/errorComponent'
 import LoadingSpinner from '../../loadingSpinner/loadingSpinner'
 import PackingSlipDetail from '../packingSlipDetail/packingSlipDetail'
 import PackingSlipApproval from '../packingSlipApproval/packingSlipApproval'
+import PackingSlipUpdate from '../packingSlipUpdate/packingSlipUpdate'
 
 const PackingSlipList = () => {
   const {
@@ -66,7 +67,19 @@ const PackingSlipList = () => {
           handleClose={() => setShowCreatePSForm(false)}
         />
       )
-    }
+  }
+
+  if(showUpdatePSForm) {
+    return (
+      <PackingSlipUpdate
+        handleClose={handleClose}
+        packingSlip={PSDetail || selectedRowData[0]}
+        handleUpdated={handleUpdated}
+        setShowUpdatePSForm={setShowUpdatePSForm}
+      />
+    )
+  }
+  
 
   if(packingSlips.length === 0){
     return (

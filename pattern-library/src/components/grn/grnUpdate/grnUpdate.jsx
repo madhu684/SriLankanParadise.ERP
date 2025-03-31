@@ -13,6 +13,7 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
     validationErrors,
     selectedPurchaseOrder,
     selectedPurchaseRequisition,
+    selectedSupplier,
     purchaseOrders,
     purchaseRequisitions,
     statusOptions,
@@ -270,11 +271,14 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
           {/* Purchase Order ID Selection */}
           <div className="col-md-5">
             <h4>2. Purchase Details</h4>
-            <div className="mt-3">
-              <label htmlFor="purchaseOrder" className="form-label">
-                Purchase Order
-              </label>
-            </div>
+
+            {selectedPurchaseOrder && (
+              <div className="mt-3">
+                <label htmlFor="purchaseOrder" className="form-label">
+                  Purchase Order
+                </label>
+              </div>
+            )}
 
             {/* Additional Purchase Order Information */}
             {!['finishedGoodsIn', 'directPurchase'].includes(
@@ -309,7 +313,7 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
               </div>
             )}
 
-            {selectedPurchaseRequisition && (
+            {selectedPurchaseRequisition && selectedSupplier && (
               <div className="mt-3">
                 <label htmlFor="purchaseRequisition" className="form-label">
                   Purchase Requisition
@@ -317,7 +321,15 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
               </div>
             )}
 
-            {selectedPurchaseRequisition && (
+            {selectedPurchaseRequisition && selectedSupplier && (
+              <div className="mt-3">
+                <label htmlFor="supplier" className="form-label">
+                  Supplier
+                </label>
+              </div>
+            )}
+
+            {selectedPurchaseRequisition && selectedSupplier && (
               <div className="card mb-3">
                 <div className="card-header">Selected Purchase Requisition</div>
                 <div className="card-body">
@@ -338,14 +350,14 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
               </div>
             )}
 
-            {formData.grnType === 'finishedGoodsIn' && (
-              <div className="alert alert-warning" role="alert">
-                This is a "Finished Goods In", no need a purchase order.
-              </div>
-            )}
-            {formData.grnType === 'directPurchase' && (
-              <div className="alert alert-warning" role="alert">
-                This is a "Direct Purchase", no need a purchase order.
+            {selectedPurchaseRequisition && selectedSupplier && (
+              <div className="card mb-3">
+                <div className="card-header">Selected Supplier</div>
+                <div className="card-body">
+                  <p>Supplier Name : {selectedSupplier?.supplierName}</p>
+                  <p>Supplier Email : {selectedSupplier?.email}</p>
+                  <p>Contact No : {selectedSupplier?.phone}</p>
+                </div>
               </div>
             )}
           </div>
