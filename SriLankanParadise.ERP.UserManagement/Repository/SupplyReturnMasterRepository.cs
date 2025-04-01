@@ -67,6 +67,27 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
+        public async Task<IEnumerable<SupplyReturnMaster>> GetApprovedSupplyReturnMasterByCompanyId(int companyId)
+        {
+            try
+            {
+                var master = await _dbContext.SupplyReturnMasters.Where(s => s.CompanyId == companyId && s.Status == 2)
+                    .Include(s => s.Supplier)
+                    .Include(s => s.SupplyReturnDetails)
+                        .ThenInclude(sd => sd.ItemMaster)
+                            .ThenInclude(si => si.Unit)
+                    .Include(s => s.SupplyReturnDetails)
+                        .ThenInclude(sd => sd.Batch)
+                    .ToListAsync();
+
+                return master.Any() ? master : null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<IEnumerable<SupplyReturnMaster>> GetSupplyReturnMasterByCompanyId(int companyId)
         {
             try

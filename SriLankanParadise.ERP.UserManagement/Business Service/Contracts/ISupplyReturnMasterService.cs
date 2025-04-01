@@ -7,6 +7,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task AddSupplyReturnMaster(SupplyReturnMaster supplyReturnMaster);
         Task<IEnumerable<SupplyReturnMaster>> GetAll();
         Task<IEnumerable<SupplyReturnMaster>> GetSupplyReturnMasterByCompanyId(int companyId);
+        Task<IEnumerable<SupplyReturnMaster>> GetApprovedSupplyReturnMasterByCompanyId(int companyId);
 
         Task<IEnumerable<SupplyReturnMaster>> GetSupplyReturnMasterByUserId(int userId);
 

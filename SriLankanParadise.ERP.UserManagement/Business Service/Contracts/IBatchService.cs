@@ -5,6 +5,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
     public interface IBatchService
     {
         Task AddBatch(Batch batch);
+        Task<Batch> GetBatchById(int batchId);
 
         Task<IEnumerable<Batch>> GetAll();
 

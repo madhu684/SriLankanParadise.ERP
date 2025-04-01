@@ -921,4 +921,10 @@
   <data name="StockReportNotFound" xml:space="preserve">
     <value>Stock report not found</value>
   </data>
+  <data name="ApprovedSupplyReturnMasterRetrived" xml:space="preserve">
+    <value>Approved supply return master retrived</value>
+  </data>
+  <data name="ApprovedSupplyReturnMasterNotFound" xml:space="preserve">
+    <value>Approved supply return master not found</value>
+  </data>
 </root>

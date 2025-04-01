@@ -210,7 +210,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var inventories = await _dbContext.LocationInventories
                     .Where(li => li.LocationId == locationId)
-                    .Include(li => li.ItemMaster)
+                    .Include(li => li.ItemMaster)  
                     .ToListAsync();
 
                 return inventories.Any() ? inventories : null;

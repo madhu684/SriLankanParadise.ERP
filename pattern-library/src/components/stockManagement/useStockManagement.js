@@ -6,6 +6,11 @@ import {
 import { useCallback, useState } from "react";
 
 const useStockManagement = () => {
+  const [formData, setFormData] = useState({
+    location: "",
+    date: "",
+    itemDetails: [],
+  });
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [inventories, setInventories] = useState([]);

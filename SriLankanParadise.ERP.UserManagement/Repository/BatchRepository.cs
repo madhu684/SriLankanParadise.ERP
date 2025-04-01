@@ -40,6 +40,21 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
+        public async Task<Batch> GetBatchById(int batchId)
+        {
+            try
+            {
+                var batch =  await _dbContext.Batches
+                    .Where(b => b.BatchId == batchId)
+                    .FirstOrDefaultAsync();
+
+                return batch;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
         public async Task<IEnumerable<Batch>> GetBatchesByCompanyId(int companyId)
         {

@@ -83,10 +83,9 @@ const useSupplierReturnList = () => {
       1: "Pending Approval",
       2: "Approved",
       3: "Rejected",
-      4: "Goods Received",
-      5: "Completed",
-      6: "Cancelled",
-      7: "On Hold",
+      4: "GRN Pending",
+      5: "GRN Approved",
+      6: "GRN Completed",
     };
 
     return statusLabels[statusCode] || "Unknown Status";
@@ -97,10 +96,9 @@ const useSupplierReturnList = () => {
       1: "bg-warning",
       2: "bg-success",
       3: "bg-danger",
-      4: "bg-info",
-      5: "bg-primary",
-      6: "bg-dark",
-      7: "bg-secondary",
+      4: "bg-warning",
+      5: "bg-info",
+      6: "bg-secondary",
     };
 
     return statusClasses[statusCode] || "bg-secondary";

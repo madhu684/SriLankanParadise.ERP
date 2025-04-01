@@ -89,6 +89,31 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpGet("GetApprovedSupplyReturnMasterByCompanyId/{companyId}")]
+        public async Task<ApiResponseModel> GetApprovedSupplyReturnMasterByCompanyId(int companyId)
+        {
+            try
+            {
+                var supplyReturnMaster = await _supplyReturnMasterService.GetApprovedSupplyReturnMasterByCompanyId(companyId);
+                if (supplyReturnMaster != null) 
+                {
+                    var supplyReturnMasterDtos = _mapper.Map<IEnumerable<SupplyReturnMasterDto>>(supplyReturnMaster);
+                    AddResponseMessage(Response, LogMessages.ApprovedSupplyReturnMasterRetrived, supplyReturnMasterDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.ApprovedSupplyReturnMasterNotFound);
+                    AddResponseMessage(Response, LogMessages.ApprovedSupplyReturnMasterNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
         [HttpGet("GetSupplyReturnMasterByUserId/{userId}")]
         public async Task<ApiResponseModel> GetSupplyReturnMasterByUserId (int userId)
         {

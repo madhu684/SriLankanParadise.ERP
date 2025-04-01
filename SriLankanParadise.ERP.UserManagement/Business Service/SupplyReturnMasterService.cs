@@ -27,6 +27,11 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             return await _repository.GetAll();
         }
 
+        public async Task<IEnumerable<SupplyReturnMaster>> GetApprovedSupplyReturnMasterByCompanyId(int companyId)
+        {
+            return await _repository.GetApprovedSupplyReturnMasterByCompanyId(companyId);
+        }
+
         public async Task<IEnumerable<SupplyReturnMaster>> GetSupplyReturnMasterByCompanyId(int companyId)
         {
             return await _repository.GetSupplyReturnMasterByCompanyId(companyId);
