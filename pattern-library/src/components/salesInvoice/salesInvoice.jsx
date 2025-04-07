@@ -91,6 +91,11 @@ const SalesInvoice = ({
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
+          <i
+            class="bi bi-arrow-left"
+            onClick={handleClose}
+            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+          ></i>
           <p>
             <CurrentDateTime />
           </p>

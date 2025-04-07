@@ -8,7 +8,7 @@ import LoadingSpinner from "../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../errorComponent/errorComponent";
 import BatchSelectionModal from "../batchSelectionModal/batchSelectionModal";
 
-const SalesOrder = ({ handleClose, handleUpdated, setShowCreateSOForm }) => {
+const SalesOrder = ({ handleClose, handleUpdated }) => {
   const {
     formData,
     customers,
@@ -102,22 +102,17 @@ const SalesOrder = ({ handleClose, handleUpdated, setShowCreateSOForm }) => {
     return <ErrorComponent error={'Error fetching data'} />
   }
 
-  
-  const handleBack = () => {
-    setShowCreateSOForm(false)
-  }
   return (
     <div className="container mt-4">
       {/* Header */}
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <button
-            onClick={handleBack}
-            className="btn btn-dark d-flex align-items-center"
-          >
-            Back
-          </button>
+          <i
+            class="bi bi-arrow-left"
+            onClick={handleClose}
+            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+          ></i>
           <p>
             <CurrentDateTime />
           </p>

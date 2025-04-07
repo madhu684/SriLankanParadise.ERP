@@ -30,7 +30,7 @@ const StockReport = () => {
     getFilteredData,
   } = useStockReport();
 
-  const companyLogoUrl = useCompanyLogoUrl();
+  //const companyLogoUrl = useCompanyLogoUrl();
   console.log("reportData", reportData);
   if (
     isitemMastersError ||
@@ -47,8 +47,8 @@ const StockReport = () => {
     <div className="container mt-4">
       {/* Header */}
       <div className="mb-4">
-        <div className="d-flex justify-content-between">
-          <img src={companyLogoUrl} alt="Company Logo" height={30} />
+        <div className="d-flex justify-content-end">
+          {/* <img src={companyLogoUrl} alt="Company Logo" height={30} /> */}
           <p>
             <CurrentDateTime />
           </p>

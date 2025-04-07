@@ -1,14 +1,20 @@
-import React from "react";
-import useTinList from "./useTinList.js";
-import TinApproval from "../tinApproval/tinApproval.jsx";
-import Tin from "../tin.jsx";
-import TinDetails from "../tinDetail/tinDetail.jsx";
-import LoadingSpinner from "../../loadingSpinner/loadingSpinner.jsx";
-import ErrorComponent from "../../errorComponent/errorComponent.jsx";
-import moment from "moment";
-import "moment-timezone";
+import React, { useState } from 'react'
+import useTinList from './useTinList.js'
+import TinApproval from '../tinApproval/tinApproval.jsx'
+import Tin from '../tin.jsx'
+import TinDetails from '../tinDetail/tinDetail.jsx'
+import LoadingSpinner from '../../loadingSpinner/loadingSpinner.jsx'
+import ErrorComponent from '../../errorComponent/errorComponent.jsx'
+import moment from 'moment'
+import 'moment-timezone'
+import { FaSearch } from 'react-icons/fa'
+import Pagination from '../../common/Pagination/Pagination.jsx'
 
 const TinList = () => {
+  const [searchQuery, setSearchQuery] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
+
   const {
     Tins,
     isLoadingData,
@@ -41,14 +47,28 @@ const TinList = () => {
     hasPermission,
     handleUpdated,
     handleClose,
-  } = useTinList();
+  } = useTinList()
+
+  //Handler for search input
+  const handleSearch = (e) => {
+    setSearchQuery(e.target.value)
+    setCurrentPage(1)
+  }
+
+  //Filter TINS based on search query
+  const filteredTins = Tins?.filter((tin) =>
+    tin.referenceNumber.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
+  //Pagination Handler
+  const paginate = (pageNumber) => setCurrentPage(pageNumber)
 
   if (error || isPermissionsError) {
-    return <ErrorComponent error={error || "Error fetching data"} />;
+    return <ErrorComponent error={error || 'Error fetching data'} />
   }
 
   if (isLoadingData || isLoadingPermissions || (Tins && !(Tins?.length >= 0))) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner />
   }
 
   if (showCreateTinForm) {
@@ -57,7 +77,7 @@ const TinList = () => {
         handleClose={() => setShowCreateTinForm(false)}
         handleUpdated={handleUpdated}
       />
-    );
+    )
   }
 
   if (Tins?.length === 0) {
@@ -66,10 +86,10 @@ const TinList = () => {
         <h2>Transfer Issue Notes</h2>
         <div
           className="d-flex flex-column justify-content-center align-items-center text-center vh-100"
-          style={{ maxHeight: "80vh" }}
+          style={{ maxHeight: '80vh' }}
         >
           <p>You haven't created any transfer issue note. Create a new one.</p>
-          {hasPermission("Create Transfer Issue Note") && (
+          {hasPermission('Create Transfer Issue Note') && (
             <button
               type="button"
               className="btn btn-primary"
@@ -80,7 +100,7 @@ const TinList = () => {
           )}
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -88,7 +108,7 @@ const TinList = () => {
       <h2>Transfer Issue Notes</h2>
       <div className="mt-3 d-flex justify-content-start align-items-center">
         <div className="btn-group" role="group">
-          {hasPermission("Create Transfer Issue Note") && (
+          {hasPermission('Create Transfer Issue Note') && (
             <button
               type="button"
               className="btn btn-primary"
@@ -97,9 +117,9 @@ const TinList = () => {
               Create
             </button>
           )}
-          {hasPermission("Approve Transfer Issue Note") &&
+          {hasPermission('Approve Transfer Issue Note') &&
             selectedRowData[0]?.createdUserId !==
-              parseInt(sessionStorage.getItem("userId")) &&
+              parseInt(sessionStorage.getItem('userId')) &&
             isAnyRowSelected &&
             areAnySelectedRowsPending(selectedRows) && (
               <button
@@ -109,6 +129,20 @@ const TinList = () => {
                 Approve
               </button>
             )}
+        </div>
+      </div>
+      <div className="d-flex justify-content-end mb-3">
+        <div className="search-bar input-group">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Search"
+            value={searchQuery}
+            onChange={handleSearch}
+          />
+          <span className="input-group-text">
+            <FaSearch />
+          </span>
         </div>
       </div>
       <div className="table-responsive">
@@ -126,57 +160,68 @@ const TinList = () => {
             </tr>
           </thead>
           <tbody>
-            {Tins?.map((Tin) => (
-              <tr key={Tin.issueMasterId}>
-                <td>
-                  <input
-                    type="checkbox"
-                    checked={selectedRows.includes(Tin.issueMasterId)}
-                    onChange={() => handleRowSelect(Tin.issueMasterId)}
-                  />
-                </td>
-                <td>{Tin.referenceNumber}</td>
-                <td>{Tin.createdBy}</td>
-                <td>
-                  {moment
-                    .utc(Tin?.issueDate)
-                    .tz("Asia/Colombo")
-                    .format("YYYY-MM-DD hh:mm:ss A")}
-                </td>
-                <td>
-                  <span
-                    className={`badge rounded-pill ${getStatusBadgeClass(
-                      Tin.status
-                    )}`}
-                  >
-                    {getStatusLabel(Tin.status)}
-                  </span>
-                </td>
-                <td>
-                  <button
-                    className="btn btn-primary me-2"
-                    onClick={() => handleViewDetails(Tin)}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      fill="currentColor"
-                      className="bi bi-arrow-right"
-                      viewBox="0 0 16 16"
+            {filteredTins
+              .slice(
+                (currentPage - 1) * itemsPerPage,
+                currentPage * itemsPerPage
+              )
+              .map((Tin) => (
+                <tr key={Tin.issueMasterId}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={selectedRows.includes(Tin.issueMasterId)}
+                      onChange={() => handleRowSelect(Tin.issueMasterId)}
+                    />
+                  </td>
+                  <td>{Tin.referenceNumber}</td>
+                  <td>{Tin.createdBy}</td>
+                  <td>
+                    {moment
+                      .utc(Tin?.issueDate)
+                      .tz('Asia/Colombo')
+                      .format('YYYY-MM-DD hh:mm:ss A')}
+                  </td>
+                  <td>
+                    <span
+                      className={`badge rounded-pill ${getStatusBadgeClass(
+                        Tin.status
+                      )}`}
                     >
-                      <path
-                        fillRule="evenodd"
-                        d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"
-                      />
-                    </svg>{" "}
-                    View
-                  </button>
-                </td>
-              </tr>
-            ))}
+                      {getStatusLabel(Tin.status)}
+                    </span>
+                  </td>
+                  <td>
+                    <button
+                      className="btn btn-primary me-2"
+                      onClick={() => handleViewDetails(Tin)}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        fill="currentColor"
+                        className="bi bi-arrow-right"
+                        viewBox="0 0 16 16"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"
+                        />
+                      </svg>{' '}
+                      View
+                    </button>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
+        <Pagination
+          itemsPerPage={itemsPerPage}
+          totalItems={filteredTins.length}
+          paginate={paginate}
+          currentPage={currentPage}
+        />
         {showDetailTinModalInParent && (
           <TinDetails
             show={showDetailTinModal}
@@ -194,7 +239,7 @@ const TinList = () => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default TinList;
+export default TinList

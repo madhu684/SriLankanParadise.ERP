@@ -4,7 +4,7 @@ import usePackingSlip from './usePackingSlip'
 import ButtonLoadingSpinner from '../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner'
 import BatchSelectionModal from '../batchSelectionModal/batchSelectionModal'
 
-const PackingSlip = ({handleClose}) => {
+const PackingSlip = ({ handleClose }) => {
   const {
     formData,
     submissionStatus,
@@ -73,7 +73,12 @@ const PackingSlip = ({handleClose}) => {
       {/* Header */}
       <div className="mb-4">
         <div ref={alertRef}></div>
-        <div className="d-flex justify-content-end">
+        <div className="d-flex justify-content-between">
+          <i
+            class="bi bi-arrow-left"
+            onClick={handleClose}
+            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+          ></i>
           <p>
             <CurrentDateTime />
           </p>

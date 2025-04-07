@@ -38,7 +38,7 @@ const Supplier = ({ handleClose, handleUpdated }) => {
       handleUpdated();
     },
   });
-  const companyLogoUrl = useCompanyLogoUrl();
+  //const companyLogoUrl = useCompanyLogoUrl();
 
   if (isLoading || isCompanyTypesLoading || isBusinessTypesLoading) {
     return <LoadingSpinner />;
@@ -54,7 +54,12 @@ const Supplier = ({ handleClose, handleUpdated }) => {
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img src={companyLogoUrl} alt="Company Logo" height={30} />
+          {/* <img src={companyLogoUrl} alt="Company Logo" height={30} /> */}
+          <i
+            class="bi bi-arrow-left"
+            onClick={handleClose}
+            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+          ></i>
           <p>
             <CurrentDateTime />
           </p>
@@ -64,17 +69,17 @@ const Supplier = ({ handleClose, handleUpdated }) => {
       </div>
 
       {/* Display success or error messages */}
-      {submissionStatus === "successSubmitted" && (
+      {submissionStatus === 'successSubmitted' && (
         <div className="alert alert-success mb-3" role="alert">
           Supplier created successfully!
         </div>
       )}
-      {submissionStatus === "successSavedAsDraft" && (
+      {submissionStatus === 'successSavedAsDraft' && (
         <div className="alert alert-success mb-3" role="alert">
           Supplier saved as draft, you can edit and submit it later!
         </div>
       )}
-      {submissionStatus === "error" && (
+      {submissionStatus === 'error' && (
         <div className="alert alert-danger mb-3" role="alert">
           Error creating supplier. Please try again.
         </div>
@@ -92,13 +97,13 @@ const Supplier = ({ handleClose, handleUpdated }) => {
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.supplierName ? "is-valid" : ""
-                } ${validationErrors.supplierName ? "is-invalid" : ""}`}
+                  validFields.supplierName ? 'is-valid' : ''
+                } ${validationErrors.supplierName ? 'is-invalid' : ''}`}
                 id="SupplierName"
                 placeholder="Enter Supplier name"
                 value={formData.supplierName}
                 onChange={(e) =>
-                  handleInputChange("supplierName", e.target.value)
+                  handleInputChange('supplierName', e.target.value)
                 }
                 required
               />
@@ -115,13 +120,13 @@ const Supplier = ({ handleClose, handleUpdated }) => {
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.addressLine1 ? "is-valid" : ""
-                } ${validationErrors.addressLine1 ? "is-invalid" : ""}`}
+                  validFields.addressLine1 ? 'is-valid' : ''
+                } ${validationErrors.addressLine1 ? 'is-invalid' : ''}`}
                 id="AddressLine1"
                 placeholder="Enter Address Line 1"
                 value={formData.addressLine1}
                 onChange={(e) =>
-                  handleInputChange("addressLine1", e.target.value)
+                  handleInputChange('addressLine1', e.target.value)
                 }
                 required
               />
@@ -139,13 +144,13 @@ const Supplier = ({ handleClose, handleUpdated }) => {
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.addressLine2 ? "is-valid" : ""
-                } ${validationErrors.addressLine2 ? "is-invalid" : ""}`}
+                  validFields.addressLine2 ? 'is-valid' : ''
+                } ${validationErrors.addressLine2 ? 'is-invalid' : ''}`}
                 id="AddressLine2"
                 placeholder="Enter Address Line 2"
                 value={formData.addressLine2}
                 onChange={(e) =>
-                  handleInputChange("addressLine2", e.target.value)
+                  handleInputChange('addressLine2', e.target.value)
                 }
                 required
               />
@@ -162,13 +167,13 @@ const Supplier = ({ handleClose, handleUpdated }) => {
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.contactPerson ? "is-valid" : ""
-                } ${validationErrors.contactPerson ? "is-invalid" : ""}`}
+                  validFields.contactPerson ? 'is-valid' : ''
+                } ${validationErrors.contactPerson ? 'is-invalid' : ''}`}
                 id="contactPerson"
                 placeholder="Enter contact person"
                 value={formData.contactPerson}
                 onChange={(e) =>
-                  handleInputChange("contactPerson", e.target.value)
+                  handleInputChange('contactPerson', e.target.value)
                 }
                 required
               />
@@ -185,12 +190,12 @@ const Supplier = ({ handleClose, handleUpdated }) => {
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.phone ? "is-valid" : ""
-                } ${validationErrors.phone ? "is-invalid" : ""}`}
+                  validFields.phone ? 'is-valid' : ''
+                } ${validationErrors.phone ? 'is-invalid' : ''}`}
                 id="phone"
                 placeholder="Enter mobile number"
                 value={formData.phone}
-                onChange={(e) => handleInputChange("phone", e.target.value)}
+                onChange={(e) => handleInputChange('phone', e.target.value)}
                 required
               />
               {validationErrors.phone && (
@@ -204,13 +209,13 @@ const Supplier = ({ handleClose, handleUpdated }) => {
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.contactNumber ? "is-valid" : ""
-                } ${validationErrors.contactNumber ? "is-invalid" : ""}`}
+                  validFields.contactNumber ? 'is-valid' : ''
+                } ${validationErrors.contactNumber ? 'is-invalid' : ''}`}
                 id="contactNumber"
                 placeholder="Enter office contact number"
                 value={formData.contactNumber}
                 onChange={(e) =>
-                  handleInputChange("contactNumber", e.target.value)
+                  handleInputChange('contactNumber', e.target.value)
                 }
                 required
               />
@@ -227,12 +232,12 @@ const Supplier = ({ handleClose, handleUpdated }) => {
               <input
                 type="email"
                 className={`form-control ${
-                  validFields.email ? "is-valid" : ""
-                } ${validationErrors.email ? "is-invalid" : ""}`}
+                  validFields.email ? 'is-valid' : ''
+                } ${validationErrors.email ? 'is-invalid' : ''}`}
                 id="email"
                 placeholder="Enter email"
                 value={formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
+                onChange={(e) => handleInputChange('email', e.target.value)}
                 required
               />
               {validationErrors.email && (
@@ -250,7 +255,7 @@ const Supplier = ({ handleClose, handleUpdated }) => {
                 value={formData.categories}
                 onChange={(e) =>
                   handleInputChange(
-                    "categories",
+                    'categories',
                     Array.from(
                       e.target.selectedOptions,
                       (option) => option.value
@@ -277,7 +282,7 @@ const Supplier = ({ handleClose, handleUpdated }) => {
                   {formData.categories.map((categoryId) => {
                     const selectedCategory = categories.find(
                       (category) => category.categoryId === parseInt(categoryId)
-                    );
+                    )
                     return (
                       <ListGroup.Item
                         key={categoryId}
@@ -286,13 +291,13 @@ const Supplier = ({ handleClose, handleUpdated }) => {
                         {selectedCategory.categoryName}
                         {/* Remove button (x icon) */}
                         <span
-                          style={{ cursor: "pointer" }}
+                          style={{ cursor: 'pointer' }}
                           onClick={() => handleRemoveCategory(categoryId)}
                         >
                           <i className="bi bi-x text-danger fs-5"></i>
                         </span>
                       </ListGroup.Item>
-                    );
+                    )
                   })}
                 </ListGroup>
               </div>
@@ -309,15 +314,15 @@ const Supplier = ({ handleClose, handleUpdated }) => {
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.businessRegistrationNo ? "is-valid" : ""
+                  validFields.businessRegistrationNo ? 'is-valid' : ''
                 } ${
-                  validationErrors.businessRegistrationNo ? "is-invalid" : ""
+                  validationErrors.businessRegistrationNo ? 'is-invalid' : ''
                 }`}
                 id="BusinessRegistrationNo"
                 placeholder="Enter Business Registration No"
                 value={formData.businessRegistrationNo}
                 onChange={(e) =>
-                  handleInputChange("businessRegistrationNo", e.target.value)
+                  handleInputChange('businessRegistrationNo', e.target.value)
                 }
                 required
               />
@@ -335,13 +340,13 @@ const Supplier = ({ handleClose, handleUpdated }) => {
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.vatRegistrationNo ? "is-valid" : ""
-                } ${validationErrors.vatRegistrationNo ? "is-invalid" : ""}`}
+                  validFields.vatRegistrationNo ? 'is-valid' : ''
+                } ${validationErrors.vatRegistrationNo ? 'is-invalid' : ''}`}
                 id="VATRegistrationNo"
                 placeholder="Enter VAT Registration No"
                 value={formData.vatRegistrationNo}
                 onChange={(e) =>
-                  handleInputChange("vatRegistrationNo", e.target.value)
+                  handleInputChange('vatRegistrationNo', e.target.value)
                 }
                 required
               />
@@ -359,10 +364,10 @@ const Supplier = ({ handleClose, handleUpdated }) => {
               <select
                 id="CompanyTypeId"
                 className={`form-select ${
-                  validFields.companyTypeId ? "is-valid" : ""
-                } ${validationErrors.companyTypeId ? "is-invalid" : ""}`}
+                  validFields.companyTypeId ? 'is-valid' : ''
+                } ${validationErrors.companyTypeId ? 'is-invalid' : ''}`}
                 onChange={(e) =>
-                  handleInputChange("companyTypeId", e.target.value)
+                  handleInputChange('companyTypeId', e.target.value)
                 }
                 value={formData.companyTypeId}
                 required
@@ -389,10 +394,10 @@ const Supplier = ({ handleClose, handleUpdated }) => {
               <select
                 id="BusinessTypeId"
                 className={`form-select ${
-                  validFields.businessTypeId ? "is-valid" : ""
-                } ${validationErrors.businessTypeId ? "is-invalid" : ""}`}
+                  validFields.businessTypeId ? 'is-valid' : ''
+                } ${validationErrors.businessTypeId ? 'is-invalid' : ''}`}
                 onChange={(e) =>
-                  handleInputChange("businessTypeId", e.target.value)
+                  handleInputChange('businessTypeId', e.target.value)
                 }
                 value={formData.businessTypeId}
                 required
@@ -419,8 +424,8 @@ const Supplier = ({ handleClose, handleUpdated }) => {
               <input
                 type="file"
                 className={`form-control ${
-                  validFields.supplierLogo ? "is-valid" : ""
-                } ${validationErrors.supplierLogo ? "is-invalid" : ""}`}
+                  validFields.supplierLogo ? 'is-valid' : ''
+                } ${validationErrors.supplierLogo ? 'is-invalid' : ''}`}
                 id="supplierLogo"
                 accept="image/*"
                 onChange={(e) => handleLogoUpload(e.target.files[0])}
@@ -437,9 +442,9 @@ const Supplier = ({ handleClose, handleUpdated }) => {
                   alt="Supplier Logo"
                   className="img-thumbnail mt-2"
                   style={{
-                    maxWidth: "200px",
-                    maxHeight: "200px",
-                    objectFit: "contain",
+                    maxWidth: '200px',
+                    maxHeight: '200px',
+                    objectFit: 'contain',
                   }}
                 />
               ) : (
@@ -449,9 +454,9 @@ const Supplier = ({ handleClose, handleUpdated }) => {
                   className="img-thumbnail mt-2"
                   width="100px"
                   style={{
-                    maxWidth: "200px",
-                    maxHeight: "200px",
-                    objectFit: "contain",
+                    maxWidth: '200px',
+                    maxHeight: '200px',
+                    objectFit: 'contain',
                   }}
                 />
               )}
@@ -475,17 +480,17 @@ const Supplier = ({ handleClose, handleUpdated }) => {
                 step="0.1"
                 value={formData.rating}
                 onChange={(e) =>
-                  handleInputChange("rating", parseFloat(e.target.value))
+                  handleInputChange('rating', parseFloat(e.target.value))
                 }
                 className={`form-range ${
-                  validFields.rating ? "is-valid" : ""
-                } ${validationErrors.rating ? "is-invalid" : ""}`}
+                  validFields.rating ? 'is-valid' : ''
+                } ${validationErrors.rating ? 'is-invalid' : ''}`}
               />
               <div className="rating-stars">
                 {[...Array(5)].map((_, index) => {
-                  const ratingValue = index + 1;
-                  const fillPercentage = (formData.rating - index) * 100;
-                  const starFill = fillPercentage >= 100 ? 100 : fillPercentage;
+                  const ratingValue = index + 1
+                  const fillPercentage = (formData.rating - index) * 100
+                  const starFill = fillPercentage >= 100 ? 100 : fillPercentage
                   return (
                     <span key={index}>
                       <svg
@@ -494,9 +499,9 @@ const Supplier = ({ handleClose, handleUpdated }) => {
                         width="1.8em"
                         height="1.8em"
                         viewBox="0 0 20 20"
-                        fill={"var(--bs-gray-300)"}
+                        fill={'var(--bs-gray-300)'}
                         xmlns="http://www.w3.org/2000/svg"
-                        onClick={() => handleInputChange("rating", ratingValue)}
+                        onClick={() => handleInputChange('rating', ratingValue)}
                       >
                         <path
                           fillRule="evenodd"
@@ -512,11 +517,11 @@ const Supplier = ({ handleClose, handleUpdated }) => {
                           >
                             <stop
                               offset={`${starFill}%`}
-                              style={{ stopColor: "gold" }}
+                              style={{ stopColor: 'gold' }}
                             />
                             <stop
                               offset={`${starFill}%`}
-                              style={{ stopColor: "transparent" }}
+                              style={{ stopColor: 'transparent' }}
                             />
                           </linearGradient>
                         </defs>
@@ -525,12 +530,12 @@ const Supplier = ({ handleClose, handleUpdated }) => {
                           fillRule="evenodd"
                           d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"
                         />
-                      </svg>{" "}
+                      </svg>{' '}
                     </span>
-                  );
+                  )
                 })}
-                <span className="rating-number" style={{ fontSize: "1.1rem" }}>
-                  {"  "}
+                <span className="rating-number" style={{ fontSize: '1.1rem' }}>
+                  {'  '}
                   {formData.rating.toFixed(1)}
                 </span>
               </div>
@@ -547,12 +552,12 @@ const Supplier = ({ handleClose, handleUpdated }) => {
               </label>
               <textarea
                 className={`form-control ${
-                  validFields.remarks ? "is-valid" : ""
-                } ${validationErrors.remarks ? "is-invalid" : ""}`}
+                  validFields.remarks ? 'is-valid' : ''
+                } ${validationErrors.remarks ? 'is-invalid' : ''}`}
                 id="Remarks"
                 placeholder="Enter Remarks"
                 value={formData.remarks}
-                onChange={(e) => handleInputChange("remarks", e.target.value)}
+                onChange={(e) => handleInputChange('remarks', e.target.value)}
                 maxLength={200}
               />
               {validationErrors.remarks && (
@@ -571,12 +576,12 @@ const Supplier = ({ handleClose, handleUpdated }) => {
             Status
           </label>
           <select
-            className={`form-select ${validFields.status ? "is-valid" : ""} ${
-              validationErrors.status ? "is-invalid" : ""
+            className={`form-select ${validFields.status ? 'is-valid' : ''} ${
+              validationErrors.status ? 'is-invalid' : ''
             }`}
             id="status"
             value={formData.status}
-            onChange={(e) => handleInputChange("status", e.target.value)}
+            onChange={(e) => handleInputChange('status', e.target.value)}
           >
             <option value="">Select status</option>
             <option value="1">Active</option>
@@ -597,8 +602,8 @@ const Supplier = ({ handleClose, handleUpdated }) => {
           <input
             type="file"
             className={`form-control ${
-              validFields.attachments ? "is-valid" : ""
-            } ${validationErrors.attachments ? "is-invalid" : ""}`}
+              validFields.attachments ? 'is-valid' : ''
+            } ${validationErrors.attachments ? 'is-invalid' : ''}`}
             id="attachment"
             onChange={(e) => handleAttachmentChange(e.target.files)}
             multiple
@@ -622,7 +627,7 @@ const Supplier = ({ handleClose, handleUpdated }) => {
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Creating..." />
             ) : (
-              "Create"
+              'Create'
             )}
           </button>
           <button
@@ -636,7 +641,7 @@ const Supplier = ({ handleClose, handleUpdated }) => {
         </div>
       </form>
     </div>
-  );
+  )
 };
 
 export default Supplier;

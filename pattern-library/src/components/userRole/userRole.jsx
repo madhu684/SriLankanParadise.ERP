@@ -30,14 +30,19 @@ const UserRole = ({ handleClose, handleUpdated }) => {
     },
   });
 
-  const companyLogoUrl = useCompanyLogoUrl();
+  //const companyLogoUrl = useCompanyLogoUrl();
 
   return (
     <div className="container mt-4">
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img src={companyLogoUrl} alt="Company Logo" height={30} />
+          {/* <img src={companyLogoUrl} alt="Company Logo" height={30} /> */}
+          <i
+            class="bi bi-arrow-left"
+            onClick={handleClose}
+            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+          ></i>
           <p>
             <CurrentDateTime />
           </p>
@@ -46,12 +51,12 @@ const UserRole = ({ handleClose, handleUpdated }) => {
         <hr />
       </div>
 
-      {submissionStatus === "successSubmitted" && (
+      {submissionStatus === 'successSubmitted' && (
         <div className="alert alert-success mb-3" role="alert">
           User role created successfully!
         </div>
       )}
-      {submissionStatus === "error" && (
+      {submissionStatus === 'error' && (
         <div className="alert alert-danger mb-3" role="alert">
           Error creating user role. Please try again.
         </div>
@@ -69,12 +74,12 @@ const UserRole = ({ handleClose, handleUpdated }) => {
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.roleName ? "is-valid" : ""
-                } ${validationErrors.roleName ? "is-invalid" : ""}`}
+                  validFields.roleName ? 'is-valid' : ''
+                } ${validationErrors.roleName ? 'is-invalid' : ''}`}
                 id="roleName"
                 placeholder="Enter Role Name"
                 value={formData.roleName}
-                onChange={(e) => handleInputChange("roleName", e.target.value)}
+                onChange={(e) => handleInputChange('roleName', e.target.value)}
                 required
               />
               {validationErrors.roleName && (
@@ -90,12 +95,12 @@ const UserRole = ({ handleClose, handleUpdated }) => {
               </label>
               <select
                 className={`form-select ${
-                  validFields.systemModule ? "is-valid" : ""
-                } ${validationErrors.systemModule ? "is-invalid" : ""}`}
+                  validFields.systemModule ? 'is-valid' : ''
+                } ${validationErrors.systemModule ? 'is-invalid' : ''}`}
                 id="systemModule"
                 value={formData.systemModule}
                 onChange={(e) =>
-                  handleInputChange("systemModule", e.target.value)
+                  handleInputChange('systemModule', e.target.value)
                 }
                 required
               >
@@ -122,11 +127,11 @@ const UserRole = ({ handleClose, handleUpdated }) => {
               </label>
               <select
                 className={`form-select ${
-                  validFields.status ? "is-valid" : ""
-                } ${validationErrors.status ? "is-invalid" : ""}`}
+                  validFields.status ? 'is-valid' : ''
+                } ${validationErrors.status ? 'is-invalid' : ''}`}
                 id="status"
                 value={formData.status}
-                onChange={(e) => handleInputChange("status", e.target.value)}
+                onChange={(e) => handleInputChange('status', e.target.value)}
                 required
               >
                 <option value="">Select Status</option>
@@ -152,7 +157,7 @@ const UserRole = ({ handleClose, handleUpdated }) => {
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Creating..." />
             ) : (
-              "Create"
+              'Create'
             )}
           </button>
           <button
@@ -166,7 +171,7 @@ const UserRole = ({ handleClose, handleUpdated }) => {
         </div>
       </form>
     </div>
-  );
+  )
 };
 
 export default UserRole;
