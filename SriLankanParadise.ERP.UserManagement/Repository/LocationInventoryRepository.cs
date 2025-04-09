@@ -13,11 +13,10 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             _dbContext = dbContext;
         }
-        public async Task AddLocationInventory(LocationInventory locationInventory, int m)
+        public async Task<LocationInventory> AddLocationInventory(LocationInventory locationInventory, int m)
         {
             try
             {
-                // Check if a record with the same ItemMasterId, BatchNo, and LocationId exists
                 var existingInventory = await _dbContext.LocationInventories
                     .FirstOrDefaultAsync(li => li.ItemMasterId == locationInventory.ItemMasterId
                                             && li.BatchNo == locationInventory.BatchNo
@@ -37,28 +36,33 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     {
                         existingInventory.StockInHand = locationInventory.StockInHand;
                     }
+
+                    await _dbContext.SaveChangesAsync();
+                    return existingInventory;
                 }
                 else
                 {
-                    // If a record with the same ItemMasterId and BatchNo exists (regardless of LocationId)
                     var batchInventory = await _dbContext.LocationInventories
                         .FirstOrDefaultAsync(li => li.ItemMasterId == locationInventory.ItemMasterId
                                                 && li.BatchNo == locationInventory.BatchNo);
 
                     if (batchInventory != null && batchInventory.ExpirationDate != null)
                     {
-                        // Add the existing record's ExpireDate to the new record's ExpireDate
                         locationInventory.ExpirationDate = batchInventory.ExpirationDate;
                     }
+
                     _dbContext.LocationInventories.Add(locationInventory);
+                    await _dbContext.SaveChangesAsync();
+
+                    return locationInventory;
                 }
-                await _dbContext.SaveChangesAsync();
             }
             catch (Exception)
             {
                 throw;
             }
         }
+
 
         public async Task<IEnumerable<LocationInventory>> GetAll()
         {

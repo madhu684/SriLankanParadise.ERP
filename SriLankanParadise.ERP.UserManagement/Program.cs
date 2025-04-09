@@ -193,6 +193,8 @@ builder.Services.AddScoped<ISubItemMasterService, SubItemMasterService>();
 builder.Services.AddScoped<ISubItemMasterRepository, SubItemMasterRepository>();
 builder.Services.AddScoped<IDailyLocationInventoryService, DailyLocationInventoryService>();
 builder.Services.AddScoped<IDailyLocationInventoryRepository, DailyLocationInventoryRepository>();
+builder.Services.AddScoped<IDailyLocationInventoryLogService, DailyLocationInventoryLogService>();
+builder.Services.AddScoped<IDailyLocationInventoryLogRepository, DailyLocationInventoryLogRepository>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

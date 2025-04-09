@@ -145,6 +145,8 @@ public partial class ErpSystemContext : DbContext
     
     public virtual DbSet<DailyLocationInventory> DailyLocationInventories { get; set; }
 
+    public virtual DbSet<DailyLocationInventoryLog> DailyLocationInventoryLogs { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:LocalSqlServerConnection");
 
@@ -1264,7 +1266,7 @@ public partial class ErpSystemContext : DbContext
 
         modelBuilder.Entity<DailyLocationInventory>(entity =>
         {
-            entity.HasKey(e => e.RunDate).HasName("PK_DailyLocationInventory");
+            entity.HasKey(e => e.Id).HasName("PK_DailyLocationInventory");
 
             entity.ToTable("DailyLocationInventory");
 
@@ -1288,6 +1290,17 @@ public partial class ErpSystemContext : DbContext
                 .HasForeignKey(d => d.LocationId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_DailyLocationInventory_Location");
+        });
+
+        modelBuilder.Entity<DailyLocationInventoryLog>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_DailyLocationInventoryLog_Id");
+
+            entity.ToTable("DailyLocationInventorylog");
+            entity.HasOne(d => d.DailyLocationInventory).WithMany(p => p.DailyLocationInventoryLogs)
+                  .HasForeignKey(d => d.DailyLocationInventoryId)
+                  .OnDelete(DeleteBehavior.Cascade)
+                  .HasConstraintName("FK_DailyLocationInventoryLog_DailyLocationInventory");
         });
 
         OnModelCreatingPartial(modelBuilder);

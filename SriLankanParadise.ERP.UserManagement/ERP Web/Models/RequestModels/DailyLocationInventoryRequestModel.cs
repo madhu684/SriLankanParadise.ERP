@@ -18,5 +18,8 @@
 
         public string? BatchNo { get; set; }
         public DateTime? ExpirationDate { get; set; }
+
+        public DateTime TransactionDate { get; set; }
+        public int MovementTypeId { get; set; }
     }
 }

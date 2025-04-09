@@ -4,7 +4,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
 {
     public interface IDailyLocationInventoryService
     {
-        Task Add(DailyLocationInventory dailyLocationInventory);
+        Task<DailyLocationInventory> Add(DailyLocationInventory dailyLocationInventory, DateTime trasactionDate, int m, int EnteredUserId, string? Remark);
 
         Task<IEnumerable<DailyLocationInventory>> Get(DateOnly runDate, int locationId);
 

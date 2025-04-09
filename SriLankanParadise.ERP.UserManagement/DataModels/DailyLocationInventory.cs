@@ -29,5 +29,7 @@ namespace SriLankanParadise.ERP.UserManagement.DataModels
         public virtual ItemMaster ItemMaster { get; set; } = null!;
 
         public virtual Location Location { get; set; } = null!;
+
+        public ICollection<DailyLocationInventoryLog> DailyLocationInventoryLogs { get; set; }
     }
 }

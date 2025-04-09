@@ -19,5 +19,6 @@
         public DateTime? Date { get; set; }
 
         public decimal? Qty { get; set; }
+        public DateTime? TransactionDate { get; set; }
     }
 }
