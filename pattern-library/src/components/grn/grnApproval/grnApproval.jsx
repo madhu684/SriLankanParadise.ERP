@@ -131,7 +131,7 @@ const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
                     <th>Received Quantity</th>
                     <th>Rejected Quantity</th>
                     <th>Free Quantity</th>
-                    <th>Expiry Date</th>
+                    <th>Item Barcode</th>
                     <th>Unit Price</th>
                     <th>Cost Price</th>
                     <th>Selling Price</th>
@@ -147,7 +147,7 @@ const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
                         <td>{item.receivedQuantity}</td>
                         <td>{item.rejectedQuantity}</td>
                         <td>{item.freeQuantity}</td>
-                        <td>{item.expiryDate?.split("T")[0]}</td>
+                        <td>{item.itemBarcode}</td>
                         <td>{item.unitPrice.toFixed(2)}</td>
                         {/* Additional fields */}
                         <td>

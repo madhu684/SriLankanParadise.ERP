@@ -16,6 +16,10 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public int? PurchaseOrderId { get; set; }
 
+        public int? PurchaseRequisitionId { get; set; }
+
+        public int? SupplierId { get; set; }
+
         public virtual PurchaseOrderDto? PurchaseOrder { get; set; }
 
         public int? CompanyId { get; set; }

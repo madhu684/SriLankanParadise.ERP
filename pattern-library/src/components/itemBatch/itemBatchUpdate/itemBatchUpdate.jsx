@@ -37,15 +37,15 @@ const ItemBatchUpdate = ({ handleClose, handleUpdated }) => {
     onFormSubmit: () => {},
   });
 
-  const companyLogoUrl = useCompanyLogoUrl();
+  //const companyLogoUrl = useCompanyLogoUrl();
 
   return (
     <div className="container mt-4">
       {/* Header */}
       <div className="mb-4">
         <div ref={alertRef}></div>
-        <div className="d-flex justify-content-between">
-          <img src={companyLogoUrl} alt="Company Logo" height={30} />
+        <div className="d-flex justify-content-end">
+          {/* <img src={companyLogoUrl} alt="Company Logo" height={30} /> */}
           <p>
             <CurrentDateTime />
           </p>

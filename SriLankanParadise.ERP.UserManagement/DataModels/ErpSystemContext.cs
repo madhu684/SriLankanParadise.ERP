@@ -85,6 +85,10 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<MovementType> MovementTypes { get; set; }
 
+    public virtual DbSet<PackingSlip> PackingSlips { get; set; }
+
+    public virtual DbSet<PackingSlipDetail> PackingSlipDetails { get; set; }
+
     public virtual DbSet<PaymentMode> PaymentModes { get; set; }
 
     public virtual DbSet<Permission> Permissions { get; set; }
@@ -445,7 +449,7 @@ public partial class ErpSystemContext : DbContext
 
             entity.ToTable("GrnDetail");
 
-            entity.Property(e => e.ExpiryDate).HasColumnType("date");
+            //entity.Property(e => e.ExpiryDate).HasColumnType("date");
             entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.GrnMaster).WithMany(p => p.GrnDetails)
@@ -742,6 +746,49 @@ public partial class ErpSystemContext : DbContext
 
             entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.Name).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<PackingSlip>(entity =>
+        {
+            entity.HasKey(e => e.PackingSlipId).HasName("PK__PackingS__5DD9E352401DF738");
+
+            entity.ToTable("PackingSlip");
+
+            entity.Property(e => e.ApprovedBy).HasMaxLength(100);
+            entity.Property(e => e.ApprovedDate).HasColumnType("datetime");
+            entity.Property(e => e.CreatedBy).HasMaxLength(100);
+            entity.Property(e => e.InvoiceReferenceNumber).HasMaxLength(50);
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
+            entity.Property(e => e.PackingSlipDate).HasColumnType("date");
+            entity.Property(e => e.ReferenceNo)
+                .HasMaxLength(20)
+                .HasDefaultValueSql("('PS'+CONVERT([nvarchar](20),NEXT VALUE FOR [dbo].[PackingSlipReferenceNoSeq]))");
+            entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
+
+            entity.HasOne(d => d.Customer).WithMany(p => p.PackingSlips)
+                .HasForeignKey(d => d.CustomerId)
+                .HasConstraintName("FK_PackingSlip_Customer");
+        });
+
+        modelBuilder.Entity<PackingSlipDetail>(entity =>
+        {
+            entity.HasKey(e => e.PackingSlipDetailId).HasName("PK__PackingS__323218A15F13C77D");
+
+            entity.ToTable("PackingSlipDetail");
+
+            entity.Property(e => e.TotalPrice).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
+
+            entity.HasOne(d => d.PackingSlip).WithMany(p => p.PackingSlipDetails)
+                .HasForeignKey(d => d.PackingSlipId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_PackingSlipDetail_PackingSlip");
+
+            entity.HasOne(d => d.ItemBatch).WithMany(p => p.PackingSlipDetails)
+                .HasForeignKey(d => new { d.ItemBatchBatchId, d.ItemBatchItemMasterId })
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_PackingSlipDetail_ItemBatch");
         });
 
         modelBuilder.Entity<PaymentMode>(entity =>

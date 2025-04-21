@@ -38,7 +38,7 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
       handleUpdated();
     },
   });
-  const companyLogoUrl = useCompanyLogoUrl();
+  //const companyLogoUrl = useCompanyLogoUrl();
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -54,7 +54,12 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img src={companyLogoUrl} alt="Company Logo" height={30} />
+          {/* <img src={companyLogoUrl} alt="Company Logo" height={30} /> */}
+          <i
+            class="bi bi-arrow-left"
+            onClick={handleClose}
+            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+          ></i>
           <p>
             <CurrentDateTime />
           </p>
@@ -64,18 +69,18 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
       </div>
 
       {/* Display success or error messages */}
-      {submissionStatus === "successSubmitted" && (
+      {submissionStatus === 'successSubmitted' && (
         <div className="alert alert-success mb-3" role="alert">
           Transfer requisition note submitted successfully!
         </div>
       )}
-      {submissionStatus === "successSavedAsDraft" && (
+      {submissionStatus === 'successSavedAsDraft' && (
         <div className="alert alert-success mb-3" role="alert">
           Transfer requisition note saved as draft, you can edit and submit it
           later!
         </div>
       )}
-      {submissionStatus === "error" && (
+      {submissionStatus === 'error' && (
         <div className="alert alert-danger mb-3" role="alert">
           Error submitting Transfer requisition. Please try again.
         </div>
@@ -92,13 +97,13 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
               </label>
               <textarea
                 className={`form-control ${
-                  validFields.purposeOfRequest ? "is-valid" : ""
-                } ${validationErrors.purposeOfRequest ? "is-invalid" : ""}`}
+                  validFields.purposeOfRequest ? 'is-valid' : ''
+                } ${validationErrors.purposeOfRequest ? 'is-invalid' : ''}`}
                 placeholder="Enter purpose of request"
                 id="purposeOfRequest"
                 value={formData.purposeOfRequest}
                 onChange={(e) =>
-                  handleInputChange("purposeOfRequest", e.target.value)
+                  handleInputChange('purposeOfRequest', e.target.value)
                 }
                 rows="2"
                 maxLength="200"
@@ -117,17 +122,17 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
               </label>
               <select
                 className={`form-select ${
-                  validFields.deliveryLocation ? "is-valid" : ""
-                } ${validationErrors.deliveryLocation ? "is-invalid" : ""}`}
+                  validFields.deliveryLocation ? 'is-valid' : ''
+                } ${validationErrors.deliveryLocation ? 'is-invalid' : ''}`}
                 id="deliveryLocation"
-                value={formData?.deliveryLocation ?? ""}
+                value={formData?.deliveryLocation ?? ''}
                 onChange={(e) => {
-                  handleInputChange("deliveryLocation", e.target.value);
+                  handleInputChange('deliveryLocation', e.target.value)
                   // Reset warehouseLocation in formData
                   setFormData((prevFormData) => ({
                     ...prevFormData,
-                    warehouseLocation: "",
-                  }));
+                    warehouseLocation: '',
+                  }))
                 }}
                 disabled
               >
@@ -135,7 +140,7 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
                 {/* Filter out locations where locationType is not "Warehouse" */}
                 {locations
                   .filter(
-                    (location) => location.locationType.name !== "Warehouse"
+                    (location) => location.locationType.name !== 'Warehouse'
                   )
                   .map((location) => (
                     <option
@@ -159,13 +164,13 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
               </label>
               <select
                 className={`form-select ${
-                  validFields.toWarehouseLocation ? "is-valid" : ""
-                } ${validationErrors.toWarehouseLocation ? "is-invalid" : ""}`}
+                  validFields.toWarehouseLocation ? 'is-valid' : ''
+                } ${validationErrors.toWarehouseLocation ? 'is-invalid' : ''}`}
                 id="toWarehouseLocation"
-                value={formData?.toWarehouseLocation ?? ""}
+                value={formData?.toWarehouseLocation ?? ''}
                 disabled={!formData.deliveryLocation}
                 onChange={(e) =>
-                  handleInputChange("toWarehouseLocation", e.target.value)
+                  handleInputChange('toWarehouseLocation', e.target.value)
                 }
               >
                 <option value="">Select Warehouse</option>
@@ -175,7 +180,7 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
                     (location) =>
                       location.parentId ===
                         parseInt(formData.deliveryLocation) &&
-                      location.locationType.name === "Warehouse"
+                      location.locationType.name === 'Warehouse'
                   )
                   .map((location) => (
                     <option
@@ -199,22 +204,22 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
               </label>
               <select
                 className={`form-select ${
-                  validFields.fromWarehouseLocation ? "is-valid" : ""
+                  validFields.fromWarehouseLocation ? 'is-valid' : ''
                 } ${
-                  validationErrors.fromWarehouseLocation ? "is-invalid" : ""
+                  validationErrors.fromWarehouseLocation ? 'is-invalid' : ''
                 }`}
                 id="fromWarehouseLocation"
-                value={formData?.fromWarehouseLocation ?? ""}
+                value={formData?.fromWarehouseLocation ?? ''}
                 disabled={!formData.deliveryLocation}
                 onChange={(e) =>
-                  handleInputChange("fromWarehouseLocation", e.target.value)
+                  handleInputChange('fromWarehouseLocation', e.target.value)
                 }
               >
                 <option value="">Select Warehouse</option>
                 {/* Filter out warehouse locations based on the locationType being "Warehouse" */}
                 {locations
                   .filter(
-                    (location) => location.locationType.name === "Warehouse"
+                    (location) => location.locationType.name === 'Warehouse'
                   )
                   .map((location) => (
                     <option
@@ -255,9 +260,9 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
                 <span
                   className="input-group-text bg-transparent"
                   style={{
-                    cursor: "pointer",
+                    cursor: 'pointer',
                   }}
-                  onClick={() => setSearchTerm("")}
+                  onClick={() => setSearchTerm('')}
                 >
                   <i className="bi bi-x"></i>
                 </span>
@@ -265,14 +270,14 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
             </div>
             {/* Dropdown for filtered items */}
             {searchTerm && (
-              <div className="dropdown" style={{ width: "100%" }}>
+              <div className="dropdown" style={{ width: '100%' }}>
                 <ul
                   className="dropdown-menu"
                   style={{
-                    display: "block",
-                    width: "100%",
-                    maxHeight: "200px",
-                    overflowY: "auto",
+                    display: 'block',
+                    width: '100%',
+                    maxHeight: '200px',
+                    overflowY: 'auto',
                   }}
                 >
                   {isItemsLoading ? (
@@ -352,17 +357,17 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
                       <input
                         type="number"
                         className={`form-control ${
-                          validFields[`quantity_${index}`] ? "is-valid" : ""
+                          validFields[`quantity_${index}`] ? 'is-valid' : ''
                         } ${
                           validationErrors[`quantity_${index}`]
-                            ? "is-invalid"
-                            : ""
+                            ? 'is-invalid'
+                            : ''
                         }`}
                         value={item.quantity}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            "quantity",
+                            'quantity',
                             e.target.value
                           )
                         }
@@ -398,8 +403,8 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
           <input
             type="file"
             className={`form-control ${
-              validFields.attachments ? "is-valid" : ""
-            } ${validationErrors.attachments ? "is-invalid" : ""}`}
+              validFields.attachments ? 'is-valid' : ''
+            } ${validationErrors.attachments ? 'is-invalid' : ''}`}
             id="attachment"
             onChange={(e) => handleAttachmentChange(e.target.files)}
             multiple
@@ -427,7 +432,7 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Submitting..." />
             ) : (
-              "Submit"
+              'Submit'
             )}
           </button>
           {/* <button
@@ -448,7 +453,7 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
         </div>
       </form>
     </div>
-  );
+  )
 };
 
 export default TransferRequisition;

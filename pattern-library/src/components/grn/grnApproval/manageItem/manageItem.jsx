@@ -63,10 +63,10 @@ const ManageItem = ({ show, handleClose, item }) => {
                   </div>
                   <div className="row mb-2">
                     <div className="col-6">
-                      <strong>Expiry Date:</strong>
+                      <strong>Item Barcode:</strong>
                     </div>
                     <div className="col-6">
-                      {item?.expiryDate?.split("T")[0]}
+                      {item?.itemBarcode}
                     </div>
                   </div>
                   <div className="row mb-2">

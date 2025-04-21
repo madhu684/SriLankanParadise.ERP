@@ -21,7 +21,7 @@ const ExpenseOutRequisition = ({ handleClose, handleUpdated }) => {
     },
   });
 
-  const companyLogoUrl = useCompanyLogoUrl();
+  //const companyLogoUrl = useCompanyLogoUrl();
 
   return (
     <div className="container mt-4">
@@ -29,9 +29,14 @@ const ExpenseOutRequisition = ({ handleClose, handleUpdated }) => {
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img src={companyLogoUrl} alt="Company Logo" height={30} />
+          {/* <img src={companyLogoUrl} alt="Company Logo" height={30} /> */}
+          <i
+            class="bi bi-arrow-left"
+            onClick={handleClose}
+            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+          ></i>
           <p>
-            {" "}
+            {' '}
             <CurrentDateTime />
           </p>
         </div>
@@ -40,18 +45,18 @@ const ExpenseOutRequisition = ({ handleClose, handleUpdated }) => {
       </div>
 
       {/* Display success or error messages */}
-      {submissionStatus === "successSubmitted" && (
+      {submissionStatus === 'successSubmitted' && (
         <div className="alert alert-success mb-3" role="alert">
           Expense out request submitted successfully!
         </div>
       )}
-      {submissionStatus === "successSavedAsDraft" && (
+      {submissionStatus === 'successSavedAsDraft' && (
         <div className="alert alert-success mb-3" role="alert">
           Expense out request created as draft, you can edit and submit it
           later!
         </div>
       )}
-      {submissionStatus === "error" && (
+      {submissionStatus === 'error' && (
         <div className="alert alert-danger mb-3" role="alert">
           Error submitting expense out request. Please try again.
         </div>
@@ -70,15 +75,15 @@ const ExpenseOutRequisition = ({ handleClose, handleUpdated }) => {
               <input
                 type="number"
                 className={`form-control ${
-                  validFields.amount ? "is-valid" : ""
-                } ${validationErrors.amount ? "is-invalid" : ""}`}
+                  validFields.amount ? 'is-valid' : ''
+                } ${validationErrors.amount ? 'is-invalid' : ''}`}
                 id="amount"
                 placeholder="Enter Amount"
                 value={formData.amount}
                 onChange={(e) => {
-                  const value = parseFloat(e.target.value);
-                  const positiveValue = isNaN(value) ? 0 : Math.max(0, value);
-                  handleInputChange("amount", positiveValue);
+                  const value = parseFloat(e.target.value)
+                  const positiveValue = isNaN(value) ? 0 : Math.max(0, value)
+                  handleInputChange('amount', positiveValue)
                 }}
                 required
               />
@@ -95,12 +100,12 @@ const ExpenseOutRequisition = ({ handleClose, handleUpdated }) => {
               </label>
               <textarea
                 className={`form-control ${
-                  validFields.reason ? "is-valid" : ""
-                } ${validationErrors.reason ? "is-invalid" : ""}`}
+                  validFields.reason ? 'is-valid' : ''
+                } ${validationErrors.reason ? 'is-invalid' : ''}`}
                 id="reason"
                 placeholder="Enter Reason"
                 value={formData.reason}
-                onChange={(e) => handleInputChange("reason", e.target.value)}
+                onChange={(e) => handleInputChange('reason', e.target.value)}
                 required
                 rows="2"
                 maxLength="250"
@@ -125,7 +130,7 @@ const ExpenseOutRequisition = ({ handleClose, handleUpdated }) => {
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Requesting..." />
             ) : (
-              "Request"
+              'Request'
             )}
           </button>
           <button
@@ -139,7 +144,7 @@ const ExpenseOutRequisition = ({ handleClose, handleUpdated }) => {
         </div>
       </form>
     </div>
-  );
+  )
 };
 
 export default ExpenseOutRequisition;
