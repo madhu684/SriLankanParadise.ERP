@@ -1,14 +1,17 @@
-import React, { useEffect } from "react";
-import useUserRoleUpdate from "./useUserRoleUpdate";
-import CurrentDateTime from "../../currentDateTime/currentDateTime";
-import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
+import React from "react";
+import useUnit from "./useSystemPrivilage";
+import { useNavigate } from "react-router-dom";
+import CurrentDateTime from "../currentDateTime/currentDateTime";
+import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
+import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
 
-const UserRoleUpdate = ({ handleClose, role, handleUpdated }) => {
+const SystemPrivilege = ({ handleClose, handleUpdated }) => {
+  const navigate = useNavigate();
   const {
     formData,
-    submissionStatus,
     validFields,
     validationErrors,
+    submissionStatus,
     alertRef,
     loading,
     isLoading,
@@ -16,17 +19,18 @@ const UserRoleUpdate = ({ handleClose, role, handleUpdated }) => {
     systemModules,
     handleInputChange,
     handleSubmit,
-  } = useUserRoleUpdate({
-    role,
+    //handleClose,
+  } = useUnit({
     onFormSubmit: () => {
-      handleClose();
-      handleUpdated();
+      if (handleUpdated) handleUpdated();
+      if (handleClose) handleClose();
+    },
+    onClose: () => {
+      navigate(-1);
     },
   });
 
-  useEffect(() => {
-    console.log("Role prop received in UserRoleUpdate:", role);
-  }, [role]);
+  const companyLogoUrl = useCompanyLogoUrl();
 
   return (
     <div className="container mt-4">
@@ -34,61 +38,60 @@ const UserRoleUpdate = ({ handleClose, role, handleUpdated }) => {
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <i
-            class="bi bi-arrow-left-square fs-3"
-            style={{ cursor: "pointer" }}
-            onClick={handleClose}
-          />
+          <img src={companyLogoUrl} alt="Company Logo" height={30} />
           <p>
             {" "}
             <CurrentDateTime />
           </p>
         </div>
-        <h1 className="mt-2 text-center">User Role Update</h1>
+        <h1 className="mt-2 text-center">System Privilege</h1>
         <hr />
       </div>
 
       {/* Display success or error messages */}
       {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
-          User role updated successfully!
+          System privilege created successfully!
         </div>
       )}
       {submissionStatus === "successSavedAsDraft" && (
         <div className="alert alert-success mb-3" role="alert">
-          User role updated as inactive, you can edit and active it later!
+          System privilege created as inactive, you can edit and active it
+          later!
         </div>
       )}
       {submissionStatus === "error" && (
         <div className="alert alert-danger mb-3" role="alert">
-          Error updating user role. Please try again.
+          Error creating system privilege. Please try again.
         </div>
       )}
 
       <form>
-        {/* Role Information */}
+        {/* Permission Information */}
         <div className="row mb-3">
           <div className="col-md-6">
-            <h4>Role Information</h4>
+            <h4>System Privilege Information</h4>
 
             <div className="mb-3 mt-3">
-              <label htmlFor="roleName" className="form-label">
-                Role Name
+              <label htmlFor="permissionName" className="form-label">
+                Permission Name
               </label>
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.roleName ? "is-valid" : ""
-                } ${validationErrors.roleName ? "is-invalid" : ""}`}
-                id="roleName"
-                placeholder="Enter Role Name"
-                value={formData.roleName}
-                onChange={(e) => handleInputChange("roleName", e.target.value)}
+                  validFields.permissionName ? "is-valid" : ""
+                } ${validationErrors.permissionName ? "is-invalid" : ""}`}
+                id="permissionName"
+                placeholder="Enter Permission Name"
+                value={formData.permissionName}
+                onChange={(e) =>
+                  handleInputChange("permissionName", e.target.value)
+                }
                 required
               />
-              {validationErrors.roleName && (
+              {validationErrors.permissionName && (
                 <div className="invalid-feedback">
-                  {validationErrors.roleName}
+                  {validationErrors.permissionName}
                 </div>
               )}
             </div>
@@ -109,7 +112,6 @@ const UserRoleUpdate = ({ handleClose, role, handleUpdated }) => {
                 required
               >
                 <option value="">Select system module</option>
-                {/* Assuming you have an array of system modules */}
                 {systemModules?.map((type) => (
                   <option
                     key={type.subscriptionModule.moduleId}
@@ -125,6 +127,7 @@ const UserRoleUpdate = ({ handleClose, role, handleUpdated }) => {
                 </div>
               )}
             </div>
+
             <div className="mb-3">
               <label htmlFor="status" className="form-label">
                 Status
@@ -134,8 +137,10 @@ const UserRoleUpdate = ({ handleClose, role, handleUpdated }) => {
                   validFields.status ? "is-valid" : ""
                 } ${validationErrors.status ? "is-invalid" : ""}`}
                 id="status"
-                value={formData.status}
-                onChange={(e) => handleInputChange("status", e.target.value)}
+                value={formData.permissionStatus}
+                onChange={(e) =>
+                  handleInputChange("permissionStatus", e.target.value)
+                }
                 required
               >
                 <option value="">Select Status</option>
@@ -160,15 +165,16 @@ const UserRoleUpdate = ({ handleClose, role, handleUpdated }) => {
             disabled={loading || submissionStatus !== null}
           >
             {loading && submissionStatus === null ? (
-              <ButtonLoadingSpinner text="Updating..." />
+              <ButtonLoadingSpinner text="Creating..." />
             ) : (
-              "Update"
+              "Create"
             )}
           </button>
           <button
             type="button"
             className="btn btn-danger"
             onClick={handleClose}
+            disabled={loading || submissionStatus !== null}
           >
             Cancel
           </button>
@@ -178,4 +184,4 @@ const UserRoleUpdate = ({ handleClose, role, handleUpdated }) => {
   );
 };
 
-export default UserRoleUpdate;
+export default SystemPrivilege;

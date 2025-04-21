@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import useLocationList from "./useLocationList";
-//import Location from "../location";
+import Location from "../location";
 import LocationUpdate from "../locationUpdate/locationUpdate";
 import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
@@ -66,14 +66,14 @@ const LocationList = () => {
     return <LoadingSpinner />;
   }
 
-  //   if (showCreateLocationForm) {
-  //     return (
-  //       <Location
-  //         handleClose={() => setShowCreateLocationForm(false)}
-  //         handleUpdated={handleUpdated}
-  //       />
-  //     );
-  //   }
+  if (showCreateLocationForm) {
+    return (
+      <Location
+        handleClose={() => setShowCreateLocationForm(false)}
+        handleUpdated={handleUpdated}
+      />
+    );
+  }
 
   if (showUpdateLocationForm) {
     return (
@@ -134,29 +134,6 @@ const LocationList = () => {
           </span>
         </div>
       </div>
-      {/* <div className="mt-3 d-flex justify-content-start align-items-center">
-        <div className="btn-group" role="group">
-          <button
-            type="button"
-            className="btn btn-primary me-2"
-            onClick={() => setShowCreateLocationForm(true)}
-          >
-            Create
-          </button>
-        </div>
-        <div className="input-group search-bar">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Search by location name"
-            value={searchTerm}
-            onChange={handleSearchChange}
-          />
-          <span className="input-group-text">
-            <FaSearch />
-          </span>
-        </div>
-      </div> */}
       <div className="table-responsive">
         <table className="table mt-2">
           <thead>

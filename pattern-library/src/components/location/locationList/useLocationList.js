@@ -85,6 +85,7 @@ const useLocationList = () => {
   const handleConfirmDeleteLocation = async () => {
     // try {
     //   setLoading(true);
+    //   //FIXME: No any end point for delete location in ERP
     //   const deleteResponse = await delete_company_location_api(
     //     locationDetail.locationId
     //   );

@@ -1270,6 +1270,17 @@ export const get_location_inventory_by_locationInvemtoryId_api = async (
   } catch (error) {}
 };
 
+export const post_comapny_location_api = async (locationData) => {
+  try {
+    const response = await api.post("/location", locationData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const put_company_location_api = async (locationId, locationData) => {
   try {
     const response = await api.put(`/location/${locationId}`, locationData, {
