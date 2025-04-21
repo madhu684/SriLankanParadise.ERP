@@ -135,6 +135,8 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<CompanySubscriptionModuleUser, CompanySubscriptionModuleUserDto>();
             CreateMap<SubscriptionModule, SubscriptionModuleDto>();
             CreateMap<SubItemMaster, SubItemMasterDto>();
+            CreateMap<UserGeoLocationRequestModel, UserGeoLocation>();
+            CreateMap<UserGeoLocation, UserGeoLocationDto>();
             // Add more mapping configurations if needed
         }
     }

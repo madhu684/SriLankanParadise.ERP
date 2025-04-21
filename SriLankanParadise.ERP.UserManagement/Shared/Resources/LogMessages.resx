@@ -885,4 +885,7 @@
   <data name="UserActivated" xml:space="preserve">
     <value>User Activated</value>
   </data>
+  <data name="UserGeoLocationsRetrieved" xml:space="preserve">
+    <value>User geo locations retrieved</value>
+  </data>
 </root>

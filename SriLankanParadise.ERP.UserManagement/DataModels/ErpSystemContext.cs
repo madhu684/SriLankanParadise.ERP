@@ -137,6 +137,8 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
+    public virtual DbSet<UserGeoLocation> UserGeoLocations { get; set; }
+
     public virtual DbSet<UserLocation> UserLocations { get; set; }
 
     public virtual DbSet<UserPermission> UserPermissions { get; set; }
@@ -1205,6 +1207,24 @@ public partial class ErpSystemContext : DbContext
             entity.HasOne(d => d.Location).WithMany(p => p.Users)
                 .HasForeignKey(d => d.LocationId)
                 .HasConstraintName("FK_User_Location");
+        });
+
+        modelBuilder.Entity<UserGeoLocation>(entity =>
+        {
+            entity.HasKey(e => e.GeoLocationId).HasName("PK__UserGeoL__81B966A30BB71539");
+
+            entity.ToTable("UserGeoLocation");
+
+            entity.Property(e => e.GeoDate).HasColumnType("date");
+            entity.Property(e => e.CapturedTime).HasColumnType("datetime");
+            entity.Property(e => e.CreatedAt).HasColumnType("datetime");
+            entity.Property(e => e.UpdatedAt).HasColumnType("datetime");
+            entity.Property(e => e.Latitude).HasColumnType("decimal(9,6)");
+            entity.Property(e => e.Longitude).HasColumnType("decimal(9,6)");
+
+            entity.HasOne(d => d.User).WithMany(p => p.UserGeoLocations)
+                .HasForeignKey(d => d.UserProfileId)
+                .HasConstraintName("FK_UserGeoLocation_User");   
         });
 
         modelBuilder.Entity<UserLocation>(entity =>

@@ -2221,6 +2221,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to User geo locations retrieved.
+        /// </summary>
+        public static string UserGeoLocationsRetrieved {
+            get {
+                return ResourceManager.GetString("UserGeoLocationsRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to User location created successfully.
         /// </summary>
         public static string UserLocationCreated {
