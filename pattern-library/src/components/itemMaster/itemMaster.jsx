@@ -52,10 +52,7 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
     },
   })
 
-  const companyLogoUrl = useCompanyLogoUrl()
-  const handleBack = () => {
-    setShowCreateIMForm(false)
-  }
+  //const companyLogoUrl = useCompanyLogoUrl()
 
   if (isLoading) {
     return <LoadingSpinner />
@@ -71,12 +68,11 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <button
-            onClick={handleBack}
-            className="btn btn-dark d-flex align-items-center"
-          >
-            Back
-          </button>
+          <i
+            class="bi bi-arrow-left"
+            onClick={handleClose}
+            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+          ></i>
           <p>
             {' '}
             <CurrentDateTime />

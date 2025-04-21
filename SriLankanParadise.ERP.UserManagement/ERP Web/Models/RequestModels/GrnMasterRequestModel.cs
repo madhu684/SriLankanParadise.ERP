@@ -4,6 +4,10 @@
     {
         public int? PurchaseOrderId { get; set; }
 
+        public int? PurchaseRequisitionId { get; set; }
+
+        public int? SupplierId { get; set; }
+
         public DateTime? GrnDate { get; set; }
 
         public string? ReceivedBy { get; set; }

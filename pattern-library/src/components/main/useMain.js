@@ -26,6 +26,7 @@ import LocationList from "../location/locationList/locationList.jsx";
 import StockManagement from "../stockManagement/stockManagement.jsx";
 import InventoryAnalysisReport from "../inventoryAnalysisReport/InventoryAnalysisReport.jsx";
 import InventoryAnalysisAsAtDateReport from "../inventoryAnalysisReportAsAtDateReport/InventoryAnalysisAsAtDateReport.jsx";
+import PackingSlipList from "../packingSlip/packingSlipList/packingSlipList.jsx";
 import SupplierReturnList from "../supplierReturn/supplierReturnList/supplierReturnList.jsx";
 
 const useMain = () => {
@@ -133,10 +134,12 @@ const useMain = () => {
         return <LocationList />;
       case "Stock Management":
         return <StockManagement />;
-      // case "Inventory Analysis Report":
-      //   return <InventoryAnalysisReport />;
-      // case "Inventory As At Date Report":
-      //   return <InventoryAnalysisAsAtDateReport />;
+      case "Inventory Analysis Report":
+        return <InventoryAnalysisReport />;
+      case "Inventory As At Date Report":
+        return <InventoryAnalysisAsAtDateReport />;
+      case "Packing Slip":
+        return <PackingSlipList />;
       case "Supplier Return":
         return <SupplierReturnList />;
       default:

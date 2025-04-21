@@ -56,6 +56,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(ib => ib.ItemMaster)
                     .ThenInclude(im => im.Unit)
                     .Include(si => si.SalesOrder)
+                    .ThenInclude(so => so.SalesOrderDetails)
                     .ToListAsync();
 
                 return salesInvoices.Any() ? salesInvoices : null;

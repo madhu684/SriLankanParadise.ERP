@@ -21,7 +21,7 @@ public partial class GrnDetail
 
     public int? FreeQuantity { get; set; }
 
-    public DateTime? ExpiryDate { get; set; }
+    public string? ItemBarcode { get; set; }
 
     public virtual GrnMaster GrnMaster { get; set; } = null!;
 

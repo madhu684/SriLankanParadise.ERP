@@ -1184,6 +1184,96 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Packing slip approved.
+        /// </summary>
+        public static string PackingSlipApproved {
+            get {
+                return ResourceManager.GetString("PackingSlipApproved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Packing slip created successfully. .
+        /// </summary>
+        public static string PackingSlipCreated {
+            get {
+                return ResourceManager.GetString("PackingSlipCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Packing slip detail created successfully..
+        /// </summary>
+        public static string PackingSlipDetailCreated {
+            get {
+                return ResourceManager.GetString("PackingSlipDetailCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Packing slip detail deleted.
+        /// </summary>
+        public static string PackingSlipDetailDeleted {
+            get {
+                return ResourceManager.GetString("PackingSlipDetailDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Packing slip detail not found.
+        /// </summary>
+        public static string PackingSlipDetailNotFound {
+            get {
+                return ResourceManager.GetString("PackingSlipDetailNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Packing slip detail retrieved.
+        /// </summary>
+        public static string PackingSlipDetailRetrieved {
+            get {
+                return ResourceManager.GetString("PackingSlipDetailRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Packing slip detail updated.
+        /// </summary>
+        public static string PackingSlipDetailUpdated {
+            get {
+                return ResourceManager.GetString("PackingSlipDetailUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Packing slip not found.
+        /// </summary>
+        public static string PackingSlipNotFound {
+            get {
+                return ResourceManager.GetString("PackingSlipNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Packing slip retrieved successfully. .
+        /// </summary>
+        public static string PackingSlipRetrieved {
+            get {
+                return ResourceManager.GetString("PackingSlipRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Packing slip updated.
+        /// </summary>
+        public static string PackingSlipUpdated {
+            get {
+                return ResourceManager.GetString("PackingSlipUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Payment mode created successfully.
         /// </summary>
         public static string PaymentModeCreated {

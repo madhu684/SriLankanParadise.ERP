@@ -4,7 +4,11 @@ import CurrentDateTime from "../currentDateTime/currentDateTime";
 import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
 
-const Category = ({ handleClose, handleUpdated }) => {
+const Category = ({
+  handleClose,
+  handleUpdated,
+  setShowCreateCategoryForm,
+}) => {
   const {
     formData,
     validFields,
@@ -16,22 +20,27 @@ const Category = ({ handleClose, handleUpdated }) => {
     handleSubmit,
   } = useCategory({
     onFormSubmit: () => {
-      handleClose();
-      handleUpdated();
+      handleClose()
+      handleUpdated()
     },
-  });
+  })
 
-  const companyLogoUrl = useCompanyLogoUrl();
-
+  //const companyLogoUrl = useCompanyLogoUrl()
+  
   return (
     <div className="container mt-4">
       {/* Header */}
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img src={companyLogoUrl} alt="Company Logo" height={30} />
+          {/* <img src={companyLogoUrl} alt="Company Logo" height={30} /> */}
+          <i
+            class="bi bi-arrow-left"
+            onClick={handleClose}
+            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+          ></i>
           <p>
-            {" "}
+            {' '}
             <CurrentDateTime />
           </p>
         </div>
@@ -40,17 +49,17 @@ const Category = ({ handleClose, handleUpdated }) => {
       </div>
 
       {/* Display success or error messages */}
-      {submissionStatus === "successSubmitted" && (
+      {submissionStatus === 'successSubmitted' && (
         <div className="alert alert-success mb-3" role="alert">
           Category created successfully!
         </div>
       )}
-      {submissionStatus === "successSavedAsDraft" && (
+      {submissionStatus === 'successSavedAsDraft' && (
         <div className="alert alert-success mb-3" role="alert">
           Category created as inactive, you can edit and active it later!
         </div>
       )}
-      {submissionStatus === "error" && (
+      {submissionStatus === 'error' && (
         <div className="alert alert-danger mb-3" role="alert">
           Error creating category. Please try again.
         </div>
@@ -69,13 +78,13 @@ const Category = ({ handleClose, handleUpdated }) => {
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.categoryName ? "is-valid" : ""
-                } ${validationErrors.categoryName ? "is-invalid" : ""}`}
+                  validFields.categoryName ? 'is-valid' : ''
+                } ${validationErrors.categoryName ? 'is-invalid' : ''}`}
                 id="categoryName"
                 placeholder="Enter Category Name"
                 value={formData.categoryName}
                 onChange={(e) =>
-                  handleInputChange("categoryName", e.target.value)
+                  handleInputChange('categoryName', e.target.value)
                 }
                 required
               />
@@ -92,11 +101,11 @@ const Category = ({ handleClose, handleUpdated }) => {
               </label>
               <select
                 className={`form-select ${
-                  validFields.status ? "is-valid" : ""
-                } ${validationErrors.status ? "is-invalid" : ""}`}
+                  validFields.status ? 'is-valid' : ''
+                } ${validationErrors.status ? 'is-invalid' : ''}`}
                 id="status"
                 value={formData.status}
-                onChange={(e) => handleInputChange("status", e.target.value)}
+                onChange={(e) => handleInputChange('status', e.target.value)}
                 required
               >
                 <option value="">Select Status</option>
@@ -123,7 +132,7 @@ const Category = ({ handleClose, handleUpdated }) => {
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Creating..." />
             ) : (
-              "Create"
+              'Create'
             )}
           </button>
           <button
@@ -137,7 +146,7 @@ const Category = ({ handleClose, handleUpdated }) => {
         </div>
       </form>
     </div>
-  );
-};
+  )
+}
 
 export default Category;

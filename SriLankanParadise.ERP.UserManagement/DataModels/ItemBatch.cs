@@ -48,4 +48,6 @@ public partial class ItemBatch
     public virtual ICollection<SalesInvoiceDetail> SalesInvoiceDetails { get; set; } = new List<SalesInvoiceDetail>();
 
     public virtual ICollection<SalesOrderDetail> SalesOrderDetails { get; set; } = new List<SalesOrderDetail>();
+
+    public virtual ICollection<PackingSlipDetail> PackingSlipDetails { get; set; } = new List<PackingSlipDetail>();
 }

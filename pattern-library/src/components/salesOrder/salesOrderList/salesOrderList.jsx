@@ -65,7 +65,6 @@ const SalesOrderList = () => {
       <SalesOrder
         handleClose={() => setShowCreateSOForm(false)}
         handleUpdated={handleUpdated}
-        setShowCreateSOForm={setShowCreateSOForm}
       />
     );
   }
