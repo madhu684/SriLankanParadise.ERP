@@ -361,6 +361,152 @@ export const delete_sales_invoice_detail_api = async (salesInvoiceDetailId) => {
   }
 }
 
+//packing slips apis
+
+export const get_packing_slips_details_by_packing_slip_id = async (
+  packingSlipId
+) => {
+  try {
+    const response = await api.get(
+      `/packingSlipDetail/GetPackingSlipDetailsByPackingSlipId/${packingSlipId}`,
+      {
+        withCredentials: true,
+      }
+    )
+    return response.data
+  } catch (error) {
+    console.log(error)
+    throw error
+  }
+}
+
+export const post_packing_slip_api = async (formData) => {
+  try {
+    const response = await api.post('/packingSlip', formData, {
+      withCredentials: true,
+    })
+    return response.data
+  } catch (error) {
+    console.log(error)
+    throw error
+  }
+}
+
+export const post_packing_slip_detail_api = async (formData) => {
+  try {
+    const response = await api.post('/packingSlipDetail', formData, {
+      withCredentials: true,
+    })
+    return response.data
+  } catch (error) {
+    console.log(error)
+    throw error
+  }
+}
+
+export const get_packing_slips_api = async () => {
+  try {
+    const response = await api.get('/packingSlip')
+    return response.data
+  } catch (error) {
+    console.log(error)
+    throw error
+  }
+}
+
+export const get_packing_slips_with_out_drafts_api = async (companyId) => {
+  try {
+    const response = await api.get(
+      `/packingSlip/GetPackingSlipsWithoutDraftsByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    )
+    return response.data
+  } catch (error) {
+    console.log(error)
+    throw error
+  }
+}
+
+export const get_packing_slips_by_user_id_api = async (userId) => {
+  try {
+    const response = await api.get(
+      `/packingSlip/GetPackingSlipsByUserId/${userId}`,
+      {
+        withCredentials: true,
+      }
+    )
+    return response.data
+  } catch (error) {
+    console.log(error)
+    throw error
+  }
+}
+
+export const put_packing_slip_detail_api = async (
+  packingSlipDetailId,
+  packingSlipDetailData
+) => {
+  try {
+    const response = await api.put(
+      `/packingSlipDetail/${packingSlipDetailId}`,
+      packingSlipDetailData,
+      {
+        withCredentials: true,
+      }
+    )
+    return response.data
+  } catch (error) {
+    throw error
+  }
+}
+
+export const approve_packing_slip_api = async (packingSlipId, approvalData) => {
+  try {
+    const response = await api.patch(
+      `/packingSlip/approve/${packingSlipId}`,
+      approvalData,
+      {
+        withCredentials: true,
+      }
+    )
+    return response.data
+  } catch (error) {
+    throw error
+  }
+}
+
+export const put_packing_slip_api = async (packingSlipId, packingSlipData) => {
+  try {
+    const response = await api.put(
+      `/packingSlip/${packingSlipId}`,
+      packingSlipData,
+      {
+        withCredentials: true,
+      }
+    )
+    return response.data
+  } catch (error) {
+    throw error
+  }
+}
+
+export const delete_packing_slip_detail_api = async (packingSlipDetailId) => {
+  try {
+    const response = await api.delete(
+      `/packingSlipDetail/${packingSlipDetailId}`,
+      {
+        withCredentials: true,
+      }
+    )
+    return response.data
+  } catch (error) {
+    throw error
+  }
+}
+
+
 //payment modes api
 export const get_payment_modes_api = async (companyId) => {
   try {

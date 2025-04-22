@@ -24,7 +24,7 @@ const Unit = ({ handleClose, handleUpdated }) => {
     },
   });
 
-  const companyLogoUrl = useCompanyLogoUrl();
+  //const companyLogoUrl = useCompanyLogoUrl();
 
   return (
     <div className="container mt-4">
@@ -32,9 +32,14 @@ const Unit = ({ handleClose, handleUpdated }) => {
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img src={companyLogoUrl} alt="Company Logo" height={30} />
+          {/* <img src={companyLogoUrl} alt="Company Logo" height={30} /> */}
+          <i
+            class="bi bi-arrow-left"
+            onClick={handleClose}
+            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+          ></i>
           <p>
-            {" "}
+            {' '}
             <CurrentDateTime />
           </p>
         </div>
@@ -43,17 +48,17 @@ const Unit = ({ handleClose, handleUpdated }) => {
       </div>
 
       {/* Display success or error messages */}
-      {submissionStatus === "successSubmitted" && (
+      {submissionStatus === 'successSubmitted' && (
         <div className="alert alert-success mb-3" role="alert">
           Unit created successfully!
         </div>
       )}
-      {submissionStatus === "successSavedAsDraft" && (
+      {submissionStatus === 'successSavedAsDraft' && (
         <div className="alert alert-success mb-3" role="alert">
           Unit created as inactive, you can edit and active it later!
         </div>
       )}
-      {submissionStatus === "error" && (
+      {submissionStatus === 'error' && (
         <div className="alert alert-danger mb-3" role="alert">
           Error creating unit. Please try again.
         </div>
@@ -72,12 +77,12 @@ const Unit = ({ handleClose, handleUpdated }) => {
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.unitName ? "is-valid" : ""
-                } ${validationErrors.unitName ? "is-invalid" : ""}`}
+                  validFields.unitName ? 'is-valid' : ''
+                } ${validationErrors.unitName ? 'is-invalid' : ''}`}
                 id="unitName"
                 placeholder="Enter Unit Name, ex:- Meter (m)"
                 value={formData.unitName}
-                onChange={(e) => handleInputChange("unitName", e.target.value)}
+                onChange={(e) => handleInputChange('unitName', e.target.value)}
                 required
               />
               {validationErrors.unitName && (
@@ -93,12 +98,12 @@ const Unit = ({ handleClose, handleUpdated }) => {
               </label>
               <select
                 className={`form-select ${
-                  validFields.measurementType ? "is-valid" : ""
-                } ${validationErrors.measurementType ? "is-invalid" : ""}`}
+                  validFields.measurementType ? 'is-valid' : ''
+                } ${validationErrors.measurementType ? 'is-invalid' : ''}`}
                 id="measurementType"
                 value={formData.measurementType}
                 onChange={(e) =>
-                  handleInputChange("measurementType", e.target.value)
+                  handleInputChange('measurementType', e.target.value)
                 }
                 required
               >
@@ -126,11 +131,11 @@ const Unit = ({ handleClose, handleUpdated }) => {
               </label>
               <select
                 className={`form-select ${
-                  validFields.status ? "is-valid" : ""
-                } ${validationErrors.status ? "is-invalid" : ""}`}
+                  validFields.status ? 'is-valid' : ''
+                } ${validationErrors.status ? 'is-invalid' : ''}`}
                 id="status"
                 value={formData.status}
-                onChange={(e) => handleInputChange("status", e.target.value)}
+                onChange={(e) => handleInputChange('status', e.target.value)}
                 required
               >
                 <option value="">Select Status</option>
@@ -157,7 +162,7 @@ const Unit = ({ handleClose, handleUpdated }) => {
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Creating..." />
             ) : (
-              "Create"
+              'Create'
             )}
           </button>
           <button
@@ -171,7 +176,7 @@ const Unit = ({ handleClose, handleUpdated }) => {
         </div>
       </form>
     </div>
-  );
+  )
 };
 
 export default Unit;

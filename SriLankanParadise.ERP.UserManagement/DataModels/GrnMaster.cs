@@ -17,6 +17,10 @@ public partial class GrnMaster
 
     public int? PurchaseOrderId { get; set; }
 
+    public int? PurchaseRequisitionId { get; set; }
+
+    public int? SupplierId { get; set; }
+
     public int? CompanyId { get; set; }
 
     public int? ReceivedUserId { get; set; }
