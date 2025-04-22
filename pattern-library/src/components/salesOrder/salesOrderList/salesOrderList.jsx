@@ -66,7 +66,7 @@ const SalesOrderList = () => {
         handleClose={() => setShowCreateSOForm(false)}
         handleUpdated={handleUpdated}
       />
-    )
+    );
   }
 
   if (showUpdateSOForm) {

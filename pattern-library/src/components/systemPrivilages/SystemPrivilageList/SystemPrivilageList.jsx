@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useSystemPrivilegeList from "./useSystemPrivilageList";
-//import SystemPrivilege from "../systemPrivilege";
-//import SystemPrivilegeUpdate from "../systemPrivilegeUpdate/systemPrivilegeUpdate";
+import SystemPrivilege from "../systemPrivilage";
+import SystemPrivilegeUpdate from "../SystemPrivilageUpdate/systemPrivilegeUpdate";
 import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
 import DeleteConfirmationModal from "../../confirmationModals/deleteConfirmationModal/deleteConfirmationModal";
@@ -46,15 +46,15 @@ const SystemPrivilegeList = () => {
 
   useEffect(() => {
     if (submissionStatus) {
-      setShowMessage(true); // Show message when submissionStatus changes
+      setShowMessage(true);
 
       const timer = setTimeout(() => {
-        setShowMessage(false); // Hide message after 3 seconds
+        setShowMessage(false);
       }, 3000);
 
-      return () => clearTimeout(timer); // Cleanup timer on component unmount or when submissionStatus changes
+      return () => clearTimeout(timer);
     }
-  }, [submissionStatus]); // Run effect when submissionStatus changes
+  }, [submissionStatus]);
 
   const filteredPermissions = permissions.filter((p) =>
     p.permissionName.toLowerCase().includes(searchTerm.toLowerCase())
@@ -75,24 +75,24 @@ const SystemPrivilegeList = () => {
   if (error) return <ErrorComponent error={error} />;
   if (isLoadingData) return <LoadingSpinner />;
 
-  //   if (showCreatePermissionForm) {
-  //     return (
-  //       <SystemPrivilege
-  //         handleClose={() => setShowCreatePermissionForm(false)}
-  //         handleUpdated={handleUpdated}
-  //       />
-  //     );
-  //   }
+  if (showCreatePermissionForm) {
+    return (
+      <SystemPrivilege
+        handleClose={() => setShowCreatePermissionForm(false)}
+        handleUpdated={handleUpdated}
+      />
+    );
+  }
 
-  //   if (showUpdatePermissionForm) {
-  //     return (
-  //       <SystemPrivilegeUpdate
-  //         handleClose={handleClose}
-  //         permission={permissionDetail || selectedRowData[0]}
-  //         handleUpdated={handleUpdated}
-  //       />
-  //     );
-  //   }
+  if (showUpdatePermissionForm) {
+    return (
+      <SystemPrivilegeUpdate
+        handleClose={handleClose}
+        permission={permissionDetail || selectedRowData[0]}
+        handleUpdated={handleUpdated}
+      />
+    );
+  }
 
   if (permissions.length === 0) {
     return (
@@ -130,7 +130,7 @@ const SystemPrivilegeList = () => {
           <button
             type="button"
             className="btn bg-primary text-white"
-            onClick={() => navigate('/systemPrivileges/create')}
+            onClick={() => setShowCreatePermissionForm(true)}
           >
             Create
           </button>

@@ -7,6 +7,7 @@
         public int? PurchaseRequisitionId { get; set; }
 
         public int? SupplierId { get; set; }
+        public int? SupplyReturnMasterId { get; set; }
 
         public DateTime? GrnDate { get; set; }
 

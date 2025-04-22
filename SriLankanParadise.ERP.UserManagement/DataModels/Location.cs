@@ -50,4 +50,6 @@ public partial class Location
     public virtual ICollection<UserLocation> UserLocations { get; set; } = new List<UserLocation>();
 
     public virtual ICollection<User> Users { get; set; } = new List<User>();
+
+    public virtual ICollection<DailyLocationInventory> DailyLocationInventories { get; set; } = new List<DailyLocationInventory>();
 }

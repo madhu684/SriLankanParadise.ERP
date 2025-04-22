@@ -194,6 +194,56 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpGet("ByDateRangeAndTransactionType/{fromDate}/{toDate}/{movementTypeId}/{transactionTypeId}")]
+        public async Task<ApiResponseModel> ByDateRangeAndTransactionType(DateTime fromDate, DateTime toDate, int movementTypeId, int transactionTypeId)
+        {
+            try
+            {
+                var locationInventoryMovements = await _locationInventoryMovementService.ByDateRangeAndTransactionType(fromDate, toDate, movementTypeId, transactionTypeId);
+
+                if (locationInventoryMovements != null)
+                {
+                    var locationInventoryMovementsDto = _mapper.Map<IEnumerable<LocationInventoryMovementDto>>(locationInventoryMovements);
+                    return AddResponseMessage(Response, LogMessages.LocationInventoryMovementsRetrieved, locationInventoryMovementsDto, true, HttpStatusCode.OK);
+                }
+
+                locationInventoryMovements = new List<LocationInventoryMovement>();
+                _logger.LogInformation(LogMessages.LocationInventoryMovementNotFound);
+                return AddResponseMessage(Response, LogMessages.LocationInventoryMovementNotFound, locationInventoryMovements, true, HttpStatusCode.NotFound);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("ByDateRangeLocationIdMovementTypeId/{fromDate}/{toDate}/{locationId}/{movementTypeId}")]
+        public async Task<ApiResponseModel> ByDateRangeLocationIdMovementTypeId(DateTime fromDate, DateTime toDate, int locationId, int movementTypeId)
+        {
+            try
+            {
+                var locationInventoryMovements = await _locationInventoryMovementService.ByDateRangeLocationIdMovementTypeId(fromDate, toDate, locationId, movementTypeId);
+
+                if (locationInventoryMovements != null)
+                {
+                    var locationInventoryMovementsDto = _mapper.Map<IEnumerable<LocationInventoryMovementDto>>(locationInventoryMovements);
+                    return AddResponseMessage(Response, LogMessages.LocationInventoryMovementsRetrieved, locationInventoryMovementsDto, true, HttpStatusCode.OK);
+                }
+
+                locationInventoryMovements = new List<LocationInventoryMovement>();
+                _logger.LogInformation(LogMessages.LocationInventoryMovementNotFound);
+                return AddResponseMessage(Response, LogMessages.LocationInventoryMovementNotFound, locationInventoryMovements, true, HttpStatusCode.NotFound);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
 
         [HttpPut("{locationInventoryMovementId}")]
         public async Task<ApiResponseModel> UpdateLocationInventoryMovement(int locationInventoryMovementId, LocationInventoryMovementRequestModel locationInventoryMovementRequest)

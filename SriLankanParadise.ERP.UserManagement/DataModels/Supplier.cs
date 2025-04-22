@@ -60,4 +60,6 @@ public partial class Supplier
     public virtual ICollection<SupplierAttachment> SupplierAttachments { get; set; } = new List<SupplierAttachment>();
 
     public virtual ICollection<SupplierCategory> SupplierCategories { get; set; } = new List<SupplierCategory>();
+
+    public virtual ICollection<SupplyReturnMaster> SupplyReturnMasters { get; set; } = new List<SupplyReturnMaster>();
 }

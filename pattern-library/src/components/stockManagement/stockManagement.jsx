@@ -137,8 +137,8 @@ const StockManagement = () => {
                 <th>Item Name</th>
                 <th>UOM</th>
                 <th>Stock in Hand</th>
-                <th>Lot No</th>
-                <th>Adjusted Volume</th>
+                <th>Batch Number</th>
+                <th>Adjusted Quantity</th>
               </tr>
             </thead>
             <tbody>

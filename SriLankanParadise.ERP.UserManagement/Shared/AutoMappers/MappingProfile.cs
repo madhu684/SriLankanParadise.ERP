@@ -140,6 +140,11 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<PackingSlipDetailRequestModel, PackingSlipDetail>();
             CreateMap<PackingSlipDetail, PackingSlipDetailDto>();
             CreateMap<ApprovePackingSlipRequestModel, PackingSlip>();
+            CreateMap<SupplyReturnMasterRequestModel, SupplyReturnMaster>();
+            CreateMap<SupplyReturnMaster, SupplyReturnMasterDto>();
+            CreateMap<ApproveSupplyReturnMasterRequsetModel, SupplyReturnMaster>();
+            CreateMap<SupplyReturnDetailRequestModel, SupplyReturnDetail>();
+            CreateMap<SupplyReturnDetail, SupplyReturnDetailDto>();
             CreateMap<UserGeoLocationRequestModel, UserGeoLocation>();
             CreateMap<UserGeoLocation, UserGeoLocationDto>();
             CreateMap<LeadRequestModel, Lead>();

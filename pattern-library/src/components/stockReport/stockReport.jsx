@@ -5,42 +5,40 @@ import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonL
 import LoadingSpinner from "../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../errorComponent/errorComponent";
 import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
+import Pagination from "../common/Pagination/Pagination";
 
 const StockReport = () => {
   const {
-    loading,
+    companyLocations,
+    isCompanyLocationsLoading,
+    isCompanyLocationsError,
+    companyLocationsError,
     startDate,
     endDate,
     reportData,
-    companyLocations,
+    isLoading,
+    selectedLoction,
+    currentItems,
+    itemsPerPage,
+    currentPage,
+    filteredData,
     searchTerm,
-    generatedDateTime,
-    isReportGenerated,
-    isitemMastersError,
-    isItemBatchesError,
-    isGrnMastersError,
-    isIssueMastersError,
-    isSalesOrdersError,
-    isSalesInvoicesError,
-    setStartDate,
-    setEndDate,
-    handleGenerateReport,
-    setSearchTerm,
-    getCurrentDate,
-    getFilteredData,
+    handleStartDateChange,
+    handleEndDateChange,
+    handleLocationChange,
+    handleSearch,
+    paginate,
+    handleSearchChange,
   } = useStockReport();
 
   //const companyLogoUrl = useCompanyLogoUrl();
   console.log("reportData", reportData);
-  if (
-    isitemMastersError ||
-    isItemBatchesError ||
-    isGrnMastersError ||
-    isIssueMastersError ||
-    isSalesOrdersError ||
-    isSalesInvoicesError
-  ) {
-    return <ErrorComponent error={"Error fetching data"} />;
+  if (isCompanyLocationsError) {
+    return (
+      <ErrorComponent
+        error={"Error fetching locations" || companyLocationsError}
+      />
+    );
   }
 
   return (
@@ -69,9 +67,8 @@ const StockReport = () => {
               id="startDate"
               type="date"
               className="form-control"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              max={getCurrentDate()}
+              //value={startDate}
+              onChange={handleStartDateChange}
             />
           </div>
           <div className="col-md-2">
@@ -82,10 +79,8 @@ const StockReport = () => {
               id="endDate"
               type="date"
               className="form-control"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              max={getCurrentDate()}
-              min={startDate}
+              //value={endDate}
+              onChange={handleEndDateChange}
             />
           </div>
           <div className="col-md-3">
@@ -95,10 +90,10 @@ const StockReport = () => {
             <select
               className="form-select"
               id="warehouse"
-              //onChange={handleLocationChange}
+              onChange={handleLocationChange}
             >
               <option value="" disabled selected>
-                All Warehouses
+                Select a warehouse
               </option>
               {companyLocations && companyLocations.length > 0 ? (
                 companyLocations
@@ -116,22 +111,19 @@ const StockReport = () => {
           <div className="col-md-2 d-flex align-items-end">
             <button
               className="btn btn-primary w-100"
-              onClick={handleGenerateReport}
-              disabled={loading || isReportGenerated}
+              onClick={handleSearch}
+              disabled={
+                isLoading ||
+                isCompanyLocationsLoading ||
+                !selectedLoction ||
+                !startDate ||
+                !endDate
+              }
             >
-              {loading ? (
+              {isLoading ? (
                 <ButtonLoadingSpinner text="Processing..." />
               ) : (
-                <>
-                  <i
-                    className={`bi ${
-                      isReportGenerated
-                        ? "bi bi-check-circle"
-                        : "bi-file-earmark-text"
-                    } me-2`}
-                  ></i>
-                  {isReportGenerated ? "Report Generated" : "Generate Report"}
-                </>
+                "Search"
               )}
             </button>
           </div>
@@ -139,7 +131,7 @@ const StockReport = () => {
       </div>
 
       {/* Report Table */}
-      {loading ? (
+      {isLoading ? (
         <LoadingSpinner />
       ) : (
         <>
@@ -156,13 +148,13 @@ const StockReport = () => {
                   className="form-control"
                   placeholder="Search for an item..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={handleSearchChange}
                 />
                 {searchTerm && (
                   <span
                     className="input-group-text bg-transparent"
                     style={{ cursor: "pointer" }}
-                    onClick={() => setSearchTerm("")}
+                    onClick={handleSearchChange}
                   >
                     <i className="bi bi-x"></i>
                   </span>
@@ -176,7 +168,7 @@ const StockReport = () => {
             </div>
           </div>
 
-          {getFilteredData()?.length > 0 ? (
+          {currentItems && currentItems.length > 0 ? (
             <div className="table-responsive mb-2">
               <table
                 className="table"
@@ -185,7 +177,8 @@ const StockReport = () => {
                 <thead>
                   <tr>
                     <th>Item Name</th>
-                    <th>Code</th>
+                    <th>Item Code</th>
+                    <th>Batch Number</th>
                     <th>Unit</th>
                     <th>Opening Qty</th>
                     <th>
@@ -194,50 +187,34 @@ const StockReport = () => {
                     <th>
                       <i className="bi bi-arrow-up"></i> Out
                     </th>
-                    <th>Current Qty</th>
+                    <th>Cloding Balance</th>
                     <th>Reorder Level</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {reportData
-                    ?.filter(
-                      (item) =>
-                        item?.itemName
-                          ?.toLowerCase()
-                          .replace(/\s+/g, "")
-                          ?.includes(
-                            searchTerm.toLowerCase().replace(/\s+/g, "")
-                          ) ||
-                        item?.itemCode
-                          ?.toLowerCase()
-                          .replace(/\s+/g, "")
-                          ?.includes(
-                            searchTerm.toLowerCase().replace(/\s+/g, "")
-                          )
-                    )
-                    ?.map((item) => (
-                      <tr
-                        key={item.itemMasterId}
-                        className={
-                          item.currentQty < item.reorderLevel
-                            ? "table-warning"
-                            : ""
-                        }
-                      >
-                        <td>{item?.itemName}</td>
-                        <td>{item?.itemCode}</td>
-                        <td>{item?.unit?.unitName}</td>
-                        <td>{item?.currentQty - item?.in + item?.out}</td>
-                        <td>{item?.in}</td>
-                        <td>{item?.out}</td>
-                        <td>{item?.currentQty}</td>
-                        <td>{item?.reorderLevel}</td>
-                      </tr>
-                    ))}
+                  {currentItems.map((item) => (
+                    <tr
+                      className={
+                        item.closingBalance < item.reorderLevel
+                          ? "table-warning"
+                          : ""
+                      }
+                    >
+                      <td>{item.itemName}</td>
+                      <td>{item.itemCode}</td>
+                      <td>{item.batchNumber}</td>
+                      <td>{item.unitName}</td>
+                      <td>{item.openingBalance}</td>
+                      <td className="fw-bold">{item.totalIn}</td>
+                      <td className="text-danger fw-bold">{item.totalOut}</td>
+                      <td>{item.closingBalance}</td>
+                      <td>{item.reorderLevel}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
               <small className="text-muted">
-                *Items with a current quantity below the reorder level are
+                *Items with a closing balance below the reorder level are
                 highlighted.
               </small>
             </div>
@@ -246,17 +223,33 @@ const StockReport = () => {
               <span className="me-3">
                 <i className="bi bi-emoji-frown"></i>
               </span>
-              No matching items found.
+              {`${
+                !selectedLoction ||
+                !startDate ||
+                !endDate ||
+                reportData.length < 0
+                  ? "Please select a date range and location"
+                  : "No matching items found."
+              }`}
             </div>
           )}
           {/* Generated Date and Time */}
-          {generatedDateTime && reportData && (
+          {/* {generatedDateTime && reportData && (
             <div className="text-center text-muted mt-4">
               <p>
                 This is a computer-generated document. No signature is required.
               </p>
               <p>Generated on: {generatedDateTime.toLocaleString()}</p>
             </div>
+          )} */}
+          {/* Pagination */}
+          {reportData && reportData.length > 0 && (
+            <Pagination
+              itemsPerPage={itemsPerPage}
+              totalItems={filteredData ? filteredData.length : 0}
+              paginate={paginate}
+              currentPage={currentPage}
+            />
           )}
         </>
       )}

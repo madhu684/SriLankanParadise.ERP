@@ -47,7 +47,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBatch, setSelectedBatch] = useState(null);
   const [customerSearchTerm, setCustomerSearchTerm] = useState("");
-  const [salesPersonSearchTerm, setSalesPersonSearchTerm] = useState('')
+  const [salesPersonSearchTerm, setSalesPersonSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -131,24 +131,23 @@ const useSalesOrder = ({ onFormSubmit }) => {
   const fetchSalesPersons = async () => {
     try {
       const response = await get_sales_persons_by_company_id_api(
-        sessionStorage?.getItem('companyId')
-      )
-      return response.data.result || []
+        sessionStorage?.getItem("companyId")
+      );
+      return response.data.result || [];
     } catch (error) {
-      console.error('Error fetching sales persons:', error)
+      console.error("Error fetching sales persons:", error);
     }
-  }
+  };
 
   const {
     data: salesPersons,
     isLoading: isSalesPersonsLoading,
     isError: isSalesPersonsError,
     error: salesPersonsError,
-    
   } = useQuery({
-    queryKey: ['salesPersons'],
+    queryKey: ["salesPersons"],
     queryFn: fetchSalesPersons,
-  })
+  });
 
   const fetchCompany = async () => {
     try {
@@ -304,13 +303,12 @@ const useSalesOrder = ({ onFormSubmit }) => {
         formData.customerId
       );
     }
-    
-    const isSalesPersonValid = validateField(
-      'salesPersonId',
-      'Sales Person',
-      formData.salesPersonId
-    )
 
+    const isSalesPersonValid = validateField(
+      "salesPersonId",
+      "Sales Person",
+      formData.salesPersonId
+    );
 
     const isOrderDateValid = validateField(
       "orderDate",
@@ -464,7 +462,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
 
   const handleSubmit = async (isSaveAsDraft) => {
     try {
-      console.log('handleSubmit triggered')
+      console.log("handleSubmit triggered");
       const customerId = directOrder ? null : formData.customerId;
       const status = isSaveAsDraft ? 0 : 1;
       const isFormValid = validateForm();
@@ -485,19 +483,19 @@ const useSalesOrder = ({ onFormSubmit }) => {
           deliveryDate: formData.deliveryDate,
           totalAmount: formData.totalAmount,
           status: status,
-          createdBy: sessionStorage?.getItem('username') ?? null,
-          createdUserId: sessionStorage?.getItem('userId') ?? null,
+          createdBy: sessionStorage?.getItem("username") ?? null,
+          createdUserId: sessionStorage?.getItem("userId") ?? null,
           approvedBy: null,
           approvedUserId: null,
           approvedDate: null,
-          companyId: sessionStorage?.getItem('companyId') ?? null,
+          companyId: sessionStorage?.getItem("companyId") ?? null,
           createdDate: currentDate,
           lastUpdatedDate: currentDate,
           permissionId: 25,
-          salesPersonId: formData.salesPersonId
-        }
+          salesPersonId: formData.salesPersonId,
+        };
 
-        console.log("Sale order data", salesOrderData)
+        console.log("Sale order data", salesOrderData);
         const response = await post_sales_order_api(salesOrderData);
         setReferenceNo(response.data.result.referenceNo);
 
@@ -532,7 +530,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
                   qty: batch.qty,
                   permissionId: 1065,
                 };
-                console.log('Item Batch Update Data', itemBatchUpdateData)
+                console.log("Item Batch Update Data", itemBatchUpdateData);
                 batchUpdates.push(
                   put_item_batch_api(
                     batch.batchId,
@@ -639,7 +637,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
           postChargesAndDeductionsAppliedResponse.every(
             (detailsResponse) => detailsResponse.status === 201
           );
-          
+
         if (
           allDetailsSuccessful &&
           allAppliedSuccessful &&
@@ -1033,10 +1031,10 @@ const useSalesOrder = ({ onFormSubmit }) => {
   const handleResetSalesPerson = () => {
     setFormData((prevFormData) => ({
       ...prevFormData,
-      selectedSalesPerson: '',
-      salesPersonId: '',
-    }))
-  }
+      selectedSalesPerson: "",
+      salesPersonId: "",
+    }));
+  };
 
   const handleSelectCustomer = (selectedCustomer) => {
     setFormData((prevFormData) => ({
@@ -1051,18 +1049,16 @@ const useSalesOrder = ({ onFormSubmit }) => {
   };
 
   const handleSelectSalesPerson = (selectedSalesPerson) => {
-    
     setFormData((prevFormData) => ({
       ...prevFormData,
       salesPersonId: selectedSalesPerson.userId,
       selectedSalesPerson: selectedSalesPerson,
-      
-    }))
+    }));
 
-    setSalesPersonSearchTerm('') // Clear the supplier search term
-    setValidFields({})
-    setValidationErrors({})
-  }
+    setSalesPersonSearchTerm(""); // Clear the supplier search term
+    setValidFields({});
+    setValidationErrors({});
+  };
 
   const renderColumns = () => {
     return chargesAndDeductions.map((charge) => {
@@ -1175,6 +1171,8 @@ const useSalesOrder = ({ onFormSubmit }) => {
   const closeModal = () => {
     setShowModal(false);
   };
+
+  console.log("formData", formData);
 
   return {
     formData,
