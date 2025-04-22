@@ -191,6 +191,10 @@ builder.Services.AddScoped<ISubItemMasterService, SubItemMasterService>();
 builder.Services.AddScoped<ISubItemMasterRepository, SubItemMasterRepository>();
 builder.Services.AddScoped<IUserGeoLocationRepository, UserGeoLocationRepository>();
 builder.Services.AddScoped<IUserGeoLocationService, UserGeoLocationService>();
+builder.Services.AddScoped<ILeadRepository, LeadRepository>();
+builder.Services.AddScoped<ILeadService, LeadService>();
+builder.Services.AddScoped<IMeetingRepository, MeetingRepository>();
+builder.Services.AddScoped<IMeetingService, MeetingService>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

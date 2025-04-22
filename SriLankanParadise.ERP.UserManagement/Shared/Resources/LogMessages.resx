@@ -888,4 +888,28 @@
   <data name="UserGeoLocationsRetrieved" xml:space="preserve">
     <value>User geo locations retrieved</value>
   </data>
+  <data name="MeetingsRetrieved" xml:space="preserve">
+    <value>Meetings retrieved successfully</value>
+  </data>
+  <data name="MeetingNotFound" xml:space="preserve">
+    <value>Meeting not found</value>
+  </data>
+  <data name="MeetingUpdated" xml:space="preserve">
+    <value>Meeting updated successfully</value>
+  </data>
+  <data name="MeetingDeleted" xml:space="preserve">
+    <value>Meeting deleted successfully</value>
+  </data>
+  <data name="LeadRetrieved" xml:space="preserve">
+    <value>Lead retrieved successfully</value>
+  </data>
+  <data name="LeadNotFound" xml:space="preserve">
+    <value>Lead not found</value>
+  </data>
+  <data name="LeadUpdated" xml:space="preserve">
+    <value>Lead updated successfully</value>
+  </data>
+  <data name="LeadDeleted" xml:space="preserve">
+    <value>Lead deleted successfully</value>
+  </data>
 </root>

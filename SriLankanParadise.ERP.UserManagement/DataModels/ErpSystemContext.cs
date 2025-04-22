@@ -69,6 +69,8 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<ItemType> ItemTypes { get; set; }
 
+    public virtual DbSet<Lead> Leads { get; set; }
+
     public virtual DbSet<Location> Locations { get; set; }
 
     public virtual DbSet<LocationInventory> LocationInventories { get; set; }
@@ -80,6 +82,8 @@ public partial class ErpSystemContext : DbContext
     public virtual DbSet<LocationType> LocationTypes { get; set; }
 
     public virtual DbSet<MeasurementType> MeasurementTypes { get; set; }
+
+    public virtual DbSet<Meeting> Meetings { get; set; }
 
     public virtual DbSet<Module> Modules { get; set; }
 
@@ -613,6 +617,22 @@ public partial class ErpSystemContext : DbContext
                 .IsUnicode(false);
         });
 
+        modelBuilder.Entity<Lead>(entity =>
+        {
+            entity.HasKey(e => e.LeadId).HasName("PK__Lead__73EF78FA3C7745EE");
+
+            entity.ToTable("Lead");
+
+            entity.Property(e => e.LeadDate).HasColumnType("date");
+            entity.Property(e => e.LeadCreatedDateTime).HasColumnType("datetime");
+            entity.Property(e => e.Description).HasMaxLength(255);
+            entity.Property(e => e.ForecastedValue).HasMaxLength(50);
+
+            entity.HasOne(d => d.Customer).WithMany(p => p.Leads)
+                .HasForeignKey(d => d.CustomerId)
+                .HasConstraintName("CONSTRAINT FK_Leads_Customer");
+        });
+
         modelBuilder.Entity<Location>(entity =>
         {
             entity.HasKey(e => e.LocationId).HasName("PK__Location__E7FEA4977CC34C1F");
@@ -727,6 +747,18 @@ public partial class ErpSystemContext : DbContext
             entity.ToTable("MeasurementType");
 
             entity.Property(e => e.Name).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<Meeting>(entity => 
+        { 
+            entity.HasKey(e => e.MeetingId).HasName("PK__Meeting__E9F9E94C5069C5FB");
+
+            entity.ToTable("Meeting");
+
+            entity.HasOne(d => d.Lead).WithMany(p => p.Meetings)
+                .HasForeignKey(d => d.LeadId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Meetings_Lead");
         });
 
         modelBuilder.Entity<Module>(entity =>
