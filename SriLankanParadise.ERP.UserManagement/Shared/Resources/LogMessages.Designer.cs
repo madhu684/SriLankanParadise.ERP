@@ -905,6 +905,42 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Lead deleted successfully.
+        /// </summary>
+        public static string LeadDeleted {
+            get {
+                return ResourceManager.GetString("LeadDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lead not found.
+        /// </summary>
+        public static string LeadNotFound {
+            get {
+                return ResourceManager.GetString("LeadNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lead retrieved successfully.
+        /// </summary>
+        public static string LeadRetrieved {
+            get {
+                return ResourceManager.GetString("LeadRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lead updated successfully.
+        /// </summary>
+        public static string LeadUpdated {
+            get {
+                return ResourceManager.GetString("LeadUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to LocationChannelItemBatch created successfully.
         /// </summary>
         public static string LocationChannelItemBatchCreated {
@@ -1126,6 +1162,42 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string MeasurementTypesRetrieved {
             get {
                 return ResourceManager.GetString("MeasurementTypesRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Meeting deleted successfully.
+        /// </summary>
+        public static string MeetingDeleted {
+            get {
+                return ResourceManager.GetString("MeetingDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Meeting not found.
+        /// </summary>
+        public static string MeetingNotFound {
+            get {
+                return ResourceManager.GetString("MeetingNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Meetings retrieved successfully.
+        /// </summary>
+        public static string MeetingsRetrieved {
+            get {
+                return ResourceManager.GetString("MeetingsRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Meeting updated successfully.
+        /// </summary>
+        public static string MeetingUpdated {
+            get {
+                return ResourceManager.GetString("MeetingUpdated", resourceCulture);
             }
         }
         
@@ -2440,6 +2512,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string UserDeactivated {
             get {
                 return ResourceManager.GetString("UserDeactivated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User geo locations retrieved.
+        /// </summary>
+        public static string UserGeoLocationsRetrieved {
+            get {
+                return ResourceManager.GetString("UserGeoLocationsRetrieved", resourceCulture);
             }
         }
         
