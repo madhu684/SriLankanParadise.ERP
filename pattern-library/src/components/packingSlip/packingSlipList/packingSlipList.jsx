@@ -1,11 +1,11 @@
-import React from 'react'
-import usePackingSlipList from './usePackingSlipList'
-import PackingSlip from '../packingSlip'
-import ErrorComponent from '../../errorComponent/errorComponent'
-import LoadingSpinner from '../../loadingSpinner/loadingSpinner'
-import PackingSlipDetail from '../packingSlipDetail/packingSlipDetail'
-import PackingSlipApproval from '../packingSlipApproval/packingSlipApproval'
-import PackingSlipUpdate from '../packingSlipUpdate/packingSlipUpdate'
+import React from "react";
+import usePackingSlipList from "./usePackingSlipList";
+import PackingSlip from "../packingSlip";
+import ErrorComponent from "../../errorComponent/errorComponent";
+import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
+import PackingSlipDetail from "../packingSlipDetail/packingSlipDetail";
+import PackingSlipApproval from "../packingSlipApproval/packingSlipApproval";
+import PackingSlipUpdate from "../packingSlipUpdate/packingSlipUpdate";
 
 const PackingSlipList = () => {
   const {
@@ -44,13 +44,14 @@ const PackingSlipList = () => {
     handleUpdate,
     handleUpdated,
     handleClose,
+    handleRefetchSlip,
     areAnySelectedRowsApproved,
     handleConvert,
     setShowConvertPSForm,
-  } = usePackingSlipList()
+  } = usePackingSlipList();
 
   if (error || isPermissionsError) {
-    return <ErrorComponent error={error || 'Error fetching data'} />
+    return <ErrorComponent error={error || "Error fetching data"} />;
   }
 
   if (
@@ -58,18 +59,19 @@ const PackingSlipList = () => {
     isLoadingPermissions ||
     (packingSlips && !(packingSlips.length >= 0))
   ) {
-    return <LoadingSpinner />
+    return <LoadingSpinner />;
   }
 
   if (showCreatePSForm) {
-      return (
-        <PackingSlip
-          handleClose={() => setShowCreatePSForm(false)}
-        />
-      )
+    return (
+      <PackingSlip
+        handleRefetchSlip={handleRefetchSlip}
+        handleClose={() => setShowCreatePSForm(false)}
+      />
+    );
   }
 
-  if(showUpdatePSForm) {
+  if (showUpdatePSForm) {
     return (
       <PackingSlipUpdate
         handleClose={handleClose}
@@ -77,20 +79,19 @@ const PackingSlipList = () => {
         handleUpdated={handleUpdated}
         setShowUpdatePSForm={setShowUpdatePSForm}
       />
-    )
+    );
   }
-  
 
-  if(packingSlips.length === 0){
+  if (packingSlips.length === 0) {
     return (
       <div className="container mt-4">
         <h2>Packing Slips</h2>
         <div
           className="d-flex flex-column justify-content-center align-items-center text-center vh-100"
-          style={{ maxHeight: '80vh' }}
+          style={{ maxHeight: "80vh" }}
         >
           <p>You haven't created any packing slips. Create a new one.</p>
-          {hasPermission('Create Packing Slip') && (
+          {hasPermission("Create Packing Slip") && (
             <button
               type="button"
               className="btn btn-primary"
@@ -101,7 +102,7 @@ const PackingSlipList = () => {
           )}
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -109,7 +110,7 @@ const PackingSlipList = () => {
       <h2>Packing Slips</h2>
       <div className="mt-3 d-flex justify-content-start align-items-center">
         <div className="btn-group" role="group">
-          {hasPermission('Create Packing Slip') && (
+          {hasPermission("Create Packing Slip") && (
             <button
               type="button"
               className="btn btn-primary"
@@ -118,9 +119,9 @@ const PackingSlipList = () => {
               Create
             </button>
           )}
-          {hasPermission('Approve Packing Slip') &&
+          {hasPermission("Approve Packing Slip") &&
             selectedRowData[0]?.createdUserId !==
-              parseInt(sessionStorage.getItem('userId')) &&
+              parseInt(sessionStorage.getItem("userId")) &&
             isAnyRowSelected &&
             areAnySelectedRowsPending(selectedRows) && (
               <button
@@ -140,7 +141,7 @@ const PackingSlipList = () => {
                 Convert
               </button>
             )} */}
-          {hasPermission('Update Packing Slip') && isAnyRowSelected && (
+          {hasPermission("Update Packing Slip") && isAnyRowSelected && (
             <button
               className="btn btn-warning"
               onClick={() => setShowUpdatePSForm(true)}
@@ -176,7 +177,7 @@ const PackingSlipList = () => {
                 </td>
                 <td>{ps.referenceNo}</td>
                 <td>{ps.createdBy}</td>
-                <td>{ps?.packingSlipDate?.split('T')[0]}</td>
+                <td>{ps?.packingSlipDate?.split("T")[0]}</td>
                 <td>
                   <span
                     className={`badge rounded-pill ${getStatusBadgeClass(
@@ -201,7 +202,7 @@ const PackingSlipList = () => {
                         viewBox="0 0 16 16"
                       >
                         <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z" />
-                      </svg>{' '}
+                      </svg>{" "}
                       Edit
                     </button>
                   ) : (
@@ -221,7 +222,7 @@ const PackingSlipList = () => {
                           fillRule="evenodd"
                           d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"
                         />
-                      </svg>{' '}
+                      </svg>{" "}
                       View
                     </button>
                   )}
@@ -247,8 +248,7 @@ const PackingSlipList = () => {
         )}
       </div>
     </div>
-  )
-  
-}
+  );
+};
 
-export default PackingSlipList
+export default PackingSlipList;

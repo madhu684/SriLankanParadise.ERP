@@ -79,7 +79,7 @@ const useSupplierReturnApprove = ({ onFormSubmit }) => {
 
       const inventoryMovementData = {
         movementTypeId: 2,
-        transactionTypeId: 9,
+        transactionTypeId: 10,
         itemMasterId: item.itemMasterId,
         batchId: item.batchId,
         locationId: item.locationId,

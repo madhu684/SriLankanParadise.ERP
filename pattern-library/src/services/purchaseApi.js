@@ -1391,3 +1391,19 @@ export const put_supply_return_detail_api = async (id, formData) => {
     throw error;
   }
 };
+
+export const get_supply_return_masters_by_supplyReturnMasterId = async (
+  supplyReturnMasterId
+) => {
+  try {
+    const response = await api.get(
+      `/supplyReturnMaster/GetSupplyReturnMasterBySupplyReturnMasterId/${supplyReturnMasterId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

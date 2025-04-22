@@ -2,7 +2,7 @@ import "./menu.css";
 import React from "react";
 import { Navigate } from "react-router-dom";
 import userImage from "../../assets/images/person-circle.svg";
-import CompanyImage  from "../../assets/images/power-tech-control.png";
+import CompanyImage  from "../../assets/images/powerline_lanka_logo.jpeg";
 
 function template() {
   const {

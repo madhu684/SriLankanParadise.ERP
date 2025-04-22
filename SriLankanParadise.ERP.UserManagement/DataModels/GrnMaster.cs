@@ -20,6 +20,7 @@ public partial class GrnMaster
     public int? PurchaseRequisitionId { get; set; }
 
     public int? SupplierId { get; set; }
+    public int? SupplyReturnMasterId { get; set; }
 
     public int? CompanyId { get; set; }
 

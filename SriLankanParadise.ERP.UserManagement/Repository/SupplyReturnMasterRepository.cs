@@ -117,6 +117,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(s => s.Supplier)
                     .Include(s => s.SupplyReturnDetails)
                         .ThenInclude(sd => sd.ItemMaster)
+                            .ThenInclude(si => si.Unit)
                     .Include(s => s.SupplyReturnDetails)
                         .ThenInclude(sd => sd.Batch)
                     .FirstOrDefaultAsync();
