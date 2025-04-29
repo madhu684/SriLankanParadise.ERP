@@ -59,16 +59,41 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
                 resourceCulture = value;
             }
         }
-        
+
+
         /// <summary>
         ///   Looks up a localized string similar to Batch created successfully.
         /// </summary>
-        public static string BatchCreated {
-            get {
-                return ResourceManager.GetString("BatchCreated", resourceCulture);
+        public static string ApprovedSupplyReturnMasterRetrived
+        {
+            get
+            {
+                return ResourceManager.GetString("Approved Supply return master retrived", resourceCulture);
             }
         }
-        
+
+
+        /// <summary>
+        ///   Looks up a localized string similar to Batch created successfully.
+        /// </summary>
+        public static string ApprovedSupplyReturnMasterNotFound
+        {
+            get {
+                return ResourceManager.GetString("Approved supply return masterNot found", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Batch created successfully.
+        /// </summary>
+        public static string BatchCreated
+        {
+            get
+            {
+                return ResourceManager.GetString("Batch created", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Batches not found.
         /// </summary>
@@ -2023,6 +2048,24 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Stock report not found.
+        /// </summary>
+        public static string StockReportNotFound {
+            get {
+                return ResourceManager.GetString("StockReportNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stock report retrieved.
+        /// </summary>
+        public static string StockReportRetrieved {
+            get {
+                return ResourceManager.GetString("StockReportRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Sub items not found.
         /// </summary>
         public static string SubItemsNotFound {
@@ -2289,6 +2332,96 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string SupplierUpdated {
             get {
                 return ResourceManager.GetString("SupplierUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supply return detail created sucessfully.
+        /// </summary>
+        public static string SupplyReturnDetailCreated {
+            get {
+                return ResourceManager.GetString("SupplyReturnDetailCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supply return detail deleted.
+        /// </summary>
+        public static string SupplyReturnDetailDeleted {
+            get {
+                return ResourceManager.GetString("SupplyReturnDetailDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supply return detail not found.
+        /// </summary>
+        public static string SupplyReturnDetailNotFound {
+            get {
+                return ResourceManager.GetString("SupplyReturnDetailNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supply return detail retieved.
+        /// </summary>
+        public static string SupplyReturnDetailRetieved {
+            get {
+                return ResourceManager.GetString("SupplyReturnDetailRetieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supply return detail updated.
+        /// </summary>
+        public static string SupplyReturnDetailUpdated {
+            get {
+                return ResourceManager.GetString("SupplyReturnDetailUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supply return master approved.
+        /// </summary>
+        public static string SupplyReturnMasterApproved {
+            get {
+                return ResourceManager.GetString("SupplyReturnMasterApproved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supply return master created successfully.
+        /// </summary>
+        public static string SupplyReturnMasterCreated {
+            get {
+                return ResourceManager.GetString("SupplyReturnMasterCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supply return master not found.
+        /// </summary>
+        public static string SupplyReturnMasterNotFound {
+            get {
+                return ResourceManager.GetString("SupplyReturnMasterNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supply return master retrieved.
+        /// </summary>
+        public static string SupplyReturnMasterRetrieved {
+            get {
+                return ResourceManager.GetString("SupplyReturnMasterRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supply return master updated.
+        /// </summary>
+        public static string SupplyReturnMasterUpdated {
+            get {
+                return ResourceManager.GetString("SupplyReturnMasterUpdated", resourceCulture);
             }
         }
         

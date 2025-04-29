@@ -6,6 +6,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
     {
         Task AddBatch(Batch batch);
 
+        Task <Batch> GetBatchById(int batchId);
+
         Task<IEnumerable<Batch>> GetAll();
 
         Task<IEnumerable<Batch>> GetBatchesByCompanyId(int companyId);

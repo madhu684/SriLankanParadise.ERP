@@ -885,6 +885,78 @@
   <data name="UserActivated" xml:space="preserve">
     <value>User Activated</value>
   </data>
+  <data name="PackingSlipDetailCreated" xml:space="preserve">
+    <value>Packing slip detail created successfully.</value>
+  </data>
+  <data name="PackingSlipCreated" xml:space="preserve">
+    <value>Packing slip created successfully. </value>
+  </data>
+  <data name="PackingSlipRetrieved" xml:space="preserve">
+    <value>Packing slip retrieved successfully. </value>
+  </data>
+  <data name="PackingSlipDetailRetrieved" xml:space="preserve">
+    <value>Packing slip detail retrieved</value>
+  </data>
+  <data name="PackingSlipNotFound" xml:space="preserve">
+    <value>Packing slip not found</value>
+  </data>
+  <data name="PackingSlipApproved" xml:space="preserve">
+    <value>Packing slip approved</value>
+  </data>
+  <data name="PackingSlipUpdated" xml:space="preserve">
+    <value>Packing slip updated</value>
+  </data>
+  <data name="PackingSlipDetailNotFound" xml:space="preserve">
+    <value>Packing slip detail not found</value>
+  </data>
+  <data name="PackingSlipDetailUpdated" xml:space="preserve">
+    <value>Packing slip detail updated</value>
+  </data>
+  <data name="PackingSlipDetailDeleted" xml:space="preserve">
+    <value>Packing slip detail deleted</value>
+  </data>
+  <data name="SupplyReturnMasterCreated" xml:space="preserve">
+    <value>Supply return master created successfully</value>
+  </data>
+  <data name="SupplyReturnMasterNotFound" xml:space="preserve">
+    <value>Supply return master not found</value>
+  </data>
+  <data name="SupplyReturnMasterRetrieved" xml:space="preserve">
+    <value>Supply return master retrieved</value>
+  </data>
+  <data name="SupplyReturnMasterUpdated" xml:space="preserve">
+    <value>Supply return master updated</value>
+  </data>
+  <data name="SupplyReturnDetailCreated" xml:space="preserve">
+    <value>Supply return detail created sucessfully</value>
+  </data>
+  <data name="SupplyReturnDetailNotFound" xml:space="preserve">
+    <value>Supply return detail not found</value>
+  </data>
+  <data name="SupplyReturnDetailRetieved" xml:space="preserve">
+    <value>Supply return detail retieved</value>
+  </data>
+  <data name="SupplyReturnDetailUpdated" xml:space="preserve">
+    <value>Supply return detail updated</value>
+  </data>
+  <data name="SupplyReturnMasterApproved" xml:space="preserve">
+    <value>Supply return master approved</value>
+  </data>
+  <data name="SupplyReturnDetailDeleted" xml:space="preserve">
+    <value>Supply return detail deleted</value>
+  </data>
+  <data name="StockReportRetrieved" xml:space="preserve">
+    <value>Stock report retrieved</value>
+  </data>
+  <data name="StockReportNotFound" xml:space="preserve">
+    <value>Stock report not found</value>
+  </data>
+  <data name="ApprovedSupplyReturnMasterRetrived" xml:space="preserve">
+    <value>Approved supply return master retrived</value>
+  </data>
+  <data name="ApprovedSupplyReturnMasterNotFound" xml:space="preserve">
+    <value>Approved supply return master not found</value>
+  </data>
   <data name="UserGeoLocationsRetrieved" xml:space="preserve">
     <value>User geo locations retrieved</value>
   </data>

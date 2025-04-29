@@ -265,13 +265,13 @@ export const get_sub_item_masters_by_item_master_id_api = async (
       {
         withCredentials: true,
       }
-    )
-    return response.data
+    );
+    return response.data;
   } catch (error) {
-    console.log(error)
-    throw error
+    console.log(error);
+    throw error;
   }
-}
+};
 
 //item types api
 export const get_item_types_by_company_id_api = async (companyId) => {
@@ -294,6 +294,21 @@ export const get_measurement_types_by_company_id_api = async (companyId) => {
   try {
     const response = await api.get(
       `/measurementType/GetMeasurementTypesByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_stock_report_api = async (fromDate, toDate, locationId) => {
+  try {
+    const response = await api.get(
+      `/report/StockReport/${fromDate}/${toDate}/${locationId}`,
       {
         withCredentials: true,
       }

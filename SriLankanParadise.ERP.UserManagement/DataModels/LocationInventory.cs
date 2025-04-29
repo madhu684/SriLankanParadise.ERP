@@ -25,4 +25,6 @@ public partial class LocationInventory
 
     public virtual ItemMaster ItemMaster { get; set; } = null!;
 
+    public virtual ICollection<DailyLocationInventory> DailyLocationInventories { get; set; } = new List<DailyLocationInventory>();
+
 }

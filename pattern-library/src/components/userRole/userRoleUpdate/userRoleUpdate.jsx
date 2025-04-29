@@ -28,8 +28,6 @@ const UserRoleUpdate = ({ handleClose, role, handleUpdated }) => {
     console.log("Role prop received in UserRoleUpdate:", role);
   }, [role]);
 
-  console.log("systemModules in jsx: ", systemModules);
-
   return (
     <div className="container mt-4">
       {/* Header */}

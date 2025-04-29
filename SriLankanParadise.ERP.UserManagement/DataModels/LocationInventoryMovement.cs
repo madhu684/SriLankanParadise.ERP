@@ -25,6 +25,8 @@ public partial class LocationInventoryMovement
 
     public virtual ItemBatch ItemBatch { get; set; } = null!;
 
+    public virtual Batch Batch { get; set; } = null!;
+
     public virtual Location Location { get; set; } = null!;
 
     public virtual MovementType MovementType { get; set; } = null!;

@@ -1,10 +1,10 @@
-import React from 'react'
-import CurrentDateTime from '../currentDateTime/currentDateTime'
-import usePackingSlip from './usePackingSlip'
-import ButtonLoadingSpinner from '../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner'
-import BatchSelectionModal from '../batchSelectionModal/batchSelectionModal'
+import React from "react";
+import CurrentDateTime from "../currentDateTime/currentDateTime";
+import usePackingSlip from "./usePackingSlip";
+import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
+import BatchSelectionModal from "../batchSelectionModal/batchSelectionModal";
 
-const PackingSlip = ({ handleClose }) => {
+const PackingSlip = ({ handleRefetchSlip, handleClose }) => {
   const {
     formData,
     submissionStatus,
@@ -64,9 +64,10 @@ const PackingSlip = ({ handleClose }) => {
     userLocations,
   } = usePackingSlip({
     onFormSubmit: () => {
-      handleClose()
+      handleClose();
     },
-  })
+    handleRefetchSlip,
+  });
 
   return (
     <div className="container mt-4">
@@ -88,18 +89,18 @@ const PackingSlip = ({ handleClose }) => {
       </div>
 
       {/*Displat success or error messages */}
-      {submissionStatus === 'successSubmitted' && (
+      {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
           Packing Slip submitted successfully! Reference Number: {referenceNo}
         </div>
       )}
-      {submissionStatus === 'successSavedAsDraft' && (
+      {submissionStatus === "successSavedAsDraft" && (
         <div className="alert alert-success mb-3" role="alert">
           Packing Slip saved as draft, you can edit and submit it later!
           Reference Number: {referenceNo}
         </div>
       )}
-      {submissionStatus === 'error' && (
+      {submissionStatus === "error" && (
         <div className="alert alert-danger mb-3" role="alert">
           Error submitting packing slip. Please try again.
         </div>
@@ -118,13 +119,13 @@ const PackingSlip = ({ handleClose }) => {
               <input
                 type="date"
                 className={`form-control ${
-                  validFields.packingSlipDate ? 'is-valid' : ''
-                } ${validationErrors.packingSlipDate ? 'is-invalid' : ''}`}
+                  validFields.packingSlipDate ? "is-valid" : ""
+                } ${validationErrors.packingSlipDate ? "is-invalid" : ""}`}
                 id="packingSlipDate"
                 placeholder="Enter Slip Create Date"
-                value={formData?.packingSlipDate || ''}
+                value={formData?.packingSlipDate || ""}
                 onChange={(e) =>
-                  handleInputChange('packingSlipDate', e.target.value)
+                  handleInputChange("packingSlipDate", e.target.value)
                 }
                 required
               />
@@ -141,15 +142,15 @@ const PackingSlip = ({ handleClose }) => {
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.invoiceReferenceNumber ? 'is-valid' : ''
+                  validFields.invoiceReferenceNumber ? "is-valid" : ""
                 } ${
-                  validationErrors.invoiceReferenceNumber ? 'is-invalid' : ''
+                  validationErrors.invoiceReferenceNumber ? "is-invalid" : ""
                 }`}
                 id="invoiceReferenceNumber"
                 placeholder="Enter invoice reference number"
                 value={formData.invoiceReferenceNumber}
                 onChange={(e) =>
-                  handleInputChange('invoiceReferenceNumber', e.target.value)
+                  handleInputChange("invoiceReferenceNumber", e.target.value)
                 }
                 required
               />
@@ -165,12 +166,12 @@ const PackingSlip = ({ handleClose }) => {
               </label>
               <select
                 className={`form-select ${
-                  validFields.storeLocation ? 'is-valid' : ''
-                } ${validationErrors.storeLocation ? 'is-invalid' : ''}`}
+                  validFields.storeLocation ? "is-valid" : ""
+                } ${validationErrors.storeLocation ? "is-invalid" : ""}`}
                 id="storeLocation"
-                value={formData?.storeLocation ?? ''}
+                value={formData?.storeLocation ?? ""}
                 onChange={(e) =>
-                  handleInputChange('storeLocation', e.target.value)
+                  handleInputChange("storeLocation", e.target.value)
                 }
               >
                 <option value="">Select Location</option>
@@ -178,7 +179,7 @@ const PackingSlip = ({ handleClose }) => {
                   ? userLocations
                       .filter(
                         (location) =>
-                          location.location.locationType.name === 'Warehouse'
+                          location.location.locationType.name === "Warehouse"
                       )
                       .map((location) => (
                         <option
@@ -188,7 +189,7 @@ const PackingSlip = ({ handleClose }) => {
                           {location.location.locationName}
                         </option>
                       ))
-                  : ''}
+                  : ""}
               </select>
               {validationErrors.storeLocation && (
                 <div className="invalid-feedback">
@@ -204,7 +205,7 @@ const PackingSlip = ({ handleClose }) => {
               <label htmlFor="customerId" className="form-label">
                 Customer
               </label>
-              {formData.selectedCustomer === '' && (
+              {formData.selectedCustomer === "" && (
                 <div className="mb-3 position-relative">
                   <div className="input-group">
                     <span className="input-group-text bg-transparent ">
@@ -213,8 +214,8 @@ const PackingSlip = ({ handleClose }) => {
                     <input
                       type="text"
                       className={`form-control ${
-                        validFields.customerId ? 'is-valid' : ''
-                      } ${validationErrors.customerId ? 'is-invalid' : ''}`}
+                        validFields.customerId ? "is-valid" : ""
+                      } ${validationErrors.customerId ? "is-invalid" : ""}`}
                       placeholder="Search for a customer..."
                       value={customerSearchTerm}
                       onChange={(e) => setCustomerSearchTerm(e.target.value)}
@@ -224,9 +225,9 @@ const PackingSlip = ({ handleClose }) => {
                       <span
                         className="input-group-text bg-transparent"
                         style={{
-                          cursor: 'pointer',
+                          cursor: "pointer",
                         }}
-                        onClick={() => setCustomerSearchTerm('')}
+                        onClick={() => setCustomerSearchTerm("")}
                       >
                         <i className="bi bi-x"></i>
                       </span>
@@ -235,14 +236,14 @@ const PackingSlip = ({ handleClose }) => {
 
                   {/* Dropdown for filtered customers */}
                   {customerSearchTerm && (
-                    <div className="dropdown" style={{ width: '100%' }}>
+                    <div className="dropdown" style={{ width: "100%" }}>
                       <ul
                         className="dropdown-menu"
                         style={{
-                          display: 'block',
-                          width: '100%',
-                          maxHeight: '200px',
-                          overflowY: 'auto',
+                          display: "block",
+                          width: "100%",
+                          maxHeight: "200px",
+                          overflowY: "auto",
                         }}
                       >
                         {customers
@@ -252,8 +253,8 @@ const PackingSlip = ({ handleClose }) => {
                                 .toLowerCase()
                                 .includes(customerSearchTerm.toLowerCase()) ||
                               customer.phone
-                                .replace(/\s/g, '')
-                                .includes(customerSearchTerm.replace(/\s/g, ''))
+                                .replace(/\s/g, "")
+                                .includes(customerSearchTerm.replace(/\s/g, ""))
                           )
                           .map((customer) => (
                             <li key={customer.customerId}>
@@ -263,7 +264,7 @@ const PackingSlip = ({ handleClose }) => {
                               >
                                 <span className="me-3">
                                   <i className="bi-person-lines-fill"></i>
-                                </span>{' '}
+                                </span>{" "}
                                 {customer?.customerName} - {customer?.phone}
                               </button>
                             </li>
@@ -274,8 +275,8 @@ const PackingSlip = ({ handleClose }) => {
                               .toLowerCase()
                               .includes(customerSearchTerm.toLowerCase()) ||
                             customer.phone
-                              .replace(/\s/g, '')
-                              .includes(customerSearchTerm.replace(/\s/g, ''))
+                              .replace(/\s/g, "")
+                              .includes(customerSearchTerm.replace(/\s/g, ""))
                         ).length === 0 && (
                           <>
                             <li className="dropdown-item text-center">
@@ -289,7 +290,7 @@ const PackingSlip = ({ handleClose }) => {
                       </ul>
                     </div>
                   )}
-                  {formData.selectedCustomer === '' && (
+                  {formData.selectedCustomer === "" && (
                     <div className="mb-3">
                       <small className="form-text text-muted">
                         {validationErrors.customerId && (
@@ -340,8 +341,8 @@ const PackingSlip = ({ handleClose }) => {
             id="searchByBatch"
             checked={searchByBatch}
             onChange={() => {
-              setSearchByBatch(!searchByBatch)
-              setSearchByBarcode(false)
+              setSearchByBatch(!searchByBatch);
+              setSearchByBarcode(false);
             }}
           />
           <label className="form-check-label" htmlFor="searchByPOCheckbox">
@@ -356,8 +357,8 @@ const PackingSlip = ({ handleClose }) => {
             id="searchByBarcode"
             checked={searchByBarcode}
             onChange={() => {
-              setSearchByBarcode(!searchByBarcode)
-              setSearchByBatch(false)
+              setSearchByBarcode(!searchByBarcode);
+              setSearchByBatch(false);
             }}
           />
           <label className="form-check-label" htmlFor="searchByPRCheckbox">
@@ -384,9 +385,9 @@ const PackingSlip = ({ handleClose }) => {
                   <span
                     className="input-group-text bg-transparent"
                     style={{
-                      cursor: 'pointer',
+                      cursor: "pointer",
                     }}
-                    onClick={() => setSearchTerm('')}
+                    onClick={() => setSearchTerm("")}
                   >
                     <i className="bi bi-x"></i>
                   </span>
@@ -394,14 +395,14 @@ const PackingSlip = ({ handleClose }) => {
               </div>
               {/* Dropdown for filtered items */}
               {searchTerm && (
-                <div className="dropdown" style={{ width: '100%' }}>
+                <div className="dropdown" style={{ width: "100%" }}>
                   <ul
                     className="dropdown-menu"
                     style={{
-                      display: 'block',
-                      width: '100%',
-                      maxHeight: '200px',
-                      overflowY: 'auto',
+                      display: "block",
+                      width: "100%",
+                      maxHeight: "200px",
+                      overflowY: "auto",
                     }}
                   >
                     {isItemsLoading ? (
@@ -416,14 +417,14 @@ const PackingSlip = ({ handleClose }) => {
                       availableItems.length === 0 ||
                       availableItems.filter((item) => {
                         // If batchStockType is FIFO, filter out items already present in formData.itemDetails
-                        if (company.batchStockType === 'FIFO') {
+                        if (company.batchStockType === "FIFO") {
                           return !formData.itemDetails.some(
                             (detail) =>
                               detail.itemMasterId === item.itemMasterId
-                          )
+                          );
                         }
                         // Otherwise, include all items
-                        return true
+                        return true;
                       }).length === 0 ? (
                       <li className="dropdown-item">
                         <span className="me-3">
@@ -435,14 +436,14 @@ const PackingSlip = ({ handleClose }) => {
                       availableItems
                         .filter((item) => {
                           // If batchStockType is FIFO, filter out items already present in formData.itemDetails
-                          if (company.batchStockType === 'FIFO') {
+                          if (company.batchStockType === "FIFO") {
                             return !formData.itemDetails.some(
                               (detail) =>
                                 detail.itemMasterId === item.itemMasterId
-                            )
+                            );
                           }
                           // Otherwise, include all items
-                          return true
+                          return true;
                         })
                         .map((item) => (
                           <li key={item.itemMasterId}>
@@ -492,13 +493,13 @@ const PackingSlip = ({ handleClose }) => {
           <div className="table-responsive mb-2">
             <table
               className="table"
-              style={{ minWidth: '1000px', overflowX: 'auto' }}
+              style={{ minWidth: "1000px", overflowX: "auto" }}
             >
               <thead>
                 <tr>
                   <th>Item Name</th>
                   <th>Unit</th>
-                  {company.batchStockType !== 'FIFO' && <th>Batch Ref</th>}
+                  {company.batchStockType !== "FIFO" && <th>Batch Ref</th>}
                   <th>Temp Qty</th>
                   <th>Quantity</th>
                   <th>Unit Price</th>
@@ -512,7 +513,7 @@ const PackingSlip = ({ handleClose }) => {
                   <tr key={index}>
                     <td>{item.name}</td>
                     <td>{item.unit}</td>
-                    {company.batchStockType !== 'FIFO' && (
+                    {company.batchStockType !== "FIFO" && (
                       <td>{item.batchRef}</td>
                     )}
                     <td>{item.tempQuantity}</td>
@@ -520,17 +521,17 @@ const PackingSlip = ({ handleClose }) => {
                       <input
                         type="number"
                         className={`form-control ${
-                          validFields[`quantity_${index}`] ? 'is-valid' : ''
+                          validFields[`quantity_${index}`] ? "is-valid" : ""
                         } ${
                           validationErrors[`quantity_${index}`]
-                            ? 'is-invalid'
-                            : ''
+                            ? "is-invalid"
+                            : ""
                         }`}
                         value={item.quantity}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            'quantity',
+                            "quantity",
                             e.target.value
                           )
                         }
@@ -542,7 +543,7 @@ const PackingSlip = ({ handleClose }) => {
                       )}
                     </td>
                     <td>
-                      {item.unitPrice ? item.unitPrice.toFixed(2) : '0.00'}
+                      {item.unitPrice ? item.unitPrice.toFixed(2) : "0.00"}
                     </td>
                     {item.chargesAndDeductions.map((charge, chargeIndex) => (
                       <td key={chargeIndex}>
@@ -551,18 +552,18 @@ const PackingSlip = ({ handleClose }) => {
                           type="number"
                           value={charge.value}
                           onChange={(e) => {
-                            let newValue = parseFloat(e.target.value)
+                            let newValue = parseFloat(e.target.value);
 
                             // If the entered value is not a valid number, set it to 0
                             if (isNaN(newValue)) {
-                              newValue = 0
+                              newValue = 0;
                             } else {
                               // If the charge is a percentage, ensure the value is between 0 and 100
                               if (charge.isPercentage) {
-                                newValue = Math.min(100, Math.max(0, newValue)) // Clamp the value between 0 and 100
+                                newValue = Math.min(100, Math.max(0, newValue)); // Clamp the value between 0 and 100
                               } else {
                                 // For non-percentage charges, ensure the value is positive
-                                newValue = Math.max(0, newValue)
+                                newValue = Math.max(0, newValue);
                               }
                             }
 
@@ -570,7 +571,7 @@ const PackingSlip = ({ handleClose }) => {
                               index,
                               `chargesAndDeductions_${chargeIndex}_value`,
                               newValue
-                            )
+                            );
                           }}
                         />
                       </td>
@@ -594,7 +595,7 @@ const PackingSlip = ({ handleClose }) => {
                     colSpan={
                       5 +
                       formData.itemDetails[0].chargesAndDeductions.length -
-                      (company.batchStockType === 'FIFO' ? 1 : 0)
+                      (company.batchStockType === "FIFO" ? 1 : 0)
                     }
                   ></td>
                   <th>Sub Total</th>
@@ -607,7 +608,7 @@ const PackingSlip = ({ handleClose }) => {
                     colSpan={
                       5 +
                       formData.itemDetails[0].chargesAndDeductions.length -
-                      (company.batchStockType === 'FIFO' ? 1 : 0)
+                      (company.batchStockType === "FIFO" ? 1 : 0)
                     }
                   ></td>
                   <th>Total Amount</th>
@@ -641,9 +642,9 @@ const PackingSlip = ({ handleClose }) => {
                   <span
                     className="input-group-text bg-transparent"
                     style={{
-                      cursor: 'pointer',
+                      cursor: "pointer",
                     }}
-                    onClick={() => setSearchTerm('')}
+                    onClick={() => setSearchTerm("")}
                   >
                     <i className="bi bi-x"></i>
                   </span>
@@ -670,8 +671,8 @@ const PackingSlip = ({ handleClose }) => {
           <input
             type="file"
             className={`form-control ${
-              validFields.attachments ? 'is-valid' : ''
-            } ${validationErrors.attachments ? 'is-invalid' : ''}`}
+              validFields.attachments ? "is-valid" : ""
+            } ${validationErrors.attachments ? "is-invalid" : ""}`}
             id="attachment"
             onChange={(e) => handleAttachmentChange(e.target.files)}
             multiple
@@ -700,7 +701,7 @@ const PackingSlip = ({ handleClose }) => {
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Submitting..." />
             ) : (
-              'Submit'
+              "Submit"
             )}
           </button>
           <button
@@ -717,7 +718,7 @@ const PackingSlip = ({ handleClose }) => {
             {loadingDraft && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Saving as Draft..." />
             ) : (
-              'Save as Draft'
+              "Save as Draft"
             )}
           </button>
           <button
@@ -748,7 +749,7 @@ const PackingSlip = ({ handleClose }) => {
         />
       )}
     </div>
-  )
-}
+  );
+};
 
-export default PackingSlip
+export default PackingSlip;

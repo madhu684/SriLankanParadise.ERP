@@ -537,3 +537,30 @@ export const activate_user = async (userId) => {
     throw error;
   }
 };
+
+export const post_permission_api = async (formData) => {
+  try {
+    const response = await api.post("/permission", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const put_permission_api = async (permissionId, permissionData) => {
+  try {
+    const response = await api.put(
+      `/permission/${permissionId}`,
+      permissionData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

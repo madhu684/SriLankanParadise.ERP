@@ -153,6 +153,12 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<UserRole> UserRoles { get; set; }
 
+    public virtual DbSet<SupplyReturnMaster> SupplyReturnMasters { get; set; }
+
+    public virtual DbSet<SupplyReturnDetail> SupplyReturnDetails { get; set; }
+
+    public virtual DbSet<DailyLocationInventory> DailyLocationInventories { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:LocalSqlServerConnection");
 
@@ -1377,6 +1383,79 @@ public partial class ErpSystemContext : DbContext
                 .HasForeignKey(d => d.MainItemMasterId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_SubItemMaster_ItemMaster");
+        });
+
+        modelBuilder.Entity<SupplyReturnMaster>(entity =>
+        {
+            entity.HasKey(e => e.SupplyReturnMasterId).HasName("PK__SupplyRe__6B3BF9D974CFEE53");
+
+            entity.ToTable("SupplyReturnMaster");
+
+            entity.Property(e => e.ApprovedBy).HasMaxLength(50);
+            entity.Property(e => e.ApprovedDate).HasColumnType("datetime");
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+            entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
+            entity.Property(e => e.ReturnDate).HasColumnType("datetime");
+            entity.Property(e => e.ReferenceNo)
+                .HasMaxLength(20)
+                .HasDefaultValueSql("('R' + CONVERT(NVARCHAR(20), NEXT VALUE FOR dbo.SupplyReturnMasterReferenceNoSeq)");
+
+            entity.HasOne(d => d.Supplier).WithMany(p => p.SupplyReturnMasters)
+                .HasForeignKey(d => d.SupplierId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_SupplyReturnMaster_Supplier");
+        });
+
+        modelBuilder.Entity<SupplyReturnDetail>(entity =>
+        {
+            entity.HasKey(e => e.SupplyReturnDetailId).HasName("PK__SupplyRe__A80AF570F9E7AA64");
+
+            entity.ToTable("SupplyReturnDetail");
+
+            entity.Property(e => e.ReturnedQuantity).HasColumnType("decimal(18, 2)");
+
+            entity.HasOne(d => d.SupplyReturnMaster).WithMany(p => p.SupplyReturnDetails)
+                  .HasForeignKey(d => d.SupplyReturnMasterId)
+                  .OnDelete(DeleteBehavior.ClientSetNull)
+                  .HasConstraintName("FK_SupplyReturnDetail_SupplyReturnMaster");
+
+            entity.HasOne(d => d.ItemMaster).WithMany(p => p.SupplyReturnDetails)
+                  .HasForeignKey(d => d.ItemMasterId)
+                  .OnDelete(DeleteBehavior.ClientSetNull)
+                  .HasConstraintName("FK_SupplyReturnDetail_ItemMaster");
+
+            entity.HasOne(d => d.Batch).WithMany(p => p.SupplyReturnDetails)
+                  .HasForeignKey(d => d.BatchId)
+                  .OnDelete(DeleteBehavior.ClientSetNull)
+                  .HasConstraintName("FK_SupplyReturnDetail_Batch");
+        });
+
+        modelBuilder.Entity<DailyLocationInventory>(entity =>
+        {
+            entity.HasKey(e => e.RunDate).HasName("PK_DailyLocationInventory");
+
+            entity.ToTable("DailyLocationInventory");
+
+            entity.Property(e => e.RunDate)
+                .HasConversion(
+                    dateOnly => dateOnly.ToDateTime(TimeOnly.MinValue), // Convert DateOnly to DateTime for storage
+                    dateTime => DateOnly.FromDateTime(dateTime)         // Convert DateTime back to DateOnly on retrieval
+                );
+
+            entity.HasOne(d => d.LocationInventory).WithMany(p => p.DailyLocationInventories)
+                .HasForeignKey(d => d.LocationInventoryId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_DailyLocationInventory_LocationInventory");
+
+            entity.HasOne(d => d.ItemMaster).WithMany(p => p.DailyLocationInventories)
+                .HasForeignKey(d => d.ItemMasterId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_DailyLocationInventory_ItemMaster");
+
+            entity.HasOne(d => d.Location).WithMany(p => p.DailyLocationInventories)
+                .HasForeignKey(d => d.LocationId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_DailyLocationInventory_Location");
         });
 
 

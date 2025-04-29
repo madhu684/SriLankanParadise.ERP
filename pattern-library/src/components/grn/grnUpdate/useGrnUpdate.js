@@ -1,5 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { get_company_suppliers_api, get_purchase_orders_with_out_drafts_api, get_purchase_requisitions_with_out_drafts_api } from "../../../services/purchaseApi";
+import {
+  get_company_suppliers_api,
+  get_purchase_orders_with_out_drafts_api,
+  get_purchase_requisitions_with_out_drafts_api,
+  get_supply_return_masters_by_supplyReturnMasterId,
+} from "../../../services/purchaseApi";
 import {
   put_grn_master_api,
   put_grn_detail_api,
@@ -13,24 +18,26 @@ import { useQuery } from "@tanstack/react-query";
 
 const useGrnUpdate = ({ grn, onFormSubmit }) => {
   const [formData, setFormData] = useState({
-    grnDate: '',
-    receivedBy: '',
-    receivedDate: '',
+    grnDate: "",
+    receivedBy: "",
+    receivedDate: "",
     itemDetails: [],
-    status: '',
-    purchaseOrderId: '',
-    supplierId: '',
-    purchaseRequisitionId: '',
-    grnType: 'goodsReceivedNote',
+    status: "",
+    purchaseOrderId: "",
+    supplierId: "",
+    purchaseRequisitionId: "",
+    supplyReturnMasterId: "",
+    grnType: "goodsReceivedNote",
     warehouseLocation: null,
-  })
+  });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
   const [selectedPurchaseOrder, setSelectedPurchaseOrder] = useState(null);
   const [selectedPurchaseRequisition, setSelectedPurchaseRequisition] =
-    useState(null)
-  const [selectedSupplier, setSelectedSupplier] = useState(null)
+    useState(null);
+  const [selectedSupplyReturn, setSelectedSupplyReturn] = useState(null);
+  const [selectedSupplier, setSelectedSupplier] = useState(null);
   const statusOptions = [
     { id: "4", label: "In Progress" },
     { id: "5", label: "Completed" },
@@ -44,8 +51,10 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     { id: "directPurchase", label: "Direct Purchase" },
   ];
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchByPO, setSearchByPO] = useState(false)
-  const [searchByPR, setSearchByPR] = useState(true)
+  const [searchByPO, setSearchByPO] = useState(false);
+  const [searchByPR, setSearchByPR] = useState(true);
+
+  console.log("Grn: ", grn);
 
   const fetchLocations = async () => {
     try {
@@ -120,16 +129,16 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
   const fetchPerchaseRequisitions = async () => {
     try {
       const response = await get_purchase_requisitions_with_out_drafts_api(
-        sessionStorage?.getItem('companyId')
-      )
+        sessionStorage?.getItem("companyId")
+      );
       const filteredPurchaseRequisitions = response.data.result?.filter(
         (pr) => pr.status === 2
-      )
-      return filteredPurchaseRequisitions || []
+      );
+      return filteredPurchaseRequisitions || [];
     } catch (error) {
-      console.error('Error fetching purchase requisitions:', error)
+      console.error("Error fetching purchase requisitions:", error);
     }
-  }
+  };
 
   const {
     data: purchaseRequisitions,
@@ -138,9 +147,9 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     errorPurchaseRequisition,
     refetch: refetchPerchaseRequisitions,
   } = useQuery({
-    queryKey: ['purchaseRequisitions'],
+    queryKey: ["purchaseRequisitions"],
     queryFn: fetchPerchaseRequisitions,
-  })
+  });
 
   const fetchGrnsBypurchaseOrderId = async (purchaseOrderId) => {
     try {
@@ -168,17 +177,17 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
   const fetchSuppliers = async () => {
     try {
       const response = await get_company_suppliers_api(
-        sessionStorage.getItem('companyId')
-      )
+        sessionStorage.getItem("companyId")
+      );
 
       const filteredSuppliers = response.data.result?.filter(
         (supplier) => supplier.status === 1
-      )
-      return filteredSuppliers || []
+      );
+      return filteredSuppliers || [];
     } catch (error) {
-      console.error('Error fetching suppliers:', error)
+      console.error("Error fetching suppliers:", error);
     }
-  }
+  };
 
   const {
     data: suppliers,
@@ -187,9 +196,35 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     errorSuppliers,
     refetch: refetchSuppliers,
   } = useQuery({
-    queryKey: ['suppliers'],
+    queryKey: ["suppliers"],
     queryFn: fetchSuppliers,
-  })
+  });
+
+  const fetchSupplyReturns = async () => {
+    try {
+      const response = await get_supply_return_masters_by_supplyReturnMasterId(
+        parseInt(grn.supplyReturnMasterId)
+      );
+      if (response.data.result !== null) {
+        setSelectedSupplyReturn(response.data.result);
+      }
+      return response.data.result || [];
+    } catch (error) {
+      console.error("Error fetching supply returns:", error);
+    }
+  };
+
+  const {
+    data: supplyReturns,
+    isLoadingSupplyReturns,
+    isErrorSupplyReturns,
+    errorSupplyReturns,
+    refetch: refetchSupplyReturns,
+  } = useQuery({
+    queryKey: ["supplyReturns"],
+    queryFn: fetchSupplyReturns,
+    enabled: !!grn.supplyReturnMasterId,
+  });
 
   useEffect(() => {
     const deepCopyGrn = JSON.parse(JSON.stringify(grn));
@@ -201,6 +236,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       status: deepCopyGrn?.status?.toString().charAt(0) ?? "",
       purchaseOrderId: deepCopyGrn?.purchaseOrderId ?? "",
       purchaseRequisitionId: deepCopyGrn?.purchaseRequisitionId ?? "",
+      supplyReturnMasterId: deepCopyGrn?.supplyReturnMasterId ?? "",
       supplierId: deepCopyGrn?.supplierId ?? "",
       attachments: deepCopyGrn?.attachments ?? [],
       grnType: deepCopyGrn?.grnType,
@@ -209,15 +245,15 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
 
     if (!isLoading && purchaseOrders) {
       //handlePurchaseOrderChange(deepCopyGrn?.purchaseOrder?.referenceNo);
-      handlePurchaseOrderChange(deepCopyGrn?.purchaseOrderId)
+      handlePurchaseOrderChange(deepCopyGrn?.purchaseOrderId);
     }
-    if(!isLoading && purchaseRequisitions){
+    if (!isLoading && purchaseRequisitions) {
       //handlePurchaseRequisitionChange(deepCopyGrn?.purchaseRequisition?.referenceNo)
-      handlePurchaseRequisitionChange(deepCopyGrn?.purchaseRequisitionId)
+      handlePurchaseRequisitionChange(deepCopyGrn?.purchaseRequisitionId);
     }
 
     if (!isLoading && suppliers) {
-      handleSupplierChange(deepCopyGrn?.supplierId)
+      handleSupplierChange(deepCopyGrn?.supplierId);
     }
   }, [grn, isLoading]);
 
@@ -304,60 +340,61 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
 
   useEffect(() => {
     if (grns && selectedPurchaseRequisition) {
-      const updatedItemDetails = selectedPurchaseRequisition.purchaseRequisitionDetails
-        .map((prItem) => {
-          const receivedQuantity = grns.reduce((total, grn) => {
-            const grnDetail = grn.grnDetails.find(
-              (detail) => detail.itemId === prItem.itemMaster?.itemMasterId
-            )
-            return total + (grnDetail ? grnDetail.receivedQuantity : 0)
-          }, 0)
+      const updatedItemDetails =
+        selectedPurchaseRequisition.purchaseRequisitionDetails
+          .map((prItem) => {
+            const receivedQuantity = grns.reduce((total, grn) => {
+              const grnDetail = grn.grnDetails.find(
+                (detail) => detail.itemId === prItem.itemMaster?.itemMasterId
+              );
+              return total + (grnDetail ? grnDetail.receivedQuantity : 0);
+            }, 0);
 
-          const remainingQuantity = prItem.quantity - receivedQuantity
+            const remainingQuantity = prItem.quantity - receivedQuantity;
 
-          const matchingGrnDetail = grn.grnDetails.find(
-            (detail) => detail.itemId === prItem.itemMaster.itemMasterId
-          )
+            const matchingGrnDetail = grn.grnDetails.find(
+              (detail) => detail.itemId === prItem.itemMaster.itemMasterId
+            );
 
-          console.log(matchingGrnDetail)
+            console.log(matchingGrnDetail);
 
-          return {
-            id: prItem.itemMaster.itemMasterId,
-            name: prItem.itemMaster.itemName,
-            unit: prItem.itemMaster.unit.unitName,
-            quantity: prItem.quantity,
-            remainingQuantity:
-              Math.max(0, remainingQuantity) +
-              (matchingGrnDetail ? matchingGrnDetail.receivedQuantity : 0),
-            receivedQuantity: matchingGrnDetail
-              ? matchingGrnDetail.receivedQuantity
-              : 0,
-            rejectedQuantity: matchingGrnDetail
-              ? matchingGrnDetail.rejectedQuantity
-              : 0,
-            freeQuantity: matchingGrnDetail
-              ? matchingGrnDetail.freeQuantity
-              : 0,
-            // expiryDate: matchingGrnDetail
-            //   ? matchingGrnDetail.expiryDate?.split('T')[0]
-            //   : '',
-            itemBarcode: prItem.itemBarcode,
-            unitPrice: prItem.unitPrice,
-            grnDetailId: matchingGrnDetail
-              ? matchingGrnDetail.grnDetailId
-              : null,
-            grnMasterId: matchingGrnDetail
-              ? matchingGrnDetail.grnMasterId
-              : null,
-          }
-        })
-        .filter((item) => item.grnMasterId === grn.grnMasterId)
+            return {
+              id: prItem.itemMaster.itemMasterId,
+              name: prItem.itemMaster.itemName,
+              unit: prItem.itemMaster.unit.unitName,
+              quantity: prItem.quantity,
+              remainingQuantity:
+                Math.max(0, remainingQuantity) +
+                (matchingGrnDetail ? matchingGrnDetail.receivedQuantity : 0),
+              receivedQuantity: matchingGrnDetail
+                ? matchingGrnDetail.receivedQuantity
+                : 0,
+              rejectedQuantity: matchingGrnDetail
+                ? matchingGrnDetail.rejectedQuantity
+                : 0,
+              freeQuantity: matchingGrnDetail
+                ? matchingGrnDetail.freeQuantity
+                : 0,
+              // expiryDate: matchingGrnDetail
+              //   ? matchingGrnDetail.expiryDate?.split('T')[0]
+              //   : '',
+              itemBarcode: prItem.itemBarcode,
+              unitPrice: prItem.unitPrice,
+              grnDetailId: matchingGrnDetail
+                ? matchingGrnDetail.grnDetailId
+                : null,
+              grnMasterId: matchingGrnDetail
+                ? matchingGrnDetail.grnMasterId
+                : null,
+            };
+          })
+          .filter((item) => item.grnMasterId === grn.grnMasterId);
 
       // Update form data with filtered items
       setFormData((prevFormData) => ({
         ...prevFormData,
         itemDetails: updatedItemDetails,
-      }))
+      }));
     } else {
       const formattedItemDetails = grn.grnDetails.map((detail) => ({
         id: detail.item.itemMasterId,
@@ -372,15 +409,75 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
         itemBarcode: detail.itemBarcode,
         unitPrice: detail.unitPrice,
         grnDetailId: detail.grnDetailId,
-      }))
+      }));
 
       setFormData((prevFormData) => ({
         ...prevFormData,
         itemDetails: formattedItemDetails,
-      }))
+      }));
     }
-  }, [selectedPurchaseRequisition, grns])
-  /* */
+  }, [selectedPurchaseRequisition, grns]);
+
+  /* Supply Return selection */
+
+  useEffect(() => {
+    if (grns && selectedSupplyReturn) {
+      const formattedItemDetails = selectedSupplyReturn.supplyReturnDetails
+        .map((srItem) => {
+          const receivedQuantity = grns.reduce((total, grn) => {
+            const grnDetail = grn.grnDetails.find(
+              (detail) => detail.itemId === srItem.itemMaster?.itemMasterId
+            );
+            return total + (grnDetail ? grnDetail.receivedQuantity : 0);
+          }, 0);
+
+          const remainingQuantity = srItem.returnedQuantity - receivedQuantity;
+
+          return {
+            id: srItem.itemMaster?.itemMasterId,
+            name: srItem.itemMaster?.itemName,
+            unit: srItem.itemMaster?.unit.unitName,
+            quantity: srItem.quantity,
+            remainingQuantity: Math.max(0, remainingQuantity),
+            receivedQuantity: 0,
+            rejectedQuantity: 0,
+            freeQuantity: 0,
+            //expiryDate: '',
+            itemBarcode: "",
+            unitPrice: srItem.itemMaster.unitPrice,
+          };
+        })
+        .filter((item) => item.remainingQuantity > 0);
+
+      // Update form data with filtered items
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        itemDetails: formattedItemDetails,
+      }));
+    } else if (selectedSupplyReturn) {
+      const formattedItemDetails = selectedSupplyReturn.supplyReturnDetails.map(
+        (srItem) => ({
+          id: srItem.itemMaster?.itemMasterId,
+          name: srItem.itemMaster?.itemName,
+          unit: srItem.itemMaster?.unit.unitName,
+          quantity: srItem.returnedQuantity,
+          remainingQuantity: srItem.returnedQuantity, // Set remaining quantity same as ordered quantity
+          receivedQuantity: srItem.returnedQuantity,
+          rejectedQuantity: 0,
+          freeQuantity: 0,
+          //expiryDate: '',
+          itemBarcode: "",
+          unitPrice: srItem.itemMaster.unitPrice,
+          // Other item properties...
+        })
+      );
+
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        itemDetails: formattedItemDetails,
+      }));
+    }
+  }, [selectedSupplyReturn, grns]);
 
   useEffect(() => {
     if (submissionStatus != null) {
@@ -443,16 +540,16 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     );
 
     const isPurchaseRequisitionIdValid = validateField(
-      'purchaseRequisitionId',
-      'Purchase requisition Id',
+      "purchaseRequisitionId",
+      "Purchase requisition Id",
       formData.purchaseRequisitionId
-    )
+    );
 
     const isSupplierValid = validateField(
-      'supplierId',
-      'Supplier',
+      "supplierId",
+      "Supplier",
       formData.supplierId
-    )
+    );
 
     const isStatusValid = validateField("status", "Status", formData.status);
 
@@ -563,10 +660,10 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     // });
 
     const isItemBarcodeValid = validateField(
-      'itemBarcode',
-      'Item Barcode',
+      "itemBarcode",
+      "Item Barcode",
       formData.itemBarcode
-    )
+    );
 
     const isGrnTypeValid = validateField(
       "grnType",
@@ -593,7 +690,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       isWarehouseLocationValid &&
       (isPurchaseOrderIdValid ||
         (isPurchaseRequisitionIdValid && isSupplierValid))
-    )
+    );
   };
 
   const handleSubmit = async (isSaveAsDraft) => {
@@ -622,11 +719,12 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
           purchaseOrderId: purchaseOrderId,
           purchaseRequisitionId: formData.purchaseRequisitionId,
           supplierId: formData.supplierId,
+          supplyReturnMasterId: formData.supplyReturnMasterId,
           grnDate: formData.grnDate,
           receivedBy: formData.receivedBy,
           receivedDate: formData.receivedDate,
           status: combinedStatus,
-          companyId: sessionStorage?.getItem('companyId') ?? null,
+          companyId: sessionStorage?.getItem("companyId") ?? null,
           receivedUserId: grn?.receivedUserId,
           approvedBy: null,
           approvedUserId: null,
@@ -636,10 +734,10 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
           grnType: formData.grnType,
           warehouseLocationId: formData.warehouseLocation,
           permissionId: 22,
-        }
+        };
 
         const response = await put_grn_master_api(grn.grnMasterId, grnData);
-        console.log('GRN Update Response', response)
+        console.log("GRN Update Response", response);
 
         // Extract itemDetails from formData
         const itemDetailsData = formData.itemDetails.map(async (item) => {
@@ -751,7 +849,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
   const handlePurchaseOrderChange = (purchaseOrderId) => {
     const selectedPurchaseOrder = purchaseOrders?.find(
       (purchaseOrder) => purchaseOrder.purchaseOrderId === purchaseOrderId
-    )
+    );
 
     setSelectedPurchaseOrder(selectedPurchaseOrder);
 
@@ -765,30 +863,29 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     const selectedPurchaseRequisition = purchaseRequisitions?.find(
       (purchaseRequisition) =>
         purchaseRequisition.purchaseRequisitionId === purchaseRequisitionId
-    )
+    );
 
-    setSelectedPurchaseRequisition(selectedPurchaseRequisition)
+    setSelectedPurchaseRequisition(selectedPurchaseRequisition);
 
     setFormData((prevFormData) => ({
       ...prevFormData,
       purchaseRequisitionId:
-        selectedPurchaseRequisition?.purchaseRequisitionId ?? '',
-    }))
-  }
+        selectedPurchaseRequisition?.purchaseRequisitionId ?? "",
+    }));
+  };
 
   const handleSupplierChange = (supplierId) => {
     const selectedSupplier = suppliers?.find(
       (supplier) => supplier.supplierId === supplierId
-    )
+    );
 
-    setSelectedSupplier(selectedSupplier)
+    setSelectedSupplier(selectedSupplier);
 
     setFormData((prevFormData) => ({
       ...prevFormData,
-      supplierId:
-      selectedSupplier?.supplierId ?? '',
-    }))
-  }
+      supplierId: selectedSupplier?.supplierId ?? "",
+    }));
+  };
 
   const handleStatusChange = (selectedOption) => {
     setFormData((prevFormData) => ({
@@ -812,13 +909,15 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
           rejectedQuantity: 0,
           freeQuantity: 0,
           //expiryDate: "",
-          itemBarcode: '',
+          itemBarcode: "",
           unitPrice: 0.0,
         },
       ],
-    }))
+    }));
     setSearchTerm(""); // Clear the search term
   };
+
+  console.log("formData", formData);
 
   return {
     formData,
@@ -826,6 +925,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     validationErrors,
     selectedPurchaseOrder,
     selectedPurchaseRequisition,
+    selectedSupplyReturn,
     selectedSupplier,
     purchaseOrders,
     purchaseRequisitions,
@@ -835,6 +935,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     isLoading,
     isError,
     suppliers,
+    supplyReturns,
     loading,
     loadingDraft,
     grnTypeOptions,
@@ -861,7 +962,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     setSelectedPurchaseRequisition,
     setSearchTerm,
     handleSelectItem,
-  }
+  };
 };
 
 export default useGrnUpdate;

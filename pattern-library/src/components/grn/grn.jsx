@@ -1,10 +1,10 @@
-import React from 'react'
-import useGrn from './useGrn'
-import CurrentDateTime from '../currentDateTime/currentDateTime'
-import useCompanyLogoUrl from '../companyLogo/useCompanyLogoUrl'
-import LoadingSpinner from '../loadingSpinner/loadingSpinner'
-import ErrorComponent from '../errorComponent/errorComponent'
-import ButtonLoadingSpinner from '../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner'
+import React from "react";
+import useGrn from "./useGrn";
+import CurrentDateTime from "../currentDateTime/currentDateTime";
+import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
+import LoadingSpinner from "../loadingSpinner/loadingSpinner";
+import ErrorComponent from "../errorComponent/errorComponent";
+import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 
 const Grn = ({ handleClose, handleUpdated }) => {
   const {
@@ -14,14 +14,17 @@ const Grn = ({ handleClose, handleUpdated }) => {
     validationErrors,
     selectedPurchaseOrder,
     selectedPurchaseRequisition,
+    selectedSupplyReturn,
     purchaseOrders,
     purchaseRequisitions,
+    approvedSupplyReturnMasters,
     statusOptions,
     alertRef,
     isLoading,
     isError,
     purchaseOrderSearchTerm,
     purchaseRequisitionSearchTerm,
+    supplyReturnSearchTerm,
     supplierSearchTerm,
     loading,
     loadingDraft,
@@ -38,8 +41,10 @@ const Grn = ({ handleClose, handleUpdated }) => {
     locationsError,
     searchByPO,
     searchByPR,
+    searchBySR,
     setSearchByPO,
     setSearchByPR,
+    setSearchBySR,
     handleInputChange,
     handleItemDetailsChange,
     handleRemoveItem,
@@ -47,11 +52,14 @@ const Grn = ({ handleClose, handleUpdated }) => {
     handlePrint,
     handlePurchaseOrderChange,
     handlePurchaseRequisitionChange,
+    handleSupplyReturnChange,
     handleStatusChange,
     setPurchaseOrderSearchTerm,
     setPurchaseRequisitionSearchTerm,
+    setSupplyReturnSearchTerm,
     setSupplierSearchTerm,
     handleResetPurchaseOrder,
+    handleResetSupplyReturn,
     handleResetSupplier,
     handleResetPurchaseRequisition,
     handleSelectSupplier,
@@ -59,18 +67,18 @@ const Grn = ({ handleClose, handleUpdated }) => {
     handleSelectItem,
   } = useGrn({
     onFormSubmit: () => {
-      handleClose()
-      handleUpdated()
+      handleClose();
+      handleUpdated();
     },
-  })
-  //const companyLogoUrl = useCompanyLogoUrl()
+  });
+  const companyLogoUrl = useCompanyLogoUrl();
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return <LoadingSpinner />;
   }
 
   if (isError) {
-    return <ErrorComponent error={'Error fetching data'} />
+    return <ErrorComponent error={"Error fetching data"} />;
   }
 
   return (
@@ -79,12 +87,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          {/* <img src={companyLogoUrl} alt="Company Logo" height={30} /> */}
-          <i
-            class="bi bi-arrow-left"
-            onClick={handleClose}
-            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
-          ></i>
+          <img src={companyLogoUrl} alt="Company Logo" height={30} />
           <p>
             <CurrentDateTime />
           </p>
@@ -94,17 +97,17 @@ const Grn = ({ handleClose, handleUpdated }) => {
       </div>
 
       {/* Display success or error message */}
-      {submissionStatus === 'successSubmitted' && (
+      {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
           GRN submitted successfully!
         </div>
       )}
-      {submissionStatus === 'successSavedAsDraft' && (
+      {submissionStatus === "successSavedAsDraft" && (
         <div className="alert alert-success mb-3" role="alert">
           GRN saved as draft, you can edit and submit it later!
         </div>
       )}
-      {submissionStatus === 'error' && (
+      {submissionStatus === "error" && (
         <div className="alert alert-danger mb-3" role="alert">
           Error submitting GRN. Please try again.
         </div>
@@ -122,12 +125,12 @@ const Grn = ({ handleClose, handleUpdated }) => {
               <input
                 type="date"
                 className={`form-control ${
-                  validFields.grnDate ? 'is-valid' : ''
-                } ${validationErrors.grnDate ? 'is-invalid' : ''}`}
+                  validFields.grnDate ? "is-valid" : ""
+                } ${validationErrors.grnDate ? "is-invalid" : ""}`}
                 id="grnDate"
                 placeholder="Enter GRN date"
                 value={formData.grnDate}
-                onChange={(e) => handleInputChange('grnDate', e.target.value)}
+                onChange={(e) => handleInputChange("grnDate", e.target.value)}
                 required
               />
               {validationErrors.grnDate && (
@@ -143,13 +146,13 @@ const Grn = ({ handleClose, handleUpdated }) => {
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.receivedBy ? 'is-valid' : ''
-                } ${validationErrors.receivedBy ? 'is-invalid' : ''}`}
+                  validFields.receivedBy ? "is-valid" : ""
+                } ${validationErrors.receivedBy ? "is-invalid" : ""}`}
                 id="receivedBy"
                 placeholder="Enter name"
                 value={formData.receivedBy}
                 onChange={(e) =>
-                  handleInputChange('receivedBy', e.target.value)
+                  handleInputChange("receivedBy", e.target.value)
                 }
                 required
               />
@@ -166,13 +169,13 @@ const Grn = ({ handleClose, handleUpdated }) => {
               <input
                 type="date"
                 className={`form-control ${
-                  validFields.receivedDate ? 'is-valid' : ''
-                } ${validationErrors.receivedDate ? 'is-invalid' : ''}`}
+                  validFields.receivedDate ? "is-valid" : ""
+                } ${validationErrors.receivedDate ? "is-invalid" : ""}`}
                 id="receivedDate"
                 placeholder="Enter received date"
                 value={formData.receivedDate}
                 onChange={(e) =>
-                  handleInputChange('receivedDate', e.target.value)
+                  handleInputChange("receivedDate", e.target.value)
                 }
                 required
               />
@@ -191,10 +194,10 @@ const Grn = ({ handleClose, handleUpdated }) => {
               <select
                 id="grnType"
                 className={`form-select ${
-                  validFields.grnType ? 'is-valid' : ''
-                } ${validationErrors.grnType ? 'is-invalid' : ''}`}
+                  validFields.grnType ? "is-valid" : ""
+                } ${validationErrors.grnType ? "is-invalid" : ""}`}
                 value={formData.grnType}
-                onChange={(e) => handleInputChange('grnType', e.target.value)}
+                onChange={(e) => handleInputChange("grnType", e.target.value)}
                 required
               >
                 <option value="">Select GRN Type</option>
@@ -219,8 +222,8 @@ const Grn = ({ handleClose, handleUpdated }) => {
               <select
                 id="status"
                 className={`form-select ${
-                  validFields.status ? 'is-valid' : ''
-                } ${validationErrors.status ? 'is-invalid' : ''}`}
+                  validFields.status ? "is-valid" : ""
+                } ${validationErrors.status ? "is-invalid" : ""}`}
                 value={formData.status}
                 onChange={(e) =>
                   handleStatusChange(
@@ -249,19 +252,19 @@ const Grn = ({ handleClose, handleUpdated }) => {
               </label>
               <select
                 className={`form-select ${
-                  validFields.warehouseLocation ? 'is-valid' : ''
-                } ${validationErrors.warehouseLocation ? 'is-invalid' : ''}`}
+                  validFields.warehouseLocation ? "is-valid" : ""
+                } ${validationErrors.warehouseLocation ? "is-invalid" : ""}`}
                 id="warehouseLocation"
-                value={formData?.warehouseLocation ?? ''}
+                value={formData?.warehouseLocation ?? ""}
                 onChange={(e) =>
-                  handleInputChange('warehouseLocation', e.target.value)
+                  handleInputChange("warehouseLocation", e.target.value)
                 }
               >
                 <option value="">Select Warehouse</option>
                 {/* Filter out warehouse locations based on the locationType being "Warehouse" */}
                 {locations
                   ?.filter(
-                    (location) => location.locationType.name === 'Warehouse'
+                    (location) => location.locationType.name === "Warehouse"
                   )
                   ?.map((location) => (
                     <option
@@ -291,8 +294,9 @@ const Grn = ({ handleClose, handleUpdated }) => {
                 id="searchByPOCheckbox"
                 checked={searchByPO}
                 onChange={() => {
-                  setSearchByPO(!searchByPO)
-                  setSearchByPR(false)
+                  setSearchByPO(true);
+                  setSearchByPR(false);
+                  setSearchBySR(false);
                 }}
               />
               <label className="form-check-label" htmlFor="searchByPOCheckbox">
@@ -307,12 +311,30 @@ const Grn = ({ handleClose, handleUpdated }) => {
                 id="searchByPRCheckbox"
                 checked={searchByPR}
                 onChange={() => {
-                  setSearchByPR(!searchByPR)
-                  setSearchByPO(false)
+                  setSearchByPO(false);
+                  setSearchByPR(true);
+                  setSearchBySR(false);
                 }}
               />
               <label className="form-check-label" htmlFor="searchByPRCheckbox">
                 Search By Purchase Requisition
+              </label>
+            </div>
+
+            <div className="mb-3 mt-3 form-check">
+              <input
+                type="checkbox"
+                className="form-check-input"
+                id="searchBySRCheckbox"
+                checked={searchBySR}
+                onChange={() => {
+                  setSearchByPO(false);
+                  setSearchByPR(false);
+                  setSearchBySR(true);
+                }}
+              />
+              <label className="form-check-label" htmlFor="searchBySRCheckbox">
+                Search By Supply Return
               </label>
             </div>
 
@@ -322,7 +344,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
                   Purchase Order
                 </label>
 
-                {!['finishedGoodsIn', 'directPurchase'].includes(
+                {!["finishedGoodsIn", "directPurchase"].includes(
                   formData?.grnType
                 ) &&
                   selectedPurchaseOrder === null && (
@@ -334,9 +356,9 @@ const Grn = ({ handleClose, handleUpdated }) => {
                         <input
                           type="text"
                           className={`form-control ${
-                            validFields.purchaseOrderId ? 'is-valid' : ''
+                            validFields.purchaseOrderId ? "is-valid" : ""
                           } ${
-                            validationErrors.purchaseOrderId ? 'is-invalid' : ''
+                            validationErrors.purchaseOrderId ? "is-invalid" : ""
                           }`}
                           placeholder="Search for a purchase order..."
                           value={purchaseOrderSearchTerm}
@@ -349,9 +371,9 @@ const Grn = ({ handleClose, handleUpdated }) => {
                           <span
                             className="input-group-text bg-transparent"
                             style={{
-                              cursor: 'pointer',
+                              cursor: "pointer",
                             }}
-                            onClick={() => setPurchaseOrderSearchTerm('')}
+                            onClick={() => setPurchaseOrderSearchTerm("")}
                           >
                             <i className="bi bi-x"></i>
                           </span>
@@ -360,25 +382,25 @@ const Grn = ({ handleClose, handleUpdated }) => {
 
                       {/* Dropdown for filtered suppliers */}
                       {purchaseOrderSearchTerm && (
-                        <div className="dropdown" style={{ width: '100%' }}>
+                        <div className="dropdown" style={{ width: "100%" }}>
                           <ul
                             className="dropdown-menu"
                             style={{
-                              display: 'block',
-                              width: '100%',
-                              maxHeight: '200px',
-                              overflowY: 'auto',
+                              display: "block",
+                              width: "100%",
+                              maxHeight: "200px",
+                              overflowY: "auto",
                             }}
                           >
                             {purchaseOrders
                               .filter((purchaseOrder) =>
                                 purchaseOrder.referenceNo
-                                  ?.replace(/\s/g, '')
+                                  ?.replace(/\s/g, "")
                                   ?.toLowerCase()
                                   .includes(
                                     purchaseOrderSearchTerm
                                       .toLowerCase()
-                                      .replace(/\s/g, '')
+                                      .replace(/\s/g, "")
                                   )
                               )
                               .map((purchaseOrder) => (
@@ -393,19 +415,19 @@ const Grn = ({ handleClose, handleUpdated }) => {
                                   >
                                     <span className="me-3">
                                       <i className="bi bi-file-earmark-text"></i>
-                                    </span>{' '}
+                                    </span>{" "}
                                     {purchaseOrder?.referenceNo}
                                   </button>
                                 </li>
                               ))}
                             {purchaseOrders.filter((purchaseOrder) =>
                               purchaseOrder.referenceNo
-                                ?.replace(/\s/g, '')
+                                ?.replace(/\s/g, "")
                                 ?.toLowerCase()
                                 .includes(
                                   purchaseOrderSearchTerm
                                     .toLowerCase()
-                                    .replace(/\s/g, '')
+                                    .replace(/\s/g, "")
                                 )
                             ).length === 0 && (
                               <li className="dropdown-item text-center">
@@ -432,12 +454,12 @@ const Grn = ({ handleClose, handleUpdated }) => {
                       )}
                     </div>
                   )}
-                {formData.grnType === 'finishedGoodsIn' && (
+                {formData.grnType === "finishedGoodsIn" && (
                   <div className="alert alert-warning" role="alert">
                     This is a "Finished Goods In", no need a purchase order.
                   </div>
                 )}
-                {formData.grnType === 'directPurchase' && (
+                {formData.grnType === "directPurchase" && (
                   <div className="alert alert-warning" role="alert">
                     This is a "Direct Purchase", no need a purchase order.
                   </div>
@@ -470,34 +492,34 @@ const Grn = ({ handleClose, handleUpdated }) => {
                       <span
                         className="input-group-text bg-transparent"
                         style={{
-                          cursor: 'pointer',
+                          cursor: "pointer",
                         }}
-                        onClick={() => setPurchaseRequisitionSearchTerm('')}
+                        onClick={() => setPurchaseRequisitionSearchTerm("")}
                       >
                         <i className="bi bi-x"></i>
                       </span>
                     )}
 
                     {purchaseRequisitionSearchTerm && (
-                      <div className="dropdown" style={{ width: '100%' }}>
+                      <div className="dropdown" style={{ width: "100%" }}>
                         <ul
                           className="dropdown-menu"
                           style={{
-                            display: 'block',
-                            width: '100%',
-                            maxHeight: '200px',
-                            overflowY: 'auto',
+                            display: "block",
+                            width: "100%",
+                            maxHeight: "200px",
+                            overflowY: "auto",
                           }}
                         >
                           {purchaseRequisitions
                             .filter((purchaseRequisitions) =>
                               purchaseRequisitions.referenceNo
-                                ?.replace(/\s/g, '')
+                                ?.replace(/\s/g, "")
                                 ?.toLowerCase()
                                 .includes(
                                   purchaseRequisitionSearchTerm
                                     .toLowerCase()
-                                    .replace(/\s/g, '')
+                                    .replace(/\s/g, "")
                                 )
                             )
                             .map((purchaseRequisition) => (
@@ -514,19 +536,19 @@ const Grn = ({ handleClose, handleUpdated }) => {
                                 >
                                   <span className="me-3">
                                     <i className="bi bi-file-earmark-text"></i>
-                                  </span>{' '}
+                                  </span>{" "}
                                   {purchaseRequisition?.referenceNo}
                                 </button>
                               </li>
                             ))}
                           {purchaseRequisitions.filter((purchaseRequisition) =>
                             purchaseRequisition.referenceNo
-                              ?.replace(/\s/g, '')
+                              ?.replace(/\s/g, "")
                               ?.toLowerCase()
                               .includes(
                                 purchaseRequisitionSearchTerm
                                   .toLowerCase()
-                                  .replace(/\s/g, '')
+                                  .replace(/\s/g, "")
                               )
                           ).length === 0 && (
                             <li className="dropdown-item text-center">
@@ -565,8 +587,8 @@ const Grn = ({ handleClose, handleUpdated }) => {
                     <input
                       type="text"
                       className={`form-control ${
-                        validFields.supplierId ? 'is-valid' : ''
-                      } ${validationErrors.supplierId ? 'is-invalid' : ''}`}
+                        validFields.supplierId ? "is-valid" : ""
+                      } ${validationErrors.supplierId ? "is-invalid" : ""}`}
                       placeholder="Search for a supplier..."
                       value={supplierSearchTerm}
                       onChange={(e) => setSupplierSearchTerm(e.target.value)}
@@ -576,9 +598,9 @@ const Grn = ({ handleClose, handleUpdated }) => {
                       <span
                         className="input-group-text bg-transparent"
                         style={{
-                          cursor: 'pointer',
+                          cursor: "pointer",
                         }}
-                        onClick={() => setSupplierSearchTerm('')}
+                        onClick={() => setSupplierSearchTerm("")}
                       >
                         <i className="bi bi-x"></i>
                       </span>
@@ -586,14 +608,14 @@ const Grn = ({ handleClose, handleUpdated }) => {
                   </div>
 
                   {supplierSearchTerm && (
-                    <div className="dropdown" style={{ width: '100%' }}>
+                    <div className="dropdown" style={{ width: "100%" }}>
                       <ul
                         className="dropdown-menu"
                         style={{
-                          display: 'block',
-                          width: '100%',
-                          maxHeight: '200px',
-                          overflowY: 'auto',
+                          display: "block",
+                          width: "100%",
+                          maxHeight: "200px",
+                          overflowY: "auto",
                         }}
                       >
                         {suppliers
@@ -603,8 +625,8 @@ const Grn = ({ handleClose, handleUpdated }) => {
                                 .toLowerCase()
                                 .includes(supplierSearchTerm.toLowerCase()) ||
                               supplier.phone
-                                .replace(/\s/g, '')
-                                .includes(supplierSearchTerm.replace(/\s/g, ''))
+                                .replace(/\s/g, "")
+                                .includes(supplierSearchTerm.replace(/\s/g, ""))
                           )
                           .map((supplier) => (
                             <li key={supplier.supplierId}>
@@ -614,7 +636,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
                               >
                                 <span className="me-3">
                                   <i className="bi bi-shop"></i>
-                                </span>{' '}
+                                </span>{" "}
                                 {supplier?.supplierName} - {supplier?.phone}
                               </button>
                             </li>
@@ -625,8 +647,8 @@ const Grn = ({ handleClose, handleUpdated }) => {
                               .toLowerCase()
                               .includes(supplierSearchTerm.toLowerCase()) ||
                             supplier.phone
-                              .replace(/\s/g, '')
-                              .includes(supplierSearchTerm.replace(/\s/g, ''))
+                              .replace(/\s/g, "")
+                              .includes(supplierSearchTerm.replace(/\s/g, ""))
                         ).length === 0 && (
                           <>
                             <li className="dropdown-item text-center">
@@ -640,7 +662,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
                       </ul>
                     </div>
                   )}
-                  {formData.selectedSupplier === '' && (
+                  {formData.selectedSupplier === "" && (
                     <div className="mb-3">
                       <small className="form-text text-muted">
                         {validationErrors.supplierId && (
@@ -656,21 +678,130 @@ const Grn = ({ handleClose, handleUpdated }) => {
               </div>
             )}
 
+            {searchBySR && (
+              <div className="mt-3">
+                <label htmlFor="supplyRetuen" className="form-label">
+                  Search for Supply Return
+                </label>
+
+                <div className="mb-3">
+                  <div className="input-group">
+                    <span className="input-group-text bg-transparent ">
+                      <i className="bi bi-search"></i>
+                    </span>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Search for a supply return..."
+                      value={supplyReturnSearchTerm}
+                      onChange={(e) =>
+                        setSupplyReturnSearchTerm(e.target.value)
+                      }
+                      autoFocus={false}
+                    />
+                    {supplyReturnSearchTerm && (
+                      <span
+                        className="input-group-text bg-transparent"
+                        style={{
+                          cursor: "pointer",
+                        }}
+                        onClick={() => setSupplyReturnSearchTerm("")}
+                      >
+                        <i className="bi bi-x"></i>
+                      </span>
+                    )}
+
+                    {supplyReturnSearchTerm && (
+                      <div className="dropdown" style={{ width: "100%" }}>
+                        <ul
+                          className="dropdown-menu"
+                          style={{
+                            display: "block",
+                            width: "100%",
+                            maxHeight: "200px",
+                            overflowY: "auto",
+                          }}
+                        >
+                          {approvedSupplyReturnMasters
+                            .filter((supplyReturn) =>
+                              supplyReturn.referenceNo
+                                ?.replace(/\s/g, "")
+                                ?.toLowerCase()
+                                .includes(
+                                  supplyReturnSearchTerm
+                                    .toLowerCase()
+                                    .replace(/\s/g, "")
+                                )
+                            )
+                            .map((supplyReturn) => (
+                              <li key={supplyReturn.supplyReturnMasterId}>
+                                <button
+                                  className="dropdown-item"
+                                  onClick={() =>
+                                    handleSupplyReturnChange(
+                                      supplyReturn.referenceNo
+                                    )
+                                  }
+                                >
+                                  <span className="me-3">
+                                    <i className="bi bi-file-earmark-text"></i>
+                                  </span>{" "}
+                                  {supplyReturn?.referenceNo}
+                                </button>
+                              </li>
+                            ))}
+                          {approvedSupplyReturnMasters.filter((supplyReturn) =>
+                            supplyReturn.referenceNo
+                              ?.replace(/\s/g, "")
+                              ?.toLowerCase()
+                              .includes(
+                                supplyReturnSearchTerm
+                                  .toLowerCase()
+                                  .replace(/\s/g, "")
+                              )
+                          ).length === 0 && (
+                            <li className="dropdown-item text-center">
+                              <span className="me-3">
+                                <i className="bi bi-emoji-frown"></i>
+                              </span>
+                              No supply return found
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                  {selectedSupplyReturn === null && (
+                    <div className="mb-3">
+                      <small className="form-text text-muted">
+                        {validationErrors.supplyReturnMasterId && (
+                          <div className="text-danger mb-1">
+                            {validationErrors.supplyReturnMasterId}
+                          </div>
+                        )}
+                        Please search for a supply return and select it
+                      </small>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Additional Purchase Order Information */}
             {selectedPurchaseOrder && (
               <div className="card mb-3">
                 <div className="card-header">Selected Purchase Order</div>
                 <div className="card-body">
                   <p>
-                    Purchase Order Reference No:{' '}
+                    Purchase Order Reference No:{" "}
                     {selectedPurchaseOrder?.referenceNo}
                   </p>
                   <p>
                     Supplier: {selectedPurchaseOrder?.supplier?.supplierName}
                   </p>
                   <p>
-                    Order Date:{' '}
-                    {selectedPurchaseOrder?.orderDate?.split('T')[0] ?? ''}
+                    Order Date:{" "}
+                    {selectedPurchaseOrder?.orderDate?.split("T")[0] ?? ""}
                   </p>
                   <button
                     type="button"
@@ -689,17 +820,17 @@ const Grn = ({ handleClose, handleUpdated }) => {
                 <div className="card-header">Selected Purchase Requisition</div>
                 <div className="card-body">
                   <p>
-                    Purchase Requisition Reference No:{' '}
+                    Purchase Requisition Reference No:{" "}
                     {selectedPurchaseRequisition?.referenceNo}
                   </p>
                   <p>
                     Requested By: {selectedPurchaseRequisition?.requestedBy}
                   </p>
                   <p>
-                    Requisition Date:{' '}
+                    Requisition Date:{" "}
                     {selectedPurchaseRequisition?.requisitionDate?.split(
-                      'T'
-                    )[0] ?? ''}
+                      "T"
+                    )[0] ?? ""}
                   </p>
                   <button
                     type="button"
@@ -711,6 +842,34 @@ const Grn = ({ handleClose, handleUpdated }) => {
                 </div>
               </div>
             )}
+
+            {/* Additional Supply Return Information */}
+            {selectedSupplyReturn && (
+              <div className="card mb-3">
+                <div className="card-header">Selected Supply Return</div>
+                <div className="card-body">
+                  <p>
+                    Supply Return Reference No:{" "}
+                    {selectedSupplyReturn?.referenceNo}
+                  </p>
+                  <p>
+                    Supplier: {selectedSupplyReturn?.supplier?.supplierName}
+                  </p>
+                  <p>
+                    Returned Date:{" "}
+                    {selectedSupplyReturn?.returnDate?.split("T")[0] ?? ""}
+                  </p>
+                  <button
+                    type="button"
+                    className="btn btn-outline-danger float-end"
+                    onClick={handleResetSupplyReturn}
+                  >
+                    Reset Supply Return
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Additional Supplier Information */}
             {formData.selectedSupplier && (
               <div className="card mb-3">
@@ -736,7 +895,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
             {/* Item Details */}
             <h4>3. Item Details</h4>
             {/* Item Search */}
-            {['finishedGoodsIn', 'directPurchase'].includes(
+            {["finishedGoodsIn", "directPurchase"].includes(
               formData?.grnType
             ) && (
               <div className="mb-0 mt-3">
@@ -755,9 +914,9 @@ const Grn = ({ handleClose, handleUpdated }) => {
                     <span
                       className="input-group-text bg-transparent"
                       style={{
-                        cursor: 'pointer',
+                        cursor: "pointer",
                       }}
-                      onClick={() => setSearchTerm('')}
+                      onClick={() => setSearchTerm("")}
                     >
                       <i className="bi bi-x"></i>
                     </span>
@@ -766,14 +925,14 @@ const Grn = ({ handleClose, handleUpdated }) => {
 
                 {/* Dropdown for filtered items */}
                 {searchTerm && (
-                  <div className="dropdown" style={{ width: '100%' }}>
+                  <div className="dropdown" style={{ width: "100%" }}>
                     <ul
                       className="dropdown-menu"
                       style={{
-                        display: 'block',
-                        width: '100%',
-                        maxHeight: '200px',
-                        overflowY: 'auto',
+                        display: "block",
+                        width: "100%",
+                        maxHeight: "200px",
+                        overflowY: "auto",
                       }}
                     >
                       {isItemsLoading ? (
@@ -813,7 +972,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
                               >
                                 <span className="me-3">
                                   <i className="bi bi-cart4"></i>
-                                </span>{' '}
+                                </span>{" "}
                                 {item.itemName}
                               </button>
                             </li>
@@ -842,7 +1001,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
                 <tr>
                   <th>Item Name</th>
                   <th>Unit</th>
-                  {!['finishedGoodsIn', 'directPurchase'].includes(
+                  {!["finishedGoodsIn", "directPurchase"].includes(
                     formData?.grnType
                   ) && (
                     <>
@@ -863,7 +1022,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
                   <tr key={index}>
                     <td>{item.name}</td>
                     <td>{item.unit}</td>
-                    {!['finishedGoodsIn', 'directPurchase'].includes(
+                    {!["finishedGoodsIn", "directPurchase"].includes(
                       formData?.grnType
                     ) && (
                       <>
@@ -876,18 +1035,18 @@ const Grn = ({ handleClose, handleUpdated }) => {
                         type="number"
                         className={`form-control ${
                           validFields[`receivedQuantity_${index}`]
-                            ? 'is-valid'
-                            : ''
+                            ? "is-valid"
+                            : ""
                         } ${
                           validationErrors[`receivedQuantity_${index}`]
-                            ? 'is-invalid'
-                            : ''
+                            ? "is-invalid"
+                            : ""
                         }`}
                         value={item.receivedQuantity}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            'receivedQuantity',
+                            "receivedQuantity",
                             e.target.value
                           )
                         }
@@ -903,18 +1062,18 @@ const Grn = ({ handleClose, handleUpdated }) => {
                         type="number"
                         className={`form-control ${
                           validFields[`rejectedQuantity_${index}`]
-                            ? 'is-valid'
-                            : ''
+                            ? "is-valid"
+                            : ""
                         } ${
                           validationErrors[`rejectedQuantity_${index}`]
-                            ? 'is-invalid'
-                            : ''
+                            ? "is-invalid"
+                            : ""
                         }`}
                         value={item.rejectedQuantity}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            'rejectedQuantity',
+                            "rejectedQuantity",
                             e.target.value
                           )
                         }
@@ -933,7 +1092,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            'freeQuantity',
+                            "freeQuantity",
                             e.target.value
                           )
                         }
@@ -945,11 +1104,11 @@ const Grn = ({ handleClose, handleUpdated }) => {
                         className="form-control"
                         id="itemBarcode"
                         placeholder="Enter Item Barcode"
-                        value={item.itemBarcode || ''}
+                        value={item.itemBarcode || ""}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            'itemBarcode',
+                            "itemBarcode",
                             e.target.value
                           )
                         }
@@ -960,17 +1119,17 @@ const Grn = ({ handleClose, handleUpdated }) => {
                       <input
                         type="number"
                         className={`form-control ${
-                          validFields[`unitPrice_${index}`] ? 'is-valid' : ''
+                          validFields[`unitPrice_${index}`] ? "is-valid" : ""
                         } ${
                           validationErrors[`unitPrice_${index}`]
-                            ? 'is-invalid'
-                            : ''
+                            ? "is-invalid"
+                            : ""
                         }`}
                         value={item.unitPrice}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            'unitPrice',
+                            "unitPrice",
                             e.target.value
                           )
                         }
@@ -997,7 +1156,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
           </div>
         )}
 
-        {!['finishedGoodsIn', 'directPurchase'].includes(formData?.grnType) &&
+        {!["finishedGoodsIn", "directPurchase"].includes(formData?.grnType) &&
           selectedPurchaseOrder === null && (
             <div className="mb-3">
               <small className="form-text text-muted">
@@ -1032,7 +1191,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Submitting..." />
             ) : (
-              'Submit'
+              "Submit"
             )}
           </button>
           <button
@@ -1049,7 +1208,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
             {loadingDraft && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Saving as Draft..." />
             ) : (
-              'Save as Draft'
+              "Save as Draft"
             )}
           </button>
           <button
@@ -1071,7 +1230,7 @@ const Grn = ({ handleClose, handleUpdated }) => {
         </div>
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default Grn
+export default Grn;
