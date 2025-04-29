@@ -880,6 +880,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Lead created successfully.
+        /// </summary>
+        public static string LeadCreated {
+            get {
+                return ResourceManager.GetString("LeadCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Lead deleted successfully.
         /// </summary>
         public static string LeadDeleted {
@@ -1141,6 +1150,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Meeting created successfully.
+        /// </summary>
+        public static string MeetingCreated {
+            get {
+                return ResourceManager.GetString("MeetingCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Meeting deleted successfully.
         /// </summary>
         public static string MeetingDeleted {
@@ -1231,7 +1249,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Packing slip approved.
+        ///   Looks up a localized string similar to Packing slip approval success.
         /// </summary>
         public static string PackingSlipApproved {
             get {
@@ -1240,7 +1258,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Packing slip created successfully. .
+        ///   Looks up a localized string similar to Packing slip created successfully.
         /// </summary>
         public static string PackingSlipCreated {
             get {
@@ -1249,7 +1267,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Packing slip detail created successfully..
+        ///   Looks up a localized string similar to Packing slip detail created successfully.
         /// </summary>
         public static string PackingSlipDetailCreated {
             get {
@@ -1285,7 +1303,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Packing slip detail updated.
+        ///   Looks up a localized string similar to Packing slip detail updated successfully.
         /// </summary>
         public static string PackingSlipDetailUpdated {
             get {
@@ -1294,7 +1312,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Packing slip not found.
+        ///   Looks up a localized string similar to Packing not found.
         /// </summary>
         public static string PackingSlipNotFound {
             get {
@@ -1303,7 +1321,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Packing slip retrieved successfully. .
+        ///   Looks up a localized string similar to Packing slip retrieved successfully.
         /// </summary>
         public static string PackingSlipRetrieved {
             get {
@@ -1312,7 +1330,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Packing slip updated.
+        ///   Looks up a localized string similar to Packing slip updated successfully.
         /// </summary>
         public static string PackingSlipUpdated {
             get {
@@ -2379,6 +2397,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string UserDeactivated {
             get {
                 return ResourceManager.GetString("UserDeactivated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User geo location created.
+        /// </summary>
+        public static string UserGeoLocationCreated {
+            get {
+                return ResourceManager.GetString("UserGeoLocationCreated", resourceCulture);
             }
         }
         

@@ -32,6 +32,9 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             {
                 var userGeoLocation = _mapper.Map<UserGeoLocation>(userGeoLocationRequestModel);
                 await _userGeoLocationService.CreateGeoLocation(userGeoLocation);
+
+                var userGeoLocationDto = _mapper.Map<UserGeoLocationDto>(userGeoLocation);
+                AddResponseMessage(Response, LogMessages.UserGeoLocationCreated, userGeoLocationDto, true, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {

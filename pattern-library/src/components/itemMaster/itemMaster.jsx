@@ -4,7 +4,6 @@ import CurrentDateTime from "../currentDateTime/currentDateTime";
 import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 import LoadingSpinner from "../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../errorComponent/errorComponent";
-import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
 
 const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
   const {
@@ -36,6 +35,7 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
     searchChildTerm,
     selectedParentItem,
     selectedChildItems,
+    itemCode,
     setSearchTerm,
     setSearchChildTerm,
     handleInputChange,
@@ -85,7 +85,7 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
       {/* Display success or error messages */}
       {submissionStatus === 'successSubmitted' && (
         <div className="alert alert-success mb-3" role="alert">
-          Item master created successfully!
+          Item master created successfully! Item Code : {itemCode}
         </div>
       )}
       {submissionStatus === 'successSavedAsDraft' && (
@@ -126,7 +126,7 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
               )}
             </div>
 
-            <div className="mb-3 mt-3">
+            {/* <div className="mb-3 mt-3">
               <label htmlFor="itemCode" className="form-label">
                 Item Code
               </label>
@@ -146,7 +146,7 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
                   {validationErrors.itemCode}
                 </div>
               )}
-            </div>
+            </div> */}
 
             <div className="mb-3 mt-3">
               <label htmlFor="itemType" className="form-label">
@@ -438,6 +438,229 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
           </div>
 
           <div className="col-md-5">
+            <h4>Item Prices</h4>
+            <div className="mb-3 mt-3 d-flex align-items-center">
+              <label
+                htmlFor="costRatio"
+                className="form-label me-2 mb-0"
+                style={{ minWidth: '200px' }}
+              >
+                Cost Ratio :
+              </label>
+              <input
+                type="text"
+                className={`form-control ${
+                  validFields.costRatio ? 'is-valid' : ''
+                } ${validationErrors.costRatio ? 'is-invalid' : ''}`}
+                id="costRatio"
+                placeholder="Enter Cost Ratio"
+                value={formData.costRatio}
+                onChange={(e) => handleInputChange('costRatio', e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="mb-3 mt-3 d-flex align-items-center">
+              <label
+                htmlFor="fobInUSD"
+                className="form-label me-2 mb-0"
+                style={{ minWidth: '200px' }}
+              >
+                FOB In USD :
+              </label>
+              <input
+                type="text"
+                className={`form-control ${
+                  validFields.fobInUSD ? 'is-valid' : ''
+                } ${validationErrors.fobInUSD ? 'is-invalid' : ''}`}
+                id="fobInUSD"
+                placeholder="Enter FOB In USD"
+                value={formData.fobInUSD}
+                onChange={(e) => handleInputChange('fobInUSD', e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="mb-3 mt-3 d-flex align-items-center">
+              <label
+                htmlFor="landedCost"
+                className="form-label me-2 mb-0"
+                style={{ minWidth: '200px' }}
+              >
+                Landed Cost :
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="landedCost"
+                placeholder="Enter Landed Cost"
+                value={formData.landedCost}
+                onChange={(e) =>
+                  handleInputChange('landedCost', e.target.value)
+                }
+                readOnly
+              />
+            </div>
+
+            <div className="mb-3 mt-3 d-flex align-items-center">
+              <label
+                htmlFor="minNetSellingPrice"
+                className="form-label me-2 mb-0"
+                style={{ minWidth: '200px' }}
+              >
+                Min Net Selling Price :
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="minNetSellingPrice"
+                placeholder="Enter Min Net Selling Price"
+                value={formData.minNetSellingPrice}
+                onChange={(e) =>
+                  handleInputChange('minNetSellingPrice', e.target.value)
+                }
+                readOnly
+              />
+            </div>
+
+            <div className="mb-3 mt-3 d-flex align-items-center">
+              <label
+                htmlFor="sellingPrice"
+                className="form-label me-2 mb-0"
+                style={{ minWidth: '200px' }}
+              >
+                Selling Price :
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="sellingPrice"
+                placeholder="Enter Selling Price"
+                value={formData.sellingPrice}
+                onChange={(e) =>
+                  handleInputChange('sellingPrice', e.target.value)
+                }
+                readOnly
+              />
+            </div>
+
+            <div className="mb-3 mt-3 d-flex align-items-center">
+              <label
+                htmlFor="mrp"
+                className="form-label me-2 mb-0"
+                style={{ minWidth: '200px' }}
+              >
+                MRP :
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="mrp"
+                placeholder="Enter MRP"
+                value={formData.mrp}
+                onChange={(e) => handleInputChange('mrp', e.target.value)}
+                readOnly
+              />
+            </div>
+
+            <div className="mb-3 mt-3 d-flex align-items-center">
+              <label
+                htmlFor="competitorPrice"
+                className="form-label me-2 mb-0"
+                style={{ minWidth: '200px' }}
+              >
+                Competitor Price :
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="competitorPrice"
+                placeholder="Enter Competitor Price"
+                value={formData.competitorPrice}
+                onChange={(e) =>
+                  handleInputChange('competitorPrice', e.target.value)
+                }
+              />
+            </div>
+
+            <div className="mb-3 mt-3 d-flex align-items-center">
+              <label
+                htmlFor="labelPrice"
+                className="form-label me-2 mb-0"
+                style={{ minWidth: '200px' }}
+              >
+                Label Price :
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="labelPrice"
+                placeholder="Enter Label Price"
+                value={formData.labelPrice}
+                onChange={(e) =>
+                  handleInputChange('labelPrice', e.target.value)
+                }
+              />
+            </div>
+
+            <div className="mb-3 mt-3 d-flex align-items-center">
+              <label
+                htmlFor="averageSellingPrice"
+                className="form-label me-2 mb-0"
+                style={{ minWidth: '200px' }}
+              >
+                Average Selling Price :
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="averageSellingPrice"
+                placeholder="Enter Average Selling Price"
+                value={formData.averageSellingPrice}
+                onChange={(e) =>
+                  handleInputChange('averageSellingPrice', e.target.value)
+                }
+              />
+            </div>
+
+            <div className="mb-3 mt-3 d-flex align-items-center">
+              <label
+                htmlFor="stockClearance"
+                className="form-label me-2 mb-0"
+                style={{ minWidth: '200px' }}
+              >
+                Stock Clearance :
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="stockClearance"
+                placeholder="Enter Stock Clearance Price"
+                value={formData.stockClearance}
+                onChange={(e) =>
+                  handleInputChange('stockClearance', e.target.value)
+                }
+              />
+            </div>
+
+            <div className="mb-3 mt-3 d-flex align-items-center">
+              <label
+                htmlFor="bulkPrice"
+                className="form-label me-2 mb-0"
+                style={{ minWidth: '200px' }}
+              >
+                Bulk Price :
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                id="bulkPrice"
+                placeholder="Enter Bulk Price"
+                value={formData.bulkPrice}
+                onChange={(e) => handleInputChange('bulkPrice', e.target.value)}
+              />
+            </div>
+
             <h4>Item Hierarchy</h4>
             {/* Other form fields */}
             <div className="mb-3 mt-3">

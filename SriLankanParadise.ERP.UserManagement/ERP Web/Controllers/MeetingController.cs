@@ -68,7 +68,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _meetingService.AddMeetingAsync(meeting);
 
                 var meetingDto = _mapper.Map<MeetingDto>(meeting);
-                AddResponseMessage(Response, LogMessages.MeetingsRetrieved, meetingDto, true, HttpStatusCode.OK);
+                AddResponseMessage(Response, LogMessages.MeetingCreated, meetingDto, true, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {

@@ -14,7 +14,10 @@ public partial class LocationInventory
     public int LocationId { get; set; }
 
     public decimal? StockInHand { get; set; }
+
     public string? BatchNo { get; set; }
+
+    public string? RackNo { get; set; }
 
     public virtual ItemBatch ItemBatch { get; set; } = null!;
 

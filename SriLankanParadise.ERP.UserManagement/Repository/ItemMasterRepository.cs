@@ -60,7 +60,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(u => u.MeasurementType)
                     .ToListAsync();
 
-                return itemMasters.Any() ? itemMasters : null;
+                return itemMasters;
             }
             catch (Exception)
             {

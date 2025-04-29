@@ -14,7 +14,7 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
         <div className="mb-3 d-flex justify-content-between">
           <h6>Details for Item Master ID: {itemMaster.itemMasterId}</h6>
           <div>
-            Status :{" "}
+            Status :{' '}
             <span
               className={`badge rounded-pill ${getStatusBadgeClass(
                 itemMaster.status
@@ -49,7 +49,7 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
 
           <div className="col-md-6">
             <p>
-              <strong>Measurement Type:</strong>{" "}
+              <strong>Measurement Type:</strong>{' '}
               {itemMaster.unit?.measurementType?.name}
             </p>
             <p>
@@ -59,10 +59,65 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
               <strong>Reorder Level:</strong> {itemMaster?.reorderLevel}
             </p>
             <p>
-              <strong>Hierarchy Type:</strong>{" "}
+              <strong>Hierarchy Type:</strong>{' '}
               {itemMaster.parentId !== itemMaster.itemMasterId
-                ? "Sub Item"
-                : "Main Item"}
+                ? 'Sub Item'
+                : 'Main Item'}
+            </p>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-md-6 mt-4">
+            <h6>Item Master Price Details</h6>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-md-6 mt-3">
+            <p>
+              <strong>Cost Ratio: </strong>
+              {itemMaster.costRatio}
+            </p>
+            <p>
+              <strong>FOB in USD: </strong>
+              {itemMaster.fobInUSD}
+            </p>
+            <p>
+              <strong>Landed Cost: </strong>
+              {itemMaster.landedCost}
+            </p>
+            <p>
+              <strong>Min Net Selling Price: </strong>
+              {itemMaster.minNetSellingPrice}
+            </p>
+            <p>
+              <strong>Selling Price: </strong>
+              {itemMaster.sellingPrice}
+            </p>
+            <p>
+              <strong>Bulk Price: </strong>
+              {itemMaster.bulkPrice}
+            </p>
+          </div>
+          <div className="col-md-6 mt-3">
+            <p>
+              <strong>MRP: </strong>
+              {itemMaster.mrp}
+            </p>
+            <p>
+              <strong>Competitor Price: </strong>
+              {itemMaster.competitorPrice}
+            </p>
+            <p>
+              <strong>Label Price: </strong>
+              {itemMaster.labelPrice}
+            </p>
+            <p>
+              <strong>Average Selling Price: </strong>
+              {itemMaster.averageSellingPrice}
+            </p>
+            <p>
+              <strong>Stock Clearance: </strong>
+              {itemMaster.stockClearance}
             </p>
           </div>
         </div>
@@ -73,7 +128,7 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
         </Button>
       </Modal.Footer>
     </Modal>
-  );
+  )
 };
 
 export default ItemMasterDetail;
