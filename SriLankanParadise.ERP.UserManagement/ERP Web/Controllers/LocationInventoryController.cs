@@ -41,7 +41,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             try
             {
                 var locationInventory = _mapper.Map<LocationInventory>(locationInventoryRequest);
-                await _locationInventoryService.AddLocationInventory(locationInventory, locationInventoryRequest.MovementTypeId);
+                var locationInventoryResult = await _locationInventoryService.AddLocationInventory(locationInventory, locationInventoryRequest.MovementTypeId);
 
                 // Create action log
                 //var actionLog = new ActionLogModel()
@@ -54,7 +54,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
 
                 // send response
-                var locationInventoryDto = _mapper.Map<LocationInventoryDto>(locationInventory);
+                var locationInventoryDto = _mapper.Map<LocationInventoryDto>(locationInventoryResult);
                 _logger.LogInformation(LogMessages.LocationInventoryCreated);
                 AddResponseMessage(Response, LogMessages.LocationInventoryCreated, locationInventoryDto, true, HttpStatusCode.Created);
             }

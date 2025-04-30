@@ -30,15 +30,15 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             this.logger = logger;
         }
 
-        [HttpPost()]
-        public async Task<ApiResponseModel> Get([FromBody] DailyLocationInventoryRequestModel dailyLocationInventoryRequest)
+        [HttpPost]
+        public async Task<ApiResponseModel> Get(DailyLocationInventoryLogRequestModel dailyLocationInventoryRequest)
         {
             try
             {
-                var dailyLocationInventory = mapper.Map<DailyLocationInventory>(dailyLocationInventoryRequest);
-                await dailyLocationInventoryService.Add(dailyLocationInventory);
+                var dailyLocationInventory = mapper.Map<DailyLocationInventory>(dailyLocationInventoryRequest.DailyLocationInventory);
+                var result = await dailyLocationInventoryService.Add(dailyLocationInventory, dailyLocationInventoryRequest.DailyLocationInventory.TransactionDate, dailyLocationInventoryRequest.DailyLocationInventory.MovementTypeId, dailyLocationInventoryRequest.EnteredUserId, dailyLocationInventoryRequest.Remark);
 
-                var dailyLocationInventoryDto = mapper.Map<DailyLocationInventoryDto>(dailyLocationInventory);
+                var dailyLocationInventoryDto = mapper.Map<DailyLocationInventoryDto>(result);
                 logger.LogInformation(LogMessages.DailyLocationInventoryCreated);
                 AddResponseMessage(Response, LogMessages.DailyLocationInventoryCreated, dailyLocationInventoryDto, true, HttpStatusCode.Created);
             }

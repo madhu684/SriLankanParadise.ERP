@@ -969,4 +969,7 @@
   <data name="UserActivated" xml:space="preserve">
     <value>User Activated</value>
   </data>
+  <data name="DailyLocationInventoryUpdated" xml:space="preserve">
+    <value>Daily location inventory updated</value>
+  </data>
 </root>

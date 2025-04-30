@@ -556,6 +556,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Daily location inventory updated.
+        /// </summary>
+        public static string DailyLocationInventoryUpdated {
+            get {
+                return ResourceManager.GetString("DailyLocationInventoryUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Daily stock balance created successfully.
         /// </summary>
         public static string DailyStockBalanceCreated {

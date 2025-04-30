@@ -4,7 +4,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 {
     public class LocationInventoryDto
     {
-        public int LocationInventoryId { get; set; }
+        public int locationInventoryId { get; set; }
 
         public int ItemMasterId { get; set; }
 

@@ -15,7 +15,11 @@
         public DateTime? Date { get; set; }
 
         public decimal? Qty { get; set; }
+
+        public DateTime? TransactionDate { get; set; }
+
         public int? ReferenceNo { get; set; }
+
         public string? BatchNo { get; set; }
 
         public int PermissionId { get; set; }

@@ -22,6 +22,7 @@ public partial class LocationInventoryMovement
     public DateTime? Date { get; set; }
 
     public decimal? Qty { get; set; }
+    public DateTime? TransactionDate { get; set; }
 
     public virtual ItemBatch ItemBatch { get; set; } = null!;
 

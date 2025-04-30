@@ -13,10 +13,59 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             this.dbContext = dbContext;
         }
 
-        public async Task Add(DailyLocationInventory dailyLocationInventory)
+        public async Task<DailyLocationInventory> Add(DailyLocationInventory dailyLocationInventory, DateTime transactionDate, int m)
         {
-            await dbContext.AddAsync(dailyLocationInventory);
-            await dbContext.SaveChangesAsync();
+            try
+            {
+                var runDate = DateOnly.FromDateTime(transactionDate);
+                var existingDailyInventory = await dbContext.DailyLocationInventories
+                    .Where(d =>
+                        d.RunDate == runDate &&
+                        d.LocationId == dailyLocationInventory.LocationId &&
+                        d.ItemMasterId == dailyLocationInventory.ItemMasterId &&
+                        d.BatchNo == dailyLocationInventory.BatchNo)
+                    .FirstOrDefaultAsync();
+
+                if (existingDailyInventory != null)
+                {
+                    if (m == 1)
+                    {
+                        await dbContext.DailyLocationInventories
+                            .Where(d => d.Id == existingDailyInventory.Id)
+                            .ExecuteUpdateAsync(setters => setters
+                                .SetProperty(d => d.StockInHand, existingDailyInventory.StockInHand + dailyLocationInventory.StockInHand));
+                    }
+                    else if (m == 2)
+                    {
+                        await dbContext.DailyLocationInventories
+                            .Where(d => d.Id == existingDailyInventory.Id)
+                            .ExecuteUpdateAsync(setters => setters
+                                .SetProperty(d => d.StockInHand, existingDailyInventory.StockInHand - dailyLocationInventory.StockInHand));
+                    }
+                    else
+                    {
+                        await dbContext.DailyLocationInventories
+                            .Where(d => d.Id == existingDailyInventory.Id)
+                            .ExecuteUpdateAsync(setters => setters
+                                .SetProperty(d => d.StockInHand, dailyLocationInventory.StockInHand));
+                    }
+                    return existingDailyInventory;
+
+                }
+                else
+                {
+                    dailyLocationInventory.RunDate = runDate;
+                    dbContext.DailyLocationInventories.Add(dailyLocationInventory);
+                    await dbContext.SaveChangesAsync();
+
+                    return dailyLocationInventory;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in Add method: {ex.Message}");
+                throw;
+            }
         }
 
         public async Task<IEnumerable<DailyLocationInventory>> Get(DateOnly runDate, int locationId)

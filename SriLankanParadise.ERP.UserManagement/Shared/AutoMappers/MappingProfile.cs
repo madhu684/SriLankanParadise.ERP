@@ -135,7 +135,8 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
                 .ForMember(dest => dest.SubItemMasters, opt => opt.Ignore());
             CreateMap<SubItemMaster, SubItemMasterDto>();
             CreateMap<RolePermission, RolePermissionDto>();
-            CreateMap<DailyLocationInventoryRequestModel, DailyLocationInventory>();
+            CreateMap<DailyLocationInventoryRequestModel, DailyLocationInventory>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
             CreateMap<DailyLocationInventory, DailyLocationInventoryDto>();
             CreateMap<UserUpdateRequestModel, User>();
             CreateMap<CompanySubscriptionModuleUser, CompanySubscriptionModuleUserDto>();
