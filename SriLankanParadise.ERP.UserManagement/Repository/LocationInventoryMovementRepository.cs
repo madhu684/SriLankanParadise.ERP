@@ -186,7 +186,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             try
             {
                 var query = await _dbContext.LocationInventoryMovements
-                            .Where(l => l.Date.HasValue && l.Date.Value.Date >= fromDate.Date && l.Date.Value.Date <= toDate.Date)
+                            .Where(l => l.TransactionDate.HasValue && l.TransactionDate.Value.Date >= fromDate.Date && l.TransactionDate.Value.Date <= toDate.Date)
                             .Where(l => l.MovementTypeId == movementTypeId)
                             .Where(l => l.LocationId == locationId)
                             .GroupBy(l => new { l.ItemMasterId, l.TransactionTypeId, l.BatchNo, l.LocationId })
@@ -219,7 +219,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             try
             {
                 var query = await _dbContext.LocationInventoryMovements
-                            .Where(l => l.Date.HasValue && l.Date.Value.Date >= fromDate.Date && l.Date.Value.Date <= toDate.Date)
+                            .Where(l => l.TransactionDate.HasValue && l.TransactionDate.Value.Date >= fromDate.Date && l.TransactionDate.Value.Date <= toDate.Date)
                             .Where(l => l.MovementTypeId == movementTypeId)
                             .Where(l => l.TransactionTypeId == transactionTypeId)
                             .ToListAsync();
