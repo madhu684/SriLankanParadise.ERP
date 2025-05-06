@@ -17,7 +17,7 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     unitId: '',
     categoryId: '',
     itemName: '',
-    itemCode: '',
+    //itemCode: '',
     itemTypeId: '',
     measurementType: '',
     itemHierarchy: '',
@@ -26,6 +26,17 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     conversionValue: '',
     reorderLevel: '',
     unitPrice: '',
+    costRatio: '',
+    fobInUSD: '',
+    landedCost: '',
+    minNetSellingPrice: '',
+    sellingPrice: '',
+    mrp: '',
+    competitorPrice: '',
+    labelPrice: '',
+    averageSellingPrice: '',
+    stockClearance: '',
+    bulkPrice: '',
   })
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -153,6 +164,24 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
   });
 
   useEffect(() => {
+    const costRatio = parseFloat(formData.costRatio) || 0
+    const fobInUSD = parseFloat(formData.fobInUSD) || 0
+
+    const landedCost = costRatio * fobInUSD
+    const minNetSellingPrice = landedCost / 0.9
+    const sellingPrice = landedCost / 0.75
+    const mrp = sellingPrice / 0.7
+
+    setFormData((prev) => ({
+      ...prev,
+      landedCost: landedCost.toFixed(2),
+      minNetSellingPrice: minNetSellingPrice.toFixed(2),
+      sellingPrice: sellingPrice.toFixed(2),
+      mrp: mrp.toFixed(2),
+    }))
+  }, [formData.costRatio, formData.fobInUSD])
+
+  useEffect(() => {
     const deepCopyItemMaster = JSON.parse(JSON.stringify(itemMaster));
     const itemHierarchy =
       deepCopyItemMaster?.parentId !== deepCopyItemMaster?.itemMasterId
@@ -171,9 +200,20 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
         deepCopyItemMaster?.inventoryUnit?.measurementTypeId,
       inventoryUnitId: deepCopyItemMaster?.inventoryUnitId,
       conversionValue: deepCopyItemMaster?.conversionRate,
-      itemCode: deepCopyItemMaster?.itemCode ?? '',
+      //itemCode: deepCopyItemMaster?.itemCode ?? '',
       reorderLevel: deepCopyItemMaster?.reorderLevel ?? '',
       unitPrice: deepCopyItemMaster?.unitPrice ?? '',
+      costRatio: deepCopyItemMaster?.costRatio ?? '',
+      fobInUSD: deepCopyItemMaster?.fobInUSD ?? '',
+      landedCost: deepCopyItemMaster?.landedCost ?? '',
+      minNetSellingPrice: deepCopyItemMaster?.minNetSellingPrice ?? '',
+      sellingPrice: deepCopyItemMaster?.sellingPrice ?? '',
+      mrp: deepCopyItemMaster?.mrp ?? '',
+      competitorPrice: deepCopyItemMaster?.competitorPrice ?? '',
+      labelPrice: deepCopyItemMaster?.labelPrice ?? '',
+      averageSellingPrice: deepCopyItemMaster?.averageSellingPrice ?? '',
+      stockClearance: deepCopyItemMaster?.stockClearance ?? '',
+      bulkPrice: deepCopyItemMaster?.bulkPrice ?? '',
     })
 
     const fetchParentItem = async () => {
@@ -310,11 +350,11 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       }
     );
 
-    const isItemCodeValid = validateField(
-      "itemCode",
-      "Item code",
-      formData.itemCode
-    );
+    // const isItemCodeValid = validateField(
+    //   "itemCode",
+    //   "Item code",
+    //   formData.itemCode
+    // );
 
     const isReorderLevelValid = validateField(
       "reorderLevel",
@@ -328,6 +368,18 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       formData.unitPrice
     )
 
+    const isCostRatioValid = validateField(
+      'costRatio',
+      'Cost Ratio',
+      formData.costRatio
+    )
+
+    const isFOBInUSDValid = validateField(
+      'fobInUSD',
+      'FOB In USD',
+      formData.fobInUSD
+    )
+
     return (
       isUnitValid &&
       isCategoryValid &&
@@ -337,9 +389,11 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       isparentItemValid &&
       isInventoryUnitValid &&
       isConversionValueValid &&
-      isItemCodeValid &&
+      //isItemCodeValid &&
       isReorderLevelValid &&
-      isUnitPriceValid
+      isUnitPriceValid &&
+      isCostRatioValid &&
+      isFOBInUSDValid
     )
   };
   const handleSubmit = async (isSaveAsDraft) => {
@@ -373,10 +427,21 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
           })),
           inventoryUnitId: formData.inventoryUnitId,
           conversionRate: formData.conversionValue,
-          itemCode: formData.itemCode,
+          //itemCode: formData.itemCode,
           reorderLevel: formData.reorderLevel,
           permissionId: 1040,
           unitPrice: formData.unitPrice,
+          costRatio: formData.costRatio,
+          fobInUSD: formData.fobInUSD,
+          landedCost: formData.landedCost,
+          minNetSellingPrice: formData.minNetSellingPrice,
+          sellingPrice: formData.sellingPrice,
+          mrp: formData.mrp,
+          competitorPrice: formData.competitorPrice,
+          labelPrice: formData.labelPrice,
+          averageSellingPrice: formData.averageSellingPrice,
+          stockClearance: formData.stockClearance,
+          bulkPrice: formData.bulkPrice,
         }
 
         const putResponse = await put_item_master_api(

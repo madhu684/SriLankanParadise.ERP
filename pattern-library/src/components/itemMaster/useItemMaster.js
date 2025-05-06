@@ -15,7 +15,7 @@ const useItemMaster = ({ onFormSubmit }) => {
     unitId: '',
     categoryId: '',
     itemName: '',
-    itemCode: '',
+    //itemCode: '',
     itemTypeId: '',
     measurementType: '',
     itemHierarchy: 'main',
@@ -24,10 +24,22 @@ const useItemMaster = ({ onFormSubmit }) => {
     conversionValue: '',
     reorderLevel: '',
     unitPrice: '',
+    costRatio: '',
+    fobInUSD: '',
+    landedCost: '',
+    minNetSellingPrice: '',
+    sellingPrice: '',
+    mrp: '',
+    competitorPrice: '',
+    labelPrice: '',
+    averageSellingPrice: '',
+    stockClearance: '',
+    bulkPrice: ''
   })
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
   const [unitOptions, setUnitOptions] = useState([]);
+  const [itemCode, setItemCode] = useState(null);
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const alertRef = useRef(null);
@@ -204,6 +216,26 @@ const useItemMaster = ({ onFormSubmit }) => {
     }
   }, [submissionStatus]);
 
+
+  useEffect(() => {
+    const costRatio = parseFloat(formData.costRatio) || 0
+    const fobInUSD = parseFloat(formData.fobInUSD) || 0
+
+    const landedCost = costRatio * fobInUSD
+    const minNetSellingPrice = landedCost / 0.9
+    const sellingPrice = landedCost / 0.75
+    const mrp = sellingPrice / 0.7
+
+    setFormData((prev) => ({
+      ...prev,
+      landedCost: landedCost.toFixed(2),
+      minNetSellingPrice: minNetSellingPrice.toFixed(2),
+      sellingPrice: sellingPrice.toFixed(2),
+      mrp: mrp.toFixed(2),
+    }))
+  }, [formData.costRatio, formData.fobInUSD])
+
+
   const validateField = (
     fieldName,
     fieldDisplayName,
@@ -290,11 +322,11 @@ const useItemMaster = ({ onFormSubmit }) => {
       }
     );
 
-    const isItemCodeValid = validateField(
-      "itemCode",
-      "Item code",
-      formData.itemCode
-    );
+    // const isItemCodeValid = validateField(
+    //   "itemCode",
+    //   "Item code",
+    //   formData.itemCode
+    // );
 
     const isReorderLevelValid = validateField(
       "reorderLevel",
@@ -308,6 +340,18 @@ const useItemMaster = ({ onFormSubmit }) => {
       formData.unitPrice
     )
 
+    const isCostRatioValid = validateField(
+      'costRatio',
+      'Cost Ratio',
+      formData.costRatio
+    )
+
+    const isFOBInUSDValid = validateField(
+      'fobInUSD',
+      'FOB In USD',
+      formData.fobInUSD
+    )
+
     return (
       isUnitValid &&
       isCategoryValid &&
@@ -317,9 +361,11 @@ const useItemMaster = ({ onFormSubmit }) => {
       isparentItemValid &&
       isInventoryUnitValid &&
       isConversionValueValid &&
-      isItemCodeValid &&
+      //isItemCodeValid &&
       isReorderLevelValid &&
-      isUnitPriceValid
+      isUnitPriceValid &&
+      isCostRatioValid &&
+      isFOBInUSDValid
     )
   };
 
@@ -352,13 +398,27 @@ const useItemMaster = ({ onFormSubmit }) => {
           })),
           inventoryUnitId: formData.inventoryUnitId,
           conversionRate: formData.conversionValue,
-          itemCode: formData.itemCode,
+          //itemCode: formData.itemCode,
           reorderLevel: formData.reorderLevel,
           permissionId: 1039,
           unitPrice: formData.unitPrice,
+          costRatio: formData.costRatio,
+          fobInUSD: formData.fobInUSD,
+          landedCost: formData.landedCost,
+          minNetSellingPrice: formData.minNetSellingPrice,
+          sellingPrice: formData.sellingPrice,
+          mrp: formData.mrp,
+          competitorPrice: formData.competitorPrice,
+          labelPrice: formData.labelPrice,
+          averageSellingPrice: formData.averageSellingPrice,
+          stockClearance: formData.stockClearance,
+          bulkPrice: formData.bulkPrice,
         }
 
+        console.log('sending request : ', itemMasterData)
         const response = await post_item_master_api(itemMasterData);
+        console.log('response after POST request : ', response)
+        setItemCode(response.data.result.itemCode);
         const itemMasterId = response.data.result.itemMasterId;
 
         if (formData.itemHierarchy === "main") {
@@ -378,10 +438,21 @@ const useItemMaster = ({ onFormSubmit }) => {
             })),
             inventoryUnitId: formData.inventoryUnitId,
             conversionRate: formData.conversionValue,
-            itemCode: formData.itemCode,
+            //itemCode: formData.itemCode,
             reorderLevel: formData.reorderLevel,
             permissionId: 1040,
             unitPrice: formData.unitPrice,
+            costRatio: formData.costRatio,
+            fobInUSD: formData.fobInUSD,
+            landedCost: formData.landedCost,
+            minNetSellingPrice: formData.minNetSellingPrice,
+            sellingPrice: formData.sellingPrice,
+            mrp: formData.mrp,
+            competitorPrice: formData.competitorPrice,
+            labelPrice: formData.labelPrice,
+            averageSellingPrice: formData.averageSellingPrice,
+            stockClearance: formData.stockClearance,
+            bulkPrice: formData.bulkPrice,
           }
 
           putResponse = await put_item_master_api(itemMasterId, itemMasterData);
@@ -485,6 +556,7 @@ const useItemMaster = ({ onFormSubmit }) => {
     searchChildTerm,
     selectedParentItem,
     selectedChildItems,
+    itemCode,
     setSearchTerm,
     setSearchChildTerm,
     setFormData,

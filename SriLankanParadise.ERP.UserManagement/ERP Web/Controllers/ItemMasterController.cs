@@ -163,6 +163,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 }
 
                 var updatedItemMaster = _mapper.Map<ItemMaster>(itemMasterRequest);
+                updatedItemMaster.ItemMasterId = itemMasterId;
+                updatedItemMaster.ItemCode = existingItemMaster.ItemCode;
                 // Update item master
                 await _itemMasterService.UpdateItemMaster(itemMasterId, updatedItemMaster);
 

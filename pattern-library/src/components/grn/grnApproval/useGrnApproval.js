@@ -7,6 +7,7 @@ import {
   post_itemBatch_api,
   post_location_inventory_api,
   post_location_inventory_movement_api,
+  approve_supply_return_master_api,
 } from "../../../services/purchaseApi";
 
 const useGrnApproval = ({ grn, onFormSubmit }) => {
@@ -80,6 +81,10 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
         await createBatchHasGrnMaster(batchId, GrnId);
 
         await createItemBatchesAndDetails(batchId, GrnId);
+
+        if (grn.supplyReturnMasterId) {
+          await updateSupplyReturnMaster(grn);
+        }
       } else {
         setApprovalStatus("error");
       }
@@ -110,6 +115,25 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
 
     // Combine components to form batch reference
     return `B-${formattedDate}-${randomNum}`;
+  };
+
+  const updateSupplyReturnMaster = async (master) => {
+    try {
+      let updateMasterData = {
+        status: 6,
+        approvedBy: master.approvedBy,
+        approvedUserId: sessionStorage.getItem("userId"),
+        approvedDate: new Date().toISOString(),
+      };
+
+      await approve_supply_return_master_api(
+        master.supplyReturnMasterId,
+        updateMasterData
+      );
+    } catch (error) {
+      console.error("Error updating supply return master:", error);
+      return false;
+    }
   };
 
   const createBatch = async () => {
@@ -160,7 +184,7 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
         locationId: grn?.warehouseLocationId,
         stockInHand: grnDetail.acceptedQuantity + grnDetail.freeQuantity,
         permissionId: 1088,
-        movementTypeId: 2
+        movementTypeId: 2,
       };
 
       await post_location_inventory_api(locationInventoryData);

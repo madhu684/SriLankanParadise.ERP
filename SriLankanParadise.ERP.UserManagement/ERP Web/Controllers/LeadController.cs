@@ -70,7 +70,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 await _leadService.AddLeadAsync(lead);
 
                 var leadDto = _mapper.Map<LeadDto>(lead);
-                AddResponseMessage(Response, LogMessages.LeadRetrieved, leadDto, true, HttpStatusCode.OK);
+                AddResponseMessage(Response, LogMessages.LeadCreated, leadDto, true, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {

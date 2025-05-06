@@ -590,8 +590,21 @@ public partial class ErpSystemContext : DbContext
 
             entity.Property(e => e.ConversionRate).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.CreatedBy).HasMaxLength(50);
-            entity.Property(e => e.ItemCode).HasMaxLength(50);
+            entity.Property(e => e.ItemCode)
+                .HasMaxLength(20)
+                .HasDefaultValueSql("('PL'+CONVERT([nvarchar](20),NEXT VALUE FOR [dbo].[ItemMasterItemCodeSeq]))");
             entity.Property(e => e.ItemName).HasMaxLength(50);
+            entity.Property(e => e.CostRatio).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.FOBInUSD).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.LandedCost).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.SellingPrice).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.MRP).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.MinNetSellingPrice).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.CompetitorPrice).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.LabelPrice).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.AverageSellingPrice).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.BulkPrice).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.StockClearance).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.Category).WithMany(p => p.ItemMasters)
                 .HasForeignKey(d => d.CategoryId)
@@ -640,7 +653,7 @@ public partial class ErpSystemContext : DbContext
 
             entity.HasOne(d => d.Customer).WithMany(p => p.Leads)
                 .HasForeignKey(d => d.CustomerId)
-                .HasConstraintName("CONSTRAINT FK_Leads_Customer");
+                .HasConstraintName("FK_Leads_Customer");
         });
 
         modelBuilder.Entity<Location>(entity =>
