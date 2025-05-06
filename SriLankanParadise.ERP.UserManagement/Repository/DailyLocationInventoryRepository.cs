@@ -54,10 +54,33 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 }
                 else
                 {
-                    dailyLocationInventory.RunDate = runDate;
-                    dbContext.DailyLocationInventories.Add(dailyLocationInventory);
-                    await dbContext.SaveChangesAsync();
+                    var existingLocationInventory = await dbContext.LocationInventories
+                        .FirstOrDefaultAsync(l => l.LocationId == dailyLocationInventory.LocationId 
+                            && l.ItemMasterId == dailyLocationInventory.ItemMasterId 
+                            && l.BatchNo == dailyLocationInventory.BatchNo
+                            && l.StockInHand > 0);
 
+                    if (existingLocationInventory != null)
+                    {
+                        var dialyInventory = new DailyLocationInventory()
+                        {
+                            RunDate = runDate,
+                            LocationInventoryId = existingLocationInventory.LocationInventoryId,
+                            ItemMasterId = existingLocationInventory.ItemMasterId,
+                            BatchId = existingLocationInventory.BatchId,
+                            LocationId = existingLocationInventory.LocationId,
+                            StockInHand = existingLocationInventory.StockInHand,
+                            BatchNo = existingLocationInventory.BatchNo,
+                            CreatedDate = dailyLocationInventory.CreatedDate,
+                            ExpirationDate = existingLocationInventory.ExpirationDate
+                        };
+
+                        await dbContext.DailyLocationInventories.AddAsync(dialyInventory);
+                        await dbContext.SaveChangesAsync();
+
+                        return dialyInventory;
+
+                    }
                     return dailyLocationInventory;
                 }
             }
