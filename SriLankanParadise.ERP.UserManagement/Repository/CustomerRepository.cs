@@ -41,6 +41,19 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
+        public async Task<Customer> GetCustomerById(int id)
+        {
+            try
+            {
+                var customer = await _dbContext.Customers.FirstOrDefaultAsync(c => c.CustomerId == id);
+                return customer != null ? customer : null!;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<IEnumerable<Customer>> GetCustomersByCompanyId(int companyId)
         {
             try

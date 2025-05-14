@@ -82,6 +82,32 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpGet("{id}")]
+        public async Task<ApiResponseModel> GetById(int id)
+        {
+            try
+            {
+                var customer = await _customerService.GetCustomerById(id);
+                
+                if(customer != null)
+                {
+                    var customerDto = _mapper.Map<CustomerDto>(customer);
+                    AddResponseMessage(Response, LogMessages.CustomersRetrieved, customerDto, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.CustomersNotFound);
+                    AddResponseMessage(Response, LogMessages.CustomersNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
         [HttpGet("GetCustomersByCompanyId/{companyId}")]
         public async Task<ApiResponseModel> GetCustomersByCompanyId(int companyId)
         {
