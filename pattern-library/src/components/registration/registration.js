@@ -735,8 +735,8 @@ class registration extends React.Component {
               ...prevState.formData["user-module"],
               assignedModules: [], // Unassign modules when companyId changes
               availableModules: modulesArray.map((module) => ({
-                id: module.moduleId,
-                name: module.moduleName,
+                id: module.subscriptionModule.moduleId,
+                name: module.subscriptionModule.module.moduleName,
                 roles: {
                   assignedRoles: [],
                   availableRoles: [],
