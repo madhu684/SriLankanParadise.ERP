@@ -241,6 +241,8 @@ const useMin = ({ onFormSubmit }) => {
     );
 
     let isItemQuantityValid = true;
+    let isItemBatchValid = true;
+
     // Validate item details
     formData.itemDetails.forEach((item, index) => {
       const fieldName = `issuedQuantity_${index}`;
@@ -259,10 +261,22 @@ const useMin = ({ onFormSubmit }) => {
         additionalRules
       );
 
+      //Validate Item Batch (Required)
+      const batchFieldName = `batch_${index}`;
+      const batchFieldDisplayName = `Batch for ${item.name}`;
+
+      const isValidBatch = validateField(
+        batchFieldName,
+        batchFieldDisplayName,
+        item.batchId
+      );
+
+      isItemBatchValid = isItemBatchValid && isValidBatch;
+
       isItemQuantityValid = isItemQuantityValid && isValidQuantity;
     });
 
-    return isStatusValid && isMrnIdValid && isItemQuantityValid;
+    return isStatusValid && isMrnIdValid && isItemQuantityValid && isItemBatchValid;
   };
 
   const generateReferenceNumber = () => {
@@ -449,6 +463,8 @@ const useMin = ({ onFormSubmit }) => {
     setValidFields({});
     setValidationErrors({});
   };
+
+  console.log("formData", formData);
 
   return {
     formData,

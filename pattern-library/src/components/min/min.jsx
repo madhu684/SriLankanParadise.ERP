@@ -75,17 +75,17 @@ const Min = ({ handleClose, handleUpdated }) => {
       </div>
 
       {/* Display success or error message */}
-      {submissionStatus === 'successSubmitted' && (
+      {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
           Material issue note submitted successfully!
         </div>
       )}
-      {submissionStatus === 'successSavedAsDraft' && (
+      {submissionStatus === "successSavedAsDraft" && (
         <div className="alert alert-success mb-3" role="alert">
           Material issue note saved as draft, you can edit and submit it later!
         </div>
       )}
-      {submissionStatus === 'error' && (
+      {submissionStatus === "error" && (
         <div className="alert alert-danger mb-3" role="alert">
           Error submitting Material issue note. Please try again.
         </div>
@@ -104,8 +104,8 @@ const Min = ({ handleClose, handleUpdated }) => {
               <select
                 id="status"
                 className={`form-select ${
-                  validFields.status ? 'is-valid' : ''
-                } ${validationErrors.status ? 'is-invalid' : ''}`}
+                  validFields.status ? "is-valid" : ""
+                } ${validationErrors.status ? "is-invalid" : ""}`}
                 value={formData.status}
                 onChange={(e) =>
                   handleStatusChange(
@@ -145,8 +145,8 @@ const Min = ({ handleClose, handleUpdated }) => {
                     <input
                       type="text"
                       className={`form-control ${
-                        validFields.mrnId ? 'is-valid' : ''
-                      } ${validationErrors.mrnId ? 'is-invalid' : ''}`}
+                        validFields.mrnId ? "is-valid" : ""
+                      } ${validationErrors.mrnId ? "is-invalid" : ""}`}
                       placeholder="Search for a material requisition..."
                       value={mrnSearchTerm}
                       onChange={(e) => setMrnSearchTerm(e.target.value)}
@@ -156,9 +156,9 @@ const Min = ({ handleClose, handleUpdated }) => {
                       <span
                         className="input-group-text bg-transparent"
                         style={{
-                          cursor: 'pointer',
+                          cursor: "pointer",
                         }}
-                        onClick={() => setMrnSearchTerm('')}
+                        onClick={() => setMrnSearchTerm("")}
                       >
                         <i className="bi bi-x"></i>
                       </span>
@@ -167,23 +167,23 @@ const Min = ({ handleClose, handleUpdated }) => {
 
                   {/* Dropdown for filtered suppliers */}
                   {mrnSearchTerm && (
-                    <div className="dropdown" style={{ width: '100%' }}>
+                    <div className="dropdown" style={{ width: "100%" }}>
                       <ul
                         className="dropdown-menu"
                         style={{
-                          display: 'block',
-                          width: '100%',
-                          maxHeight: '200px',
-                          overflowY: 'auto',
+                          display: "block",
+                          width: "100%",
+                          maxHeight: "200px",
+                          overflowY: "auto",
                         }}
                       >
                         {mrns
                           .filter((mrn) =>
                             mrn.referenceNumber
-                              ?.replace(/\s/g, '')
+                              ?.replace(/\s/g, "")
                               ?.toLowerCase()
                               .includes(
-                                mrnSearchTerm.toLowerCase().replace(/\s/g, '')
+                                mrnSearchTerm.toLowerCase().replace(/\s/g, "")
                               )
                           )
                           .map((mrn) => (
@@ -196,17 +196,17 @@ const Min = ({ handleClose, handleUpdated }) => {
                               >
                                 <span className="me-3">
                                   <i className="bi bi-file-earmark-text"></i>
-                                </span>{' '}
+                                </span>{" "}
                                 {mrn?.referenceNumber}
                               </button>
                             </li>
                           ))}
                         {mrns.filter((mrn) =>
                           mrn.referenceNumber
-                            ?.replace(/\s/g, '')
+                            ?.replace(/\s/g, "")
                             ?.toLowerCase()
                             .includes(
-                              mrnSearchTerm.toLowerCase().replace(/\s/g, '')
+                              mrnSearchTerm.toLowerCase().replace(/\s/g, "")
                             )
                         ).length === 0 && (
                           <li className="dropdown-item text-center">
@@ -241,23 +241,23 @@ const Min = ({ handleClose, handleUpdated }) => {
                 <div className="card-header">Selected Material Requisition</div>
                 <div className="card-body">
                   <p>
-                    Material Requisition Reference No:{' '}
+                    Material Requisition Reference No:{" "}
                     {selectedMrn?.referenceNumber}
                   </p>
                   <p>Requested By: {selectedMrn?.requestedBy}</p>
                   <p>
-                    MRN Date:{' '}
+                    MRN Date:{" "}
                     {moment
                       .utc(selectedMrn?.requisitionDate)
-                      .tz('Asia/Colombo')
-                      .format('YYYY-MM-DD hh:mm:ss A')}
+                      .tz("Asia/Colombo")
+                      .format("YYYY-MM-DD hh:mm:ss A")}
                   </p>
                   <p>
-                    Delivery Location:{' '}
+                    Delivery Location:{" "}
                     {selectedMrn?.requestedToLocation.locationName}
                   </p>
                   <p>
-                    Warehouse Location:{' '}
+                    Warehouse Location:{" "}
                     {selectedMrn?.requestedFromLocation.locationName}
                   </p>
                   <button
@@ -298,12 +298,16 @@ const Min = ({ handleClose, handleUpdated }) => {
                     <td>{item.remainingQuantity}</td>
                     <td>
                       <select
-                        className="form-select"
+                        className={`form-select ${
+                          validFields[`batch_${index}`] ? "is-valid" : ""
+                        } ${
+                          validationErrors[`batch_${index}`] ? "is-invalid" : ""
+                        }`}
                         value={item.batchId}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            'batchId',
+                            "batchId",
                             e.target.value
                           )
                         }
@@ -317,29 +321,34 @@ const Min = ({ handleClose, handleUpdated }) => {
                               value={batch.batchId}
                               disabled={batch.stockInHand === 0}
                             >
-                              {batch.itemBatch.batch.batchRef} - Stock in hand{' '}
+                              {batch.itemBatch.batch.batchRef} - Stock in hand{" "}
                               {batch.stockInHand}
                             </option>
                           ))}
                       </select>
+                      {validationErrors[`batch_${index}`] && (
+                        <div className="invalid-feedback">
+                          {validationErrors[`batch_${index}`]}
+                        </div>
+                      )}
                     </td>
                     <td>
                       <input
                         type="number"
                         className={`form-control ${
                           validFields[`issuedQuantity_${index}`]
-                            ? 'is-valid'
-                            : ''
+                            ? "is-valid"
+                            : ""
                         } ${
                           validationErrors[`issuedQuantity_${index}`]
-                            ? 'is-invalid'
-                            : ''
+                            ? "is-invalid"
+                            : ""
                         }`}
                         value={item.issuedQuantity}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            'issuedQuantity',
+                            "issuedQuantity",
                             e.target.value
                           )
                         }
@@ -398,7 +407,7 @@ const Min = ({ handleClose, handleUpdated }) => {
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Submitting..." />
             ) : (
-              'Submit'
+              "Submit"
             )}
           </button>
           <button
@@ -420,7 +429,7 @@ const Min = ({ handleClose, handleUpdated }) => {
         </div>
       </form>
     </div>
-  )
+  );
 };
 
 export default Min;

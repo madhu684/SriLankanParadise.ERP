@@ -26,15 +26,15 @@ const useItemMaster = ({ onFormSubmit }) => {
     unitPrice: '',
     costRatio: '',
     fobInUSD: '',
-    landedCost: '',
-    minNetSellingPrice: '',
-    sellingPrice: '',
-    mrp: '',
-    competitorPrice: '',
-    labelPrice: '',
-    averageSellingPrice: '',
-    stockClearance: '',
-    bulkPrice: ''
+    landedCost: 0,
+    minNetSellingPrice: 0,
+    sellingPrice: 0,
+    mrp: 0,
+    competitorPrice: 0,
+    labelPrice: 0,
+    averageSellingPrice: 0,
+    stockClearance: 0,
+    bulkPrice: 0
   })
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
