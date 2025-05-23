@@ -137,5 +137,15 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task UpdatePassword(int userId, string hashedPassword)
+        {
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+            if (user != null)
+            {
+                user.PasswordHash = hashedPassword;
+                await _dbContext.SaveChangesAsync();
+            }
+        }
     }
 }

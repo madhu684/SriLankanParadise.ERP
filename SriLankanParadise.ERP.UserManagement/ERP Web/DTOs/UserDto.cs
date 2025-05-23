@@ -8,8 +8,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public string Username { get; set; } = null!;
 
-        public string PasswordHash { get; set; } = null!;
-
         public string Email { get; set; } = null!;
 
         public string ContactNo { get; set; } = null!;
@@ -28,6 +26,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public int? LocationId { get; set; }
 
-        public Location? Location { get; set; }
+        public LocationDto? Location { get; set; }
     }
 }
