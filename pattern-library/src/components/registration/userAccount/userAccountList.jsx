@@ -1,12 +1,15 @@
-import React, { useState } from "react";
-import useUserAccountList from "./useUserAccountList";
-import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
-import ErrorComponent from "../../errorComponent/errorComponent";
+import { useState } from "react";
 import { FaSearch } from "react-icons/fa";
+import ErrorComponent from "../../errorComponent/errorComponent";
+import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
+import useUserAccountList from "./useUserAccountList";
 //import Registration from "../registrationUpdate/registration";
-import "./userAccountList.css"; // Import the CSS file
 import { useNavigate } from "react-router-dom"; // Import useNavigate from react-router-dom
 import Pagination from "../../common/Pagination/Pagination"; // Import the new Pagination component
+import ConfirmationModal from "../../confirmationModals/confirmationModal/confirmationModal";
+import Registration from "../registration";
+import "./userAccountList.css"; // Import the CSS file
+import RegistrationUpdate from "../registeredUserUpdate/registeredUserUpdate";
 
 const UserAccountList = () => {
   const navigate = useNavigate(); // Hook to manage navigation
@@ -18,7 +21,9 @@ const UserAccountList = () => {
     selectedRows,
     showEditForm,
     showDeactivateConfirmation,
+    showActivateConfirmation,
     selectedUser,
+    showRegistrationForm,
     handleRowSelect,
     setShowEditForm,
     getStatusBadgeClass,
@@ -29,6 +34,14 @@ const UserAccountList = () => {
     userDetail,
     handleDeactivate,
     handleActivate,
+    setShowRegistrationForm,
+    setShowConfirmation,
+    showConfirmation,
+    setShowActivateConfirmation,
+    setShowDeactivateConfirmation,
+    setSelectedUser,
+    userActivate,
+    userDeactivate,
   } = useUserAccountList();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -57,6 +70,8 @@ const UserAccountList = () => {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
+  console.log("Selected user: ", selectedUser);
+
   if (error) {
     return <ErrorComponent error={error} />;
   }
@@ -84,12 +99,26 @@ const UserAccountList = () => {
     //       setShowEditForm(false);
     //     }}
     //   />
-    // );
+
+    return (
+      <RegistrationUpdate
+        userId={userDetail?.userId || selectedRowData[0]?.userId}
+        user={userDetail || selectedRowData[0]}
+        handleClose={() => {
+          console.log("Closing Registration form");
+          setShowEditForm(false);
+        }}
+      />
+    );
   } else {
     console.log(
       "Not rendering Registration component. Current showEditForm state:",
       showEditForm
     );
+  }
+
+  if (showRegistrationForm) {
+    return <Registration />;
   }
 
   if (userAccounts.length === 0) {
@@ -104,7 +133,7 @@ const UserAccountList = () => {
           <button
             type="button"
             className="btn btn-primary"
-            onClick={() => navigate("/userAccounts/registration")}
+            onClick={() => setShowRegistrationForm(true)}
           >
             Create
           </button>
@@ -120,7 +149,7 @@ const UserAccountList = () => {
         <button
           type="button"
           className="btn btn-primary"
-          onClick={() => navigate('/userAccounts/registration')}
+          onClick={() => setShowRegistrationForm(true)}
         >
           Create
         </button>
@@ -142,7 +171,7 @@ const UserAccountList = () => {
       <div className="table-responsive">
         <table
           className="table mt-2"
-          style={{ minWidth: '1000px', overflowX: 'auto' }}
+          style={{ minWidth: "1000px", overflowX: "auto" }}
         >
           <thead>
             <tr>
@@ -186,20 +215,26 @@ const UserAccountList = () => {
                       viewBox="0 0 16 16"
                     >
                       <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z" />
-                    </svg>{' '}
+                    </svg>{" "}
                     Edit
                   </button>
-                  {!user.isDeleted ? (
+                  {user.status ? (
                     <button
                       className="btn btn-danger me-2"
-                      onClick={() => handleDeactivate(user.userId)}
+                      onClick={() => {
+                        setShowDeactivateConfirmation(true);
+                        handleDeactivate(user);
+                      }}
                     >
-                      Delete
+                      Deactivate
                     </button>
                   ) : (
                     <button
                       className="btn btn-secondary"
-                      onClick={() => handleActivate(user.userId)}
+                      onClick={() => {
+                        setShowActivateConfirmation(true);
+                        handleActivate(user);
+                      }}
                     >
                       Activate
                     </button>
@@ -216,8 +251,27 @@ const UserAccountList = () => {
           currentPage={currentPage}
         />
       </div>
+      <ConfirmationModal
+        show={showActivateConfirmation}
+        handleClose={() => setShowActivateConfirmation(false)}
+        handleConfirm={() => userActivate(parseInt(selectedUser?.userId))}
+        title="Confirm Activation"
+        message={`Are you sure you want to activate "${selectedUser?.firstname} ${selectedUser?.lastname}"?`}
+        confirmButtonText="Activate"
+        cancelButtonText="Cancel"
+      />
+      ;{/* Deactivate Confirmation Modal */}
+      <ConfirmationModal
+        show={showDeactivateConfirmation}
+        handleClose={() => setShowDeactivateConfirmation(false)}
+        handleConfirm={() => userDeactivate(parseInt(selectedUser?.userId))}
+        title="Confirm Deactivation"
+        message={`Are you sure you want to deactivate "${selectedUser?.firstname} ${selectedUser?.lastname}"?`}
+        confirmButtonText="Deactivate"
+        cancelButtonText="Cancel"
+      />
     </div>
-  )
+  );
 };
 
 export default UserAccountList;

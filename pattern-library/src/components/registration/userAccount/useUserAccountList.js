@@ -14,8 +14,12 @@ const useUserAccountList = () => {
   const [showEditForm, setShowEditForm] = useState(false);
   const [showDeactivateConfirmation, setShowDeactivateConfirmation] =
     useState(false);
+  const [showActivateConfirmation, setShowActivateConfirmation] =
+    useState(false);
+  const [selectedUser, setSelectedUser] = useState();
   const [userDetail, setUserDetail] = useState(null);
   const [selectedRowData, setSelectedRowData] = useState([]);
+  const [showRegistrationForm, setShowRegistrationForm] = useState(false);
   const [isUserUpdated, setIsUserUpdated] = useState(false);
 
   const fetchData = async () => {
@@ -81,21 +85,37 @@ const useUserAccountList = () => {
     }
   };
 
-  const handleDeactivate = async (id) => {
+  const handleDeactivate = (user) => {
+    console.log("User to be deactivated:", user);
+    setShowDeactivateConfirmation(true);
+    setSelectedUser(user);
+    setIsUserUpdated(true);
+  };
+
+  const handleActivate = (user) => {
+    console.log("User to be activated:", user);
+    setShowActivateConfirmation(true);
+    setSelectedUser(user);
+    setIsUserUpdated(true);
+  };
+
+  const userDeactivate = async (id) => {
     try {
       await deactivate_user(id);
-      setShowDeactivateConfirmation(true);
       setIsUserUpdated(true);
+      setShowDeactivateConfirmation(false);
+      setSelectedUser(null);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const handleActivate = async (id) => {
+  const userActivate = async (id) => {
     try {
       await activate_user(id);
-      // setShowActivateConfirmation(true);
       setIsUserUpdated(true);
+      setShowActivateConfirmation(false);
+      setSelectedUser(null);
     } catch (error) {
       console.log(error);
     }
@@ -113,7 +133,6 @@ const useUserAccountList = () => {
       false: "Inactive",
       true: "Active",
     };
-
     return statusLabels[statusCode] || "Unknown Status";
   };
 
@@ -136,6 +155,9 @@ const useUserAccountList = () => {
     selectedRowData,
     userDetail,
     users,
+    showRegistrationForm,
+    showActivateConfirmation,
+    selectedUser,
     handleRowSelect,
     setShowEditForm,
     handleEdit,
@@ -146,6 +168,11 @@ const useUserAccountList = () => {
     handleClose,
     handleDeactivate,
     handleActivate,
+    setShowRegistrationForm,
+    setShowActivateConfirmation,
+    setShowDeactivateConfirmation,
+    userActivate,
+    userDeactivate,
   };
 };
 

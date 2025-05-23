@@ -516,6 +516,21 @@ export const get_all_users_by_company_id_api = async (companyId) => {
   }
 };
 
+export const get_user_by_user_id = async (userId) => {
+  try {
+    const response = await api.get(
+      `/user/GetUserByUserId/${userId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const deactivate_user = async (userId) => {
   try {
     const response = await api.put(`/user/${userId}/deactivate`, {
