@@ -107,7 +107,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
 
                 if (user != null)
                 {
-                    user.IsDeleted = true;
+                    //user.IsDeleted = true;
+                    user.Status = false;
                     await _dbContext.SaveChangesAsync();
                 }
             }
@@ -117,9 +118,30 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public Task Activate(int userId)
+        public async Task Activate(int userId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var user = await _dbContext.Users
+                    .Where(u => u.UserId == userId)
+                    .FirstOrDefaultAsync();
+
+                if (user != null)
+                {
+                    //user.IsDeleted = false;
+                    user.Status = true;
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
+
+        //public Task Activate(int userId)
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }
