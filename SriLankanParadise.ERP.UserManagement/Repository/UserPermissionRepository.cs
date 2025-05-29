@@ -47,5 +47,24 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+        public async Task DeleteUserPermissions(int userId)
+        {
+            try
+            {
+                var userPermissions = await _dbContext.UserPermissions
+                    .Where(up => up.UserId == userId)
+                    .ToListAsync();
+
+                if (userPermissions.Any())
+                {
+                    _dbContext.UserPermissions.RemoveRange(userPermissions);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

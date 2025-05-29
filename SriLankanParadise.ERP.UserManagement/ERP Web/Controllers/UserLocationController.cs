@@ -147,6 +147,35 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
         }
 
+        [HttpPut("UpdateUserLocations/{userId}")]
+        public async Task<ApiResponseModel> UpdateUserPermissions([FromRoute] int userId, [FromBody] int[] locationIds)
+        {
+            try
+            {
+                await _userLocationService.DeleteUserLocations(userId);
+
+                foreach (var locationId in locationIds)
+                {
+                    var userLocation = new UserLocation()
+                    {
+                        UserId = userId,
+                        LocationId = locationId
+                    };
+
+                    await _userLocationService.AddUserLocation(userLocation);
+                }
+
+                _logger.LogInformation(LogMessages.UserLocationUpdated);
+                AddResponseMessage(Response, LogMessages.UserLocationUpdated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
         [HttpDelete("{userLocationId}")]
         public async Task<ApiResponseModel> DeleteUserLocation(int userLocationId)
         {

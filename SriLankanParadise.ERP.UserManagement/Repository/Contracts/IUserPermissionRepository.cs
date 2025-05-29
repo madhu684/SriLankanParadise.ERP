@@ -7,5 +7,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task AddUserPermission(UserPermission userPermission);
 
         Task<IEnumerable<UserPermission>> GetUserPermissionsByUserId(int userId);
+        Task DeleteUserPermissions(int userId);
+
     }
 }
