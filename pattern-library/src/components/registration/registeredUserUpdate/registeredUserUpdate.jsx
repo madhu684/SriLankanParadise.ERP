@@ -2,6 +2,7 @@ import "./registeredUserUpdate.css";
 import React from "react";
 import AssignItems from "../../assignItems/assignItems.js";
 import { Row, Col, Form, Button, Card } from "react-bootstrap";
+import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner.jsx";
 
 function template() {
   const { showSuccessAlert, showFailureAlert } = this.state;
@@ -10,7 +11,7 @@ function template() {
       <div className="container mt-4 mb-4">
         <div className="row justify-content-center">
           <div className="col-md-10">
-            <h2 className="mb-3 text-black fw-bold">User Registration</h2>
+            <h2 className="mb-3 text-black fw-bold">User Update</h2>
             <div
               className="card bg-transparent"
               style={{
@@ -449,7 +450,6 @@ function template() {
                                     : ""
                                 }`}
                               >
-                                <option value="">Select Warehouses</option>
                                 {this.state.locations
                                   .filter(
                                     (location) =>
@@ -475,98 +475,6 @@ function template() {
                               )}
                             </Form.Group>
                           </Col>
-                        </Row>
-
-                        <Row>
-                          <Col md={6} sm={12} className="mb-3">
-                            <Form.Group>
-                              <Form.Label style={{ fontWeight: "bold" }}>
-                                Production Stage
-                              </Form.Label>
-                              <Form.Select
-                                value={this.state.selectedProductionStageId} // This tracks the selected stage ID
-                                onChange={this.handleSelectProductionStage} // Handles selection
-                                style={{ width: "100%" }}
-                                className={`form-control focus-ring input-registration ${
-                                  this.state.validFields.basic?.productionStage
-                                    ? "is-valid"
-                                    : ""
-                                } ${
-                                  this.state.validationErrors.basic
-                                    ?.productionStage
-                                    ? "is-invalid"
-                                    : ""
-                                }`}
-                              >
-                                <option value="">
-                                  Select Production Stage
-                                </option>
-                                {this.state.availableProductionStages.map(
-                                  (stage) => (
-                                    <option key={stage.id} value={stage.id}>
-                                      {stage.name}{" "}
-                                      {/* Display the stage name */}
-                                    </option>
-                                  )
-                                )}
-                              </Form.Select>
-                              {this.state.validationErrors.basic
-                                ?.productionStage && (
-                                <div className="invalid-feedback">
-                                  {
-                                    this.state.validationErrors.basic
-                                      .productionStage
-                                  }
-                                </div>
-                              )}
-                            </Form.Group>
-                          </Col>
-
-                          {/* Log the selected stages before rendering */}
-                          {console.log(
-                            "Current state of selected production stages:",
-                            this.state.formData.basic.productionStages
-                          )}
-                          {this.state.formData.basic.productionStages.length >
-                            0 && (
-                            <Col md={6} className="mt-4">
-                              <Card>
-                                <Card.Header>
-                                  <h6 className="card-title-small">
-                                    Selected Stages
-                                  </h6>
-                                </Card.Header>
-                                <Card.Body>
-                                  <div className="selected-stages">
-                                    {this.state.formData.basic.productionStages.map(
-                                      (stage) => (
-                                        <div
-                                          key={stage.id}
-                                          className="d-flex justify-content-between align-items-center mb-2"
-                                        >
-                                          <span className="me-2">
-                                            {stage.name}
-                                          </span>
-                                          <Button
-                                            variant="danger"
-                                            size="sm"
-                                            onClick={() =>
-                                              this.handleRemoveProductionStage(
-                                                stage.id
-                                              )
-                                            } // Remove stage by its ID
-                                            className="ms-2"
-                                          >
-                                            Remove
-                                          </Button>
-                                        </div>
-                                      )
-                                    )}
-                                  </div>
-                                </Card.Body>
-                              </Card>
-                            </Col>
-                          )}
                         </Row>
                       </div>
                     </div>
@@ -702,6 +610,14 @@ function template() {
                               assignedItems={
                                 role.permissions.assignedPermissions
                               }
+                              // availableItems={
+                              //   role.permissions.availablePermissions.filter(
+                              //     (available) =>
+                              //       !role.permissions.assignedPermissions.some(
+                              //         (assigned) => assigned.id === available.id
+                              //       )
+                              //   )
+                              // }
                               handleSelect={(itemId) =>
                                 this.handleSelectPermission(
                                   module.id,
@@ -747,20 +663,20 @@ function template() {
                       <button
                         className="btn btn-primary btn-block"
                         onClick={this.handlePrevious}
-                        style={{
-                          backgroundColor: "#BFB69F",
-                          color: "white",
-                          borderRadius: "5px",
-                          fontWeight: "bold",
-                          border: "none",
-                          cursor: "pointer",
-                        }}
-                        onMouseOver={(e) => {
-                          e.target.style.background = "#666053";
-                        }}
-                        onMouseOut={(e) => {
-                          e.target.style.background = "#88857c";
-                        }}
+                        // style={{
+                        //   backgroundColor: "#BFB69F",
+                        //   color: "white",
+                        //   borderRadius: "5px",
+                        //   fontWeight: "bold",
+                        //   border: "none",
+                        //   cursor: "pointer",
+                        // }}
+                        // onMouseOver={(e) => {
+                        //   e.target.style.background = "#666053";
+                        // }}
+                        // onMouseOut={(e) => {
+                        //   e.target.style.background = "#88857c";
+                        // }}
                       >
                         Previous
                       </button>
@@ -769,23 +685,22 @@ function template() {
                   {this.state.activeTab !== "role-permission" ? (
                     <div className="btn-width-reg">
                       <button
-                        className="btn btn-primary btn-block"
+                      className="btn btn-primary btn-block"
                         onClick={this.handleNext}
-                        style={{
-                          backgroundColor: "#666053",
-                          color: "white",
-                          borderRadius: "24px",
-                          fontWeight: "bold",
-                          border: "none",
-                          borderRadius: "5px",
-                          cursor: "pointer",
-                        }}
-                        onMouseOver={(e) => {
-                          e.target.style.background = "#666053";
-                        }}
-                        onMouseOut={(e) => {
-                          e.target.style.background = "#88857c";
-                        }}
+                        // style={{
+                        //   color: "white",
+                        //   borderRadius: "24px",
+                        //   fontWeight: "bold",
+                        //   border: "none",
+                        //   borderRadius: "5px",
+                        //   cursor: "pointer",
+                        // }}
+                        // onMouseOver={(e) => {
+                        //   e.target.style.background = "#666053";
+                        // }}
+                        // onMouseOut={(e) => {
+                        //   e.target.style.background = "#88857c";
+                        // }}
                       >
                         Next
                       </button>
@@ -796,22 +711,26 @@ function template() {
                         className="btn btn-primary btn-block"
                         onClick={this.handleSave}
                         disabled={this.state.registrationSuccessful}
-                        style={{
-                          backgroundColor: "#666053",
-                          color: "white",
-                          borderRadius: "5px",
-                          fontWeight: "bold",
-                          border: "none",
-                          cursor: "pointer",
-                        }}
-                        onMouseOver={(e) => {
-                          e.target.style.background = "#666053";
-                        }}
-                        onMouseOut={(e) => {
-                          e.target.style.background = "#88857c";
-                        }}
+                        // style={{
+                        //   backgroundColor: "#666053",
+                        //   color: "white",
+                        //   borderRadius: "5px",
+                        //   fontWeight: "bold",
+                        //   border: "none",
+                        //   cursor: "pointer",
+                        // }}
+                        // onMouseOver={(e) => {
+                        //   e.target.style.background = "#666053";
+                        // }}
+                        // onMouseOut={(e) => {
+                        //   e.target.style.background = "#88857c";
+                        // }}
                       >
-                        Save
+                        {this.state.loading ? (
+                        <ButtonLoadingSpinner/>
+                      ) : (
+                        "Update"
+                      )}
                       </button>
                     </div>
                   )}

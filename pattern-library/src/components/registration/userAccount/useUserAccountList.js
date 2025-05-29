@@ -22,6 +22,8 @@ const useUserAccountList = () => {
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
   const [isUserUpdated, setIsUserUpdated] = useState(false);
 
+  const [refetch, setRefetch] = useState(false);
+
   const fetchData = async () => {
     try {
       const usersResponse = await get_all_users_by_company_id_api(
@@ -38,7 +40,10 @@ const useUserAccountList = () => {
   useEffect(() => {
     fetchData();
     setIsUserUpdated(false);
-  }, [isUserUpdated, setIsUserUpdated]);
+    if(refetch == true){
+      handleRefetchFalse();
+    }
+  }, [isUserUpdated, setIsUserUpdated, refetch]);
 
   const handleEdit = (user) => {
     console.log("Editing user:", user);
@@ -61,9 +66,14 @@ const useUserAccountList = () => {
       setUserDetail("");
     }, delay);
   };
-  useEffect(() => {
-    console.log("showEditForm changed to:", showEditForm);
-  }, [showEditForm]);
+  
+  const handleRefetchTrue = () => {
+    setRefetch(true);
+  }
+
+  const handleRefetchFalse = () => {
+    setRefetch(false);
+  }
 
   const handleRowSelect = (id) => {
     const isSelected = selectedRows.includes(id);
@@ -171,6 +181,7 @@ const useUserAccountList = () => {
     setShowRegistrationForm,
     setShowActivateConfirmation,
     setShowDeactivateConfirmation,
+    handleRefetchTrue,
     userActivate,
     userDeactivate,
   };

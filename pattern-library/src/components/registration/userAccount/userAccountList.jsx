@@ -30,6 +30,7 @@ const UserAccountList = () => {
     getStatusLabel,
     handleEdit,
     handleClose,
+    handleRefetchTrue,
     selectedRowData,
     userDetail,
     handleDeactivate,
@@ -41,7 +42,7 @@ const UserAccountList = () => {
     setShowDeactivateConfirmation,
     setSelectedUser,
     userActivate,
-    userDeactivate,
+    userDeactivate
   } = useUserAccountList();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -105,9 +106,9 @@ const UserAccountList = () => {
         userId={userDetail?.userId || selectedRowData[0]?.userId}
         user={userDetail || selectedRowData[0]}
         handleClose={() => {
-          console.log("Closing Registration form");
           setShowEditForm(false);
         }}
+        handleRefetchTrue={handleRefetchTrue}
       />
     );
   } else {
