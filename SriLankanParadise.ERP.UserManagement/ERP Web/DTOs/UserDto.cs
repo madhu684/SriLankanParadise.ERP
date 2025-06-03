@@ -20,6 +20,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public bool IsDeleted { get; set; }
 
+        public string? AccessToken { get; set; }
+
         public virtual CompanyDto Company { get; set; } = null!;
 
         public bool Status { get; set; }

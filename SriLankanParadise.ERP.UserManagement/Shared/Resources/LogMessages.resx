@@ -972,4 +972,13 @@
   <data name="DailyLocationInventoryUpdated" xml:space="preserve">
     <value>Daily location inventory updated</value>
   </data>
+  <data name="AuditLogCreated" xml:space="preserve">
+    <value>Audit log created successfully</value>
+  </data>
+  <data name="AuditLogRetrieved" xml:space="preserve">
+    <value>Audit log retrieved</value>
+  </data>
+  <data name="AuditLogNotFound" xml:space="preserve">
+    <value>Audit log not found</value>
+  </data>
 </root>

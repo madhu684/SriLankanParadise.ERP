@@ -1,4 +1,5 @@
-﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+﻿using Microsoft.EntityFrameworkCore;
+using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository

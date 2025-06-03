@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using SriLankanParadise.ERP.UserManagement.Business_Service;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
@@ -9,8 +11,10 @@ using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Shared.Resources;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
+using System.Text;
 
 namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 {
@@ -18,17 +22,21 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
     [Route("api/user")]
     public class UserController : BaseApiController
     {
+        private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
         private readonly ILogger<UserController> _logger;
         private readonly IActionLogService _actionLogService;
+        private readonly IAuditLogService _auditLogService;
         private readonly ICompanyService _companyService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UserController(IUserService userService, IActionLogService actionLogService, ICompanyService companyService, IMapper mapper, IHttpContextAccessor httpContextAccessor, ILogger<UserController> logger)
+        public UserController(IConfiguration configuration,IUserService userService, IActionLogService actionLogService, IAuditLogService auditLogService, ICompanyService companyService, IMapper mapper, IHttpContextAccessor httpContextAccessor, ILogger<UserController> logger)
         {
+            _configuration = configuration;
             _userService = userService;
             _actionLogService = actionLogService;
+            _auditLogService = auditLogService;
             _companyService = companyService;
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
@@ -36,6 +44,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         }
 
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<ApiResponseModel> Login(UserRequestModel userRequestModel)
         {
             try
@@ -65,11 +74,34 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                         }
                         else
                         {
-                            var actionLog = await UserAuthentication(userRequestModel, user);
-                            //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+                            // Create SessionId
+                            var sessionId = Guid.NewGuid();
 
-                            // Send response
+                            var token = GenerateJwtToken(user, sessionId);
+
+                            // Map user to DTO
                             var userDto = _mapper.Map<UserDto>(user);
+
+                            // Add token to DTO (make sure AccessToken is a string property in UserDto)
+                            userDto.AccessToken = token;
+
+                            //Manually create audit log on logging
+
+                            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+                            var auditLogOnLogin = new AuditLog
+                            {
+                                UserId = userDto.UserId,
+                                SessionId = sessionId,
+                                AccessedPath = "/api/User/login",
+                                AccessedMethod = "POST",
+                                Timestamp = DateTime.UtcNow,
+                                Ipaddress = ipAddress,
+                                Description = "User login"
+                            };
+
+                            await _auditLogService.CreateAuditLog(auditLogOnLogin);
+
                             _logger.LogInformation(LogMessages.UserAuthenticated);
                             AddResponseMessage(Response, LogMessages.UserAuthenticated, userDto, true, HttpStatusCode.OK);
                         }
@@ -85,27 +117,31 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
         }
 
-        private async Task<ActionLogModel> UserAuthentication(UserRequestModel userRequestModel, User user)
+        private string GenerateJwtToken(User user, Guid sessionId)
         {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Key"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.UserId.ToString()),
-                // Add other claims if necessary
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Email, user.Email ?? ""),
+                new Claim("CompanyId", user.CompanyId.ToString()),
+                new Claim("FirstName", user.Firstname ?? ""),
+                new Claim("LastName", user.Lastname ?? ""),
+                new Claim("SessionId", sessionId.ToString())
             };
 
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(claimsIdentity));
+            var token = new JwtSecurityToken(
+                issuer: _configuration["JwtSettings:Issuer"],
+                audience: _configuration["JwtSettings:Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(double.Parse(_configuration["JwtSettings:ExpiryMinutes"]!)),
+                signingCredentials: creds
+            );
 
-            // Create action log
-            var actionLog = new ActionLogModel()
-            {
-                ActionId = userRequestModel.PermissionId,
-                UserId = user.UserId,
-                Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                Timestamp = DateTime.UtcNow
-            };
-            return actionLog;
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
         [HttpPost("register")]
@@ -165,10 +201,11 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         }
 
         [HttpPost("logout")]
-        public async Task<IActionResult> Logout()
+        public async Task<ApiResponseModel> Logout()
         {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return Ok("Logged out");
+            var userId = User?.Identity?.Name ?? "Unknown";
+            _logger.LogInformation($"User {userId} logged out at {DateTime.UtcNow}");
+            return AddResponseMessage(Response, "User log out", null, true, HttpStatusCode.OK);
         }
 
         [HttpGet("GetAllUsersByCompanyId/{companyId}")]
@@ -259,7 +296,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
         }
 
-        [HttpPut("{userId}/deactivate")]
+        [HttpPut("deactivate/{userId}")]
         public async Task<ApiResponseModel> Deactivate(int userId)
         {
             try
@@ -283,7 +320,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
         }
 
-        [HttpPut("{userId}/activate")]
+        [HttpPut("activate/{userId}")]
         public async Task<ApiResponseModel> Activate(int userId)
         {
             try

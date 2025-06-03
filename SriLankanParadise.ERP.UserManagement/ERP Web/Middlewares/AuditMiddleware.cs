@@ -1,61 +1,82 @@
-﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+﻿using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
+using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 using SriLankanParadise.ERP.UserManagement.Shared.Resources;
+using SriLankanParadise.ERP.UserManagement.Utilities;
+using System.Security.Claims;
 
 namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Middlewares
 {
     public class AuditMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<AuditMiddleware> _logger;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public AuditMiddleware(RequestDelegate next, IHttpContextAccessor httpContextAccessor, ILogger<AuditMiddleware> logger)
+        public AuditMiddleware(RequestDelegate next, ILogger<AuditMiddleware> logger, IHttpContextAccessor httpContextAccessor)
         {
             _next = next;
-            _httpContextAccessor = httpContextAccessor;
             _logger = logger;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task Invoke(HttpContext context)
+        public async Task InvokeAsync(HttpContext context, IAuditLogService auditLogService)
         {
-            try
-            {
-                var userId = context.User.Identity?.Name;
-                var requestPath = context.Request.Path;
-                var method = context.Request.Method;
-                var ipAddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
-                var timestamp = DateTime.UtcNow;
+            var user = context.User;
+            var path = context.Request.Path.ToString();
+            var sessionIdClaim = context.User.FindFirst("sessionId");
+            var sessionId = sessionIdClaim?.Value ?? Guid.NewGuid().ToString();
 
-                if (userId != null)
+            if (AuditLogExclusions.IsExcluded(path, context.Request.Method))
+            {
+                await _next(context);
+                return;
+            }
+
+            if (user?.Identity != null && user.Identity.IsAuthenticated)
+            {
+                var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+                var ipAddress = context.Request.Headers.ContainsKey("X-Forwarded-For")
+                    ? context.Request.Headers["X-Forwarded-For"].FirstOrDefault()
+                    : context.Connection.RemoteIpAddress?.ToString();
+
+                _logger.LogInformation($"UserId claim: {userIdClaim?.Value}");
+                _logger.LogInformation($"IP Address: {ipAddress}");
+
+                if (userIdClaim != null)
                 {
-                    var logEntry = new AuditLog
+                    var description = AuditLogDescriptions.GetDescription(path, context.Request.Method);
+
+                    var auditLog = new AuditLog
                     {
-                        UserId = Int32.Parse(userId),
-                        AccessedPath = requestPath,
-                        AccessedMethod = method,
-                        Timestamp = timestamp,
-                        Ipaddress = ipAddress != null ? ipAddress : "",
-                        // Additional details as needed
+                        UserId = int.Parse(userIdClaim.Value),
+                        SessionId = Guid.Parse(sessionId),
+                        AccessedPath = path,
+                        AccessedMethod = context.Request.Method,
+                        Timestamp = DateTime.UtcNow,
+                        Ipaddress = ipAddress ?? "Unknown",
+                        Description = description
                     };
 
-                    // Access the scoped services using HttpContext.RequestServices
-                    using var scope = context.RequestServices.CreateScope(); // Create a new scope
-
-                    // Resolve your scoped service (ErpSystemContext) within the scope
-                    var dbContext = scope.ServiceProvider.GetRequiredService<ErpSystemContext>();
-
-
-                    dbContext.AuditLogs.Add(logEntry);
-                    await dbContext.SaveChangesAsync();
+                    try
+                    {
+                        await auditLogService.CreateAuditLog(auditLog);
+                        _logger.LogInformation("Audit log created successfully.");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to create audit log.");
+                    }
                 }
-                await _next(context);
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogError(ex, ErrorMessages.InternalServerError);
-                throw;
+                _logger.LogInformation("User not authenticated or no claims found.");
             }
+
+            await _next(context);
         }
     }
+
 
 }

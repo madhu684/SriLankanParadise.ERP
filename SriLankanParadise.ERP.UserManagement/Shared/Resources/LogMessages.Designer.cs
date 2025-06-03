@@ -61,6 +61,33 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Audit log created successfully.
+        /// </summary>
+        public static string AuditLogCreated {
+            get {
+                return ResourceManager.GetString("AuditLogCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Audit log not found.
+        /// </summary>
+        public static string AuditLogNotFound {
+            get {
+                return ResourceManager.GetString("AuditLogNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Audit log retrieved.
+        /// </summary>
+        public static string AuditLogRetrieved {
+            get {
+                return ResourceManager.GetString("AuditLogRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Batch created successfully.
         /// </summary>
         public static string BatchCreated {
