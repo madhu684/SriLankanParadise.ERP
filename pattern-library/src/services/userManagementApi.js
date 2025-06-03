@@ -127,32 +127,32 @@ export const user_permission_api = async (userPermissionFromData) => {
   }
 };
 
-// export const role_permission_api = async (rolePermissionFromData) => {
-//   try {
-//     const response = await api.post("/rolePermission", rolePermissionFromData, {
-//       withCredentials: true,
-//     });
-//     return response.data;
-//   } catch (error) {
-//     console.log(error);
-//     throw error;
-//   }
-// };
+export const role_permission_api = async (rolePermissionFromData) => {
+  try {
+    const response = await api.post("/rolePermission", rolePermissionFromData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
 
-// export const role_permissions_api = async (moduleIds) => {
-//   try {
-//     const formattedRoleIds = moduleIds.map((id) => `roleIds=${id}`).join("&");
+export const role_permissions_api = async (moduleIds) => {
+  try {
+    const formattedRoleIds = moduleIds.map((id) => `roleIds=${id}`).join("&");
 
-//     const response = await api.get(
-//       `/rolePermission/GetRolePermissionsByRoleIds?${formattedRoleIds}`
-//     );
+    const response = await api.get(
+      `/rolePermission/GetRolePermissionsByRoleIds?${formattedRoleIds}`
+    );
 
-//     return response.data;
-//   } catch (error) {
-//     console.log(error);
-//     throw error;
-//   }
-// };
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
 // Company Subscription Module User API's
 export const company_subscription_module_user_api = async (
   userModulesFromData
@@ -549,7 +549,6 @@ export const post_role_api = async (formData) => {
   }
 };
 
-
 export const put_role_api = async (roleId, roleData) => {
   try {
     const response = await api.put(`/role/${roleId}`, roleData, {
@@ -650,12 +649,9 @@ export const get_all_users_by_company_id_api = async (companyId) => {
 
 export const get_user_by_user_id = async (userId) => {
   try {
-    const response = await api.get(
-      `/user/GetUserByUserId/${userId}`,
-      {
-        withCredentials: true,
-      }
-    );
+    const response = await api.get(`/user/GetUserByUserId/${userId}`, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);
@@ -724,17 +720,17 @@ export const put_permission_api = async (permissionId, permissionData) => {
   }
 };
 
-export const role_permissions_api = async (moduleIds) => {
-  try {
-    const formattedRoleIds = moduleIds.map((id) => `roleIds=${id}`).join("&");
+// export const role_permissions_api = async (moduleIds) => {
+//   try {
+//     const formattedRoleIds = moduleIds.map((id) => `roleIds=${id}`).join("&");
 
-    const response = await api.get(
-      `/rolePermission/GetRolePermissionsByRoleIds?${formattedRoleIds}`
-    );
+//     const response = await api.get(
+//       `/rolePermission/GetRolePermissionsByRoleIds?${formattedRoleIds}`
+//     );
 
-    return response.data;
-  } catch (error) {
-    console.log(error);
-    throw error;
-  }
-};
+//     return response.data;
+//   } catch (error) {
+//     console.log(error);
+//     throw error;
+//   }
+// };

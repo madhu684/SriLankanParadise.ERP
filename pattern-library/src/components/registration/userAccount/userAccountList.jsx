@@ -10,6 +10,7 @@ import ConfirmationModal from "../../confirmationModals/confirmationModal/confir
 import Registration from "../registration";
 import "./userAccountList.css"; // Import the CSS file
 import RegistrationUpdate from "../registeredUserUpdate/registeredUserUpdate";
+import ViewUserDetails from "../viewRegisteredUserDetails/viewUserDetails.jsx";
 
 const UserAccountList = () => {
   const navigate = useNavigate(); // Hook to manage navigation
@@ -29,6 +30,8 @@ const UserAccountList = () => {
     getStatusBadgeClass,
     getStatusLabel,
     handleEdit,
+    handleViewUserDetails,
+    showUserDetailModal,
     handleClose,
     handleRefetchTrue,
     selectedRowData,
@@ -42,7 +45,8 @@ const UserAccountList = () => {
     setShowDeactivateConfirmation,
     setSelectedUser,
     userActivate,
-    userDeactivate
+    userDeactivate,
+    handleCloseUserDetailModal,
   } = useUserAccountList();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -120,6 +124,16 @@ const UserAccountList = () => {
 
   if (showRegistrationForm) {
     return <Registration />;
+  }
+
+  if (showUserDetailModal) {
+    return (
+      <ViewUserDetails
+        user={userDetail}
+        show={showUserDetailModal}
+        onHide={handleCloseUserDetailModal}
+      />
+    );
   }
 
   if (userAccounts.length === 0) {
@@ -203,6 +217,14 @@ const UserAccountList = () => {
                   </span>
                 </td>
                 <td>
+                  <button
+                    className="btn btn-primary me-2"
+                    onClick={() => handleViewUserDetails(user)}
+                    // aria-label={`View details of ${user.firstname}`}
+                    // disabled={!hasPermission(PermissionIndex.VI_ITEM_MASTER)}
+                  >
+                    View
+                  </button>
                   <button
                     className="btn btn-warning me-2"
                     onClick={() => handleEdit(user)}

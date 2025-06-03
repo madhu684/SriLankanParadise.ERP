@@ -24,6 +24,10 @@ const useUserAccountList = () => {
 
   const [refetch, setRefetch] = useState(false);
 
+  const [showUserDetailModal, setShowUserDetailModal] = useState(false);
+  // const [showDetailIMModalInParent, setShowUserDetailModalInParent] =
+  //   useState(false);
+
   const fetchData = async () => {
     try {
       const usersResponse = await get_all_users_by_company_id_api(
@@ -40,10 +44,36 @@ const useUserAccountList = () => {
   useEffect(() => {
     fetchData();
     setIsUserUpdated(false);
-    if(refetch == true){
+    if (refetch == true) {
       handleRefetchFalse();
     }
   }, [isUserUpdated, setIsUserUpdated, refetch]);
+
+  // view Model handle start
+  // const handleShowUserDetailsModal = () => {
+  //   setShowUserDetailModal(true);
+  //   setShowUserDetailModalInParent(true);
+  // };
+
+  const handleCloseUserDetailModal = () => {
+    setShowUserDetailModal(false);
+    setUserDetail("");
+    //handleCloseUserDetailModalInParent();
+  };
+
+  // const handleCloseUserDetailModalInParent = () => {
+  //   const delay = 300;
+  //   setTimeout(() => {
+  //     setShowUserDetailModalInParent(false);
+  //     setUserDetail("");
+  //   }, delay);
+  // };
+
+  const handleViewUserDetails = (user) => {
+    setUserDetail(user);
+    setShowUserDetailModal(true);
+  };
+  // end Model handle start
 
   const handleEdit = (user) => {
     console.log("Editing user:", user);
@@ -66,14 +96,14 @@ const useUserAccountList = () => {
       setUserDetail("");
     }, delay);
   };
-  
+
   const handleRefetchTrue = () => {
     setRefetch(true);
-  }
+  };
 
   const handleRefetchFalse = () => {
     setRefetch(false);
-  }
+  };
 
   const handleRowSelect = (id) => {
     const isSelected = selectedRows.includes(id);
@@ -168,9 +198,15 @@ const useUserAccountList = () => {
     showRegistrationForm,
     showActivateConfirmation,
     selectedUser,
+    showUserDetailModal,
+    handleCloseUserDetailModal,
+    handleViewUserDetails,
+    //showDetailIMModalInParent,
     handleRowSelect,
     setShowEditForm,
     handleEdit,
+    // handleShowUserDetailsModal,
+    handleCloseUserDetailModal,
     getStatusBadgeClass,
     getStatusLabel,
     areAnySelectedRowsPending,

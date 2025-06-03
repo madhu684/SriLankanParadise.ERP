@@ -450,6 +450,7 @@ function template() {
                                     : ""
                                 }`}
                               >
+                                <option value="">Select Warehouses</option>
                                 {this.state.locations
                                   .filter(
                                     (location) =>
@@ -648,6 +649,18 @@ function template() {
                           </>
                         ))
                       )}
+                      <div>
+                        {showSuccessAlert && (
+                          <div className="alert alert-success" role="alert">
+                            Update successful! Your data have been saved.
+                          </div>
+                        )}
+                        {showFailureAlert && (
+                          <div className="alert alert-danger" role="alert">
+                            Update failed! Please try again.
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </form>
@@ -685,7 +698,7 @@ function template() {
                   {this.state.activeTab !== "role-permission" ? (
                     <div className="btn-width-reg">
                       <button
-                      className="btn btn-primary btn-block"
+                        className="btn btn-primary btn-block"
                         onClick={this.handleNext}
                         // style={{
                         //   color: "white",
@@ -727,10 +740,10 @@ function template() {
                         // }}
                       >
                         {this.state.loading ? (
-                        <ButtonLoadingSpinner/>
-                      ) : (
-                        "Update"
-                      )}
+                          <ButtonLoadingSpinner />
+                        ) : (
+                          "Update"
+                        )}
                       </button>
                     </div>
                   )}
