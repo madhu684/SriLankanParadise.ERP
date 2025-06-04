@@ -1,5 +1,10 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 
 import Login from "./components/login";
 import Main from "./components/main";
@@ -15,6 +20,7 @@ import ItemMaster from "./components/itemMaster/itemMaster";
 import Category from "./components/category/category";
 import Unit from "./components/unit/unit";
 import Supplier from "./components/supplier/supplierMain/supplier";
+import UserAccountList from "./components/registration/userAccount/userAccountList";
 
 const Routers = () => {
   return (
@@ -42,9 +48,10 @@ const Routers = () => {
         <Route path="/category" element={<Category />} />
         <Route path="/unit" element={<Unit />} />
         <Route path="/supplier" element={<Supplier />} />
+        <Route path="/useraccount" element={<UserAccountList />} />
       </Routes>
     </Router>
-  )
+  );
 };
 
 export default Routers;

@@ -169,25 +169,42 @@ const usePurchaseOrderList = () => {
     setPODetail("");
   };
 
-  const handleRowSelect = (id) => {
-    const isSelected = selectedRows.includes(id);
-    const selectedRow = purchaseOrders.find((pr) => pr.purchaseOrderId === id);
+  // const handleRowSelect = (id) => {
+  //   const isSelected = selectedRows.includes(id);
+  //   const selectedRow = purchaseOrders.find((pr) => pr.purchaseOrderId === id);
 
-    if (isSelected) {
-      setSelectedRows((prevSelected) =>
-        prevSelected.filter((selectedId) => selectedId !== id)
-      );
-      setSelectedRowData((prevSelectedData) =>
-        prevSelectedData.filter((data) => data.purchaseOrderId !== id)
-      );
-    } else {
-      setSelectedRows((prevSelected) => [...prevSelected, id]);
-      setSelectedRowData((prevSelectedData) => [
-        ...prevSelectedData,
-        selectedRow,
-      ]);
-    }
-  };
+  //   if (isSelected) {
+  //     setSelectedRows((prevSelected) =>
+  //       prevSelected.filter((selectedId) => selectedId !== id)
+  //     );
+  //     setSelectedRowData((prevSelectedData) =>
+  //       prevSelectedData.filter((data) => data.purchaseOrderId !== id)
+  //     );
+  //   } else {
+
+  //     setSelectedRows((prevSelected) => [...prevSelected, id]);
+  //     setSelectedRowData((prevSelectedData) => [
+  //       ...prevSelectedData,
+  //       selectedRow,
+  //     ]);
+  //   }
+  // };
+
+  const handleRowSelect = (id) => {
+  const selectedRow = purchaseOrders.find((pr) => pr.purchaseOrderId === id);
+  const isSelected = selectedRows.includes(id);
+
+  if (isSelected) {
+    // If already selected, uncheck it
+    setSelectedRows([]);
+    setSelectedRowData([]);
+  } else {
+    // Deselect previous and select only the new one
+    setSelectedRows([id]);
+    setSelectedRowData([selectedRow]);
+  }
+};
+
 
   const isAnyRowSelected = selectedRows.length === 1;
 

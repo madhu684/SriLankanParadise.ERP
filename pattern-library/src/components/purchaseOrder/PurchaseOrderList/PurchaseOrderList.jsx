@@ -172,7 +172,6 @@ const PurchaseOrderList = () => {
           <thead>
             <tr>
               <th>
-                <input type="checkbox" />
               </th>
               <th>Reference No</th>
               <th>Ordered By</th>
@@ -194,7 +193,7 @@ const PurchaseOrderList = () => {
                       type="checkbox"
                       checked={selectedRows.includes(po.purchaseOrderId)}
                       onChange={() => handleRowSelect(po.purchaseOrderId)}
-                    />
+                                    />
                   </td>
                   <td>{po.referenceNo}</td>
                   <td>{po.orderedBy}</td>

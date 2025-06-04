@@ -88,5 +88,33 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+        [HttpPut("UpdateUserPermissions/{userId}")]
+        public async Task<ApiResponseModel> UpdateUserPermissions([FromRoute] int userId, [FromBody] int[] permissionIds)
+        {
+            try
+            {
+                await _userPermissionService.DeleteUserPermissions(userId);
+
+                foreach (var permissionId in permissionIds)
+                {
+                    var userPermission = new UserPermission()
+                    {
+                        UserId = userId,
+                        PermissionId = permissionId
+                    };
+
+                    await _userPermissionService.AddUserPermission(userPermission);
+                }
+
+                _logger.LogInformation(LogMessages.UserPermissionsUpdated);
+                AddResponseMessage(Response, LogMessages.UserPermissionsUpdated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

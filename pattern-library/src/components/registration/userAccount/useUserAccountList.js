@@ -14,9 +14,19 @@ const useUserAccountList = () => {
   const [showEditForm, setShowEditForm] = useState(false);
   const [showDeactivateConfirmation, setShowDeactivateConfirmation] =
     useState(false);
+  const [showActivateConfirmation, setShowActivateConfirmation] =
+    useState(false);
+  const [selectedUser, setSelectedUser] = useState();
   const [userDetail, setUserDetail] = useState(null);
   const [selectedRowData, setSelectedRowData] = useState([]);
+  const [showRegistrationForm, setShowRegistrationForm] = useState(false);
   const [isUserUpdated, setIsUserUpdated] = useState(false);
+
+  const [refetch, setRefetch] = useState(false);
+
+  const [showUserDetailModal, setShowUserDetailModal] = useState(false);
+  // const [showDetailIMModalInParent, setShowUserDetailModalInParent] =
+  //   useState(false);
 
   const fetchData = async () => {
     try {
@@ -34,7 +44,36 @@ const useUserAccountList = () => {
   useEffect(() => {
     fetchData();
     setIsUserUpdated(false);
-  }, [isUserUpdated, setIsUserUpdated]);
+    if (refetch == true) {
+      handleRefetchFalse();
+    }
+  }, [isUserUpdated, setIsUserUpdated, refetch]);
+
+  // view Model handle start
+  // const handleShowUserDetailsModal = () => {
+  //   setShowUserDetailModal(true);
+  //   setShowUserDetailModalInParent(true);
+  // };
+
+  const handleCloseUserDetailModal = () => {
+    setShowUserDetailModal(false);
+    setUserDetail("");
+    //handleCloseUserDetailModalInParent();
+  };
+
+  // const handleCloseUserDetailModalInParent = () => {
+  //   const delay = 300;
+  //   setTimeout(() => {
+  //     setShowUserDetailModalInParent(false);
+  //     setUserDetail("");
+  //   }, delay);
+  // };
+
+  const handleViewUserDetails = (user) => {
+    setUserDetail(user);
+    setShowUserDetailModal(true);
+  };
+  // end Model handle start
 
   const handleEdit = (user) => {
     console.log("Editing user:", user);
@@ -57,9 +96,14 @@ const useUserAccountList = () => {
       setUserDetail("");
     }, delay);
   };
-  useEffect(() => {
-    console.log("showEditForm changed to:", showEditForm);
-  }, [showEditForm]);
+
+  const handleRefetchTrue = () => {
+    setRefetch(true);
+  };
+
+  const handleRefetchFalse = () => {
+    setRefetch(false);
+  };
 
   const handleRowSelect = (id) => {
     const isSelected = selectedRows.includes(id);
@@ -81,21 +125,37 @@ const useUserAccountList = () => {
     }
   };
 
-  const handleDeactivate = async (id) => {
+  const handleDeactivate = (user) => {
+    console.log("User to be deactivated:", user);
+    setShowDeactivateConfirmation(true);
+    setSelectedUser(user);
+    setIsUserUpdated(true);
+  };
+
+  const handleActivate = (user) => {
+    console.log("User to be activated:", user);
+    setShowActivateConfirmation(true);
+    setSelectedUser(user);
+    setIsUserUpdated(true);
+  };
+
+  const userDeactivate = async (id) => {
     try {
       await deactivate_user(id);
-      setShowDeactivateConfirmation(true);
       setIsUserUpdated(true);
+      setShowDeactivateConfirmation(false);
+      setSelectedUser(null);
     } catch (error) {
       console.log(error);
     }
   };
 
-  const handleActivate = async (id) => {
+  const userActivate = async (id) => {
     try {
       await activate_user(id);
-      // setShowActivateConfirmation(true);
       setIsUserUpdated(true);
+      setShowActivateConfirmation(false);
+      setSelectedUser(null);
     } catch (error) {
       console.log(error);
     }
@@ -113,7 +173,6 @@ const useUserAccountList = () => {
       false: "Inactive",
       true: "Active",
     };
-
     return statusLabels[statusCode] || "Unknown Status";
   };
 
@@ -136,9 +195,18 @@ const useUserAccountList = () => {
     selectedRowData,
     userDetail,
     users,
+    showRegistrationForm,
+    showActivateConfirmation,
+    selectedUser,
+    showUserDetailModal,
+    handleCloseUserDetailModal,
+    handleViewUserDetails,
+    //showDetailIMModalInParent,
     handleRowSelect,
     setShowEditForm,
     handleEdit,
+    // handleShowUserDetailsModal,
+    handleCloseUserDetailModal,
     getStatusBadgeClass,
     getStatusLabel,
     areAnySelectedRowsPending,
@@ -146,6 +214,12 @@ const useUserAccountList = () => {
     handleClose,
     handleDeactivate,
     handleActivate,
+    setShowRegistrationForm,
+    setShowActivateConfirmation,
+    setShowDeactivateConfirmation,
+    handleRefetchTrue,
+    userActivate,
+    userDeactivate,
   };
 };
 

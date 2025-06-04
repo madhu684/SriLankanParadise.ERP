@@ -151,6 +151,8 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<Lead, LeadDto>();
             CreateMap<MeetingRequestModel, Meeting>();
             CreateMap<Meeting, MeetingDto>();
+            CreateMap<UserUpdateRequestModel, User>();
+            CreateMap<RolePermission, RolePermissionDto>();
             // Add more mapping configurations if needed
         }
     }
