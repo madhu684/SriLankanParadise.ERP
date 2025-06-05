@@ -11,6 +11,8 @@ const useItemBatchUpdate = ({ onFormSubmit }) => {
     id: 0,
     name: "",
     unit: "",
+    sellingPrice: "",
+    expiryDate: "",
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -72,7 +74,6 @@ const useItemBatchUpdate = ({ onFormSubmit }) => {
 
   useEffect(() => {
     if (submissionStatus != null) {
-      // Scroll to the success alert when it becomes visible
       alertRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [submissionStatus]);
@@ -86,13 +87,11 @@ const useItemBatchUpdate = ({ onFormSubmit }) => {
     let isFieldValid = true;
     let errorMessage = "";
 
-    // Required validation
     if (value === null || value === undefined || `${value}`.trim() === "") {
       isFieldValid = false;
       errorMessage = `${fieldDisplayName} is required`;
     }
 
-    // Additional validation
     if (
       isFieldValid &&
       additionalRules.validationFunction &&
@@ -140,6 +139,8 @@ const useItemBatchUpdate = ({ onFormSubmit }) => {
       if (isFormValid && !isUpdateAllBatches) {
         setLoading(true);
 
+        const formattedExpiryDate = formData.expiryDate.split("T")[0];
+
         const itemBatchUpdateData = {
           batchId: selectedBatch.batchId,
           itemMasterId: selectedBatch.itemMasterId,
@@ -151,7 +152,7 @@ const useItemBatchUpdate = ({ onFormSubmit }) => {
           createdUserId: sessionStorage.getItem("userId"),
           tempQuantity: selectedBatch.tempQuantity,
           locationId: selectedBatch.locationId,
-          expiryDate: formData.expiryDate,
+          expiryDate: formattedExpiryDate,
           permissionId: 1065,
         };
 
@@ -182,33 +183,31 @@ const useItemBatchUpdate = ({ onFormSubmit }) => {
       } else if (isFormValid && isUpdateAllBatches) {
         setLoading(true);
 
-        // Update all batches
+        const formattedExpiryDate = formData.expiryDate.split("T")[0];
+
         const updatedBatches = itemBatches.map((batch) => {
           return {
             batchId: batch.batchId,
             itemMasterId: batch.itemMasterId,
             costPrice: batch.costPrice,
-            sellingPrice: formData.sellingPrice, // Update selling price for all batches
+            sellingPrice: formData.sellingPrice,
             status: status,
             companyId: sessionStorage.getItem("companyId"),
             createdBy: sessionStorage.getItem("username"),
             createdUserId: sessionStorage.getItem("userId"),
             tempQuantity: batch.tempQuantity,
             locationId: batch.locationId,
-            expiryDate: batch.expiryDate,
+            expiryDate: formattedExpiryDate,
             permissionId: 1065,
           };
         });
 
-        // Submit updates for all batches
         const batchUpdatePromises = updatedBatches.map((batch) => {
           return put_item_batch_api(batch.batchId, batch.itemMasterId, batch);
         });
 
-        // Wait for all batch updates to complete
         const batchUpdateResponses = await Promise.all(batchUpdatePromises);
 
-        // Check if all batch updates were successful
         const allBatchUpdatesSuccessful = batchUpdateResponses.every(
           (response) => response.status === 200
         );
@@ -261,14 +260,15 @@ const useItemBatchUpdate = ({ onFormSubmit }) => {
     window.print();
   };
 
-  // Handler to add the selected item to itemDetails
   const handleSelectItem = (item) => {
     setFormData({
       id: item.itemMasterId,
       name: item.itemName,
       unit: item.unit.unitName,
+      sellingPrice: "",
+      expiryDate: "",
     });
-    setSearchTerm(""); // Clear the search term
+    setSearchTerm("");
 
     setSelectedBatch(null);
     refetchItemBatches();
@@ -278,20 +278,17 @@ const useItemBatchUpdate = ({ onFormSubmit }) => {
 
   const handleBatchSelection = (e) => {
     const selectedBatchId = e.target.value;
-    console.log(selectedBatchId);
     const batch = itemBatches.find(
       (batch) => batch.batchId === parseInt(selectedBatchId, 10)
     );
 
-    // Ensure batch exists
     if (batch) {
       setSelectedBatch(batch);
 
-      // Add selling price and expiry date to formData
       setFormData((prevFormData) => ({
         ...prevFormData,
         sellingPrice: batch.sellingPrice,
-        expiryDate: batch.expiryDate?.split("T")[0],
+        expiryDate: batch.expiryDate ? batch.expiryDate.split("T")[0] : "",
       }));
     } else {
       setSelectedBatch(null);

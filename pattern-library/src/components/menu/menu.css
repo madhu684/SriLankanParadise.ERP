@@ -47,7 +47,39 @@
   z-index: 1030; /* Make sure it's above other content */
 }
 
-.company-logo {
+.company-menu-logo {
   max-width: 130px;
   height: 30px;
+}
+
+/* CSS to align the text and reduce extra spacing */
+.submodule-text {
+  text-align: left;
+  line-height: 1.1; /* Further tighten the line height */
+  margin: 0; /* Remove any default margins */
+  padding: 0; /* Remove any default padding */
+  display: inline-block; /* Ensure the div doesn't add extra space */
+}
+.submodule-text br + * {
+  margin-left: 0; /* Ensure "Report" aligns with the start of the first line */
+}
+
+/* Updated CSS to further reduce the gap between submodules */
+.submodule-list {
+  padding-top: 0; /* Remove extra padding at the top */
+  padding-bottom: 0; /* Remove extra padding at the bottom */
+  margin: 0; /* Remove any default margins on the list */
+}
+.submodule-list li {
+  margin: 0; /* Remove all margins between list items */
+  padding: 0; /* Remove padding to minimize gaps */
+  line-height: 1.1; /* Tighten line height for consistency */
+}
+
+/* Ensure the nav-link and span don't add extra spacing */
+.nav-link {
+  padding: 2px 0; /* Reduce padding to minimize vertical space */
+}
+.nav-link-hover-lite {
+  display: inline-block; /* Prevent span from adding extra space */
 }
