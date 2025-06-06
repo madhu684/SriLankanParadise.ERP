@@ -1,5 +1,6 @@
 ﻿using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 using SriLankanParadise.ERP.UserManagement.Repository;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
@@ -57,6 +58,35 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         public async Task Activate(int userId)
         {
             await _userRepository.Activate(userId);
+        }
+
+        public async Task<bool> UpdatePasswordAsync(int userId, ForgetPasswordRequestModel model)
+        {
+            var user = await _userRepository.GetUserByUserId(userId);
+            if (user == null)
+            {
+                return false;
+            }
+            if (!BCrypt.Net.BCrypt.Verify(model.CurrentPassword, user.PasswordHash))
+                return false;
+
+            var newHashedPassword = BCrypt.Net.BCrypt.HashPassword(model.NewPassword);
+            await _userRepository.UpdatePassword(userId, newHashedPassword);
+
+            return true;
+        }
+
+        public async Task<bool> ResetPasswordAsync(int userId, string password)
+        {
+            var user = await _userRepository.GetUserByUserId(userId);
+            if (user == null)
+            {
+                return false;
+            }
+            var newHashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
+            await _userRepository.UpdatePassword(userId, newHashedPassword);
+
+            return true;
         }
     }
 }
