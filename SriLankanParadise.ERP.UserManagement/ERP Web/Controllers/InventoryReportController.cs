@@ -194,12 +194,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     item.closingBalance = item.openingBalance + item.receivedQty - item.actualUsage;
                 }
 
-                // calculate closing balance
-                foreach (var item in inventoryItems)
-                {
-                    item.closingBalance = item.openingBalance + item.receivedQty - item.actualUsage;
-                }
-
                 if (inventoryItems != null && inventoryItems.Any())
                 {
                     var reportData = new List<InventoryReportDto>();
