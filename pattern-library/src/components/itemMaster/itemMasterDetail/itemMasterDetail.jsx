@@ -1,12 +1,12 @@
 import React from "react";
 import { Modal, Button } from "react-bootstrap";
-import useItemMasterDetial from "./useItemMasterDetail";
 import useItemMasterList from "../itemMasterList/useItemMasterList";
 
 const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
   const { getStatusLabel, getStatusBadgeClass } = useItemMasterList();
+
   return (
-    <Modal show={show} onHide={handleClose} centered scrollable size="lg">
+    <Modal size="lg" show={show} onHide={handleClose} centered scrollable>
       <Modal.Header closeButton>
         <Modal.Title>Item Master</Modal.Title>
       </Modal.Header>
@@ -54,6 +54,9 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
             </p>
             <p>
               <strong>Unit:</strong> {itemMaster.unit?.unitName}
+            </p>
+            <p>
+              <strong>Unit Price:</strong> {itemMaster?.unitPrice || "N/A"}
             </p>
             <p>
               <strong>Reorder Level:</strong> {itemMaster?.reorderLevel}

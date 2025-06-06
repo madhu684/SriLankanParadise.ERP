@@ -139,6 +139,21 @@ export const role_permission_api = async (rolePermissionFromData) => {
   }
 };
 
+export const role_permissions_api = async (moduleIds) => {
+  try {
+    const formattedRoleIds = moduleIds.map((id) => `roleIds=${id}`).join("&");
+
+    const response = await api.get(
+      `/rolePermission/GetRolePermissionsByRoleIds?${formattedRoleIds}`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+// Company Subscription Module User API's
 export const company_subscription_module_user_api = async (
   userModulesFromData
 ) => {
@@ -149,6 +164,21 @@ export const company_subscription_module_user_api = async (
       {
         withCredentials: true,
       }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const update_company_subscription_module_user_api = async (
+  userModulesFromData
+) => {
+  try {
+    const response = await api.put(
+      "/companySubscriptionModuleUser",
+      userModulesFromData
     );
     return response.data;
   } catch (error) {
@@ -331,7 +361,7 @@ export const put_subscription_api = async (
   }
 };
 
-//modules apis
+////User Module API'S
 export const get_modules_api = async () => {
   try {
     const response = await api.get("/module", {
@@ -378,7 +408,21 @@ export const put_module_api = async (moduleId, moduleData) => {
   }
 };
 
-//user permissions
+export const get_user_modules_by_user_id_api = async (userId) => {
+  try {
+    const response = await api.get(
+      `/module/GetModulesByUserId?userId=${userId}`, // Use template literals to include userId in the URL
+      {
+        withCredentials: true, // Include credentials if necessary
+      }
+    );
+    return response.data; // Return the response data
+  } catch (error) {
+    throw error; // Throw the error if there's an issue
+  }
+};
+
+//User Permissions API'S
 export const get_user_permissions_api = async (userId) => {
   try {
     const response = await api.get(
@@ -395,7 +439,22 @@ export const get_user_permissions_api = async (userId) => {
   }
 };
 
-//user location apis
+export const get_user_permissions_by_user_id_api = async (userId) => {
+  try {
+    const response = await api.get(
+      `/userPermission/GetUserPermissionsByUserId`,
+      {
+        params: { userId }, // Pass userId as a query parameter
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+//User Locations API'S
 export const post_user_location_api = async (userLocationData) => {
   try {
     const response = await api.post("/userLocation", userLocationData, {
@@ -429,6 +488,32 @@ export const delete_user_location_api = async (userId, locationId) => {
   }
 };
 
+export const getUserLocationsByUserId = async (userId) => {
+  try {
+    const response = await api.get(
+      `/userLocation/GetUserLocationsByUserId/${userId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user locations:", error);
+    throw error;
+  }
+};
+
+export const userLocations_update_api = async (userId, locationIds) => {
+  try {
+    const response = await api.put(
+      `/userLocation/UpdateUserLocations/${userId}`,
+      locationIds
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user locations:", error);
+    throw error;
+  }
+};
+
+//User Roles API's
 export const get_roles_by_company_id_api = async (companyId) => {
   try {
     const response = await api.get(`/role/GetRolesByCompanyId/${companyId}`, {
@@ -475,6 +560,36 @@ export const put_role_api = async (roleId, roleData) => {
   }
 };
 
+export const update_user_role_api = async (userId, roleIds) => {
+  try {
+    const response = await api.put(
+      `/userRole/UpdateUserRole/${userId}`,
+      roleIds,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const get_user_roles_by_user_id_api = async (userId) => {
+  try {
+    const response = await api.get(
+      `/userRole/GetUserRolesByUserId/${userId}`, // Use template literals to include userId in the URL
+      {
+        withCredentials: true, // Include credentials if necessary
+      }
+    );
+    return response.data; // Return the response data
+  } catch (error) {
+    throw error; // Throw the error if there's an issue
+  }
+};
+
+//User Permissions API'S
 export const get_permissions_by_company_id_api = async (companyId) => {
   try {
     const response = await api.get(
@@ -501,6 +616,22 @@ export const delete_permission_api = async (permissionId) => {
   }
 };
 
+export const update_user_permissions_api = async (userId, permissionIds) => {
+  try {
+    const response = await api.put(
+      `/userPermission/UpdateUserPermissions/${userId}`,
+      permissionIds,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+//User API'S
 export const get_all_users_by_company_id_api = async (companyId) => {
   try {
     const response = await api.get(
@@ -509,6 +640,18 @@ export const get_all_users_by_company_id_api = async (companyId) => {
         withCredentials: true,
       }
     );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_user_by_user_id = async (userId) => {
+  try {
+    const response = await api.get(`/user/GetUserByUserId/${userId}`, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);
@@ -538,6 +681,18 @@ export const activate_user = async (userId) => {
   }
 };
 
+export const put_registration_api = async (userId, userData) => {
+  try {
+    const response = await api.put(`/user/${userId}`, userData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+//Role Permissions API'S
 export const post_permission_api = async (formData) => {
   try {
     const response = await api.post("/permission", formData, {
@@ -564,3 +719,18 @@ export const put_permission_api = async (permissionId, permissionData) => {
     throw error;
   }
 };
+
+// export const role_permissions_api = async (moduleIds) => {
+//   try {
+//     const formattedRoleIds = moduleIds.map((id) => `roleIds=${id}`).join("&");
+
+//     const response = await api.get(
+//       `/rolePermission/GetRolePermissionsByRoleIds?${formattedRoleIds}`
+//     );
+
+//     return response.data;
+//   } catch (error) {
+//     console.log(error);
+//     throw error;
+//   }
+// };

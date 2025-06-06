@@ -20,13 +20,13 @@ const Category = ({
     handleSubmit,
   } = useCategory({
     onFormSubmit: () => {
-      handleClose()
-      handleUpdated()
+      handleClose();
+      handleUpdated();
     },
-  })
+  });
 
   //const companyLogoUrl = useCompanyLogoUrl()
-  
+
   return (
     <div className="container mt-4">
       {/* Header */}
@@ -40,7 +40,7 @@ const Category = ({
             className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
           ></i>
           <p>
-            {' '}
+            {" "}
             <CurrentDateTime />
           </p>
         </div>
@@ -49,17 +49,17 @@ const Category = ({
       </div>
 
       {/* Display success or error messages */}
-      {submissionStatus === 'successSubmitted' && (
+      {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
           Category created successfully!
         </div>
       )}
-      {submissionStatus === 'successSavedAsDraft' && (
+      {submissionStatus === "successSavedAsDraft" && (
         <div className="alert alert-success mb-3" role="alert">
           Category created as inactive, you can edit and active it later!
         </div>
       )}
-      {submissionStatus === 'error' && (
+      {submissionStatus === "error" && (
         <div className="alert alert-danger mb-3" role="alert">
           Error creating category. Please try again.
         </div>
@@ -78,13 +78,13 @@ const Category = ({
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.categoryName ? 'is-valid' : ''
-                } ${validationErrors.categoryName ? 'is-invalid' : ''}`}
+                  validFields.categoryName ? "is-valid" : ""
+                } ${validationErrors.categoryName ? "is-invalid" : ""}`}
                 id="categoryName"
                 placeholder="Enter Category Name"
                 value={formData.categoryName}
                 onChange={(e) =>
-                  handleInputChange('categoryName', e.target.value)
+                  handleInputChange("categoryName", e.target.value)
                 }
                 required
               />
@@ -101,11 +101,11 @@ const Category = ({
               </label>
               <select
                 className={`form-select ${
-                  validFields.status ? 'is-valid' : ''
-                } ${validationErrors.status ? 'is-invalid' : ''}`}
+                  validFields.status ? "is-valid" : ""
+                } ${validationErrors.status ? "is-invalid" : ""}`}
                 id="status"
                 value={formData.status}
-                onChange={(e) => handleInputChange('status', e.target.value)}
+                onChange={(e) => handleInputChange("status", e.target.value)}
                 required
               >
                 <option value="">Select Status</option>
@@ -132,7 +132,7 @@ const Category = ({
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Creating..." />
             ) : (
-              'Create'
+              "Create"
             )}
           </button>
           <button
@@ -146,7 +146,7 @@ const Category = ({
         </div>
       </form>
     </div>
-  )
-}
+  );
+};
 
 export default Category;

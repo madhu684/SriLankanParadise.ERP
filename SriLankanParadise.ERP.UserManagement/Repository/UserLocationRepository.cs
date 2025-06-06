@@ -114,5 +114,26 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task DeleteUserLocations(int userId)
+        {
+            try
+            {
+                var userLocations = await _dbContext.UserLocations
+                    .Where(ul => ul.UserId == userId)
+                    .ToListAsync();
+
+                if (userLocations.Any())
+                {
+                    _dbContext.UserLocations.RemoveRange(userLocations);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }

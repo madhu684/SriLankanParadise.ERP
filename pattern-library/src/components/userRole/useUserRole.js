@@ -62,6 +62,11 @@ const useUserRole = ({ onFormSubmit, onClose }) => {
   }, []);
 
   const handleInputChange = (field, value) => {
+    setSubmissionStatus(null);
+    setValidationErrors((prev) => ({
+            ...prev,
+            [field]: "",
+          }));
     setFormData({
       ...formData,
       [field]: value,
@@ -184,7 +189,7 @@ const useUserRole = ({ onFormSubmit, onClose }) => {
     setSubmissionStatus(null);
     if (onClose) onClose();
   };
-
+  
   return {
     formData,
     validFields,

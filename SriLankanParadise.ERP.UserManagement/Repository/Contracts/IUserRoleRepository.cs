@@ -5,5 +5,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
     public interface IUserRoleRepository
     {
         Task AddUserRole(UserRole userRole);
+        Task<IEnumerable<Role>> GetUserRolesByUserId(int userId);
+        Task DeleteUserRoles(int userId);
+
+
     }
 }

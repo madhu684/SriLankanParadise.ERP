@@ -1,0 +1,43 @@
+.btn-width-reg {
+  width: 100px !important;
+}
+
+.btn-width-reg .btn-primary {
+  width: 100% !important;
+}
+
+.card-height {
+  max-height: 100vh !important;
+}
+
+.input-registration {
+  background-color: #ffffff !important;
+  border-color: grey;
+  border-radius: 5px;
+  width:250px;
+  --bs-focus-ring-color: #f4f2f2 !important;
+}
+
+.tab-active {
+  background-color: #c7bfbf !important;
+  border: none !important;
+}
+
+
+.selected-stages {
+  display: flex;
+  flex-direction: column;
+}
+
+.selected-stages .d-flex {
+  align-items: center;
+}
+
+.selected-stages span {
+  font-size: 0.875rem;
+}
+
+.selected-stages .btn-danger {
+  font-size: 0.75rem;
+}
+
