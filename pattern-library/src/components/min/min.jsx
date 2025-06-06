@@ -184,7 +184,7 @@ const Min = ({ handleClose, handleUpdated }) => {
                                 <span className="me-3">
                                   <i className="bi bi-file-earmark-text"></i>
                                 </span>
-                                {mrn.referenceNumber}
+                                {mrn?.referenceNumber}
                               </button>
                             </li>
                           ))}
@@ -230,23 +230,23 @@ const Min = ({ handleClose, handleUpdated }) => {
                 <div className="card-body">
                   <p>
                     Material Requisition Reference No:{" "}
-                    {selectedMrn.referenceNumber}
+                    {selectedMrn?.referenceNumber}
                   </p>
                   <p>Requested By: {selectedMrn.requestedBy}</p>
                   <p>
                     MRN Date:{" "}
                     {moment
-                      .utc(selectedMrn.requisitionDate)
+                      .utc(selectedMrn?.requisitionDate)
                       .tz("Asia/Colombo")
                       .format("YYYY-MM-DD hh:mm:ss A")}
                   </p>
                   <p>
                     Delivery Location:{" "}
-                    {selectedMrn.requestedToLocation.locationName}
+                    {selectedMrn?.requestedToLocation.locationName}
                   </p>
                   <p>
                     Warehouse Location:{" "}
-                    {selectedMrn.requestedFromLocation.locationName}
+                    {selectedMrn?.requestedFromLocation.locationName}
                   </p>
                   <button
                     type="button"
@@ -286,7 +286,11 @@ const Min = ({ handleClose, handleUpdated }) => {
                     <td>{item.remainingQuantity}</td>
                     <td>
                       <select
-                        className="form-select"
+                        className={`form-select ${
+                          validFields[`batch_${index}`] ? "is-valid" : ""
+                        } ${
+                          validationErrors[`batch_${index}`] ? "is-invalid" : ""
+                        }`}
                         value={item.batchId}
                         onChange={(e) =>
                           handleItemDetailsChange(
@@ -310,6 +314,11 @@ const Min = ({ handleClose, handleUpdated }) => {
                             </option>
                           ))}
                       </select>
+                      {validationErrors[`batch_${index}`] && (
+                        <div className="invalid-feedback">
+                          {validationErrors[`batch_${index}`]}
+                        </div>
+                      )}
                     </td>
                     <td>
                       <input

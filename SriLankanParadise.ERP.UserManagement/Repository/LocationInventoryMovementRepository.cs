@@ -168,6 +168,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(l => l.Batch)
                     .ToListAsync();
 
+                
+                
                 return inventoryMovements.Any() ? inventoryMovements : null;
             }
             catch (Exception)

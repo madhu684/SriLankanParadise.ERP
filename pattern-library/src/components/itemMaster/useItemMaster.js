@@ -35,6 +35,7 @@ const useItemMaster = ({ onFormSubmit }) => {
     stockClearance: "0.00",
     bulkPrice: "0.00",
   });
+
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
   const [unitOptions, setUnitOptions] = useState([]);
