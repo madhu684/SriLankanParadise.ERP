@@ -1,6 +1,5 @@
-import React from "react";
-import { Modal, Button } from "react-bootstrap";
-import useMaterialRequisitionDetial from "./useMaterialRequisitionDetail";
+import { React } from "react";
+import { Modal, Button, Form } from "react-bootstrap";
 import useMaterialRequisitionList from "../materialRequisitionList/useMaterialRequisitionList";
 import moment from "moment";
 import "moment-timezone";
@@ -82,7 +81,7 @@ const MaterialRequisitionDetail = ({
             <tr>
               <th>Item Name</th>
               <th>Unit</th>
-              <th>Quantity</th>
+              <th>Requested Quantity</th>
             </tr>
           </thead>
           <tbody>

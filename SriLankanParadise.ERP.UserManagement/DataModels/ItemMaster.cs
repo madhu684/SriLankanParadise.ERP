@@ -27,6 +27,8 @@ public partial class ItemMaster
 
     public int? InventoryUnitId { get; set; }
 
+
+
     public decimal? ConversionRate { get; set; }
 
     public string? ItemCode { get; set; }

@@ -19,7 +19,7 @@ public partial class LocationInventory
 
     public string? RackNo { get; set; }
 
-    public virtual ItemBatch ItemBatch { get; set; } = null!;
+    public virtual ItemBatch ItemBatch { get; set; }
 
     public virtual Location Location { get; set; } = null!;
 

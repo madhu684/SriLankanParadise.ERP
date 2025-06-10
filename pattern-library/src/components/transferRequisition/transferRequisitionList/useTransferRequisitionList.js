@@ -23,6 +23,7 @@ const useTransferRequisitionList = () => {
   const [TRDetail, setTRDetail] = useState("");
   const [filter, setFilter] = useState("all"); // 'all', 'incoming', 'outgoing'
   const [userWarehouses, setUserWarehouses] = useState([]);
+  const [openTINsList, setOpenTINsList] = useState(false);
   const [selectedWarehouse, setSelectedWarehouse] = useState(
     userWarehouses[0]?.id || ""
   );
@@ -332,6 +333,7 @@ const useTransferRequisitionList = () => {
     userWarehouses,
     filter,
     filteredRequisitions,
+    openTINsList,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleViewDetails,

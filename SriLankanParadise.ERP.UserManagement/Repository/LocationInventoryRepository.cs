@@ -55,7 +55,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             try
             {
-                return await _dbContext.LocationInventories.ToListAsync();
+                return await _dbContext.LocationInventories
+                     .ToListAsync();
             }
             catch (Exception)
             {
@@ -71,6 +72,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var locationInventory = await _dbContext.LocationInventories
                     .Where(li => li.LocationInventoryId == locationInventoryId)
+                    .Include(li => li.ItemBatch)
                     .FirstOrDefaultAsync();
 
                 return locationInventory;
@@ -87,13 +89,16 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var locationInventories = await _dbContext.LocationInventories
                     .Where(li => li.LocationId == locationId)
+                    .Include(li => li.ItemBatch)
+                        .ThenInclude(ib => ib.Batch)
+
                     .Include(li => li.ItemMaster)
                     .ThenInclude(im => im.Unit)
                     .Include(li => li.ItemBatch)
                     .ThenInclude(ib => ib.Batch)
                     .ToListAsync();
 
-                return locationInventories.Any() ? locationInventories : null;
+                return locationInventories;
             }
             catch (Exception)
             {

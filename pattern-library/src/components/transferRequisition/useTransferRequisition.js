@@ -99,7 +99,12 @@ const useTransferRequisition = ({ onFormSubmit }) => {
   } = useQuery({
     queryKey: ["items", searchTerm],
     queryFn: () =>
-      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "Sellable"),
+      fetchItems(
+        sessionStorage.getItem("companyId"),
+        searchTerm,
+        "Sellable",
+        "Raw Material"
+      ),
   });
 
   useEffect(() => {

@@ -819,6 +819,39 @@ export const approve_issue_master_api = async (issueMasterId, approvalData) => {
   }
 };
 
+//======================
+//patch_issue_detail_api
+export const patch_issue_detail_api = async (issueMasterId, formData) => {
+  try {
+    const response = await api.patch(
+      `/issueDetail/update-received-quantity/${issueMasterId}`,
+      formData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+//get issue details api
+export const get_issue_details_api = async (issueMasterId) => {
+  try {
+    const response = await api.get(`/issueDetail/${issueMasterId}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+//========================
+
 export const post_issue_detail_api = async (formData) => {
   try {
     const response = await api.post("/issueDetail", formData, {

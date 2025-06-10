@@ -1,5 +1,10 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 
 import Login from "./components/login";
 import Main from "./components/main";
@@ -21,7 +26,7 @@ const Routers = () => {
     <Router>
       <Routes>
         {/* <Route path="/" element={<Home />} /> */}
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/main" element={<Main />} />
         <Route path="/admin" element={<Admin />} />
@@ -44,7 +49,7 @@ const Routers = () => {
         <Route path="/supplier" element={<Supplier />} />
       </Routes>
     </Router>
-  )
+  );
 };
 
 export default Routers;
