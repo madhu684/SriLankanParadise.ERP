@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import useSupplierList from "./useSupplierList";
-import Supplier from "../supplier";
+import Supplier from "../../../supplier/supplierMain/supplier";
 import SupplierDetails from "../supplierDetail/supplierDetail";
 import SupplierUpdate from "../supplierUpdate/supplierUpdate";
 import LoadingSpinner from "../../../loadingSpinner/loadingSpinner";

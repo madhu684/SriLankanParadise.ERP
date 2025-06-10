@@ -16,5 +16,14 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             await _userRoleRepository.AddUserRole(userRole);
         }
+
+        public async Task<IEnumerable<Role>> GetUserRolesByUserId(int userId)
+        {
+            return await _userRoleRepository.GetUserRolesByUserId(userId);
+        }
+        public async Task DeleteUserRoles(int userId)
+        {
+            await _userRoleRepository.DeleteUserRoles(userId);
+        }
     }
 }

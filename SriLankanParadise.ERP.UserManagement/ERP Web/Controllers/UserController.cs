@@ -234,6 +234,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                 var updatedUser = _mapper.Map<User>(userUpdateRequest);
                 updatedUser.UserId = userId; // Ensure the ID is not changed
+                updatedUser.PasswordHash = existingUser.PasswordHash;
 
                 await _userService.UpdateUser(existingUser.UserId, updatedUser);
 

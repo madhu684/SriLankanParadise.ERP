@@ -15,5 +15,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task UpdateUserLocation(int userLocationId, UserLocation userLocation);
 
         Task DeleteUserLocation(int userLocationId);
+        Task DeleteUserLocations(int userId);
     }
 }

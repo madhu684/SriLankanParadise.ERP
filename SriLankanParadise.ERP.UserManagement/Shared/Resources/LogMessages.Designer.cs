@@ -2694,5 +2694,28 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
                 return ResourceManager.GetString("UserUpdated", resourceCulture);
             }
         }
+
+        public static string RolePermissionsRetrieved { 
+            get {
+                return ResourceManager.GetString("RolePermissionsRetrieved", resourceCulture);
+            } 
+        }
+
+        public static string RolePermissionsNotFound { get {
+                return ResourceManager.GetString("RolePermissionsNotFound", resourceCulture);
+            } 
+        }
+
+        public static string UserRoleUpdated {
+            get {
+                return ResourceManager.GetString("UserRoleUpdated", resourceCulture);
+            } 
+        }
+
+        public static string UserPermissionsUpdated {
+            get {
+                return ResourceManager.GetString("UserPermissionsUpdated", resourceCulture);
+            }
+        }
     }
 }

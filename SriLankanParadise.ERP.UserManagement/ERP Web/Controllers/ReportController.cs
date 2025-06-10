@@ -47,7 +47,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             {
                 var inventoryItems = new List<StockReportDto>();
 
-                //Need below values after adding DailyLocationInventory
                 var previousDate = fromDate.AddDays(-1);
                 var previousDateOnly = new DateOnly(previousDate.Year, previousDate.Month, previousDate.Day);
 
@@ -66,12 +65,12 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                         {
                             itemId = item.ItemMasterId,
                             batchId = item.BatchId,
-                            batchNumber = item.Batch.BatchRef ?? "-",
-                            location = location.LocationName ?? "-",
-                            itemName = item.ItemMaster.ItemName ?? "-",
-                            itemCode = item.ItemMaster.ItemCode ?? "-",
-                            unitName = item.ItemMaster.Unit.UnitName ?? "-",
-                            reorderLevel = item.ItemMaster.ReorderLevel ?? 0,
+                            batchNumber = item.Batch?.BatchRef ?? "-",
+                            location = location?.LocationName ?? "-",
+                            itemName = item.ItemMaster?.ItemName ?? "-",
+                            itemCode = item.ItemMaster?.ItemCode ?? "-",
+                            unitName = item.ItemMaster?.Unit?.UnitName ?? "-",
+                            reorderLevel = item.ItemMaster?.ReorderLevel ?? 0,
                             openingBalance = item.StockInHand ?? 0,
                             totalIn = 0,
                             totalOut = 0,
@@ -79,6 +78,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                         });
                     }
                 }
+
 
                 if (in_ItemsLocInv != null && in_ItemsLocInv.Any())
                 {
@@ -98,11 +98,11 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                             {
                                 itemId = in_Item.ItemMasterId,
                                 batchId = in_Item.BatchId,
-                                batchNumber = in_Item.ItemBatch.Batch.BatchRef ?? "-",
+                                batchNumber = in_Item.Batch?.BatchRef ?? "-",
                                 location = location.LocationName ?? "-",
                                 itemName = itemMaster.ItemName ?? "-",
                                 itemCode = itemMaster.ItemCode ?? "-",
-                                unitName = itemMaster.Unit.UnitName ?? "-",
+                                unitName = itemMaster.Unit?.UnitName ?? "-",
                                 reorderLevel = itemMaster.ReorderLevel ?? 0,
                                 openingBalance = 0,
                                 totalIn = in_Item.Qty ?? 0,

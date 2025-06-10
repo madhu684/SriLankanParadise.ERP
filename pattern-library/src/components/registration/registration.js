@@ -2,19 +2,17 @@ import React from "react";
 import template from "./registration.jsx";
 import {
   company_modules_api,
-  post_user_location_api,
   module_roles_api,
-  module_permissions_api,
   user_registration_api,
   company_subscription_module_user_api,
-  get_company_subscription_module_id_api,
   user_role_api,
   user_permission_api,
-  role_permission_api,
+  post_user_location_api,
+  role_permissions_api,
 } from "../../services/userManagementApi.js";
-import { get_company_locations_api } from "../../services/purchaseApi";
+import { get_company_locations_api } from "../../services/purchaseApi.js";
 
-class registration extends React.Component {
+class Registration extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -22,45 +20,33 @@ class registration extends React.Component {
         basic: {
           username: "",
           email: "",
-          password: "",
-          confirmPassword: "",
           contactNo: "",
           firstname: "",
           lastname: "",
-          companyId: sessionStorage.getItem("companyId"),
+          companyId: sessionStorage.getItem("companyId") || "", // Default to sessionStorage value
           department: "",
-          warehouse: [],
+          warehouse: "",
+          // productionStages: [],
+          status: false, // Initially empty, will be fetched later
         },
         "user-module": {
-          assignedModules: [], // Array to store assigned modules
-          availableModules: [
-            // {
-            //   id: null,
-            //   name: "",
-            //   roles: {
-            //     assignedRoles: [],
-            //     availableRoles: [
-            //       { id: null, name: "" },
-            //       // ... other roles for Module 1
-            //     ],
-            //   },
-            //   permissions: {
-            //     assignedPermissions: [],
-            //     availablePermissions: [
-            //       { id: null, name: "" },
-            //       // ... other permissions for Module 1
-            //     ],
-            //   },
-            // },
-          ], // Array to store available modules for the dropdown
+          availableModules: [], // Initially empty array for available modules
+          assignedModules: [], // Initially empty array for assigned modules
         },
+        "user-role": {
+          assignedRoles: [],
+        },
+        permissions: {},
       },
       activeTab: "basic",
-      prevCompanyId: 0, // Initialize with the default companyId
+      prevCompanyId: 0,
       fetchedAssignedModuleIds: [],
       registrationSuccessful: false,
       showSuccessAlert: false,
       showFailureAlert: false,
+
+      registrationErrorMessage: " ",
+
       validFields: {
         basic: {},
       },
@@ -70,12 +56,355 @@ class registration extends React.Component {
         "user-role": {},
         "role-permission": {},
       },
-      locations: [],
-      loading: false, // Flag to indicate loading state
+      locations: [], // Will be fetched later
     };
   }
 
-  validateBasicTab = () => {
+  componentDidMount() {
+    this.fetchInitialData();
+  }
+
+  /**
+   * Fetches initial data (Production stages, locations) from the API and updates the component state.
+   */
+  fetchInitialData = async () => {
+    get_company_locations_api(sessionStorage.getItem("companyId"))
+      .then((response) => {
+        this.setState((prev) => ({
+          ...prev,
+          locations: response.data.result,
+        }));
+      })
+      .catch((error) => {
+        console.error("Error fetching locations:", error);
+      });
+    await this.fetchCompanyModules();
+  };
+
+  /**
+   * Handles the "Next" button click and navigates to the next tab.
+   * */
+  handleNext = async () => {
+    switch (this.state.activeTab) {
+      case "basic":
+        const isBasicTabValid = this.validateUserInfoTab();
+        if (isBasicTabValid) {
+          this.setState((prev) => ({ ...prev, activeTab: "user-module" }));
+        }
+        break;
+      case "user-module":
+        const isUserModuleTabValid = this.validateUserModulesTab();
+        if (isUserModuleTabValid) {
+          await this.fetchModuleRoles();
+          this.setState((prev) => ({ ...prev, activeTab: "user-role" }));
+        }
+        break;
+      case "user-role":
+        const isUserRoleTabValid = this.validateUserRolesTab();
+        if (isUserRoleTabValid) {
+          await this.fetchRolePermissions();
+          this.setState((prev) => ({ ...prev, activeTab: "role-permission" }));
+        }
+        break;
+      default:
+        break;
+    }
+  };
+
+  /**
+   * Handles the "Previous" button click and navigates to the previous tab.
+   */
+  handlePrevious = () => {
+    switch (this.state.activeTab) {
+      case "user-module":
+        this.resetValidationErrors("user-module");
+        this.setState((prevState) => ({
+          ...prevState,
+          activeTab: "basic",
+        }));
+        break;
+      case "user-role":
+        this.resetValidationErrors("user-role");
+        this.setState((prevState) => ({
+          ...prevState,
+          activeTab: "user-module",
+        }));
+        break;
+      case "role-permission":
+        this.resetValidationErrors("role-permission");
+        this.setState((prevState) => ({
+          ...prevState,
+          activeTab: "user-role",
+        }));
+        break;
+      default:
+        break;
+    }
+  };
+
+  /**
+   * Handles input changes for form fields.
+   */
+  handleInputChange = (section, field, value) => {
+    this.setState((prevState) => ({
+      formData: {
+        ...prevState.formData,
+        [section]: {
+          ...prevState.formData[section],
+          [field]: value,
+        },
+      },
+    }));
+  };
+
+  /**
+   * Handles the selection of a Module.
+   */
+  handleSelectModule = (moduleId) => {
+    const selectedModule = this.state.formData[
+      "user-module"
+    ].availableModules.find((module) => module.id === parseInt(moduleId, 10));
+
+    if (selectedModule) {
+      const updatedAssignedModules = [
+        ...this.state.formData["user-module"].assignedModules,
+        selectedModule,
+      ];
+
+      const updatedAvailableModules = this.state.formData[
+        "user-module"
+      ].availableModules.filter((module) => module.id !== selectedModule.id);
+
+      this.setState((prevState) => ({
+        formData: {
+          ...prevState.formData,
+          "user-module": {
+            ...prevState.formData["user-module"],
+            assignedModules: updatedAssignedModules,
+            availableModules: updatedAvailableModules,
+          },
+        },
+      }));
+    }
+  };
+  /**
+   * Handles the removal of a Module.
+   */
+  handleRemoveModule = (moduleId) => {
+    const removedModule = this.state.formData[
+      "user-module"
+    ].assignedModules.find((module) => module.id === moduleId);
+
+    if (removedModule) {
+      const updatedAssignedModules = this.state.formData[
+        "user-module"
+      ].assignedModules.filter((module) => module.id !== moduleId);
+
+      const updatedAvailableModules = [
+        ...this.state.formData["user-module"].availableModules,
+        removedModule,
+      ];
+
+      this.setState((prevState) => ({
+        formData: {
+          ...prevState.formData,
+          "user-module": {
+            ...prevState.formData["user-module"],
+            assignedModules: updatedAssignedModules,
+            availableModules: updatedAvailableModules,
+          },
+        },
+      }));
+    }
+  };
+  /**
+   * Handles the selection of a Role.
+   */
+  handleSelectRole = (roleId, moduleId) => {
+    const updatedModules = this.state.formData[
+      "user-module"
+    ].assignedModules.map((module) => {
+      if (module.id === moduleId) {
+        const selectedRole = module.roles.availableRoles.find(
+          (role) => role.id === parseInt(roleId, 10)
+        );
+
+        if (!selectedRole) return module;
+
+        return {
+          ...module,
+          roles: {
+            assignedRoles: [...module.roles.assignedRoles, selectedRole],
+            availableRoles: module.roles.availableRoles.filter(
+              (role) => role.id !== selectedRole.id
+            ),
+          },
+        };
+      }
+      return module;
+    });
+
+    this.setState((prevState) => ({
+      formData: {
+        ...prevState.formData,
+        "user-module": {
+          ...prevState.formData["user-module"],
+          assignedModules: updatedModules,
+        },
+      },
+    }));
+  };
+
+  /**
+   * Handles the removal of a Role.
+   */
+  handleRemoveRole = (roleId, moduleId) => {
+    const updatedModules = this.state.formData[
+      "user-module"
+    ].assignedModules.map((module) => {
+      if (module.id === moduleId) {
+        const removedRole = module.roles.assignedRoles.find(
+          (role) => role.id === roleId
+        );
+
+        if (!removedRole) return module;
+
+        return {
+          ...module,
+          roles: {
+            assignedRoles: module.roles.assignedRoles.filter(
+              (role) => role.id !== roleId
+            ),
+            availableRoles: [...module.roles.availableRoles, removedRole],
+          },
+        };
+      }
+      return module;
+    });
+
+    this.setState((prevState) => ({
+      formData: {
+        ...prevState.formData,
+        "user-module": {
+          ...prevState.formData["user-module"],
+          assignedModules: updatedModules,
+        },
+      },
+    }));
+  };
+
+  /**
+   * Handles the selection of a Permission.
+   */
+  handleSelectPermission = (moduleId, roleId, permissionId) => {
+    permissionId = parseInt(permissionId, 10);
+
+    const updatedModules = this.state.formData[
+      "user-module"
+    ].assignedModules.map((module) => {
+      if (module.id !== moduleId) return module;
+
+      return {
+        ...module,
+        roles: {
+          ...module.roles,
+          assignedRoles: module.roles.assignedRoles.map((role) => {
+            if (role.id !== roleId) return role;
+
+            const permissionToAssign =
+              role.permissions.availablePermissions.find(
+                (permission) => permission.id === permissionId
+              );
+
+            if (!permissionToAssign) return role;
+
+            return {
+              ...role,
+              permissions: {
+                assignedPermissions: [
+                  ...role.permissions.assignedPermissions,
+                  permissionToAssign,
+                ],
+                availablePermissions:
+                  role.permissions.availablePermissions.filter(
+                    (permission) => permission.id !== permissionId
+                  ),
+              },
+            };
+          }),
+        },
+      };
+    });
+
+    this.setState((prevState) => ({
+      formData: {
+        ...prevState.formData,
+        "user-module": {
+          ...prevState.formData["user-module"],
+          assignedModules: updatedModules,
+        },
+      },
+    }));
+  };
+
+  /**
+   * Handles the removal of a Permission.
+   */
+  handleRemovePermission = (moduleId, roleId, permissionId) => {
+    permissionId = parseInt(permissionId, 10);
+
+    const updatedModules = this.state.formData[
+      "user-module"
+    ].assignedModules.map((module) => {
+      if (module.id !== moduleId) return module;
+
+      return {
+        ...module,
+        roles: {
+          ...module.roles,
+          assignedRoles: module.roles.assignedRoles.map((role) => {
+            if (role.id !== roleId) return role;
+
+            const permissionToRemove =
+              role.permissions.assignedPermissions.find(
+                (permission) => permission.id === permissionId
+              );
+
+            if (!permissionToRemove) return role;
+
+            return {
+              ...role,
+              permissions: {
+                assignedPermissions:
+                  role.permissions.assignedPermissions.filter(
+                    (permission) => permission.id !== permissionId
+                  ),
+                availablePermissions: [
+                  ...role.permissions.availablePermissions,
+                  permissionToRemove,
+                ],
+              },
+            };
+          }),
+        },
+      };
+    });
+
+    this.setState((prevState) => ({
+      formData: {
+        ...prevState.formData,
+        "user-module": {
+          ...prevState.formData["user-module"],
+          assignedModules: updatedModules,
+        },
+      },
+    }));
+  };
+
+  /**
+   * Validates the User Information tab of the registration form.
+   */
+  validateUserInfoTab = () => {
     const { basic } = this.state.formData;
     const errors = {};
 
@@ -99,11 +428,16 @@ class registration extends React.Component {
       errors.username = "Username is required.";
     }
 
-    // TODO : Add more validations for the password field as needed.
     if (!basic.password) {
       errors.password = "Password is required.";
     } else if (basic.password.length < 8) {
       errors.password = "Password must be at least 8 characters long.";
+    } else if (!/[A-Za-z]/.test(basic.password)) {
+      errors.password = "Password must contain at least one letter.";
+    } else if (!/[0-9]/.test(basic.password)) {
+      errors.password = "Password must contain at least one number.";
+    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(basic.password)) {
+      errors.password = "Password must contain at least one special character.";
     }
 
     if (!basic.confirmPassword) {
@@ -116,27 +450,37 @@ class registration extends React.Component {
       errors.department = "Department is required.";
     }
 
-    this.setState({
-      validationErrors: { ...this.state.validationErrors, basic: errors },
+    // if (!basic.productionStages) {
+    //   errors.productionStages = "At least one production stage is required.";
+    // }
+
+    this.setState((prevState) => ({
+      validationErrors: {
+        ...prevState.validationErrors,
+        basic: errors,
+      },
       validFields: {
-        ...this.state.validFields,
+        ...prevState.validFields,
         basic: {
-          ...this.state.validFields.basic,
-          firstname: !errors.firstname,
-          username: !errors.username,
-          email: !errors.email,
-          contactNo: !errors.contactNo,
-          password: !errors.password,
-          confirmPassword: !errors.confirmPassword,
-          department: !errors.department,
+          firstname: !!basic.firstname,
+          email: !!basic.email,
+          contactNo: !!basic.contactNo,
+          username: !!basic.username,
+          password: !!basic.password,
+          confirmPassword: !!basic.confirmPassword,
+          department: !!basic.department,
+          //productionStages: !!basic.productionStages,
         },
       },
-    });
+    }));
 
     return Object.keys(errors).length === 0;
   };
 
-  validateUserModuleTab = () => {
+  /**
+   * Validates the User Modules tab of the registration form.
+   */
+  validateUserModulesTab = () => {
     const { "user-module": userModule } = this.state.formData;
     const errors = {};
 
@@ -160,7 +504,10 @@ class registration extends React.Component {
     return userModule.assignedModules.length > 0;
   };
 
-  validateUserRoleTab = () => {
+  /**
+   * Validates the User Roles tab of the registration form.
+   */
+  validateUserRolesTab = () => {
     const { "user-module": userModule } = this.state.formData;
     const errors = {};
 
@@ -180,18 +527,25 @@ class registration extends React.Component {
     return Object.keys(errors).length === 0;
   };
 
-  validateRolePermissionTab = () => {
+  /**
+   * Validates the Role Permissions tab of the registration form.
+   */
+  validateRolePermissionsTab = () => {
     const { "user-module": userModule } = this.state.formData;
     const errors = {};
 
     // Validate each assigned module
     userModule.assignedModules.forEach((module) => {
-      if (module.permissions.assignedPermissions.length === 0) {
-        errors[
-          module.id
-        ] = `Please assign at least one permission for module ${module.name.toLowerCase()}.`;
-      }
+      module.roles.assignedRoles.forEach((role) => {
+        if (role.permissions.assignedPermissions.length === 0) {
+          errors[
+            role.id
+          ] = `Please assign at least one permission for role ${role.name.toLowerCase()}.`;
+        }
+      });
     });
+
+    console.log(errors);
 
     this.setState((prevState) => ({
       validationErrors: {
@@ -203,59 +557,187 @@ class registration extends React.Component {
     return Object.keys(errors).length === 0;
   };
 
-  // Handle next button click
-  handleNext = async () => {
-    switch (this.state.activeTab) {
-      case "basic":
-        const isBasicTabValid = this.validateBasicTab();
-        if (isBasicTabValid) {
-          await this.fetchCompanyModules();
-          this.setState({ activeTab: "user-module" });
-        }
-        break;
-      case "user-module":
-        const isUserModuleTabValid = this.validateUserModuleTab();
-        if (isUserModuleTabValid) {
-          await this.fetchRolesPermissions();
-        }
-        break;
-      case "user-role":
-        const isUserRoleTabValid = this.validateUserRoleTab();
-        if (isUserRoleTabValid) {
-          this.setState({ activeTab: "role-permission" });
-        }
-        break;
-      default:
-        break;
-    }
-  };
+  /**
+   * Fetches Modules for the selected Company
+   */
+  async fetchCompanyModules() {
+    const companyId = this.state.formData.basic.companyId;
+    try {
+      const modulesData = await company_modules_api(companyId);
+      const modulesArray = modulesData.data.result || [];
 
-  // handle previous button click
-  handlePrevious = () => {
-    switch (this.state.activeTab) {
-      case "user-module":
-        this.resetValidationErrors("user-module");
-        this.setState({ activeTab: "basic" });
-        break;
-      case "user-role":
-        this.resetValidationErrors("user-role");
-        this.setState({ activeTab: "user-module" });
-        break;
-      case "role-permission":
-        this.resetValidationErrors("role-permission");
-        this.setState({ activeTab: "user-role" });
-        break;
-      default:
-        break;
+      this.setState((prevState) => ({
+        formData: {
+          ...prevState.formData,
+          "user-module": {
+            ...prevState.formData["user-module"],
+            assignedModules: [],
+            availableModules: modulesArray.map((module) => ({
+              id: module.subscriptionModule.moduleId,
+              name: module.subscriptionModule.module.moduleName,
+              subscriptionModuleId: module.subscriptionModuleId,
+              roles: {
+                assignedRoles: [],
+                availableRoles: [],
+              },
+            })),
+          },
+        },
+      }));
+    } catch (error) {
+      console.error("Error fetching modules:", error);
     }
-  };
+  }
 
-  //Save the user data
+  /**
+   * Fetches Roles for the assigned Modules
+   */
+  async fetchModuleRoles() {
+    let isFetchRequired = false;
+    this.state.formData["user-module"].assignedModules.forEach((module) => {
+      if (module.roles.availableRoles.length === 0) {
+        isFetchRequired = true;
+      }
+    });
+
+    if (!isFetchRequired) {
+      return;
+    }
+
+    const assignedModuleIds = this.state.formData[
+      "user-module"
+    ].assignedModules.map((module) => module.id);
+
+    if (assignedModuleIds.length > 0) {
+      try {
+        const rolesData = await module_roles_api(assignedModuleIds);
+
+        this.setState((prevState) => ({
+          formData: {
+            ...prevState.formData,
+            "user-module": {
+              ...prevState.formData["user-module"],
+              assignedModules: prevState.formData[
+                "user-module"
+              ].assignedModules.map((assignedModule) => {
+                const moduleId = assignedModule.id.toString();
+                const moduleRoles = rolesData.data.result[moduleId];
+
+                if (!moduleRoles) {
+                  return assignedModule;
+                }
+
+                return {
+                  ...assignedModule,
+                  roles: {
+                    availableRoles: moduleRoles.map((role) => ({
+                      id: role.roleId,
+                      name: role.roleName,
+                      permissions: {
+                        assignedPermissions: [],
+                        availablePermissions: [],
+                      },
+                    })),
+                    assignedRoles: [],
+                  },
+                };
+              }),
+            },
+          },
+        }));
+      } catch (error) {
+        console.error("Error fetching roles:", error);
+      }
+    }
+  }
+
+  /**
+   * Fetches Permissions for the assigned Roles
+   */
+  async fetchRolePermissions() {
+    let isFetchRequired = false;
+    this.state.formData["user-module"].assignedModules.forEach((module) => {
+      module.roles.assignedRoles.forEach((role) => {
+        if (role.permissions.availablePermissions.length === 0) {
+          isFetchRequired = true;
+        }
+      });
+    });
+
+    if (!isFetchRequired) {
+      return;
+    }
+
+    const assignedRoleIds = this.state.formData[
+      "user-module"
+    ].assignedModules.flatMap((module) =>
+      module.roles.assignedRoles.map((role) => role.id)
+    );
+
+    if (assignedRoleIds.length > 0) {
+      try {
+        const permissions = await role_permissions_api(assignedRoleIds);
+        const permissionsData = permissions.data.result;
+
+        this.setState((prevState) => ({
+          formData: {
+            ...prevState.formData,
+            "user-module": {
+              ...prevState.formData["user-module"],
+              assignedModules: prevState.formData[
+                "user-module"
+              ].assignedModules.map((assignedModule) => {
+                return {
+                  ...assignedModule,
+                  roles: {
+                    ...assignedModule.roles,
+                    assignedRoles: assignedModule.roles.assignedRoles.map(
+                      (assignedRole) => {
+                        const roleId = assignedRole.id.toString();
+                        const rolePermissions = permissionsData[roleId];
+
+                        if (!rolePermissions) {
+                          console.error(
+                            "No permissions found for role ID:",
+                            roleId
+                          );
+                          return assignedRole;
+                        }
+
+                        return {
+                          ...assignedRole,
+                          permissions: {
+                            assignedPermissions: [],
+                            availablePermissions: rolePermissions.map(
+                              (permission) => ({
+                                id: permission.permission.permissionId,
+                                name: permission.permission.permissionName,
+                              })
+                            ),
+                          },
+                        };
+                      }
+                    ),
+                  },
+                };
+              }),
+            },
+          },
+        }));
+      } catch (error) {
+        console.error("Error fetching roles:", error);
+      }
+    }
+  }
+
+  /**
+   * Handles the Save button click
+   */
   handleSave = async () => {
-    const isBasicValid = this.validateBasicTab();
-    const isUserModuleValid = this.validateUserModuleTab();
-    const isUserRoleValid = this.validateUserRoleTab();
-    const isRolePermissionValid = this.validateRolePermissionTab();
+    const isBasicValid = this.validateUserInfoTab();
+    const isUserModuleValid = this.validateUserModulesTab();
+    const isUserRoleValid = this.validateUserRolesTab();
+    const isRolePermissionValid = this.validateRolePermissionsTab();
 
     if (
       isBasicValid &&
@@ -263,254 +745,40 @@ class registration extends React.Component {
       isUserRoleValid &&
       isRolePermissionValid
     ) {
-      // Set loading to true to show loading spinner
-      this.setState({ loading: true });
       const saveSuccessful = await this.saveRegistrationData();
       if (saveSuccessful) {
-        this.setState({ showSuccessAlert: true, loading: false });
+        this.setState({ showSuccessAlert: true });
 
         setTimeout(() => {
           this.setState({ showSuccessAlert: false, showFailureAlert: false });
           this.resetState();
         }, 3000);
+
+        window.location.href = "/main";
+        // window.location.href = "/userAccount";
       } else {
-        this.setState({ showFailureAlert: true, loading: false });
+        this.setState({ showFailureAlert: true });
 
         setTimeout(() => {
           this.setState({ showFailureAlert: false });
-        }, 3000);
+        }, 5000);
       }
     }
   };
 
-  // Update the form data when input values change
-  handleInputChange = (tab, field, value) => {
-    this.setState((prevState) => ({
-      formData: {
-        ...prevState.formData,
-        [tab]: {
-          ...prevState.formData[tab],
-          [field]: value,
-        },
-      },
-    }));
-  };
-
-  // Module Selection
-  handleModuleSelect = (moduleId) => {
-    const selectedModule = this.state.formData[
-      "user-module"
-    ].availableModules.find((module) => module.id === parseInt(moduleId, 10));
-
-    if (selectedModule) {
-      this.setState((prevState) => ({
-        formData: {
-          ...prevState.formData,
-          "user-module": {
-            ...prevState.formData["user-module"],
-            assignedModules: [
-              ...prevState.formData["user-module"].assignedModules,
-              selectedModule,
-            ],
-            availableModules: prevState.formData[
-              "user-module"
-            ].availableModules.filter(
-              (module) => module.id !== selectedModule.id
-            ),
-          },
-        },
-      }));
-    }
-  };
-
-  handleRemoveModule = (moduleId) => {
-    const removedModule = this.state.formData[
-      "user-module"
-    ].assignedModules.find((module) => module.id === moduleId);
-
-    if (removedModule) {
-      this.setState((prevState) => ({
-        formData: {
-          ...prevState.formData,
-          "user-module": {
-            ...prevState.formData["user-module"],
-            assignedModules: prevState.formData[
-              "user-module"
-            ].assignedModules.filter((module) => module.id !== moduleId),
-            availableModules: [
-              ...prevState.formData["user-module"].availableModules,
-              removedModule,
-            ],
-          },
-        },
-      }));
-    }
-  };
-
-  // Role Selection
-  handleRoleSelect = (roleId, moduleId) => {
-    this.setState((prevState) => {
-      const updatedModules = [
-        ...prevState.formData["user-module"].assignedModules,
-      ];
-
-      updatedModules.forEach((module) => {
-        if (module.id === moduleId) {
-          const selectedRole = module.roles.availableRoles.find(
-            (role) => role.id === parseInt(roleId, 10)
-          );
-
-          if (selectedRole) {
-            module.roles.assignedRoles.push(selectedRole);
-            module.roles.availableRoles = module.roles.availableRoles.filter(
-              (role) => role.id !== selectedRole.id
-            );
-          }
-        }
-      });
-
-      return {
-        formData: {
-          ...prevState.formData,
-          "user-module": {
-            ...prevState.formData["user-module"],
-            assignedModules: updatedModules,
-          },
-        },
-      };
-    });
-  };
-
-  handleRemoveRole = (roleId, moduleId) => {
-    this.setState((prevState) => {
-      const updatedModules = [
-        ...prevState.formData["user-module"].assignedModules,
-      ];
-
-      updatedModules.forEach((module) => {
-        if (module.id === moduleId) {
-          const removedRoleIndex = module.roles.assignedRoles.findIndex(
-            (role) => role.id === roleId
-          );
-
-          if (removedRoleIndex !== -1) {
-            const removedRole = module.roles.assignedRoles.splice(
-              removedRoleIndex,
-              1
-            )[0];
-            module.roles.availableRoles.push(removedRole);
-          }
-        }
-      });
-
-      return {
-        formData: {
-          ...prevState.formData,
-          "user-module": {
-            ...prevState.formData["user-module"],
-            assignedModules: updatedModules,
-          },
-        },
-      };
-    });
-  };
-
-  // Role Permission Selection
-  handleRolePermissionSelect = (permissionId, moduleId) => {
-    this.setState((prevState) => {
-      const updatedModules = [
-        ...prevState.formData["user-module"].assignedModules,
-      ];
-
-      updatedModules.forEach((module) => {
-        if (module.id === moduleId) {
-          const selectedPermission =
-            module.permissions.availablePermissions.find(
-              (permission) => permission.id === parseInt(permissionId, 10)
-            );
-
-          if (selectedPermission) {
-            module.permissions.availablePermissions =
-              module.permissions.availablePermissions.filter(
-                (permission) => permission.id !== selectedPermission.id
-              );
-            module.permissions.assignedPermissions.push(selectedPermission);
-          }
-        }
-      });
-
-      return {
-        formData: {
-          ...prevState.formData,
-          "user-module": {
-            ...prevState.formData["user-module"],
-            assignedModules: updatedModules,
-          },
-        },
-      };
-    });
-  };
-
-  handleRemoveRolePermission = (permissionId, moduleId) => {
-    this.setState((prevState) => {
-      const updatedModules = [
-        ...prevState.formData["user-module"].assignedModules,
-      ];
-
-      updatedModules.forEach((module) => {
-        if (module.id === moduleId) {
-          const removedPermissionIndex =
-            module.permissions.assignedPermissions.findIndex(
-              (permission) => permission.id === permissionId
-            );
-
-          if (removedPermissionIndex !== -1) {
-            const removedPermission =
-              module.permissions.assignedPermissions.splice(
-                removedPermissionIndex,
-                1
-              )[0];
-            module.permissions.availablePermissions.push(removedPermission);
-          }
-        }
-      });
-
-      return {
-        formData: {
-          ...prevState.formData,
-          "user-module": {
-            ...prevState.formData["user-module"],
-            assignedModules: updatedModules,
-          },
-        },
-      };
-    });
-  };
-
-  // Helper function to compare arrays
-  arraysAreEqual = (arr1, arr2) => {
-    if (arr1.length !== arr2.length) {
-      return false;
-    }
-
-    for (let i = 0; i < arr1.length; i++) {
-      if (arr1[i] !== arr2[i]) {
-        return false;
-      }
-    }
-
-    return true;
-  };
-
+  /**
+   * Save the Registration data
+   */
   async saveRegistrationData() {
     try {
+      console.log("Starting registration process...");
       this.setState({ registrationSuccessful: true });
 
       // Extract assigned module IDs as a single number
       const assignedModuleIds = this.state.formData[
         "user-module"
       ].assignedModules.map((module) => module.id);
-      const permissionId = 3;
+      const permissionId = parseInt(assignedModuleIds.join(""));
 
       // Extract basic user information
       const basicUserData = {
@@ -525,10 +793,10 @@ class registration extends React.Component {
         permissionId: permissionId,
       };
 
-      // Call the user registration API to save basic user information
+      console.log("Sending user registration data:", basicUserData);
       const registrationResponse = await user_registration_api(basicUserData);
+      console.log("User registration response:", registrationResponse);
 
-      // Check if the registration was successful
       if (
         registrationResponse.status === 201 &&
         registrationResponse.data &&
@@ -537,37 +805,48 @@ class registration extends React.Component {
       ) {
         const userId = registrationResponse.data.result.userId;
 
-        const permissionId = 1085;
+        const departmentLocationId = this.state.formData.basic.department;
+        if (departmentLocationId) {
+          console.log("Saving department location...");
 
-        await this.postUserLocationData(userId, permissionId);
+          const locationData = {
+            locationId: parseInt(departmentLocationId),
+            userId: userId,
+            permissionId: permissionId,
+          };
 
-        // Extract assigned module IDs
-        const assignedModuleIds = this.state.formData[
+          await post_user_location_api(locationData);
+          console.log("Department location saved.");
+        }
+
+        // Save warehouse location
+        const warehouseLocationId = this.state.formData.basic.warehouse;
+        if (warehouseLocationId) {
+          console.log("Saving warehouse location...");
+          const locationData = {
+            locationId: parseInt(warehouseLocationId),
+            userId: userId,
+            permissionId: permissionId,
+          };
+
+          await post_user_location_api(locationData);
+          console.log("Warehouse location saved.");
+        }
+
+        const userModulesFromData = this.state.formData[
           "user-module"
-        ].assignedModules.map((module) => module.id);
+        ].assignedModules.map((module, index) => ({
+          companySubscriptionModuleId: module.subscriptionModuleId,
+          userId: userId,
+          permissionId: permissionId,
+        }));
 
-        // Fetch company subscription module IDs and prepare data
-        const userModulesFromData = await Promise.all(
-          assignedModuleIds.map(async (module) => {
-            const response = await get_company_subscription_module_id_api(
-              sessionStorage.getItem("companyId"),
-              module
-            );
-            return {
-              companySubscriptionModuleId: response.data.result,
-              userId: userId,
-              permissionId: permissionId,
-            };
-          })
-        );
-
-        // Loop through the prepared data and call the API for each row
         for (const userModuleData of userModulesFromData) {
+          console.log("Sending user module data:", userModuleData);
           const userModuleResponse = await company_subscription_module_user_api(
             userModuleData
           );
-
-          console.log("User Module Response:", userModuleResponse);
+          console.log("User module response:", userModuleResponse);
         }
 
         // Prepare data for user_role_api
@@ -575,187 +854,54 @@ class registration extends React.Component {
           "user-module"
         ].assignedModules
           .map((module) => module.roles.assignedRoles)
-          .flat() // Flatten the array of arrays
+          .flat()
           .map((role) => ({
             userId: userId,
             roleId: role.id,
             permissionId: permissionId,
           }));
 
-        // Loop through the prepared data and call the API for each row
         for (const userRoleData of userRolesFromData) {
+          console.log("Sending user role data:", userRoleData);
           const userRoleResponse = await user_role_api(userRoleData);
-
-          console.log("User Role Response:", userRoleResponse);
+          console.log("User role response:", userRoleResponse);
         }
 
         // Prepare data for user_permission_api
-        const userPermissionsFromData = this.state.formData[
-          "user-module"
-        ].assignedModules
-          .map((module) => module.permissions.assignedPermissions)
-          .flat() // Flatten the array of arrays
-          .map((permission) => ({
-            userId: userId,
-            permissionId: permission.id,
-          }));
+        const userPermissionsFromData = [];
+        this.state.formData["user-module"].assignedModules.forEach((module) => {
+          module.roles.assignedRoles.forEach((role) => {
+            role.permissions.assignedPermissions.forEach((permission) => {
+              userPermissionsFromData.push({
+                userId: userId,
+                permissionId: permission.id,
+              });
+            });
+          });
+        });
 
-        // Loop through the prepared data and call the API for each row
         for (const userPermissionData of userPermissionsFromData) {
+          console.log("Sending user permission data:", userPermissionData);
           const userPermissionResponse = await user_permission_api(
             userPermissionData
           );
-
-          console.log("User Permission Response:", userPermissionResponse);
+          console.log("User permission response:", userPermissionResponse);
         }
 
-        // Prepare data for role_permission_api
-        const rolePermissionsFromData = this.state.formData[
-          "user-module"
-        ].assignedModules
-          .map((module) => {
-            const assignedRoles = module.roles.assignedRoles.map(
-              (role) => role.id
-            );
-            const assignedPermissions =
-              module.permissions.assignedPermissions.map(
-                (permission) => permission.id
-              );
-
-            // Generate all combinations of roleId and permissionId
-            return assignedRoles.flatMap((roleId) =>
-              assignedPermissions.map((permissionId) => ({
-                roleId: roleId,
-                permissionId: permissionId,
-              }))
-            );
-          })
-          .flat(); // Flatten the array of arrays
-
-        // Loop through the prepared data and call the API for each row
-        for (const rolePermissionData of rolePermissionsFromData) {
-          const rolePermissionResponse = await role_permission_api(
-            rolePermissionData
-          );
-          console.log("Role Permission Response:", rolePermissionResponse);
-        }
-        // Log success message
-        console.log("Registration successful! , Data saved");
+        console.log("Registration successful! All data saved.");
         this.setState({ showSuccessAlert: true });
         return true;
       } else {
         this.setState({ registrationSuccessful: false });
+        this.setState({
+          registrationErrorMessage: registrationResponse.message,
+        });
         console.error("User registration failed:", registrationResponse);
         return false;
       }
     } catch (error) {
       console.error("Error saving user information:", error);
       return false;
-    }
-  }
-
-  async fetchRolesPermissions() {
-    // AssignedModules is an array of module IDs
-    const assignedModuleIds = this.state.formData[
-      "user-module"
-    ].assignedModules.map((module) => module.id);
-
-    // Check if assignedModuleIds have changed
-    if (
-      !this.arraysAreEqual(
-        assignedModuleIds,
-        this.state.fetchedAssignedModuleIds
-      )
-    ) {
-      try {
-        // Fetch roles and permissions for the assigned modules
-        const rolesData = await module_roles_api(assignedModuleIds);
-        const permissionData = await module_permissions_api(assignedModuleIds);
-        // Update the state with the fetched roles and modules for assigned modules
-        this.setState((prevState) => ({
-          formData: {
-            ...prevState.formData,
-            "user-module": {
-              ...prevState.formData["user-module"],
-              assignedModules: prevState.formData[
-                "user-module"
-              ].assignedModules.map((assignedModule) => {
-                const moduleId = assignedModule.id.toString();
-                const moduleRoles = rolesData.data.result[moduleId] || [];
-                const modulePermissions =
-                  permissionData.data.result[moduleId] || [];
-                return {
-                  ...assignedModule,
-                  roles: {
-                    availableRoles: moduleRoles.map((role) => ({
-                      id: role.roleId,
-                      name: role.roleName,
-                    })),
-                    assignedRoles: [], // Keep assignedRoles
-                  },
-                  permissions: {
-                    availablePermissions: modulePermissions.map(
-                      (permission) => ({
-                        id: permission.permissionId,
-                        name: permission.permissionName,
-                      })
-                    ),
-                    assignedPermissions: [], // Keep assignedPermissions
-                  },
-                };
-              }),
-              availableModules:
-                prevState.formData["user-module"].availableModules, // Keep availableModules
-            },
-          },
-          activeTab: "user-role",
-          fetchedAssignedModuleIds: assignedModuleIds, // Update fetchedAssignedModuleIds
-        }));
-      } catch (error) {
-        console.error("Error fetching roles:", error);
-        // Handle error, e.g., show an error message to the user
-      }
-    } else {
-      // Data is already fetched, move to the next tab
-      this.setState({ activeTab: "user-role" });
-    }
-  }
-
-  async fetchCompanyModules() {
-    const companyId = this.state.formData.basic.companyId;
-    if (companyId !== this.state.prevCompanyId) {
-      try {
-        const modulesData = await company_modules_api(companyId);
-        const modulesArray = modulesData.data.result || [];
-
-        this.setState((prevState) => ({
-          formData: {
-            ...prevState.formData,
-            "user-module": {
-              ...prevState.formData["user-module"],
-              assignedModules: [], // Unassign modules when companyId changes
-              availableModules: modulesArray.map((module) => ({
-                id: module.moduleId,
-                name: module.moduleName,
-                roles: {
-                  assignedRoles: [],
-                  availableRoles: [],
-                },
-                permissions: {
-                  assignedPermissions: [],
-                  availablePermissions: [],
-                },
-              })),
-            },
-          },
-          prevCompanyId: companyId, // Update prevCompanyId
-        }));
-      } catch (error) {
-        console.error("Error fetching modules:", error);
-      }
-    } else {
-      // If companyId has not changed, just move to the next tab
-      this.setState({ activeTab: "user-module" });
     }
   }
 
@@ -766,23 +912,6 @@ class registration extends React.Component {
         [tabName]: {},
       },
     }));
-  };
-
-  componentDidMount() {
-    // Fetch locations when the component mounts
-    this.fetchLocations();
-    window.addEventListener("beforeunload", this.handleBeforeUnload);
-  }
-
-  fetchLocations = () => {
-    get_company_locations_api(sessionStorage.getItem("companyId"))
-      .then((response) => {
-        const locations = response.data.result;
-        this.setState({ locations });
-      })
-      .catch((error) => {
-        console.error("Error fetching locations:", error);
-      });
   };
 
   resetState = () => {
@@ -798,6 +927,7 @@ class registration extends React.Component {
           lastname: "",
           companyId: sessionStorage.getItem("companyId"),
           department: "",
+          //productionStages: [],
         },
         "user-module": {
           assignedModules: [],
@@ -805,8 +935,6 @@ class registration extends React.Component {
         },
       },
       activeTab: "basic",
-      prevCompanyId: 0,
-      fetchedAssignedModuleIds: [],
       registrationSuccessful: false,
       showSuccessAlert: false,
       showFailureAlert: false,
@@ -822,56 +950,9 @@ class registration extends React.Component {
     });
   };
 
-  prepareUserLocationData = (userId, permissionId) => {
-    const { department, warehouse } = this.state.formData.basic;
-
-    // Gather all location IDs
-    const locationIds = [];
-    if (department) {
-      locationIds.push(department);
-    }
-    if (warehouse.length > 0) {
-      locationIds.push(...warehouse);
-    }
-
-    // Format the data
-    const userLocationData = locationIds.map((locationId) => ({
-      locationId: locationId,
-      userId: userId,
-      permissionId: permissionId,
-    }));
-
-    return userLocationData;
-  };
-
-  postUserLocationData = async (userId, permissionId) => {
-    const userLocationData = this.prepareUserLocationData(userId, permissionId);
-
-    try {
-      // Post each location data individually
-      for (const data of userLocationData) {
-        const response = await post_user_location_api(data);
-        console.log("User location data posted successfully:", response);
-      }
-    } catch (error) {
-      console.error("Error posting user location data:", error);
-    }
-  };
-
-  componentWillUnmount() {
-    window.removeEventListener("beforeunload", this.handleBeforeUnload);
-  }
-
-  handleBeforeUnload = (e) => {
-    if (this.state.loading) {
-      e.preventDefault();
-      e.returnValue = "";
-    }
-  };
-
   render() {
     return template.call(this);
   }
 }
 
-export default registration;
+export default Registration;

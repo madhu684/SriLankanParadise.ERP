@@ -5,5 +5,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
     public interface IRolePermissionService
     {
         Task AddRolePermission(RolePermission rolePermission);
+
+        Task<Dictionary<int, List<RolePermission>>> GetRolePermissionsByRoleIds(int[] roleIds);
     }
 }

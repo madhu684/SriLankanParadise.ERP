@@ -1,22 +1,34 @@
 import "./registration.css";
 import React from "react";
 import AssignItems from "../assignItems/assignItems.js";
-import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
+import { Row, Col, Form, Button, Card } from "react-bootstrap";
 
 function template() {
-  const { showSuccessAlert, showFailureAlert } = this.state;
+  const { showSuccessAlert, showFailureAlert, registrationErrorMessage } =
+    this.state;
+
+  console.log(this.state);
   return (
     <div className="container mt-4 mb-4">
       <div className="row justify-content-center">
-        <div className="col-md-12">
-          <h2 className="mb-3 ">User Registration</h2>
-          <div className="card border-secondary">
-            <div className="card-header">
+        <div className="col-md-10">
+          <h2 className="mb-3 text-black fw-bold">User Registration</h2>
+          <div
+            className="card bg-white"
+            style={{
+              backdropFilter: "blur(10px)",
+              boxShadow: "0 0 10px rgba(0, 0, 0, 0.3)",
+              border: "0",
+            }}
+          >
+            <div className="card-header bg-white">
               <ul className="nav nav-tabs card-header-tabs">
                 <li className="nav-item">
                   <a
                     className={`nav-link disabled ${
-                      this.state.activeTab === "basic" ? "active" : ""
+                      this.state.activeTab === "basic"
+                        ? "active tab-active"
+                        : ""
                     }`}
                   >
                     <svg
@@ -35,7 +47,9 @@ function template() {
                 <li className="nav-item">
                   <a
                     className={`nav-link disabled ${
-                      this.state.activeTab === "user-module" ? "active" : ""
+                      this.state.activeTab === "user-module"
+                        ? "active tab-active"
+                        : ""
                     }`}
                   >
                     <svg
@@ -54,7 +68,9 @@ function template() {
                 <li className="nav-item">
                   <a
                     className={`nav-link disabled ${
-                      this.state.activeTab === "user-role" ? "active" : ""
+                      this.state.activeTab === "user-role"
+                        ? "active tab-active"
+                        : ""
                     }`}
                   >
                     <svg
@@ -74,7 +90,9 @@ function template() {
                 <li className="nav-item">
                   <a
                     className={`nav-link disabled ${
-                      this.state.activeTab === "role-permission" ? "active" : ""
+                      this.state.activeTab === "role-permission"
+                        ? "active tab-active"
+                        : ""
                     }`}
                   >
                     <svg
@@ -103,344 +121,411 @@ function template() {
                     }`}
                     id="basic"
                   >
-                    <h5 className="mt-1 mb-4 fw-semibold">
+                    {/* <h5 className="mt-1 mb-2 fw-semibold">
                       Please enter the user information
-                    </h5>
+                    </h5> */}
+
                     <div className="row g-3">
-                      <div className="form-group col-md-4">
-                        <label htmlFor="firstname" className="form-label">
-                          First Name
-                        </label>
-                        <input
-                          type="text"
-                          className={`form-control ${
-                            this.state.validFields.basic?.firstname
-                              ? "is-valid"
-                              : ""
-                          } ${
-                            this.state.validationErrors.basic?.firstname
-                              ? "is-invalid"
-                              : ""
-                          }`}
-                          id="firstname"
-                          value={this.state.formData.basic.firstname}
-                          onChange={(e) =>
-                            this.handleInputChange(
-                              "basic",
-                              "firstname",
-                              e.target.value
-                            )
-                          }
-                          required
-                        />
-                        {this.state.validationErrors.basic?.firstname && (
-                          <div className="invalid-feedback">
-                            {this.state.validationErrors.basic.firstname}
-                          </div>
-                        )}
-                      </div>
-                      <div className="form-group col-md-4">
-                        <label htmlFor="lastname" className="form-label">
-                          Last Name
-                        </label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          id="lastname"
-                          value={this.state.formData.basic.lastname}
-                          onChange={(e) =>
-                            this.handleInputChange(
-                              "basic",
-                              "lastname",
-                              e.target.value
-                            )
-                          }
-                        />
-                      </div>
-                      <div className="form-group col-md-4">
-                        <label htmlFor="username" className="form-label">
-                          User Name
-                        </label>
-                        <div className="input-group has-validation">
-                          <span
-                            className="input-group-text"
-                            id="inputGroupPrepend"
-                          >
-                            @
-                          </span>
-                          <input
-                            type="text"
-                            className={`form-control ${
-                              this.state.validFields.basic?.username
-                                ? "is-valid"
-                                : ""
-                            } ${
-                              this.state.validationErrors.basic?.username
-                                ? "is-invalid"
-                                : ""
-                            }`}
-                            id="username"
-                            value={this.state.formData.basic.username}
-                            onChange={(e) =>
-                              this.handleInputChange(
-                                "basic",
-                                "username",
-                                e.target.value
-                              )
-                            }
-                            required
-                          />
-                          {this.state.validationErrors.basic?.username && (
-                            <div className="invalid-feedback">
-                              {this.state.validationErrors.basic.username}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                      <div className="form-group col-md-6">
-                        <label htmlFor="email" className="form-label">
-                          Email
-                        </label>
-                        <input
-                          type="email"
-                          className={`form-control ${
-                            this.state.validFields.basic?.email
-                              ? "is-valid"
-                              : ""
-                          } ${
-                            this.state.validationErrors.basic?.email
-                              ? "is-invalid"
-                              : ""
-                          }`}
-                          id="email"
-                          value={this.state.formData.basic.email}
-                          onChange={(e) =>
-                            this.handleInputChange(
-                              "basic",
-                              "email",
-                              e.target.value
-                            )
-                          }
-                          required
-                        />
-                        {this.state.validationErrors.basic?.email && (
-                          <div className="invalid-feedback">
-                            {this.state.validationErrors.basic.email}
-                          </div>
-                        )}
-                      </div>
-                      <div className="form-group col-md-6">
-                        <label htmlFor="contactNo" className="form-label">
-                          Contact Number
-                        </label>
-                        <input
-                          type="text"
-                          className={`form-control ${
-                            this.state.validFields.basic?.contactNo
-                              ? "is-valid"
-                              : ""
-                          } ${
-                            this.state.validationErrors.basic?.contactNo
-                              ? "is-invalid"
-                              : ""
-                          }`}
-                          id="contactNo"
-                          value={this.state.formData.basic.contactNo}
-                          onChange={(e) =>
-                            this.handleInputChange(
-                              "basic",
-                              "contactNo",
-                              e.target.value
-                            )
-                          }
-                          required
-                        />
-                        {this.state.validationErrors.basic?.contactNo && (
-                          <div className="invalid-feedback">
-                            {this.state.validationErrors.basic.contactNo}
-                          </div>
-                        )}
-                      </div>
+                      <Row>
+                        <Col md={6}>
+                          <Form.Group>
+                            <Form.Label style={{ fontWeight: "bold" }}>
+                              First Name
+                            </Form.Label>
+                            <Form.Control
+                              type="text"
+                              placeholder="Enter First Name"
+                              required
+                              style={{
+                                width: "100%",
+                                borderColor: this.state.validationErrors.basic
+                                  ?.firstname
+                                  ? "red"
+                                  : null, // Adjust border color for validation
+                              }}
+                              value={this.state.formData.basic.firstname}
+                              onChange={(e) =>
+                                this.handleInputChange(
+                                  "basic",
+                                  "firstname",
+                                  e.target.value
+                                )
+                              }
+                              className={`form-control focus-ring input-registration ${
+                                this.state.validFields.basic?.firstname
+                                  ? "is-valid"
+                                  : ""
+                              } ${
+                                this.state.validationErrors.basic?.firstname
+                                  ? "is-invalid"
+                                  : ""
+                              }`}
+                            />
+                            {this.state.validationErrors.basic?.firstname && (
+                              <div className="invalid-feedback">
+                                {this.state.validationErrors.basic.firstname}
+                              </div>
+                            )}
+                          </Form.Group>
+                        </Col>
 
-                      <div className="form-group col-md-6">
-                        <label htmlFor="password" className="form-label">
-                          Password
-                        </label>
-                        <input
-                          type="password"
-                          className={`form-control ${
-                            this.state.validFields.basic?.password
-                              ? "is-valid"
-                              : ""
-                          } ${
-                            this.state.validationErrors.basic?.password
-                              ? "is-invalid"
-                              : ""
-                          }`}
-                          id="password"
-                          value={this.state.formData.basic.password}
-                          onChange={(e) =>
-                            this.handleInputChange(
-                              "basic",
-                              "password",
-                              e.target.value
-                            )
-                          }
-                          required
-                        />
-                        {this.state.validationErrors.basic?.password && (
-                          <div className="invalid-feedback">
-                            {this.state.validationErrors.basic.password}
-                          </div>
-                        )}
-                      </div>
-                      <div className="form-group col-md-6">
-                        <label htmlFor="confirmPassword" className="form-label">
-                          Confirm Password
-                        </label>
-                        <input
-                          type="password"
-                          className={`form-control ${
-                            this.state.validFields.basic?.confirmPassword
-                              ? "is-valid"
-                              : ""
-                          } ${
-                            this.state.validationErrors.basic?.confirmPassword
-                              ? "is-invalid"
-                              : ""
-                          }`}
-                          id="confirmPassword"
-                          value={this.state.formData.basic.confirmPassword}
-                          onChange={(e) =>
-                            this.handleInputChange(
-                              "basic",
-                              "confirmPassword",
-                              e.target.value
-                            )
-                          }
-                          required
-                        />
-                        {this.state.validationErrors.basic?.confirmPassword && (
-                          <div className="invalid-feedback">
-                            {this.state.validationErrors.basic.confirmPassword}
-                          </div>
-                        )}
-                      </div>
-                      <div className="form-group col-md-6">
-                        <label htmlFor="department" className="form-label">
-                          Department
-                        </label>
-                        <select
-                          className={`form-select ${
-                            this.state.validFields.basic?.department
-                              ? "is-valid"
-                              : ""
-                          } ${
-                            this.state.validationErrors.basic?.department
-                              ? "is-invalid"
-                              : ""
-                          }`}
-                          id="department"
-                          value={this.state.formData.basic.department}
-                          onChange={(e) => {
-                            this.handleInputChange(
-                              "basic",
-                              "department",
-                              e.target.value
-                            );
-                            // Reset warehouseLocation in formData
-                            this.setState((prevState) => ({
-                              formData: {
-                                ...prevState.formData,
-                                basic: {
-                                  ...prevState.formData["basic"],
-                                  warehouse: "",
-                                },
-                              },
-                            }));
-                          }}
-                          required
-                        >
-                          <option value="">Select Department</option>
-                          {this.state.locations
-                            .filter(
-                              (location) =>
-                                location.locationType.name === "Department"
-                            )
-                            .map((location) => (
-                              <option
-                                key={location.locationId}
-                                value={location.locationId}
-                              >
-                                {location.locationName}
-                              </option>
-                            ))}
-                        </select>
-                        {this.state.validationErrors.basic?.department && (
-                          <div className="invalid-feedback">
-                            {this.state.validationErrors.basic.department}
-                          </div>
-                        )}
-                      </div>
+                        <Col md={6}>
+                          <Form.Group>
+                            <Form.Label style={{ fontWeight: "bold" }}>
+                              Last Name
+                            </Form.Label>
+                            <Form.Control
+                              type="text"
+                              placeholder="Enter Last Name"
+                              required
+                              style={{
+                                width: "100%",
+                                borderColor: this.state.validationErrors.basic
+                                  ?.lastname
+                                  ? "red"
+                                  : null, // Adjust border color for validation
+                              }}
+                              value={this.state.formData.basic.lastname}
+                              onChange={(e) =>
+                                this.handleInputChange(
+                                  "basic",
+                                  "lastname",
+                                  e.target.value
+                                )
+                              }
+                              className={`form-control focus-ring input-registration ${
+                                this.state.validFields.basic?.lastname
+                                  ? "is-valid"
+                                  : ""
+                              } ${
+                                this.state.validationErrors.basic?.lastname
+                                  ? "is-invalid"
+                                  : ""
+                              }`}
+                            />
+                            {this.state.validationErrors.basic?.lastname && (
+                              <div className="invalid-feedback">
+                                {this.state.validationErrors.basic.lastname}
+                              </div>
+                            )}
+                          </Form.Group>
+                        </Col>
+                      </Row>
 
-                      <div className="form-group col-md-6">
-                        <label htmlFor="warehouse" className="form-label">
-                          Warehouse
-                        </label>
-                        <select
-                          className={`form-select focus-ring input-registration ${
-                            this.state.validFields.basic?.warehouse
-                              ? "is-valid"
-                              : ""
-                          } ${
-                            this.state.validationErrors.basic?.warehouse
-                              ? "is-invalid"
-                              : ""
-                          }`}
-                          id="warehouse"
-                          value={this.state.formData.basic.warehouse}
-                          onChange={(e) =>
-                            this.handleInputChange(
-                              "basic",
-                              "warehouse",
-                              Array.from(
-                                e.target.selectedOptions,
-                                (option) => option.value
-                              )
-                            )
-                          }
-                          required
-                          disabled={!this.state.formData.basic.department}
-                          multiple
-                          size={3}
-                        >
-                          <option value="">Select Warehouses</option>
-                          {this.state.locations
-                            .filter(
-                              (location) =>
-                                location.parentId ===
-                                  parseInt(
-                                    this.state.formData.basic.department
-                                  ) &&
-                                location.locationType.name === "Warehouse"
-                            )
-                            .map((location) => (
-                              <option
-                                key={location.locationId}
-                                value={location.locationId}
-                              >
-                                {location.locationName}
-                              </option>
-                            ))}
-                        </select>
-                        {this.state.validationErrors.basic?.warehouse && (
-                          <div className="invalid-feedback">
-                            {this.state.validationErrors.basic.warehouse}
-                          </div>
-                        )}
-                      </div>
+                      <Row>
+                        <Col md={6}>
+                          <Form.Group className="mt-1">
+                            <Form.Label style={{ fontWeight: "bold" }}>
+                              User Name
+                            </Form.Label>
+                            <Form.Control
+                              type="text"
+                              placeholder="Enter User Name"
+                              required
+                              style={{ width: "100%" }} // Adjust width here
+                              value={this.state.formData.basic.username}
+                              onChange={(e) =>
+                                this.handleInputChange(
+                                  "basic",
+                                  "username",
+                                  e.target.value
+                                )
+                              }
+                              className={`form-control focus-ring input-registration ${
+                                this.state.validFields.basic?.username
+                                  ? "is-valid"
+                                  : ""
+                              } ${
+                                this.state.validationErrors.basic?.username
+                                  ? "is-invalid"
+                                  : ""
+                              }`}
+                              id="username"
+                            />
+                            {this.state.validationErrors.basic?.username && (
+                              <div className="invalid-feedback">
+                                {this.state.validationErrors.basic.username}
+                              </div>
+                            )}
+                          </Form.Group>
+                        </Col>
+                      </Row>
+
+                      <Row>
+                        <Col md={6}>
+                          <Form.Group className="mt-1">
+                            <Form.Label style={{ fontWeight: "bold" }}>
+                              Email
+                            </Form.Label>
+                            <Form.Control
+                              type="email"
+                              placeholder="Enter Email"
+                              required
+                              style={{ width: "100%" }}
+                              value={this.state.formData.basic.email}
+                              onChange={(e) =>
+                                this.handleInputChange(
+                                  "basic",
+                                  "email",
+                                  e.target.value
+                                )
+                              }
+                              className={`form-control focus-ring input-registration ${
+                                this.state.validFields.basic?.email
+                                  ? "is-valid"
+                                  : ""
+                              } ${
+                                this.state.validationErrors.basic?.email
+                                  ? "is-invalid"
+                                  : ""
+                              }`}
+                              id="email"
+                            />
+                            {this.state.validationErrors.basic?.email && (
+                              <div className="invalid-feedback">
+                                {this.state.validationErrors.basic.email}
+                              </div>
+                            )}
+                          </Form.Group>
+                        </Col>
+
+                        <Col md={6}>
+                          <Form.Group className="mt-1">
+                            <Form.Label style={{ fontWeight: "bold" }}>
+                              Contact Number
+                            </Form.Label>
+                            <Form.Control
+                              type="text"
+                              placeholder="Enter Contact Number"
+                              required
+                              style={{ width: "100%" }}
+                              value={this.state.formData.basic.contactNo}
+                              onChange={(e) =>
+                                this.handleInputChange(
+                                  "basic",
+                                  "contactNo",
+                                  e.target.value
+                                )
+                              }
+                              className={`form-control focus-ring input-registration ${
+                                this.state.validFields.basic?.contactNo
+                                  ? "is-valid"
+                                  : ""
+                              } ${
+                                this.state.validationErrors.basic?.contactNo
+                                  ? "is-invalid"
+                                  : ""
+                              }`}
+                              id="contactNo"
+                            />
+                            {this.state.validationErrors.basic?.contactNo && (
+                              <div className="invalid-feedback">
+                                {this.state.validationErrors.basic.contactNo}
+                              </div>
+                            )}
+                          </Form.Group>
+                        </Col>
+                      </Row>
+
+                      <Row>
+                        <Col md={6}>
+                          <Form.Group className="mt-1">
+                            <Form.Label style={{ fontWeight: "bold" }}>
+                              Password
+                            </Form.Label>
+                            <Form.Control
+                              type="password"
+                              placeholder="Enter Password"
+                              style={{ width: "100%" }}
+                              required
+                              value={this.state.formData.basic.password}
+                              onChange={(e) =>
+                                this.handleInputChange(
+                                  "basic",
+                                  "password",
+                                  e.target.value
+                                )
+                              }
+                              className={`form-control focus-ring input-registration ${
+                                this.state.validFields.basic?.password
+                                  ? "is-valid"
+                                  : ""
+                              } ${
+                                this.state.validationErrors.basic?.password
+                                  ? "is-invalid"
+                                  : ""
+                              }`}
+                              id="password"
+                            />
+                            {this.state.validationErrors.basic?.password && (
+                              <div className="invalid-feedback">
+                                {this.state.validationErrors.basic.password}
+                              </div>
+                            )}
+                          </Form.Group>
+                        </Col>
+                        <Col md={6}>
+                          <Form.Group className="mt-1">
+                            <Form.Label style={{ fontWeight: "bold" }}>
+                              Confirm Password
+                            </Form.Label>
+                            <Form.Control
+                              type="password"
+                              placeholder="Confirm Password"
+                              required
+                              style={{ width: "100%" }}
+                              value={this.state.formData.basic.confirmPassword}
+                              onChange={(e) =>
+                                this.handleInputChange(
+                                  "basic",
+                                  "confirmPassword",
+                                  e.target.value
+                                )
+                              }
+                              className={`form-control focus-ring input-registration ${
+                                this.state.validFields.basic?.confirmPassword
+                                  ? "is-valid"
+                                  : ""
+                              } ${
+                                this.state.validationErrors.basic
+                                  ?.confirmPassword
+                                  ? "is-invalid"
+                                  : ""
+                              }`}
+                              id="confirmPassword"
+                            />
+                            {this.state.validationErrors.basic
+                              ?.confirmPassword && (
+                              <div className="invalid-feedback">
+                                {
+                                  this.state.validationErrors.basic
+                                    .confirmPassword
+                                }
+                              </div>
+                            )}
+                          </Form.Group>
+                        </Col>
+                      </Row>
+
+                      <Row>
+                        <Col md={6} className="mt-1">
+                          <Form.Group>
+                            <Form.Label style={{ fontWeight: "bold" }}>
+                              Department
+                            </Form.Label>
+                            <Form.Select
+                              id="department"
+                              required
+                              style={{ width: "100%" }}
+                              value={this.state.formData.basic.department}
+                              onChange={(e) => {
+                                const selectedDepartment = e.target.value;
+                                this.handleInputChange(
+                                  "basic",
+                                  "department",
+                                  selectedDepartment
+                                );
+                                // Reset warehouseLocation in formData when department changes
+                                this.setState((prevState) => ({
+                                  formData: {
+                                    ...prevState.formData,
+                                    basic: {
+                                      ...prevState.formData.basic,
+                                      warehouse: "", // Reset warehouse when department changes
+                                    },
+                                  },
+                                }));
+                              }}
+                              className={`form-control focus-ring input-registration ${
+                                this.state.validFields.basic?.department
+                                  ? "is-valid"
+                                  : ""
+                              } ${
+                                this.state.validationErrors.basic?.department
+                                  ? "is-invalid"
+                                  : ""
+                              }`}
+                            >
+                              <option value="">Select Department</option>
+                              {this.state.locations
+                                .filter(
+                                  (location) =>
+                                    location.locationType.name === "Department"
+                                )
+                                .map((location) => (
+                                  <option
+                                    key={location.locationId}
+                                    value={location.locationId}
+                                  >
+                                    {location.locationName}
+                                  </option>
+                                ))}
+                            </Form.Select>
+                            {this.state.validationErrors.basic?.department && (
+                              <div className="invalid-feedback">
+                                {this.state.validationErrors.basic.department}
+                              </div>
+                            )}
+                          </Form.Group>
+                        </Col>
+                        <Col md={6} className="mt-1">
+                          <Form.Group>
+                            <Form.Label style={{ fontWeight: "bold" }}>
+                              Warehouses
+                            </Form.Label>
+                            <Form.Select
+                              id="warehouse"
+                              required
+                              style={{ width: "100%" }}
+                              value={this.state.formData.basic.warehouse}
+                              onChange={(e) =>
+                                this.handleInputChange(
+                                  "basic",
+                                  "warehouse",
+                                  e.target.value
+                                )
+                              }
+                              disabled={!this.state.formData.basic.department}
+                              className={`form-control focus-ring input-registration ${
+                                this.state.validFields.basic?.warehouse
+                                  ? "is-valid"
+                                  : ""
+                              } ${
+                                this.state.validationErrors.basic?.warehouse
+                                  ? "is-invalid"
+                                  : ""
+                              }`}
+                            >
+                              <option value="">Select Warehouses</option>
+                              {this.state.locations
+                                .filter(
+                                  (location) =>
+                                    location.parentId ===
+                                      parseInt(
+                                        this.state.formData.basic.department
+                                      ) &&
+                                    location.locationType.name === "Warehouse"
+                                )
+                                .map((location) => (
+                                  <option
+                                    key={location.locationId}
+                                    value={location.locationId}
+                                  >
+                                    {location.locationName}
+                                  </option>
+                                ))}
+                            </Form.Select>
+                            {this.state.validationErrors.basic?.warehouse && (
+                              <div className="invalid-feedback">
+                                {this.state.validationErrors.basic.warehouse}
+                              </div>
+                            )}
+                          </Form.Group>
+                        </Col>
+                      </Row>
                     </div>
                   </div>
+
                   {/* User Module Assign Tab */}
                   <div
                     className={`tab-pane fade ${
@@ -454,7 +539,7 @@ function template() {
                       Please assign modules for the user
                     </h5>
                     <hr className="my-3" />
-                    {/* Add your user module assign form fields here */}
+
                     <AssignItems
                       label=""
                       choise="module"
@@ -465,7 +550,7 @@ function template() {
                       assignedItems={
                         this.state.formData["user-module"].assignedModules
                       }
-                      handleSelect={this.handleModuleSelect}
+                      handleSelect={this.handleSelectModule}
                       handleRemove={this.handleRemoveModule}
                     />
                     {this.state.validationErrors["user-module"].modules && (
@@ -474,7 +559,6 @@ function template() {
                       </div>
                     )}
                   </div>
-                  {/* User Role Assign Tab */}
                   <div
                     className={`tab-pane fade ${
                       this.state.activeTab === "user-role" ? "show active" : ""
@@ -485,8 +569,6 @@ function template() {
                       Please assign user roles for each module
                     </h5>
                     <hr className="my-3" />
-                    {/* Add your user role assign form fields here */}
-                    {/* Render AssignItems for each assigned module */}
                     {this.state.formData["user-module"].assignedModules.map(
                       (module) => (
                         <>
@@ -498,7 +580,7 @@ function template() {
                             availableItems={module.roles.availableRoles}
                             assignedItems={module.roles.assignedRoles}
                             handleSelect={(itemId) =>
-                              this.handleRoleSelect(itemId, module.id)
+                              this.handleSelectRole(itemId, module.id)
                             }
                             handleRemove={(itemId) =>
                               this.handleRemoveRole(itemId, module.id)
@@ -520,7 +602,6 @@ function template() {
                       )
                     )}
                   </div>
-                  {/* Role Permission Assign Tab */}
                   <div
                     className={`tab-pane fade ${
                       this.state.activeTab === "role-permission"
@@ -533,43 +614,50 @@ function template() {
                       Please assign role permissions for each module
                     </h5>
                     <hr className="my-3" />
-                    {/* Add your role permission assign form fields here */}
-                    {/* Render AssignItems for each assigned module */}
-                    {this.state.formData["user-module"].assignedModules.map(
-                      (module) => (
-                        <>
-                          <AssignItems
-                            key={module.id}
-                            label={`Module ${module.name}`}
-                            choise="permission"
-                            choiseFor={`${module.name}`}
-                            availableItems={
-                              module.permissions.availablePermissions
-                            }
-                            assignedItems={
-                              module.permissions.assignedPermissions
-                            }
-                            handleSelect={(itemId) =>
-                              this.handleRolePermissionSelect(itemId, module.id)
-                            }
-                            handleRemove={(itemId) =>
-                              this.handleRemoveRolePermission(itemId, module.id)
-                            }
-                          />
-                          {this.state.validationErrors["role-permission"][
-                            module.id
-                          ] && (
-                            <div className="invalid-feedback d-block">
-                              {
-                                this.state.validationErrors["role-permission"][
-                                  module.id
-                                ]
+                    {this.state.formData["user-module"].assignedModules.flatMap(
+                      (module) =>
+                        module.roles.assignedRoles?.map((role) => (
+                          <>
+                            <AssignItems
+                              key={role.id}
+                              label={`Module ${role.name}`}
+                              choise="permission"
+                              choiseFor={`${role.name}`}
+                              availableItems={
+                                role.permissions.availablePermissions
                               }
-                            </div>
-                          )}
-                          <br />
-                        </>
-                      )
+                              assignedItems={
+                                role.permissions.assignedPermissions
+                              }
+                              handleSelect={(itemId) =>
+                                this.handleSelectPermission(
+                                  module.id,
+                                  role.id,
+                                  itemId
+                                )
+                              }
+                              handleRemove={(itemId) =>
+                                this.handleRemovePermission(
+                                  module.id,
+                                  role.id,
+                                  itemId
+                                )
+                              }
+                            />
+                            {this.state.validationErrors["role-permission"][
+                              role.id
+                            ] && (
+                              <div className="invalid-feedback d-block">
+                                {
+                                  this.state.validationErrors[
+                                    "role-permission"
+                                  ][role.id]
+                                }
+                              </div>
+                            )}
+                            <br />
+                          </>
+                        ))
                     )}
                     <div>
                       {showSuccessAlert && (
@@ -579,12 +667,9 @@ function template() {
                       )}
                       {showFailureAlert && (
                         <div className="alert alert-danger" role="alert">
-                          Registration failed! Please try again.
-                        </div>
-                      )}
-                      {this.state.loading && (
-                        <div className="alert alert-primary" role="alert">
-                          Please wait until we save your data...
+                          {registrationErrorMessage
+                            ? registrationErrorMessage
+                            : "Registration failed! Please try again."}
                         </div>
                       )}
                     </div>
@@ -618,17 +703,13 @@ function template() {
                     </button>
                   </div>
                 ) : (
-                  <div className={this.state.loading ? "" : "btn-width-reg"}>
+                  <div className="btn-width-reg">
                     <button
                       className="btn btn-primary btn-block"
                       onClick={this.handleSave}
                       disabled={this.state.registrationSuccessful}
                     >
-                      {this.state.loading ? (
-                        <ButtonLoadingSpinner text="Saving..." />
-                      ) : (
-                        "Save"
-                      )}
+                      Save
                     </button>
                   </div>
                 )}
@@ -637,13 +718,6 @@ function template() {
           </div>
         </div>
       </div>
-      {/* {this.state.loading && (
-        <div className="position-fixed top-0 start-0 w-100 h-100 bg-white bg-opacity-75 d-flex justify-content-center align-items-center">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      )} */}
     </div>
   );
 }
