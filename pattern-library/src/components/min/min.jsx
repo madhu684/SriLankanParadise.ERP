@@ -7,7 +7,7 @@ import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonL
 import moment from "moment";
 import "moment-timezone";
 
-const Min = ({ handleClose, handleUpdated }) => {
+const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
   const {
     formData,
     submissionStatus,
@@ -22,7 +22,13 @@ const Min = ({ handleClose, handleUpdated }) => {
     mrnSearchTerm,
     loading,
     loadingDraft,
+    itemBatches,
+    isItemBatchesLoading,
+    isItemBatchesError,
+    isLocationInventoriesLoading,
+    isLocationInventoriesError,
     locationInventories,
+    handleInputChange,
     handleItemDetailsChange,
     handleRemoveItem,
     handleSubmit,
@@ -38,13 +44,19 @@ const Min = ({ handleClose, handleUpdated }) => {
     },
   });
 
-  if (isLoading) {
+  if (isLoading || isItemBatchesLoading) {
     return <LoadingSpinner />;
   }
 
-  if (isError) {
+  if (isError || isItemBatchesError) {
     return <ErrorComponent error={"Error fetching data"} />;
   }
+
+  const handleBack = () => {
+    setShowCreateMinForm(false);
+  };
+
+  console.log("LocationInventories", locationInventories);
 
   return (
     <div className="container mt-4">
@@ -52,6 +64,12 @@ const Min = ({ handleClose, handleUpdated }) => {
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
+          <button
+            onClick={handleBack}
+            className="btn btn-dark d-flex align-items-center"
+          >
+            Back
+          </button>
           <i
             className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
             onClick={handleClose}
@@ -184,7 +202,7 @@ const Min = ({ handleClose, handleUpdated }) => {
                                 <span className="me-3">
                                   <i className="bi bi-file-earmark-text"></i>
                                 </span>
-                                {mrn?.referenceNumber}
+                                {mrn.referenceNumber}
                               </button>
                             </li>
                           ))}
@@ -223,30 +241,30 @@ const Min = ({ handleClose, handleUpdated }) => {
               )}
             </div>
 
-            {/* Display selected MRN details */}
+            {/* Additional Purchase Order Information */}
             {selectedMrn && (
               <div className="card mb-3">
                 <div className="card-header">Selected Material Requisition</div>
                 <div className="card-body">
                   <p>
                     Material Requisition Reference No:{" "}
-                    {selectedMrn?.referenceNumber}
+                    {selectedMrn.referenceNumber}
                   </p>
                   <p>Requested By: {selectedMrn.requestedBy}</p>
                   <p>
                     MRN Date:{" "}
                     {moment
-                      .utc(selectedMrn?.requisitionDate)
+                      .utc(selectedMrn.requisitionDate)
                       .tz("Asia/Colombo")
                       .format("YYYY-MM-DD hh:mm:ss A")}
                   </p>
                   <p>
                     Delivery Location:{" "}
-                    {selectedMrn?.requestedToLocation.locationName}
+                    {selectedMrn.requestedToLocation.locationName}
                   </p>
                   <p>
                     Warehouse Location:{" "}
-                    {selectedMrn?.requestedFromLocation.locationName}
+                    {selectedMrn.requestedFromLocation.locationName}
                   </p>
                   <button
                     type="button"
@@ -263,6 +281,7 @@ const Min = ({ handleClose, handleUpdated }) => {
 
         {/* 3. Item Details */}
         <h4>3. Item Details</h4>
+        {/* {console.log('formdata: ', formData)} */}
         {formData.itemDetails.length > 0 && (
           <div className="table-responsive mb-2">
             <table className="table">
@@ -286,11 +305,7 @@ const Min = ({ handleClose, handleUpdated }) => {
                     <td>{item.remainingQuantity}</td>
                     <td>
                       <select
-                        className={`form-select ${
-                          validFields[`batch_${index}`] ? "is-valid" : ""
-                        } ${
-                          validationErrors[`batch_${index}`] ? "is-invalid" : ""
-                        }`}
+                        className="form-select"
                         value={item.batchId}
                         onChange={(e) =>
                           handleItemDetailsChange(
@@ -314,11 +329,6 @@ const Min = ({ handleClose, handleUpdated }) => {
                             </option>
                           ))}
                       </select>
-                      {validationErrors[`batch_${index}`] && (
-                        <div className="invalid-feedback">
-                          {validationErrors[`batch_${index}`]}
-                        </div>
-                      )}
                     </td>
                     <td>
                       <input
