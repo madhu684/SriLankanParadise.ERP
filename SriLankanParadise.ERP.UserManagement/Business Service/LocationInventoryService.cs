@@ -31,6 +31,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             return await _locationInventoryRepository.GetLocationInventoriesByLocationId(locationId);
         }
+        public async Task<IEnumerable<LocationInventory>> GetEmptyReturnItemLocationInventoriesByLocationId(int locationId)
+        {
+            return await _locationInventoryRepository.GetEmptyReturnItemLocationInventoriesByLocationId(locationId);
+        }
 
         public async Task<IEnumerable<LocationInventory>> GetLocationInventoriesByLocationIdItemMasterId(int locationId, int itemMasrerId)
         {

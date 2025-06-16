@@ -133,6 +133,31 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpGet("GetEmptyReturnItemLocationInventoriesByLocationId/{locationId}")]
+        public async Task<ApiResponseModel> GetEmptyReturnItemLocationInventoriesByLocationId(int locationId)
+        {
+            try
+            {
+                var locationInventories = await _locationInventoryService.GetEmptyReturnItemLocationInventoriesByLocationId(locationId);
+                if (locationInventories != null)
+                {
+                    var locationInventoryDtos = _mapper.Map<IEnumerable<EmptyReturnItemLocationInventoryDto>>(locationInventories);
+                    AddResponseMessage(Response, LogMessages.EmptyReturnItemLocationInventoriesRetrieved, locationInventoryDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.LocationInventoriesNotFound);
+                    AddResponseMessage(Response, LogMessages.EmptyReturnItemLocationInventoriesNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
         [HttpGet("GetItemLocationInventoriesByLocationId/{locationId}")]
         public async Task<ApiResponseModel> GetItemLocationInventoriesByLocationId(int locationId)
         {

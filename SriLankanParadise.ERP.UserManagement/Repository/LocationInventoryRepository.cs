@@ -100,6 +100,23 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+        public async Task<IEnumerable<LocationInventory>> GetEmptyReturnItemLocationInventoriesByLocationId(int locationId)
+        {
+            try
+            {
+                var locationInventories = await _dbContext.LocationInventories
+                    .Where(li => li.LocationId == locationId)
+                    .Include(li => li.ItemMaster)
+                        .ThenInclude(im => im.Unit)
+                    .ToListAsync();
+
+                return locationInventories.Any() ? locationInventories : null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
         public async Task<IEnumerable<LocationInventory>> GetLocationInventoriesByLocationIdItemMasterId(int locationId , int itemMasterId)
         {

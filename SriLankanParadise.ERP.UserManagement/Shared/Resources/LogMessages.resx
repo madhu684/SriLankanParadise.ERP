@@ -886,31 +886,31 @@
     <value>User Activated</value>
   </data>
   <data name="PackingSlipDetailCreated" xml:space="preserve">
-    <value>Packing slip detail created successfully.</value>
+    <value>Packing slip detail created successfully</value>
   </data>
   <data name="PackingSlipCreated" xml:space="preserve">
-    <value>Packing slip created successfully. </value>
+    <value>Packing slip created successfully</value>
   </data>
   <data name="PackingSlipRetrieved" xml:space="preserve">
-    <value>Packing slip retrieved successfully. </value>
+    <value>Packing slip retrieved successfully</value>
   </data>
   <data name="PackingSlipDetailRetrieved" xml:space="preserve">
     <value>Packing slip detail retrieved</value>
   </data>
   <data name="PackingSlipNotFound" xml:space="preserve">
-    <value>Packing slip not found</value>
+    <value>Packing not found</value>
   </data>
   <data name="PackingSlipApproved" xml:space="preserve">
-    <value>Packing slip approved</value>
+    <value>Packing slip approval success</value>
   </data>
   <data name="PackingSlipUpdated" xml:space="preserve">
-    <value>Packing slip updated</value>
+    <value>Packing slip updated successfully</value>
   </data>
   <data name="PackingSlipDetailNotFound" xml:space="preserve">
     <value>Packing slip detail not found</value>
   </data>
   <data name="PackingSlipDetailUpdated" xml:space="preserve">
-    <value>Packing slip detail updated</value>
+    <value>Packing slip detail updated successfully</value>
   </data>
   <data name="PackingSlipDetailDeleted" xml:space="preserve">
     <value>Packing slip detail deleted</value>
@@ -993,34 +993,31 @@
   <data name="LeadCreated" xml:space="preserve">
     <value>Lead created successfully</value>
   </data>
-  <data name="PackingSlipUpdated" xml:space="preserve">
-    <value>Packing slip updated successfully</value>
+  <data name="EmptyReturnMasterUpdated" xml:space="preserve">
+    <value>Empty return master updated successfully</value>
   </data>
-  <data name="PackingSlipRetrieved" xml:space="preserve">
-    <value>Packing slip retrieved successfully</value>
+  <data name="EmptyReturnMasterNotFound" xml:space="preserve">
+    <value>Empty return master not found</value>
   </data>
-  <data name="PackingSlipNotFound" xml:space="preserve">
-    <value>Packing not found</value>
+  <data name="EmptyReturnCreated" xml:space="preserve">
+    <value>Empty return master created successfully</value>
   </data>
-  <data name="PackingSlipCreated" xml:space="preserve">
-    <value>Packing slip created successfully</value>
+  <data name="RolePermissionsRetrieved" xml:space="preserve">
+    <value>Role permissions retrieved successfully</value>
   </data>
-  <data name="PackingSlipApproved" xml:space="preserve">
-    <value>Packing slip approval success</value>
+  <data name="RolePermissionsNotFound" xml:space="preserve">
+    <value>Role permissions not found</value>
   </data>
-  <data name="PackingSlipDetailUpdated" xml:space="preserve">
-    <value>Packing slip detail updated successfully</value>
+  <data name="UserPermissionsUpdated" xml:space="preserve">
+    <value>User permissions updated successfully</value>
   </data>
-  <data name="PackingSlipDetailRetrieved" xml:space="preserve">
-    <value>Packing slip detail retrieved</value>
+  <data name="UserRoleUpdated" xml:space="preserve">
+    <value>User role updated successfully</value>
   </data>
-  <data name="PackingSlipDetailNotFound" xml:space="preserve">
-    <value>Packing slip detail not found</value>
+  <data name="EmptyReturnItemLocationInventoriesRetrieved" xml:space="preserve">
+    <value>Empty return Item location Inventories retrieved</value>
   </data>
-  <data name="PackingSlipDetailCreated" xml:space="preserve">
-    <value>Packing slip detail created successfully</value>
-  </data>
-  <data name="PackingSlipDetailDeleted" xml:space="preserve">
-    <value>Packing slip detail deleted</value>
+  <data name="EmptyReturnItemLocationInventoriesNotFound" xml:space="preserve">
+    <value>Empty return item location inventories not found</value>
   </data>
 </root>
