@@ -319,3 +319,19 @@ export const get_stock_report_api = async (fromDate, toDate, locationId) => {
     throw error;
   }
 };
+
+export const get_Empty_Return_Item_locations_inventories_by_location_id_api =
+  async (locationId) => {
+    try {
+      const response = await api.get(
+        `/locationInventory/GetEmptyReturnItemLocationInventoriesByLocationId/${locationId}`,
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
