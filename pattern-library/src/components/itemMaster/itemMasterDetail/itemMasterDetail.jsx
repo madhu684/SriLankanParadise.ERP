@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal, Button, Table } from "react-bootstrap";
+import { Modal, Button } from "react-bootstrap";
 import useItemMasterList from "../itemMasterList/useItemMasterList";
 
 const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
@@ -9,114 +9,120 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
     <Modal size="lg" show={show} onHide={handleClose} centered scrollable>
       <Modal.Header closeButton>
         <Modal.Title>Item Master Details</Modal.Title>
-        <div className="ms-auto">
-          <strong>{"Status: "}</strong>
-          <span
-            className={`badge rounded-pill ${getStatusBadgeClass(
-              itemMaster.status
-            )}`}
-          >
-            {getStatusLabel(itemMaster.status)}
-          </span>
-        </div>
       </Modal.Header>
-
       <Modal.Body>
-        {/* General Info */}
-        <div className="mb-3">
-          <h6 className="text-primary">General Information</h6>
-          <Table borderless size="sm">
-            <tbody>
-              <tr>
-                <td>
-                  <strong>Item Master ID:</strong>
-                </td>
-                <td>{itemMaster.itemMasterId}</td>
-              </tr>
-              <tr>
-                <td>
-                  <strong>Created By:</strong>
-                </td>
-                <td>{itemMaster.createdBy}</td>
-              </tr>
-              <tr>
-                <td>
-                  <strong>Hierarchy Type:</strong>
-                </td>
-                <td>
-                  {itemMaster.parentId !== itemMaster.itemMasterId
-                    ? "Sub Item"
-                    : "Main Item"}
-                </td>
-              </tr>
-            </tbody>
-          </Table>
+        <div className="mb-3 d-flex justify-content-between">
+          <h6>Details for Item Master ID: {itemMaster.itemMasterId}</h6>
+          <div>
+            Status :{" "}
+            <span
+              className={`badge rounded-pill ${getStatusBadgeClass(
+                itemMaster.status
+              )}`}
+            >
+              {getStatusLabel(itemMaster.status)}
+            </span>
+          </div>
         </div>
-
-        {/* Item Details */}
-        <div className="mb-3">
-          <h6 className="text-primary">Item Details</h6>
-          <Table borderless size="sm">
-            <tbody>
-              <tr>
-                <td>
-                  <strong>Item Name:</strong>
-                </td>
-                <td>{itemMaster?.itemName}</td>
-              </tr>
-              <tr>
-                <td>
-                  <strong>Item Code:</strong>
-                </td>
-                <td>{itemMaster?.itemCode}</td>
-              </tr>
-              <tr>
-                <td>
-                  <strong>Item Type:</strong>
-                </td>
-                <td>{itemMaster?.itemType?.name}</td>
-              </tr>
-              <tr>
-                <td>
-                  <strong>Category:</strong>
-                </td>
-                <td>{itemMaster?.category?.categoryName}</td>
-              </tr>
-            </tbody>
-          </Table>
+        <div className="row">
+          <div className="col-md-6">
+            <p>
+              <strong>Created By:</strong> {itemMaster.createdBy}
+            </p>
+          </div>
         </div>
+        <div className="row">
+          <div className="col-md-6">
+            <p>
+              <strong>Item name:</strong> {itemMaster?.itemName}
+            </p>
+            <p>
+              <strong>Item code:</strong> {itemMaster?.itemCode}
+            </p>
+            <p>
+              <strong>Item type:</strong> {itemMaster?.itemType?.name}
+            </p>
+            <p>
+              <strong>Category:</strong> {itemMaster?.category?.categoryName}
+            </p>
+          </div>
 
-        {/* Measurement & Pricing */}
-        <div className="mb-3">
-          <h6 className="text-primary">Measurement & Pricing</h6>
-          <Table borderless size="sm">
-            <tbody>
-              <tr>
-                <td>
-                  <strong>Measurement Type:</strong>
-                </td>
-                <td>{itemMaster.unit?.measurementType?.name}</td>
-              </tr>
-              <tr>
-                <td>
-                  <strong>Unit:</strong>
-                </td>
-                <td>{itemMaster.unit?.unitName}</td>
-              </tr>
-              <tr>
-                <td>
-                  <strong>Reorder Level:</strong>
-                </td>
-                <td>{itemMaster?.reorderLevel}</td>
-              </tr>
-              <tr>
-                <td>
-                  <strong>Unit Price:</strong>
-                </td>
-                <td>{itemMaster.unitPrice}</td>
-              </tr>
-            </tbody>
-          </Table>
+          <div className="col-md-6">
+            <p>
+              <strong>Measurement Type:</strong>{" "}
+              {itemMaster.unit?.measurementType?.name}
+            </p>
+            <p>
+              <strong>Unit:</strong> {itemMaster.unit?.unitName}
+            </p>
+            <p>
+              <strong>Unit Price:</strong> {itemMaster?.unitPrice || "N/A"}
+            </p>
+            <p>
+              <strong>Reorder Level:</strong> {itemMaster?.reorderLevel}
+            </p>
+            <p>
+              <strong>Hierarchy Type:</strong>{" "}
+              {itemMaster.parentId !== itemMaster.itemMasterId
+                ? "Sub Item"
+                : "Main Item"}
+            </p>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-md-6 mt-4">
+            <h6>Item Master Price Details</h6>
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-md-6 mt-3">
+            <p>
+              <strong>Cost Ratio: </strong>
+              {itemMaster.costRatio}
+            </p>
+            <p>
+              <strong>FOB in USD: </strong>
+              {itemMaster.fobInUSD}
+            </p>
+            <p>
+              <strong>Landed Cost: </strong>
+              {itemMaster.landedCost}
+            </p>
+            <p>
+              <strong>Min Net Selling Price: </strong>
+              {itemMaster.minNetSellingPrice}
+            </p>
+            <p>
+              <strong>Selling Price: </strong>
+              {itemMaster.sellingPrice}
+            </p>
+            <p>
+              <strong>Bulk Price: </strong>
+              {itemMaster.bulkPrice}
+            </p>
+          </div>
+          <div className="col-md-6 mt-3">
+            <p>
+              <strong>MRP: </strong>
+              {itemMaster.mrp}
+            </p>
+            <p>
+              <strong>Competitor Price: </strong>
+              {itemMaster.competitorPrice}
+            </p>
+            <p>
+              <strong>Label Price: </strong>
+              {itemMaster.labelPrice}
+            </p>
+            <p>
+              <strong>Average Selling Price: </strong>
+              {itemMaster.averageSellingPrice}
+            </p>
+            <p>
+              <strong>Stock Clearance: </strong>
+              {itemMaster.stockClearance}
+            </p>
+          </div>
         </div>
       </Modal.Body>
       {/* <Modal.Footer>

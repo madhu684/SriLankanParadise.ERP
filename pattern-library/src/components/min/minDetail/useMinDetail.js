@@ -70,6 +70,11 @@ const useMinDetail = (min, handleClose) => {
   });
 
   const handleAccept = () => {
+    if (!Array.isArray(issuedetails)) {
+      console.error("Issue details are not loaded yet!");
+      return;
+    }
+
     const updatedDetails = issuedetails.map((item) => ({
       issueDetailId: item.issueDetailId,
       receivedQuantity: receivedQuantities[item.issueDetailId] || 0,

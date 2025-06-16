@@ -2717,5 +2717,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
                 return ResourceManager.GetString("UserPermissionsUpdated", resourceCulture);
             }
         }
+
+        public static string IssueDetailsRetrieved { get; internal set; }
     }
 }

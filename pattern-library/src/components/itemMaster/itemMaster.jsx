@@ -70,12 +70,6 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <button
-            onClick={handleBack}
-            className="btn btn-dark d-flex align-items-center"
-          >
-            Back
-          </button>
           <i
             className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
             onClick={handleClose}

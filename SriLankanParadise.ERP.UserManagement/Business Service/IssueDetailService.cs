@@ -18,9 +18,14 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             await _issueDetailRepository.AddIssueDetail(issueDetail);
         }
 
+        public Task<IEnumerable<IssueDetail>> GetIssueDetails(int issueMasterId)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<List<IssueDetail>> UpdateIssueDetailReceivedQuantity(int issueMasterId, List<IssueDetail> issueDetailReceivedQtyUpdate)
         {
-            return await _issueDetailRepository.UpdateIssueDetailReceivedQuantity(issueMasterId, issueDetailReceivedQtyUpdate);
+            return await _issueDetailRepository.UpdateIssueDetailReceivedAndReturnedQuantity(issueMasterId, issueDetailReceivedQtyUpdate);
         }
     }
 }

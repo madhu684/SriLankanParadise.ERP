@@ -119,7 +119,7 @@ const TinDetail = ({ show, handleClose, tin }) => {
                       value={
                         receivedQuantities[item.issueDetailId] !== undefined
                           ? receivedQuantities[item.issueDetailId]
-                          : item.receivedQuantity ?? ""
+                          : item.receivedQuantity ?? 0
                       }
                       onChange={(e) =>
                         handleReceivedQuantityChange(

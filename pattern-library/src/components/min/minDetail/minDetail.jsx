@@ -106,62 +106,70 @@ const MinDetail = ({ show, handleClose, min }) => {
             </tr>
           </thead>
           <tbody>
-            {min.issueDetails.map((item, index) => (
-              <tr key={index}>
-                <td>{item.itemMaster?.itemName}</td>
-                <td>{item.itemMaster?.unit.unitName}</td>
-                <td>{item.batch?.batchRef}</td>
-                <td>{item.quantity}</td>
-                <td>
-                  {isRequester ? (
-                    <Form.Control
-                      type="number"
-                      min="0"
-                      value={
-                        receivedQuantities[item.issueDetailId] !== undefined
-                          ? receivedQuantities[item.issueDetailId]
-                          : item.receivedQuantity ?? 0
-                      }
-                      onChange={(e) =>
-                        handleReceivedQuantityChange(
-                          item.issueDetailId,
-                          e.target.value
-                        )
-                      }
-                      placeholder="Enter received qty"
-                    />
-                  ) : item.receivedQuantity ? (
-                    <span>{item.receivedQuantity}</span>
-                  ) : (
-                    <span>-</span>
-                  )}
-                </td>
-                <td>
-                  {isRequester ? (
-                    <Form.Control
-                      type="number"
-                      min="0"
-                      value={
-                        returnedQuantities[item.issueDetailId] !== undefined
-                          ? returnedQuantities[item.issueDetailId]
-                          : item.returnedQuantity ?? 0
-                      }
-                      onChange={(e) =>
-                        handleReturnedQuantityChange(
-                          item.issueDetailId,
-                          e.target.value
-                        )
-                      }
-                      placeholder="Enter returned qty"
-                    />
-                  ) : item.returnedQuantity ? (
-                    <span>{item.returnedQuantity}</span>
-                  ) : (
-                    <span>-</span>
-                  )}
+            {Array.isArray(min?.issueDetails) && min.issueDetails.length > 0 ? (
+              min.issueDetails.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.itemMaster?.itemName}</td>
+                  <td>{item.itemMaster?.unit.unitName}</td>
+                  <td>{item.batch?.batchRef}</td>
+                  <td>{item.quantity}</td>
+                  <td>
+                    {isRequester ? (
+                      <Form.Control
+                        type="number"
+                        min="0"
+                        value={
+                          receivedQuantities[item.issueDetailId] !== undefined
+                            ? receivedQuantities[item.issueDetailId]
+                            : item.receivedQuantity ?? 0
+                        }
+                        onChange={(e) =>
+                          handleReceivedQuantityChange(
+                            item.issueDetailId,
+                            e.target.value
+                          )
+                        }
+                        placeholder="Enter received qty"
+                      />
+                    ) : item.receivedQuantity ? (
+                      <span>{item.receivedQuantity}</span>
+                    ) : (
+                      <span>-</span>
+                    )}
+                  </td>
+                  <td>
+                    {isRequester ? (
+                      <Form.Control
+                        type="number"
+                        min="0"
+                        value={
+                          returnedQuantities[item.issueDetailId] !== undefined
+                            ? returnedQuantities[item.issueDetailId]
+                            : item.returnedQuantity ?? 0
+                        }
+                        onChange={(e) =>
+                          handleReturnedQuantityChange(
+                            item.issueDetailId,
+                            e.target.value
+                          )
+                        }
+                        placeholder="Enter returned qty"
+                      />
+                    ) : item.returnedQuantity ? (
+                      <span>{item.returnedQuantity}</span>
+                    ) : (
+                      <span>-</span>
+                    )}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="6" className="text-center">
+                  No issue details available.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </Modal.Body>

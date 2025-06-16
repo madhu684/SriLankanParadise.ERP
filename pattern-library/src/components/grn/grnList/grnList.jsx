@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import useGrnList from "./useGrnList.js";
 import GrnApproval from "../grnApproval/grnApproval.jsx";
 import Grn from "../grn";
@@ -6,8 +6,14 @@ import GrnDetail from "../grnDetail/grnDetail.jsx";
 import GrnUpdate from "../grnUpdate/grnUpdate.jsx";
 import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
+import { FaSearch } from "react-icons/fa";
+import Pagination from "../../common/Pagination/Pagination.jsx";
 
 const GrnList = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   const {
     Grns,
     isLoadingData,
@@ -42,6 +48,20 @@ const GrnList = () => {
     handleUpdated,
     handleClose,
   } = useGrnList();
+
+  //Handler for search input
+  const handleSearch = (e) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
+  };
+
+  //Filter MRNs based on search query
+  const filteredGRNs = Grns.filter((grn) =>
+    grn.receivedBy.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  //Pagination Handler
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   if (error || isPermissionsError) {
     return <ErrorComponent error={error || "Error fetching data"} />;
@@ -132,6 +152,20 @@ const GrnList = () => {
             )}
         </div>
       </div>
+      <div className="d-flex justify-content-end mb-3">
+        <div className="search-bar input-group">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Search"
+            value={searchQuery}
+            onChange={handleSearch}
+          />
+          <span className="input-group-text">
+            <FaSearch />
+          </span>
+        </div>
+      </div>
       <div className="table-responsive">
         <table className="table mt-2">
           <thead>
@@ -212,6 +246,12 @@ const GrnList = () => {
             ))}
           </tbody>
         </table>
+        <Pagination
+          itemsPerPage={itemsPerPage}
+          totalItems={filteredGRNs.length}
+          paginate={paginate}
+          currentPage={currentPage}
+        />
         {showApproveGrnModalInParent && (
           <GrnApproval
             show={showApproveGrnModal}

@@ -27,7 +27,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
-        public async Task<List<IssueDetail>> UpdateIssueDetailReceivedQuantity(int issueMasterId, List<IssueDetail> issueDetails)
+        public async Task<List<IssueDetail>> UpdateIssueDetailReceivedAndReturnedQuantity(int issueMasterId, List<IssueDetail> issueDetails)
         {
             try
             {
@@ -42,6 +42,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     if (existingIssueDetail != null)
                     {
                         existingIssueDetail.ReceivedQuantity = issueDetail.ReceivedQuantity;
+                        existingIssueDetail.ReturnedQuantity = issueDetail.ReturnedQuantity;
 
                         await _dbContext.SaveChangesAsync();
 

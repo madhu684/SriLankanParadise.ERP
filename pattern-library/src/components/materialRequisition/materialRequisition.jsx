@@ -61,12 +61,6 @@ const MaterialRequisition = ({
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <button
-            onClick={handleBack}
-            className="btn btn-dark d-flex align-items-center"
-          >
-            Back
-          </button>
           <i
             class="bi bi-arrow-left"
             onClick={handleClose}

@@ -130,12 +130,18 @@ const MaterialRequisitionList = () => {
   return (
     <div className="container mt-4">
       <h2>Material Requisition Notes</h2>
-      <div className="mt-3 d-flex justify-content-start align-items-center">
+      <div
+        className="mt-3 d-flex justify-content-start align-items-center"
+        style={{ maxHeight: "80vh" }}
+      >
         <div className="btn-group" role="group">
+          <p>
+            You haven't created any material requisition note. Create a new one.
+          </p>
           {hasPermission("Create Material Requisition Note") && (
             <button
               type="button"
-              className="btn btn-primary"
+              className="btn btn-primary ms-3 rounded"
               onClick={() => {
                 setShowCreateMRForm(true);
               }}
