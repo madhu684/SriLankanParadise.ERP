@@ -3,6 +3,7 @@
     public class ModuleWithIdDto
     {
         public int ModuleId { get; set; }
+        public int CompanySubscriptionModuleId { get; set; }
         public string ModuleName { get; set; } = null!;
 
         public bool Status { get; set; }

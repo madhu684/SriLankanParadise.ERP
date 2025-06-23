@@ -1,4 +1,5 @@
 ﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
 {
@@ -6,7 +7,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
     {
         Task<Module> GetModuleByModuleId(int moduleId);
 
-        Task<IEnumerable<Module>> GetModulesByUserId(int userId);
+        Task<IEnumerable<ModuleWithIdDto>> GetModulesByUserId(int userId);
         Task<IEnumerable<Module>> GetAll();
         Task AddModule(Module module);
         Task DeleteModule(int moduleId);
