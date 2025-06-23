@@ -1,5 +1,6 @@
 ﻿using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Business_Service
@@ -37,7 +38,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             await _moduleRepository.UpdateModule(moduleId, module);
         }
 
-        public async Task<IEnumerable<Module>> GetModulesByUserId(int userId)
+        public async Task<IEnumerable<ModuleWithIdDto>> GetModulesByUserId(int userId)
         {
             return await _moduleRepository.GetModulesByUserId(userId);
         }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
@@ -95,40 +96,51 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         }
 
 
-        public async Task<IEnumerable<Module>> GetModulesByUserId(int userId)
-        {
-            try
-            {
-                var modules = await _dbContext.CompanySubscriptionModuleUsers
-                    .Where(csmu => csmu.UserId == userId)
-                    .Join(
-                        _dbContext.CompanySubscriptionModules,
-                        csmu => csmu.CompanySubscriptionModuleId,
-                        csm => csm.CompanySubscriptionModuleId,
-                        (csmu, csm) => csm
-                    )
-                    .Join(
-                        _dbContext.SubscriptionModules,
-                        csm => csm.SubscriptionModuleId,
-                        sm => sm.SubscriptionModuleId,
-                        (csm, sm) => sm
-                    )
-                    .Join(
-                        _dbContext.Modules,
-                        sm => sm.ModuleId,
-                        m => m.ModuleId,
-                        (sm, m) => m
-                    )
-                    .Include(m => m.SubModules)
-                    .ToListAsync();
+        public async Task<IEnumerable<ModuleWithIdDto>> GetModulesByUserId(int userId)
+{
+    try
+    {
+        var modules = await _dbContext.CompanySubscriptionModuleUsers
+            .Where(csmu => csmu.UserId == userId)
+            .Join(
+                _dbContext.CompanySubscriptionModules,
+                csmu => csmu.CompanySubscriptionModuleId,
+                csm => csm.CompanySubscriptionModuleId,
+                (csmu, csm) => new { csmu.CompanySubscriptionModuleId, csm }
+            )
+            .Join(
+                _dbContext.SubscriptionModules,
+                x => x.csm.SubscriptionModuleId,
+                sm => sm.SubscriptionModuleId,
+                (x, sm) => new { x.CompanySubscriptionModuleId, sm }
+            )
+            .Join(
+                _dbContext.Modules,
+                x => x.sm.ModuleId,
+                m => m.ModuleId,
+                (x, m) => new ModuleWithIdDto
+                {
+                    CompanySubscriptionModuleId = x.CompanySubscriptionModuleId,
+                    ModuleId = m.ModuleId,
+                    ModuleName = m.ModuleName,
+                    Status = m.Status,
+                    SubModules = m.SubModules.Select(sm => new SubModuleDto
+                    {
+                        SubModuleName = sm.SubModuleName,
+                        Status = sm.Status,
+                        ModuleId = sm.ModuleId,
+                    })
+                }
+            )
+            .ToListAsync();
 
-                return modules;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
+        return modules;
+    }
+    catch (Exception)
+    {
+        throw;
+    }
+}
 
 
     }

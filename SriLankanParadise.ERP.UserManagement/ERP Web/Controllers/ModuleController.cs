@@ -170,11 +170,10 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         {
             try
             {
-                var modules = await _moduleService.GetModulesByUserId(userId);
-                if (modules != null)
+                var moduleDtos = await _moduleService.GetModulesByUserId(userId);
+                if (moduleDtos != null && moduleDtos.Any())
                 {
-                    var moduleWithDto = _mapper.Map<IEnumerable<ModuleWithIdDto>>(modules);
-                    AddResponseMessage(Response, LogMessages.ModulesRetrieved, moduleWithDto, true, HttpStatusCode.OK);
+                    AddResponseMessage(Response, LogMessages.ModulesRetrieved, moduleDtos, true, HttpStatusCode.OK);
                 }
                 else
                 {
