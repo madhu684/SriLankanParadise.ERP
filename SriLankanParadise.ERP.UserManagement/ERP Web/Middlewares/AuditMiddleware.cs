@@ -24,8 +24,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Middlewares
         {
             var user = context.User;
             var path = context.Request.Path.ToString();
-            var sessionIdClaim = context.User.FindFirst("sessionId");
-            var sessionId = sessionIdClaim?.Value ?? Guid.NewGuid().ToString();
+            var sessionIdClaim = context.User.FindFirst("SessionId");
+            var sessionId = sessionIdClaim?.Value;
 
             if (AuditLogExclusions.IsExcluded(path, context.Request.Method))
             {
