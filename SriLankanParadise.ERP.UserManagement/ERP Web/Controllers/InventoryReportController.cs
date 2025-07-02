@@ -43,7 +43,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         }
 
         [HttpGet("InventoryAnalysisReport/{fromDate}/{toDate}/{locationId}")]
-        public async Task<ApiResponseModel> InventoryAnalysisReport([FromRoute] DateTime fromDate, [FromRoute] DateTime toDate, [FromRoute] int locationId)
+        public async Task<ApiResponseModel> InventoryAnalysisReport([FromRoute] DateTime fromDate, [FromRoute] DateTime toDate, [FromRoute] int locationId, [FromQuery] bool showZeroBalanceItems = false)
         {
             try
             {
@@ -194,14 +194,22 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     item.closingBalance = item.openingBalance + item.receivedQty - item.actualUsage;
                 }
 
+                if (!showZeroBalanceItems)
+                {
+                    inventoryItems = inventoryItems.Where(item => !(item.openingBalance == 0 && item.closingBalance == 0)).ToList();
+                }
+
                 if (inventoryItems != null && inventoryItems.Any())
                 {
                     var reportData = new List<InventoryReportDto>();
 
                     foreach (var item in inventoryItems)
                     {
-                        // Exclude items where both opening balance and closing balance are zero
-                        if (!(item.openingBalance == 0 && item.closingBalance == 0))
+                        bool shouldIncludeItem = showZeroBalanceItems
+                            ? (item.openingBalance == 0 && item.closingBalance == 0)
+                            : !(item.openingBalance == 0 && item.closingBalance == 0);
+
+                        if (shouldIncludeItem)
                         {
                             var report = new InventoryReportDto
                             {
@@ -225,6 +233,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                             };
                             reportData.Add(report);
                         }
+
                     }
 
                     if (reportData.Any())
