@@ -352,6 +352,7 @@ const useTransferRequisitionList = () => {
     formatDateInTimezone,
     setSelectedWarehouse,
     setFilter,
+    setOpenTINsList,
   };
 };
 

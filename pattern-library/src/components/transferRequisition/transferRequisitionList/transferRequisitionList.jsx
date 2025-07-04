@@ -234,7 +234,7 @@ const TransferRequisitionList = () => {
               <th>Direction</th>
               <th>Details</th>
               <th>TRN Details</th>
-              <th>TIN Details</th>
+              {/* <th>TIN Details</th> */}
             </tr>
           </thead>
           <tbody>
@@ -299,6 +299,7 @@ const TransferRequisitionList = () => {
                     </button>
                   </td>
                   <td>
+                    {/* Display Accept button and disable it if Pending Approval or Approved and user is not the creator */}
                     <button
                       style={{
                         backgroundColor: "#FFA07A",
@@ -310,6 +311,12 @@ const TransferRequisitionList = () => {
                         setOpenTINsList(true);
                         setSelectedTrnId(mr.requisitionMasterId);
                       }}
+                      disabled={
+                        mr.status === 1 ||
+                        (mr.status === 2 &&
+                          mr.requestedUserId !==
+                            parseInt(sessionStorage.getItem("userId")))
+                      }
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"

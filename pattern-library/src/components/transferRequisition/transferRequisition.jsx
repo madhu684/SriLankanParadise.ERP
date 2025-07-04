@@ -63,12 +63,12 @@ const TransferRequisition = ({
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
           {/* <img src={companyLogoUrl} alt="Company Logo" height={30} /> */}
-          <button
+          {/* <button
             onClick={handleBack}
             className="btn btn-dark d-flex align-items-center"
           >
             Back
-          </button>
+          </button> */}
           <i
             class="bi bi-arrow-left"
             onClick={handleClose}
@@ -359,6 +359,9 @@ const TransferRequisition = ({
                   <th>Item Name</th>
                   <th>Unit</th>
                   <th>Quantity</th>
+                  <th>Total Stock in Hand</th>
+                  <th>Re Order Level</th>
+                  <th>Max Order Level</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -392,6 +395,9 @@ const TransferRequisition = ({
                         </div>
                       )}
                     </td>
+                    <td>{item.totalStockInHand}</td>
+                    <td>{item.reOrderLevel}</td>
+                    <td>{item.maxStockLevel}</td>
                     <td>
                       <button
                         type="button"

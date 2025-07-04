@@ -285,6 +285,7 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
 
         {/* Item Details */}
         <h4>3. Item Details</h4>
+        {/* {console.log('formdata: ', formData)} */}
         {formData.itemDetails.length > 0 && (
           <div className="table-responsive mb-2">
             <table className="table">
@@ -336,6 +337,8 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
                     <td>
                       <input
                         type="number"
+                        min="1"
+                        max={item.remainingQuantity}
                         className={`form-control ${
                           validFields[`issuedQuantity_${index}`]
                             ? "is-valid"
@@ -353,6 +356,7 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
                             e.target.value
                           )
                         }
+                        placeholder={`1 - ${item.remainingQuantity}`}
                       />
                       {validationErrors[`issuedQuantity_${index}`] && (
                         <div className="invalid-feedback">

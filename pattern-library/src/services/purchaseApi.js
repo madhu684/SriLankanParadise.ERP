@@ -1303,6 +1303,36 @@ export const get_location_inventory_by_locationInvemtoryId_api = async (
   } catch (error) {}
 };
 
+//=============
+export const get_sum_location_inventories_by_locationId_itemMasterId_api =
+  async (locationId, itemMasterId) => {
+    try {
+      const response = await api.get(
+        `/locationInventory/GetSumLocationInventoriesByLocationIdItemMasterId/${locationId}/${itemMasterId}`,
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching sum location inventories:", error);
+      throw error;
+    }
+  };
+
+export const get_Low_Stock_Items_api = async () => {
+  try {
+    const response = await api.get(`/locationInventory/GetLowStockItems`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching low stock items:", error);
+    throw error;
+  }
+};
+//==============
+
 export const post_comapny_location_api = async (locationData) => {
   try {
     const response = await api.post("/location", locationData, {
@@ -1437,6 +1467,18 @@ export const get_supply_return_masters_by_supplyReturnMasterId = async (
     );
     return response.data;
   } catch (error) {
+    throw error;
+  }
+};
+
+export const put_location_inventory_by_id_api = async (id, formData) => {
+  try {
+    const response = await api.put(`/locationInventory/${id}`, formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
     throw error;
   }
 };

@@ -89,7 +89,9 @@ const MinDetail = ({ show, handleClose, min }) => {
           <div className="col-md-6">
             <p>
               <strong>Material Requisition Reference No:</strong>{" "}
-              {min.requisitionMaster.referenceNumber}
+              {min.requisitionMaster
+                ? min.requisitionMaster.referenceNumber
+                : "MIN Without MRN"}
             </p>
           </div>
         </div>

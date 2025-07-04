@@ -9,8 +9,9 @@ const useMinDetail = (min, handleClose) => {
   const queryClient = useQueryClient();
 
   const isRequester =
-    Number(sessionStorage?.getItem("userId")) ===
-    min.requisitionMaster.requestedUserId;
+    Number(sessionStorage?.getItem("userId")) === min.requisitionMaster
+      ? min.requisitionMaster.requestedUserId
+      : min.createdUserId;
 
   const { data: issuedetails } = useQuery({
     queryKey: ["minDetails", min.issueMasterId],

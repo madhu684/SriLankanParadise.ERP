@@ -7,7 +7,7 @@ public partial class IssueMaster
 {
     public int IssueMasterId { get; set; }
 
-    public int RequisitionMasterId { get; set; }
+    public int? RequisitionMasterId { get; set; }
 
     public DateTime? IssueDate { get; set; }
 
@@ -31,5 +31,5 @@ public partial class IssueMaster
 
     public virtual ICollection<IssueDetail> IssueDetails { get; set; } = new List<IssueDetail>();
 
-    public virtual RequisitionMaster RequisitionMaster { get; set; } = null!;
+    public virtual RequisitionMaster? RequisitionMaster { get; set; } = null!;
 }

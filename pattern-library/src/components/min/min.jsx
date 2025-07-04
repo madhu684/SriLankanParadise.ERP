@@ -54,22 +54,6 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
     },
   });
 
-  //===========================
-  const [dummySearchTerm, setDummySearchTerm] = useState("");
-
-  useEffect(() => {
-    setSearchByMrn(false);
-    setSearchByWithoutMrn(false);
-  }, [setSearchByMrn, setSearchByWithoutMrn]);
-
-  const filteredItems = (locationInventories || []).filter((inv) =>
-    inv?.itemMaster?.itemName
-      ?.toLowerCase()
-      ?.includes(dummySearchTerm.toLowerCase())
-  );
-
-  //==========================
-
   if (isLoading || isItemBatchesLoading) {
     return <LoadingSpinner />;
   }
@@ -330,7 +314,6 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
             </div>
           )}
         </div>
-
         {selectedMrn === null && (
           <div className="mb-3">
             <small className="form-text text-muted">
@@ -345,62 +328,66 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
             </small>
           </div>
         )}
-
         {/* Show Item Details only if searchByWithoutMrn is selected */}
         {searchByWithoutMrn && (
-          <div className="mt-3">
-            <label className="form-label">Search Item</label>
-            <div className="input-group mb-2">
-              <span className="input-group-text bg-transparent">
-                <i className="bi bi-search"></i>
-              </span>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Search for an item..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              {searchTerm && (
-                <span
-                  className="input-group-text bg-transparent"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => setSearchTerm("")}
+          <div className="row mb-3 d-flex justify-content-between">
+            <div className="col-md-5">
+              <div className="mt-3">
+                <label className="form-label">Search Item</label>
+                <div
+                  className="input-group mb-2"
+                  style={{ width: "100%", maxWidth: "100%" }}
                 >
-                  <i className="bi bi-x"></i>
-                </span>
-              )}
-            </div>
-            {isItemsLoading && <LoadingSpinner />}
-            state for items
-            {isItemsError && <ErrorComponent error="Error fetching items" />}
-            Updated: Added error state for items
-            {availableItems?.length > 0 ? (
-              <ul className="list-group mb-3">
-                {availableItems.map((item, idx) => (
-                  <li
-                    key={idx}
-                    className="list-group-item d-flex justify-content-between align-items-center"
+                  <span
+                    className="input-group-text bg-transparent"
+                    style={{ width: "40px" }}
                   >
-                    <span>
-                      {item.itemName} – Stock: {item.stockInHand}
-                      Adjusted to use item.itemName and item.stockInHand
-                    </span>
-                    <button
-                      className="btn btn-sm btn-outline-primary"
-                      onClick={() => handleAddDummyItem(item)}
+                    <i className="bi bi-search"></i>
+                  </span>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search for an item..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{ flex: "1" }}
+                  />
+                  {searchTerm && (
+                    <span
+                      className="input-group-text bg-transparent"
+                      style={{ width: "40px", cursor: "pointer" }}
+                      onClick={() => setSearchTerm("")}
                     >
-                      Add
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : searchTerm ? (
-              <div className="text-muted">No matching items found.</div>
-            ) : null}
+                      <i className="bi bi-x"></i>
+                    </span>
+                  )}
+                </div>
+                {isItemsLoading && <LoadingSpinner />}
+                {isItemsError && (
+                  <ErrorComponent error="Error fetching items" />
+                )}
+                {availableItems?.length > 0 ? (
+                  <ul className="list-group mb-3">
+                    {availableItems.map((item, idx) => (
+                      <li
+                        key={idx}
+                        className="list-group-item d-flex justify-content-between align-items-center"
+                        onClick={() => handleAddDummyItem(item)}
+                        style={{ cursor: "pointer" }} // Indicate clickable behavior
+                      >
+                        <span>
+                          {item.itemName} – Stock: {item.stockInHand}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : searchTerm ? (
+                  <div className="text-muted">No matching items found.</div>
+                ) : null}
+              </div>
+            </div>
           </div>
         )}
-
         <h4>3. Item Details</h4>
         {/* {console.log('formdata: ', formData)} */}
         {formData.itemDetails.length > 0 && (
@@ -496,7 +483,6 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
             </table>
           </div>
         )}
-
         {/* Actions */}
         <div className="mb-3">
           <button

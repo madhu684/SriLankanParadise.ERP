@@ -84,10 +84,12 @@ const MinApproval = ({ show, handleClose, handleApproved, min }) => {
             )}
           </div>
           <div className="col-md-6">
-            <p>
-              <strong>Material Requisition Reference No:</strong>{" "}
-              {min.requisitionMaster.referenceNumber}
-            </p>
+            {min.requisitionMaster && (
+              <p>
+                <strong>Material Requisition Reference No:</strong>{" "}
+                {min.requisitionMaster.referenceNumber}
+              </p>
+            )}
           </div>
         </div>
 

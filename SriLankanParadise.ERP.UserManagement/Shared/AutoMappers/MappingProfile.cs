@@ -154,6 +154,8 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<UpdateIssueDetailRequestModel, IssueDetail>();
             CreateMap<UserUpdateRequestModel, User>();
             CreateMap<RolePermission, RolePermissionDto>();
+            CreateMap<LocationInventorySummary, LocationInventorySummaryDto>()
+                 .ForMember(dest => dest.ItemMaster, opt => opt.MapFrom(src => src.ItemMaster)); // Explicitly map ItemMaster
             // Add more mapping configurations if needed
 
         }
