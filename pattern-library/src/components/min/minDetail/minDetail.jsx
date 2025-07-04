@@ -104,6 +104,7 @@ const MinDetail = ({ show, handleClose, min }) => {
               <th>Unit</th>
               <th>Item Batch</th>
               <th>Dispatched Quantity</th>
+              <th>Received Quantity</th>
               <th>Returned Quantity</th>
             </tr>
           </thead>

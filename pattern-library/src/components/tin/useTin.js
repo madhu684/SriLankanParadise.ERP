@@ -7,7 +7,7 @@ import {
   get_item_batches_api,
   get_locations_inventories_by_location_id_api,
 } from "../../services/purchaseApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const useTin = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -27,6 +27,7 @@ const useTin = ({ onFormSubmit }) => {
   const [trnSearchTerm, setTrnSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
+  const queryClient = useQueryClient();
 
   // Fetch TRNs
   const fetchTrns = async () => {
@@ -491,6 +492,14 @@ const useTin = ({ onFormSubmit }) => {
     setSelectedTrn(null);
     setValidFields({});
     setValidationErrors({});
+    // Reset query states to clear errors
+    refetchTrns();
+    refetchTins();
+    refetchItemBatches();
+    refetchLocationInventories();
+    // Explicitly reset selectedTrn to null to disable dependent queries
+    queryClient.resetQueries(["tins", null]);
+    queryClient.resetQueries(["locationInventories", null]);
   };
 
   console.log("formData", formData);
