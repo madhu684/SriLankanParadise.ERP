@@ -2,7 +2,7 @@
 {
     public class IssueMasterRequestModel
     {
-        public int RequisitionMasterId { get; set; }
+        public int? RequisitionMasterId { get; set; }
 
         public DateTime? IssueDate { get; set; }
 

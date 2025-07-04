@@ -2,7 +2,6 @@ import React from "react";
 import useCategoryUpdate from "./useCategoryUpdate";
 import CurrentDateTime from "../../currentDateTime/currentDateTime";
 import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
-import useCompanyLogoUrl from "../../companyLogo/useCompanyLogoUrl";
 
 const CategoryUpdate = ({ handleClose, category, handleUpdated }) => {
   const {
@@ -22,15 +21,18 @@ const CategoryUpdate = ({ handleClose, category, handleUpdated }) => {
     },
   });
 
-  const companyLogoUrl = useCompanyLogoUrl();
-
   return (
     <div className="container mt-4">
       {/* Header */}
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img src={companyLogoUrl} alt="Company Logo" height={30} />
+          <button
+            onClick={handleClose}
+            className="btn btn-dark d-flex align-items-center"
+          >
+            Back
+          </button>
           <p>
             {" "}
             <CurrentDateTime />

@@ -24,6 +24,7 @@ import SystemPrivilegeList from "../systemPrivilages/SystemPrivilageList/SystemP
 import UserAccountList from "../registration/userAccount/userAccountList.jsx";
 import LocationList from "../location/locationList/locationList.jsx";
 import StockManagement from "../stockManagement/stockManagement.jsx";
+import StockLevel from "../stockLevel/stockLevel.jsx";
 import InventoryAnalysisReport from "../inventoryAnalysisReport/InventoryAnalysisReport.jsx";
 import InventoryAnalysisAsAtDateReport from "../inventoryAnalysisReportAsAtDateReport/InventoryAnalysisAsAtDateReport.jsx";
 import PackingSlipList from "../packingSlip/packingSlipList/packingSlipList.jsx";
@@ -141,7 +142,9 @@ const useMain = () => {
       case "Packing Slip":
         return <PackingSlipList />;
       case "Supplier Return":
-        return <SupplierReturnList />;  
+        return <SupplierReturnList />;
+      case "Stock Level":
+        return <StockLevel />;
       default:
         return null;
     }

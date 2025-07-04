@@ -1,5 +1,6 @@
 ﻿using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Business_Service
@@ -46,8 +47,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             await _locationInventoryRepository.UpdateLocationInventory(locationInventoryId, locationInventory);
         }
-
-        public async Task UpdateLocationInventoryStockInHand(int locationId, int itemMasterId, int batchId, LocationInventory locationInventory, string operation )
+        public async Task UpdateLocationInventoryStockInHand(int locationId, int itemMasterId, int batchId, LocationInventory locationInventory, string operation)
         {
             await _locationInventoryRepository.UpdateLocationInventoryStockInHand(locationId, itemMasterId, batchId, locationInventory, operation);
         }
@@ -60,6 +60,15 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         public async Task<IEnumerable<LocationInventory>> GetLocationInventoryByBatchId(int batchId)
         {
             return await _locationInventoryRepository.GetLocationInventoryByBatchId(batchId);
+        }
+        public async Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemMasterId(int locationId, int itemMasterId)
+        {
+            return await _locationInventoryRepository.GetSumLocationInventoriesByLocationIdItemMasterId(locationId, itemMasterId);
+        }
+
+        public async Task<IEnumerable<LocationInventorySummary>> GetLowStockItems()
+        {
+            return await _locationInventoryRepository.GetLowStockItems();
         }
     }
 }

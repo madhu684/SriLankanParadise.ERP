@@ -6,7 +6,7 @@ import LoadingSpinner from "../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../errorComponent/errorComponent";
 import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 
-const Grn = ({ handleClose, handleUpdated }) => {
+const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
   const {
     formData,
     submissionStatus,
@@ -81,6 +81,10 @@ const Grn = ({ handleClose, handleUpdated }) => {
     return <ErrorComponent error={"Error fetching data"} />;
   }
 
+  const handleBack = () => {
+    setShowCreateGrnForm(false);
+  };
+
   return (
     <div className="container mt-4">
       {/* Header */}
@@ -88,6 +92,14 @@ const Grn = ({ handleClose, handleUpdated }) => {
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
           <img src={companyLogoUrl} alt="Company Logo" height={30} />
+
+          <button
+            onClick={handleBack}
+            className="btn btn-dark d-flex align-items-center me-auto"
+          >
+            Back
+          </button>
+
           <p>
             <CurrentDateTime />
           </p>

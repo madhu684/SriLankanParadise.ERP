@@ -4,6 +4,7 @@ import {
   post_requisition_master_api,
   post_requisition_detail_api,
   get_user_locations_by_user_id_api,
+  get_sum_location_inventories_by_locationId_itemMasterId_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
@@ -99,12 +100,31 @@ const useTransferRequisition = ({ onFormSubmit }) => {
   } = useQuery({
     queryKey: ["items", searchTerm],
     queryFn: () =>
-      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "Sellable"),
+      fetchItems(
+        sessionStorage.getItem("companyId"),
+        searchTerm,
+        "Sellable",
+        "Raw Material"
+      ),
   });
+
+  // Fetch stock details for an item when selected
+  const fetchStockDetails = async (locationId, itemMasterId) => {
+    try {
+      const response =
+        await get_sum_location_inventories_by_locationId_itemMasterId_api(
+          locationId,
+          itemMasterId
+        );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching stock details:", error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     if (submissionStatus != null) {
-      // Scroll to the success alert when it becomes visible
       alertRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [submissionStatus]);
@@ -118,13 +138,11 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     let isFieldValid = true;
     let errorMessage = "";
 
-    // Required validation
     if (value === null || value === undefined || `${value}`.trim() === "") {
       isFieldValid = false;
       errorMessage = `${fieldDisplayName} is required`;
     }
 
-    // Additional validation
     if (
       isFieldValid &&
       additionalRules.validationFunction &&
@@ -153,7 +171,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     ];
 
     if (!files || files.length === 0) {
-      isAttachmentsValid = true; // Attachments are optional, so it's considered valid if there are none.
+      isAttachmentsValid = true;
       errorMessage = "";
     }
 
@@ -222,14 +240,17 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     );
 
     let isItemQuantityValid = true;
-    // Validate item details
     formData.itemDetails.forEach((item, index) => {
       const fieldName = `quantity_${index}`;
       const fieldDisplayName = `Quantity for ${item.name}`;
 
       const additionalRules = {
-        validationFunction: (value) => parseFloat(value) > 0,
-        errorMessage: `${fieldDisplayName} must be greater than 0`,
+        validationFunction: (value) =>
+          parseFloat(value) > 0 &&
+          parseFloat(value) <= (item.totalStockInHand || Infinity),
+        errorMessage: `${fieldDisplayName} must be greater than 0 and not exceed available stock (${
+          item.totalStockInHand || 0
+        })`,
       };
 
       const isValidQuantity = validateField(
@@ -260,29 +281,18 @@ const useTransferRequisition = ({ onFormSubmit }) => {
 
   const generateReferenceNumber = () => {
     const currentDate = new Date();
-
-    // Format the date as needed (e.g., YYYYMMDDHHMMSS)
     const formattedDate = currentDate
       .toISOString()
       .replace(/\D/g, "")
       .slice(0, 14);
-
-    // Generate a random number (e.g., 4 digits)
     const randomNumber = Math.floor(1000 + Math.random() * 9000);
-
-    // Combine the date and random number
-    const referenceNumber = `TRN_${formattedDate}_${randomNumber}`;
-
-    return referenceNumber;
+    return `TRN_${formattedDate}_${randomNumber}`;
   };
 
   const handleSubmit = async (isSaveAsDraft) => {
     try {
       const status = isSaveAsDraft ? 0 : 1;
-
-      // Get the current date and time in UTC timezone in the specified format
       const requisitionDate = new Date().toISOString();
-
       const isFormValid = validateForm(isSaveAsDraft);
       if (isFormValid) {
         setLoading(true);
@@ -310,7 +320,6 @@ const useTransferRequisition = ({ onFormSubmit }) => {
 
         const requisitionMasterId = response.data.result.requisitionMasterId;
 
-        // Extract itemDetails from formData
         const itemDetailsData = formData.itemDetails.map(async (item) => {
           const detailsData = {
             requisitionMasterId,
@@ -319,7 +328,6 @@ const useTransferRequisition = ({ onFormSubmit }) => {
             permissionId: 1052,
           };
 
-          // Call post_purchase_requisition_detail_api for each item
           const detailsApiResponse = await post_requisition_detail_api(
             detailsData
           );
@@ -376,7 +384,6 @@ const useTransferRequisition = ({ onFormSubmit }) => {
       const updatedItemDetails = [...prevFormData.itemDetails];
       updatedItemDetails[index][field] = value;
 
-      // Ensure positive values for Quantities and Unit Prices
       updatedItemDetails[index].quantity = Math.max(
         0,
         updatedItemDetails[index].quantity
@@ -413,8 +420,11 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     }));
   };
 
-  // Handler to add the selected item to itemDetails
-  const handleSelectItem = (item) => {
+  const handleSelectItem = async (item) => {
+    const stockDetails = await fetchStockDetails(
+      formData.fromWarehouseLocation,
+      item.itemMasterId
+    );
     setFormData((prevFormData) => ({
       ...prevFormData,
       itemDetails: [
@@ -423,11 +433,14 @@ const useTransferRequisition = ({ onFormSubmit }) => {
           id: item.itemMasterId,
           name: item.itemName,
           unit: item.unit.unitName,
-          quantity: 0, // You can set a default quantity here
+          quantity: 0,
+          totalStockInHand: stockDetails?.totalStockInHand || 0,
+          reOrderLevel: stockDetails?.minReOrderLevel || 0,
+          maxStockLevel: stockDetails?.maxStockLevel || 0,
         },
       ],
     }));
-    setSearchTerm(""); // Clear the search term
+    setSearchTerm("");
   };
 
   return {

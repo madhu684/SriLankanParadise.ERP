@@ -9,35 +9,35 @@ import {
   get_item_master_by_item_master_id_api,
   get_sub_items_by_item_master_id_api,
   get_sub_item_masters_by_item_master_id_api,
-} from '../../../services/inventoryApi'
+} from "../../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
 
 const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
   const [formData, setFormData] = useState({
-    unitId: '',
-    categoryId: '',
-    itemName: '',
+    unitId: "",
+    categoryId: "",
+    itemName: "",
     //itemCode: '',
-    itemTypeId: '',
-    measurementType: '',
-    itemHierarchy: '',
-    inventoryMeasurementType: '',
-    inventoryUnitId: '',
-    conversionValue: '',
-    reorderLevel: '',
-    unitPrice: '',
-    costRatio: '',
-    fobInUSD: '',
-    landedCost: '',
-    minNetSellingPrice: '',
-    sellingPrice: '',
-    mrp: '',
-    competitorPrice: '',
-    labelPrice: '',
-    averageSellingPrice: '',
-    stockClearance: '',
-    bulkPrice: '',
-  })
+    itemTypeId: "",
+    measurementType: "",
+    itemHierarchy: "",
+    inventoryMeasurementType: "",
+    inventoryUnitId: "",
+    conversionValue: "",
+    reorderLevel: "",
+    unitPrice: "",
+    costRatio: "",
+    fobInUSD: "",
+    landedCost: "",
+    minNetSellingPrice: "",
+    sellingPrice: "",
+    mrp: "",
+    competitorPrice: "",
+    labelPrice: "",
+    averageSellingPrice: "",
+    stockClearance: "",
+    bulkPrice: "",
+  });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
@@ -46,9 +46,9 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchChildTerm, setSearchChildTerm] = useState('')
+  const [searchChildTerm, setSearchChildTerm] = useState("");
   const [selectedParentItem, setSelectedParentItem] = useState("");
-  const [selectedChildItems, setSelectedChildItems] = useState([])
+  const [selectedChildItems, setSelectedChildItems] = useState([]);
 
   const fetchItems = async (companyId, searchQuery, itemType) => {
     try {
@@ -80,10 +80,10 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     isError: isChildItemsError,
     error: childItemsError,
   } = useQuery({
-    queryKey: ['childItems', searchChildTerm],
+    queryKey: ["childItems", searchChildTerm],
     queryFn: () =>
-      fetchItems(sessionStorage.getItem('companyId'), searchChildTerm, 'All'),
-  })
+      fetchItems(sessionStorage.getItem("companyId"), searchChildTerm, "All"),
+  });
 
   const fetchUnits = async () => {
     try {
@@ -164,13 +164,13 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
   });
 
   useEffect(() => {
-    const costRatio = parseFloat(formData.costRatio) || 0
-    const fobInUSD = parseFloat(formData.fobInUSD) || 0
+    const costRatio = parseFloat(formData.costRatio) || 0;
+    const fobInUSD = parseFloat(formData.fobInUSD) || 0;
 
-    const landedCost = costRatio * fobInUSD
-    const minNetSellingPrice = landedCost / 0.9
-    const sellingPrice = landedCost / 0.75
-    const mrp = sellingPrice / 0.7
+    const landedCost = costRatio * fobInUSD;
+    const minNetSellingPrice = landedCost / 0.9;
+    const sellingPrice = landedCost / 0.75;
+    const mrp = sellingPrice / 0.7;
 
     setFormData((prev) => ({
       ...prev,
@@ -178,8 +178,8 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       minNetSellingPrice: minNetSellingPrice.toFixed(2),
       sellingPrice: sellingPrice.toFixed(2),
       mrp: mrp.toFixed(2),
-    }))
-  }, [formData.costRatio, formData.fobInUSD])
+    }));
+  }, [formData.costRatio, formData.fobInUSD]);
 
   useEffect(() => {
     const deepCopyItemMaster = JSON.parse(JSON.stringify(itemMaster));
@@ -201,20 +201,20 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       inventoryUnitId: deepCopyItemMaster?.inventoryUnitId,
       conversionValue: deepCopyItemMaster?.conversionRate,
       //itemCode: deepCopyItemMaster?.itemCode ?? '',
-      reorderLevel: deepCopyItemMaster?.reorderLevel ?? '',
-      unitPrice: deepCopyItemMaster?.unitPrice ?? '',
-      costRatio: deepCopyItemMaster?.costRatio ?? '',
-      fobInUSD: deepCopyItemMaster?.fobInUSD ?? '',
-      landedCost: deepCopyItemMaster?.landedCost ?? '',
-      minNetSellingPrice: deepCopyItemMaster?.minNetSellingPrice ?? '',
-      sellingPrice: deepCopyItemMaster?.sellingPrice ?? '',
-      mrp: deepCopyItemMaster?.mrp ?? '',
-      competitorPrice: deepCopyItemMaster?.competitorPrice ?? '',
-      labelPrice: deepCopyItemMaster?.labelPrice ?? '',
-      averageSellingPrice: deepCopyItemMaster?.averageSellingPrice ?? '',
-      stockClearance: deepCopyItemMaster?.stockClearance ?? '',
-      bulkPrice: deepCopyItemMaster?.bulkPrice ?? '',
-    })
+      reorderLevel: deepCopyItemMaster?.reorderLevel ?? "",
+      unitPrice: deepCopyItemMaster?.unitPrice ?? "",
+      costRatio: deepCopyItemMaster?.costRatio ?? "",
+      fobInUSD: deepCopyItemMaster?.fobInUSD ?? "",
+      landedCost: deepCopyItemMaster?.landedCost ?? "",
+      minNetSellingPrice: deepCopyItemMaster?.minNetSellingPrice ?? "",
+      sellingPrice: deepCopyItemMaster?.sellingPrice ?? "",
+      mrp: deepCopyItemMaster?.mrp ?? "",
+      competitorPrice: deepCopyItemMaster?.competitorPrice ?? "",
+      labelPrice: deepCopyItemMaster?.labelPrice ?? "",
+      averageSellingPrice: deepCopyItemMaster?.averageSellingPrice ?? "",
+      stockClearance: deepCopyItemMaster?.stockClearance ?? "",
+      bulkPrice: deepCopyItemMaster?.bulkPrice ?? "",
+    });
 
     const fetchParentItem = async () => {
       try {
@@ -231,10 +231,10 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       try {
         const response = await get_sub_item_masters_by_item_master_id_api(
           deepCopyItemMaster.itemMasterId
-        )
+        );
 
-        let childItems = response.data.result
-        console.log('childItems', childItems)
+        let childItems = response.data.result;
+        console.log("childItems", childItems);
         if (childItems.length > 0) {
           childItems = childItems.map((item) => {
             return {
@@ -242,16 +242,16 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
               name: item.subItemMaster.itemName,
               unit: item.subItemMaster.unit.unitName,
               quantity: item.quantity,
-            }
-          })
-          setSelectedChildItems(childItems)
+            };
+          });
+          setSelectedChildItems(childItems);
         }
       } catch (error) {
-        console.error('Error fetching child item:', error)
+        console.error("Error fetching child item:", error);
       }
-    }
+    };
 
-    fetchChildItems()
+    fetchChildItems();
     if (itemHierarchy === "sub") {
       fetchParentItem();
     }
@@ -363,22 +363,22 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     );
 
     const isUnitPriceValid = validateField(
-      'unitPrice',
-      'Unit price',
+      "unitPrice",
+      "Unit price",
       formData.unitPrice
-    )
+    );
 
     const isCostRatioValid = validateField(
-      'costRatio',
-      'Cost Ratio',
+      "costRatio",
+      "Cost Ratio",
       formData.costRatio
-    )
+    );
 
     const isFOBInUSDValid = validateField(
-      'fobInUSD',
-      'FOB In USD',
+      "fobInUSD",
+      "FOB In USD",
       formData.fobInUSD
-    )
+    );
 
     return (
       isUnitValid &&
@@ -394,13 +394,14 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       isUnitPriceValid &&
       isCostRatioValid &&
       isFOBInUSDValid
-    )
+    );
   };
   const handleSubmit = async (isSaveAsDraft) => {
     try {
+      console.log("handleSubmit triggered!", isSaveAsDraft);
       const status = isSaveAsDraft ? false : true;
 
-      const isFormValid = validateForm()
+      const isFormValid = validateForm();
       if (isFormValid) {
         if (isSaveAsDraft) {
           setLoadingDraft(true);
@@ -413,12 +414,12 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
           categoryId: formData.categoryId,
           itemName: formData.itemName,
           status: status,
-          companyId: sessionStorage.getItem('companyId'),
-          createdBy: sessionStorage.getItem('username'),
-          createdUserId: sessionStorage.getItem('userId'),
+          companyId: sessionStorage.getItem("companyId"),
+          createdBy: sessionStorage.getItem("username"),
+          createdUserId: sessionStorage.getItem("userId"),
           itemTypeId: formData.itemTypeId,
           parentId:
-            formData.itemHierarchy === 'sub'
+            formData.itemHierarchy === "sub"
               ? selectedParentItem?.itemMasterId
               : itemMaster.itemMasterId,
           SubItemMasters: selectedChildItems.map((item) => ({
@@ -442,7 +443,7 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
           averageSellingPrice: formData.averageSellingPrice,
           stockClearance: formData.stockClearance,
           bulkPrice: formData.bulkPrice,
-        }
+        };
 
         const putResponse = await put_item_master_api(
           itemMaster.itemMasterId,
@@ -533,33 +534,33 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       name: item.itemName,
       unit: item.unit.unitName,
       quantity: item.quantity,
-    }
+    };
 
-    setSelectedChildItems((val) => [...val, subItem])
-    setSearchChildTerm('')
-  }
+    setSelectedChildItems((val) => [...val, subItem]);
+    setSearchChildTerm("");
+  };
 
   const handleChildItemDetailsChange = (index, field, value) => {
     setFormData((prevFormData) => {
-      const updatedItemDetails = [...prevFormData.itemDetails]
-      updatedItemDetails[index][field] = value
+      const updatedItemDetails = [...prevFormData.itemDetails];
+      updatedItemDetails[index][field] = value;
 
       // Ensure positive values for Quantities and Unit Prices
       updatedItemDetails[index].quantity = Math.max(
         0,
         updatedItemDetails[index].quantity
-      )
+      );
 
       return {
         ...prevFormData,
         itemDetails: updatedItemDetails,
-      }
-    })
-  }
+      };
+    });
+  };
 
   const handleRemoveChildItem = (index) => {
-    setSelectedChildItems(selectedChildItems.filter((item, i) => i !== index))
-  }
+    setSelectedChildItems(selectedChildItems.filter((item, i) => i !== index));
+  };
 
   const handleChildItemQuantityChange = (id, value) => {
     setSelectedChildItems(
@@ -568,8 +569,8 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
           ? { ...i, quantity: value ? parseFloat(value, 10).toString() : 0 }
           : i
       )
-    )
-  }
+    );
+  };
 
   const handleResetParentItem = () => {
     setSelectedParentItem("");
@@ -623,7 +624,7 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     handleRemoveChildItem,
     handleResetParentItem,
     handleChildItemQuantityChange,
-  }
+  };
 };
 
 export default useItemMasterUpdate;
