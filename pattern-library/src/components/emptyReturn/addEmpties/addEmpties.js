@@ -1,11 +1,14 @@
 import { useState, useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   get_company_locations_api,
   post_location_inventory_api,
   post_location_inventory_movement_api,
 } from "../../../services/purchaseApi";
-import { get_item_masters_by_company_id_with_query_api } from "../../../services/inventoryApi";
+import {
+  get_item_masters_by_company_id_with_query_api,
+  post_Empty_Return_api,
+} from "../../../services/inventoryApi";
 
 export const AddEmptiesManagement = (handleClose) => {
   const [formData, setFormData] = useState({
@@ -18,6 +21,8 @@ export const AddEmptiesManagement = (handleClose) => {
   const [validationErrors, setValidationErrors] = useState({});
   const alertRef = useRef(null);
   const [loading, setLoading] = useState(false);
+
+  const queryClient = useQueryClient();
 
   // fetch Warehouses
   const fetchWarehouses = async () => {
@@ -136,6 +141,21 @@ export const AddEmptiesManagement = (handleClose) => {
           );
         }
 
+        const EmptyReturnData = {
+          companyId: parseInt(sessionStorage.getItem("companyId")),
+          fromLocationId: locationId,
+          toLocationId: locationId,
+          status: 0,
+          createdBy: parseInt(sessionStorage.getItem("userId")),
+          emptyReturnDetails: formData.itemDetails.map((item) => ({
+            itemMasterId: item.id,
+            addedQuantity: item.quantity,
+          })),
+        };
+
+        console.log("📦 Posting to Empty Return API:", EmptyReturnData);
+        await post_Empty_Return_api(EmptyReturnData);
+        queryClient.invalidateQueries("addedEmptyItems");
         // ✅ Reset form
         setFormData({ warehouseLocation: null, itemDetails: [] });
         // ✅ Refetch dropdown options

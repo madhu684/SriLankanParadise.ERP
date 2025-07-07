@@ -335,3 +335,48 @@ export const get_Empty_Return_Item_locations_inventories_by_location_id_api =
       throw error;
     }
   };
+
+export const post_Empty_Return_api = async (formData) => {
+  try {
+    const response = await api.post("/emptyReturn/addEmptyReturn", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_added_empty_items_api = async (companyId) => {
+  try {
+    const response = await api.get(
+      `/emptyReturn/GetEmptyReturnDetails/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const update_empty_return_api = async (
+  emptyReturnMasterId,
+  emptyReturnData
+) => {
+  try {
+    const response = await api.patch(
+      `/emptyReturn/update/${emptyReturnMasterId}`,
+      emptyReturnData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
