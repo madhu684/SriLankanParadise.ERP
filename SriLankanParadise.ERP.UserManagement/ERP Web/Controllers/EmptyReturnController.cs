@@ -79,7 +79,36 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
-        [HttpPut("update/{emptyReturnMasterId}")]
+        //[HttpPut("update/{emptyReturnMasterId}")]
+        //public async Task<ApiResponseModel> UpdateEmptyReturnDetailss(int emptyReturnMasterId, UpdateEmptyReturnRequestModel requestModel)
+        //{
+        //    try
+        //    {
+        //        var existingMaster = await _emptyReturnService.GetEmptyReturnMasterById(emptyReturnMasterId);
+        //        if (existingMaster == null)
+        //        {
+        //            _logger.LogWarning(LogMessages.EmptyReturnMasterNotFound);
+        //            return AddResponseMessage(Response, LogMessages.EmptyReturnMasterNotFound, null, true, HttpStatusCode.NotFound);
+        //        }
+
+        //        // Map request data except ReferenceNo
+        //        var updatedMaster = _mapper.Map<EmptyReturnMaster>(requestModel);
+        //        updatedMaster.EmptyReturnMasterId = emptyReturnMasterId;
+
+        //        await _emptyReturnService.UpdateEmptyReturnMasterAndDetails(updatedMaster);
+
+        //        _logger.LogInformation(LogMessages.EmptyReturnMasterUpdated);
+        //        return AddResponseMessage(Response, LogMessages.EmptyReturnMasterUpdated, null, true, HttpStatusCode.OK);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, ErrorMessages.InternalServerError);
+        //        return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+        //    }
+        //}
+
+
+        [HttpPatch("update/{emptyReturnMasterId}")]
         public async Task<ApiResponseModel> UpdateEmptyReturnDetails(int emptyReturnMasterId, UpdateEmptyReturnRequestModel requestModel)
         {
             try
@@ -91,11 +120,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     return AddResponseMessage(Response, LogMessages.EmptyReturnMasterNotFound, null, true, HttpStatusCode.NotFound);
                 }
 
-                // Map request data except ReferenceNo
-                var updatedMaster = _mapper.Map<EmptyReturnMaster>(requestModel);
-                updatedMaster.EmptyReturnMasterId = emptyReturnMasterId;
-
-                await _emptyReturnService.UpdateEmptyReturnMasterAndDetails(updatedMaster);
+                await _emptyReturnService.UpdateEmptyReturnMasterAndDetails(emptyReturnMasterId, requestModel);
 
                 _logger.LogInformation(LogMessages.EmptyReturnMasterUpdated);
                 return AddResponseMessage(Response, LogMessages.EmptyReturnMasterUpdated, null, true, HttpStatusCode.OK);

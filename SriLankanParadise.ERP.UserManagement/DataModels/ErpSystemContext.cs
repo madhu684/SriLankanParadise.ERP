@@ -1504,6 +1504,7 @@ public partial class ErpSystemContext : DbContext
             entity.ToTable("EmptyReturnDetail");
 
             entity.Property(e => e.ReturnQuantity).HasColumnType("decimal(18,2)");
+            entity.Property(e => e.AddedQuantity).HasColumnType("decimal(18,2)");
 
             entity.HasOne(d => d.EmptyReturnMaster)
                 .WithMany(p => p.EmptyReturnDetails)

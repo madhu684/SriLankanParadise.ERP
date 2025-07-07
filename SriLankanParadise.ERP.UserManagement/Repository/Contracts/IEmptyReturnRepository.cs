@@ -9,7 +9,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task<EmptyReturnMaster> AddEmptyReturnAsync(EmptyReturnMaster master);
         Task<IEnumerable<EmptyReturnMaster>> GetEmptyReturnsByCompanyAsync(int companyId);
         Task<EmptyReturnMaster> GetEmptyReturnMasterById(int id);
-        Task UpdateEmptyReturnMasterAndDetails(EmptyReturnMaster masterWithDetails);
+        //Task UpdateEmptyReturnMasterAndDetails(EmptyReturnMaster masterWithDetails);
+        Task UpdateEmptyReturnMasterAndDetails(int emptyReturnMasterId, UpdateEmptyReturnRequestModel requestModel);
         Task<bool> ApproveEmptyReturnMaster(int emptyReturnMasterId, ApproveEmptyReturnRequestModel request);
 
 

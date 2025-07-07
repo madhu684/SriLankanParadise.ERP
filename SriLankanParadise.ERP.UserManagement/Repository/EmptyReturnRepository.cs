@@ -50,7 +50,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var result = await _dbContext.EmptyReturnMasters
                     .Where(m => m.CompanyId == companyId)
+                    .Include(m => m.FromLocation)
                     .Include(m => m.EmptyReturnDetails)
+                        .ThenInclude(im => im.ItemMaster)
                     .ToListAsync();
 
                 return result.Any() ? result : null;
@@ -67,40 +69,81 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 .FirstOrDefaultAsync(m => m.EmptyReturnMasterId == id);
         }
 
-        public async Task UpdateEmptyReturnMasterAndDetails(EmptyReturnMaster updatedMaster)
+        //public async Task UpdateEmptyReturnMasterAndDetailss(EmptyReturnMaster updatedMaster)
+        //{
+        //    var existingMaster = await _dbContext.EmptyReturnMasters
+        //        .Include(m => m.EmptyReturnDetails)
+        //        .FirstOrDefaultAsync(m => m.EmptyReturnMasterId == updatedMaster.EmptyReturnMasterId);
+
+        //    if (existingMaster != null)
+        //    {
+        //        // Preserve important fields
+        //        updatedMaster.ReferenceNo = existingMaster.ReferenceNo;
+        //        updatedMaster.CreatedBy = existingMaster.CreatedBy;
+        //        updatedMaster.CreateDate = existingMaster.CreateDate;
+        //        updatedMaster.ModifyDate = DateTime.UtcNow;
+        //        updatedMaster.ApprovedBy = existingMaster.ApprovedBy;
+        //        updatedMaster.ApprovedDate = existingMaster.ApprovedDate;
+        //        updatedMaster.ApprovedUserId = existingMaster.ApprovedUserId;
+
+        //        // Update master values (excluding navigation properties)
+        //        _dbContext.Entry(existingMaster).CurrentValues.SetValues(updatedMaster);
+
+        //        // Remove all existing details
+        //        _dbContext.EmptyReturnDetails.RemoveRange(existingMaster.EmptyReturnDetails);
+
+        //        // Re-attach updated details with correct master id
+        //        foreach (var newDetail in updatedMaster.EmptyReturnDetails)
+        //        {
+        //            newDetail.EmptyReturnDetailId = 0; // Reset EF identity if needed
+        //            newDetail.EmptyReturnMasterId = existingMaster.EmptyReturnMasterId;
+        //            _dbContext.EmptyReturnDetails.Add(newDetail);
+        //        }
+
+        //        await _dbContext.SaveChangesAsync();
+        //    }
+        //}
+
+        public async Task UpdateEmptyReturnMasterAndDetails(int emptyReturnMasterId, UpdateEmptyReturnRequestModel requestModel)
         {
             var existingMaster = await _dbContext.EmptyReturnMasters
                 .Include(m => m.EmptyReturnDetails)
-                .FirstOrDefaultAsync(m => m.EmptyReturnMasterId == updatedMaster.EmptyReturnMasterId);
+                .FirstOrDefaultAsync(m => m.EmptyReturnMasterId == emptyReturnMasterId);
 
             if (existingMaster != null)
             {
-                // Preserve important fields
-                updatedMaster.ReferenceNo = existingMaster.ReferenceNo;
-                updatedMaster.CreatedBy = existingMaster.CreatedBy;
-                updatedMaster.CreateDate = existingMaster.CreateDate;
-                updatedMaster.ModifyDate = DateTime.UtcNow;
-                updatedMaster.ApprovedBy = existingMaster.ApprovedBy;
-                updatedMaster.ApprovedDate = existingMaster.ApprovedDate;
-                updatedMaster.ApprovedUserId = existingMaster.ApprovedUserId;
-
-                // Update master values (excluding navigation properties)
-                _dbContext.Entry(existingMaster).CurrentValues.SetValues(updatedMaster);
-
-                // Remove all existing details
-                _dbContext.EmptyReturnDetails.RemoveRange(existingMaster.EmptyReturnDetails);
-
-                // Re-attach updated details with correct master id
-                foreach (var newDetail in updatedMaster.EmptyReturnDetails)
+                if (existingMaster.ModifyDate == null)
                 {
-                    newDetail.EmptyReturnDetailId = 0; // Reset EF identity if needed
-                    newDetail.EmptyReturnMasterId = existingMaster.EmptyReturnMasterId;
-                    _dbContext.EmptyReturnDetails.Add(newDetail);
+                    existingMaster.ModifyDate = requestModel.ModifyDate;
                 }
+                else
+                {
+                    requestModel.ModifyDate = (DateTime)existingMaster.ModifyDate;
+                }
+                requestModel.EmptyReturnMasterId = existingMaster.EmptyReturnMasterId;
 
+                _dbContext.Entry(existingMaster).CurrentValues.SetValues(requestModel);
+
+                foreach (var newDetail in requestModel.EmptyReturnDetails)
+                {
+                    var existingDetail = existingMaster.EmptyReturnDetails
+                        .FirstOrDefault(d => d.EmptyReturnDetailId == newDetail.EmptyReturnDetailId);
+
+                    if (existingDetail == null)
+                    {
+                        throw new InvalidOperationException($"EmptyReturnDetailId {newDetail.EmptyReturnDetailId} does not exist.");
+                    }
+
+                    if (newDetail.ReturnQuantity != default(decimal))
+                    {
+                        existingDetail.ReturnQuantity = newDetail.ReturnQuantity;
+                    }
+                }
                 await _dbContext.SaveChangesAsync();
             }
         }
+
+
         public async Task<bool> ApproveEmptyReturnMaster(int emptyReturnMasterId, ApproveEmptyReturnRequestModel request)
         {
             var master = await _dbContext.EmptyReturnMasters

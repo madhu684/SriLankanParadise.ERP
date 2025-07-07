@@ -155,7 +155,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<UserUpdateRequestModel, User>();
             CreateMap<RolePermission, RolePermissionDto>();
             CreateMap<AddEmptyReturnRequestModel, EmptyReturnMaster>();
-            CreateMap<UpdateEmptyReturnRequestModel, EmptyReturnMaster>();
+            //CreateMap<UpdateEmptyReturnRequestModel, EmptyReturnMaster>();
             CreateMap<EmptyReturnDetailRequestModel, EmptyReturnDetail>()
                 .ForMember(dest => dest.EmptyReturnDetailId, opt => opt.Ignore());
             CreateMap<EmptyReturnDetail, EmptyReturnDetailDto>();

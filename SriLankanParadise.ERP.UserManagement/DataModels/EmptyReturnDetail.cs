@@ -15,8 +15,10 @@ public partial class EmptyReturnDetail
     public int ItemMasterId { get; set; }
 
     public int? BatchId { get; set; }
-
+    public decimal AddedQuantity { get; set; }
     public decimal ReturnQuantity { get; set; }
+   
+
 
     // 🔗 Navigation Properties
     public virtual EmptyReturnMaster EmptyReturnMaster { get; set; } = null!;

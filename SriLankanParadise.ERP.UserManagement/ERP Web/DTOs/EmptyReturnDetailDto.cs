@@ -6,6 +6,9 @@
         public int EmptyReturnMasterId { get; set; }
         public int ItemMasterId { get; set; }
         public int? BatchId { get; set; }
+        public decimal AddedQuantity { get; set; }
         public decimal ReturnQuantity { get; set; }
+
+        public virtual ItemMasterDto ItemMaster { get; set; }
     }
 }

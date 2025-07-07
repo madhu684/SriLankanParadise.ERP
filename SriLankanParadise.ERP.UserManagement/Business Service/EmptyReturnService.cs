@@ -45,9 +45,14 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             return await _emptyReturnRepository.GetEmptyReturnMasterById(id);
         }
 
-        public async Task UpdateEmptyReturnMasterAndDetails(EmptyReturnMaster updatedMaster)
+        //public async Task UpdateEmptyReturnMasterAndDetails(EmptyReturnMaster updatedMaster)
+        //{
+        //    await _emptyReturnRepository.UpdateEmptyReturnMasterAndDetails(updatedMaster);
+        //}
+
+        public async Task UpdateEmptyReturnMasterAndDetails(int emptyReturnMasterId, UpdateEmptyReturnRequestModel requestModel)
         {
-            await _emptyReturnRepository.UpdateEmptyReturnMasterAndDetails(updatedMaster);
+            await _emptyReturnRepository.UpdateEmptyReturnMasterAndDetails(emptyReturnMasterId, requestModel);
         }
         public async Task<bool> ApproveEmptyReturnMaster(int emptyReturnMasterId, ApproveEmptyReturnRequestModel request)
         {
