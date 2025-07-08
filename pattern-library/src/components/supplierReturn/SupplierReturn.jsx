@@ -407,6 +407,7 @@ const SupplierReturn = ({ handleClose, setShowCreateSRForm }) => {
                   <th>Unit</th>
                   <th>Stock In hand</th>
                   <th>Return Quantity</th>
+                  <th>Warehouse </th>
                   <th className="text-end">Action</th>
                 </tr>
               </thead>
@@ -444,6 +445,8 @@ const SupplierReturn = ({ handleClose, setShowCreateSRForm }) => {
                         </div>
                       )}
                     </td>
+                    <td>{item.locationName || "N/A"}</td>
+
                     <td className="text-end">
                       <button
                         type="button"

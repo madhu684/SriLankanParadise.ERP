@@ -175,9 +175,7 @@ const SupplierReturnList = () => {
           <table className="table mt-2">
             <thead>
               <tr>
-                <th>
-                  <input type="checkbox" />
-                </th>
+                <th></th>
                 <th>Reference No</th>
                 <th>Created By</th>
                 <th>Created Date</th>
