@@ -4,6 +4,7 @@ import { get_company_locations_api } from "../../../services/purchaseApi";
 import { update_empty_return_api } from "../../../services/inventoryApi";
 import ToastMessage from "../../toastMessage/toastMessage";
 import { get_item_masters_by_company_id_with_query_api } from "../../../services/inventoryApi";
+import { get_user_locations_by_user_id_api } from "../../../services/purchaseApi";
 
 export const CreateEmptyReturn = (selectedItems) => {
   const [stockData, setStockData] = useState([]);
@@ -62,10 +63,21 @@ export const CreateEmptyReturn = (selectedItems) => {
   }, [handleSetSelectedItems]);
 
   // Load warehouse locations
+  // const fetchWarehouses = async () => {
+  //   try {
+  //     const response = await get_company_locations_api(
+  //       sessionStorage.getItem("companyId")
+  //     );
+  //     return response.data.result;
+  //   } catch (error) {
+  //     console.error("Error fetching locations:", error);
+  //   }
+  // };
+
   const fetchWarehouses = async () => {
     try {
-      const response = await get_company_locations_api(
-        sessionStorage.getItem("companyId")
+      const response = await get_user_locations_by_user_id_api(
+        sessionStorage.getItem("userId")
       );
       return response.data.result;
     } catch (error) {
@@ -136,6 +148,7 @@ export const CreateEmptyReturn = (selectedItems) => {
         transferDate: "Transfer Date is required.",
       }));
     }
+
     if (
       formData.emptyReturnDetails?.some(
         (item) => !item.returnQuantity || item.returnQuantity <= 0

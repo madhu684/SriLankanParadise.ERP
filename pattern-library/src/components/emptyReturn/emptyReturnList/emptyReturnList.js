@@ -61,7 +61,7 @@ const useEmptyReturnsLogic = () => {
       case 0:
         return "Empty Added";
       case 1:
-        return "Pending";
+        return "Empty Transfered";
       case 2:
         return "Approved";
       default:

@@ -77,10 +77,10 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
     renderSubColumns,
   } = useSalesOrder({
     onFormSubmit: () => {
-      handleClose()
-      handleUpdated()
+      handleClose();
+      handleUpdated();
     },
-  })
+  });
 
   if (
     isCustomersLoading ||
@@ -89,7 +89,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
     isLoadingTransactionTypes ||
     isCompanyLoading
   ) {
-    return <LoadingSpinner />
+    return <LoadingSpinner />;
   }
 
   if (
@@ -99,8 +99,11 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
     isTransactionTypesError ||
     isCustomersError
   ) {
-    return <ErrorComponent error={'Error fetching data'} />
+    return <ErrorComponent error={"Error fetching data"} />;
   }
+
+  console.log("formData dinusha jeewanka", availableItems);
+  console.log("formData dinusha jeewanka2", formData);
 
   return (
     <div className="container mt-4">
@@ -122,18 +125,18 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
       </div>
 
       {/* Display success or error messages */}
-      {submissionStatus === 'successSubmitted' && (
+      {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
           Sales order submitted successfully! Reference Number: {referenceNo}
         </div>
       )}
-      {submissionStatus === 'successSavedAsDraft' && (
+      {submissionStatus === "successSavedAsDraft" && (
         <div className="alert alert-success mb-3" role="alert">
           Sales order saved as draft, you can edit and submit it later!
           Reference Number: {referenceNo}
         </div>
       )}
-      {submissionStatus === 'error' && (
+      {submissionStatus === "error" && (
         <div className="alert alert-danger mb-3" role="alert">
           Error submitting sales order. Please try again.
         </div>
@@ -163,7 +166,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                 <label htmlFor="customerId" className="form-label">
                   Customer
                 </label>
-                {formData.selectedCustomer === '' && (
+                {formData.selectedCustomer === "" && (
                   <div className="mb-3 position-relative">
                     <div className="input-group">
                       <span className="input-group-text bg-transparent ">
@@ -172,8 +175,8 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                       <input
                         type="text"
                         className={`form-control ${
-                          validFields.supplierId ? 'is-valid' : ''
-                        } ${validationErrors.supplierId ? 'is-invalid' : ''}`}
+                          validFields.supplierId ? "is-valid" : ""
+                        } ${validationErrors.supplierId ? "is-invalid" : ""}`}
                         placeholder="Search for a customer..."
                         value={customerSearchTerm}
                         onChange={(e) => setCustomerSearchTerm(e.target.value)}
@@ -183,9 +186,9 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                         <span
                           className="input-group-text bg-transparent"
                           style={{
-                            cursor: 'pointer',
+                            cursor: "pointer",
                           }}
-                          onClick={() => setCustomerSearchTerm('')}
+                          onClick={() => setCustomerSearchTerm("")}
                         >
                           <i className="bi bi-x"></i>
                         </span>
@@ -194,14 +197,14 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
 
                     {/* Dropdown for filtered customers */}
                     {customerSearchTerm && (
-                      <div className="dropdown" style={{ width: '100%' }}>
+                      <div className="dropdown" style={{ width: "100%" }}>
                         <ul
                           className="dropdown-menu"
                           style={{
-                            display: 'block',
-                            width: '100%',
-                            maxHeight: '200px',
-                            overflowY: 'auto',
+                            display: "block",
+                            width: "100%",
+                            maxHeight: "200px",
+                            overflowY: "auto",
                           }}
                         >
                           {customers
@@ -211,9 +214,9 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                                   .toLowerCase()
                                   .includes(customerSearchTerm.toLowerCase()) ||
                                 customer.phone
-                                  .replace(/\s/g, '')
+                                  .replace(/\s/g, "")
                                   .includes(
-                                    customerSearchTerm.replace(/\s/g, '')
+                                    customerSearchTerm.replace(/\s/g, "")
                                   )
                             )
                             .map((customer) => (
@@ -224,7 +227,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                                 >
                                   <span className="me-3">
                                     <i className="bi-person-lines-fill"></i>
-                                  </span>{' '}
+                                  </span>{" "}
                                   {customer?.customerName} - {customer?.phone}
                                 </button>
                               </li>
@@ -235,8 +238,8 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                                 .toLowerCase()
                                 .includes(customerSearchTerm.toLowerCase()) ||
                               customer.phone
-                                .replace(/\s/g, '')
-                                .includes(customerSearchTerm.replace(/\s/g, ''))
+                                .replace(/\s/g, "")
+                                .includes(customerSearchTerm.replace(/\s/g, ""))
                           ).length === 0 && (
                             <>
                               <li className="dropdown-item text-center">
@@ -263,7 +266,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                         </ul>
                       </div>
                     )}
-                    {formData.selectedCustomer === '' && (
+                    {formData.selectedCustomer === "" && (
                       <div className="mb-3">
                         <small className="form-text text-muted">
                           {validationErrors.customerId && (
@@ -286,7 +289,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                         Customer Name: {formData.selectedCustomer.customerName}
                       </p>
                       <p>
-                        Contact Person:{' '}
+                        Contact Person:{" "}
                         {formData.selectedCustomer.contactPerson}
                       </p>
                       <p>Phone: {formData.selectedCustomer.phone}</p>
@@ -308,7 +311,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
             <label htmlFor="salesPersonId" className="form-label mt-3">
               Sales Person
             </label>
-            {formData.selectedSalesPerson === '' && (
+            {formData.selectedSalesPerson === "" && (
               <div className="mb-3 position-relative">
                 <div className="input-group">
                   <span className="input-group-text bg-transparent">
@@ -317,8 +320,8 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                   <input
                     type="text"
                     className={`form-control ${
-                      validFields.salesPersonId ? 'is-valid' : ''
-                    } ${validationErrors.salesPersonId ? 'is-invalid' : ''}`}
+                      validFields.salesPersonId ? "is-valid" : ""
+                    } ${validationErrors.salesPersonId ? "is-invalid" : ""}`}
                     placeholder="Search for a sales person..."
                     value={salesPersonSearchTerm}
                     onChange={(e) => setSalesPersonSearchTerm(e.target.value)}
@@ -327,9 +330,9 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                     <span
                       className="input-group-text bg-transparent"
                       style={{
-                        cursor: 'pointer',
+                        cursor: "pointer",
                       }}
-                      onClick={() => setSalesPersonSearchTerm('')}
+                      onClick={() => setSalesPersonSearchTerm("")}
                     >
                       <i className="bi bi-x"></i>
                     </span>
@@ -338,14 +341,14 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
 
                 {/* Dropdown for filtered sales persons */}
                 {salesPersonSearchTerm && (
-                  <div className="dropdown" style={{ width: '100%' }}>
+                  <div className="dropdown" style={{ width: "100%" }}>
                     <ul
                       className="dropdown-menu"
                       style={{
-                        display: 'block',
-                        width: '100%',
-                        maxHeight: '200px',
-                        overflowY: 'auto',
+                        display: "block",
+                        width: "100%",
+                        maxHeight: "200px",
+                        overflowY: "auto",
                       }}
                     >
                       {salesPersons
@@ -355,9 +358,9 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                               .toLowerCase()
                               .includes(salesPersonSearchTerm.toLowerCase()) ||
                             salesPerson.contactNo
-                              .replace(/\s/g, '')
+                              .replace(/\s/g, "")
                               .includes(
-                                salesPersonSearchTerm.replace(/\s/g, '')
+                                salesPersonSearchTerm.replace(/\s/g, "")
                               )
                         )
                         .map((salesPerson) => (
@@ -370,8 +373,8 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                             >
                               <span className="me-3">
                                 <i className="bi-person-lines-fill"></i>
-                              </span>{' '}
-                              {salesPerson?.firstname} -{' '}
+                              </span>{" "}
+                              {salesPerson?.firstname} -{" "}
                               {salesPerson?.contactNo}
                             </button>
                           </li>
@@ -382,8 +385,8 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                             .toLowerCase()
                             .includes(salesPersonSearchTerm.toLowerCase()) ||
                           salesPerson.contactNo
-                            .replace(/\s/g, '')
-                            .includes(salesPersonSearchTerm.replace(/\s/g, ''))
+                            .replace(/\s/g, "")
+                            .includes(salesPersonSearchTerm.replace(/\s/g, ""))
                       ).length === 0 && (
                         <li className="dropdown-item text-center">
                           <span className="me-3">
@@ -430,12 +433,12 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
               <input
                 type="date"
                 className={`form-control ${
-                  validFields.orderDate ? 'is-valid' : ''
-                } ${validationErrors.orderDate ? 'is-invalid' : ''}`}
+                  validFields.orderDate ? "is-valid" : ""
+                } ${validationErrors.orderDate ? "is-invalid" : ""}`}
                 id="orderDate"
                 placeholder="Enter order date"
                 value={formData.orderDate}
-                onChange={(e) => handleInputChange('orderDate', e.target.value)}
+                onChange={(e) => handleInputChange("orderDate", e.target.value)}
                 required
               />
               {validationErrors.orderDate && (
@@ -451,13 +454,13 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
               <input
                 type="date"
                 className={`form-control ${
-                  validFields.deliveryDate ? 'is-valid' : ''
-                } ${validationErrors.deliveryDate ? 'is-invalid' : ''}`}
+                  validFields.deliveryDate ? "is-valid" : ""
+                } ${validationErrors.deliveryDate ? "is-invalid" : ""}`}
                 id="deliveryDate"
                 placeholder="Enter delivery date"
                 value={formData.deliveryDate}
                 onChange={(e) =>
-                  handleInputChange('deliveryDate', e.target.value)
+                  handleInputChange("deliveryDate", e.target.value)
                 }
                 required
               />
@@ -471,7 +474,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
         </div>
 
         {/* Item Details */}
-        <h4>3. Item Details</h4>
+        <h4>3. Item Details dinusha</h4>
 
         <div className="col-md-5">
           {/* Item Search */}
@@ -491,9 +494,9 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                 <span
                   className="input-group-text bg-transparent"
                   style={{
-                    cursor: 'pointer',
+                    cursor: "pointer",
                   }}
-                  onClick={() => setSearchTerm('')}
+                  onClick={() => setSearchTerm("")}
                 >
                   <i className="bi bi-x"></i>
                 </span>
@@ -501,14 +504,14 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
             </div>
             {/* Dropdown for filtered items */}
             {searchTerm && (
-              <div className="dropdown" style={{ width: '100%' }}>
+              <div className="dropdown" style={{ width: "100%" }}>
                 <ul
                   className="dropdown-menu"
                   style={{
-                    display: 'block',
-                    width: '100%',
-                    maxHeight: '200px',
-                    overflowY: 'auto',
+                    display: "block",
+                    width: "100%",
+                    maxHeight: "200px",
+                    overflowY: "auto",
                   }}
                 >
                   {isItemsLoading ? (
@@ -523,13 +526,13 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                     availableItems.length === 0 ||
                     availableItems.filter((item) => {
                       // If batchStockType is FIFO, filter out items already present in formData.itemDetails
-                      if (company.batchStockType === 'FIFO') {
+                      if (company.batchStockType === "FIFO") {
                         return !formData.itemDetails.some(
                           (detail) => detail.itemMasterId === item.itemMasterId
-                        )
+                        );
                       }
                       // Otherwise, include all items
-                      return true
+                      return true;
                     }).length === 0 ? (
                     <li className="dropdown-item">
                       <span className="me-3">
@@ -541,14 +544,14 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                     availableItems
                       .filter((item) => {
                         // If batchStockType is FIFO, filter out items already present in formData.itemDetails
-                        if (company.batchStockType === 'FIFO') {
+                        if (company.batchStockType === "FIFO") {
                           return !formData.itemDetails.some(
                             (detail) =>
                               detail.itemMasterId === item.itemMasterId
-                          )
+                          );
                         }
                         // Otherwise, include all items
-                        return true
+                        return true;
                       })
                       .map((item) => (
                         <li key={item.itemMasterId}>
@@ -630,13 +633,13 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
           <div className="table-responsive mb-2">
             <table
               className="table"
-              style={{ minWidth: '1000px', overflowX: 'auto' }}
+              style={{ minWidth: "1000px", overflowX: "auto" }}
             >
               <thead>
                 <tr>
                   <th>Item Name</th>
                   <th>Unit</th>
-                  {company.batchStockType !== 'FIFO' && <th>Batch Ref</th>}
+                  {company.batchStockType !== "FIFO" && <th>Batch Ref</th>}
                   <th>Temp Qty</th>
                   <th>Quantity</th>
                   <th>Unit Price</th>
@@ -650,7 +653,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                   <tr key={index}>
                     <td>{item.name}</td>
                     <td>{item.unit}</td>
-                    {company.batchStockType !== 'FIFO' && (
+                    {company.batchStockType !== "FIFO" && (
                       <td>{item.batchRef}</td>
                     )}
                     <td>{item.tempQuantity}</td>
@@ -658,17 +661,17 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                       <input
                         type="number"
                         className={`form-control ${
-                          validFields[`quantity_${index}`] ? 'is-valid' : ''
+                          validFields[`quantity_${index}`] ? "is-valid" : ""
                         } ${
                           validationErrors[`quantity_${index}`]
-                            ? 'is-invalid'
-                            : ''
+                            ? "is-invalid"
+                            : ""
                         }`}
                         value={item.quantity}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            'quantity',
+                            "quantity",
                             e.target.value
                           )
                         }
@@ -687,18 +690,18 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                           type="number"
                           value={charge.value}
                           onChange={(e) => {
-                            let newValue = parseFloat(e.target.value)
+                            let newValue = parseFloat(e.target.value);
 
                             // If the entered value is not a valid number, set it to 0
                             if (isNaN(newValue)) {
-                              newValue = 0
+                              newValue = 0;
                             } else {
                               // If the charge is a percentage, ensure the value is between 0 and 100
                               if (charge.isPercentage) {
-                                newValue = Math.min(100, Math.max(0, newValue)) // Clamp the value between 0 and 100
+                                newValue = Math.min(100, Math.max(0, newValue)); // Clamp the value between 0 and 100
                               } else {
                                 // For non-percentage charges, ensure the value is positive
-                                newValue = Math.max(0, newValue)
+                                newValue = Math.max(0, newValue);
                               }
                             }
 
@@ -706,7 +709,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                               index,
                               `chargesAndDeductions_${chargeIndex}_value`,
                               newValue
-                            )
+                            );
                           }}
                         />
                       </td>
@@ -730,7 +733,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                     colSpan={
                       5 +
                       formData.itemDetails[0].chargesAndDeductions.length -
-                      (company.batchStockType === 'FIFO' ? 1 : 0)
+                      (company.batchStockType === "FIFO" ? 1 : 0)
                     }
                   ></td>
                   <th>Sub Total</th>
@@ -743,7 +746,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                     colSpan={
                       5 +
                       formData.itemDetails[0].chargesAndDeductions.length -
-                      (company.batchStockType === 'FIFO' ? 1 : 0)
+                      (company.batchStockType === "FIFO" ? 1 : 0)
                     }
                   ></td>
                   <th>Total Amount</th>
@@ -766,8 +769,8 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
           <input
             type="file"
             className={`form-control ${
-              validFields.attachments ? 'is-valid' : ''
-            } ${validationErrors.attachments ? 'is-invalid' : ''}`}
+              validFields.attachments ? "is-valid" : ""
+            } ${validationErrors.attachments ? "is-invalid" : ""}`}
             id="attachment"
             onChange={(e) => handleAttachmentChange(e.target.files)}
             multiple
@@ -796,7 +799,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Submitting..." />
             ) : (
-              'Submit'
+              "Submit"
             )}
           </button>
           <button
@@ -813,7 +816,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
             {loadingDraft && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Saving as Draft..." />
             ) : (
-              'Save as Draft'
+              "Save as Draft"
             )}
           </button>
           <button
@@ -851,7 +854,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
         />
       )}
     </div>
-  )
-}
+  );
+};
 
 export default SalesOrder;

@@ -4,6 +4,7 @@ import {
   get_company_locations_api,
   post_location_inventory_api,
   post_location_inventory_movement_api,
+  get_user_locations_by_user_id_api,
 } from "../../../services/purchaseApi";
 import {
   get_item_masters_by_company_id_with_query_api,
@@ -25,10 +26,21 @@ export const AddEmptiesManagement = (handleClose) => {
   const queryClient = useQueryClient();
 
   // fetch Warehouses
+  // const fetchWarehouses = async () => {
+  //   try {
+  //     const response = await get_company_locations_api(
+  //       sessionStorage.getItem("companyId")
+  //     );
+  //     return response.data.result;
+  //   } catch (error) {
+  //     console.error("Error fetching locations:", error);
+  //   }
+  // };
+
   const fetchWarehouses = async () => {
     try {
-      const response = await get_company_locations_api(
-        sessionStorage.getItem("companyId")
+      const response = await get_user_locations_by_user_id_api(
+        sessionStorage.getItem("userId")
       );
       return response.data.result;
     } catch (error) {

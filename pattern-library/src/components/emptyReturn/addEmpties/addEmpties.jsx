@@ -27,7 +27,7 @@ const AddEmpties = ({ show, handleClose }) => {
     handleSubmit,
     handleWarehouseLocationChange,
   } = AddEmptiesManagement(handleClose);
-  console.log("Fetched warehouses:", warehouses);
+  console.log("Fetched warehouses dinusha:", warehouses);
   console.log("Fetched items:", availableItems);
 
   useEffect(() => {
@@ -64,11 +64,24 @@ const AddEmpties = ({ show, handleClose }) => {
                   }
                 >
                   <option value="">Select Warehouse</option>
-                  {warehouses
+                  {/* {warehouses
                     .filter((w) => w.locationType?.name === "Warehouse") // ✅ filter here
                     .map((w) => (
                       <option key={w.locationId} value={w.locationId}>
                         {w.locationName}
+                      </option>
+                    ))} */}
+
+                  {warehouses
+                    .filter(
+                      (w) => w.location.locationType?.name === "Warehouse"
+                    ) // ✅ filter here
+                    .map((w) => (
+                      <option
+                        key={w.location.locationId}
+                        value={w.location.locationId}
+                      >
+                        {w.location.locationName}
                       </option>
                     ))}
                 </select>

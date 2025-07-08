@@ -99,7 +99,7 @@ const EmptyReturnList = () => {
               </button>
             )}
 
-            {selectedRows.length > 0 &&
+            {/* {selectedRows.length > 0 &&
               addedEmptyItems.some(
                 (item) =>
                   selectedRows.includes(item.emptyReturnMasterId) &&
@@ -121,7 +121,7 @@ const EmptyReturnList = () => {
                     Approve
                   </button>
                 </div>
-              )}
+              )} */}
           </div>
         </div>
 
@@ -131,7 +131,7 @@ const EmptyReturnList = () => {
             <table className="table mt-2">
               <thead>
                 <tr>
-                  <th></th>
+                  {/* <th></th> */}
                   <th>Reference No</th>
                   <th>From Location</th>
                   <th>Created Date</th>
@@ -143,7 +143,7 @@ const EmptyReturnList = () => {
               <tbody>
                 {addedEmptyItems?.map((item) => (
                   <tr key={item.emptyReturnMasterId}>
-                    <td>
+                    {/* <td>
                       <input
                         type="checkbox"
                         checked={selectedRows.includes(
@@ -153,7 +153,7 @@ const EmptyReturnList = () => {
                           handleRowSelect(item.emptyReturnMasterId)
                         } // Handle selection of the row
                       />
-                    </td>
+                    </td> */}
                     <td>{item.referenceNo}</td>
                     <td>{item.fromLocation.locationName}</td>
                     <td>
@@ -175,13 +175,30 @@ const EmptyReturnList = () => {
                       >
                         View
                       </button> */}
+
                       <button
-                        className="btn btn-success"
+                        type="button"
+                        className="btn btn-warning me-2"
+                        onClick={() => handleEdit(selectedRows[0])}
+                        disabled={item.status === 1}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="btn btn-primary me-2"
                         onClick={() => handleEmptyTransfer(item)}
                         disabled={item.status !== 0} // Disable the button when status is 0
                       >
                         Empty Transfer
                       </button>
+                      {/* <button
+                        type="button"
+                        className="btn btn-success me-2"
+                        onClick={() => handleApprove(selectedRows[0])}
+                        disabled={item.status === 0 || item.status === 2}
+                      >
+                        Approve
+                      </button> */}
                     </td>
                   </tr>
                 ))}

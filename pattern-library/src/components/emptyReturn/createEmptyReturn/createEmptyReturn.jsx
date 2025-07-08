@@ -107,6 +107,45 @@ const CreateEmptyReturn = ({ selectedItems, handleClose }) => {
                   >
                     <option>{selectedItems.fromLocation?.locationName}</option>
                   </select>
+
+                  {/* <select
+                    className="form-select"
+                    name="fromLocation"
+                    value={formData.fromLocation} // Ensure the value is the locationId
+                    onChange={(e) => {
+                      const selectedLocationId = e.target.value;
+                      const updatedLocation = warehouses.find(
+                        (w) => w.location.locationId === selectedLocationId
+                      );
+
+                      // If found, update formData with the selected location object
+                      if (updatedLocation) {
+                        setFormData((prevData) => ({
+                          ...prevData,
+                          fromLocation: updatedLocation.fromLocation, // Store the full location object
+                        }));
+                      } else {
+                        setFormData((prevData) => ({
+                          ...prevData,
+                          fromLocation: null, // Handle case when no location is selected
+                        }));
+                      }
+                    }}
+                  >
+                    <option value="">Select a location</option>{" "}
+                    {warehouses
+                      .filter(
+                        (w) => w.location.locationType?.name === "Warehouse"
+                      )
+                      .map((w) => (
+                        <option
+                          key={w.location.locationId}
+                          value={w.location.locationId}
+                        >
+                          {w.location.locationName}
+                        </option>
+                      ))}
+                  </select> */}
                 </div>
 
                 <div className="col-md-4">
@@ -129,11 +168,24 @@ const CreateEmptyReturn = ({ selectedItems, handleClose }) => {
                     ) : (
                       <>
                         <option value="">Select To Location</option>
-                        {warehouses
+                        {/* {warehouses
                           .filter((w) => w.locationType?.name === "Warehouse")
                           .map((w) => (
                             <option key={w.locationId} value={w.locationId}>
                               {w.locationName}
+                            </option>
+                          ))} */}
+
+                        {warehouses
+                          .filter(
+                            (w) => w.location.locationType?.name === "Warehouse"
+                          ) // ✅ filter here
+                          .map((w) => (
+                            <option
+                              key={w.location.locationId}
+                              value={w.location.locationId}
+                            >
+                              {w.location.locationName}
                             </option>
                           ))}
                       </>
@@ -155,6 +207,7 @@ const CreateEmptyReturn = ({ selectedItems, handleClose }) => {
                     name="transferDate"
                     value={formData.transferDate}
                     // onChange={handleInputChange}
+                    max={new Date().toISOString().split("T")[0]}
                     onChange={(e) =>
                       handleInputChange("transferDate", e.target.value)
                     }
