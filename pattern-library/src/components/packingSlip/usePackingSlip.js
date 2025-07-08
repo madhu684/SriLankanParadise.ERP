@@ -110,7 +110,7 @@ const usePackingSlip = ({ onFormSubmit, handleRefetchSlip }) => {
   } = useQuery({
     queryKey: ["items", searchTerm],
     queryFn: () =>
-      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "Sellable"), //Sellable
+      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"), //Sellable
   });
 
   const fetchCompany = async () => {
