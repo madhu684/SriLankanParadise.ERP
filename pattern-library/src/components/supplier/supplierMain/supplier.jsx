@@ -63,12 +63,12 @@ const Supplier = ({
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
           {/* <img src={companyLogoUrl} alt="Company Logo" height={30} /> */}
-          <button
+          {/* <button
             onClick={handleBack}
             className="btn btn-dark d-flex align-items-center"
           >
             Back
-          </button>
+          </button> */}
           <i
             class="bi bi-arrow-left"
             onClick={handleClose}

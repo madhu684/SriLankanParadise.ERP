@@ -91,14 +91,13 @@ const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img src={companyLogoUrl} alt="Company Logo" height={30} />
+          {/*<img src={companyLogoUrl} alt="Company Logo" height={30} />*/}
 
-          <button
+          <i
+            class="bi bi-arrow-left"
             onClick={handleBack}
-            className="btn btn-dark d-flex align-items-center me-auto"
-          >
-            Back
-          </button>
+            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+          ></i>
 
           <p>
             <CurrentDateTime />
