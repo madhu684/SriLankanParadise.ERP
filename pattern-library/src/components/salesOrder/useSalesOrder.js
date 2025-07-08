@@ -894,6 +894,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
       itemMasterId: item.itemMasterId,
       itemMaster: item,
     }));
+    console.log(setFormData, "kavindu ser frm");
     setSearchTerm(""); // Clear the search term
 
     setSelectedBatch(null);

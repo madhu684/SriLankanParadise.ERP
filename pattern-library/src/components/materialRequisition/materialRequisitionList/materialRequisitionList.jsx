@@ -135,9 +135,9 @@ const MaterialRequisitionList = () => {
         style={{ maxHeight: "80vh" }}
       >
         <div className="btn-group" role="group">
-          <p>
+          {/* <p>
             You haven't created any material requisition note. Create a new one.
-          </p>
+          </p> */}
           {hasPermission("Create Material Requisition Note") && (
             <button
               type="button"
