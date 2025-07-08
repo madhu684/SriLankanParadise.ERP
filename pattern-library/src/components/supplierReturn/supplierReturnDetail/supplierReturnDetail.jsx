@@ -108,6 +108,7 @@ const SupplierReturnDetail = ({ show, handleClose, supplyReturnMaster }) => {
                   <th>Batch</th>
                   <th>Unit</th>
                   <th>Return Quantity</th>
+                  <th>Warehouse </th>
                 </thead>
                 <tbody>
                   {supplyReturnMaster.supplyReturnDetails ? (
@@ -117,6 +118,7 @@ const SupplierReturnDetail = ({ show, handleClose, supplyReturnMaster }) => {
                         <td>{item.batch.batchRef}</td>
                         <td>{item.itemMaster.unit.unitName}</td>
                         <td>{item.returnedQuantity.toFixed(2)}</td>
+                        <td>{item.location.locationName}</td>
                       </tr>
                     ))
                   ) : (

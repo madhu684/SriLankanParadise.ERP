@@ -368,6 +368,7 @@ const SupplierReturnUpdate = ({
                   <th>Unit</th>
                   <th>Stock In hand</th>
                   <th>Return Quantity</th>
+                  <th>Warehouse</th>
                   <th className="text-end">Action</th>
                 </tr>
               </thead>
@@ -405,6 +406,7 @@ const SupplierReturnUpdate = ({
                         </div>
                       )}
                     </td>
+                    <td>{item.locationName}</td>
                     <td className="text-end">
                       <button
                         type="button"
