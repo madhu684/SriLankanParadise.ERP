@@ -228,6 +228,7 @@ const UserAccountList = () => {
                   <button
                     className="btn btn-warning me-2"
                     onClick={() => handleEdit(user)}
+                    disabled={!user.status} // Disable when user.status is false/0
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
