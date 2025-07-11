@@ -6,6 +6,7 @@ import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonL
 import LoadingSpinner from "../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../errorComponent/errorComponent";
 import Supplier from "../supplier/supplier";
+import ToastMessage from "../toastMessage/toastMessage";
 
 const PurchaseOrder = ({
   handleClose,
@@ -26,6 +27,7 @@ const PurchaseOrder = ({
     isItemsLoading,
     isItemsError,
     itemsError,
+    isPOGenerated,
     isLoading,
     isError,
     error,
@@ -89,12 +91,7 @@ const PurchaseOrder = ({
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
           {/* <img src={companyLogoUrl} alt="Company Logo" height={30} /> */}
-          {/* <button
-            onClick={handleBack}
-            className="btn btn-dark d-flex align-items-center"
-          >
-            Back
-          </button> */}
+
           <i
             class="bi bi-arrow-left"
             onClick={handleClose}
@@ -300,7 +297,7 @@ const PurchaseOrder = ({
 
             {/* Generate Purchase Order - Moved here */}
             <h4>5. Generate Purchase Order</h4>
-            <div className="mb-3">
+            <div className="mb-3 mt-3">
               {/* <label className="form-label">Generate Purchase Order</label> */}
               <div>
                 <button
@@ -314,6 +311,18 @@ const PurchaseOrder = ({
                   Generate Purchase Order
                 </button>
               </div>
+            </div>
+            <div className="mt-3">
+              {formData.itemDetails.length == 0 && isPOGenerated == true && (
+                // <div className="alert alert-warning">
+                //   No any low-stock items found
+                // </div>
+                <ToastMessage
+                  show={true}
+                  type={"danger"}
+                  message={"No any low-stock items found"}
+                />
+              )}
             </div>
           </div>
         </div>

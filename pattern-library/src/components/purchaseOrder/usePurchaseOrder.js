@@ -39,6 +39,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [isPOGenerated, setIsPOGenerated] = useState(false);
 
   const fetchSuppliers = async () => {
     try {
@@ -925,8 +926,17 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   const handleGeneratePurchaseOrder = async () => {
     try {
       setLoading(true); // Show loading state
+      setIsPOGenerated(true);
       const response = await get_Low_Stock_Items_api();
       const lowStockItems = response.data.result || [];
+
+      if (lowStockItems.length === 0) {
+        setTimeout(() => {
+          setIsPOGenerated(false);
+        }, 3000);
+        setLoading(false);
+        return;
+      }
 
       if (lowStockItems.length > 0) {
         // Generate chargesAndDeductions array for each low-stock item
@@ -995,6 +1005,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     isLoadingTransactionTypes,
     isTransactionTypesError,
     transactionTypesError,
+    isPOGenerated,
     loading,
     loadingDraft,
     handleInputChange,

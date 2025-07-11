@@ -228,6 +228,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Where(li => li.BatchId == batchId)
                     .Include(li => li.ItemMaster)
                     .ThenInclude(im => im.Unit)
+                    .Include(li => li.Location)
                     .ToListAsync();
 
                 return locationInventories.Any() ? locationInventories : null;

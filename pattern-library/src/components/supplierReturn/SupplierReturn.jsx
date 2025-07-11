@@ -59,6 +59,12 @@ const SupplierReturn = ({ handleClose, setShowCreateSRForm }) => {
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
           {/* <img src={companyLogoUrl} alt="Company Logo" height={30} /> */}
+          <i
+            class="bi bi-arrow-left"
+            onClick={handleClose}
+            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+          ></i>
+
           <p>
             <CurrentDateTime />
           </p>
@@ -407,6 +413,7 @@ const SupplierReturn = ({ handleClose, setShowCreateSRForm }) => {
                   <th>Unit</th>
                   <th>Stock In hand</th>
                   <th>Return Quantity</th>
+                  <th>Warehouse </th>
                   <th className="text-end">Action</th>
                 </tr>
               </thead>
@@ -444,6 +451,8 @@ const SupplierReturn = ({ handleClose, setShowCreateSRForm }) => {
                         </div>
                       )}
                     </td>
+                    <td>{item.locationName || "N/A"}</td>
+
                     <td className="text-end">
                       <button
                         type="button"

@@ -136,6 +136,7 @@ const useSupplierReturnUpdate = ({ supplyReturnMaster, onFormSubmit }) => {
                   stockInHand: inventory ? inventory.stockInHand : 0,
                   returnQuantity: item.returnedQuantity,
                   locationId: item.locationId,
+                  locationName: item.location.locationName,
                 };
               }
             ),
@@ -268,6 +269,7 @@ const useSupplierReturnUpdate = ({ supplyReturnMaster, onFormSubmit }) => {
                 stockInHand: item.stockInHand,
                 returnQuantity: 0,
                 locationId: item.locationId,
+                locationName: item.location.locationName,
               })),
             ]
           : prevFormData.itemDetails, // Keep the existing itemDetails if no inventory

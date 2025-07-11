@@ -104,7 +104,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
         sessionStorage.getItem("companyId"),
         searchTerm,
         "Sellable",
-        "Raw Material"
+        "All"
       ),
   });
 
