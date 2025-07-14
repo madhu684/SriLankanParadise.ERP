@@ -4,6 +4,7 @@ import {
   post_requisition_master_api,
   post_requisition_detail_api,
   get_user_locations_by_user_id_api,
+  get_issue_masters_by_requisition_master_id_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
@@ -98,7 +99,7 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
   } = useQuery({
     queryKey: ["items", searchTerm],
     queryFn: () =>
-      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "Consumable,Raw Material,Sellable"),
+      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"),
   });
 
   useEffect(() => {

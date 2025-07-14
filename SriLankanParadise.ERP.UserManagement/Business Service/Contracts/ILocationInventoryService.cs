@@ -1,4 +1,5 @@
 ﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 
 namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
 {
@@ -24,5 +25,8 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task UpdateLocationInventory(int locationInventoryId, LocationInventory locationInventory);
 
         Task UpdateLocationInventoryStockInHand(int locationId, int itemMasterId, int batchId, LocationInventory locationInventory, string operation);
+        Task<IEnumerable<LocationInventorySummary>> GetLowStockItems();
+
+        Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemMasterId(int locationId, int itemMasterId);
     }
 }

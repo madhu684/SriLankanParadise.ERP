@@ -130,7 +130,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var itemMaster = await _dbContext.ItemMasters
                     .Where(im => im.ItemMasterId == itemMasterId)
-                    .Include(im => im.SubItemMasters)
+                    //.Include(im => im.SubItemMasters)
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
                     .ThenInclude(u => u.MeasurementType)

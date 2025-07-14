@@ -1020,4 +1020,7 @@
   <data name="EmptyReturnItemLocationInventoriesNotFound" xml:space="preserve">
     <value>Empty return item location inventories not found</value>
   </data>
+  <data name="IssueDetailsRetrieved" xml:space="preserve">
+    <value>Issue details retrieved</value>
+  </data>
 </root>

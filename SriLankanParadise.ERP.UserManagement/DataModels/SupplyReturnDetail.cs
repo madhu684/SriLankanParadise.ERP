@@ -16,5 +16,6 @@
         public virtual Batch Batch { get; set; } = null!;
         public virtual Location Location { get; set; } = null!;
 
+
     }
 }

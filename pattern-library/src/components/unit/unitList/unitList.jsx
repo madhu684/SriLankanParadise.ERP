@@ -1,17 +1,17 @@
-import React, { useState } from 'react'
-import useUnitList from './useUnitList'
-import Unit from '../unit'
-import UnitUpdate from '../unitUpdate/unitUpdate'
-import LoadingSpinner from '../../loadingSpinner/loadingSpinner'
-import ErrorComponent from '../../errorComponent/errorComponent'
-import DeleteConfirmationModal from '../../confirmationModals/deleteConfirmationModal/deleteConfirmationModal'
-import { FaSearch } from 'react-icons/fa'
-import Pagination from '../../common/Pagination/Pagination'
+import React, { useState } from "react";
+import useUnitList from "./useUnitList";
+import Unit from "../unit";
+import UnitUpdate from "../unitUpdate/unitUpdate";
+import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
+import ErrorComponent from "../../errorComponent/errorComponent";
+import DeleteConfirmationModal from "../../confirmationModals/deleteConfirmationModal/deleteConfirmationModal";
+import { FaSearch } from "react-icons/fa";
+import Pagination from "../../common/Pagination/Pagination";
 
 const UnitList = () => {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 10
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const {
     units,
@@ -42,24 +42,24 @@ const UnitList = () => {
     handleClose,
     handleConfirmDeleteUnit,
     handleCloseDeleteConfirmation,
-  } = useUnitList()
+  } = useUnitList();
 
   //Handler for search input
   const handleSearch = (e) => {
-    setSearchQuery(e.target.value)
-    setCurrentPage(1)
-  }
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
+  };
 
   //Filter Units based on search query
   const filteredUnits = units.filter((unit) =>
     unit.unitName.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  );
 
   //Pagination Handler
-  const paginate = (pageNumber) => setCurrentPage(pageNumber)
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   if (error) {
-    return <ErrorComponent error={error} />
+    return <ErrorComponent error={error} />;
   }
 
   if (
@@ -67,7 +67,7 @@ const UnitList = () => {
     isLoadingPermissions ||
     (units && !(units.length >= 0))
   ) {
-    return <LoadingSpinner />
+    return <LoadingSpinner />;
   }
 
   if (showCreateUnitForm) {
@@ -75,8 +75,9 @@ const UnitList = () => {
       <Unit
         handleClose={() => setShowCreateUnitForm(false)}
         handleUpdated={handleUpdated}
+        setShowCreateUnitForm={setShowCreateUnitForm}
       />
-    )
+    );
   }
 
   if (showUpdateUnitForm) {
@@ -86,7 +87,7 @@ const UnitList = () => {
         unit={unitDetail || selectedRowData[0]}
         handleUpdated={handleUpdated}
       />
-    )
+    );
   }
 
   if (units.length === 0) {
@@ -95,10 +96,10 @@ const UnitList = () => {
         <h2>Units</h2>
         <div
           className="d-flex flex-column justify-content-center align-items-center text-center vh-100"
-          style={{ maxHeight: '80vh' }}
+          style={{ maxHeight: "80vh" }}
         >
           <p>You haven't created any unit. Create a new one.</p>
-          {hasPermission('Create Unit') && (
+          {hasPermission("Create Unit") && (
             <button
               type="button"
               className="btn btn-primary"
@@ -109,7 +110,7 @@ const UnitList = () => {
           )}
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -117,7 +118,7 @@ const UnitList = () => {
       <h2>Units</h2>
       <div className="mt-3 d-flex justify-content-start align-items-center">
         <div className="btn-group" role="group">
-          {hasPermission('Create Unit') && (
+          {hasPermission("Create Unit") && (
             <button
               type="button"
               className="btn btn-primary"
@@ -126,7 +127,7 @@ const UnitList = () => {
               Create
             </button>
           )}
-          {hasPermission('Update Unit') && isAnyRowSelected && (
+          {hasPermission("Update Unit") && isAnyRowSelected && (
             <button
               className="btn btn-warning"
               onClick={() => setShowUpdateUnitForm(true)}
@@ -134,7 +135,7 @@ const UnitList = () => {
               Edit
             </button>
           )}
-          {hasPermission('Delete Unit') && isAnyRowSelected && (
+          {hasPermission("Delete Unit") && isAnyRowSelected && (
             <button
               className="btn btn-danger"
               onClick={() => setShowDeleteConfirmation(true)}
@@ -213,7 +214,7 @@ const UnitList = () => {
                         viewBox="0 0 16 16"
                       >
                         <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z" />
-                      </svg>{' '}
+                      </svg>{" "}
                       Edit
                     </button>
                   </td>
@@ -238,7 +239,7 @@ const UnitList = () => {
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default UnitList
+export default UnitList;

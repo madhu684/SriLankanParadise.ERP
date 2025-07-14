@@ -1,14 +1,13 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import useMin from "./useMin";
 import CurrentDateTime from "../currentDateTime/currentDateTime";
-import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
 import LoadingSpinner from "../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../errorComponent/errorComponent";
 import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 import moment from "moment";
 import "moment-timezone";
 
-const Min = ({ handleClose, handleUpdated }) => {
+const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
   const {
     formData,
     submissionStatus,
@@ -18,6 +17,8 @@ const Min = ({ handleClose, handleUpdated }) => {
     mrns,
     statusOptions,
     alertRef,
+    searchByMrn,
+    searchByWithoutMrn,
     isLoading,
     isError,
     mrnSearchTerm,
@@ -29,6 +30,8 @@ const Min = ({ handleClose, handleUpdated }) => {
     isLocationInventoriesLoading,
     isLocationInventoriesError,
     locationInventories,
+    setSearchByMrn,
+    setSearchByWithoutMrn,
     handleInputChange,
     handleItemDetailsChange,
     handleRemoveItem,
@@ -38,13 +41,18 @@ const Min = ({ handleClose, handleUpdated }) => {
     handleStatusChange,
     setMrnSearchTerm,
     handleResetMrn,
+    searchTerm,
+    setSearchTerm,
+    availableItems,
+    isItemsLoading,
+    isItemsError,
+    handleAddDummyItem,
   } = useMin({
     onFormSubmit: () => {
       handleClose();
       handleUpdated();
     },
   });
-  //const companyLogoUrl = useCompanyLogoUrl();
 
   if (isLoading || isItemBatchesLoading) {
     return <LoadingSpinner />;
@@ -54,17 +62,19 @@ const Min = ({ handleClose, handleUpdated }) => {
     return <ErrorComponent error={"Error fetching data"} />;
   }
 
+  const handleBack = () => {
+    setShowCreateMinForm(false);
+  };
+
   return (
     <div className="container mt-4">
       {/* Header */}
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          {/* <img src={companyLogoUrl} alt="Company Logo" height={30} /> */}
           <i
-            class="bi bi-arrow-left"
-            onClick={handleClose}
             className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+            onClick={handleClose}
           ></i>
           <p>
             <CurrentDateTime />
@@ -75,28 +85,27 @@ const Min = ({ handleClose, handleUpdated }) => {
       </div>
 
       {/* Display success or error message */}
-      {submissionStatus === 'successSubmitted' && (
+      {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
           Material issue note submitted successfully!
         </div>
       )}
-      {submissionStatus === 'successSavedAsDraft' && (
+      {submissionStatus === "successSavedAsDraft" && (
         <div className="alert alert-success mb-3" role="alert">
           Material issue note saved as draft, you can edit and submit it later!
         </div>
       )}
-      {submissionStatus === 'error' && (
+      {submissionStatus === "error" && (
         <div className="alert alert-danger mb-3" role="alert">
           Error submitting Material issue note. Please try again.
         </div>
       )}
 
       <form>
-        {/* Min Information */}
+        {/* 1. MIN Information */}
         <div className="row mb-3 d-flex justify-content-between">
           <div className="col-md-5">
             <h4>1. MIN Information</h4>
-            {/* Status Dropdown */}
             <div className="mb-3 mt-3">
               <label htmlFor="status" className="form-label">
                 Status
@@ -104,8 +113,8 @@ const Min = ({ handleClose, handleUpdated }) => {
               <select
                 id="status"
                 className={`form-select ${
-                  validFields.status ? 'is-valid' : ''
-                } ${validationErrors.status ? 'is-invalid' : ''}`}
+                  validFields.status ? "is-valid" : ""
+                } ${validationErrors.status ? "is-invalid" : ""}`}
                 value={formData.status}
                 onChange={(e) =>
                   handleStatusChange(
@@ -129,152 +138,258 @@ const Min = ({ handleClose, handleUpdated }) => {
             </div>
           </div>
 
-          {/* Material Requisition Selection */}
+          {/* 2. Material Requisition Details */}
           <div className="col-md-5">
             <h4>2. Material Requisition Details</h4>
-            <div className="mt-3">
-              <label htmlFor="materialRequisition" className="form-label">
-                Material Requisition
+            {/* Modified checkbox logic */}
+            <div className="mb-3 mt-3 form-check">
+              <input
+                type="checkbox"
+                className="form-check-input"
+                id="searchByMrn"
+                checked={searchByMrn}
+                onChange={() => {
+                  setSearchByMrn(true);
+                  setSearchByWithoutMrn(false);
+                }}
+              />
+              <label className="form-check-label" htmlFor="searchByMrn">
+                Search Using MRN
               </label>
-              {selectedMrn === null && (
-                <div className="mb-3">
-                  <div className="input-group">
-                    <span className="input-group-text bg-transparent ">
-                      <i className="bi bi-search"></i>
-                    </span>
-                    <input
-                      type="text"
-                      className={`form-control ${
-                        validFields.mrnId ? 'is-valid' : ''
-                      } ${validationErrors.mrnId ? 'is-invalid' : ''}`}
-                      placeholder="Search for a material requisition..."
-                      value={mrnSearchTerm}
-                      onChange={(e) => setMrnSearchTerm(e.target.value)}
-                      autoFocus={false}
-                    />
-                    {mrnSearchTerm && (
-                      <span
-                        className="input-group-text bg-transparent"
-                        style={{
-                          cursor: 'pointer',
-                        }}
-                        onClick={() => setMrnSearchTerm('')}
-                      >
-                        <i className="bi bi-x"></i>
+            </div>
+            <div className="mb-3 form-check">
+              <input
+                type="checkbox"
+                className="form-check-input"
+                id="searchByWithoutMrn"
+                checked={searchByWithoutMrn}
+                onChange={() => {
+                  setSearchByWithoutMrn(true);
+                  setSearchByMrn(false);
+                }}
+              />
+              <label className="form-check-label" htmlFor="searchByWithoutMrn">
+                Search By Without MRN
+              </label>
+            </div>
+            {/* Show Material Requisition search bar only if searchByMrn is true */}
+            {searchByMrn && (
+              <div className="mt-3">
+                <label htmlFor="materialRequisition" className="form-label">
+                  Material Requisition
+                </label>
+                {/* ... keep existing search input logic ... */}
+                {/* (unchanged code for MRN search bar remains here) */}
+                {selectedMrn === null && (
+                  <div className="mb-3">
+                    <div className="input-group">
+                      <span className="input-group-text bg-transparent">
+                        <i className="bi bi-search"></i>
                       </span>
-                    )}
-                  </div>
+                      <input
+                        type="text"
+                        className={`form-control ${
+                          validFields.mrnId ? "is-valid" : ""
+                        } ${validationErrors.mrnId ? "is-invalid" : ""}`}
+                        placeholder="Search for a material requisition..."
+                        value={mrnSearchTerm}
+                        onChange={(e) => setMrnSearchTerm(e.target.value)}
+                        autoFocus={false}
+                      />
+                      {mrnSearchTerm && (
+                        <span
+                          className="input-group-text bg-transparent"
+                          style={{ cursor: "pointer" }}
+                          onClick={() => setMrnSearchTerm("")}
+                        >
+                          <i className="bi bi-x"></i>
+                        </span>
+                      )}
+                    </div>
 
-                  {/* Dropdown for filtered suppliers */}
-                  {mrnSearchTerm && (
-                    <div className="dropdown" style={{ width: '100%' }}>
-                      <ul
-                        className="dropdown-menu"
-                        style={{
-                          display: 'block',
-                          width: '100%',
-                          maxHeight: '200px',
-                          overflowY: 'auto',
-                        }}
-                      >
-                        {mrns
-                          .filter((mrn) =>
+                    {/* Dropdown for filtered MRNs */}
+                    {mrnSearchTerm && (
+                      <div className="dropdown" style={{ width: "100%" }}>
+                        <ul
+                          className="dropdown-menu"
+                          style={{
+                            display: "block",
+                            width: "100%",
+                            maxHeight: "200px",
+                            overflowY: "auto",
+                          }}
+                        >
+                          {mrns
+                            .filter((mrn) =>
+                              mrn.referenceNumber
+                                ?.replace(/\s/g, "")
+                                ?.toLowerCase()
+                                .includes(
+                                  mrnSearchTerm.toLowerCase().replace(/\s/g, "")
+                                )
+                            )
+                            .map((mrn) => (
+                              <li key={mrn.requisitionMasterId}>
+                                <button
+                                  className="dropdown-item"
+                                  onClick={() =>
+                                    handleMrnChange(mrn.referenceNumber)
+                                  }
+                                >
+                                  <span className="me-3">
+                                    <i className="bi bi-file-earmark-text"></i>
+                                  </span>
+                                  {mrn.referenceNumber}
+                                </button>
+                              </li>
+                            ))}
+                          {mrns.filter((mrn) =>
                             mrn.referenceNumber
-                              ?.replace(/\s/g, '')
+                              ?.replace(/\s/g, "")
                               ?.toLowerCase()
                               .includes(
-                                mrnSearchTerm.toLowerCase().replace(/\s/g, '')
+                                mrnSearchTerm.toLowerCase().replace(/\s/g, "")
                               )
-                          )
-                          .map((mrn) => (
-                            <li key={mrn.requisitionMasterId}>
-                              <button
-                                className="dropdown-item"
-                                onClick={() =>
-                                  handleMrnChange(mrn.referenceNumber)
-                                }
-                              >
-                                <span className="me-3">
-                                  <i className="bi bi-file-earmark-text"></i>
-                                </span>{' '}
-                                {mrn?.referenceNumber}
-                              </button>
+                          ).length === 0 && (
+                            <li className="dropdown-item text-center">
+                              <span className="me-3">
+                                <i className="bi bi-emoji-frown"></i>
+                              </span>
+                              No material requisitions found
                             </li>
-                          ))}
-                        {mrns.filter((mrn) =>
-                          mrn.referenceNumber
-                            ?.replace(/\s/g, '')
-                            ?.toLowerCase()
-                            .includes(
-                              mrnSearchTerm.toLowerCase().replace(/\s/g, '')
-                            )
-                        ).length === 0 && (
-                          <li className="dropdown-item text-center">
-                            <span className="me-3">
-                              <i className="bi bi-emoji-frown"></i>
-                            </span>
-                            No material requisitions found
-                          </li>
-                        )}
-                      </ul>
-                    </div>
-                  )}
-                  {selectedMrn === null && (
-                    <div className="mb-3">
-                      <small className="form-text text-muted">
-                        {validationErrors.mrnId && (
-                          <div className="text-danger mb-1">
-                            {validationErrors.mrnId}
-                          </div>
-                        )}
-                        Please search for a material requisition and select it
-                      </small>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+                          )}
+                        </ul>
+                      </div>
+                    )}
 
-            {/* Additional Purchase Order Information */}
-            {selectedMrn && (
-              <div className="card mb-3">
-                <div className="card-header">Selected Material Requisition</div>
-                <div className="card-body">
-                  <p>
-                    Material Requisition Reference No:{' '}
-                    {selectedMrn?.referenceNumber}
-                  </p>
-                  <p>Requested By: {selectedMrn?.requestedBy}</p>
-                  <p>
-                    MRN Date:{' '}
-                    {moment
-                      .utc(selectedMrn?.requisitionDate)
-                      .tz('Asia/Colombo')
-                      .format('YYYY-MM-DD hh:mm:ss A')}
-                  </p>
-                  <p>
-                    Delivery Location:{' '}
-                    {selectedMrn?.requestedToLocation.locationName}
-                  </p>
-                  <p>
-                    Warehouse Location:{' '}
-                    {selectedMrn?.requestedFromLocation.locationName}
-                  </p>
-                  <button
-                    type="button"
-                    className="btn btn-outline-danger float-end"
-                    onClick={handleResetMrn}
-                  >
-                    Reset Material Requisition
-                  </button>
-                </div>
+                    {selectedMrn === null && (
+                      <div className="mb-3">
+                        <small className="form-text text-muted">
+                          {validationErrors.mrnId && (
+                            <div className="text-danger mb-1">
+                              {validationErrors.mrnId}
+                            </div>
+                          )}
+                          Please search for a material requisition and select it
+                        </small>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
+          {selectedMrn && (
+            <div className="card mb-3">
+              <div className="card-header">Selected Material Requisition</div>
+              <div className="card-body">
+                <p>
+                  Material Requisition Reference No:{" "}
+                  {selectedMrn.referenceNumber}
+                </p>
+                <p>Requested By: {selectedMrn.requestedBy}</p>
+                <p>
+                  MRN Date:{" "}
+                  {moment
+                    .utc(selectedMrn.requisitionDate)
+                    .tz("Asia/Colombo")
+                    .format("YYYY-MM-DD hh:mm:ss A")}
+                </p>
+                <p>
+                  Delivery Location:{" "}
+                  {selectedMrn.requestedToLocation.locationName}
+                </p>
+                <p>
+                  Warehouse Location:{" "}
+                  {selectedMrn.requestedFromLocation.locationName}
+                </p>
+                <button
+                  type="button"
+                  className="btn btn-outline-danger float-end"
+                  onClick={handleResetMrn}
+                >
+                  Reset Material Requisition
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-
-        {/* Item Details */}
+        {selectedMrn === null && (
+          <div className="mb-3">
+            <small className="form-text text-muted">
+              Please select a material requisition to add item details.
+            </small>
+          </div>
+        )}
+        {selectedMrn !== null && formData.itemDetails.length === 0 && (
+          <div className="mb-3">
+            <small className="form-text text-danger">
+              Selected material requisition has no remaining items to issue.
+            </small>
+          </div>
+        )}
+        {/* Show Item Details only if searchByWithoutMrn is selected */}
+        {searchByWithoutMrn && (
+          <div className="row mb-3 d-flex justify-content-between">
+            <div className="col-md-5">
+              <div className="mt-3">
+                <label className="form-label">Search Item</label>
+                <div
+                  className="input-group mb-2"
+                  style={{ width: "100%", maxWidth: "100%" }}
+                >
+                  <span
+                    className="input-group-text bg-transparent"
+                    style={{ width: "40px" }}
+                  >
+                    <i className="bi bi-search"></i>
+                  </span>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search for an item..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{ flex: "1" }}
+                  />
+                  {searchTerm && (
+                    <span
+                      className="input-group-text bg-transparent"
+                      style={{ width: "40px", cursor: "pointer" }}
+                      onClick={() => setSearchTerm("")}
+                    >
+                      <i className="bi bi-x"></i>
+                    </span>
+                  )}
+                </div>
+                {isItemsLoading && <LoadingSpinner />}
+                {isItemsError && (
+                  <ErrorComponent error="Error fetching items" />
+                )}
+                {availableItems?.length > 0 ? (
+                  <ul className="list-group mb-3">
+                    {availableItems.map((item, idx) => (
+                      <li
+                        key={idx}
+                        className="list-group-item d-flex justify-content-between align-items-center"
+                        onClick={() => handleAddDummyItem(item)}
+                        style={{ cursor: "pointer" }} // Indicate clickable behavior
+                      >
+                        <span>
+                          {item.itemName} – Stock: {item.stockInHand}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : searchTerm ? (
+                  <div className="text-muted">No matching items found.</div>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        )}
         <h4>3. Item Details</h4>
+        {/* {console.log('formdata: ', formData)} */}
         {formData.itemDetails.length > 0 && (
           <div className="table-responsive mb-2">
             <table className="table">
@@ -303,7 +418,7 @@ const Min = ({ handleClose, handleUpdated }) => {
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            'batchId',
+                            "batchId",
                             e.target.value
                           )
                         }
@@ -317,7 +432,7 @@ const Min = ({ handleClose, handleUpdated }) => {
                               value={batch.batchId}
                               disabled={batch.stockInHand === 0}
                             >
-                              {batch.itemBatch.batch.batchRef} - Stock in hand{' '}
+                              {batch.itemBatch.batch.batchRef} - Stock in hand{" "}
                               {batch.stockInHand}
                             </option>
                           ))}
@@ -326,23 +441,26 @@ const Min = ({ handleClose, handleUpdated }) => {
                     <td>
                       <input
                         type="number"
+                        min="1"
+                        max={item.remainingQuantity}
                         className={`form-control ${
                           validFields[`issuedQuantity_${index}`]
-                            ? 'is-valid'
-                            : ''
+                            ? "is-valid"
+                            : ""
                         } ${
                           validationErrors[`issuedQuantity_${index}`]
-                            ? 'is-invalid'
-                            : ''
+                            ? "is-invalid"
+                            : ""
                         }`}
                         value={item.issuedQuantity}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            'issuedQuantity',
+                            "issuedQuantity",
                             e.target.value
                           )
                         }
+                        placeholder={`1 - ${item.remainingQuantity}`}
                       />
                       {validationErrors[`issuedQuantity_${index}`] && (
                         <div className="invalid-feedback">
@@ -365,23 +483,6 @@ const Min = ({ handleClose, handleUpdated }) => {
             </table>
           </div>
         )}
-
-        {selectedMrn === null && (
-          <div className="mb-3">
-            <small className="form-text text-muted">
-              Please select a material requisition to add item details.
-            </small>
-          </div>
-        )}
-
-        {selectedMrn !== null && formData.itemDetails.length === 0 && (
-          <div className="mb-3">
-            <small className="form-text  text-danger">
-              Selected material requisition has no remaining items to issue.
-            </small>
-          </div>
-        )}
-
         {/* Actions */}
         <div className="mb-3">
           <button
@@ -398,7 +499,7 @@ const Min = ({ handleClose, handleUpdated }) => {
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Submitting..." />
             ) : (
-              'Submit'
+              "Submit"
             )}
           </button>
           <button
@@ -420,7 +521,7 @@ const Min = ({ handleClose, handleUpdated }) => {
         </div>
       </form>
     </div>
-  )
+  );
 };
 
 export default Min;

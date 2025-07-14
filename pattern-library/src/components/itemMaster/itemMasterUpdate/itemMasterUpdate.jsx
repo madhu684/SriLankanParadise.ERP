@@ -57,26 +57,24 @@ const ItemMasterUpdate = ({
   } = useItemMasterUpdate({
     itemMaster,
     onFormSubmit: () => {
-      handleClose()
-      handleUpdated()
+      handleClose();
+      handleUpdated();
     },
-  })
-
-  const companyLogoUrl = useCompanyLogoUrl()
+  });
 
   if (isUnitOptionsLoading || isLoading || isMeasurementTypesLoading) {
-    return <LoadingSpinner />
+    return <LoadingSpinner />;
   }
 
   if (isUnitOptionsError || isError || isMeasurementTypesError) {
-    return <ErrorComponent error={'Error fetching data'} />
+    return <ErrorComponent error={"Error fetching data"} />;
   }
 
   const handleBack = () => {
-    setShowUpdateIMForm(false)
-  }
+    setShowUpdateIMForm(false);
+  };
 
-  console.log('selectedChildItems', selectedChildItems.length)
+  console.log("selectedChildItems", selectedChildItems.length);
 
   return (
     <div className="container mt-4">
@@ -91,7 +89,7 @@ const ItemMasterUpdate = ({
             Back
           </button>
           <p>
-            {' '}
+            {" "}
             <CurrentDateTime />
           </p>
         </div>
@@ -100,18 +98,18 @@ const ItemMasterUpdate = ({
       </div>
 
       {/* Display success or error messages */}
-      {submissionStatus === 'successSubmitted' && (
+      {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
           Item master updated successfully!
         </div>
       )}
-      {submissionStatus === 'successSavedAsDraft' && (
+      {submissionStatus === "successSavedAsDraft" && (
         <div className="alert alert-success mb-3" role="alert">
           Item master updated and saved as draft, you can edit and create it
           later!
         </div>
       )}
-      {submissionStatus === 'error' && (
+      {submissionStatus === "error" && (
         <div className="alert alert-danger mb-3" role="alert">
           Error updating item master. Please try again.
         </div>
@@ -129,12 +127,12 @@ const ItemMasterUpdate = ({
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.itemName ? 'is-valid' : ''
-                } ${validationErrors.itemName ? 'is-invalid' : ''}`}
+                  validFields.itemName ? "is-valid" : ""
+                } ${validationErrors.itemName ? "is-invalid" : ""}`}
                 id="itemName"
                 placeholder="Enter Item Name"
                 value={formData.itemName}
-                onChange={(e) => handleInputChange('itemName', e.target.value)}
+                onChange={(e) => handleInputChange("itemName", e.target.value)}
                 required
               />
               {validationErrors.itemName && (
@@ -172,12 +170,12 @@ const ItemMasterUpdate = ({
               </label>
               <select
                 className={`form-select ${
-                  validFields.itemTypeId ? 'is-valid' : ''
-                } ${validationErrors.itemTypeId ? 'is-invalid' : ''}`}
+                  validFields.itemTypeId ? "is-valid" : ""
+                } ${validationErrors.itemTypeId ? "is-invalid" : ""}`}
                 id="itemType"
                 value={formData.itemTypeId}
                 onChange={(e) =>
-                  handleInputChange('itemTypeId', e.target.value)
+                  handleInputChange("itemTypeId", e.target.value)
                 }
                 required
               >
@@ -202,12 +200,12 @@ const ItemMasterUpdate = ({
               </label>
               <select
                 className={`form-select ${
-                  validFields.categoryId ? 'is-valid' : ''
-                } ${validationErrors.categoryId ? 'is-invalid' : ''}`}
+                  validFields.categoryId ? "is-valid" : ""
+                } ${validationErrors.categoryId ? "is-invalid" : ""}`}
                 id="categoryId"
                 value={formData.categoryId}
                 onChange={(e) =>
-                  handleInputChange('categoryId', e.target.value)
+                  handleInputChange("categoryId", e.target.value)
                 }
                 required
               >
@@ -231,12 +229,12 @@ const ItemMasterUpdate = ({
               </label>
               <select
                 className={`form-select ${
-                  validFields.measurementType ? 'is-valid' : ''
-                } ${validationErrors.measurementType ? 'is-invalid' : ''}`}
+                  validFields.measurementType ? "is-valid" : ""
+                } ${validationErrors.measurementType ? "is-invalid" : ""}`}
                 id="measurementType"
                 value={formData.measurementType}
                 onChange={(e) =>
-                  handleInputChange('measurementType', e.target.value)
+                  handleInputChange("measurementType", e.target.value)
                 }
                 required
               >
@@ -264,13 +262,13 @@ const ItemMasterUpdate = ({
               </label>
               <select
                 className={`form-select ${
-                  validFields.unitId ? 'is-valid' : ''
-                } ${validationErrors.unitId ? 'is-invalid' : ''}`}
+                  validFields.unitId ? "is-valid" : ""
+                } ${validationErrors.unitId ? "is-invalid" : ""}`}
                 id="unitId"
                 value={formData.unitId}
-                onChange={(e) => handleInputChange('unitId', e.target.value)}
+                onChange={(e) => handleInputChange("unitId", e.target.value)}
                 required
-                disabled={formData.measurementType === ''}
+                disabled={formData.measurementType === ""}
               >
                 <option value="">Select Unit</option>
                 {unitOptions
@@ -297,12 +295,12 @@ const ItemMasterUpdate = ({
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.unitPrice ? 'is-valid' : ''
-                } ${validationErrors.unitPrice ? 'is-invalid' : ''}`}
+                  validFields.unitPrice ? "is-valid" : ""
+                } ${validationErrors.unitPrice ? "is-invalid" : ""}`}
                 id="unitPrice"
                 placeholder="Enter Unit Price"
                 value={formData.unitPrice}
-                onChange={(e) => handleInputChange('unitPrice', e.target.value)}
+                onChange={(e) => handleInputChange("unitPrice", e.target.value)}
                 required
               />
               {validationErrors.unitPrice && (
@@ -318,17 +316,17 @@ const ItemMasterUpdate = ({
               </label>
               <select
                 className={`form-select ${
-                  validFields.inventoryMeasurementType ? 'is-valid' : ''
+                  validFields.inventoryMeasurementType ? "is-valid" : ""
                 } ${
-                  validationErrors.inventoryMeasurementType ? 'is-invalid' : ''
+                  validationErrors.inventoryMeasurementType ? "is-invalid" : ""
                 }`}
                 id="inventoryMeasurementType"
                 value={formData.inventoryMeasurementType}
                 onChange={(e) =>
-                  handleInputChange('inventoryMeasurementType', e.target.value)
+                  handleInputChange("inventoryMeasurementType", e.target.value)
                 }
                 required
-                disabled={selectedParentItem !== ''}
+                disabled={selectedParentItem !== ""}
               >
                 <option value="">Select measurement Type</option>
                 {/* Assuming you have an array of measurement types */}
@@ -354,17 +352,17 @@ const ItemMasterUpdate = ({
               </label>
               <select
                 className={`form-select ${
-                  validFields.inventoryUnitId ? 'is-valid' : ''
-                } ${validationErrors.inventoryUnitId ? 'is-invalid' : ''}`}
+                  validFields.inventoryUnitId ? "is-valid" : ""
+                } ${validationErrors.inventoryUnitId ? "is-invalid" : ""}`}
                 id="inventoryUnitId"
                 value={formData.inventoryUnitId}
                 onChange={(e) =>
-                  handleInputChange('inventoryUnitId', e.target.value)
+                  handleInputChange("inventoryUnitId", e.target.value)
                 }
                 required
                 disabled={
-                  formData.inventoryMeasurementType === '' ||
-                  selectedParentItem !== ''
+                  formData.inventoryMeasurementType === "" ||
+                  selectedParentItem !== ""
                 }
               >
                 <option value="">Select Unit</option>
@@ -389,15 +387,15 @@ const ItemMasterUpdate = ({
             {formData.inventoryUnitId && formData.unitId && (
               <div className="mb-3 mt-3">
                 <label htmlFor="conversionValue" className="form-label">
-                  How many{' '}
+                  How many{" "}
                   <span className="fw-bold text-primary">
                     {unitOptions
                       ?.find(
                         (u) => u.unitId === parseInt(formData?.inventoryUnitId)
                       )
                       .unitName.toLowerCase()}
-                  </span>{' '}
-                  in one{' '}
+                  </span>{" "}
+                  in one{" "}
                   <span className="fw-bold text-primary">
                     {unitOptions
                       ?.find((u) => u.unitId === parseInt(formData?.unitId))
@@ -408,14 +406,14 @@ const ItemMasterUpdate = ({
                 <input
                   type="number"
                   className={`form-control ${
-                    validFields.conversionValue ? 'is-valid' : ''
-                  } ${validationErrors.conversionValue ? 'is-invalid' : ''}`}
+                    validFields.conversionValue ? "is-valid" : ""
+                  } ${validationErrors.conversionValue ? "is-invalid" : ""}`}
                   id="conversionValue"
                   value={formData.conversionValue}
                   onChange={(e) => {
-                    const value = parseFloat(e.target.value)
-                    const positiveValue = isNaN(value) ? 0 : Math.max(0, value)
-                    handleInputChange('conversionValue', positiveValue)
+                    const value = parseFloat(e.target.value);
+                    const positiveValue = isNaN(value) ? 0 : Math.max(0, value);
+                    handleInputChange("conversionValue", positiveValue);
                   }}
                   required
                 />
@@ -435,15 +433,15 @@ const ItemMasterUpdate = ({
               <input
                 type="number"
                 className={`form-control ${
-                  validFields.reorderLevel ? 'is-valid' : ''
-                } ${validationErrors.reorderLevel ? 'is-invalid' : ''}`}
+                  validFields.reorderLevel ? "is-valid" : ""
+                } ${validationErrors.reorderLevel ? "is-invalid" : ""}`}
                 id="reorderLevel"
                 placeholder="Enter Reorder Level"
                 value={formData.reorderLevel}
                 onChange={(e) => {
-                  const value = parseFloat(e.target.value)
-                  const positiveValue = isNaN(value) ? 0 : Math.max(0, value)
-                  handleInputChange('reorderLevel', positiveValue)
+                  const value = parseFloat(e.target.value);
+                  const positiveValue = isNaN(value) ? 0 : Math.max(0, value);
+                  handleInputChange("reorderLevel", positiveValue);
                 }}
                 required
               />
@@ -460,19 +458,19 @@ const ItemMasterUpdate = ({
               <label
                 htmlFor="costRatio"
                 className="form-label me-2 mb-0"
-                style={{ minWidth: '200px' }}
+                style={{ minWidth: "200px" }}
               >
                 Cost Ratio :
               </label>
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.costRatio ? 'is-valid' : ''
-                } ${validationErrors.costRatio ? 'is-invalid' : ''}`}
+                  validFields.costRatio ? "is-valid" : ""
+                } ${validationErrors.costRatio ? "is-invalid" : ""}`}
                 id="costRatio"
                 placeholder="Enter Cost Ratio"
                 value={formData.costRatio}
-                onChange={(e) => handleInputChange('costRatio', e.target.value)}
+                onChange={(e) => handleInputChange("costRatio", e.target.value)}
                 required
               />
             </div>
@@ -481,19 +479,19 @@ const ItemMasterUpdate = ({
               <label
                 htmlFor="fobInUSD"
                 className="form-label me-2 mb-0"
-                style={{ minWidth: '200px' }}
+                style={{ minWidth: "200px" }}
               >
                 FOB In USD :
               </label>
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.fobInUSD ? 'is-valid' : ''
-                } ${validationErrors.fobInUSD ? 'is-invalid' : ''}`}
+                  validFields.fobInUSD ? "is-valid" : ""
+                } ${validationErrors.fobInUSD ? "is-invalid" : ""}`}
                 id="fobInUSD"
                 placeholder="Enter FOB In USD"
                 value={formData.fobInUSD}
-                onChange={(e) => handleInputChange('fobInUSD', e.target.value)}
+                onChange={(e) => handleInputChange("fobInUSD", e.target.value)}
                 required
               />
             </div>
@@ -502,7 +500,7 @@ const ItemMasterUpdate = ({
               <label
                 htmlFor="landedCost"
                 className="form-label me-2 mb-0"
-                style={{ minWidth: '200px' }}
+                style={{ minWidth: "200px" }}
               >
                 Landed Cost :
               </label>
@@ -513,7 +511,7 @@ const ItemMasterUpdate = ({
                 placeholder="Enter Landed Cost"
                 value={formData.landedCost}
                 onChange={(e) =>
-                  handleInputChange('landedCost', e.target.value)
+                  handleInputChange("landedCost", e.target.value)
                 }
                 readOnly
               />
@@ -523,7 +521,7 @@ const ItemMasterUpdate = ({
               <label
                 htmlFor="minNetSellingPrice"
                 className="form-label me-2 mb-0"
-                style={{ minWidth: '200px' }}
+                style={{ minWidth: "200px" }}
               >
                 Min Net Selling Price :
               </label>
@@ -534,7 +532,7 @@ const ItemMasterUpdate = ({
                 placeholder="Enter Min Net Selling Price"
                 value={formData.minNetSellingPrice}
                 onChange={(e) =>
-                  handleInputChange('minNetSellingPrice', e.target.value)
+                  handleInputChange("minNetSellingPrice", e.target.value)
                 }
                 readOnly
               />
@@ -544,7 +542,7 @@ const ItemMasterUpdate = ({
               <label
                 htmlFor="sellingPrice"
                 className="form-label me-2 mb-0"
-                style={{ minWidth: '200px' }}
+                style={{ minWidth: "200px" }}
               >
                 Selling Price :
               </label>
@@ -555,7 +553,7 @@ const ItemMasterUpdate = ({
                 placeholder="Enter Selling Price"
                 value={formData.sellingPrice}
                 onChange={(e) =>
-                  handleInputChange('sellingPrice', e.target.value)
+                  handleInputChange("sellingPrice", e.target.value)
                 }
                 readOnly
               />
@@ -565,7 +563,7 @@ const ItemMasterUpdate = ({
               <label
                 htmlFor="mrp"
                 className="form-label me-2 mb-0"
-                style={{ minWidth: '200px' }}
+                style={{ minWidth: "200px" }}
               >
                 MRP :
               </label>
@@ -575,7 +573,7 @@ const ItemMasterUpdate = ({
                 id="mrp"
                 placeholder="Enter MRP"
                 value={formData.mrp}
-                onChange={(e) => handleInputChange('mrp', e.target.value)}
+                onChange={(e) => handleInputChange("mrp", e.target.value)}
                 readOnly
               />
             </div>
@@ -584,7 +582,7 @@ const ItemMasterUpdate = ({
               <label
                 htmlFor="competitorPrice"
                 className="form-label me-2 mb-0"
-                style={{ minWidth: '200px' }}
+                style={{ minWidth: "200px" }}
               >
                 Competitor Price :
               </label>
@@ -595,7 +593,7 @@ const ItemMasterUpdate = ({
                 placeholder="Enter Competitor Price"
                 value={formData.competitorPrice}
                 onChange={(e) =>
-                  handleInputChange('competitorPrice', e.target.value)
+                  handleInputChange("competitorPrice", e.target.value)
                 }
               />
             </div>
@@ -604,7 +602,7 @@ const ItemMasterUpdate = ({
               <label
                 htmlFor="labelPrice"
                 className="form-label me-2 mb-0"
-                style={{ minWidth: '200px' }}
+                style={{ minWidth: "200px" }}
               >
                 Label Price :
               </label>
@@ -615,7 +613,7 @@ const ItemMasterUpdate = ({
                 placeholder="Enter Label Price"
                 value={formData.labelPrice}
                 onChange={(e) =>
-                  handleInputChange('labelPrice', e.target.value)
+                  handleInputChange("labelPrice", e.target.value)
                 }
               />
             </div>
@@ -624,7 +622,7 @@ const ItemMasterUpdate = ({
               <label
                 htmlFor="averageSellingPrice"
                 className="form-label me-2 mb-0"
-                style={{ minWidth: '200px' }}
+                style={{ minWidth: "200px" }}
               >
                 Average Selling Price :
               </label>
@@ -635,7 +633,7 @@ const ItemMasterUpdate = ({
                 placeholder="Enter Average Selling Price"
                 value={formData.averageSellingPrice}
                 onChange={(e) =>
-                  handleInputChange('averageSellingPrice', e.target.value)
+                  handleInputChange("averageSellingPrice", e.target.value)
                 }
               />
             </div>
@@ -644,7 +642,7 @@ const ItemMasterUpdate = ({
               <label
                 htmlFor="stockClearance"
                 className="form-label me-2 mb-0"
-                style={{ minWidth: '200px' }}
+                style={{ minWidth: "200px" }}
               >
                 Stock Clearance :
               </label>
@@ -655,7 +653,7 @@ const ItemMasterUpdate = ({
                 placeholder="Enter Stock Clearance Price"
                 value={formData.stockClearance}
                 onChange={(e) =>
-                  handleInputChange('stockClearance', e.target.value)
+                  handleInputChange("stockClearance", e.target.value)
                 }
               />
             </div>
@@ -664,7 +662,7 @@ const ItemMasterUpdate = ({
               <label
                 htmlFor="bulkPrice"
                 className="form-label me-2 mb-0"
-                style={{ minWidth: '200px' }}
+                style={{ minWidth: "200px" }}
               >
                 Bulk Price :
               </label>
@@ -674,7 +672,7 @@ const ItemMasterUpdate = ({
                 id="bulkPrice"
                 placeholder="Enter Bulk Price"
                 value={formData.bulkPrice}
-                onChange={(e) => handleInputChange('bulkPrice', e.target.value)}
+                onChange={(e) => handleInputChange("bulkPrice", e.target.value)}
               />
             </div>
 
@@ -686,12 +684,12 @@ const ItemMasterUpdate = ({
               </label>
               <select
                 className={`form-select ${
-                  validFields.itemHierarchy ? 'is-valid' : ''
-                } ${validationErrors.itemHierarchy ? 'is-invalid' : ''}`}
+                  validFields.itemHierarchy ? "is-valid" : ""
+                } ${validationErrors.itemHierarchy ? "is-invalid" : ""}`}
                 id="itemHierarchy"
                 value={formData.itemHierarchy}
                 onChange={(e) =>
-                  handleInputChange('itemHierarchy', e.target.value)
+                  handleInputChange("itemHierarchy", e.target.value)
                 }
                 required
               >
@@ -706,7 +704,7 @@ const ItemMasterUpdate = ({
               )}
             </div>
 
-            {formData.itemHierarchy === 'sub' && selectedParentItem === '' && (
+            {formData.itemHierarchy === "sub" && selectedParentItem === "" && (
               <div className="mb-3 mt-4">
                 {/* Item Search */}
                 <div className="mb-0 mt-3">
@@ -725,9 +723,9 @@ const ItemMasterUpdate = ({
                       <span
                         className="input-group-text bg-transparent"
                         style={{
-                          cursor: 'pointer',
+                          cursor: "pointer",
                         }}
-                        onClick={() => setSearchTerm('')}
+                        onClick={() => setSearchTerm("")}
                       >
                         <i className="bi bi-x"></i>
                       </span>
@@ -736,14 +734,14 @@ const ItemMasterUpdate = ({
 
                   {/* Dropdown for filtered items */}
                   {searchTerm && (
-                    <div className="dropdown" style={{ width: '100%' }}>
+                    <div className="dropdown" style={{ width: "100%" }}>
                       <ul
                         className="dropdown-menu"
                         style={{
-                          display: 'block',
-                          width: '100%',
-                          maxHeight: '200px',
-                          overflowY: 'auto',
+                          display: "block",
+                          width: "100%",
+                          maxHeight: "200px",
+                          overflowY: "auto",
                         }}
                       >
                         {isItemsLoading ? (
@@ -771,7 +769,7 @@ const ItemMasterUpdate = ({
                               >
                                 <span className="me-3">
                                   <i className="bi bi-cart4"></i>
-                                </span>{' '}
+                                </span>{" "}
                                 {item.itemName}
                               </button>
                             </li>
@@ -805,7 +803,7 @@ const ItemMasterUpdate = ({
                   <p>Category: {selectedParentItem.category.categoryName}</p>
                   <hr />
                   <p>
-                    Measurement Type:{' '}
+                    Measurement Type:{" "}
                     {selectedParentItem.unit?.measurementType?.name}
                   </p>
                   <p>Unit: {selectedParentItem.unit?.unitName}</p>
@@ -843,9 +841,9 @@ const ItemMasterUpdate = ({
                     <span
                       className="input-group-text bg-transparent"
                       style={{
-                        cursor: 'pointer',
+                        cursor: "pointer",
                       }}
-                      onClick={() => setSearchChildTerm('')}
+                      onClick={() => setSearchChildTerm("")}
                     >
                       <i className="bi bi-x"></i>
                     </span>
@@ -854,14 +852,14 @@ const ItemMasterUpdate = ({
 
                 {/* Dropdown for filtered items */}
                 {searchChildTerm && (
-                  <div className="dropdown" style={{ width: '100%' }}>
+                  <div className="dropdown" style={{ width: "100%" }}>
                     <ul
                       className="dropdown-menu"
                       style={{
-                        display: 'block',
-                        width: '100%',
-                        maxHeight: '200px',
-                        overflowY: 'auto',
+                        display: "block",
+                        width: "100%",
+                        maxHeight: "200px",
+                        overflowY: "auto",
                       }}
                     >
                       {isChildItemsLoading ? (
@@ -897,7 +895,7 @@ const ItemMasterUpdate = ({
                               >
                                 <span className="me-3">
                                   <i className="bi bi-cart4"></i>
-                                </span>{' '}
+                                </span>{" "}
                                 {item.itemName}
                               </button>
                             </li>
@@ -961,7 +959,7 @@ const ItemMasterUpdate = ({
                             </button>
                           </td>
                         </tr>
-                      )
+                      );
                     })}
                   </tbody>
                 </table>
@@ -981,7 +979,7 @@ const ItemMasterUpdate = ({
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Updating..." />
             ) : (
-              'Update'
+              "Update"
             )}
           </button>
           <button
@@ -993,7 +991,7 @@ const ItemMasterUpdate = ({
             {loadingDraft && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Saving as Draft..." />
             ) : (
-              'Save as Draft'
+              "Save as Draft"
             )}
           </button>
           <button
@@ -1007,7 +1005,7 @@ const ItemMasterUpdate = ({
         </div>
       </form>
     </div>
-  )
-}
+  );
+};
 
 export default ItemMasterUpdate;

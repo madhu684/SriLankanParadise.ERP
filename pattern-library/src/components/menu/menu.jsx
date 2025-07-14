@@ -2,7 +2,7 @@ import "./menu.css";
 import React from "react";
 import { Navigate } from "react-router-dom";
 import userImage from "../../assets/images/person-circle.svg";
-import CompanyImage  from "../../assets/images/powerline_lanka_logo.jpeg";
+import CompanyImage from "../../assets/images/powerline_lanka_logo.jpeg";
 
 function template() {
   const {
@@ -34,7 +34,7 @@ function template() {
               } mb-0 mb-md-0 me-md-auto link-dark text-decoration-none`}
             >
               <img
-                className="company-logo"
+                className="company-menu-logo"
                 src={CompanyImage}
                 alt="Company Logo"
               />
@@ -75,7 +75,7 @@ function template() {
                       className="collapse"
                       id={`submodulesCollapse${module.id}`}
                     >
-                      <ul className="list-unstyled ps-2">
+                      <ul className="list-unstyled ps-2 submodule-list">
                         {module.submodules.map((submodule) => (
                           <li key={submodule.id}>
                             <a
@@ -167,7 +167,6 @@ function template() {
                 >
                   Sign out
                 </a>
-                {/* Redirect to the /login route */}
                 {this.state.isLogout && <Navigate to="/login" replace={true} />}
               </li>
             </ul>

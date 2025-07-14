@@ -763,6 +763,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Issue details retrieved.
+        /// </summary>
+        public static string IssueDetailsRetrieved {
+            get {
+                return ResourceManager.GetString("IssueDetailsRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Issue master approved.
         /// </summary>
         public static string IssueMasterApproved {

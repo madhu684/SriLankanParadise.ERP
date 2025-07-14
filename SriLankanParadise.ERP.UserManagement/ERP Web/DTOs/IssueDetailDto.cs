@@ -16,5 +16,9 @@
         public virtual BatchDto? Batch { get; set; }
 
         public int? Quantity { get; set; }
+
+        public decimal? ReceivedQuantity { get; set; }
+
+        public decimal? ReturnedQuantity { get; set; }
     }
 }

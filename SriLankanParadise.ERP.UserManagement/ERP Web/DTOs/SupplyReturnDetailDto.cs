@@ -12,5 +12,6 @@
         public ItemMasterDto? ItemMaster { get; set; }
         public BatchDto? Batch { get; set; }
         public LocationDto? Location { get; set; }
+
     }
 }
