@@ -59,41 +59,34 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
                 resourceCulture = value;
             }
         }
-
-
+        
         /// <summary>
-        ///   Looks up a localized string similar to Batch created successfully.
+        ///   Looks up a localized string similar to Approved supply return master not found.
         /// </summary>
-        public static string ApprovedSupplyReturnMasterRetrived
-        {
-            get
-            {
-                return ResourceManager.GetString("Approved Supply return master retrived", resourceCulture);
-            }
-        }
-
-
-        /// <summary>
-        ///   Looks up a localized string similar to Batch created successfully.
-        /// </summary>
-        public static string ApprovedSupplyReturnMasterNotFound
-        {
+        public static string ApprovedSupplyReturnMasterNotFound {
             get {
-                return ResourceManager.GetString("Approved supply return masterNot found", resourceCulture);
+                return ResourceManager.GetString("ApprovedSupplyReturnMasterNotFound", resourceCulture);
             }
         }
-
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Approved supply return master retrived.
+        /// </summary>
+        public static string ApprovedSupplyReturnMasterRetrived {
+            get {
+                return ResourceManager.GetString("ApprovedSupplyReturnMasterRetrived", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to Batch created successfully.
         /// </summary>
-        public static string BatchCreated
-        {
-            get
-            {
-                return ResourceManager.GetString("Batch created", resourceCulture);
+        public static string BatchCreated {
+            get {
+                return ResourceManager.GetString("BatchCreated", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Batches not found.
         /// </summary>
@@ -721,6 +714,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string IssueDetailCreated {
             get {
                 return ResourceManager.GetString("IssueDetailCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Issue details retrieved.
+        /// </summary>
+        public static string IssueDetailsRetrieved {
+            get {
+                return ResourceManager.GetString("IssueDetailsRetrieved", resourceCulture);
             }
         }
         
@@ -1670,6 +1672,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to MIN Approved for MRN .
+        /// </summary>
+        public static string RequisitionMasterPatched {
+            get {
+                return ResourceManager.GetString("RequisitionMasterPatched", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Requisition masters not found.
         /// </summary>
         public static string RequisitionMastersNotFound {
@@ -1720,6 +1731,24 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string RolePermissionCreated {
             get {
                 return ResourceManager.GetString("RolePermissionCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Role permissions not found.
+        /// </summary>
+        public static string RolePermissionsNotFound {
+            get {
+                return ResourceManager.GetString("RolePermissionsNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Role permissions retrieved.
+        /// </summary>
+        public static string RolePermissionsRetrieved {
+            get {
+                return ResourceManager.GetString("RolePermissionsRetrieved", resourceCulture);
             }
         }
         
@@ -2651,6 +2680,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to User permissions updated.
+        /// </summary>
+        public static string UserPermissionsUpdated {
+            get {
+                return ResourceManager.GetString("UserPermissionsUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to User registered successfully.
         /// </summary>
         public static string UserRegistered {
@@ -2665,6 +2703,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string UserRetrieved {
             get {
                 return ResourceManager.GetString("UserRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User role updated.
+        /// </summary>
+        public static string UserRoleUpdated {
+            get {
+                return ResourceManager.GetString("UserRoleUpdated", resourceCulture);
             }
         }
         
@@ -2694,30 +2741,5 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
                 return ResourceManager.GetString("UserUpdated", resourceCulture);
             }
         }
-
-        public static string RolePermissionsRetrieved { 
-            get {
-                return ResourceManager.GetString("RolePermissionsRetrieved", resourceCulture);
-            } 
-        }
-
-        public static string RolePermissionsNotFound { get {
-                return ResourceManager.GetString("RolePermissionsNotFound", resourceCulture);
-            } 
-        }
-
-        public static string UserRoleUpdated {
-            get {
-                return ResourceManager.GetString("UserRoleUpdated", resourceCulture);
-            } 
-        }
-
-        public static string UserPermissionsUpdated {
-            get {
-                return ResourceManager.GetString("UserPermissionsUpdated", resourceCulture);
-            }
-        }
-
-        public static string IssueDetailsRetrieved { get; internal set; }
     }
 }

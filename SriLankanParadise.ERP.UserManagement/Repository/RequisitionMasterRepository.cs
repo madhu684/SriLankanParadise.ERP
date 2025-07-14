@@ -142,5 +142,23 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
+        public async Task PatchMinApproved(int requisitionMasterId, RequisitionMaster requisitionMaster)
+        {
+            try
+            {
+                var existRequisitionMaster = await _dbContext.RequisitionMasters.FindAsync(requisitionMasterId);
+
+                if (existRequisitionMaster != null)
+                {
+                    existRequisitionMaster.IsMINApproved = requisitionMaster.IsMINApproved;
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }

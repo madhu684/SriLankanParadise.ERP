@@ -12,6 +12,8 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
 
         Task ApproveRequisitionMaster(int requisitionMasterId, RequisitionMaster requisitionMaster);
 
+        Task PatchMinApproved(int requisitionMasterId, RequisitionMaster requisitionMaster);
+
         Task<RequisitionMaster> GetRequisitionMasterByRequisitionMasterId(int requisitionMasterId);
 
         Task<IEnumerable<RequisitionMaster>> GetRequisitionMastersByUserId(int userId);
