@@ -131,6 +131,8 @@ const TransferRequisitionList = () => {
     );
   }
 
+  console.log("transferRequisitions: ", transferRequisitions);
+
   return (
     <div className="container mt-4">
       <h2>Transfer Requisition Notes</h2>
@@ -301,17 +303,18 @@ const TransferRequisitionList = () => {
                   <td>
                     {/* Display Accept button and disable it if Pending Approval or Approved and user is not the creator */}
                     <button
-                      style={{
-                        backgroundColor: "#FFA07A",
-                        color: "white",
-                        border: "none",
-                      }}
-                      className="btn me-2"
+                      // style={{
+                      //   backgroundColor: "#FFA07A",
+                      //   color: "white",
+                      //   border: "none",
+                      // }}
+                      className="btn btn-warning me-2"
                       onClick={() => {
                         setOpenTINsList(true);
                         setSelectedTrnId(mr.requisitionMasterId);
                       }}
                       disabled={
+                        mr.isMINApproved === false ||
                         mr.status === 1 ||
                         (mr.status === 2 &&
                           mr.requestedUserId !==

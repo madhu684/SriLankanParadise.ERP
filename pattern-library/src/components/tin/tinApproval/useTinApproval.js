@@ -5,6 +5,7 @@ import {
   post_location_inventory_api,
   post_location_inventory_movement_api,
   post_location_inventory_goods_in_transit_api,
+  update_min_state_in_mrn_api,
 } from "../../../services/purchaseApi";
 
 const useTinApproval = ({ tin, onFormSubmit }) => {
@@ -20,6 +21,7 @@ const useTinApproval = ({ tin, onFormSubmit }) => {
     }
   }, [approvalStatus, onFormSubmit]);
 
+  console.log(tin);
   useEffect(() => {
     if (approvalStatus != null) {
       // Scroll to the success alert when it becomes visible
@@ -120,6 +122,17 @@ const useTinApproval = ({ tin, onFormSubmit }) => {
     }
   };
 
+  const updateMrnState = async () => {
+    try {
+      await update_min_state_in_mrn_api(tin.requisitionMasterId, {
+        isMINApproved: true,
+        isMINAccepted: false,
+      });
+    } catch (error) {
+      console.error("Error updating MRN state:", error);
+    }
+  };
+
   const handleApprove = async (tinId) => {
     try {
       setLoading(true);
@@ -147,6 +160,8 @@ const useTinApproval = ({ tin, onFormSubmit }) => {
           tin.requisitionMaster.requestedFromLocationId,
           tin.requisitionMaster.requestedToLocationId
         );
+
+        await updateMrnState();
 
         setApprovalStatus("approved");
         console.log(

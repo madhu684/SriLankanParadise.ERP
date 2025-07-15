@@ -1,16 +1,18 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  approve_issue_master_api,
-  patch_item_batch_api,
   patch_location_inventory_api,
   post_location_inventory_movement_api,
   update_min_state_in_mrn_api,
 } from "../../../services/purchaseApi";
+import { useQueryClient } from "@tanstack/react-query";
 
-const useMinApproval = ({ min, onFormSubmit }) => {
+const useMinAccept = ({ min, refetch, setRefetch, onFormSubmit }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
   const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
   const alertRef = useRef(null);
+
+  console.log("min in useMinAccept: ", min);
 
   useEffect(() => {
     if (approvalStatus === "approved") {
@@ -20,7 +22,6 @@ const useMinApproval = ({ min, onFormSubmit }) => {
     }
   }, [approvalStatus, onFormSubmit]);
 
-  console.log(min);
   useEffect(() => {
     if (approvalStatus != null) {
       // Scroll to the success alert when it becomes visible
@@ -28,11 +29,14 @@ const useMinApproval = ({ min, onFormSubmit }) => {
     }
   }, [approvalStatus]);
 
-  const updateInventory = async (details, formattedDate, fromLocationId) => {
+  const updateInventory = async (details, formattedDate, toLocationId) => {
     try {
-      const locationId =
-        fromLocationId || sessionStorage.getItem("defaultLocationId") || "4";
+      const locationId = parseInt(toLocationId, 10);
       for (const detail of details) {
+        console.log(
+          `Creating inventory for detail with id ${detail.issueDetailId}: `,
+          detail
+        );
         const { itemMasterId, batchId, quantity } = detail;
 
         // Skip if batchId or quantity is invalid
@@ -43,18 +47,12 @@ const useMinApproval = ({ min, onFormSubmit }) => {
           continue;
         }
 
-        // Patch Item Batch API
-        await patch_item_batch_api(batchId, itemMasterId, "subtract", {
-          qty: quantity,
-          permissionId: 1065,
-        });
-
         // Patch Location Inventory API
         await patch_location_inventory_api(
           locationId,
           itemMasterId,
           batchId,
-          "subtract",
+          "add",
           {
             stockInHand: quantity,
             permissionId: 1089,
@@ -63,8 +61,8 @@ const useMinApproval = ({ min, onFormSubmit }) => {
 
         // Post Location Inventory Movement API
         await post_location_inventory_movement_api({
-          movementTypeId: 2,
-          transactionTypeId: 5,
+          movementTypeId: 1,
+          transactionTypeId: 5, // need to change
           itemMasterId,
           batchId,
           locationId: locationId,
@@ -81,59 +79,29 @@ const useMinApproval = ({ min, onFormSubmit }) => {
   const updateMrnState = async () => {
     try {
       await update_min_state_in_mrn_api(min.requisitionMasterId, {
-        isMINApproved: true,
-        isMINAccepted: false,
+        isMINApproved: min?.requisitionMaster?.isMINApproved,
+        isMINAccepted: true,
       });
     } catch (error) {
       console.error("Error updating MRN state:", error);
     }
   };
 
-  const handleApprove = async (minId) => {
+  const handleAccept = async (minId) => {
     try {
       setLoading(true);
-      const firstDigit = parseInt(min.status.toString().charAt(0), 10); // Extract the first digit
-      const combinedStatus = parseInt(`${firstDigit}2`, 10);
       const currentDate = new Date();
       const formattedDate = currentDate.toISOString();
+      const locationId = min?.requisitionMaster?.requestedFromLocationId;
 
-      const approvalData = {
-        status: combinedStatus,
-        approvedBy: sessionStorage.getItem("username"), //username
-        approvedUserId: sessionStorage.getItem("userId"), //userid
-        approvedDate: formattedDate,
-        permissionId: 1062,
-      };
-      const approvalResponse = await approve_issue_master_api(
-        minId,
-        approvalData
-      );
-
-      if (approvalResponse.status === 200) {
-        await updateInventory(
-          min.issueDetails,
-          formattedDate,
-          min.fromLocationId
-        );
-
-        await updateMrnState();
-
-        console.log(
-          "Material issue note approved and inventory updated successfully:",
-          approvalResponse
-        );
-        setApprovalStatus("approved");
-      } else {
-        setApprovalStatus("error");
-      }
-
-      setTimeout(() => {
-        setApprovalStatus(null);
-        setLoading(false);
-      }, 2000);
+      await updateInventory(min.issueDetails, formattedDate, locationId);
+      await updateMrnState();
+      queryClient.invalidateQueries(["min", minId]);
+      setRefetch(!refetch);
+      setApprovalStatus("approved");
     } catch (error) {
       setApprovalStatus("error");
-      console.error("Error approving material issue Note note:", error);
+      console.error("Error accepting material issue Note note:", error);
       setTimeout(() => {
         setApprovalStatus(null);
         setLoading(false);
@@ -145,8 +113,8 @@ const useMinApproval = ({ min, onFormSubmit }) => {
     approvalStatus,
     loading,
     alertRef,
-    handleApprove,
+    handleAccept,
   };
 };
 
-export default useMinApproval;
+export default useMinAccept;

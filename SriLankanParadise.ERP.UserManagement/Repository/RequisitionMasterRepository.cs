@@ -151,6 +151,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 if (existRequisitionMaster != null)
                 {
                     existRequisitionMaster.IsMINApproved = requisitionMaster.IsMINApproved;
+                    existRequisitionMaster.IsMINAccepted = requisitionMaster.IsMINAccepted;
                     await _dbContext.SaveChangesAsync();
                 }
             }

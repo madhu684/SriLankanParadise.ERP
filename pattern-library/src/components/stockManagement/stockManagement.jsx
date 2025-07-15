@@ -36,7 +36,7 @@ const StockManagement = () => {
             </option>
             {companyLocations && companyLocations.length > 0 ? (
               companyLocations
-                .filter((l) => l.locationTypeId === 2)
+                // .filter((l) => l.locationTypeId === 2)
                 .map((item) => (
                   <option key={item.id} value={item.locationId}>
                     {item.locationName}
