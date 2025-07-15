@@ -63,6 +63,8 @@ const PurchaseOrder = ({
     renderSubColumns,
     calculateTotalAmount,
     handleGeneratePurchaseOrder, // New function to handle button click
+    showToast,
+    setShowToast,
   } = usePurchaseOrder({
     onFormSubmit: () => {
       handleClose();
@@ -313,14 +315,12 @@ const PurchaseOrder = ({
               </div>
             </div>
             <div className="mt-3">
-              {formData.itemDetails.length == 0 && isPOGenerated == true && (
-                // <div className="alert alert-warning">
-                //   No any low-stock items found
-                // </div>
+              {formData.itemDetails.length === 0 && isPOGenerated === true && (
                 <ToastMessage
-                  show={true}
-                  type={"danger"}
-                  message={"No any low-stock items found"}
+                  show={showToast}
+                  onClose={() => setShowToast(false)}
+                  type="danger"
+                  message="No any low-stock items found"
                 />
               )}
             </div>
