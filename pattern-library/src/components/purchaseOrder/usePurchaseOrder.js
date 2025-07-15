@@ -40,6 +40,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [isPOGenerated, setIsPOGenerated] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
   const fetchSuppliers = async () => {
     try {
@@ -931,8 +932,10 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
       const lowStockItems = response.data.result || [];
 
       if (lowStockItems.length === 0) {
+        setShowToast(true);
         setTimeout(() => {
           setIsPOGenerated(false);
+          setShowToast(false);
         }, 3000);
         setLoading(false);
         return;
@@ -1029,6 +1032,8 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     renderSubColumns,
     calculateTotalAmount,
     handleGeneratePurchaseOrder, // Added to the return object
+    showToast,
+    setShowToast,
   };
 };
 
