@@ -53,31 +53,31 @@ const useTinApproval = ({ tin, onFormSubmit }) => {
 
         // Patch Location Inventory API (add stock to toLocation)
 
-        const patchLocationInventoryResponse =
-          await patch_location_inventory_api(
-            toLocationId,
-            itemMasterId,
-            batchId,
-            "add",
-            {
-              stockInHand: quantity,
-              permissionId: 1089,
-            }
-          );
+        // const patchLocationInventoryResponse =
+        //   await patch_location_inventory_api(
+        //     toLocationId,
+        //     itemMasterId,
+        //     batchId,
+        //     "add",
+        //     {
+        //       stockInHand: quantity,
+        //       permissionId: 1089,
+        //     }
+        //   );
 
-        if (
-          patchLocationInventoryResponse &&
-          patchLocationInventoryResponse.status === 404
-        ) {
-          // Location inventory not found, create it
-          await post_location_inventory_api({
-            itemMasterId,
-            batchId,
-            locationId: toLocationId,
-            stockInHand: quantity,
-            permissionId: 1088,
-          });
-        }
+        // if (
+        //   patchLocationInventoryResponse &&
+        //   patchLocationInventoryResponse.status === 404
+        // ) {
+        //   // Location inventory not found, create it
+        //   await post_location_inventory_api({
+        //     itemMasterId,
+        //     batchId,
+        //     locationId: toLocationId,
+        //     stockInHand: quantity,
+        //     permissionId: 1088,
+        //   });
+        // }
 
         // Post Location Inventory Movement API
         await post_location_inventory_movement_api({
@@ -91,16 +91,16 @@ const useTinApproval = ({ tin, onFormSubmit }) => {
           permissionId: 1090,
         });
 
-        await post_location_inventory_movement_api({
-          movementTypeId: 1,
-          transactionTypeId: 6,
-          itemMasterId,
-          batchId,
-          locationId: toLocationId,
-          date: formattedDate,
-          qty: quantity,
-          permissionId: 1090,
-        });
+        // await post_location_inventory_movement_api({
+        //   movementTypeId: 1,
+        //   transactionTypeId: 6,
+        //   itemMasterId,
+        //   batchId,
+        //   locationId: toLocationId,
+        //   date: formattedDate,
+        //   qty: quantity,
+        //   permissionId: 1090,
+        // });
 
         // Prepare the data for post_location_inventory_goods_in_transit_api
         const transitData = {

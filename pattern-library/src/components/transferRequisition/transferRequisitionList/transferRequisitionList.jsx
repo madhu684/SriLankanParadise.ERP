@@ -37,6 +37,8 @@ const TransferRequisitionList = () => {
     userWarehouses,
     filter,
     filteredRequisitions,
+    refetch,
+    setRefetch,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleRowSelect,
@@ -100,6 +102,8 @@ const TransferRequisitionList = () => {
   if (openTINsList) {
     return (
       <TinsListDetail
+        refetch={refetch}
+        setRefetch={setRefetch}
         trnId={selectedTrnId}
         handleBack={() => setOpenTINsList(false)}
       />
@@ -308,12 +312,15 @@ const TransferRequisitionList = () => {
                       //   color: "white",
                       //   border: "none",
                       // }}
-                      className="btn btn-warning me-2"
+                      className={`btn me-2 ${
+                        mr.isMINAccepted ? "btn-info" : "btn-warning"
+                      }`}
                       onClick={() => {
                         setOpenTINsList(true);
                         setSelectedTrnId(mr.requisitionMasterId);
                       }}
                       disabled={
+                        //mr.isMINAccepted === true ||
                         mr.isMINApproved === false ||
                         mr.status === 1 ||
                         (mr.status === 2 &&

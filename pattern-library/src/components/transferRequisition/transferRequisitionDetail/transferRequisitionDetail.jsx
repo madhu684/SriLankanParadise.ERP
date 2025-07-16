@@ -82,7 +82,7 @@ const TransferRequisitionDetail = ({
             <tr>
               <th>Item Name</th>
               <th>Unit</th>
-              <th>Quantity</th>
+              <th>Requested Quantity</th>
             </tr>
           </thead>
           <tbody>

@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import {
   patch_location_inventory_api,
@@ -5,15 +6,14 @@ import {
   post_location_inventory_movement_api,
   update_min_state_in_mrn_api,
 } from "../../../services/purchaseApi";
-import { useQueryClient } from "@tanstack/react-query";
 
-const useMinAccept = ({ min, refetch, setRefetch, onFormSubmit }) => {
+const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
   const alertRef = useRef(null);
 
-  console.log("min in useMinAccept: ", min);
+  console.log("tin in useTinAccept: ", tin);
 
   useEffect(() => {
     if (approvalStatus === "approved") {
@@ -93,8 +93,8 @@ const useMinAccept = ({ min, refetch, setRefetch, onFormSubmit }) => {
 
   const updateMrnState = async () => {
     try {
-      await update_min_state_in_mrn_api(min.requisitionMasterId, {
-        isMINApproved: min?.requisitionMaster?.isMINApproved,
+      await update_min_state_in_mrn_api(tin.requisitionMasterId, {
+        isMINApproved: tin?.requisitionMaster?.isMINApproved,
         isMINAccepted: true,
       });
     } catch (error) {
@@ -102,16 +102,16 @@ const useMinAccept = ({ min, refetch, setRefetch, onFormSubmit }) => {
     }
   };
 
-  const handleAccept = async (minId) => {
+  const handleAccept = async (tinId) => {
     try {
       setLoading(true);
       const currentDate = new Date();
       const formattedDate = currentDate.toISOString();
-      const locationId = min?.requisitionMaster?.requestedFromLocationId;
+      const locationId = tin?.requisitionMaster?.requestedToLocationId;
 
-      await updateInventory(min.issueDetails, formattedDate, locationId);
+      await updateInventory(tin.issueDetails, formattedDate, locationId);
       await updateMrnState();
-      queryClient.invalidateQueries(["min", minId]);
+      queryClient.invalidateQueries(["tins", tinId]);
       setRefetch(!refetch);
       setApprovalStatus("approved");
     } catch (error) {
@@ -132,4 +132,4 @@ const useMinAccept = ({ min, refetch, setRefetch, onFormSubmit }) => {
   };
 };
 
-export default useMinAccept;
+export default useTinAccept;
