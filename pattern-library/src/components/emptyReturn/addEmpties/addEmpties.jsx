@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { AddEmptiesManagement } from "./addEmpties";
 import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
-// import { toast } from "react-toastify";
 
 const AddEmpties = ({ show, handleClose }) => {
   const {
@@ -34,7 +33,7 @@ const AddEmpties = ({ show, handleClose }) => {
     if (submissionStatus !== null) {
       const timer = setTimeout(() => {
         setSubmissionStatus(null);
-      }, 3000); // Hide alert after 3 seconds
+      }, 2000);
 
       return () => clearTimeout(timer);
     }
@@ -58,7 +57,7 @@ const AddEmpties = ({ show, handleClose }) => {
                 {/* <label>Warehouse</label> */}
                 <select
                   className="form-select"
-                  value={formData.warehouseLocation || ""} // ✅ controlled input
+                  value={formData.warehouseLocation || ""}
                   onChange={(e) =>
                     handleWarehouseLocationChange(parseInt(e.target.value))
                   }
@@ -75,7 +74,7 @@ const AddEmpties = ({ show, handleClose }) => {
                   {warehouses
                     .filter(
                       (w) => w.location.locationType?.name === "Warehouse"
-                    ) // ✅ filter here
+                    )
                     .map((w) => (
                       <option
                         key={w.location.locationId}
@@ -153,7 +152,7 @@ const AddEmpties = ({ show, handleClose }) => {
                               !formData.itemDetails?.some(
                                 (detail) => detail.id === item.itemMasterId
                               )
-                          ) // Filter out items that are already in itemDetails
+                          )
                           .map((item) => (
                             <li key={item.itemMasterId}>
                               <button

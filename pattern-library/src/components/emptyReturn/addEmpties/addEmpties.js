@@ -5,6 +5,7 @@ import {
   post_location_inventory_api,
   post_location_inventory_movement_api,
   get_user_locations_by_user_id_api,
+  post_batch_api,
 } from "../../../services/purchaseApi";
 import {
   get_item_masters_by_company_id_with_query_api,
@@ -67,11 +68,8 @@ export const AddEmptiesManagement = (handleClose) => {
         searchQuery,
         itemType
       );
-      console.log("Fetched itemsssssssssssssss:", response.data.result);
       return response.data.result;
-    } catch (error) {
-      console.error("Error fetching items:", error);
-    }
+    } catch (error) {}
   };
 
   const {
@@ -82,12 +80,38 @@ export const AddEmptiesManagement = (handleClose) => {
   } = useQuery({
     queryKey: ["items", searchItem],
     queryFn: () =>
-      fetchItems(
-        sessionStorage.getItem("companyId"),
-        searchItem,
-        "Consumable,Raw Material,Sellable"
-      ),
+      fetchItems(sessionStorage.getItem("companyId"), searchItem, "Empty"),
   });
+
+  const generateBatchRef = () => {
+    const currentDate = new Date();
+    const formattedDate = currentDate
+      .toISOString()
+      .split("T")[0]
+      .replace(/-/g, "");
+
+    // Generate random 4-digit number
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+
+    // Combine components to form batch reference
+    return `B-${formattedDate}-${randomNum}`;
+  };
+
+  const createBatch = async () => {
+    const currentDate = new Date();
+    const formattedDate = currentDate.toISOString();
+    const batchRef = generateBatchRef();
+
+    const batchData = {
+      batchRef: batchRef,
+      date: formattedDate,
+      companyId: sessionStorage.getItem("companyId"),
+      permissionId: 1047,
+    };
+
+    const batchResponse = await post_batch_api(batchData);
+    return batchResponse.data.result?.batchId;
+  };
 
   // Handler to add the selected item to itemDetails
   const handleSelectItem = (item) => {
@@ -99,27 +123,27 @@ export const AddEmptiesManagement = (handleClose) => {
           id: item.itemMasterId,
           name: item.itemName,
           unit: item.unit.unitName,
-          quantity: 0, // You can set a default quantity here
+          quantity: 0,
         },
       ],
     }));
-    setSearchItem(""); // Clear the search Item
+    setSearchItem("");
   };
 
   const handleSubmit = async (isSaveAsDraft) => {
     if (validateForm(isSaveAsDraft)) {
       try {
         setLoading(true);
-        setSubmissionStatus(null); // Reset submission status
-
-        console.log("📝 Submitting Form Data:", formData);
+        setSubmissionStatus(null);
 
         const locationId = formData.warehouseLocation;
+
+        const generateBatchRefBatchId = await createBatch();
 
         for (const item of formData.itemDetails) {
           const locationInventoryData = {
             itemMasterId: item.id,
-            batchId: 21,
+            batchId: null,
             locationId: locationId,
             stockInHand: item.quantity,
             permissionId: 1088,
@@ -130,29 +154,19 @@ export const AddEmptiesManagement = (handleClose) => {
             movementTypeId: 1,
             transactionTypeId: 4,
             itemMasterId: item.id,
-            batchId: 21,
+            batchId: null,
             locationId: locationId,
             date: new Date().toISOString(),
             qty: item.quantity,
             permissionId: 1090,
           };
 
-          // ✅ Log the payloads before sending
-          console.log(
-            "📦 Posting to Location Inventory API:",
-            locationInventoryData
-          );
           await post_location_inventory_api(locationInventoryData);
 
-          console.log(
-            "🔁 Posting to Inventory Movement API:",
-            locationInventoryMovementData
-          );
           await post_location_inventory_movement_api(
             locationInventoryMovementData
           );
         }
-
         const EmptyReturnData = {
           companyId: parseInt(sessionStorage.getItem("companyId")),
           fromLocationId: locationId,
@@ -165,17 +179,15 @@ export const AddEmptiesManagement = (handleClose) => {
           })),
         };
 
-        console.log("📦 Posting to Empty Return API:", EmptyReturnData);
         await post_Empty_Return_api(EmptyReturnData);
         queryClient.invalidateQueries("addedEmptyItems");
-        // ✅ Reset form
         setFormData({ warehouseLocation: null, itemDetails: [] });
-        // ✅ Refetch dropdown options
         refetchWarehouses();
         setSubmissionStatus("success");
-        // handleClose();
+        setTimeout(() => {
+          handleClose();
+        }, 2000);
       } catch (error) {
-        console.error("❌ Error submitting items:", error);
         setSubmissionStatus("error");
       } finally {
         setLoading(false);

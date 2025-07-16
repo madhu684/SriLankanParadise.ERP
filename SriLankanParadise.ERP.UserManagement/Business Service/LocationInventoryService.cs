@@ -46,6 +46,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             return await _locationInventoryRepository.GetLocationInventoryByDetails(locationId, itemMasterId, batchId);
         }
+        public async Task<LocationInventory> GetEmptyLocationInventoryByDetails(int locationId, int itemMasterId)
+        {
+            return await _locationInventoryRepository.GetEmptyLocationInventoryByDetails(locationId, itemMasterId);
+        }
 
         public async Task UpdateLocationInventory(int locationInventoryId, LocationInventory locationInventory)
         {
@@ -54,6 +58,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         public async Task UpdateLocationInventoryStockInHand(int locationId, int itemMasterId, int batchId, LocationInventory locationInventory, string operation)
         {
             await _locationInventoryRepository.UpdateLocationInventoryStockInHand(locationId, itemMasterId, batchId, locationInventory, operation);
+        }
+        public async Task UpdateEmptyLocationInventoryStockInHand(int locationId, int itemMasterId,LocationInventory locationInventory, string operation)
+        {
+            await _locationInventoryRepository.UpdateEmptyLocationInventoryStockInHand(locationId, itemMasterId,locationInventory, operation);
         }
 
         public async Task<IEnumerable<LocationInventory>> GetItemLocationInventoriesByLocationId(int locationId)

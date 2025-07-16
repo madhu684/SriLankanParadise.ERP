@@ -1238,6 +1238,26 @@ export const patch_location_inventory_api = async (
   }
 };
 
+export const patch_Empty_location_inventory_api = async (
+  locationId,
+  itemMasterId,
+  operation,
+  locationInventoryData
+) => {
+  try {
+    const response = await api.patch(
+      `/locationInventory/updateEmptyStockInHand/${locationId}/${itemMasterId}/${operation}`,
+      locationInventoryData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const patch_location_inventory_goods_in_transit_api = async (
   toLocationId,
   fromLocationId,
