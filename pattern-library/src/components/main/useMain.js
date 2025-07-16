@@ -29,6 +29,8 @@ import InventoryAnalysisReport from "../inventoryAnalysisReport/InventoryAnalysi
 import InventoryAnalysisAsAtDateReport from "../inventoryAnalysisReportAsAtDateReport/InventoryAnalysisAsAtDateReport.jsx";
 import PackingSlipList from "../packingSlip/packingSlipList/packingSlipList.jsx";
 import SupplierReturnList from "../supplierReturn/supplierReturnList/supplierReturnList.jsx";
+import EmptyReturnList from "../emptyReturn/emptyReturnList/emptyReturnList.jsx";
+import AddEmpties from "../emptyReturn/addEmpties/addEmpties.jsx";
 
 const useMain = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -145,6 +147,8 @@ const useMain = () => {
         return <SupplierReturnList />;
       case "Stock Level":
         return <StockLevel />;
+      case "Empty Return":
+        return <EmptyReturnList />;
       default:
         return null;
     }

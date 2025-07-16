@@ -12,6 +12,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task<LocationInventory> GetLocationInventoryByLocationInventoryId(int locationInventoryId);
 
         Task<IEnumerable<LocationInventory>> GetLocationInventoriesByLocationId(int locationId);
+        Task<IEnumerable<LocationInventory>> GetEmptyReturnItemLocationInventoriesByLocationId(int locationId);
 
         Task<IEnumerable<LocationInventory>> GetItemLocationInventoriesByLocationId(int locationId);
 
@@ -22,9 +23,11 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task UpdateLocationInventory(int locationInventoryId, LocationInventory locationInventory);
 
         Task<LocationInventory> GetLocationInventoryByDetails(int locationId, int itemMasterId, int batchId);
+        Task<LocationInventory> GetEmptyLocationInventoryByDetails(int locationId, int itemMasterId);
 
         Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemMasterId(int locationId, int itemMasterId);
         Task UpdateLocationInventoryStockInHand(int locationId, int itemMasterId, int batchId, LocationInventory locationInventory, string operation);
+        Task UpdateEmptyLocationInventoryStockInHand(int locationId, int itemMasterId,LocationInventory locationInventory, string operation);
 
         Task<IEnumerable<LocationInventorySummary>> GetLowStockItems();
     }

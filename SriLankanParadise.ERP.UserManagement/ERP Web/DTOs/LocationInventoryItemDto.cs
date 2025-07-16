@@ -14,7 +14,7 @@
 
         public string UnitName { get; set; }
 
-        public int BatchId { get; set; }
+        public int? BatchId { get; set; }
 
         public int LocationId { get; set; }
 
