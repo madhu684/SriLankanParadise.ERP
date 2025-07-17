@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 const useTransferRequisition = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
     deliveryLocation: "",
+    deliveryLocationId: null,
     toWarehouseLocation: null,
     fromWarehouseLocation: null,
     itemDetails: [],
@@ -66,16 +67,37 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     queryFn: fetchUserLocations,
   });
 
+  // Get user departments (locations with locationTypeId === 3)
+  const userDepartments =
+    userLocations?.filter(
+      (location) => location?.location?.locationTypeId === 3
+    ) || [];
+
   useEffect(() => {
     if (!isUserLocationsLoading && userLocations) {
-      const location = userLocations?.find(
+      const departments = userLocations?.filter(
         (location) => location?.location?.locationTypeId === 3
       );
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        department: location?.location.locationName,
-        deliveryLocation: location?.locationId,
-      }));
+
+      console.log("User departments: ", departments);
+
+      // If there's only one department, auto-select it
+      if (departments && departments.length === 1) {
+        const department = departments[0];
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          deliveryLocation: department?.location.locationName,
+          deliveryLocationId: department?.locationId,
+        }));
+      }
+      // If there are multiple departments, clear the selection to allow user to choose
+      else if (departments && departments.length > 1) {
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          deliveryLocation: "",
+          deliveryLocationId: "",
+        }));
+      }
     }
   }, [isUserLocationsLoading, userLocations]);
 
@@ -100,12 +122,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
   } = useQuery({
     queryKey: ["items", searchTerm],
     queryFn: () =>
-      fetchItems(
-        sessionStorage.getItem("companyId"),
-        searchTerm,
-        "Sellable",
-        "All"
-      ),
+      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"),
   });
 
   // Fetch stock details for an item when selected
@@ -205,18 +222,8 @@ const useTransferRequisition = ({ onFormSubmit }) => {
         formData.deliveryLocation
       );
 
-      const isWarehouseLocationValid = validateField(
-        "warehouseLocation",
-        "Warehouse location",
-        formData.warehouseLocation
-      );
-
       const isAttachmentsValid = validateAttachments(formData.attachments);
-      return (
-        isAttachmentsValid &&
-        isDeliveryLocationValid &&
-        isWarehouseLocationValid
-      );
+      return isAttachmentsValid && isDeliveryLocationValid;
     }
 
     const isDeliveryLocationValid = validateField(
@@ -379,6 +386,18 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     }));
   };
 
+  const handleDepartmentChange = (departmentLocationId) => {
+    const selectedDepartment = userDepartments.find(
+      (dept) => dept.locationId === parseInt(departmentLocationId)
+    );
+
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      deliveryLocation: selectedDepartment?.location.locationName || "",
+      deliveryLocationId: parseInt(departmentLocationId),
+    }));
+  };
+
   const handleItemDetailsChange = (index, field, value) => {
     setFormData((prevFormData) => {
       const updatedItemDetails = [...prevFormData.itemDetails];
@@ -421,8 +440,12 @@ const useTransferRequisition = ({ onFormSubmit }) => {
   };
 
   const handleSelectItem = async (item) => {
-    const stockDetails = await fetchStockDetails(
+    const currentStockDetails = await fetchStockDetails(
       formData.fromWarehouseLocation,
+      item.itemMasterId
+    );
+    const toStockDetails = await fetchStockDetails(
+      formData.toWarehouseLocation,
       item.itemMasterId
     );
     setFormData((prevFormData) => ({
@@ -434,9 +457,10 @@ const useTransferRequisition = ({ onFormSubmit }) => {
           name: item.itemName,
           unit: item.unit.unitName,
           quantity: 0,
-          totalStockInHand: stockDetails?.totalStockInHand || 0,
-          reOrderLevel: stockDetails?.minReOrderLevel || 0,
-          maxStockLevel: stockDetails?.maxStockLevel || 0,
+          totalStockInHand: currentStockDetails?.totalStockInHand || 0,
+          totalStockInHandTo: toStockDetails?.totalStockInHand || 0,
+          reOrderLevel: currentStockDetails?.minReOrderLevel || 0,
+          maxStockLevel: currentStockDetails?.maxStockLevel || 0,
         },
       ],
     }));
@@ -459,7 +483,10 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     isItemsError,
     itemsError,
     loading,
+    userLocations,
+    userDepartments,
     handleInputChange,
+    handleDepartmentChange,
     handleItemDetailsChange,
     handleSubmit,
     handleRemoveItem,

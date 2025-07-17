@@ -153,7 +153,7 @@ const useMin = ({ onFormSubmit }) => {
     queryKey: ["mins", selectedMrn?.requisitionMasterId],
     queryFn: () =>
       fetchMinsByRequisitionMasterId(selectedMrn?.requisitionMasterId),
-    enabled: !!selectedMrn?.requisitionMasterId,
+    enabled: !!selectedMrn || !!selectedMrn?.requisitionMasterId,
   });
 
   // Fetch item batches

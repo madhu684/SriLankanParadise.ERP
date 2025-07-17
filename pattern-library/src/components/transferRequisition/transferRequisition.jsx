@@ -27,7 +27,10 @@ const TransferRequisition = ({
     isItemsError,
     itemsError,
     loading,
+    userDepartments,
+    userLocations,
     handleInputChange,
+    handleDepartmentChange,
     handleItemDetailsChange,
     handleSubmit,
     handleRemoveItem,
@@ -130,7 +133,7 @@ const TransferRequisition = ({
               )}
             </div>
 
-            <div className="mb-3 mt-3">
+            {/* <div className="mb-3 mt-3">
               <label htmlFor="deliveryLocation" className="form-label">
                 Department
               </label>
@@ -151,7 +154,6 @@ const TransferRequisition = ({
                 disabled
               >
                 <option value="">Select Location</option>
-                {/* Filter out locations where locationType is not "Warehouse" */}
                 {locations
                   .filter(
                     (location) => location.locationType.name !== "Warehouse"
@@ -170,11 +172,55 @@ const TransferRequisition = ({
                   {validationErrors.deliveryLocation}
                 </div>
               )}
+            </div> */}
+
+            <div className="mb-3">
+              <label htmlFor="deliveryLocation" className="form-label">
+                Department
+              </label>
+              {userDepartments.length > 1 ? (
+                <select
+                  className={`form-select ${
+                    validFields.deliveryLocation ? "is-valid" : ""
+                  } ${validationErrors.deliveryLocation ? "is-invalid" : ""}`}
+                  id="deliveryLocation"
+                  value={formData.departmentLocation}
+                  onChange={(e) => handleDepartmentChange(e.target.value)}
+                  required
+                >
+                  <option value="">Select Department</option>
+                  {userDepartments.map((dept) => (
+                    <option key={dept.locationId} value={dept.locationId}>
+                      {dept.location.locationName}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  className={`form-control ${
+                    validFields.deliveryLocation ? "is-valid" : ""
+                  } ${validationErrors.deliveryLocation ? "is-invalid" : ""}`}
+                  id="deliveryLocation"
+                  placeholder="Enter department"
+                  value={formData.department}
+                  onChange={(e) =>
+                    handleInputChange("deliveryLocationId", e.target.value)
+                  }
+                  required
+                  disabled
+                />
+              )}
+              {validationErrors.deliveryLocation && (
+                <div className="invalid-feedback">
+                  {validationErrors.deliveryLocation}
+                </div>
+              )}
             </div>
 
             <div className="mb-3 mt-3">
               <label htmlFor="toWarehouseLocation" className="form-label">
-                To Warehouse Location
+                Requested To Warehouse
               </label>
               <select
                 className={`form-select ${
@@ -182,20 +228,20 @@ const TransferRequisition = ({
                 } ${validationErrors.toWarehouseLocation ? "is-invalid" : ""}`}
                 id="toWarehouseLocation"
                 value={formData?.toWarehouseLocation ?? ""}
-                disabled={!formData.deliveryLocation}
+                //disabled={!formData.deliveryLocation}
                 onChange={(e) =>
                   handleInputChange("toWarehouseLocation", e.target.value)
                 }
               >
                 <option value="">Select Warehouse</option>
-                {/* Filter out warehouse locations based on both the selected delivery location and the locationType being "Warehouse" */}
                 {locations
-                  .filter(
-                    (location) =>
-                      location.parentId ===
-                        parseInt(formData.deliveryLocation) &&
-                      location.locationType.name === "Warehouse"
-                  )
+                  // .filter(
+                  //   (location) =>
+                  //     location.parentId ===
+                  //       parseInt(formData.deliveryLocation) &&
+                  //     location.locationType.name === "Warehouse"
+                  // )
+                  .filter((location) => location.locationTypeId === 2)
                   .map((location) => (
                     <option
                       key={location.locationId}
@@ -214,7 +260,7 @@ const TransferRequisition = ({
 
             <div className="mb-3 mt-3">
               <label htmlFor="fromWarehouseLocation" className="form-label">
-                From Warehouse Location
+                Requested From Warehouse
               </label>
               <select
                 className={`form-select ${
@@ -224,14 +270,14 @@ const TransferRequisition = ({
                 }`}
                 id="fromWarehouseLocation"
                 value={formData?.fromWarehouseLocation ?? ""}
-                disabled={!formData.deliveryLocation}
+                //disabled={!formData.deliveryLocation}
                 onChange={(e) =>
                   handleInputChange("fromWarehouseLocation", e.target.value)
                 }
               >
                 <option value="">Select Warehouse</option>
                 {/* Filter out warehouse locations based on the locationType being "Warehouse" */}
-                {locations
+                {/* {locations
                   .filter(
                     (location) => location.locationType.name === "Warehouse"
                   )
@@ -241,6 +287,16 @@ const TransferRequisition = ({
                       value={location.locationId}
                     >
                       {location.locationName}
+                    </option>
+                  ))} */}
+                {userLocations
+                  .filter((ul) => ul.location.locationTypeId === 2)
+                  .map((ul) => (
+                    <option
+                      key={ul.location.locationId}
+                      value={ul.location.locationId}
+                    >
+                      {ul.location.locationName}
                     </option>
                   ))}
               </select>
@@ -359,9 +415,10 @@ const TransferRequisition = ({
                   <th>Item Name</th>
                   <th>Unit</th>
                   <th>Quantity</th>
-                  <th>Total Stock in Hand</th>
-                  <th>Re Order Level</th>
-                  <th>Max Order Level</th>
+                  <th>Available Stock</th>
+                  <th>Requested Location Stock</th>
+                  <th>Reorder Level</th>
+                  <th>Max Stock Level</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -396,6 +453,7 @@ const TransferRequisition = ({
                       )}
                     </td>
                     <td>{item.totalStockInHand}</td>
+                    <td>{item.totalStockInHandTo}</td>
                     <td>{item.reOrderLevel}</td>
                     <td>{item.maxStockLevel}</td>
                     <td>

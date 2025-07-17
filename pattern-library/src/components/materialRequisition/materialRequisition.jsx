@@ -27,7 +27,9 @@ const MaterialRequisition = ({
     isItemsError,
     itemsError,
     loading,
+    userDepartments,
     handleInputChange,
+    handleDepartmentChange,
     handleItemDetailsChange,
     handleSubmit,
     handleRemoveItem,
@@ -122,7 +124,7 @@ const MaterialRequisition = ({
               )}
             </div>
 
-            <div className="mb-3 mt-3">
+            {/* <div className="mb-3 mt-3">
               <label htmlFor="deliveryLocation" className="form-label">
                 Department
               </label>
@@ -143,7 +145,6 @@ const MaterialRequisition = ({
                 disabled
               >
                 <option value="">Select Location</option>
-                {/* Filter out locations where locationType is not "Warehouse" */}
                 {locations
                   .filter(
                     (location) => location.locationType.name !== "Warehouse"
@@ -162,6 +163,49 @@ const MaterialRequisition = ({
                   {validationErrors.deliveryLocation}
                 </div>
               )}
+            </div> */}
+            <div className="mb-3">
+              <label htmlFor="department" className="form-label">
+                Department
+              </label>
+              {userDepartments.length > 1 ? (
+                <select
+                  className={`form-select ${
+                    validFields.departmentLocation ? "is-valid" : ""
+                  } ${validationErrors.departmentLocation ? "is-invalid" : ""}`}
+                  id="department"
+                  value={formData.departmentLocation}
+                  onChange={(e) => handleDepartmentChange(e.target.value)}
+                  required
+                >
+                  <option value="">Select Department</option>
+                  {userDepartments.map((dept) => (
+                    <option key={dept.locationId} value={dept.locationId}>
+                      {dept.location.locationName}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  className={`form-control ${
+                    validFields.departmentLocation ? "is-valid" : ""
+                  } ${validationErrors.departmentLocation ? "is-invalid" : ""}`}
+                  id="department"
+                  placeholder="Enter department"
+                  value={formData.department}
+                  onChange={(e) =>
+                    handleInputChange("department", e.target.value)
+                  }
+                  required
+                  disabled
+                />
+              )}
+              {validationErrors.departmentLocation && (
+                <div className="invalid-feedback">
+                  {validationErrors.departmentLocation}
+                </div>
+              )}
             </div>
 
             <div className="mb-3 mt-3">
@@ -174,20 +218,23 @@ const MaterialRequisition = ({
                 } ${validationErrors.warehouseLocation ? "is-invalid" : ""}`}
                 id="warehouseLocation"
                 value={formData?.warehouseLocation ?? ""}
-                disabled={!formData.deliveryLocation}
+                //disabled={!formData.deliveryLocation}
                 onChange={(e) =>
-                  handleInputChange("warehouseLocation", e.target.value)
+                  handleInputChange(
+                    "warehouseLocation",
+                    parseInt(e.target.value)
+                  )
                 }
               >
                 <option value="">Select Warehouse</option>
-                {/* Filter out warehouse locations based on both the selected delivery location and the locationType being "Warehouse" */}
                 {locations
-                  .filter(
-                    (location) =>
-                      location.parentId ===
-                        parseInt(formData.deliveryLocation) &&
-                      location.locationType.name === "Warehouse"
-                  )
+                  // .filter(
+                  //   (location) =>
+                  //     location.parentId ===
+                  //       parseInt(formData.deliveryLocation) &&
+                  //     location.locationType.name === "Warehouse"
+                  // )
+                  .filter((location) => location.locationTypeId === 2)
                   .map((location) => (
                     <option
                       key={location.locationId}

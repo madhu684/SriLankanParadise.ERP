@@ -70,7 +70,7 @@ const MaterialRequisitionDetail = ({
               {materialRequisition.requestedToLocation?.locationName}
             </p>
             <p>
-              <strong>Warehouse Location:</strong>{" "}
+              <strong>Requested From:</strong>{" "}
               {materialRequisition.requestedFromLocation?.locationName}
             </p>
           </div>
