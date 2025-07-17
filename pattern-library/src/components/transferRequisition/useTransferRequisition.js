@@ -67,7 +67,6 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     queryFn: fetchUserLocations,
   });
 
-  // Get user departments (locations with locationTypeId === 3)
   const userDepartments =
     userLocations?.filter(
       (location) => location?.location?.locationTypeId === 3
@@ -81,7 +80,6 @@ const useTransferRequisition = ({ onFormSubmit }) => {
 
       console.log("User departments: ", departments);
 
-      // If there's only one department, auto-select it
       if (departments && departments.length === 1) {
         const department = departments[0];
         setFormData((prevFormData) => ({
@@ -89,9 +87,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
           deliveryLocation: department?.location.locationName,
           deliveryLocationId: department?.locationId,
         }));
-      }
-      // If there are multiple departments, clear the selection to allow user to choose
-      else if (departments && departments.length > 1) {
+      } else if (departments && departments.length > 1) {
         setFormData((prevFormData) => ({
           ...prevFormData,
           deliveryLocation: "",
@@ -125,7 +121,6 @@ const useTransferRequisition = ({ onFormSubmit }) => {
       fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"),
   });
 
-  // Fetch stock details for an item when selected
   const fetchStockDetails = async (locationId, itemMasterId) => {
     try {
       const response =
@@ -139,6 +134,44 @@ const useTransferRequisition = ({ onFormSubmit }) => {
       return null;
     }
   };
+
+  // New useEffect to update stock details when warehouse locations change
+  useEffect(() => {
+    const updateStockDetails = async () => {
+      if (
+        formData.fromWarehouseLocation &&
+        formData.toWarehouseLocation &&
+        formData.itemDetails.length > 0
+      ) {
+        setLoading(true);
+        const updatedItemDetails = await Promise.all(
+          formData.itemDetails.map(async (item) => {
+            const fromStockDetails = await fetchStockDetails(
+              formData.fromWarehouseLocation,
+              item.id
+            );
+            const toStockDetails = await fetchStockDetails(
+              formData.toWarehouseLocation,
+              item.id
+            );
+            return {
+              ...item,
+              totalStockInHand: fromStockDetails?.totalStockInHand || 0,
+              totalStockInHandTo: toStockDetails?.totalStockInHand || 0,
+              reOrderLevel: fromStockDetails?.minReOrderLevel || 0,
+              maxStockLevel: fromStockDetails?.maxStockLevel || 0,
+            };
+          })
+        );
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          itemDetails: updatedItemDetails,
+        }));
+        setLoading(false);
+      }
+    };
+    updateStockDetails();
+  }, [formData.fromWarehouseLocation, formData.toWarehouseLocation]);
 
   useEffect(() => {
     if (submissionStatus != null) {
@@ -178,7 +211,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
   const validateAttachments = (files) => {
     let isAttachmentsValid = true;
     let errorMessage = "";
-    const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
+    const maxSizeInBytes = 10 * 1024 * 1024;
     const allowedTypes = [
       "image/jpeg",
       "image/png",
@@ -439,15 +472,53 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     }));
   };
 
+  // const handleSelectItem = async (item) => {
+  //   const currentStockDetails = await fetchStockDetails(
+  //     formData.fromWarehouseLocation,
+  //     item.itemMasterId
+  //   );
+  //   const toStockDetails = await fetchStockDetails(
+  //     formData.toWarehouseLocation,
+  //     item.itemMasterId
+  //   );
+  //   setFormData((prevFormData) => ({
+  //     ...prevFormData,
+  //     itemDetails: [
+  //       ...prevFormData.itemDetails,
+  //       {
+  //         id: item.itemMasterId,
+  //         name: item.itemName,
+  //         unit: item.unit.unitName,
+  //         quantity: 0,
+  //         totalStockInHand: currentStockDetails?.totalStockInHand || 0,
+  //         totalStockInHandTo: toStockDetails?.totalStockInHand || 0,
+  //         reOrderLevel: currentStockDetails?.minReOrderLevel || 0,
+  //         maxStockLevel: currentStockDetails?.maxStockLevel || 0,
+  //       },
+  //     ],
+  //   }));
+  //   setSearchTerm("");
+  // };
+
   const handleSelectItem = async (item) => {
-    const currentStockDetails = await fetchStockDetails(
-      formData.fromWarehouseLocation,
-      item.itemMasterId
-    );
-    const toStockDetails = await fetchStockDetails(
-      formData.toWarehouseLocation,
-      item.itemMasterId
-    );
+    let currentStockDetails = null;
+    let toStockDetails = null;
+
+    // Only fetch stock details if both warehouse locations are selected
+    if (formData.fromWarehouseLocation) {
+      currentStockDetails = await fetchStockDetails(
+        formData.fromWarehouseLocation,
+        item.itemMasterId
+      );
+    }
+
+    if (formData.toWarehouseLocation) {
+      toStockDetails = await fetchStockDetails(
+        formData.toWarehouseLocation,
+        item.itemMasterId
+      );
+    }
+
     setFormData((prevFormData) => ({
       ...prevFormData,
       itemDetails: [

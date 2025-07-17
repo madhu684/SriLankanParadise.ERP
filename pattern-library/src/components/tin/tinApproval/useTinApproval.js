@@ -41,7 +41,7 @@ const useTinApproval = ({ tin, onFormSubmit }) => {
 
         // Patch Location Inventory API
         await patch_location_inventory_api(
-          fromLocationId,
+          toLocationId,
           itemMasterId,
           batchId,
           "subtract",
@@ -85,7 +85,7 @@ const useTinApproval = ({ tin, onFormSubmit }) => {
           transactionTypeId: 6,
           itemMasterId,
           batchId,
-          locationId: fromLocationId,
+          locationId: toLocationId,
           date: formattedDate,
           qty: quantity,
           permissionId: 1090,

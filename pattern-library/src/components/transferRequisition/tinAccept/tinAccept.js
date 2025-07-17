@@ -107,7 +107,7 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
       setLoading(true);
       const currentDate = new Date();
       const formattedDate = currentDate.toISOString();
-      const locationId = tin?.requisitionMaster?.requestedToLocationId;
+      const locationId = tin?.requisitionMaster?.requestedFromLocationId;
 
       await updateInventory(tin.issueDetails, formattedDate, locationId);
       await updateMrnState();
