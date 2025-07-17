@@ -60,7 +60,7 @@ const SalesInvoiceList = () => {
         handleClose={() => setShowCreateSIForm(false)}
         handleUpdated={handleUpdated}
       />
-    )
+    );
   }
 
   if (showUpdateSIForm) {

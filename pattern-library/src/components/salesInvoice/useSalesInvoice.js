@@ -622,7 +622,12 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
             async (item) => {
               let remainingQuantity = item.quantity;
 
-              for (const batch of item.batch) {
+              // Ensure item.batch is an array for FIFO processing
+              const batches = Array.isArray(item.batch)
+                ? item.batch
+                : [item.batch];
+
+              for (const batch of batches) {
                 const quantityToConsume = Math.min(
                   remainingQuantity,
                   batch.tempQuantity

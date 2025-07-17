@@ -36,6 +36,9 @@ const SalesReceiptList = () => {
     handleUpdated,
     handleClose,
     closeAlertAfterDelay,
+    filter,
+    setFilter,
+    filteredSalesReceipts,
   } = useSalesReceiptList();
 
   if (error || isPermissionsError) {
@@ -101,7 +104,7 @@ const SalesReceiptList = () => {
   return (
     <div className="container mt-4">
       <h2>Sales Receipts</h2>
-      <div className="mt-3 d-flex justify-content-start align-items-center">
+      <div className="mt-3 d-flex justify-content-between align-items-center">
         <div className="btn-group" role="group">
           {hasPermission("Create Sales Receipt") && (
             <button
@@ -120,6 +123,35 @@ const SalesReceiptList = () => {
               Edit
             </button>
           )}
+        </div>
+        <div className="btn-group" role="group">
+          <button
+            type="button"
+            className={`btn btn-outline-primary ${
+              filter === "all" ? "active" : ""
+            }`}
+            onClick={() => setFilter("all")}
+          >
+            All
+          </button>
+          <button
+            type="button"
+            className={`btn btn-outline-primary ${
+              filter === "short" ? "active" : ""
+            }`}
+            onClick={() => setFilter("short")}
+          >
+            Outstanding
+          </button>
+          <button
+            type="button"
+            className={`btn btn-outline-primary ${
+              filter === "excess" ? "active" : ""
+            }`}
+            onClick={() => setFilter("excess")}
+          >
+            Excess
+          </button>
         </div>
       </div>
       {showCreateSRForm && !cashierSessionOpen && (
@@ -143,7 +175,7 @@ const SalesReceiptList = () => {
             </tr>
           </thead>
           <tbody>
-            {salesReceipts.map((sr) => (
+            {filteredSalesReceipts.map((sr) => (
               <tr key={sr.salesReceiptId}>
                 <td>
                   <input

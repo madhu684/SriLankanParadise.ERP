@@ -263,8 +263,6 @@ const useSalesReceipt = ({ onFormSubmit }) => {
         };
 
         const response = await post_sales_receipt_api(salesReceiptData);
-        //setReferenceNo(response.data.result.referenceNo);
-
         const salesReceiptId = response.data.result.salesReceiptId;
 
         const selectedSalesInvoicesData = formData.selectedSalesInvoices.map(
@@ -272,11 +270,7 @@ const useSalesReceipt = ({ onFormSubmit }) => {
             const salesReceiptSalesInvoiceData = {
               salesReceiptId,
               salesInvoiceId: item.salesInvoiceId,
-              settledAmount:
-                item.payment -
-                item.excessAmount +
-                item.shortAmount -
-                item.customerBalance,
+              settledAmount: item.payment,
               excessAmount: item.excessAmount,
               shortAmount: item.shortAmount,
               customerBalance: item.customerBalance,
@@ -287,7 +281,19 @@ const useSalesReceipt = ({ onFormSubmit }) => {
               salesReceiptSalesInvoiceData
             );
 
-            const siStatus = item.updatedAmountDue === 0 ? 5 : item.status;
+            // Calculate new amount due after this payment
+            const newAmountDue = item.amountDue - item.payment;
+
+            // Determine the new status
+            let siStatus = item.status;
+            if (newAmountDue <= 0) {
+              siStatus = 5; // Settled - fully paid
+            } else if (item.shortAmount <= 100) {
+              // NEW LOGIC: If short amount (outstanding amount) <= 100, set to settled
+              siStatus = 5; // Settled - short amount within tolerance
+            } else {
+              siStatus = 2; // Approved - partially paid
+            }
 
             const salesInvoiceData = {
               invoiceDate: item.invoiceDate,
@@ -301,7 +307,7 @@ const useSalesReceipt = ({ onFormSubmit }) => {
               approvedDate: item.approvedDate,
               companyId: item.companyId,
               salesOrderId: item.salesOrderId,
-              amountDue: item.updatedAmountDue,
+              amountDue: newAmountDue, // Update with the remaining amount
               permissionId: 31,
             };
 
@@ -327,10 +333,8 @@ const useSalesReceipt = ({ onFormSubmit }) => {
         if (allUpdatesSuccessful) {
           if (isSaveAsDraft) {
             setSubmissionStatus("successSavedAsDraft");
-            console.log("Sales receipt saved as draft!", formData);
           } else {
             setSubmissionStatus("successSubmitted");
-            console.log("Sales receipt create successfully!", formData);
           }
 
           setTimeout(() => {
@@ -368,69 +372,77 @@ const useSalesReceipt = ({ onFormSubmit }) => {
       ];
       const currentItem = updatedSelectedSalesInvoices[index];
 
-      // Update the field value
+      // Store previous values before changes
+      const prevExcess = parseFloat(currentItem.excessAmount) || 0;
+      const prevCustomerBalance = parseFloat(currentItem.customerBalance) || 0;
+
+      // Update the changed field
       currentItem[field] = value;
 
-      // Calculate updated amount due
-      currentItem.updatedAmountDue =
-        currentItem.amountDue -
-        currentItem.payment +
-        currentItem.excessAmount -
-        currentItem.shortAmount;
+      // Recalculate based on what changed
+      if (field === "excessAmount") {
+        const newExcess = parseFloat(value) || 0;
+        const payment = parseFloat(currentItem.payment) || 0;
+        const amountDue = parseFloat(currentItem.amountDue) || 0;
 
-      // Calculate customer balance
-      const customerBalance = currentItem.payment - currentItem.amountDue;
+        // Calculate available balance that could be converted back
+        const totalAvailable = payment - amountDue;
 
-      // Check if customer balance is negative (indicating credit)
-      if (customerBalance < 0) {
-        if (field === "shortAmount") {
-          // Ensure shortAmount does not exceed the positive customerBalance
-          currentItem.shortAmount = Math.min(value, -customerBalance);
-        }
-        if (field === "excessAmount") {
-          currentItem.excessAmount = 0;
-        }
-      } else {
-        if (field === "excessAmount") {
-          // Ensure excessAmount does not exceed the positive customerBalance
-          currentItem.excessAmount = Math.min(value, customerBalance);
-        }
-        if (field === "shortAmount") {
-          currentItem.shortAmount = 0;
+        if (newExcess < prevExcess) {
+          // When reducing excess, add difference back to customer balance
+          const excessReduction = prevExcess - newExcess;
+          currentItem.customerBalance = Math.min(
+            prevCustomerBalance + excessReduction,
+            totalAvailable
+          );
         }
       }
 
-      if (field === "payment") {
-        currentItem.excessAmount = 0;
-        currentItem.shortAmount = 0;
-      }
+      // Maintain all other existing calculations
+      const payment = parseFloat(currentItem.payment) || 0;
+      const amountDue = parseFloat(currentItem.amountDue) || 0;
+      const excessAmount = parseFloat(currentItem.excessAmount) || 0;
 
-      // Recalculate updatedAmountDue
-      currentItem.updatedAmountDue =
-        currentItem.amountDue -
-        currentItem.payment +
-        currentItem.excessAmount -
-        currentItem.shortAmount;
+      currentItem.shortAmount = Math.max(0, amountDue - payment + excessAmount);
+      currentItem.updatedAmountDue = Math.max(
+        0,
+        amountDue - payment + excessAmount
+      );
+      currentItem.customerBalance = Math.max(
+        0,
+        payment - amountDue - excessAmount
+      );
 
-      if (currentItem.updatedAmountDue < 0) {
-        currentItem.updatedAmountDue = 0;
-      }
-
-      currentItem.customerBalance =
-        currentItem.payment -
-        currentItem.amountDue +
-        currentItem.shortAmount -
-        currentItem.excessAmount;
-
-      if (currentItem.customerBalance < 0) {
-        currentItem.customerBalance = 0;
-      }
-
-      // Update the state
       return {
         ...prevFormData,
         selectedSalesInvoices: updatedSelectedSalesInvoices,
         totalAmountReceived: calculateTotalAmount(),
+      };
+    });
+  };
+
+  const handleAddToExcess = (index) => {
+    setFormData((prevFormData) => {
+      const updatedSelectedSalesInvoices = [
+        ...prevFormData.selectedSalesInvoices,
+      ];
+      const currentItem = updatedSelectedSalesInvoices[index];
+
+      // Convert full customer balance to excess
+      currentItem.excessAmount =
+        (parseFloat(currentItem.excessAmount) || 0) +
+        (parseFloat(currentItem.customerBalance) || 0);
+      currentItem.customerBalance = 0;
+
+      // Maintain other calculations
+      const payment = parseFloat(currentItem.payment) || 0;
+      const amountDue = parseFloat(currentItem.amountDue) || 0;
+      currentItem.shortAmount = Math.max(0, amountDue - payment);
+      currentItem.updatedAmountDue = Math.max(0, amountDue - payment);
+
+      return {
+        ...prevFormData,
+        selectedSalesInvoices: updatedSelectedSalesInvoices,
       };
     });
   };
@@ -564,6 +576,7 @@ const useSalesReceipt = ({ onFormSubmit }) => {
     calculateTotalAmountReceived,
     calculateTotalExcessAmountAmount,
     calculateTotalShortAmountAmount,
+    handleAddToExcess,
   };
 };
 
