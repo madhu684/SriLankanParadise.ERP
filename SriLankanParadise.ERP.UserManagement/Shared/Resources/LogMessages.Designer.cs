@@ -60,6 +60,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
             }
         }
         
+        
         /// <summary>
         ///   Looks up a localized string similar to Approved supply return master not found.
         /// </summary>
@@ -68,6 +69,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
                 return ResourceManager.GetString("ApprovedSupplyReturnMasterNotFound", resourceCulture);
             }
         }
+        
         
         /// <summary>
         ///   Looks up a localized string similar to Approved supply return master retrived.
@@ -78,6 +80,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
             }
         }
         
+        
         /// <summary>
         ///   Looks up a localized string similar to Batch created successfully.
         /// </summary>
@@ -86,6 +89,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
                 return ResourceManager.GetString("BatchCreated", resourceCulture);
             }
         }
+        
         
         /// <summary>
         ///   Looks up a localized string similar to Batches not found.
@@ -543,6 +547,51 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string DailyStockBalancesRetrieved {
             get {
                 return ResourceManager.GetString("DailyStockBalancesRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Empty return master created successfully.
+        /// </summary>
+        public static string EmptyReturnCreated {
+            get {
+                return ResourceManager.GetString("EmptyReturnCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Empty return item location inventories not found.
+        /// </summary>
+        public static string EmptyReturnItemLocationInventoriesNotFound {
+            get {
+                return ResourceManager.GetString("EmptyReturnItemLocationInventoriesNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Empty return Item location Inventories retrieved.
+        /// </summary>
+        public static string EmptyReturnItemLocationInventoriesRetrieved {
+            get {
+                return ResourceManager.GetString("EmptyReturnItemLocationInventoriesRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Empty return master not found.
+        /// </summary>
+        public static string EmptyReturnMasterNotFound {
+            get {
+                return ResourceManager.GetString("EmptyReturnMasterNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Empty return master updated successfully.
+        /// </summary>
+        public static string EmptyReturnMasterUpdated {
+            get {
+                return ResourceManager.GetString("EmptyReturnMasterUpdated", resourceCulture);
             }
         }
         
@@ -1744,7 +1793,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Role permissions retrieved.
+        ///   Looks up a localized string similar to Role permissions retrieved successfully.
         /// </summary>
         public static string RolePermissionsRetrieved {
             get {
@@ -2680,7 +2729,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to User permissions updated.
+        ///   Looks up a localized string similar to User permissions updated successfully.
         /// </summary>
         public static string UserPermissionsUpdated {
             get {
@@ -2707,7 +2756,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to User role updated.
+        ///   Looks up a localized string similar to User role updated successfully.
         /// </summary>
         public static string UserRoleUpdated {
             get {

@@ -106,6 +106,38 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
+        public async Task<IEnumerable<LocationInventory>> GetEmptyReturnItemLocationInventoriesByLocationId(int locationId)
+        {
+            try
+            {
+                var emptyItemType = await _dbContext.ItemTypes.FirstOrDefaultAsync(x => x.Name == "Empty");
+
+                if (emptyItemType != null)
+                {
+                    var locationInventories = await _dbContext.LocationInventories
+                        .Where(li => li.LocationId == locationId)
+                        .Include(li => li.ItemMaster)
+                            .ThenInclude(im => im.Unit)
+                        .Include(li => li.Location )
+                        .ToListAsync();
+
+                    var filteredItems = locationInventories
+                        .Where(l => l.ItemMaster.ItemTypeId == emptyItemType.ItemTypeId)
+                        .ToList();
+
+                    return filteredItems.Any() ? filteredItems : null;
+                }
+
+                return null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+
         public async Task<IEnumerable<LocationInventory>> GetLocationInventoriesByLocationIdItemMasterId(int locationId , int itemMasterId)
         {
             try
@@ -153,6 +185,24 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
            
         }
+        public async Task<LocationInventory> GetEmptyLocationInventoryByDetails(int locationId, int itemMasterId)
+        {
+            try
+            {
+                var locationInventory = await _dbContext.LocationInventories
+                    .Where(li => li.LocationId == locationId && li.ItemMasterId == itemMasterId)
+                    .FirstOrDefaultAsync();
+
+                return locationInventory;
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+        }
 
         public async Task UpdateLocationInventory(int locationInventoryId, LocationInventory locationInventory)
         {
@@ -196,6 +246,41 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         
                         existLocationInventory.StockInHand -= locationInventory.StockInHand;
                         
+                    }
+
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public async Task UpdateEmptyLocationInventoryStockInHand(int locationId, int itemMasterId,LocationInventory locationInventory, string operation)
+        {
+            try
+            {
+                var existLocationInventory = await _dbContext.LocationInventories.Where(li =>
+                        li.LocationId == locationId && li.ItemMasterId == itemMasterId)
+                    .FirstOrDefaultAsync();
+
+
+                if (existLocationInventory != null)
+                {
+                    if (operation.ToLower() == "set")
+                    {
+                        existLocationInventory.StockInHand = locationInventory.StockInHand;
+                    }
+                    else if (operation.ToLower() == "add")
+                    {
+                        existLocationInventory.StockInHand += locationInventory.StockInHand;
+                    }
+                    else if (operation.ToLower() == "subtract")
+                    {
+
+                        existLocationInventory.StockInHand -= locationInventory.StockInHand;
+
                     }
 
                     await _dbContext.SaveChangesAsync();

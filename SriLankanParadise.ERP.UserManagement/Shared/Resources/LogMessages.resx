@@ -993,22 +993,34 @@
   <data name="LeadCreated" xml:space="preserve">
     <value>Lead created successfully</value>
   </data>
-  <data name="RequisitionMasterPatched" xml:space="preserve">
-    <value>MIN Approved for MRN </value>
+  <data name="EmptyReturnMasterUpdated" xml:space="preserve">
+    <value>Empty return master updated successfully</value>
   </data>
-  <data name="IssueDetailsRetrieved" xml:space="preserve">
-    <value>Issue details retrieved</value>
+  <data name="EmptyReturnMasterNotFound" xml:space="preserve">
+    <value>Empty return master not found</value>
+  </data>
+  <data name="EmptyReturnCreated" xml:space="preserve">
+    <value>Empty return master created successfully</value>
   </data>
   <data name="RolePermissionsRetrieved" xml:space="preserve">
-    <value>Role permissions retrieved</value>
+    <value>Role permissions retrieved successfully</value>
   </data>
   <data name="RolePermissionsNotFound" xml:space="preserve">
     <value>Role permissions not found</value>
   </data>
   <data name="UserPermissionsUpdated" xml:space="preserve">
-    <value>User permissions updated</value>
+    <value>User permissions updated successfully</value>
   </data>
   <data name="UserRoleUpdated" xml:space="preserve">
-    <value>User role updated</value>
+    <value>User role updated successfully</value>
+  </data>
+  <data name="EmptyReturnItemLocationInventoriesRetrieved" xml:space="preserve">
+    <value>Empty return Item location Inventories retrieved</value>
+  </data>
+  <data name="EmptyReturnItemLocationInventoriesNotFound" xml:space="preserve">
+    <value>Empty return item location inventories not found</value>
+  </data>
+  <data name="IssueDetailsRetrieved" xml:space="preserve">
+    <value>Issue details retrieved</value>
   </data>
 </root>

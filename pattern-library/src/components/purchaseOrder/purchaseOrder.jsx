@@ -6,6 +6,7 @@ import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonL
 import LoadingSpinner from "../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../errorComponent/errorComponent";
 import Supplier from "../supplier/supplier";
+import ToastMessage from "../toastMessage/toastMessage";
 
 const PurchaseOrder = ({
   handleClose,
@@ -26,6 +27,7 @@ const PurchaseOrder = ({
     isItemsLoading,
     isItemsError,
     itemsError,
+    isPOGenerated,
     isLoading,
     isError,
     error,
@@ -60,6 +62,9 @@ const PurchaseOrder = ({
     renderColumns,
     renderSubColumns,
     calculateTotalAmount,
+    handleGeneratePurchaseOrder, // New function to handle button click
+    showToast,
+    setShowToast,
   } = usePurchaseOrder({
     onFormSubmit: () => {
       handleClose();
@@ -291,9 +296,36 @@ const PurchaseOrder = ({
                 </div>
               )}
             </div>
+
+            {/* Generate Purchase Order - Moved here */}
+            <h4>5. Generate Purchase Order</h4>
+            <div className="mb-3 mt-3">
+              {/* <label className="form-label">Generate Purchase Order</label> */}
+              <div>
+                <button
+                  type="button"
+                  className="btn btn-info"
+                  onClick={handleGeneratePurchaseOrder}
+                  disabled={
+                    loading || loadingDraft || submissionStatus !== null
+                  }
+                >
+                  Generate Purchase Order
+                </button>
+              </div>
+            </div>
+            <div className="mt-3">
+              {formData.itemDetails.length === 0 && isPOGenerated === true && (
+                <ToastMessage
+                  show={showToast}
+                  onClose={() => setShowToast(false)}
+                  type="danger"
+                  message="No any low-stock items found"
+                />
+              )}
+            </div>
           </div>
         </div>
-
         <div className="row mb-3 d-flex justify-content-between">
           <div className="col-md-5">
             {/* Item Details */}
@@ -393,7 +425,6 @@ const PurchaseOrder = ({
             </div>
           </div>
         </div>
-
         {formData.itemDetails.length > 0 && (
           <div className="table-responsive mb-2">
             <table
@@ -543,7 +574,6 @@ const PurchaseOrder = ({
             </table>
           </div>
         )}
-
         {/* Attachments */}
         <h4>4. Attachments</h4>
         <div className="col-md-6 mb-3">
@@ -566,6 +596,7 @@ const PurchaseOrder = ({
             </div>
           )}
         </div>
+
         {/* Actions */}
         <div className="mb-3">
           <button

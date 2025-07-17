@@ -65,7 +65,7 @@ const useUserAccountList = () => {
   //   const delay = 300;
   //   setTimeout(() => {
   //     setShowUserDetailModalInParent(false);
-  //     setUserDetail("");
+  //     setUserDetail("");UserDetail
   //   }, delay);
   // };
 
