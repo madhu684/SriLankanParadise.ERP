@@ -293,8 +293,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
         }
 
-        [HttpGet("GetSumLocationInventoriesByLocationIdItemMasterId/{locationId}/{itemMasterId}")]
-        public async Task<ApiResponseModel> GetSumLocationInventoriesByLocationIdItemMasterId(int locationId, int itemMasterId)
+        [HttpGet("GetSumLocationInventoriesByLocationIdItemMasterId")]
+        public async Task<ApiResponseModel> GetSumLocationInventoriesByLocationIdItemMasterId(int itemMasterId, int? locationId = null)
         {
             try
             {

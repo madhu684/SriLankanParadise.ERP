@@ -239,27 +239,52 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemMasterId(int locationId, int itemMasterId)
+        public async Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemMasterId(int? locationId, int itemMasterId)
         {
             try
             {
-                var summaryData = await _dbContext.LocationInventories
-                    .Where(li => li.LocationId == locationId && li.ItemMasterId == itemMasterId)
-                    .Include(li => li.ItemMaster)
-                    .GroupBy(li => new { li.LocationId, li.ItemMasterId })
-                    .Select(g => new LocationInventorySummary
-                    {
-                        LocationInventoryId = g.FirstOrDefault().LocationInventoryId,
-                        LocationId = g.Key.LocationId,
-                        ItemMasterId = g.Key.ItemMasterId,
-                        TotalStockInHand = g.Sum(li => li.StockInHand ?? 0),
-                        MinReOrderLevel = g.Min(li => li.ReOrderLevel ?? 0),
-                        MaxStockLevel = g.Max(li => li.MaxStockLevel ?? 0),
-                        ItemMaster = g.FirstOrDefault().ItemMaster
-                    })
-                    .FirstOrDefaultAsync();
+                if (locationId.HasValue)
+                {
+                    // Query for specific location
+                    var summaryData = await _dbContext.LocationInventories
+                        .Where(li => li.LocationId == locationId.Value && li.ItemMasterId == itemMasterId)
+                        .Include(li => li.ItemMaster)
+                        .GroupBy(li => new { li.LocationId, li.ItemMasterId })
+                        .Select(g => new LocationInventorySummary
+                        {
+                            LocationInventoryId = g.FirstOrDefault().LocationInventoryId,
+                            LocationId = g.Key.LocationId,
+                            ItemMasterId = g.Key.ItemMasterId,
+                            TotalStockInHand = g.Sum(li => li.StockInHand ?? 0),
+                            MinReOrderLevel = g.Min(li => li.ReOrderLevel ?? 0),
+                            MaxStockLevel = g.Max(li => li.MaxStockLevel ?? 0),
+                            ItemMaster = g.FirstOrDefault().ItemMaster
+                        })
+                        .FirstOrDefaultAsync();
 
-                return summaryData;
+                    return summaryData;
+                }
+                else
+                {
+                    // Query for all locations
+                    var allLocationsSummary = await _dbContext.LocationInventories
+                        .Where(li => li.ItemMasterId == itemMasterId)
+                        .Include(li => li.ItemMaster)
+                        .GroupBy(li => li.ItemMasterId)
+                        .Select(g => new LocationInventorySummary
+                        {
+                            LocationInventoryId = 0,  // Not relevant for all locations
+                            LocationId = 0,           // 0 indicates all locations
+                            ItemMasterId = g.Key,
+                            TotalStockInHand = g.Sum(li => li.StockInHand ?? 0),
+                            MinReOrderLevel = g.Min(li => li.ReOrderLevel ?? 0),
+                            MaxStockLevel = g.Max(li => li.MaxStockLevel ?? 0),
+                            ItemMaster = g.FirstOrDefault().ItemMaster
+                        })
+                        .FirstOrDefaultAsync();
+
+                    return allLocationsSummary;
+                }
             }
             catch (Exception)
             {
