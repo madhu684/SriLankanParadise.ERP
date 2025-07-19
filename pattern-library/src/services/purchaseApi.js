@@ -1502,3 +1502,19 @@ export const put_location_inventory_by_id_api = async (id, formData) => {
     throw error;
   }
 };
+
+export const update_min_state_in_mrn_api = async (id, formData) => {
+  try {
+    const response = await api.patch(
+      `/requisitionMaster/patchMinApproved/${id}`,
+      formData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

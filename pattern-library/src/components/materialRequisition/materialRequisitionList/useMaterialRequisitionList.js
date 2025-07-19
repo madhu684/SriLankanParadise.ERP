@@ -23,6 +23,7 @@ const useMaterialRequisitionList = () => {
   const [showCreateMRForm, setShowCreateMRForm] = useState(false);
   const [openMINsList, setOpenMINsList] = useState(false);
   const [MRDetail, setMRDetail] = useState("");
+  const [refetch, setRefetch] = useState(false);
 
   const fetchUserPermissions = async () => {
     try {
@@ -116,7 +117,7 @@ const useMaterialRequisitionList = () => {
 
   useEffect(() => {
     fetchData();
-  }, [isLoadingPermissions, userPermissions]);
+  }, [isLoadingPermissions, userPermissions, refetch]);
 
   const handleShowApproveMRModal = () => {
     setShowApproveMRModal(true);
@@ -284,6 +285,8 @@ const useMaterialRequisitionList = () => {
     isPermissionsError,
     permissionError,
     openMINsList,
+    refetch,
+    setRefetch,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleViewDetails,

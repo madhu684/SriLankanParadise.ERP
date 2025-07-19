@@ -86,7 +86,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
-        //======
         [HttpGet("{issueMasterId}")]
         public async Task<ApiResponseModel> GetIssueDetails(int issueMasterId)
         {

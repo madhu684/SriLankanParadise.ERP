@@ -8,6 +8,8 @@ import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 const useMinDetail = (min, handleClose) => {
   const queryClient = useQueryClient();
 
+  console.log("min in useMinDetail", min);
+
   const isRequester =
     Number(sessionStorage?.getItem("userId")) === min.requisitionMaster
       ? min.requisitionMaster.requestedUserId
@@ -47,16 +49,16 @@ const useMinDetail = (min, handleClose) => {
     }
   }, [issuedetails]);
 
-  useEffect(() => {
-    if (issuedetails?.length > 0) {
-      const updatedReturnedQuantities = issuedetails.reduce((acc, item) => {
-        acc[item.issueDetailId] =
-          item.returnedQuantity !== undefined ? item.returnedQuantity : "";
-        return acc;
-      }, {});
-      setReturnedQuantities(updatedReturnedQuantities);
-    }
-  }, [issuedetails]);
+  // useEffect(() => {
+  //   if (issuedetails?.length > 0) {
+  //     const updatedReturnedQuantities = issuedetails.reduce((acc, item) => {
+  //       acc[item.issueDetailId] =
+  //         item.returnedQuantity !== undefined ? item.returnedQuantity : "";
+  //       return acc;
+  //     }, {});
+  //     setReturnedQuantities(updatedReturnedQuantities);
+  //   }
+  // }, [issuedetails]);
 
   const mutation = useMutation({
     mutationFn: ({ issuemasterid, updatedDetails }) =>
@@ -87,9 +89,9 @@ const useMinDetail = (min, handleClose) => {
 
   return {
     receivedQuantities,
+    returnedQuantities,
     isRequester,
     handleAccept,
-    returnedQuantities,
     handleReceivedQuantityChange,
     handleReturnedQuantityChange,
   };

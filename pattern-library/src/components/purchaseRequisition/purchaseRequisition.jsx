@@ -28,7 +28,9 @@ const PurchaseRequisition = ({
     isItemsLoading,
     isItemsError,
     itemsError,
+    userDepartments,
     handleInputChange,
+    handleDepartmentChange,
     handleItemDetailsChange,
     handleSubmit,
     handleSelectItem,
@@ -130,7 +132,7 @@ const PurchaseRequisition = ({
                 </div>
               )}
             </div>
-            <div className="mb-3">
+            {/* <div className="mb-3">
               <label htmlFor="department" className="form-label">
                 Department
               </label>
@@ -151,6 +153,49 @@ const PurchaseRequisition = ({
               {validationErrors.department && (
                 <div className="invalid-feedback">
                   {validationErrors.department}
+                </div>
+              )}
+            </div> */}
+            <div className="mb-3">
+              <label htmlFor="department" className="form-label">
+                Department
+              </label>
+              {userDepartments.length > 1 ? (
+                <select
+                  className={`form-select ${
+                    validFields.departmentLocation ? "is-valid" : ""
+                  } ${validationErrors.departmentLocation ? "is-invalid" : ""}`}
+                  id="department"
+                  value={formData.departmentLocation}
+                  onChange={(e) => handleDepartmentChange(e.target.value)}
+                  required
+                >
+                  <option value="">Select Department</option>
+                  {userDepartments.map((dept) => (
+                    <option key={dept.locationId} value={dept.locationId}>
+                      {dept.location.locationName}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  className={`form-control ${
+                    validFields.departmentLocation ? "is-valid" : ""
+                  } ${validationErrors.departmentLocation ? "is-invalid" : ""}`}
+                  id="department"
+                  placeholder="Enter department"
+                  value={formData.department}
+                  onChange={(e) =>
+                    handleInputChange("department", e.target.value)
+                  }
+                  required
+                  disabled
+                />
+              )}
+              {validationErrors.departmentLocation && (
+                <div className="invalid-feedback">
+                  {validationErrors.departmentLocation}
                 </div>
               )}
             </div>
@@ -288,12 +333,13 @@ const PurchaseRequisition = ({
               >
                 <option value="">Select Location</option>
                 {locations
-                  .filter(
-                    (location) =>
-                      location.locationType.name === "Warehouse" &&
-                      location.parentId ===
-                        parseInt(sessionStorage.getItem("locationId"))
-                  )
+                  // .filter(
+                  //   (location) =>
+                  //     location.locationType.name === "Warehouse" &&
+                  //     location.parentId ===
+                  //       parseInt(sessionStorage.getItem("locationId"))
+                  // )
+                  .filter((location) => location.locationTypeId === 2)
                   .map((location) => (
                     <option
                       key={location.locationId}

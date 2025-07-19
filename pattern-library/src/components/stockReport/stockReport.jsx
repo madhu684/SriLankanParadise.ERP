@@ -187,7 +187,7 @@ const StockReport = () => {
                     <th>
                       <i className="bi bi-arrow-up"></i> Out
                     </th>
-                    <th>Cloding Balance</th>
+                    <th>Closing Balance</th>
                     <th>Reorder Level</th>
                   </tr>
                 </thead>

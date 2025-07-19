@@ -35,5 +35,9 @@
         public virtual IEnumerable<RequisitionDetailDto>? RequisitionDetails { get; set; }
 
         public string? ReferenceNumber { get; set; }
+
+        public bool IsMINApproved { get; set; }
+
+        public bool IsMINAccepted { get; set; }
     }
 }

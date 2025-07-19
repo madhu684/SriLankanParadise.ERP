@@ -60,6 +60,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
             }
         }
         
+        
         /// <summary>
         ///   Looks up a localized string similar to Approved supply return master not found.
         /// </summary>
@@ -68,6 +69,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
                 return ResourceManager.GetString("ApprovedSupplyReturnMasterNotFound", resourceCulture);
             }
         }
+        
         
         /// <summary>
         ///   Looks up a localized string similar to Approved supply return master retrived.
@@ -78,6 +80,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
             }
         }
         
+        
         /// <summary>
         ///   Looks up a localized string similar to Batch created successfully.
         /// </summary>
@@ -86,6 +89,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
                 return ResourceManager.GetString("BatchCreated", resourceCulture);
             }
         }
+        
         
         /// <summary>
         ///   Looks up a localized string similar to Batches not found.
@@ -1713,6 +1717,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string RequisitionMasterNotFound {
             get {
                 return ResourceManager.GetString("RequisitionMasterNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MIN Approved for MRN .
+        /// </summary>
+        public static string RequisitionMasterPatched {
+            get {
+                return ResourceManager.GetString("RequisitionMasterPatched", resourceCulture);
             }
         }
         

@@ -33,9 +33,7 @@ const useMin = ({ onFormSubmit }) => {
   const [searchByWithoutMrn, setSearchByWithoutMrn] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [dummySearchTerm, setDummySearchTerm] = useState("");
-  const [selectedLocationId, setSelectedLocationId] = useState(
-    sessionStorage.getItem("defaultLocationId") || "4" // Main warehouse
-  );
+  const [selectedLocationId, setSelectedLocationId] = useState();
 
   // Reset search modes on component mount
   useEffect(() => {
@@ -130,31 +128,31 @@ const useMin = ({ onFormSubmit }) => {
   });
 
   // Fetch MINs by requisitionMasterId
-  const fetchMinsByRequisitionMasterId = async (requisitionMasterId) => {
-    try {
-      const response = await get_issue_masters_by_requisition_master_id_api(
-        requisitionMasterId
-      );
-      const filteredMins = response.data.result?.filter(
-        (rm) => rm.issueType === "MIN"
-      );
-      return filteredMins || null;
-    } catch (error) {
-      console.error("Error fetching MINs:", error);
-      return null;
-    }
-  };
+  // const fetchMinsByRequisitionMasterId = async (requisitionMasterId) => {
+  //   try {
+  //     const response = await get_issue_masters_by_requisition_master_id_api(
+  //       requisitionMasterId
+  //     );
+  //     const filteredMins = response.data.result?.filter(
+  //       (rm) => rm.issueType === "MIN"
+  //     );
+  //     return filteredMins || null;
+  //   } catch (error) {
+  //     console.error("Error fetching MINs:", error);
+  //     return null;
+  //   }
+  // };
 
-  const {
-    data: mins,
-    isLoading: isMinsLoading,
-    refetch: refetchMins,
-  } = useQuery({
-    queryKey: ["mins", selectedMrn?.requisitionMasterId],
-    queryFn: () =>
-      fetchMinsByRequisitionMasterId(selectedMrn?.requisitionMasterId),
-    enabled: !!selectedMrn?.requisitionMasterId,
-  });
+  // const {
+  //   data: mins,
+  //   isLoading: isMinsLoading,
+  //   refetch: refetchMins,
+  // } = useQuery({
+  //   queryKey: ["mins", selectedMrn?.requisitionMasterId],
+  //   queryFn: () =>
+  //     fetchMinsByRequisitionMasterId(selectedMrn?.requisitionMasterId),
+  //   enabled: !!selectedMrn || !!selectedMrn?.requisitionMasterId,
+  // });
 
   // Fetch item batches
   const fetchItemBatches = async () => {
@@ -217,27 +215,9 @@ const useMin = ({ onFormSubmit }) => {
 
   // Handle MRN selection and search without MRN
   useEffect(() => {
-    console.log(
-      "useEffect - selectedMrn:",
-      selectedMrn,
-      "searchByWithoutMrn:",
-      searchByWithoutMrn,
-      "dummySearchTerm:",
-      dummySearchTerm,
-      "locationInventories:",
-      locationInventories,
-      "isLoading:",
-      isLocationInventoriesLoading,
-      "selectedLocationId:",
-      selectedLocationId
-    );
     try {
       if (selectedMrn) {
-        setSelectedLocationId(
-          selectedMrn.requestedFromLocationId ||
-            sessionStorage.getItem("defaultLocationId") ||
-            "4"
-        );
+        setSelectedLocationId(selectedMrn?.requestedToLocationId);
         refetchLocationInventories();
         const updatedItemDetails = selectedMrn.requisitionDetails.map(
           (requestItem) => ({
@@ -546,7 +526,7 @@ const useMin = ({ onFormSubmit }) => {
       ...prev,
       mrnId: foundMrn?.requisitionMasterId ?? "",
     }));
-    refetchMins();
+    //refetchMins();
     refetchLocationInventories();
     setMrnSearchTerm("");
   };
@@ -600,6 +580,8 @@ const useMin = ({ onFormSubmit }) => {
   };
 
   console.log("FormData: ", formData);
+  console.log("Selected MRN: ", selectedMrn);
+  console.log("Selected Location ID: ", selectedLocationId);
 
   return {
     formData,
@@ -612,7 +594,7 @@ const useMin = ({ onFormSubmit }) => {
     alertRef,
     isLoading:
       isLoading ||
-      isMinsLoading ||
+      //isMinsLoading ||
       isItemBatchesLoading ||
       isLocationInventoriesLoading,
     isError,

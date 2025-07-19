@@ -89,6 +89,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<LocationType, LocationTypeDto>();
             CreateMap<RequisitionMasterRequestModel, RequisitionMaster>();
             CreateMap<ApproveRequisitionMasterRequestModel, RequisitionMaster>();
+            CreateMap<PatchIsMINApprovedMRNRequestModel, RequisitionMaster>();
             CreateMap<RequisitionMaster, RequisitionMasterDto>();
             CreateMap<RequisitionDetailRequestModel, RequisitionDetail>();
             CreateMap<RequisitionDetail, RequisitionDetailDto>();
