@@ -162,39 +162,6 @@ const TransferRequisition = ({
             </div>
 
             <div className="mb-3 mt-3">
-              <label htmlFor="toWarehouseLocation" className="form-label">
-                Requested To Warehouse
-              </label>
-              <select
-                className={`form-select ${
-                  validFields.toWarehouseLocation ? "is-valid" : ""
-                } ${validationErrors.toWarehouseLocation ? "is-invalid" : ""}`}
-                id="toWarehouseLocation"
-                value={formData.toWarehouseLocation ?? ""}
-                onChange={(e) =>
-                  handleInputChange("toWarehouseLocation", e.target.value)
-                }
-              >
-                <option value="">Select Warehouse</option>
-                {locations
-                  .filter((location) => location.locationTypeId === 2)
-                  .map((location) => (
-                    <option
-                      key={location.locationId}
-                      value={location.locationId}
-                    >
-                      {location.locationName}
-                    </option>
-                  ))}
-              </select>
-              {validationErrors.toWarehouseLocation && (
-                <div className="invalid-feedback">
-                  {validationErrors.toWarehouseLocation}
-                </div>
-              )}
-            </div>
-
-            <div className="mb-3 mt-3">
               <label htmlFor="fromWarehouseLocation" className="form-label">
                 Requested From Warehouse
               </label>
@@ -225,6 +192,39 @@ const TransferRequisition = ({
               {validationErrors.fromWarehouseLocation && (
                 <div className="invalid-feedback">
                   {validationErrors.fromWarehouseLocation}
+                </div>
+              )}
+            </div>
+
+            <div className="mb-3 mt-3">
+              <label htmlFor="toWarehouseLocation" className="form-label">
+                Requested To Warehouse
+              </label>
+              <select
+                className={`form-select ${
+                  validFields.toWarehouseLocation ? "is-valid" : ""
+                } ${validationErrors.toWarehouseLocation ? "is-invalid" : ""}`}
+                id="toWarehouseLocation"
+                value={formData.toWarehouseLocation ?? ""}
+                onChange={(e) =>
+                  handleInputChange("toWarehouseLocation", e.target.value)
+                }
+              >
+                <option value="">Select Warehouse</option>
+                {locations
+                  .filter((location) => location.locationTypeId === 2)
+                  .map((location) => (
+                    <option
+                      key={location.locationId}
+                      value={location.locationId}
+                    >
+                      {location.locationName}
+                    </option>
+                  ))}
+              </select>
+              {validationErrors.toWarehouseLocation && (
+                <div className="invalid-feedback">
+                  {validationErrors.toWarehouseLocation}
                 </div>
               )}
             </div>

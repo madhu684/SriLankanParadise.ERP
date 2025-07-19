@@ -11,10 +11,10 @@ const MinDetail = ({ show, handleClose, min }) => {
 
   const {
     receivedQuantities,
+    returnedQuantities,
     isRequester,
     handleQuantityChange,
     handleAccept,
-    returnedQuantities,
     handleReceivedQuantityChange,
     handleReturnedQuantityChange,
   } = useMinDetail(min, handleClose);

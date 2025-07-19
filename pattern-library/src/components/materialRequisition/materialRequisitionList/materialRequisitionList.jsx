@@ -138,9 +138,6 @@ const MaterialRequisitionList = () => {
       <h2>Material Requisition Notes</h2>
       <div className="mt-3 d-flex justify-content-start align-items-center">
         <div className="btn-group" role="group">
-          <p>
-            You haven't created any material requisition note. Create a new one.
-          </p>
           {hasPermission("Create Material Requisition Note") && (
             <button
               type="button"

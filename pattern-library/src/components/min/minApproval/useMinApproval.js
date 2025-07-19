@@ -50,28 +50,28 @@ const useMinApproval = ({ min, onFormSubmit }) => {
         });
 
         // Patch Location Inventory API
-        await patch_location_inventory_api(
-          locationId,
-          itemMasterId,
-          batchId,
-          "subtract",
-          {
-            stockInHand: quantity,
-            permissionId: 1089,
-          }
-        );
+        // await patch_location_inventory_api(
+        //   locationId,
+        //   itemMasterId,
+        //   batchId,
+        //   "subtract",
+        //   {
+        //     stockInHand: quantity,
+        //     permissionId: 1089,
+        //   }
+        // );
 
         // Post Location Inventory Movement API
-        await post_location_inventory_movement_api({
-          movementTypeId: 2,
-          transactionTypeId: 5,
-          itemMasterId,
-          batchId,
-          locationId: locationId,
-          date: formattedDate,
-          qty: quantity,
-          permissionId: 1090,
-        });
+        // await post_location_inventory_movement_api({
+        //   movementTypeId: 2,
+        //   transactionTypeId: 5,
+        //   itemMasterId,
+        //   batchId,
+        //   locationId: locationId,
+        //   date: formattedDate,
+        //   qty: quantity,
+        //   permissionId: 1090,
+        // });
       }
     } catch (error) {
       throw new Error("Error updating inventory: " + error.message);

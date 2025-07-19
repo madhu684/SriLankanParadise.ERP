@@ -89,9 +89,9 @@ const useMinDetail = (min, handleClose) => {
 
   return {
     receivedQuantities,
+    returnedQuantities,
     isRequester,
     handleAccept,
-    returnedQuantities,
     handleReceivedQuantityChange,
     handleReturnedQuantityChange,
   };
