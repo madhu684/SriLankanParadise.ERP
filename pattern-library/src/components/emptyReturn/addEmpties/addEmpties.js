@@ -10,6 +10,7 @@ import {
 import {
   get_item_masters_by_company_id_with_query_api,
   post_Empty_Return_api,
+  get_added_empty_items_by_masterId_api,
 } from "../../../services/inventoryApi";
 
 export const AddEmptiesManagement = (handleClose) => {
@@ -140,33 +141,6 @@ export const AddEmptiesManagement = (handleClose) => {
 
         const generateBatchRefBatchId = await createBatch();
 
-        for (const item of formData.itemDetails) {
-          const locationInventoryData = {
-            itemMasterId: item.id,
-            batchId: null,
-            locationId: locationId,
-            stockInHand: item.quantity,
-            permissionId: 1088,
-            movementTypeId: 1,
-          };
-
-          const locationInventoryMovementData = {
-            movementTypeId: 1,
-            transactionTypeId: 4,
-            itemMasterId: item.id,
-            batchId: null,
-            locationId: locationId,
-            date: new Date().toISOString(),
-            qty: item.quantity,
-            permissionId: 1090,
-          };
-
-          await post_location_inventory_api(locationInventoryData);
-
-          await post_location_inventory_movement_api(
-            locationInventoryMovementData
-          );
-        }
         const EmptyReturnData = {
           companyId: parseInt(sessionStorage.getItem("companyId")),
           fromLocationId: locationId,
@@ -179,7 +153,62 @@ export const AddEmptiesManagement = (handleClose) => {
           })),
         };
 
-        await post_Empty_Return_api(EmptyReturnData);
+        try {
+          const response = await post_Empty_Return_api(EmptyReturnData);
+
+          if (
+            response.data &&
+            response.data.result &&
+            response.data.result.emptyReturnMasterId
+          ) {
+            const emptyReturnMasterId =
+              response.data.result.emptyReturnMasterId;
+
+            // const EmptyReturnitemResponse =
+            //   await get_added_empty_items_by_masterId_api(emptyReturnMasterId);
+
+            for (const item of formData.itemDetails) {
+              const locationInventoryData = {
+                itemMasterId: item.id,
+                batchId: null,
+                locationId: locationId,
+                stockInHand: item.quantity,
+                permissionId: 1088,
+                movementTypeId: 1,
+                // remark: parseInt(emptyReturnMasterId),
+              };
+
+              const locationInventoryMovementData = {
+                movementTypeId: 1,
+                transactionTypeId: 4,
+                itemMasterId: item.id,
+                batchId: null,
+                locationId: locationId,
+                date: new Date().toISOString(),
+                qty: item.quantity,
+                permissionId: 1090,
+              };
+
+              const responseInventryAdded = await post_location_inventory_api(
+                locationInventoryData
+              );
+
+              await post_location_inventory_movement_api(
+                locationInventoryMovementData
+              );
+
+              console.log(
+                "Location Inventory dinusha Response dinusha 207: ",
+                responseInventryAdded
+              );
+            }
+          } else {
+            console.error("emptyReturnMasterId not found in response");
+          }
+        } catch (error) {
+          console.error("Error calling the API: ", error);
+        }
+
         queryClient.invalidateQueries("addedEmptyItems");
         setFormData({ warehouseLocation: null, itemDetails: [] });
         refetchWarehouses();

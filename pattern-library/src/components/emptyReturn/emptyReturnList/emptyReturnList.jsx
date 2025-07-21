@@ -28,15 +28,19 @@ const EmptyReturnList = () => {
     handleSearchChange,
     filteredInventories,
     showEditModal,
+    showReduceEmptyModal,
     selectedItem,
     transferDetails,
     modalErrors,
     isSubmitting,
     submissionStatus,
     handleTransfer,
+    handleReduceEmpty,
     handleCloseModal,
+    handleCloseReduceModal,
     handleModalInputChange,
     handleModalSubmit,
+    handleEmptyReduceModalSubmit,
 
     showToast,
     toastMessage,
@@ -187,10 +191,17 @@ const EmptyReturnList = () => {
                       <td>{item.stockInHand || "-"}</td>
                       <td>
                         <button
-                          className="btn btn-warning btn-sm"
+                          className="btn btn-warning btn-sm me-2"
                           onClick={() => handleTransfer(item)}
                         >
                           Empty Transfer
+                        </button>
+
+                        <button
+                          className="btn btn-danger btn-sm me-2"
+                          onClick={() => handleReduceEmpty(item)}
+                        >
+                          Empty Reduce
                         </button>
                       </td>
                     </tr>
@@ -364,6 +375,159 @@ const EmptyReturnList = () => {
                       </>
                     ) : (
                       "Transfer"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Empty Reduce Modal */}
+        {showReduceEmptyModal && (
+          <div
+            className="modal fade show d-block"
+            tabIndex="-1"
+            style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+          >
+            <div className="modal-dialog modal-lg">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Reduce Your Empties</h5>
+                  <button
+                    type="button"
+                    className="btn-close"
+                    onClick={handleCloseReduceModal}
+                    disabled={isSubmitting}
+                  ></button>
+                </div>
+                <div className="modal-body">
+                  {selectedItem && (
+                    <div>
+                      <div className="row mb-3 mx-auto">
+                        <div className="col-md-6">
+                          <label className="form-label">
+                            <strong>Item Code:</strong>
+                          </label>
+                          <p>{selectedItem.itemMaster.itemCode || "-"}</p>
+                        </div>
+                        <div className="col-md-6">
+                          <label className="form-label">
+                            <strong>Item Name:</strong>
+                          </label>
+                          <p>{selectedItem.itemMaster.itemName || "-"}</p>
+                        </div>
+                      </div>
+                      <div className="row mb-3 mx-auto">
+                        <div className="col-md-6">
+                          <label className="form-label">
+                            <strong>From Location:</strong>
+                          </label>
+                          <p>{selectedItem.location.locationName || "-"}</p>
+                        </div>
+                        <div className="col-md-6">
+                          <label className="form-label">
+                            <strong>Empty Stock in Hand:</strong>
+                          </label>
+                          <p>{selectedItem.stockInHand || "-"}</p>
+                        </div>
+                      </div>
+                      <hr />
+                      <h6>Reduce Your Empties</h6>
+                      <div className="row">
+                        {/* <div className="col-md-6">
+                          <label htmlFor="warehouse" className="form-label">
+                            Select To Location Warehouse
+                          </label>
+
+                          <select
+                            className="form-select"
+                            id="warehouse"
+                            value={transferDetails.location || ""}
+                            onChange={handleToLocationChange}
+                          >
+                            <option value="" disabled>
+                              Select a Warehouse
+                            </option>
+                            {companyLocations && companyLocations.length > 0 ? (
+                              companyLocations
+                                .filter((l) => l.locationTypeId === 2)
+                                .map((item) => (
+                                  <option key={item.id} value={item.locationId}>
+                                    {item.locationName}
+                                  </option>
+                                ))
+                            ) : (
+                              <option>No warehouses available</option>
+                            )}
+                          </select>
+                          {errors.selectedLocation && (
+                            <div className="text-danger mb-2">
+                              {errors.selectedLocation}
+                            </div>
+                          )}
+                        </div> */}
+                        <div className="col-md-6">
+                          {/* <label htmlFor="reorderLevel" className="form-label">
+                            Transfer Empties
+                          </label> */}
+
+                          {/* Show validation error if present */}
+
+                          <input
+                            type="number"
+                            className="form-control"
+                            id="transferQty"
+                            placeholder="Enter Reduce qty"
+                            value={transferDetails.transferQty ?? ""}
+                            onChange={(e) =>
+                              handleModalInputChange(
+                                "transferQty",
+                                e.target.value
+                              )
+                            }
+                            step="any"
+                          />
+                          {errors.transferQty && (
+                            <div className="text-danger mb-2">
+                              {errors.transferQty}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      {modalErrors && (
+                        <div className="alert alert-danger mt-3" role="alert">
+                          {modalErrors}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={handleCloseReduceModal}
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleEmptyReduceModalSubmit}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <span
+                          className="spinner-border spinner-border-sm me-2"
+                          role="status"
+                          aria-hidden="true"
+                        ></span>
+                        Reducing ...
+                      </>
+                    ) : (
+                      "Reduce Empties"
                     )}
                   </button>
                 </div>
