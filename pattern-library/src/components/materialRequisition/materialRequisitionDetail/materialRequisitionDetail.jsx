@@ -1,6 +1,6 @@
-import React from "react";
-import { Modal, Button } from "react-bootstrap";
+import { React } from "react";
 import useMaterialRequisitionDetial from "./useMaterialRequisitionDetail";
+import { Modal, Button, Form } from "react-bootstrap";
 import useMaterialRequisitionList from "../materialRequisitionList/useMaterialRequisitionList";
 import moment from "moment";
 import "moment-timezone";
@@ -70,7 +70,7 @@ const MaterialRequisitionDetail = ({
               {materialRequisition.requestedToLocation?.locationName}
             </p>
             <p>
-              <strong>Warehouse Location:</strong>{" "}
+              <strong>Requested From:</strong>{" "}
               {materialRequisition.requestedFromLocation?.locationName}
             </p>
           </div>
@@ -82,7 +82,7 @@ const MaterialRequisitionDetail = ({
             <tr>
               <th>Item Name</th>
               <th>Unit</th>
-              <th>Quantity</th>
+              <th>Requested Quantity</th>
             </tr>
           </thead>
           <tbody>

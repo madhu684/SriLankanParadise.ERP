@@ -6,7 +6,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
     {
         public int IssueMasterId { get; set; }
 
-        public int RequisitionMasterId { get; set; }
+        public int? RequisitionMasterId { get; set; }
 
         public virtual RequisitionMasterDto? RequisitionMaster { get; set; }
 

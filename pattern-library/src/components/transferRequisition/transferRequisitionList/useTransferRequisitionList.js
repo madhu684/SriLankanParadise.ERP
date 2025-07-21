@@ -23,9 +23,11 @@ const useTransferRequisitionList = () => {
   const [TRDetail, setTRDetail] = useState("");
   const [filter, setFilter] = useState("all"); // 'all', 'incoming', 'outgoing'
   const [userWarehouses, setUserWarehouses] = useState([]);
+  const [openTINsList, setOpenTINsList] = useState(false);
   const [selectedWarehouse, setSelectedWarehouse] = useState(
     userWarehouses[0]?.id || ""
   );
+  const [refetch, setRefetch] = useState(false);
 
   const fetchUserPermissions = async () => {
     try {
@@ -149,7 +151,7 @@ const useTransferRequisitionList = () => {
 
   useEffect(() => {
     fetchData();
-  }, [isLoadingPermissions, userPermissions]);
+  }, [isLoadingPermissions, userPermissions, refetch]);
 
   const handleShowApproveTRModal = () => {
     setShowApproveTRModal(true);
@@ -332,6 +334,9 @@ const useTransferRequisitionList = () => {
     userWarehouses,
     filter,
     filteredRequisitions,
+    openTINsList,
+    refetch,
+    setRefetch,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleViewDetails,
@@ -350,6 +355,7 @@ const useTransferRequisitionList = () => {
     formatDateInTimezone,
     setSelectedWarehouse,
     setFilter,
+    setOpenTINsList,
   };
 };
 

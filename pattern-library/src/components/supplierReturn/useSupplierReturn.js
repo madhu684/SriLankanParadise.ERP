@@ -192,6 +192,7 @@ const useSupplierReturn = ({ onFormSubmit }) => {
                 stockInHand: item.stockInHand,
                 returnQuantity: 0,
                 locationId: item.locationId,
+                locationName: item.location.locationName,
               })),
             ]
           : prevFormData.itemDetails, // Keep the existing itemDetails if no inventory

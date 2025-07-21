@@ -42,5 +42,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             return await _requisitionMasterRepository.GetRequisitionMastersByUserId(userId);
         }
 
+        public async Task PatchMinApproved(int requisitionMasterId, RequisitionMaster requisitionMaster)
+        {
+            await _requisitionMasterRepository.PatchMinApproved(requisitionMasterId, requisitionMaster);
+        }
     }
 }

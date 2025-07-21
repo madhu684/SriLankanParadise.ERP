@@ -113,16 +113,37 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     }));
   }, [formData.itemDetails]);
 
+  // Get user departments (locations with locationTypeId === 3)
+  const userDepartments =
+    userLocations?.filter(
+      (location) => location?.location?.locationTypeId === 3
+    ) || [];
+
   useEffect(() => {
     if (!isUserLocationsLoading && userLocations) {
-      const location = userLocations?.find(
+      const departments = userLocations?.filter(
         (location) => location?.location?.locationTypeId === 3
       );
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        department: location?.location.locationName,
-        departmentLocation: location?.locationId,
-      }));
+
+      console.log("User departments: ", departments);
+
+      // If there's only one department, auto-select it
+      if (departments && departments.length === 1) {
+        const department = departments[0];
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          department: department?.location.locationName,
+          departmentLocation: department?.locationId,
+        }));
+      }
+      // If there are multiple departments, clear the selection to allow user to choose
+      else if (departments && departments.length > 1) {
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          department: "",
+          departmentLocation: "",
+        }));
+      }
     }
   }, [isUserLocationsLoading, userLocations]);
 
@@ -198,6 +219,12 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
       setValidFields({});
       setValidationErrors({});
 
+      const isDepartmentValid = validateField(
+        "departmentLocation",
+        "Department",
+        formData.departmentLocation
+      );
+
       const isDeliveryLocationValid = validateField(
         "expectedDeliveryLocation",
         "Expected delivery location",
@@ -240,6 +267,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
       const isAttachmentsValid = validateAttachments(formData.attachments);
 
       return (
+        isDepartmentValid &&
         isDeliveryLocationValid &&
         isAttachmentsValid &&
         isDeliveryDateValid &&
@@ -250,6 +278,12 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
 
     setValidFields({});
     setValidationErrors({});
+
+    const isDepartmentValid = validateField(
+      "departmentLocation",
+      "Department",
+      formData.departmentLocation
+    );
 
     const isDeliveryLocationValid = validateField(
       "expectedDeliveryLocation",
@@ -310,6 +344,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     });
 
     return (
+      isDepartmentValid &&
       isEmailValid &&
       isContactNumberValid &&
       isDeliveryLocationValid &&
@@ -429,6 +464,18 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     }));
   };
 
+  const handleDepartmentChange = (departmentLocationId) => {
+    const selectedDepartment = userDepartments.find(
+      (dept) => dept.locationId === parseInt(departmentLocationId)
+    );
+
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      department: selectedDepartment?.location.locationName || "",
+      departmentLocation: parseInt(departmentLocationId),
+    }));
+  };
+
   const handleItemDetailsChange = (index, field, value) => {
     setFormData((prevFormData) => {
       const updatedItemDetails = [...prevFormData.itemDetails];
@@ -507,6 +554,8 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     setSearchTerm(""); // Clear the search term
   };
 
+  console.log("formData", formData);
+
   return {
     formData,
     locations,
@@ -524,7 +573,9 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     itemsError,
     loading,
     loadingDraft,
+    userDepartments,
     handleInputChange,
+    handleDepartmentChange,
     handleItemDetailsChange,
     handleSubmit,
     handleSelectItem,

@@ -6,7 +6,11 @@ import ErrorComponent from "../errorComponent/errorComponent";
 import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
 
-const MaterialRequisition = ({ handleClose, handleUpdated }) => {
+const MaterialRequisition = ({
+  handleClose,
+  handleUpdated,
+  setShowCreateMRForm,
+}) => {
   const {
     formData,
     locations,
@@ -23,7 +27,9 @@ const MaterialRequisition = ({ handleClose, handleUpdated }) => {
     isItemsError,
     itemsError,
     loading,
+    userDepartments,
     handleInputChange,
+    handleDepartmentChange,
     handleItemDetailsChange,
     handleSubmit,
     handleRemoveItem,
@@ -48,13 +54,15 @@ const MaterialRequisition = ({ handleClose, handleUpdated }) => {
     return <ErrorComponent error={"Error fetching data"} />;
   }
 
+  const handleBack = () => {
+    setShowCreateMRForm(false);
+  };
   return (
     <div className="container mt-4">
       {/* Header */}
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          {/* <img src={companyLogoUrl} alt="Company Logo" height={30} /> */}
           <i
             class="bi bi-arrow-left"
             onClick={handleClose}
@@ -69,18 +77,18 @@ const MaterialRequisition = ({ handleClose, handleUpdated }) => {
       </div>
 
       {/* Display success or error messages */}
-      {submissionStatus === 'successSubmitted' && (
+      {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
           Material requisition note submitted successfully!
         </div>
       )}
-      {submissionStatus === 'successSavedAsDraft' && (
+      {submissionStatus === "successSavedAsDraft" && (
         <div className="alert alert-success mb-3" role="alert">
           Material requisition note saved as draft, you can edit and submit it
           later!
         </div>
       )}
-      {submissionStatus === 'error' && (
+      {submissionStatus === "error" && (
         <div className="alert alert-danger mb-3" role="alert">
           Error submitting material requisition. Please try again.
         </div>
@@ -97,13 +105,13 @@ const MaterialRequisition = ({ handleClose, handleUpdated }) => {
               </label>
               <textarea
                 className={`form-control ${
-                  validFields.purposeOfRequest ? 'is-valid' : ''
-                } ${validationErrors.purposeOfRequest ? 'is-invalid' : ''}`}
+                  validFields.purposeOfRequest ? "is-valid" : ""
+                } ${validationErrors.purposeOfRequest ? "is-invalid" : ""}`}
                 placeholder="Enter purpose of request"
                 id="purposeOfRequest"
                 value={formData.purposeOfRequest}
                 onChange={(e) =>
-                  handleInputChange('purposeOfRequest', e.target.value)
+                  handleInputChange("purposeOfRequest", e.target.value)
                 }
                 rows="2"
                 maxLength="200"
@@ -116,31 +124,30 @@ const MaterialRequisition = ({ handleClose, handleUpdated }) => {
               )}
             </div>
 
-            <div className="mb-3 mt-3">
+            {/* <div className="mb-3 mt-3">
               <label htmlFor="deliveryLocation" className="form-label">
                 Department
               </label>
               <select
                 className={`form-select ${
-                  validFields.deliveryLocation ? 'is-valid' : ''
-                } ${validationErrors.deliveryLocation ? 'is-invalid' : ''}`}
+                  validFields.deliveryLocation ? "is-valid" : ""
+                } ${validationErrors.deliveryLocation ? "is-invalid" : ""}`}
                 id="deliveryLocation"
-                value={formData?.deliveryLocation ?? ''}
+                value={formData?.deliveryLocation ?? ""}
                 onChange={(e) => {
-                  handleInputChange('deliveryLocation', e.target.value)
+                  handleInputChange("deliveryLocation", e.target.value);
                   // Reset warehouseLocation in formData
                   setFormData((prevFormData) => ({
                     ...prevFormData,
-                    warehouseLocation: '',
-                  }))
+                    warehouseLocation: "",
+                  }));
                 }}
                 disabled
               >
                 <option value="">Select Location</option>
-                {/* Filter out locations where locationType is not "Warehouse" */}
                 {locations
                   .filter(
-                    (location) => location.locationType.name !== 'Warehouse'
+                    (location) => location.locationType.name !== "Warehouse"
                   )
                   .map((location) => (
                     <option
@@ -156,6 +163,49 @@ const MaterialRequisition = ({ handleClose, handleUpdated }) => {
                   {validationErrors.deliveryLocation}
                 </div>
               )}
+            </div> */}
+            <div className="mb-3">
+              <label htmlFor="department" className="form-label">
+                Department
+              </label>
+              {userDepartments.length > 1 ? (
+                <select
+                  className={`form-select ${
+                    validFields.departmentLocation ? "is-valid" : ""
+                  } ${validationErrors.departmentLocation ? "is-invalid" : ""}`}
+                  id="department"
+                  value={formData.departmentLocation}
+                  onChange={(e) => handleDepartmentChange(e.target.value)}
+                  required
+                >
+                  <option value="">Select Department</option>
+                  {userDepartments.map((dept) => (
+                    <option key={dept.locationId} value={dept.locationId}>
+                      {dept.location.locationName}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  className={`form-control ${
+                    validFields.departmentLocation ? "is-valid" : ""
+                  } ${validationErrors.departmentLocation ? "is-invalid" : ""}`}
+                  id="department"
+                  placeholder="Enter department"
+                  value={formData.department}
+                  onChange={(e) =>
+                    handleInputChange("department", e.target.value)
+                  }
+                  required
+                  disabled
+                />
+              )}
+              {validationErrors.departmentLocation && (
+                <div className="invalid-feedback">
+                  {validationErrors.departmentLocation}
+                </div>
+              )}
             </div>
 
             <div className="mb-3 mt-3">
@@ -164,24 +214,27 @@ const MaterialRequisition = ({ handleClose, handleUpdated }) => {
               </label>
               <select
                 className={`form-select ${
-                  validFields.warehouseLocation ? 'is-valid' : ''
-                } ${validationErrors.warehouseLocation ? 'is-invalid' : ''}`}
+                  validFields.warehouseLocation ? "is-valid" : ""
+                } ${validationErrors.warehouseLocation ? "is-invalid" : ""}`}
                 id="warehouseLocation"
-                value={formData?.warehouseLocation ?? ''}
-                disabled={!formData.deliveryLocation}
+                value={formData?.warehouseLocation ?? ""}
+                //disabled={!formData.deliveryLocation}
                 onChange={(e) =>
-                  handleInputChange('warehouseLocation', e.target.value)
+                  handleInputChange(
+                    "warehouseLocation",
+                    parseInt(e.target.value)
+                  )
                 }
               >
                 <option value="">Select Warehouse</option>
-                {/* Filter out warehouse locations based on both the selected delivery location and the locationType being "Warehouse" */}
                 {locations
-                  .filter(
-                    (location) =>
-                      location.parentId ===
-                        parseInt(formData.deliveryLocation) &&
-                      location.locationType.name === 'Warehouse'
-                  )
+                  // .filter(
+                  //   (location) =>
+                  //     location.parentId ===
+                  //       parseInt(formData.deliveryLocation) &&
+                  //     location.locationType.name === "Warehouse"
+                  // )
+                  .filter((location) => location.locationTypeId === 2)
                   .map((location) => (
                     <option
                       key={location.locationId}
@@ -221,9 +274,9 @@ const MaterialRequisition = ({ handleClose, handleUpdated }) => {
                 <span
                   className="input-group-text bg-transparent"
                   style={{
-                    cursor: 'pointer',
+                    cursor: "pointer",
                   }}
-                  onClick={() => setSearchTerm('')}
+                  onClick={() => setSearchTerm("")}
                 >
                   <i className="bi bi-x"></i>
                 </span>
@@ -231,14 +284,14 @@ const MaterialRequisition = ({ handleClose, handleUpdated }) => {
             </div>
             {/* Dropdown for filtered items */}
             {searchTerm && (
-              <div className="dropdown" style={{ width: '100%' }}>
+              <div className="dropdown" style={{ width: "100%" }}>
                 <ul
                   className="dropdown-menu"
                   style={{
-                    display: 'block',
-                    width: '100%',
-                    maxHeight: '200px',
-                    overflowY: 'auto',
+                    display: "block",
+                    width: "100%",
+                    maxHeight: "200px",
+                    overflowY: "auto",
                   }}
                 >
                   {isItemsLoading ? (
@@ -318,17 +371,17 @@ const MaterialRequisition = ({ handleClose, handleUpdated }) => {
                       <input
                         type="number"
                         className={`form-control ${
-                          validFields[`quantity_${index}`] ? 'is-valid' : ''
+                          validFields[`quantity_${index}`] ? "is-valid" : ""
                         } ${
                           validationErrors[`quantity_${index}`]
-                            ? 'is-invalid'
-                            : ''
+                            ? "is-invalid"
+                            : ""
                         }`}
                         value={item.quantity}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            'quantity',
+                            "quantity",
                             e.target.value
                           )
                         }
@@ -364,8 +417,8 @@ const MaterialRequisition = ({ handleClose, handleUpdated }) => {
           <input
             type="file"
             className={`form-control ${
-              validFields.attachments ? 'is-valid' : ''
-            } ${validationErrors.attachments ? 'is-invalid' : ''}`}
+              validFields.attachments ? "is-valid" : ""
+            } ${validationErrors.attachments ? "is-invalid" : ""}`}
             id="attachment"
             onChange={(e) => handleAttachmentChange(e.target.files)}
             multiple
@@ -393,7 +446,7 @@ const MaterialRequisition = ({ handleClose, handleUpdated }) => {
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Submitting..." />
             ) : (
-              'Submit'
+              "Submit"
             )}
           </button>
           {/* <button
@@ -414,7 +467,7 @@ const MaterialRequisition = ({ handleClose, handleUpdated }) => {
         </div>
       </form>
     </div>
-  )
+  );
 };
 
 export default MaterialRequisition;

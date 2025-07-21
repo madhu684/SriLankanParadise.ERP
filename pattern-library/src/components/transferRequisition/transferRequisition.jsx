@@ -6,7 +6,11 @@ import ErrorComponent from "../errorComponent/errorComponent";
 import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
 
-const TransferRequisition = ({ handleClose, handleUpdated }) => {
+const TransferRequisition = ({
+  handleClose,
+  handleUpdated,
+  setShowCreateTRForm,
+}) => {
   const {
     formData,
     locations,
@@ -23,7 +27,10 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
     isItemsError,
     itemsError,
     loading,
+    userDepartments,
+    userLocations,
     handleInputChange,
+    handleDepartmentChange,
     handleItemDetailsChange,
     handleSubmit,
     handleRemoveItem,
@@ -38,7 +45,6 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
       handleUpdated();
     },
   });
-  //const companyLogoUrl = useCompanyLogoUrl();
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -50,15 +56,12 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
 
   return (
     <div className="container mt-4">
-      {/* Header */}
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          {/* <img src={companyLogoUrl} alt="Company Logo" height={30} /> */}
           <i
-            class="bi bi-arrow-left"
-            onClick={handleClose}
             className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+            onClick={handleClose}
           ></i>
           <p>
             <CurrentDateTime />
@@ -68,19 +71,18 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
         <hr />
       </div>
 
-      {/* Display success or error messages */}
-      {submissionStatus === 'successSubmitted' && (
+      {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
           Transfer requisition note submitted successfully!
         </div>
       )}
-      {submissionStatus === 'successSavedAsDraft' && (
+      {submissionStatus === "successSavedAsDraft" && (
         <div className="alert alert-success mb-3" role="alert">
           Transfer requisition note saved as draft, you can edit and submit it
           later!
         </div>
       )}
-      {submissionStatus === 'error' && (
+      {submissionStatus === "error" && (
         <div className="alert alert-danger mb-3" role="alert">
           Error submitting Transfer requisition. Please try again.
         </div>
@@ -89,7 +91,6 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
       <form>
         <div className="row g-3 mb-3 d-flex justify-content-between">
           <div className="col-md-5">
-            {/* Requestor Information */}
             <h4>1. Request Information</h4>
             <div className="mb-3 mt-3">
               <label htmlFor="purposeOfRequest" className="form-label">
@@ -97,13 +98,13 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
               </label>
               <textarea
                 className={`form-control ${
-                  validFields.purposeOfRequest ? 'is-valid' : ''
-                } ${validationErrors.purposeOfRequest ? 'is-invalid' : ''}`}
+                  validFields.purposeOfRequest ? "is-valid" : ""
+                } ${validationErrors.purposeOfRequest ? "is-invalid" : ""}`}
                 placeholder="Enter purpose of request"
                 id="purposeOfRequest"
                 value={formData.purposeOfRequest}
                 onChange={(e) =>
-                  handleInputChange('purposeOfRequest', e.target.value)
+                  handleInputChange("purposeOfRequest", e.target.value)
                 }
                 rows="2"
                 maxLength="200"
@@ -116,41 +117,43 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
               )}
             </div>
 
-            <div className="mb-3 mt-3">
+            <div className="mb-3">
               <label htmlFor="deliveryLocation" className="form-label">
                 Department
               </label>
-              <select
-                className={`form-select ${
-                  validFields.deliveryLocation ? 'is-valid' : ''
-                } ${validationErrors.deliveryLocation ? 'is-invalid' : ''}`}
-                id="deliveryLocation"
-                value={formData?.deliveryLocation ?? ''}
-                onChange={(e) => {
-                  handleInputChange('deliveryLocation', e.target.value)
-                  // Reset warehouseLocation in formData
-                  setFormData((prevFormData) => ({
-                    ...prevFormData,
-                    warehouseLocation: '',
-                  }))
-                }}
-                disabled
-              >
-                <option value="">Select Location</option>
-                {/* Filter out locations where locationType is not "Warehouse" */}
-                {locations
-                  .filter(
-                    (location) => location.locationType.name !== 'Warehouse'
-                  )
-                  .map((location) => (
-                    <option
-                      key={location.locationId}
-                      value={location.locationId}
-                    >
-                      {location.locationName}
+              {userDepartments.length > 1 ? (
+                <select
+                  className={`form-select ${
+                    validFields.deliveryLocation ? "is-valid" : ""
+                  } ${validationErrors.deliveryLocation ? "is-invalid" : ""}`}
+                  id="deliveryLocation"
+                  value={formData.deliveryLocationId}
+                  onChange={(e) => handleDepartmentChange(e.target.value)}
+                  required
+                >
+                  <option value="">Select Department</option>
+                  {userDepartments.map((dept) => (
+                    <option key={dept.locationId} value={dept.locationId}>
+                      {dept.location.locationName}
                     </option>
                   ))}
-              </select>
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  className={`form-control ${
+                    validFields.deliveryLocation ? "is-valid" : ""
+                  } ${validationErrors.deliveryLocation ? "is-invalid" : ""}`}
+                  id="deliveryLocation"
+                  placeholder="Enter department"
+                  value={formData.deliveryLocation}
+                  onChange={(e) =>
+                    handleInputChange("deliveryLocation", e.target.value)
+                  }
+                  required
+                  disabled
+                />
+              )}
               {validationErrors.deliveryLocation && (
                 <div className="invalid-feedback">
                   {validationErrors.deliveryLocation}
@@ -159,29 +162,57 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
             </div>
 
             <div className="mb-3 mt-3">
-              <label htmlFor="toWarehouseLocation" className="form-label">
-                To Warehouse Location
+              <label htmlFor="fromWarehouseLocation" className="form-label">
+                Requested From Warehouse
               </label>
               <select
                 className={`form-select ${
-                  validFields.toWarehouseLocation ? 'is-valid' : ''
-                } ${validationErrors.toWarehouseLocation ? 'is-invalid' : ''}`}
-                id="toWarehouseLocation"
-                value={formData?.toWarehouseLocation ?? ''}
-                disabled={!formData.deliveryLocation}
+                  validFields.fromWarehouseLocation ? "is-valid" : ""
+                } ${
+                  validationErrors.fromWarehouseLocation ? "is-invalid" : ""
+                }`}
+                id="fromWarehouseLocation"
+                value={formData.fromWarehouseLocation ?? ""}
                 onChange={(e) =>
-                  handleInputChange('toWarehouseLocation', e.target.value)
+                  handleInputChange("fromWarehouseLocation", e.target.value)
                 }
               >
                 <option value="">Select Warehouse</option>
-                {/* Filter out warehouse locations based on both the selected delivery location and the locationType being "Warehouse" */}
+                {userLocations
+                  .filter((ul) => ul.location.locationTypeId === 2)
+                  .map((ul) => (
+                    <option
+                      key={ul.location.locationId}
+                      value={ul.location.locationId}
+                    >
+                      {ul.location.locationName}
+                    </option>
+                  ))}
+              </select>
+              {validationErrors.fromWarehouseLocation && (
+                <div className="invalid-feedback">
+                  {validationErrors.fromWarehouseLocation}
+                </div>
+              )}
+            </div>
+
+            <div className="mb-3 mt-3">
+              <label htmlFor="toWarehouseLocation" className="form-label">
+                Requested To Warehouse
+              </label>
+              <select
+                className={`form-select ${
+                  validFields.toWarehouseLocation ? "is-valid" : ""
+                } ${validationErrors.toWarehouseLocation ? "is-invalid" : ""}`}
+                id="toWarehouseLocation"
+                value={formData.toWarehouseLocation ?? ""}
+                onChange={(e) =>
+                  handleInputChange("toWarehouseLocation", e.target.value)
+                }
+              >
+                <option value="">Select Warehouse</option>
                 {locations
-                  .filter(
-                    (location) =>
-                      location.parentId ===
-                        parseInt(formData.deliveryLocation) &&
-                      location.locationType.name === 'Warehouse'
-                  )
+                  .filter((location) => location.locationTypeId === 2)
                   .map((location) => (
                     <option
                       key={location.locationId}
@@ -197,53 +228,12 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
                 </div>
               )}
             </div>
-
-            <div className="mb-3 mt-3">
-              <label htmlFor="fromWarehouseLocation" className="form-label">
-                From Warehouse Location
-              </label>
-              <select
-                className={`form-select ${
-                  validFields.fromWarehouseLocation ? 'is-valid' : ''
-                } ${
-                  validationErrors.fromWarehouseLocation ? 'is-invalid' : ''
-                }`}
-                id="fromWarehouseLocation"
-                value={formData?.fromWarehouseLocation ?? ''}
-                disabled={!formData.deliveryLocation}
-                onChange={(e) =>
-                  handleInputChange('fromWarehouseLocation', e.target.value)
-                }
-              >
-                <option value="">Select Warehouse</option>
-                {/* Filter out warehouse locations based on the locationType being "Warehouse" */}
-                {locations
-                  .filter(
-                    (location) => location.locationType.name === 'Warehouse'
-                  )
-                  .map((location) => (
-                    <option
-                      key={location.locationId}
-                      value={location.locationId}
-                    >
-                      {location.locationName}
-                    </option>
-                  ))}
-              </select>
-              {validationErrors.fromWarehouseLocation && (
-                <div className="invalid-feedback">
-                  {validationErrors.fromWarehouseLocation}
-                </div>
-              )}
-            </div>
           </div>
         </div>
 
-        {/* Item Details */}
         <h4>2. Item Details</h4>
 
         <div className="col-md-5">
-          {/* Item Search */}
           <div className="mb-3 mt-3">
             <div className="input-group">
               <span className="input-group-text bg-transparent">
@@ -260,24 +250,23 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
                 <span
                   className="input-group-text bg-transparent"
                   style={{
-                    cursor: 'pointer',
+                    cursor: "pointer",
                   }}
-                  onClick={() => setSearchTerm('')}
+                  onClick={() => setSearchTerm("")}
                 >
                   <i className="bi bi-x"></i>
                 </span>
               )}
             </div>
-            {/* Dropdown for filtered items */}
             {searchTerm && (
-              <div className="dropdown" style={{ width: '100%' }}>
+              <div className="dropdown" style={{ width: "100%" }}>
                 <ul
                   className="dropdown-menu"
                   style={{
-                    display: 'block',
-                    width: '100%',
-                    maxHeight: '200px',
-                    overflowY: 'auto',
+                    display: "block",
+                    width: "100%",
+                    maxHeight: "200px",
+                    overflowY: "auto",
                   }}
                 >
                   {isItemsLoading ? (
@@ -308,7 +297,7 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
                           !formData.itemDetails.some(
                             (detail) => detail.id === item.itemMasterId
                           )
-                      ) // Filter out items that are already in itemDetails
+                      )
                       .map((item) => (
                         <li key={item.itemMasterId}>
                           <button
@@ -345,6 +334,10 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
                   <th>Item Name</th>
                   <th>Unit</th>
                   <th>Quantity</th>
+                  <th>Available Stock</th>
+                  <th>Requested Location Stock</th>
+                  <th>Reorder Level</th>
+                  <th>Max Stock Level</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -357,17 +350,17 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
                       <input
                         type="number"
                         className={`form-control ${
-                          validFields[`quantity_${index}`] ? 'is-valid' : ''
+                          validFields[`quantity_${index}`] ? "is-valid" : ""
                         } ${
                           validationErrors[`quantity_${index}`]
-                            ? 'is-invalid'
-                            : ''
+                            ? "is-invalid"
+                            : ""
                         }`}
                         value={item.quantity}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            'quantity',
+                            "quantity",
                             e.target.value
                           )
                         }
@@ -378,6 +371,10 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
                         </div>
                       )}
                     </td>
+                    <td>{item.totalStockInHand}</td>
+                    <td>{item.totalStockInHandTo}</td>
+                    <td>{item.reOrderLevel}</td>
+                    <td>{item.maxStockLevel}</td>
                     <td>
                       <button
                         type="button"
@@ -394,7 +391,6 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
           </div>
         )}
 
-        {/* Attachments */}
         <h4>3. Attachments</h4>
         <div className="col-md-6 mb-3">
           <label htmlFor="attachment" className="form-label">
@@ -403,8 +399,8 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
           <input
             type="file"
             className={`form-control ${
-              validFields.attachments ? 'is-valid' : ''
-            } ${validationErrors.attachments ? 'is-invalid' : ''}`}
+              validFields.attachments ? "is-valid" : ""
+            } ${validationErrors.attachments ? "is-invalid" : ""}`}
             id="attachment"
             onChange={(e) => handleAttachmentChange(e.target.files)}
             multiple
@@ -417,7 +413,6 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
           )}
         </div>
 
-        {/* Actions */}
         <div className="mb-3">
           <button
             type="button"
@@ -432,16 +427,9 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Submitting..." />
             ) : (
-              'Submit'
+              "Submit"
             )}
           </button>
-          {/* <button
-            type="button"
-            className="btn btn-secondary me-2"
-            onClick={() => handleSubmit(true)}
-          >
-            Save as Draft
-          </button> */}
           <button
             type="button"
             className="btn btn-danger"
@@ -453,7 +441,7 @@ const TransferRequisition = ({ handleClose, handleUpdated }) => {
         </div>
       </form>
     </div>
-  )
+  );
 };
 
 export default TransferRequisition;

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace SriLankanParadise.ERP.UserManagement.DataModels;
+﻿using SriLankanParadise.ERP.UserManagement.DataModels;
 
 public partial class LocationInventory
 {
@@ -9,7 +6,7 @@ public partial class LocationInventory
 
     public int ItemMasterId { get; set; }
 
-    public int BatchId { get; set; }
+    public int? BatchId { get; set; }
 
     public int LocationId { get; set; }
 
@@ -19,12 +16,15 @@ public partial class LocationInventory
 
     public string? RackNo { get; set; }
 
-    public virtual ItemBatch ItemBatch { get; set; } = null!;
+    public int? ReOrderLevel { get; set; }
+
+    public int? MaxStockLevel { get; set; }
+
+    public virtual ItemBatch ItemBatch { get; set; }
 
     public virtual Location Location { get; set; } = null!;
 
     public virtual ItemMaster ItemMaster { get; set; } = null!;
 
     public virtual ICollection<DailyLocationInventory> DailyLocationInventories { get; set; } = new List<DailyLocationInventory>();
-
 }

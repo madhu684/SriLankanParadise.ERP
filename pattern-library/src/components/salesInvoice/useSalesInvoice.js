@@ -47,12 +47,13 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   const [initialized, setInitialized] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  const fetchItemBatches = async (storeLocation,itemMasterId) => {
+  const fetchItemBatches = async (storeLocation, itemMasterId) => {
     try {
-      const response = await get_locations_inventories_by_location_id_item_master_id_api(
-        storeLocation,
-        itemMasterId
-      );
+      const response =
+        await get_locations_inventories_by_location_id_item_master_id_api(
+          storeLocation,
+          itemMasterId
+        );
       return response.data.result;
     } catch (error) {
       console.error("Error fetching item batches:", error);
@@ -79,17 +80,18 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   });
 
   const {
-      data: itemBatches,
-      isLoading,
-      isError,
-      error,
-      refetch: refetchItemBatches,
-    } = useQuery({
-      queryKey: ["itemBatches", formData.storeLocation,formData.itemMasterId],
-      queryFn: () => fetchItemBatches(formData.storeLocation,formData.itemMasterId),
-      enabled: !!formData.storeLocation && !!formData.itemMasterId,
+    data: itemBatches,
+    isLoading,
+    isError,
+    error,
+    refetch: refetchItemBatches,
+  } = useQuery({
+    queryKey: ["itemBatches", formData.storeLocation, formData.itemMasterId],
+    queryFn: () =>
+      fetchItemBatches(formData.storeLocation, formData.itemMasterId),
+    enabled: !!formData.storeLocation && !!formData.itemMasterId,
   });
-  
+
   const fetchItems = async (companyId, searchQuery, itemType) => {
     try {
       const response = await get_item_masters_by_company_id_with_query_api(
@@ -97,7 +99,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         searchQuery,
         itemType
       );
-      console.log("Response : ", response)
+      console.log("Response : ", response);
       return response.data.result;
     } catch (error) {
       console.error("Error fetching items:", error);
@@ -112,7 +114,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   } = useQuery({
     queryKey: ["items", searchTerm],
     queryFn: () =>
-      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "Sellable"), //Sellable
+      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"), //Sellable
   });
 
   useEffect(() => {
@@ -221,24 +223,24 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
       invoiceDate: today,
-      dueDate: today
+      dueDate: today,
     }));
   }, []);
 
-    // Set the first available warehouse location as the default value
-    useEffect(() => {
-      if (userLocations && userLocations.length > 0) {
-        const filteredLocations = userLocations.filter(
-          (location) => location.location.locationType.name === "Warehouse"
-        );
-        if (filteredLocations.length > 0) {
-          setFormData((prevFormData) => ({
-            ...prevFormData,
-            storeLocation: filteredLocations[0].location.locationId, // Set the first location's ID
-          }));
-        }
+  // Set the first available warehouse location as the default value
+  useEffect(() => {
+    if (userLocations && userLocations.length > 0) {
+      const filteredLocations = userLocations.filter(
+        (location) => location.location.locationType.name === "Warehouse"
+      );
+      if (filteredLocations.length > 0) {
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          storeLocation: filteredLocations[0].location.locationId, // Set the first location's ID
+        }));
       }
-    }, [userLocations]);
+    }
+  }, [userLocations]);
 
   useEffect(() => {
     if (
@@ -604,7 +606,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
           lastUpdatedDate: currentDate,
           referenceNumber: formData.referenceNumber,
           permissionId: 29,
-          locationId:formData.storeLocation,
+          locationId: formData.storeLocation,
         };
 
         const response = await post_sales_invoice_api(salesInvoiceData);
@@ -697,7 +699,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
                 tempQuantity: item.batch.itemBatch.tempQuantity - item.quantity,
                 locationId: item.batch.itemBatch.locationId,
                 expiryDate: item.batch.itemBatch.expiryDate,
-                qty:item.batch.itemBatch.qty,
+                qty: item.batch.itemBatch.qty,
                 permissionId: 1065,
               };
 

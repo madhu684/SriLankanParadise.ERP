@@ -6,7 +6,7 @@ import LoadingSpinner from "../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../errorComponent/errorComponent";
 import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 
-const Grn = ({ handleClose, handleUpdated }) => {
+const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
   const {
     formData,
     submissionStatus,
@@ -81,13 +81,24 @@ const Grn = ({ handleClose, handleUpdated }) => {
     return <ErrorComponent error={"Error fetching data"} />;
   }
 
+  const handleBack = () => {
+    setShowCreateGrnForm(false);
+  };
+
   return (
     <div className="container mt-4">
       {/* Header */}
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img src={companyLogoUrl} alt="Company Logo" height={30} />
+          {/*<img src={companyLogoUrl} alt="Company Logo" height={30} />*/}
+
+          <i
+            class="bi bi-arrow-left"
+            onClick={handleBack}
+            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+          ></i>
+
           <p>
             <CurrentDateTime />
           </p>

@@ -1,19 +1,20 @@
-import React, { useState } from 'react'
-import useTransferRequisitionList from './useTransferRequisitionList'
-import TransferRequisitionApproval from '../transferRequisitionApproval/transferRequisitionApproval'
-import TransferRequisition from '../transferRequisition'
-import TransferRequisitionDetail from '../transferRequisitionDetail/transferRequisitionDetail'
-import LoadingSpinner from '../../loadingSpinner/loadingSpinner'
-import ErrorComponent from '../../errorComponent/errorComponent'
-import moment from 'moment'
-import 'moment-timezone'
-import { FaSearch } from 'react-icons/fa'
-import Pagination from '../../common/Pagination/Pagination'
+import React, { useState } from "react";
+import useTransferRequisitionList from "./useTransferRequisitionList";
+import TransferRequisitionApproval from "../transferRequisitionApproval/transferRequisitionApproval";
+import TransferRequisition from "../transferRequisition";
+import TransferRequisitionDetail from "../transferRequisitionDetail/transferRequisitionDetail";
+import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
+import ErrorComponent from "../../errorComponent/errorComponent";
+import TinsListDetail from "../tinsListDetail/tinsListDetail";
+import moment from "moment";
+import "moment-timezone";
+import { FaSearch } from "react-icons/fa";
+import Pagination from "../../common/Pagination/Pagination";
 
 const TransferRequisitionList = () => {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 10
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const {
     transferRequisitions,
@@ -31,10 +32,13 @@ const TransferRequisitionList = () => {
     TRDetail,
     isPermissionsError,
     permissionError,
+    openTINsList,
     selectedWarehouse,
     userWarehouses,
     filter,
     filteredRequisitions,
+    refetch,
+    setRefetch,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleRowSelect,
@@ -52,26 +56,29 @@ const TransferRequisitionList = () => {
     handleClose,
     setSelectedWarehouse,
     setFilter,
-  } = useTransferRequisitionList()
+    setOpenTINsList,
+  } = useTransferRequisitionList();
+
+  const [selectedTrnId, setSelectedTrnId] = useState(null);
 
   //Handler for search input
   const handleSearch = (e) => {
-    setSearchQuery(e.target.value)
-    setCurrentPage(1)
-  }
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
+  };
 
   //Filter MRNs based on search query
   const filteredTransferRequisitions = filteredRequisitions?.filter(
     (tr) =>
       tr.requestedBy.toLowerCase().includes(searchQuery.toLowerCase()) ||
       tr.referenceNumber.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  );
 
   //Pagination Handler
-  const paginate = (pageNumber) => setCurrentPage(pageNumber)
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   if (error || isPermissionsError) {
-    return <ErrorComponent error={error || permissionError.message} />
+    return <ErrorComponent error={error || permissionError.message} />;
   }
 
   if (
@@ -79,7 +86,7 @@ const TransferRequisitionList = () => {
     isLoadingPermissions ||
     (transferRequisitions && !(transferRequisitions.length >= 0))
   ) {
-    return <LoadingSpinner />
+    return <LoadingSpinner />;
   }
 
   if (showCreateTRForm) {
@@ -87,8 +94,20 @@ const TransferRequisitionList = () => {
       <TransferRequisition
         handleClose={() => setShowCreateTRForm(false)}
         handleUpdated={handleUpdated}
+        setShowCreateTRForm={setShowCreateTRForm}
       />
-    )
+    );
+  }
+
+  if (openTINsList) {
+    return (
+      <TinsListDetail
+        refetch={refetch}
+        setRefetch={setRefetch}
+        trnId={selectedTrnId}
+        handleBack={() => setOpenTINsList(false)}
+      />
+    );
   }
 
   if (transferRequisitions.length === 0) {
@@ -97,12 +116,12 @@ const TransferRequisitionList = () => {
         <h2>Transfer Requisition Notes</h2>
         <div
           className="d-flex flex-column justify-content-center align-items-center text-center vh-100"
-          style={{ maxHeight: '80vh' }}
+          style={{ maxHeight: "80vh" }}
         >
           <p>
             You haven't created any transfer requisition note. Create a new one.
           </p>
-          {hasPermission('Create Transfer Requisition Note') && (
+          {hasPermission("Create Transfer Requisition Note") && (
             <button
               type="button"
               className="btn btn-primary"
@@ -113,15 +132,17 @@ const TransferRequisitionList = () => {
           )}
         </div>
       </div>
-    )
+    );
   }
+
+  console.log("transferRequisitions: ", transferRequisitions);
 
   return (
     <div className="container mt-4">
       <h2>Transfer Requisition Notes</h2>
       <div className="mt-3 d-flex justify-content-start align-items-center">
         <div className="btn-group" role="group">
-          {hasPermission('Create Transfer Requisition Note') && (
+          {hasPermission("Create Transfer Requisition Note") && (
             <button
               type="button"
               className="btn btn-primary"
@@ -130,9 +151,9 @@ const TransferRequisitionList = () => {
               Create
             </button>
           )}
-          {hasPermission('Approve Transfer Requisition Note') &&
+          {hasPermission("Approve Transfer Requisition Note") &&
             selectedRowData[0]?.requestedUserId !==
-              parseInt(sessionStorage.getItem('userId')) &&
+              parseInt(sessionStorage.getItem("userId")) &&
             isAnyRowSelected &&
             areAnySelectedRowsPending(selectedRows) && (
               <button
@@ -163,25 +184,25 @@ const TransferRequisitionList = () => {
           <div className="filter-buttons">
             <button
               className={`btn ${
-                filter === 'all' ? 'btn-primary' : 'btn-outline-primary'
+                filter === "all" ? "btn-primary" : "btn-outline-primary"
               } me-2 mb-2 mb-md-0`}
-              onClick={() => setFilter('all')}
+              onClick={() => setFilter("all")}
             >
               All
             </button>
             <button
               className={`btn ${
-                filter === 'incoming' ? 'btn-primary' : 'btn-outline-primary'
+                filter === "incoming" ? "btn-primary" : "btn-outline-primary"
               } me-2 mb-2 mb-md-0`}
-              onClick={() => setFilter('incoming')}
+              onClick={() => setFilter("incoming")}
             >
               Incoming
             </button>
             <button
               className={`btn ${
-                filter === 'outgoing' ? 'btn-primary' : 'btn-outline-primary'
+                filter === "outgoing" ? "btn-primary" : "btn-outline-primary"
               } mb-2 mb-md-0`}
-              onClick={() => setFilter('outgoing')}
+              onClick={() => setFilter("outgoing")}
             >
               Outgoing
             </button>
@@ -205,7 +226,7 @@ const TransferRequisitionList = () => {
       <div className="table-responsive">
         <table
           className="table mt-2"
-          style={{ minWidth: '1000px', overflowX: 'auto' }}
+          style={{ minWidth: "1000px", overflowX: "auto" }}
         >
           <thead>
             <tr>
@@ -218,6 +239,8 @@ const TransferRequisitionList = () => {
               <th>Status</th>
               <th>Direction</th>
               <th>Details</th>
+              <th>TRN Details</th>
+              {/* <th>TIN Details</th> */}
             </tr>
           </thead>
           <tbody>
@@ -240,8 +263,8 @@ const TransferRequisitionList = () => {
                   <td>
                     {moment
                       .utc(mr.requisitionDate)
-                      .tz('Asia/Colombo')
-                      .format('YYYY-MM-DD hh:mm:ss A')}
+                      .tz("Asia/Colombo")
+                      .format("YYYY-MM-DD hh:mm:ss A")}
                   </td>
                   <td>
                     <span
@@ -277,8 +300,48 @@ const TransferRequisitionList = () => {
                           fillRule="evenodd"
                           d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"
                         />
-                      </svg>{' '}
+                      </svg>{" "}
                       View
+                    </button>
+                  </td>
+                  <td>
+                    {/* Display Accept button and disable it if Pending Approval or Approved and user is not the creator */}
+                    <button
+                      // style={{
+                      //   backgroundColor: "#FFA07A",
+                      //   color: "white",
+                      //   border: "none",
+                      // }}
+                      className={`btn me-2 ${
+                        mr.isMINAccepted ? "btn-info" : "btn-warning"
+                      }`}
+                      onClick={() => {
+                        setOpenTINsList(true);
+                        setSelectedTrnId(mr.requisitionMasterId);
+                      }}
+                      disabled={
+                        //mr.isMINAccepted === true ||
+                        mr.isMINApproved === false ||
+                        mr.status === 1 ||
+                        (mr.status === 2 &&
+                          mr.requestedUserId !==
+                            parseInt(sessionStorage.getItem("userId")))
+                      }
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        fill="currentColor"
+                        className="bi bi-arrow-right"
+                        viewBox="0 0 16 16"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"
+                        />
+                      </svg>{" "}
+                      {mr.isMINAccepted === true ? "Accepted" : "Accept"}
                     </button>
                   </td>
                 </tr>
@@ -308,7 +371,7 @@ const TransferRequisitionList = () => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default TransferRequisitionList
+export default TransferRequisitionList;

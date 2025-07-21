@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using SriLankanParadise.ERP.UserManagement.Business_Service;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
@@ -57,6 +58,45 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 var issueDetailDto = _mapper.Map<IssueDetailDto>(issueDetail);
                 _logger.LogInformation(LogMessages.IssueDetailCreated);
                 AddResponseMessage(Response, LogMessages.IssueDetailCreated, issueDetailDto, true, HttpStatusCode.Created);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpPatch("update-received-quantity/{issueMasterId}")]
+        public async Task<ApiResponseModel> PatchIssueDetail(int issueMasterId, List<UpdateIssueDetailRequestModel> updateIssueDetailRequestModel)
+        {
+            try
+            {
+                var updateIssueDetail = _mapper.Map<List<IssueDetail>>(updateIssueDetailRequestModel);
+                var updatedIssueDetail = await _issueDetailService.UpdateIssueDetailReceivedQuantity(issueMasterId, updateIssueDetail);
+                var issueDetailDto = _mapper.Map<List<IssueDetailDto>>(updatedIssueDetail);
+                AddResponseMessage(Response, LogMessages.RequisitionDetailCreated, issueDetailDto, true, HttpStatusCode.OK);
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("{issueMasterId}")]
+        public async Task<ApiResponseModel> GetIssueDetails(int issueMasterId)
+        {
+            try
+            {
+                var issueDetails = await _issueDetailService.GetIssueDetails(issueMasterId);
+
+                var issueDetailsDto = _mapper.Map<List<IssueDetailDto>>(issueDetails);
+
+                _logger.LogInformation(LogMessages.IssueDetailsRetrieved);
+                AddResponseMessage(Response, LogMessages.IssueDetailsRetrieved, issueDetailsDto, true, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {

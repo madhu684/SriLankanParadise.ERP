@@ -52,6 +52,10 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
     },
   });
 
+  const handleBack = () => {
+    setShowCreateIMForm(false);
+  };
+
   if (isLoading) {
     return <LoadingSpinner />;
   }

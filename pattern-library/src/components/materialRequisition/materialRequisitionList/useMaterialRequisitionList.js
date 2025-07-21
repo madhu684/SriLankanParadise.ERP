@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { get_requisition_masters_with_out_drafts_api } from "../../../services/purchaseApi";
-import { get_requisition_masters_by_user_id_api } from "../../../services/purchaseApi";
+
+import {
+  get_requisition_masters_by_user_id_api,
+  get_issue_masters_by_requisition_master_id_api,
+} from "../../../services/purchaseApi";
 import { get_user_permissions_api } from "../../../services/userManagementApi";
 import { useQuery } from "@tanstack/react-query";
 
@@ -17,7 +21,9 @@ const useMaterialRequisitionList = () => {
   const [showDetailMRModalInParent, setShowDetailMRModalInParent] =
     useState(false);
   const [showCreateMRForm, setShowCreateMRForm] = useState(false);
+  const [openMINsList, setOpenMINsList] = useState(false);
   const [MRDetail, setMRDetail] = useState("");
+  const [refetch, setRefetch] = useState(false);
 
   const fetchUserPermissions = async () => {
     try {
@@ -111,7 +117,7 @@ const useMaterialRequisitionList = () => {
 
   useEffect(() => {
     fetchData();
-  }, [isLoadingPermissions, userPermissions]);
+  }, [isLoadingPermissions, userPermissions, refetch]);
 
   const handleShowApproveMRModal = () => {
     setShowApproveMRModal(true);
@@ -161,7 +167,7 @@ const useMaterialRequisitionList = () => {
     setMRDetail(materialRequisition);
     handleShowDetailMRModal();
   };
-
+  const handleViewMinDetails = (mrnId) => {};
   const handleUpdated = async () => {
     fetchData();
     setSelectedRows([]);
@@ -278,6 +284,9 @@ const useMaterialRequisitionList = () => {
     MRDetail,
     isPermissionsError,
     permissionError,
+    openMINsList,
+    refetch,
+    setRefetch,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleViewDetails,
@@ -294,6 +303,7 @@ const useMaterialRequisitionList = () => {
     handleUpdated,
     handleClose,
     formatDateInTimezone,
+    setOpenMINsList,
   };
 };
 

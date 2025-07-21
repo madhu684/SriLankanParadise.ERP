@@ -4,13 +4,15 @@ import {
   post_requisition_master_api,
   post_requisition_detail_api,
   get_user_locations_by_user_id_api,
+  get_issue_masters_by_requisition_master_id_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
 
 const useMaterialRequisition = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
-    deliveryLocation: "",
+    departmentLocation: null,
+    department: "",
     warehouseLocation: null,
     itemDetails: [],
     attachments: [],
@@ -64,16 +66,35 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
     queryFn: fetchUserLocations,
   });
 
+  // Get user departments (locations with locationTypeId === 3)
+  const userDepartments =
+    userLocations?.filter(
+      (location) => location?.location?.locationTypeId === 3
+    ) || [];
+
   useEffect(() => {
     if (!isUserLocationsLoading && userLocations) {
-      const location = userLocations?.find(
+      const departments = userLocations?.filter(
         (location) => location?.location?.locationTypeId === 3
       );
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        department: location?.location.locationName,
-        deliveryLocation: location?.locationId,
-      }));
+
+      // If there's only one department, auto-select it
+      if (departments && departments.length === 1) {
+        const department = departments[0];
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          department: department?.location.locationName,
+          departmentLocation: department?.locationId,
+        }));
+      }
+      // If there are multiple departments, clear the selection to allow user to choose
+      else if (departments && departments.length > 1) {
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          department: "",
+          departmentLocation: "",
+        }));
+      }
     }
   }, [isUserLocationsLoading, userLocations]);
 
@@ -98,7 +119,7 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
   } = useQuery({
     queryKey: ["items", searchTerm],
     queryFn: () =>
-      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "Consumable,Raw Material,Sellable"),
+      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"),
   });
 
   useEffect(() => {
@@ -180,11 +201,17 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
       setValidFields({});
       setValidationErrors({});
 
-      const isDeliveryLocationValid = validateField(
-        "deliveryLocation",
-        "Delivery location",
-        formData.deliveryLocation
+      const isDepartmentValid = validateField(
+        "departmentLocation",
+        "Department",
+        formData.departmentLocation
       );
+
+      // const isDeliveryLocationValid = validateField(
+      //   "deliveryLocation",
+      //   "Delivery location",
+      //   formData.deliveryLocation
+      // );
 
       const isWarehouseLocationValid = validateField(
         "warehouseLocation",
@@ -193,18 +220,27 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
       );
 
       const isAttachmentsValid = validateAttachments(formData.attachments);
+
       return (
-        isAttachmentsValid &&
-        isDeliveryLocationValid &&
-        isWarehouseLocationValid
+        isDepartmentValid && isAttachmentsValid && isWarehouseLocationValid
+        // isDeliveryLocationValid
       );
     }
 
-    const isDeliveryLocationValid = validateField(
-      "deliveryLocation",
-      "Delivery location",
-      formData.deliveryLocation
+    setValidFields({});
+    setValidationErrors({});
+
+    const isDepartmentValid = validateField(
+      "departmentLocation",
+      "Department",
+      formData.departmentLocation
     );
+
+    // const isDeliveryLocationValid = validateField(
+    //   "deliveryLocation",
+    //   "Delivery location",
+    //   formData.deliveryLocation
+    // );
 
     const isAttachmentsValid = validateAttachments(formData.attachments);
 
@@ -242,7 +278,8 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
     });
 
     return (
-      isDeliveryLocationValid &&
+      isDepartmentValid &&
+      // isDeliveryLocationValid &&
       isPurposeOfRequestValid &&
       isAttachmentsValid &&
       isWarehouseLocationValid &&
@@ -271,11 +308,12 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
   const handleSubmit = async (isSaveAsDraft) => {
     try {
       const status = isSaveAsDraft ? 0 : 1;
-
+      console.log("_______Handle submit trigger________");
       // Get the current date and time in UTC timezone in the specified format
       const requisitionDate = new Date().toISOString();
 
       const isFormValid = validateForm(isSaveAsDraft);
+      console.log("isFormValid: ", isFormValid);
       if (isFormValid) {
         setLoading(true);
 
@@ -290,8 +328,8 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
           approvedDate: null,
           companyId: sessionStorage.getItem("companyId"),
           requisitionType: "MRN",
-          requestedFromLocationId: formData.warehouseLocation,
-          requestedToLocationId: formData.deliveryLocation,
+          requestedFromLocationId: formData.departmentLocation,
+          requestedToLocationId: formData.warehouseLocation,
           referenceNumber: generateReferenceNumber(),
           permissionId: 1052,
         };
@@ -354,6 +392,18 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
         setLoading(false);
       }, 3000);
     }
+  };
+
+  const handleDepartmentChange = (departmentLocationId) => {
+    const selectedDepartment = userDepartments.find(
+      (dept) => dept.locationId === parseInt(departmentLocationId)
+    );
+
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      department: selectedDepartment?.location.locationName || "",
+      departmentLocation: parseInt(departmentLocationId),
+    }));
   };
 
   const handleInputChange = (field, value) => {
@@ -422,6 +472,8 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
     setSearchTerm(""); // Clear the search term
   };
 
+  console.log("formData in MRN: ", formData);
+
   return {
     formData,
     locations,
@@ -438,7 +490,9 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
     isItemsError,
     itemsError,
     loading,
+    userDepartments,
     handleInputChange,
+    handleDepartmentChange,
     handleItemDetailsChange,
     handleSubmit,
     handleRemoveItem,

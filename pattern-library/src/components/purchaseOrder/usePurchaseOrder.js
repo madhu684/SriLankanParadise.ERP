@@ -6,6 +6,7 @@ import {
   get_charges_and_deductions_by_company_id_api,
   post_charges_and_deductions_applied_api,
   get_transaction_types_api,
+  get_Low_Stock_Items_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
@@ -38,6 +39,8 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [initialized, setInitialized] = useState(false);
+  const [isPOGenerated, setIsPOGenerated] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
   const fetchSuppliers = async () => {
     try {
@@ -920,6 +923,65 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     }
   };
 
+  // New function to handle generating purchase order from low-stock items
+  const handleGeneratePurchaseOrder = async () => {
+    try {
+      setLoading(true); // Show loading state
+      setIsPOGenerated(true);
+      const response = await get_Low_Stock_Items_api();
+      const lowStockItems = response.data.result || [];
+
+      if (lowStockItems.length === 0) {
+        setShowToast(true);
+        setTimeout(() => {
+          setIsPOGenerated(false);
+          setShowToast(false);
+        }, 3000);
+        setLoading(false);
+        return;
+      }
+
+      if (lowStockItems.length > 0) {
+        // Generate chargesAndDeductions array for each low-stock item
+        const initializedCharges =
+          chargesAndDeductions
+            ?.filter((charge) => charge.isApplicableForLineItem)
+            .map((charge) => ({
+              id: charge.chargesAndDeductionId,
+              name: charge.displayName,
+              value: charge.amount || charge.percentage,
+              sign: charge.sign,
+              isPercentage: charge.percentage !== null,
+            })) || [];
+
+        // Transform low-stock items into itemDetails format
+        const newItemDetails = lowStockItems.map((item) => ({
+          id: item.itemMasterId,
+          name: item.itemMaster.itemName,
+          unit: item.itemMaster.unit?.unitName || "", // Assuming unit is nested in itemMaster
+          quantity: 0, // Default quantity, can be adjusted later
+          unitPrice: 0.0, // Default unit price, can be adjusted later
+          totalPrice: 0.0,
+          chargesAndDeductions: initializedCharges,
+        }));
+
+        // Update formData with new itemDetails
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          itemDetails: newItemDetails,
+          subTotal: calculateSubTotal(),
+          totalAmount: calculateTotalAmount(),
+        }));
+      } else {
+        console.log("No low-stock items found.");
+      }
+    } catch (error) {
+      console.error("Error generating purchase order:", error);
+    } finally {
+      setLoading(false); // Reset loading state
+    }
+  };
+
   return {
     formData,
     suppliers,
@@ -946,6 +1008,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     isLoadingTransactionTypes,
     isTransactionTypesError,
     transactionTypesError,
+    isPOGenerated,
     loading,
     loadingDraft,
     handleInputChange,
@@ -968,6 +1031,9 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     renderColumns,
     renderSubColumns,
     calculateTotalAmount,
+    handleGeneratePurchaseOrder, // Added to the return object
+    showToast,
+    setShowToast,
   };
 };
 

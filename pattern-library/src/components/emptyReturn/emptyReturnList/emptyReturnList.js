@@ -1,0 +1,360 @@
+import { useState, useCallback, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import {
+  get_added_empty_items_api,
+  get_Empty_Return_Item_locations_inventories_by_location_id_api,
+} from "../../../services/inventoryApi";
+
+import {
+  get_company_locations_api,
+  post_location_inventory_movement_api,
+  post_location_inventory_api,
+  get_user_locations_by_user_id_api,
+  patch_Empty_location_inventory_api,
+} from "../../../services/purchaseApi";
+
+const useEmptyReturnsLogic = () => {
+  const [formData, setFormData] = useState({
+    location: "",
+    date: "",
+    itemDetails: [],
+  });
+
+  const [showAddEmptiesForm, setShowAddEmptiesForm] = useState(false);
+
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [inventories, setInventories] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionStatus, setSubmissionStatus] = useState(null);
+  const [errors, setErrors] = useState({});
+
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [transferDetails, setTransferDetails] = useState({
+    transferQty: null,
+    location: null,
+  });
+  const [modalErrors, setModalErrors] = useState("");
+
+  const itemsPerPage = 10;
+
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("");
+
+  const filteredInventories = useMemo(() => {
+    return inventories.filter((item) =>
+      item.itemMaster.itemName?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [inventories, searchTerm]);
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredInventories.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const { data: companyLocations, isLoading: companyLocationsLoading } =
+    useQuery({
+      queryKey: ["companyLocations"],
+      queryFn: async () => {
+        try {
+          const response = await get_company_locations_api(
+            sessionStorage.getItem("companyId")
+          );
+          console.log("Company locations fetched 71:", response.data.result);
+          return response.data.result;
+        } catch (error) {
+          console.error("Error fetching company locations:", error);
+          return [];
+        }
+      },
+    });
+
+  const { data: userLocations, isLoading: userLocationsLoading } = useQuery({
+    queryKey: ["userLocations"],
+    queryFn: async () => {
+      try {
+        const response = await get_user_locations_by_user_id_api(
+          sessionStorage.getItem("userId")
+        );
+        console.log("User locations fetched 88:", response.data.result);
+        return response.data.result;
+      } catch (error) {
+        console.error("Error fetching company locations:", error);
+        return [];
+      }
+    },
+  });
+
+  const handleLocationChange = (e) => {
+    setSelectedLocation(parseInt(e.target.value));
+    setFormData((prev) => ({ ...prev, location: e.target.value }));
+  };
+
+  const handleToLocationChange = (e) => {
+    setTransferDetails((prev) => ({ ...prev, location: e.target.value }));
+  };
+
+  const handleSearch = useCallback(async () => {
+    if (!selectedLocation) return;
+
+    setLoading(true);
+    try {
+      const inventory =
+        await get_Empty_Return_Item_locations_inventories_by_location_id_api(
+          selectedLocation
+        );
+      if (inventory.data && inventory.data.result) {
+        const fetchedIds = inventory.data.result.map(
+          (item) => item.locationInventoryId
+        );
+
+        setInventories(inventory.data.result);
+      } else {
+        setInventories([]);
+      }
+    } catch (error) {
+      console.error("Error fetching inventory:", error);
+      setInventories([]);
+    } finally {
+      setLoading(false);
+      console.log(
+        "Loading set to false, updated inventories length:",
+        inventories.length
+      );
+    }
+  }, [selectedLocation]);
+
+  const handleSearchChange = (e) => {
+    const newSearchTerm = e.target.value;
+    setSearchTerm(newSearchTerm);
+    setCurrentPage(1);
+  };
+
+  const handleTransfer = (item) => {
+    setSelectedItem(item);
+    setTransferDetails({
+      transferQty: item.transferQty,
+    });
+    setModalErrors("");
+    setShowEditModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowEditModal(false);
+    setSelectedItem(null);
+    setTransferDetails({
+      transferQty: null,
+    });
+    setModalErrors("");
+  };
+
+  const handleModalInputChange = (field, value) => {
+    console.log(`Modal input change: ${field} = ${value}`);
+    setTransferDetails((prev) => ({
+      ...prev,
+      [field]: value !== "" ? parseFloat(value) : null,
+    }));
+    setModalErrors("");
+  };
+
+  const validateModalForm = () => {
+    const newErrors = {};
+    const transferQty = transferDetails.transferQty;
+    const stockInHand = selectedItem.stockInHand;
+    const selectedLocation = transferDetails.location;
+
+    if (!selectedLocation) {
+      newErrors.selectedLocation = "Please select a location warehouse.";
+    }
+
+    if (transferQty <= 0 || isNaN(transferQty)) {
+      newErrors.transferQty = "Transfer quantity must be greater than 0.";
+    }
+
+    if (transferQty > stockInHand) {
+      newErrors.transferQty = `Transfer quantity cannot exceed the stock in hand (${stockInHand}).`;
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const updateSingleLocationInventoryLevel = async () => {
+    try {
+      if (
+        transferDetails.transferQty === null ||
+        transferDetails.location === null
+      ) {
+        return false;
+      }
+
+      // existing inventory Down
+      const response1 = await patch_Empty_location_inventory_api(
+        selectedItem.locationId,
+        selectedItem.itemMasterId,
+        "subtract",
+        {
+          stockInHand: transferDetails.transferQty,
+          permissionId: 1089,
+        }
+      );
+
+      if (response1.status !== 200 && response1.status !== 201) {
+        return false;
+      }
+
+      // existing movement inventory Down
+      const response2 = await post_location_inventory_movement_api({
+        movementTypeId: 2,
+        transactionTypeId: 12,
+        itemMasterId: selectedItem.itemMasterId,
+        batchId: null,
+        locationId: selectedItem.locationId,
+        date: new Date().toISOString(),
+        qty: transferDetails.transferQty,
+        permissionId: 1090,
+      });
+
+      if (response2.status !== 200 && response2.status !== 201) {
+        return false;
+      }
+
+      // existing inventory up
+      const response3 = await post_location_inventory_api({
+        itemMasterId: selectedItem.itemMasterId,
+        batchId: null,
+        locationId: transferDetails.location,
+        stockInHand: transferDetails.transferQty,
+        permissionId: 1088,
+        movementTypeId: 1,
+      });
+
+      if (response3.status !== 200 && response3.status !== 201) {
+        return false;
+      }
+
+      // existing movement inventory up
+      const response4 = await post_location_inventory_movement_api({
+        movementTypeId: 1,
+        transactionTypeId: 11,
+        itemMasterId: selectedItem.itemMasterId,
+        batchId: null,
+        locationId: parseInt(transferDetails.location), // Convert to integer selectedItem.locationId,
+        date: new Date().toISOString(),
+        qty: transferDetails.transferQty,
+        permissionId: 1090,
+      });
+
+      if (response4.status !== 200 && response4.status !== 201) {
+        return false;
+      }
+
+      return true; // Success if all responses are 200/201
+    } catch (error) {
+      console.error("Error in API calls:", error);
+      return false;
+    }
+  };
+
+  const handleModalSubmit = async () => {
+    if (!validateModalForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const success = await updateSingleLocationInventoryLevel();
+
+      if (success) {
+        setSubmissionStatus("successSubmitted");
+        showSuccessAlert("Empty Return Transfer successfully!");
+        handleCloseModal();
+        handleSearch();
+        console.log("Success message set, refreshing data");
+      } else {
+        throw new Error("Update failed due to server error");
+      }
+    } catch (error) {
+      console.log(
+        "Error in modal submission process:",
+        error.response ? error.response.data : error.message
+      );
+      setSubmissionStatus("error");
+      showErrorAlert("Error Empty Return Transfer. Please try again.");
+      setModalErrors("Error Empty Return Transfer. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+      setTimeout(() => setSubmissionStatus(null), 3000);
+    }
+  };
+
+  const showSuccessAlert = (message) => {
+    setToastMessage(message);
+    setToastType("success");
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  };
+
+  const showErrorAlert = (message) => {
+    setToastMessage(message);
+    setToastType("danger");
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 5000);
+  };
+
+  console.log("selectedItem 379:", selectedItem);
+
+  console.log("Selected to location new: ", transferDetails);
+
+  return {
+    showAddEmptiesForm,
+    setShowAddEmptiesForm,
+
+    companyLocations,
+    companyLocationsLoading,
+    userLocations,
+    userLocationsLoading,
+    selectedLocation,
+    inventories,
+    currentItems,
+    itemsPerPage,
+    currentPage,
+    loading,
+    paginate,
+    handleSearch,
+    handleSearchChange,
+    handleLocationChange,
+    handleToLocationChange,
+    isSubmitting,
+    submissionStatus,
+    filteredInventories,
+    searchTerm,
+
+    showEditModal,
+    selectedItem,
+    transferDetails,
+    modalErrors,
+    handleTransfer,
+    handleCloseModal,
+    handleModalInputChange,
+    handleModalSubmit,
+
+    showToast,
+    toastMessage,
+    toastType,
+    setShowToast,
+
+    errors,
+  };
+};
+
+export default useEmptyReturnsLogic;

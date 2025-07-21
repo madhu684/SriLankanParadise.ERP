@@ -4,6 +4,7 @@ import {
   patch_item_batch_api,
   patch_location_inventory_api,
   post_location_inventory_movement_api,
+  update_min_state_in_mrn_api,
 } from "../../../services/purchaseApi";
 
 const useMinApproval = ({ min, onFormSubmit }) => {
@@ -29,8 +30,18 @@ const useMinApproval = ({ min, onFormSubmit }) => {
 
   const updateInventory = async (details, formattedDate, fromLocationId) => {
     try {
+      const locationId =
+        fromLocationId || sessionStorage.getItem("defaultLocationId") || "4";
       for (const detail of details) {
         const { itemMasterId, batchId, quantity } = detail;
+
+        // Skip if batchId or quantity is invalid
+        if (!batchId || !quantity || quantity <= 0) {
+          console.warn(
+            `Skipping invalid item: itemMasterId=${itemMasterId}, batchId=${batchId}, quantity=${quantity}`
+          );
+          continue;
+        }
 
         // Patch Item Batch API
         await patch_item_batch_api(batchId, itemMasterId, "subtract", {
@@ -39,31 +50,42 @@ const useMinApproval = ({ min, onFormSubmit }) => {
         });
 
         // Patch Location Inventory API
-        await patch_location_inventory_api(
-          fromLocationId,
-          itemMasterId,
-          batchId,
-          "subtract",
-          {
-            stockInHand: quantity,
-            permissionId: 1089,
-          }
-        );
+        // await patch_location_inventory_api(
+        //   locationId,
+        //   itemMasterId,
+        //   batchId,
+        //   "subtract",
+        //   {
+        //     stockInHand: quantity,
+        //     permissionId: 1089,
+        //   }
+        // );
 
         // Post Location Inventory Movement API
-        await post_location_inventory_movement_api({
-          movementTypeId: 2,
-          transactionTypeId: 5,
-          itemMasterId,
-          batchId,
-          locationId: fromLocationId,
-          date: formattedDate,
-          qty: quantity,
-          permissionId: 1090,
-        });
+        // await post_location_inventory_movement_api({
+        //   movementTypeId: 2,
+        //   transactionTypeId: 5,
+        //   itemMasterId,
+        //   batchId,
+        //   locationId: locationId,
+        //   date: formattedDate,
+        //   qty: quantity,
+        //   permissionId: 1090,
+        // });
       }
     } catch (error) {
       throw new Error("Error updating inventory: " + error.message);
+    }
+  };
+
+  const updateMrnState = async () => {
+    try {
+      await update_min_state_in_mrn_api(min.requisitionMasterId, {
+        isMINApproved: true,
+        isMINAccepted: false,
+      });
+    } catch (error) {
+      console.error("Error updating MRN state:", error);
     }
   };
 
@@ -91,8 +113,10 @@ const useMinApproval = ({ min, onFormSubmit }) => {
         await updateInventory(
           min.issueDetails,
           formattedDate,
-          min.requisitionMaster.requestedFromLocationId
+          min.fromLocationId
         );
+
+        await updateMrnState();
 
         console.log(
           "Material issue note approved and inventory updated successfully:",

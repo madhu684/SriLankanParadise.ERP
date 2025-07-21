@@ -8,7 +8,7 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
   return (
     <Modal size="lg" show={show} onHide={handleClose} centered scrollable>
       <Modal.Header closeButton>
-        <Modal.Title>Item Master</Modal.Title>
+        <Modal.Title>Item Master Details</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div className="mb-3 d-flex justify-content-between">
