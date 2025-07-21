@@ -79,6 +79,33 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpGet("GetEmptyReturnDetailsByEmptyReturnMasterId/{emptyReturnMasterId}")]
+        public async Task<ApiResponseModel> GetEmptyReturnDetailsByEmptyReturnMasterId(int emptyReturnMasterId)
+        {
+            try
+            {
+                var result = await _emptyReturnService.GetEmptyReturnsByMasterId(emptyReturnMasterId);
+
+                if (result != null)
+                {
+                    var dtoList = _mapper.Map<EmptyReturnMasterDto>(result);
+                    AddResponseMessage(Response, "Empty return details retrieved successfully", dtoList, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning("Empty return details not found for CompanyId: {emptyReturnMasterId}", emptyReturnMasterId);
+                    AddResponseMessage(Response, "Empty return details not found", null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to retrieve empty return details");
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+
+            return Response;
+        }
+
         //[HttpPut("update/{emptyReturnMasterId}")]
         //public async Task<ApiResponseModel> UpdateEmptyReturnDetailss(int emptyReturnMasterId, UpdateEmptyReturnRequestModel requestModel)
         //{

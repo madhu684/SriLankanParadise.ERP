@@ -4,6 +4,6 @@
     {
         public int EmptyReturnDetailId { get; set; }
         public int ItemMasterId { get; set; }
-        public decimal ReturnQuantity { get; set; }
+        public decimal AddedQuantity { get; set; }
     }
 }

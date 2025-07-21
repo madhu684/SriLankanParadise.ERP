@@ -363,6 +363,23 @@ export const get_added_empty_items_api = async (companyId) => {
   }
 };
 
+export const get_added_empty_items_by_masterId_api = async (
+  emptyReturnMasterId
+) => {
+  try {
+    const response = await api.get(
+      `/emptyReturn/GetEmptyReturnDetailsByEmptyReturnMasterId/${emptyReturnMasterId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const update_empty_return_api = async (
   emptyReturnMasterId,
   emptyReturnData
