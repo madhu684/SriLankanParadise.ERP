@@ -63,6 +63,23 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+        public async Task<EmptyReturnMaster> GetEmptyReturnsByMasterId(int emptyReturnMasterId)
+        {
+            try
+            {
+                var result = await _dbContext.EmptyReturnMasters
+                    .Include(m => m.FromLocation)
+                    .Include(m => m.EmptyReturnDetails)
+                        .ThenInclude(im => im.ItemMaster)
+                    .FirstOrDefaultAsync(m => m.EmptyReturnMasterId == emptyReturnMasterId);
+
+                return result ?? null!;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         public async Task<EmptyReturnMaster> GetEmptyReturnMasterById(int id)
         {
             return await _dbContext.EmptyReturnMasters
@@ -135,9 +152,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         throw new InvalidOperationException($"EmptyReturnDetailId {newDetail.EmptyReturnDetailId} does not exist.");
                     }
 
-                    if (newDetail.ReturnQuantity != default(decimal))
+                    if (newDetail.AddedQuantity != default(decimal))
                     {
-                        existingDetail.ReturnQuantity = newDetail.ReturnQuantity;
+                        existingDetail.AddedQuantity = newDetail.AddedQuantity;
                     }
                 }
                 await _dbContext.SaveChangesAsync();

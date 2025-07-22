@@ -319,13 +319,18 @@ const TransferRequisitionList = () => {
                         setOpenTINsList(true);
                         setSelectedTrnId(mr.requisitionMasterId);
                       }}
+                      // disabled={
+                      //   mr.isMINApproved === false ||
+                      //   mr.status === 1 ||
+                      //   (mr.status === 2 &&
+                      //     mr.requestedUserId !==
+                      //       parseInt(sessionStorage.getItem("userId")))
+                      // }
                       disabled={
-                        //mr.isMINAccepted === true ||
+                        mr.status !== 2 ||
                         mr.isMINApproved === false ||
-                        mr.status === 1 ||
-                        (mr.status === 2 &&
-                          mr.requestedUserId !==
-                            parseInt(sessionStorage.getItem("userId")))
+                        mr.requestedUserId !==
+                          parseInt(sessionStorage.getItem("userId"))
                       }
                     >
                       <svg
