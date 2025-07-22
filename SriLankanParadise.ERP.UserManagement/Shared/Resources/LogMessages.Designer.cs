@@ -60,7 +60,6 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
             }
         }
         
-        
         /// <summary>
         ///   Looks up a localized string similar to Approved supply return master not found.
         /// </summary>
@@ -69,7 +68,6 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
                 return ResourceManager.GetString("ApprovedSupplyReturnMasterNotFound", resourceCulture);
             }
         }
-        
         
         /// <summary>
         ///   Looks up a localized string similar to Approved supply return master retrived.
@@ -80,7 +78,6 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
             }
         }
         
-        
         /// <summary>
         ///   Looks up a localized string similar to Batch created successfully.
         /// </summary>
@@ -89,7 +86,6 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
                 return ResourceManager.GetString("BatchCreated", resourceCulture);
             }
         }
-        
         
         /// <summary>
         ///   Looks up a localized string similar to Batches not found.
@@ -1721,7 +1717,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to MIN Approved for MRN .
+        ///   Looks up a localized string similar to Requisition master patched.
         /// </summary>
         public static string RequisitionMasterPatched {
             get {
@@ -2347,6 +2343,33 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string SupplierDeleted {
             get {
                 return ResourceManager.GetString("SupplierDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supplier item created succefully.
+        /// </summary>
+        public static string SupplierItemCreated {
+            get {
+                return ResourceManager.GetString("SupplierItemCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supplier items not found.
+        /// </summary>
+        public static string SupplierItemNotFound {
+            get {
+                return ResourceManager.GetString("SupplierItemNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supplier item retrived.
+        /// </summary>
+        public static string SupplierItemRetrived {
+            get {
+                return ResourceManager.GetString("SupplierItemRetrived", resourceCulture);
             }
         }
         

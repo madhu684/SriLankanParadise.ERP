@@ -5,7 +5,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
     public interface ISupplierService
     {
         Task<IEnumerable<Supplier>> GetSuppliersByCompanyId(int companyId);
-       
+
+        Task<IEnumerable<Supplier>> GetSuppliersByCompanyIdWithSearchQuery(int companyId, string searchQuery);
+
         Task AddSupplier(Supplier supplier);
 
         Task<Supplier> GetSupplierBySupplierId(int supplierId);
