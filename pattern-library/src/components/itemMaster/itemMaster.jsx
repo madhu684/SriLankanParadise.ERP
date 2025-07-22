@@ -36,7 +36,16 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
     selectedParentItem,
     selectedChildItems,
     itemCode,
+    supplierSearchTerm,
+    availableSuppliers,
+    isSuppliersLoading,
+    isSuppliersError,
+    suppliersError,
+    isSupplierSelected,
+    handleSupplierChange,
+    handleResetSupplier,
     setSearchTerm,
+    setSupplierSearchTerm,
     setSearchChildTerm,
     handleInputChange,
     handleSubmit,
@@ -410,6 +419,110 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
                 </div>
               )}
             </div>
+
+            {/* Supplier tagging */}
+            <h4>Supplier Tagging</h4>
+            <div className="mb-3 mt-3">
+              <label htmlFor="itemHierarchy" className="form-label">
+                Supplier
+              </label>
+
+              <div className="mb-0">
+                {!isSupplierSelected && (
+                  <div className="input-group">
+                    <span className="input-group-text bg-transparent">
+                      <i className="bi bi-search"></i>
+                    </span>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Search for a supplier..."
+                      value={supplierSearchTerm}
+                      onChange={(e) => setSupplierSearchTerm(e.target.value)}
+                      autoFocus={false}
+                    />
+                    {supplierSearchTerm && (
+                      <span
+                        className="input-group-text bg-transparent"
+                        style={{
+                          cursor: "pointer",
+                        }}
+                        onClick={() => setSupplierSearchTerm("")}
+                      >
+                        <i className="bi bi-x"></i>
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* Dropdown for filtered suppliers */}
+                {supplierSearchTerm && (
+                  <div className="dropdown" style={{ width: "100%" }}>
+                    <ul
+                      className="dropdown-menu"
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        maxHeight: "200px",
+                        overflowY: "auto",
+                      }}
+                    >
+                      {availableSuppliers?.map((supplier) => (
+                        <li key={supplier.supplierId}>
+                          <button
+                            className="dropdown-item"
+                            onClick={() => handleSupplierChange(supplier)}
+                          >
+                            <span className="me-3">
+                              <i className="bi bi-file-earmark-text"></i>
+                            </span>{" "}
+                            {supplier.supplierName}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {supplierSearchTerm === null && (
+                  <div className="mb-3">
+                    <small className="form-text text-muted">
+                      {/* {validationErrors.trnId && (
+                        <div className="text-danger mb-1">
+                          {validationErrors.trnId}
+                        </div>
+                      )} */}
+                      Please search for a supplier and select it
+                    </small>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Additional Purchase Order Information */}
+            {isSupplierSelected && (
+              <div className="card mb-3">
+                <div className="card-header">Selected Supplier</div>
+                <div className="card-body">
+                  <p>
+                    <strong>Supplier Name:</strong>{" "}
+                    {formData.supplier.supplierName}
+                  </p>
+                  <p>
+                    <strong>Email:</strong> {formData.supplier.email}
+                  </p>
+                  <p>
+                    <strong>Contact No:</strong> {formData.supplier.phone}
+                  </p>
+                  <button
+                    type="button"
+                    className="btn btn-outline-danger float-end"
+                    onClick={handleResetSupplier}
+                  >
+                    Reset Supplier
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="col-md-5">
