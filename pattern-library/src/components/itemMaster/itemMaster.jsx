@@ -498,7 +498,7 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
               </div>
             </div>
 
-            {/* Additional Purchase Order Information */}
+            {/* Additional Supplier Information */}
             {isSupplierSelected && (
               <div className="card mb-3">
                 <div className="card-header">Selected Supplier</div>

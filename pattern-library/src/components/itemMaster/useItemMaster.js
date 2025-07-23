@@ -447,6 +447,7 @@ const useItemMaster = ({ onFormSubmit }) => {
             averageSellingPrice: formData.averageSellingPrice,
             stockClearance: formData.stockClearance,
             bulkPrice: formData.bulkPrice,
+            supplierId: formData.supplierId,
           };
 
           putResponse = await put_item_master_api(itemMasterId, itemMasterData);
