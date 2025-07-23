@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using SriLankanParadise.ERP.UserManagement.DataModels;
 
-namespace SriLankanParadise.ERP.UserManagement.DataModels;
+namespace SriLankanParadise.ERP.UserManagement.Data;
 
 public partial class ErpSystemContext : DbContext
 {
@@ -161,6 +162,8 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<EmptyReturnMaster> EmptyReturnMasters { get; set; }
     public virtual DbSet<EmptyReturnDetail> EmptyReturnDetails { get; set; }
+
+    public virtual DbSet<SupplierItem> SupplierItems { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -1476,7 +1479,6 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.ReferenceNo).HasMaxLength(20)
                   .HasDefaultValueSql("('ER' + CONVERT(NVARCHAR(20), NEXT VALUE FOR dbo.EmptyReturnReferenceNoSeq))");
 
-            // 🔗 Foreign Keys
             entity.HasOne(d => d.Company)
                   .WithMany()
                   .HasForeignKey(d => d.CompanyId)
@@ -1517,6 +1519,29 @@ public partial class ErpSystemContext : DbContext
                 .HasForeignKey(d => d.ItemMasterId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_EmptyReturnDetail_ItemMaster");
+        });
+
+        modelBuilder.Entity<SupplierItem>(entity =>
+        {
+            entity.HasKey(e => e.Id)
+                .HasName("PK_SupplierItem_Id");
+
+            entity.ToTable("SupplierItem");
+
+            entity.Property(e => e.SupplierId).HasColumnName("SupplierId");
+            entity.Property(e => e.ItemMasterId).HasColumnName("ItemMasterId");
+
+            entity.HasOne(e => e.Supplier)
+                  .WithMany()
+                  .HasForeignKey(e => e.SupplierId)
+                  .HasConstraintName("FK_SupplierItems_Supplier")
+                  .IsRequired();
+
+            entity.HasOne(e => e.ItemMaster)
+                  .WithMany()
+                  .HasForeignKey(e => e.ItemMasterId)
+                  .HasConstraintName("FK_SupplierItems_ItemMaster")
+                  .IsRequired();
         });
 
 

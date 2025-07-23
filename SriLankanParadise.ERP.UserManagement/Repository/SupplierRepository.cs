@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
@@ -175,5 +176,28 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             return supplier?.SupplierLogoPath;
         }
 
+        public async Task<IEnumerable<Supplier>> GetSuppliersByCompanyIdWithSearchQuery(int companyId, string searchQuery)
+        {
+            try
+            {
+                // Check if searchQuery is provided
+                if (string.IsNullOrEmpty(searchQuery))
+                {
+                    return null!;
+                }
+
+                var query = _dbContext.Suppliers.Where(sp => sp.CompanyId == companyId);
+
+                // Apply search query
+                query = query.Where(sp => sp.SupplierName.Contains(searchQuery));
+
+                var suppliers = await query.ToListAsync();
+                return suppliers.Any() ? suppliers : null!;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -164,6 +164,8 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
                 .ForMember(dest => dest.EmptyReturnDetailId, opt => opt.Ignore());
             CreateMap<EmptyReturnDetail, EmptyReturnDetailDto>();
             CreateMap<EmptyReturnMaster, EmptyReturnMasterDto>();
+            CreateMap<SupplierItemRequestModel, SupplierItem>();
+            CreateMap<SupplierItem, SupplierItemDto>();
             // Add more mapping configurations if needed
 
         }

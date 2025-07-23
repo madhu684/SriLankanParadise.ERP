@@ -51,6 +51,8 @@
 
         public decimal? BulkPrice { get; set; }
 
+        public int? SupplierId { get; set; }
+
         //new properties
 
         public int PermissionId { get; set; }

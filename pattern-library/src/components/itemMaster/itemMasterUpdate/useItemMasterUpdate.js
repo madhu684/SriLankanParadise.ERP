@@ -11,6 +11,7 @@ import {
   get_sub_item_masters_by_item_master_id_api,
 } from "../../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
+import { get_supplier_by_company_id_with_query_api } from "../../../services/purchaseApi";
 
 const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -37,6 +38,8 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     averageSellingPrice: "",
     stockClearance: "",
     bulkPrice: "",
+    supplier: {},
+    supplierId: "",
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -48,6 +51,7 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchChildTerm, setSearchChildTerm] = useState("");
   const [selectedParentItem, setSelectedParentItem] = useState("");
+  const [supplierSearchTerm, setSupplierSearchTerm] = useState("");
   const [selectedChildItems, setSelectedChildItems] = useState([]);
 
   const fetchItems = async (companyId, searchQuery, itemType) => {
@@ -83,6 +87,30 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     queryKey: ["childItems", searchChildTerm],
     queryFn: () =>
       fetchItems(sessionStorage.getItem("companyId"), searchChildTerm, "All"),
+  });
+
+  const fetchSuppliers = async (companyId, searchQuery) => {
+    try {
+      const response = await get_supplier_by_company_id_with_query_api(
+        companyId,
+        searchQuery
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching suppliers:", error);
+    }
+  };
+
+  const {
+    data: availableSuppliers,
+    isLoading: isSuppliersLoading,
+    isError: isSuppliersError,
+    error: suppliersError,
+  } = useQuery({
+    queryKey: ["suppliers", supplierSearchTerm],
+    queryFn: () =>
+      fetchSuppliers(sessionStorage.getItem("companyId"), supplierSearchTerm),
+    enabled: !!supplierSearchTerm,
   });
 
   const fetchUnits = async () => {
@@ -214,6 +242,8 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       averageSellingPrice: deepCopyItemMaster?.averageSellingPrice ?? "",
       stockClearance: deepCopyItemMaster?.stockClearance ?? "",
       bulkPrice: deepCopyItemMaster?.bulkPrice ?? "",
+      supplier: deepCopyItemMaster?.supplier ?? {},
+      supplierId: deepCopyItemMaster?.supplierId ?? null,
     });
 
     const fetchParentItem = async () => {
@@ -443,6 +473,7 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
           averageSellingPrice: formData.averageSellingPrice,
           stockClearance: formData.stockClearance,
           bulkPrice: formData.bulkPrice,
+          supplierId: formData.supplierId,
         };
 
         const putResponse = await put_item_master_api(
@@ -582,6 +613,26 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     });
   };
 
+  const handleSupplierChange = (value) => {
+    setFormData((prev) => ({
+      ...prev,
+      supplier: value,
+      supplierId: parseInt(value.supplierId),
+    }));
+    setSupplierSearchTerm("");
+  };
+
+  const handleResetSupplier = () => {
+    setFormData((prev) => ({
+      ...prev,
+      supplier: "",
+      supplierId: "",
+    }));
+    setSupplierSearchTerm("");
+  };
+
+  console.log("formData", formData);
+
   return {
     formData,
     submissionStatus,
@@ -611,6 +662,12 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     isUnitOptionsError,
     isLoading,
     isError,
+    supplierSearchTerm,
+    suppliersError,
+    isSuppliersError,
+    isSuppliersLoading,
+    availableSuppliers,
+    setSupplierSearchTerm,
     setSearchTerm,
     setSearchChildTerm,
     setFormData,
@@ -624,6 +681,8 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     handleRemoveChildItem,
     handleResetParentItem,
     handleChildItemQuantityChange,
+    handleSupplierChange,
+    handleResetSupplier,
   };
 };
 

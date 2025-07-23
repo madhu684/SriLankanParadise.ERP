@@ -9,6 +9,7 @@ import {
   put_item_master_api,
 } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
+import { get_supplier_by_company_id_with_query_api } from "../../services/purchaseApi";
 
 const useItemMaster = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -34,6 +35,8 @@ const useItemMaster = ({ onFormSubmit }) => {
     averageSellingPrice: "0.00",
     stockClearance: "0.00",
     bulkPrice: "0.00",
+    supplier: {},
+    supplierId: "",
   });
 
   const [validFields, setValidFields] = useState({});
@@ -46,9 +49,12 @@ const useItemMaster = ({ onFormSubmit }) => {
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [supplierSearchTerm, setSupplierSearchTerm] = useState("");
   const [searchChildTerm, setSearchChildTerm] = useState("");
   const [selectedParentItem, setSelectedParentItem] = useState("");
   const [selectedChildItems, setSelectedChildItems] = useState([]);
+
+  const [isSupplierSelected, setIsSupplierSelected] = useState(false);
 
   const fetchItems = async (companyId, searchQuery, itemType) => {
     try {
@@ -72,6 +78,7 @@ const useItemMaster = ({ onFormSubmit }) => {
     queryKey: ["items", searchTerm],
     queryFn: () =>
       fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"),
+    enabled: !!searchTerm,
   });
 
   const {
@@ -83,6 +90,31 @@ const useItemMaster = ({ onFormSubmit }) => {
     queryKey: ["childItems", searchChildTerm],
     queryFn: () =>
       fetchItems(sessionStorage.getItem("companyId"), searchChildTerm, "All"),
+    enabled: !!searchChildTerm,
+  });
+
+  const fetchSuppliers = async (companyId, searchQuery) => {
+    try {
+      const response = await get_supplier_by_company_id_with_query_api(
+        companyId,
+        searchQuery
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching suppliers:", error);
+    }
+  };
+
+  const {
+    data: availableSuppliers,
+    isLoading: isSuppliersLoading,
+    isError: isSuppliersError,
+    error: suppliersError,
+  } = useQuery({
+    queryKey: ["suppliers", supplierSearchTerm],
+    queryFn: () =>
+      fetchSuppliers(sessionStorage.getItem("companyId"), supplierSearchTerm),
+    enabled: !!supplierSearchTerm,
   });
 
   const fetchItemTypes = async () => {
@@ -375,6 +407,7 @@ const useItemMaster = ({ onFormSubmit }) => {
           averageSellingPrice: formData.averageSellingPrice,
           stockClearance: formData.stockClearance,
           bulkPrice: formData.bulkPrice,
+          supplierId: formData.supplierId,
         };
 
         console.log("sending request : ", itemMasterData);
@@ -414,6 +447,7 @@ const useItemMaster = ({ onFormSubmit }) => {
             averageSellingPrice: formData.averageSellingPrice,
             stockClearance: formData.stockClearance,
             bulkPrice: formData.bulkPrice,
+            supplierId: formData.supplierId,
           };
 
           putResponse = await put_item_master_api(itemMasterId, itemMasterData);
@@ -488,6 +522,28 @@ const useItemMaster = ({ onFormSubmit }) => {
     });
   };
 
+  const handleSupplierChange = (value) => {
+    setIsSupplierSelected(true);
+    setFormData((prev) => ({
+      ...prev,
+      supplier: value,
+      supplierId: parseInt(value.supplierId),
+    }));
+    setSupplierSearchTerm("");
+  };
+
+  const handleResetSupplier = () => {
+    setFormData((prev) => ({
+      ...prev,
+      supplier: "",
+      supplierId: "",
+    }));
+    setIsSupplierSelected(false);
+    setSupplierSearchTerm("");
+  };
+
+  console.log("formData : ", formData);
+
   return {
     formData,
     validFields,
@@ -518,8 +574,17 @@ const useItemMaster = ({ onFormSubmit }) => {
     selectedParentItem,
     selectedChildItems,
     itemCode,
+    supplierSearchTerm,
+    availableSuppliers,
+    isSuppliersLoading,
+    isSuppliersError,
+    suppliersError,
+    isSupplierSelected,
+    handleSupplierChange,
+    handleResetSupplier,
     setSearchTerm,
     setSearchChildTerm,
+    setSupplierSearchTerm,
     setFormData,
     handleInputChange,
     handleSubmit,
