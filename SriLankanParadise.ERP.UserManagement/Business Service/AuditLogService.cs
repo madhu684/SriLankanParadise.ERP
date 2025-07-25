@@ -18,9 +18,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             await _auditLogRepository.CreateAuditLog(auditLog);
         }
 
-        public async Task<IEnumerable<AuditLog>> GetAuditLogByDate(DateTime date)
+        public async Task<IEnumerable<AuditLog>> GetAuditLogByDate(DateTime fromDate, DateTime toDate)
         {
-            return await _auditLogRepository.GetAuditLogByDate(date);
+            return await _auditLogRepository.GetAuditLogByDate(fromDate, toDate);
         }
     }
 }

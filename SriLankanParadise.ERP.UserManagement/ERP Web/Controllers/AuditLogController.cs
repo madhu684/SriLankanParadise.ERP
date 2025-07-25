@@ -48,12 +48,12 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("GetAuditLogByDate/{date}")]
-        public async Task<ApiResponseModel> GetAuditLogByDate(DateTime date)
+        [HttpGet("GetAuditLogByDate/{fromDate}/{toDate}")]
+        public async Task<ApiResponseModel> GetAuditLogByDate(DateTime fromDate, DateTime toDate)
         {
             try
             {
-                var auditLogs = await _auditLogService.GetAuditLogByDate(date);
+                var auditLogs = await _auditLogService.GetAuditLogByDate(fromDate, toDate);
 
                 if (auditLogs == null || !auditLogs.Any())
                 {
