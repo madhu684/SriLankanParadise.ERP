@@ -38,6 +38,14 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
     }).format(value);
   };
 
+  const isServiceItemType = () => {
+    if (itemMaster?.itemType?.name === "Service") {
+      return true;
+    }
+
+    return false;
+  };
+
   const InfoCard = ({ icon: Icon, title, children, variant = "light" }) => (
     <Card className="h-100 shadow-sm border-start border-3 border-primary">
       <Card.Header className="bg-light">
@@ -80,6 +88,8 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
       </Card.Body>
     </Card>
   );
+
+  console.log(itemMaster, "itemMaster 84");
 
   return (
     <Modal
@@ -148,10 +158,13 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
                     label="Unit Price"
                     value={formatCurrency(itemMaster?.unitPrice)}
                   />
-                  <InfoRow
-                    label="Reorder Level"
-                    value={itemMaster?.reorderLevel}
-                  />
+                  {!isServiceItemType() && (
+                    <InfoRow
+                      label="Reorder Level"
+                      value={itemMaster?.reorderLevel}
+                    />
+                  )}
+
                   <InfoRow
                     label="Hierarchy Type"
                     value={
@@ -226,70 +239,78 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
           )}
 
           {/* Pricing Information */}
-          <Row className="mb-4">
-            <Col xs={12}>
-              <InfoCard
-                icon={FaDollarSign}
-                title="Pricing Information"
-                variant="warning"
-              >
-                <Row>
-                  <Col md={6}>
-                    <div>
-                      <InfoRow
-                        label="Cost Ratio"
-                        value={itemMaster.costRatio}
-                      />
-                      <InfoRow
-                        label="FOB in USD"
-                        value={formatCurrency(itemMaster.fobInUSD)}
-                      />
-                      <InfoRow
-                        label="Landed Cost"
-                        value={formatCurrency(itemMaster.landedCost)}
-                      />
-                      <InfoRow
-                        label="Min Net Selling Price"
-                        value={formatCurrency(itemMaster.minNetSellingPrice)}
-                      />
-                      <InfoRow
-                        label="Selling Price"
-                        value={formatCurrency(itemMaster.sellingPrice)}
-                      />
-                      <InfoRow
-                        label="Bulk Price"
-                        value={formatCurrency(itemMaster.bulkPrice)}
-                      />
-                    </div>
-                  </Col>
-                  <Col md={6}>
-                    <div>
-                      <InfoRow
-                        label="MRP"
-                        value={formatCurrency(itemMaster.mrp)}
-                      />
-                      <InfoRow
-                        label="Competitor Price"
-                        value={formatCurrency(itemMaster.competitorPrice)}
-                      />
-                      <InfoRow
-                        label="Label Price"
-                        value={formatCurrency(itemMaster.labelPrice)}
-                      />
-                      <InfoRow
-                        label="Average Selling Price"
-                        value={formatCurrency(itemMaster.averageSellingPrice)}
-                      />
-                      <InfoRow
-                        label="Stock Clearance"
-                        value={formatCurrency(itemMaster.stockClearance)}
-                      />
-                    </div>
-                  </Col>
-                </Row>
-              </InfoCard>
-            </Col>
-          </Row>
+          {!isServiceItemType() && (
+            <>
+              <Row className="mb-4">
+                <Col xs={12}>
+                  <InfoCard
+                    icon={FaDollarSign}
+                    title="Pricing Information"
+                    variant="warning"
+                  >
+                    <Row>
+                      <Col md={6}>
+                        <div>
+                          <InfoRow
+                            label="Cost Ratio"
+                            value={itemMaster.costRatio}
+                          />
+                          <InfoRow
+                            label="FOB in USD"
+                            value={formatCurrency(itemMaster.fobInUSD)}
+                          />
+                          <InfoRow
+                            label="Landed Cost"
+                            value={formatCurrency(itemMaster.landedCost)}
+                          />
+                          <InfoRow
+                            label="Min Net Selling Price"
+                            value={formatCurrency(
+                              itemMaster.minNetSellingPrice
+                            )}
+                          />
+                          <InfoRow
+                            label="Selling Price"
+                            value={formatCurrency(itemMaster.sellingPrice)}
+                          />
+                          <InfoRow
+                            label="Bulk Price"
+                            value={formatCurrency(itemMaster.bulkPrice)}
+                          />
+                        </div>
+                      </Col>
+                      <Col md={6}>
+                        <div>
+                          <InfoRow
+                            label="MRP"
+                            value={formatCurrency(itemMaster.mrp)}
+                          />
+                          <InfoRow
+                            label="Competitor Price"
+                            value={formatCurrency(itemMaster.competitorPrice)}
+                          />
+                          <InfoRow
+                            label="Label Price"
+                            value={formatCurrency(itemMaster.labelPrice)}
+                          />
+                          <InfoRow
+                            label="Average Selling Price"
+                            value={formatCurrency(
+                              itemMaster.averageSellingPrice
+                            )}
+                          />
+                          <InfoRow
+                            label="Stock Clearance"
+                            value={formatCurrency(itemMaster.stockClearance)}
+                          />
+                        </div>
+                      </Col>
+                    </Row>
+                  </InfoCard>
+                </Col>
+              </Row>
+            </>
+          )}
 
           {/* Quick Stats */}
           <Row className="g-3">
@@ -301,14 +322,18 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
                 variant="success"
               />
             </Col>
-            <Col sm={6} lg={3}>
-              <StatCard
-                icon={FaTag}
-                label="Selling Price"
-                value={formatCurrency(itemMaster.sellingPrice)}
-                variant="info"
-              />
-            </Col>
+            {!isServiceItemType() && (
+              <>
+                <Col sm={6} lg={3}>
+                  <StatCard
+                    icon={FaTag}
+                    label="Selling Price"
+                    value={formatCurrency(itemMaster.sellingPrice)}
+                    variant="info"
+                  />
+                </Col>
+              </>
+            )}
             <Col sm={6} lg={3}>
               <StatCard
                 icon={FaChartLine}

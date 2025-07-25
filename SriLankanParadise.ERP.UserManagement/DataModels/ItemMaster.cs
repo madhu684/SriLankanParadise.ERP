@@ -7,7 +7,7 @@ public partial class ItemMaster
 {
     public int ItemMasterId { get; set; }
 
-    public int UnitId { get; set; }
+    public int? UnitId { get; set; }
 
     public int CategoryId { get; set; }
 

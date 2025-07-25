@@ -2,7 +2,7 @@
 {
     public class ItemMasterRequestModel
     {
-        public int UnitId { get; set; }
+        public int? UnitId { get; set; }
 
         public int CategoryId { get; set; }
 

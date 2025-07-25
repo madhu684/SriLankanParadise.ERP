@@ -6,7 +6,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
     {
         public int ItemMasterId { get; set; }
 
-        public int UnitId { get; set; }
+        public int? UnitId { get; set; }
 
         public int CategoryId { get; set; }
 
