@@ -25,12 +25,14 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<AuditLog>> GetAuditLogByDate(DateTime date)
+        public async Task<IEnumerable<AuditLog>> GetAuditLogByDate(DateTime fromDate, DateTime toDate)
         {
             try
             {
                 var log = await _dbContext.AuditLogs
-                    .Where(l => EF.Functions.DateDiffDay(l.Timestamp, date) == 0 && l.Description != "Fetch reference data")
+                    .Where(l => EF.Functions.DateDiffDay(fromDate, l.Timestamp) >= 0
+                             && EF.Functions.DateDiffDay(l.Timestamp, toDate) >= 0
+                             && l.Description != "Fetch reference data")
                     .Include(l => l.User)
                     .ToListAsync();
 

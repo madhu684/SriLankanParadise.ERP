@@ -43,7 +43,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         }
 
         [HttpGet("InventoryAnalysisReport/{fromDate}/{toDate}/{locationId}")]
-        public async Task<ApiResponseModel> InventoryAnalysisReport([FromRoute] DateTime fromDate, [FromRoute] DateTime toDate, [FromRoute] int locationId, [FromQuery] bool showZeroBalanceItems = false)
+        public async Task<ApiResponseModel> InventoryAnalysisReport([FromRoute] DateTime fromDate, [FromRoute] DateTime toDate, [FromRoute] int locationId)
         {
             try
             {
@@ -194,10 +194,10 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     item.closingBalance = item.openingBalance + item.receivedQty - item.actualUsage;
                 }
 
-                if (!showZeroBalanceItems)
-                {
-                    inventoryItems = inventoryItems.Where(item => !(item.openingBalance == 0 && item.closingBalance == 0)).ToList();
-                }
+                //if (!showZeroBalanceItems)
+                //{
+                //    inventoryItems = inventoryItems.Where(item => !(item.openingBalance == 0 && item.closingBalance == 0)).ToList();
+                //}
 
                 if (inventoryItems != null && inventoryItems.Any())
                 {
@@ -205,35 +205,27 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                     foreach (var item in inventoryItems)
                     {
-                        bool shouldIncludeItem = showZeroBalanceItems
-                            ? (item.openingBalance == 0 && item.closingBalance == 0)
-                            : !(item.openingBalance == 0 && item.closingBalance == 0);
-
-                        if (shouldIncludeItem)
+                        var report = new InventoryReportDto
                         {
-                            var report = new InventoryReportDto
-                            {
-                                Inventory = item.location,
-                                RawMaterial = item.ItemMaster.ItemName,
-                                ItemCode = item.ItemMaster.ItemCode,
-                                BatchNo = item.batchNumber,
-                                UOM = item.ItemMaster.Unit.UnitName,
-                                OpeningBalance = item.openingBalance,
-                                ReceivedQty = item.receivedQty - item.StAdjIn,
-                                ActualUsage = item.actualUsage - item.StAdjOut - item.StDisOut,
-                                ClosingBalance = item.closingBalance,
-                                GRNQty = item.GRNQty,
-                                ProductionInQty = item.ProductionInQty,
-                                ReturnInQty = item.ReturnInQty,
-                                ProductionOutQty = item.ProductionOutQty,
-                                ReturnQty = item.ReturnQty,
-                                StAdjIn = item.StAdjIn,
-                                StAdjOut = item.StAdjOut,
-                                StDisOut = item.StDisOut
-                            };
-                            reportData.Add(report);
-                        }
-
+                            Inventory = item.location,
+                            RawMaterial = item.ItemMaster.ItemName,
+                            ItemCode = item.ItemMaster.ItemCode,
+                            BatchNo = item.batchNumber,
+                            UOM = item.ItemMaster.Unit.UnitName,
+                            OpeningBalance = item.openingBalance,
+                            ReceivedQty = item.receivedQty - item.StAdjIn,
+                            ActualUsage = item.actualUsage - item.StAdjOut - item.StDisOut,
+                            ClosingBalance = item.closingBalance,
+                            GRNQty = item.GRNQty,
+                            ProductionInQty = item.ProductionInQty,
+                            ReturnInQty = item.ReturnInQty,
+                            ProductionOutQty = item.ProductionOutQty,
+                            ReturnQty = item.ReturnQty,
+                            StAdjIn = item.StAdjIn,
+                            StAdjOut = item.StAdjOut,
+                            StDisOut = item.StDisOut
+                        };
+                        reportData.Add(report);
                     }
 
                     if (reportData.Any())

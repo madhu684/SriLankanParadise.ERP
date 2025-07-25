@@ -5,6 +5,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
     public interface IAuditLogRepository
     {
         Task CreateAuditLog(AuditLog auditLog);
-        Task<IEnumerable<AuditLog>> GetAuditLogByDate(DateTime date);
+        Task<IEnumerable<AuditLog>> GetAuditLogByDate(DateTime fromDate, DateTime toDate);
     }
 }
