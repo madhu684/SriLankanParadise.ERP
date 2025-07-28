@@ -5,7 +5,9 @@ import {
   post_location_inventory_api,
   post_location_inventory_movement_api,
   get_user_locations_by_user_id_api,
+  get_batches_by_batchRef_api,
   post_batch_api,
+  post_itemBatch_api,
 } from "../../../services/purchaseApi";
 import {
   get_item_masters_by_company_id_with_query_api,
@@ -24,6 +26,7 @@ export const AddEmptiesManagement = (handleClose) => {
   const [validationErrors, setValidationErrors] = useState({});
   const alertRef = useRef(null);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const queryClient = useQueryClient();
 
@@ -84,35 +87,24 @@ export const AddEmptiesManagement = (handleClose) => {
       fetchItems(sessionStorage.getItem("companyId"), searchItem, "Empty"),
   });
 
-  const generateBatchRef = () => {
-    const currentDate = new Date();
-    const formattedDate = currentDate
-      .toISOString()
-      .split("T")[0]
-      .replace(/-/g, "");
-
-    // Generate random 4-digit number
-    const randomNum = Math.floor(1000 + Math.random() * 9000);
-
-    // Combine components to form batch reference
-    return `B-${formattedDate}-${randomNum}`;
+  const batchId = async () => {
+    try {
+      const response = await get_batches_by_batchRef_api("E-20250728-0000");
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching Batch:", error);
+    }
   };
 
-  const createBatch = async () => {
-    const currentDate = new Date();
-    const formattedDate = currentDate.toISOString();
-    const batchRef = generateBatchRef();
-
-    const batchData = {
-      batchRef: batchRef,
-      date: formattedDate,
-      companyId: sessionStorage.getItem("companyId"),
-      permissionId: 1047,
-    };
-
-    const batchResponse = await post_batch_api(batchData);
-    return batchResponse.data.result?.batchId;
-  };
+  const {
+    data: batch,
+    isLoading: isBatchLoading,
+    isError: isBatchError,
+    error: batchError,
+  } = useQuery({
+    queryKey: ["batch"],
+    queryFn: () => batchId(),
+  });
 
   // Handler to add the selected item to itemDetails
   const handleSelectItem = (item) => {
@@ -132,14 +124,15 @@ export const AddEmptiesManagement = (handleClose) => {
   };
 
   const handleSubmit = async (isSaveAsDraft) => {
+    if (!validateWarehouseLocation()) {
+      return;
+    }
     if (validateForm(isSaveAsDraft)) {
       try {
         setLoading(true);
         setSubmissionStatus(null);
 
         const locationId = formData.warehouseLocation;
-
-        const generateBatchRefBatchId = await createBatch();
 
         const EmptyReturnData = {
           companyId: parseInt(sessionStorage.getItem("companyId")),
@@ -149,6 +142,7 @@ export const AddEmptiesManagement = (handleClose) => {
           createdBy: parseInt(sessionStorage.getItem("userId")),
           emptyReturnDetails: formData.itemDetails.map((item) => ({
             itemMasterId: item.id,
+            batchId: batch?.batchId,
             addedQuantity: item.quantity,
           })),
         };
@@ -168,9 +162,25 @@ export const AddEmptiesManagement = (handleClose) => {
             //   await get_added_empty_items_by_masterId_api(emptyReturnMasterId);
 
             for (const item of formData.itemDetails) {
+              const itemBatchData = {
+                batchId: batch?.batchId,
+                itemMasterId: item.id,
+                costPrice: 0,
+                sellingPrice: 0,
+                status: true,
+                companyId: parseInt(sessionStorage.getItem("companyId")),
+                createdBy: sessionStorage.getItem("username"),
+                createdUserId: parseInt(sessionStorage.getItem("userId")),
+                tempQuantity: 0,
+                locationId: locationId,
+                expiryDate: "2025-07-28T05:36:11.521Z",
+                qty: item.quantity,
+                permissionId: 188,
+              };
+
               const locationInventoryData = {
                 itemMasterId: item.id,
-                batchId: null,
+                batchId: batch?.batchId,
                 locationId: locationId,
                 stockInHand: item.quantity,
                 permissionId: 1088,
@@ -180,14 +190,16 @@ export const AddEmptiesManagement = (handleClose) => {
 
               const locationInventoryMovementData = {
                 movementTypeId: 1,
-                transactionTypeId: 4,
+                transactionTypeId: 11,
                 itemMasterId: item.id,
-                batchId: null,
+                batchId: batch?.batchId,
                 locationId: locationId,
                 date: new Date().toISOString(),
                 qty: item.quantity,
                 permissionId: 1090,
               };
+
+              await post_itemBatch_api(itemBatchData);
 
               const responseInventryAdded = await post_location_inventory_api(
                 locationInventoryData
@@ -213,6 +225,7 @@ export const AddEmptiesManagement = (handleClose) => {
         setFormData({ warehouseLocation: null, itemDetails: [] });
         refetchWarehouses();
         setSubmissionStatus("success");
+        setErrors({});
         setTimeout(() => {
           handleClose();
         }, 2000);
@@ -247,6 +260,17 @@ export const AddEmptiesManagement = (handleClose) => {
     });
 
     return isItemQuantityValid;
+  };
+
+  const validateWarehouseLocation = () => {
+    const newErrors = {};
+    const warehouseLocation = formData.warehouseLocation;
+
+    if (!warehouseLocation) {
+      newErrors.warehouseLocation = "Please select a warehouse location.";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleItemDetailsChange = (index, field, value) => {
@@ -320,6 +344,7 @@ export const AddEmptiesManagement = (handleClose) => {
 
   const handleCancel = () => {
     setFormData({ warehouseLocation: null, itemDetails: [] });
+    setErrors({});
     handleClose();
   };
 
@@ -345,6 +370,8 @@ export const AddEmptiesManagement = (handleClose) => {
     handleRemoveItem,
     handleCancel,
     handleWarehouseLocationChange,
+
+    errors,
   };
 };
 export default AddEmptiesManagement;

@@ -463,15 +463,15 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                       >
                         <option value="">Select item batch</option>
                         {locationInventories
-                          ?.filter((batch) => batch.itemMasterId === item.id)
-                          ?.map((batch, batchIndex) => (
+                          ?.filter((i) => i.itemMasterId === item.id)
+                          ?.map((i, batchIndex) => (
                             <option
                               key={batchIndex}
-                              value={batch.batchId}
-                              disabled={batch.stockInHand === 0}
+                              value={i.batchId}
+                              disabled={i.stockInHand === 0}
                             >
-                              {batch.itemBatch.batch.batchRef} - Stock in hand{" "}
-                              {batch.stockInHand}
+                              {i.itemBatch.batch.batchRef} - Stock in hand{" "}
+                              {i.stockInHand}
                             </option>
                           ))}
                       </select>
