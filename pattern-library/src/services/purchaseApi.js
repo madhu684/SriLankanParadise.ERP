@@ -1536,3 +1536,15 @@ export const update_min_state_in_mrn_api = async (id, formData) => {
     throw error;
   }
 };
+
+export const get_batches_by_batchRef_api = async (batchRef) => {
+  try {
+    const response = await api.get(`/batch/GetBatchesByBatchRef/${batchRef}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

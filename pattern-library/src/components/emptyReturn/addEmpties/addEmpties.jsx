@@ -25,6 +25,8 @@ const AddEmpties = ({ show, handleClose }) => {
     handleRemoveItem,
     handleSubmit,
     handleWarehouseLocationChange,
+
+    errors,
   } = AddEmptiesManagement(handleClose);
   console.log("Fetched warehouses dinusha:", warehouses);
   console.log("Fetched items:", availableItems);
@@ -57,7 +59,7 @@ const AddEmpties = ({ show, handleClose }) => {
                 {/* <label>Warehouse</label> */}
                 <select
                   className="form-select"
-                  value={formData.warehouseLocation || ""}
+                  value={formData.warehouseLocation}
                   onChange={(e) =>
                     handleWarehouseLocationChange(parseInt(e.target.value))
                   }
@@ -84,6 +86,11 @@ const AddEmpties = ({ show, handleClose }) => {
                       </option>
                     ))}
                 </select>
+                {errors.warehouseLocation && (
+                  <div className="text-danger mb-2">
+                    {errors.warehouseLocation}
+                  </div>
+                )}
               </div>
 
               {/* Search for items */}

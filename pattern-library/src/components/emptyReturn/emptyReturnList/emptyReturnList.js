@@ -13,6 +13,8 @@ import {
   post_location_inventory_api,
   get_user_locations_by_user_id_api,
   patch_Empty_location_inventory_api,
+  patch_location_inventory_api,
+  get_batches_by_batchRef_api,
 } from "../../../services/purchaseApi";
 
 const useEmptyReturnsLogic = () => {
@@ -240,9 +242,10 @@ const useEmptyReturnsLogic = () => {
       }
 
       // existing inventory Down
-      const response1 = await patch_Empty_location_inventory_api(
+      const response1 = await patch_location_inventory_api(
         selectedItem.locationId,
         selectedItem.itemMasterId,
+        selectedItem.batchId,
         "subtract",
         {
           stockInHand: transferDetails.transferQty,
@@ -259,7 +262,7 @@ const useEmptyReturnsLogic = () => {
         movementTypeId: 2,
         transactionTypeId: 12,
         itemMasterId: selectedItem.itemMasterId,
-        batchId: null,
+        batchId: selectedItem.batchId,
         locationId: selectedItem.locationId,
         date: new Date().toISOString(),
         qty: transferDetails.transferQty,
@@ -273,7 +276,7 @@ const useEmptyReturnsLogic = () => {
       // existing inventory up
       const response3 = await post_location_inventory_api({
         itemMasterId: selectedItem.itemMasterId,
-        batchId: null,
+        batchId: selectedItem.batchId,
         locationId: transferDetails.location,
         stockInHand: transferDetails.transferQty,
         permissionId: 1088,
@@ -289,7 +292,7 @@ const useEmptyReturnsLogic = () => {
         movementTypeId: 1,
         transactionTypeId: 11,
         itemMasterId: selectedItem.itemMasterId,
-        batchId: null,
+        batchId: selectedItem.batchId,
         locationId: parseInt(transferDetails.location), // Convert to integer selectedItem.locationId,
         date: new Date().toISOString(),
         qty: transferDetails.transferQty,
@@ -314,9 +317,11 @@ const useEmptyReturnsLogic = () => {
       }
 
       // existing inventory Down API 1
-      const response1 = await patch_Empty_location_inventory_api(
+      const response1 = await patch_location_inventory_api(
         selectedItem.locationId,
         selectedItem.itemMasterId,
+        selectedItem.batchId,
+
         "subtract",
         {
           stockInHand: transferDetails.transferQty,
@@ -331,9 +336,9 @@ const useEmptyReturnsLogic = () => {
       // existing movement inventory Down API 2
       const response2 = await post_location_inventory_movement_api({
         movementTypeId: 2,
-        transactionTypeId: 12,
+        transactionTypeId: 13,
         itemMasterId: selectedItem.itemMasterId,
-        batchId: null,
+        batchId: selectedItem.batchId,
         locationId: selectedItem.locationId,
         date: new Date().toISOString(),
         qty: transferDetails.transferQty,

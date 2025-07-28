@@ -73,5 +73,20 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+        public async Task<Batch> GetBatchesByBatchRef(string batchRef)
+        {
+            try
+            {
+                var batch = await _dbContext.Batches
+                    .FirstOrDefaultAsync(b => b.BatchRef == batchRef);
+                return batch;
+            }
+            
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }
