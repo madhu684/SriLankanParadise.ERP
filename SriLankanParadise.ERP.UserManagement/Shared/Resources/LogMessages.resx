@@ -1023,4 +1023,16 @@
   <data name="IssueDetailsRetrieved" xml:space="preserve">
     <value>Issue details retrieved</value>
   </data>
+  <data name="SupplierItemCreated" xml:space="preserve">
+    <value>Supplier item created succefully</value>
+  </data>
+  <data name="SupplierItemNotFound" xml:space="preserve">
+    <value>Supplier items not found</value>
+  </data>
+  <data name="SupplierItemRetrived" xml:space="preserve">
+    <value>Supplier item retrived</value>
+  </data>
+  <data name="RequisitionMasterPatched" xml:space="preserve">
+    <value>Requisition master patched</value>
+  </data>
 </root>

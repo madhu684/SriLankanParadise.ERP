@@ -6,13 +6,9 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
     {
         public int ItemMasterId { get; set; }
 
-        public int UnitId { get; set; }
-
-        public virtual UnitDto? Unit { get; set; }
+        public int? UnitId { get; set; }
 
         public int CategoryId { get; set; }
-
-        public virtual CategoryDto? Category { get; set; }
 
         public string? ItemName { get; set; }
 
@@ -30,8 +26,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public int? InventoryUnitId { get; set; }
         public decimal? UnitPrice { get; set; }
-
-        public virtual UnitDto? InventoryUnit { get; set; }
 
         public decimal? ConversionRate { get; set; }
 
@@ -65,10 +59,13 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public decimal? BulkPrice { get; set; }
 
-        //new properties
+        public int? SupplierId { get; set; }
 
+        public virtual UnitDto? Unit { get; set; }
+        public virtual CategoryDto? Category { get; set; }
+        public virtual UnitDto? InventoryUnit { get; set; }
         public virtual ItemTypeDto? ItemType { get; set; }
-
+        public virtual SupplierDto? Supplier { get; set; }
         public ICollection<SubItemMasterDto>? SubItemMasters { get; set; }
 
 

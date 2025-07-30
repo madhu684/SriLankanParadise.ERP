@@ -301,8 +301,9 @@ const TransferRequisition = ({
                       .map((item) => (
                         <li key={item.itemMasterId}>
                           <button
+                            type="button"
                             className="dropdown-item"
-                            onClick={() => handleSelectItem(item)}
+                            onClick={(e) => handleSelectItem(item, e)}
                           >
                             <span className="me-3">
                               <i className="bi bi-cart4"></i>

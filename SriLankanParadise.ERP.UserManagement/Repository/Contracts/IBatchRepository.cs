@@ -11,5 +11,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task<IEnumerable<Batch>> GetAll();
 
         Task<IEnumerable<Batch>> GetBatchesByCompanyId(int companyId);
+        Task<Batch> GetBatchesByBatchRef(string batchRef);
+
     }
 }

@@ -106,5 +106,30 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpGet("GetBatchesByBatchRef/{batchRef}")]
+        public async Task<ApiResponseModel> GetBatchesByBatchRef(string batchRef)
+        {
+            try
+            {
+                var batches = await _batchService.GetBatchesByBatchRef(batchRef);
+                if (batches != null)
+                {
+                    var batchDtos = _mapper.Map<BatchDto>(batches);
+                    AddResponseMessage(Response, LogMessages.BatchesRetrieved, batchDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.BatchesNotFound);
+                    AddResponseMessage(Response, LogMessages.BatchesNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

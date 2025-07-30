@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
+using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
@@ -39,6 +40,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         public async Task<IEnumerable<EmptyReturnMaster>> GetEmptyReturnsAsync(int companyId)
         {
             return await _emptyReturnRepository.GetEmptyReturnsByCompanyAsync(companyId);
+        }
+        public async Task<EmptyReturnMaster> GetEmptyReturnsByMasterId(int emptyReturnMasterId)
+        {
+            return await _emptyReturnRepository.GetEmptyReturnsByMasterId(emptyReturnMasterId);
         }
         public async Task<EmptyReturnMaster> GetEmptyReturnMasterById(int id)
         {

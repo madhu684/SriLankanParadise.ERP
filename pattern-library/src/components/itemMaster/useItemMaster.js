@@ -9,6 +9,7 @@ import {
   put_item_master_api,
 } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
+import { get_supplier_by_company_id_with_query_api } from "../../services/purchaseApi";
 
 const useItemMaster = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -16,6 +17,7 @@ const useItemMaster = ({ onFormSubmit }) => {
     categoryId: "",
     itemName: "",
     itemTypeId: "",
+    itemTypeName: "",
     measurementType: "",
     itemHierarchy: "main",
     inventoryMeasurementType: "",
@@ -25,15 +27,17 @@ const useItemMaster = ({ onFormSubmit }) => {
     unitPrice: "",
     costRatio: "",
     fobInUSD: "",
-    landedCost: "",
-    minNetSellingPrice: "",
-    sellingPrice: "",
-    mrp: "",
+    landedCost: 0,
+    minNetSellingPrice: 0,
+    sellingPrice: 0,
+    mrp: 0,
     competitorPrice: "0.00",
     labelPrice: "0.00",
     averageSellingPrice: "0.00",
     stockClearance: "0.00",
     bulkPrice: "0.00",
+    supplier: {},
+    supplierId: "",
   });
 
   const [validFields, setValidFields] = useState({});
@@ -46,9 +50,12 @@ const useItemMaster = ({ onFormSubmit }) => {
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [supplierSearchTerm, setSupplierSearchTerm] = useState("");
   const [searchChildTerm, setSearchChildTerm] = useState("");
   const [selectedParentItem, setSelectedParentItem] = useState("");
   const [selectedChildItems, setSelectedChildItems] = useState([]);
+
+  const [isSupplierSelected, setIsSupplierSelected] = useState(false);
 
   const fetchItems = async (companyId, searchQuery, itemType) => {
     try {
@@ -72,6 +79,7 @@ const useItemMaster = ({ onFormSubmit }) => {
     queryKey: ["items", searchTerm],
     queryFn: () =>
       fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"),
+    enabled: !!searchTerm,
   });
 
   const {
@@ -83,6 +91,31 @@ const useItemMaster = ({ onFormSubmit }) => {
     queryKey: ["childItems", searchChildTerm],
     queryFn: () =>
       fetchItems(sessionStorage.getItem("companyId"), searchChildTerm, "All"),
+    enabled: !!searchChildTerm,
+  });
+
+  const fetchSuppliers = async (companyId, searchQuery) => {
+    try {
+      const response = await get_supplier_by_company_id_with_query_api(
+        companyId,
+        searchQuery
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching suppliers:", error);
+    }
+  };
+
+  const {
+    data: availableSuppliers,
+    isLoading: isSuppliersLoading,
+    isError: isSuppliersError,
+    error: suppliersError,
+  } = useQuery({
+    queryKey: ["suppliers", supplierSearchTerm],
+    queryFn: () =>
+      fetchSuppliers(sessionStorage.getItem("companyId"), supplierSearchTerm),
+    enabled: !!supplierSearchTerm,
   });
 
   const fetchItemTypes = async () => {
@@ -105,6 +138,8 @@ const useItemMaster = ({ onFormSubmit }) => {
     queryKey: ["itemTypes"],
     queryFn: fetchItemTypes,
   });
+
+  console.log("itemTypes 141", itemTypes);
 
   const fetchMeasurementTypes = async () => {
     try {
@@ -141,6 +176,14 @@ const useItemMaster = ({ onFormSubmit }) => {
         inventoryUnitId: "",
         conversionValue: "",
       });
+    } else if (field === "itemTypeId") {
+      setFormData({
+        ...formData,
+        [field]: value,
+        itemTypeName: itemTypes.find(
+          (type) => type.itemTypeId === parseInt(value)
+        )?.name,
+      });
     } else {
       setFormData({
         ...formData,
@@ -168,7 +211,11 @@ const useItemMaster = ({ onFormSubmit }) => {
         const response = await get_units_by_company_id_api(
           sessionStorage.getItem("companyId")
         );
-        setUnitOptions(response.data.result);
+        // Filter out the unit with 'Service Unit'
+        const filteredUnits = response.data.result.filter(
+          (unit) => unit.unitName !== "Service Unit"
+        );
+        setUnitOptions(filteredUnits);
       } catch (error) {
         console.error("Error fetching units:", error);
       }
@@ -199,22 +246,24 @@ const useItemMaster = ({ onFormSubmit }) => {
   }, [submissionStatus]);
 
   useEffect(() => {
-    const costRatio = parseFloat(formData.costRatio) || 0;
-    const fobInUSD = parseFloat(formData.fobInUSD) || 0;
+    if (formData.itemTypeName !== "Service") {
+      const costRatio = parseFloat(formData.costRatio) || 0;
+      const fobInUSD = parseFloat(formData.fobInUSD) || 0;
 
-    const landedCost = costRatio * fobInUSD;
-    const minNetSellingPrice = landedCost / 0.9;
-    const sellingPrice = landedCost / 0.75;
-    const mrp = sellingPrice / 0.7;
+      const landedCost = costRatio * fobInUSD;
+      const minNetSellingPrice = landedCost / 0.9;
+      const sellingPrice = landedCost / 0.75;
+      const mrp = sellingPrice / 0.7;
 
-    setFormData((prev) => ({
-      ...prev,
-      landedCost: landedCost.toFixed(2),
-      minNetSellingPrice: minNetSellingPrice.toFixed(2),
-      sellingPrice: sellingPrice.toFixed(2),
-      mrp: mrp.toFixed(2),
-    }));
-  }, [formData.costRatio, formData.fobInUSD]);
+      setFormData((prev) => ({
+        ...prev,
+        landedCost: landedCost.toFixed(2),
+        minNetSellingPrice: minNetSellingPrice.toFixed(2),
+        sellingPrice: sellingPrice.toFixed(2),
+        mrp: mrp.toFixed(2),
+      }));
+    }
+  }, [formData.costRatio, formData.fobInUSD, formData.itemTypeName]);
 
   const validateField = (
     fieldName,
@@ -249,7 +298,7 @@ const useItemMaster = ({ onFormSubmit }) => {
     setValidFields({});
     setValidationErrors({});
 
-    const isUnitValid = validateField("unitId", "Unit", formData.unitId);
+    // Always validate these fields
     const isCategoryValid = validateField(
       "categoryId",
       "Category",
@@ -264,6 +313,30 @@ const useItemMaster = ({ onFormSubmit }) => {
       "itemTypeId",
       "Item type",
       formData.itemTypeId
+    );
+    const isUnitPriceValid = validateField(
+      "unitPrice",
+      "Unit price",
+      formData.unitPrice
+    );
+
+    // Skip validation for Service items
+    if (formData.itemTypeName === "Service") {
+      console.log("Service item detected - skipping additional validations");
+      return (
+        isCategoryValid &&
+        isItemNameValid &&
+        isItemTypeValid &&
+        isUnitPriceValid
+      );
+    }
+
+    // For non-Service items, validate all fields
+    const isUnitValid = validateField("unitId", "Unit", formData.unitId);
+    const isMeasurementTypeValid = validateField(
+      "measurementType",
+      "Measurement Type",
+      formData.measurementType
     );
     const isItemHierarchyValid = validateField(
       "itemHierarchy",
@@ -280,6 +353,11 @@ const useItemMaster = ({ onFormSubmit }) => {
       );
     }
 
+    const isInventoryMeasurementTypeValid = validateField(
+      "inventoryMeasurementType",
+      "Inventory Measurement Type",
+      formData.inventoryMeasurementType
+    );
     const isInventoryUnitValid = validateField(
       "inventoryUnitId",
       "Inventory unit",
@@ -300,11 +378,6 @@ const useItemMaster = ({ onFormSubmit }) => {
       "Reorder level",
       formData.reorderLevel
     );
-    const isUnitPriceValid = validateField(
-      "unitPrice",
-      "Unit price",
-      formData.unitPrice
-    );
     const isCostRatioValid = validateField(
       "costRatio",
       "Cost Ratio",
@@ -318,11 +391,13 @@ const useItemMaster = ({ onFormSubmit }) => {
 
     return (
       isUnitValid &&
+      isMeasurementTypeValid &&
       isCategoryValid &&
       isItemNameValid &&
       isItemTypeValid &&
       isItemHierarchyValid &&
       isparentItemValid &&
+      isInventoryMeasurementTypeValid &&
       isInventoryUnitValid &&
       isConversionValueValid &&
       isReorderLevelValid &&
@@ -346,7 +421,7 @@ const useItemMaster = ({ onFormSubmit }) => {
         }
 
         const itemMasterData = {
-          unitId: formData.unitId,
+          unitId: formData.itemTypeName === "Service" ? 6 : formData.unitId,
           categoryId: formData.categoryId,
           itemName: formData.itemName,
           status: status,
@@ -359,22 +434,42 @@ const useItemMaster = ({ onFormSubmit }) => {
             SubItemMasterId: item.itemMasterId,
             Quantity: parseFloat(item.quantity) || 0,
           })),
-          inventoryUnitId: formData.inventoryUnitId,
-          conversionRate: formData.conversionValue,
-          reorderLevel: formData.reorderLevel,
+          inventoryUnitId:
+            formData.itemTypeName === "Service"
+              ? null
+              : formData.inventoryUnitId,
+          conversionRate:
+            formData.itemTypeName === "Service" ? 1 : formData.conversionValue,
+          reorderLevel:
+            formData.itemTypeName === "Service" ? 0 : formData.reorderLevel,
           permissionId: 1039,
           unitPrice: formData.unitPrice,
-          costRatio: formData.costRatio,
-          fobInUSD: formData.fobInUSD,
-          landedCost: formData.landedCost,
-          minNetSellingPrice: formData.minNetSellingPrice,
-          sellingPrice: formData.sellingPrice,
-          mrp: formData.mrp,
-          competitorPrice: formData.competitorPrice,
-          labelPrice: formData.labelPrice,
-          averageSellingPrice: formData.averageSellingPrice,
-          stockClearance: formData.stockClearance,
-          bulkPrice: formData.bulkPrice,
+          costRatio:
+            formData.itemTypeName === "Service" ? 0 : formData.costRatio,
+          fobInUSD: formData.itemTypeName === "Service" ? 0 : formData.fobInUSD,
+          landedCost:
+            formData.itemTypeName === "Service" ? 0 : formData.landedCost,
+          minNetSellingPrice:
+            formData.itemTypeName === "Service"
+              ? 0
+              : formData.minNetSellingPrice,
+          sellingPrice:
+            formData.itemTypeName === "Service" ? 0 : formData.sellingPrice,
+          mrp: formData.itemTypeName === "Service" ? 0 : formData.mrp,
+          competitorPrice:
+            formData.itemTypeName === "Service" ? 0 : formData.competitorPrice,
+          labelPrice:
+            formData.itemTypeName === "Service" ? 0 : formData.labelPrice,
+          averageSellingPrice:
+            formData.itemTypeName === "Service"
+              ? 0
+              : formData.averageSellingPrice,
+          stockClearance:
+            formData.itemTypeName === "Service" ? 0 : formData.stockClearance,
+          bulkPrice:
+            formData.itemTypeName === "Service" ? 0 : formData.bulkPrice,
+          supplierId:
+            formData.itemTypeName === "Service" ? null : formData.supplierId,
         };
 
         console.log("sending request : ", itemMasterData);
@@ -385,7 +480,7 @@ const useItemMaster = ({ onFormSubmit }) => {
 
         if (formData.itemHierarchy === "main") {
           const itemMasterData = {
-            unitId: formData.unitId,
+            unitId: formData.itemTypeName === "Service" ? 6 : formData.unitId,
             categoryId: formData.categoryId,
             itemName: formData.itemName,
             status: status,
@@ -398,22 +493,47 @@ const useItemMaster = ({ onFormSubmit }) => {
               SubItemMasterId: item.itemMasterId,
               Quantity: parseFloat(item.quantity) || 0,
             })),
-            inventoryUnitId: formData.inventoryUnitId,
-            conversionRate: formData.conversionValue,
-            reorderLevel: formData.reorderLevel,
+            inventoryUnitId:
+              formData.itemTypeName === "Service"
+                ? null
+                : formData.inventoryUnitId,
+            conversionRate:
+              formData.itemTypeName === "Service"
+                ? 0
+                : formData.conversionValue,
+            reorderLevel:
+              formData.itemTypeName === "Service" ? 0 : formData.reorderLevel,
             permissionId: 1040,
             unitPrice: formData.unitPrice,
-            costRatio: formData.costRatio,
-            fobInUSD: formData.fobInUSD,
-            landedCost: formData.landedCost,
-            minNetSellingPrice: formData.minNetSellingPrice,
-            sellingPrice: formData.sellingPrice,
-            mrp: formData.mrp,
-            competitorPrice: formData.competitorPrice,
-            labelPrice: formData.labelPrice,
-            averageSellingPrice: formData.averageSellingPrice,
-            stockClearance: formData.stockClearance,
-            bulkPrice: formData.bulkPrice,
+            costRatio:
+              formData.itemTypeName === "Service" ? 0 : formData.costRatio,
+            fobInUSD:
+              formData.itemTypeName === "Service" ? 0 : formData.fobInUSD,
+            landedCost:
+              formData.itemTypeName === "Service" ? 0 : formData.landedCost,
+            minNetSellingPrice:
+              formData.itemTypeName === "Service"
+                ? 0
+                : formData.minNetSellingPrice,
+            sellingPrice:
+              formData.itemTypeName === "Service" ? 0 : formData.sellingPrice,
+            mrp: formData.itemTypeName === "Service" ? 0 : formData.mrp,
+            competitorPrice:
+              formData.itemTypeName === "Service"
+                ? 0
+                : formData.competitorPrice,
+            labelPrice:
+              formData.itemTypeName === "Service" ? 0 : formData.labelPrice,
+            averageSellingPrice:
+              formData.itemTypeName === "Service"
+                ? 0
+                : formData.averageSellingPrice,
+            stockClearance:
+              formData.itemTypeName === "Service" ? 0 : formData.stockClearance,
+            bulkPrice:
+              formData.itemTypeName === "Service" ? 0 : formData.bulkPrice,
+            supplierId:
+              formData.itemTypeName === "Service" ? null : formData.supplierId,
           };
 
           putResponse = await put_item_master_api(itemMasterId, itemMasterData);
@@ -488,6 +608,29 @@ const useItemMaster = ({ onFormSubmit }) => {
     });
   };
 
+  const handleSupplierChange = (value) => {
+    setIsSupplierSelected(true);
+    setFormData((prev) => ({
+      ...prev,
+      supplier: value,
+      supplierId: parseInt(value.supplierId),
+    }));
+    setSupplierSearchTerm("");
+  };
+
+  const handleResetSupplier = () => {
+    setFormData((prev) => ({
+      ...prev,
+      supplier: "",
+      supplierId: "",
+    }));
+    setIsSupplierSelected(false);
+    setSupplierSearchTerm("");
+  };
+
+  console.log("unitOptions 229", unitOptions);
+  console.log("formData : ", formData);
+
   return {
     formData,
     validFields,
@@ -518,8 +661,17 @@ const useItemMaster = ({ onFormSubmit }) => {
     selectedParentItem,
     selectedChildItems,
     itemCode,
+    supplierSearchTerm,
+    availableSuppliers,
+    isSuppliersLoading,
+    isSuppliersError,
+    suppliersError,
+    isSupplierSelected,
+    handleSupplierChange,
+    handleResetSupplier,
     setSearchTerm,
     setSearchChildTerm,
+    setSupplierSearchTerm,
     setFormData,
     handleInputChange,
     handleSubmit,

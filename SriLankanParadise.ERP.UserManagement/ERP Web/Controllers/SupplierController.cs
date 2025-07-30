@@ -60,6 +60,32 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpGet("GetSuppliersByCompanyIdWithSearchQuery/{companyId}")]
+        public async Task<ApiResponseModel> GetSuppliersByCompanyIdWithSearchQuery(int companyId, string? searchQuery = null)
+        {
+            try
+            {
+                var suppliers = await _supplierService.GetSuppliersByCompanyIdWithSearchQuery(companyId, searchQuery);
+                if (suppliers != null)
+                {
+                    var supplierDtos = _mapper.Map<IEnumerable<SupplierDto>>(suppliers);
+                    _logger.LogInformation(LogMessages.SuppliersRetrieved);
+                    AddResponseMessage(Response, LogMessages.SuppliersRetrieved, supplierDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.SuppliersNotFound);
+                    AddResponseMessage(Response, LogMessages.SuppliersNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
         [HttpPost]
         public async Task<ApiResponseModel> AddSupplier(SupplierRequestModel supplierRequest)
         {

@@ -1108,6 +1108,24 @@ export const delete_supplier_api = async (supplierId) => {
   }
 };
 
+export const get_supplier_by_company_id_with_query_api = async (
+  companyId,
+  searchQuery
+) => {
+  try {
+    const response = await api.get(
+      `/supplier/GetSuppliersByCompanyIdWithSearchQuery/${companyId}?searchQuery=${searchQuery}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
 //user location apis
 export const get_user_locations_by_user_id_api = async (userId) => {
   try {
@@ -1512,6 +1530,18 @@ export const update_min_state_in_mrn_api = async (id, formData) => {
         withCredentials: true,
       }
     );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_batches_by_batchRef_api = async (batchRef) => {
+  try {
+    const response = await api.get(`/batch/GetBatchesByBatchRef/${batchRef}`, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);

@@ -1,6 +1,6 @@
 ﻿using Azure;
 using Microsoft.EntityFrameworkCore;
-using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;

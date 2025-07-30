@@ -45,12 +45,11 @@ const MinsListDetail = ({ refetch, setRefetch, mrnId, handleBack }) => {
       {/* Header */}
       <div className="mb-4">
         <div className="d-flex justify-content-between">
-          <button
+          <i
+            class="bi bi-arrow-left"
             onClick={handleBack}
-            className="btn btn-dark d-flex align-items-center"
-          >
-            Back
-          </button>
+            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+          ></i>
           <p>
             <CurrentDateTime />
           </p>

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
@@ -66,6 +67,21 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
 
                 return batches.Any() ? batches : null;
             }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public async Task<Batch> GetBatchesByBatchRef(string batchRef)
+        {
+            try
+            {
+                var batch = await _dbContext.Batches
+                    .FirstOrDefaultAsync(b => b.BatchRef == batchRef);
+                return batch;
+            }
+            
             catch (Exception)
             {
 

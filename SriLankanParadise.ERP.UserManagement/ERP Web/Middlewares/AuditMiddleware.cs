@@ -1,4 +1,5 @@
-﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+﻿using SriLankanParadise.ERP.UserManagement.Data;
+using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.Shared.Resources;
 
 namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Middlewares

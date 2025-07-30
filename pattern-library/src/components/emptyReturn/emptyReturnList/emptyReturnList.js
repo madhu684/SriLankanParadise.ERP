@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import {
   get_added_empty_items_api,
   get_Empty_Return_Item_locations_inventories_by_location_id_api,
+  update_empty_return_api,
+  get_added_empty_items_by_masterId_api,
 } from "../../../services/inventoryApi";
 
 import {
@@ -11,6 +13,8 @@ import {
   post_location_inventory_api,
   get_user_locations_by_user_id_api,
   patch_Empty_location_inventory_api,
+  patch_location_inventory_api,
+  get_batches_by_batchRef_api,
 } from "../../../services/purchaseApi";
 
 const useEmptyReturnsLogic = () => {
@@ -32,6 +36,7 @@ const useEmptyReturnsLogic = () => {
   const [errors, setErrors] = useState({});
 
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showReduceEmptyModal, setShowReduceEmptyModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [transferDetails, setTransferDetails] = useState({
     transferQty: null,
@@ -147,6 +152,16 @@ const useEmptyReturnsLogic = () => {
     setShowEditModal(true);
   };
 
+  // reduse empty
+  const handleReduceEmpty = (item) => {
+    setSelectedItem(item);
+    setTransferDetails({
+      transferQty: item.transferQty,
+    });
+    setModalErrors("");
+    setShowReduceEmptyModal(true);
+  };
+
   const handleCloseModal = () => {
     setShowEditModal(false);
     setSelectedItem(null);
@@ -154,6 +169,18 @@ const useEmptyReturnsLogic = () => {
       transferQty: null,
     });
     setModalErrors("");
+    setErrors({});
+  };
+
+  // reduse empty
+  const handleCloseReduceModal = () => {
+    setShowReduceEmptyModal(false);
+    setSelectedItem(null);
+    setTransferDetails({
+      transferQty: null,
+    });
+    setModalErrors("");
+    setErrors({});
   };
 
   const handleModalInputChange = (field, value) => {
@@ -187,6 +214,24 @@ const useEmptyReturnsLogic = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // reduse empty
+  const validateEmptyReduceModalForm = () => {
+    const newErrors = {};
+    const transferQty = transferDetails.transferQty;
+    const stockInHand = selectedItem.stockInHand;
+
+    if (transferQty <= 0 || isNaN(transferQty)) {
+      newErrors.transferQty = "Reduce quantity must be greater than 0.";
+    }
+
+    if (transferQty > stockInHand) {
+      newErrors.transferQty = `Reduce quantity cannot exceed the stock in hand (${stockInHand}).`;
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const updateSingleLocationInventoryLevel = async () => {
     try {
       if (
@@ -197,9 +242,10 @@ const useEmptyReturnsLogic = () => {
       }
 
       // existing inventory Down
-      const response1 = await patch_Empty_location_inventory_api(
+      const response1 = await patch_location_inventory_api(
         selectedItem.locationId,
         selectedItem.itemMasterId,
+        selectedItem.batchId,
         "subtract",
         {
           stockInHand: transferDetails.transferQty,
@@ -216,7 +262,7 @@ const useEmptyReturnsLogic = () => {
         movementTypeId: 2,
         transactionTypeId: 12,
         itemMasterId: selectedItem.itemMasterId,
-        batchId: null,
+        batchId: selectedItem.batchId,
         locationId: selectedItem.locationId,
         date: new Date().toISOString(),
         qty: transferDetails.transferQty,
@@ -230,7 +276,7 @@ const useEmptyReturnsLogic = () => {
       // existing inventory up
       const response3 = await post_location_inventory_api({
         itemMasterId: selectedItem.itemMasterId,
-        batchId: null,
+        batchId: selectedItem.batchId,
         locationId: transferDetails.location,
         stockInHand: transferDetails.transferQty,
         permissionId: 1088,
@@ -246,7 +292,7 @@ const useEmptyReturnsLogic = () => {
         movementTypeId: 1,
         transactionTypeId: 11,
         itemMasterId: selectedItem.itemMasterId,
-        batchId: null,
+        batchId: selectedItem.batchId,
         locationId: parseInt(transferDetails.location), // Convert to integer selectedItem.locationId,
         date: new Date().toISOString(),
         qty: transferDetails.transferQty,
@@ -258,6 +304,95 @@ const useEmptyReturnsLogic = () => {
       }
 
       return true; // Success if all responses are 200/201
+    } catch (error) {
+      console.error("Error in API calls:", error);
+      return false;
+    }
+  };
+
+  const updateEmptyReduceInventoryLevel = async () => {
+    try {
+      if (transferDetails.transferQty === null) {
+        return false;
+      }
+
+      // existing inventory Down API 1
+      const response1 = await patch_location_inventory_api(
+        selectedItem.locationId,
+        selectedItem.itemMasterId,
+        selectedItem.batchId,
+
+        "subtract",
+        {
+          stockInHand: transferDetails.transferQty,
+          permissionId: 1089,
+        }
+      );
+
+      if (response1.status !== 200 && response1.status !== 201) {
+        return false;
+      }
+
+      // existing movement inventory Down API 2
+      const response2 = await post_location_inventory_movement_api({
+        movementTypeId: 2,
+        transactionTypeId: 13,
+        itemMasterId: selectedItem.itemMasterId,
+        batchId: selectedItem.batchId,
+        locationId: selectedItem.locationId,
+        date: new Date().toISOString(),
+        qty: transferDetails.transferQty,
+        permissionId: 1090,
+      });
+
+      if (response2.status !== 200 && response2.status !== 201) {
+        return false;
+      }
+
+      // if (
+      //   response1.data &&
+      //   response1.data.result &&
+      //   response1.data.result.remark
+      // ) {
+      //   const emptyReturnMasterId = parseInt(response1.data.result.remark);
+      //   console.log("emptyReturnMasterId dinusha 357: ", emptyReturnMasterId);
+
+      //   // get existing empty item details API 3
+      //   const emptyReturnitemResponse =
+      //     await get_added_empty_items_by_masterId_api(emptyReturnMasterId);
+
+      //   console.log(
+      //     "emptyReturnDetails dinusha 384: ",
+      //     emptyReturnitemResponse.data.result.emptyReturnDetails
+      //   );
+
+      //   const emptyReturnData = {
+      //     toLocationId: selectedItem.locationId,
+      //     status: 0,
+      //     modifyedBy: parseInt(sessionStorage.getItem("userId")),
+      //     ModifyDate: new Date().toISOString(),
+      //     emptyReturnDetails:
+      //       emptyReturnitemResponse.data.result.emptyReturnDetails.map(
+      //         (item) => ({
+      //           emptyReturnDetailId: item.emptyReturnDetailId,
+      //           itemMasterId: selectedItem.itemMasterId,
+      //           addedQuantity: item.addedQuantity - transferDetails.transferQty,
+      //         })
+      //       ),
+      //   };
+
+      //   // patch existing empty item details API 4
+      //   const response3 = await update_empty_return_api(
+      //     emptyReturnMasterId,
+      //     emptyReturnData
+      //   );
+
+      //   if (response3.status !== 200 && response2.status !== 201) {
+      //     return false;
+      //   }
+      // }
+
+      return true;
     } catch (error) {
       console.error("Error in API calls:", error);
       return false;
@@ -291,6 +426,40 @@ const useEmptyReturnsLogic = () => {
       setSubmissionStatus("error");
       showErrorAlert("Error Empty Return Transfer. Please try again.");
       setModalErrors("Error Empty Return Transfer. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+      setTimeout(() => setSubmissionStatus(null), 3000);
+    }
+  };
+
+  // reduse empty
+  const handleEmptyReduceModalSubmit = async () => {
+    if (!validateEmptyReduceModalForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const success = await updateEmptyReduceInventoryLevel();
+
+      if (success) {
+        // setSubmissionStatus("successSubmitted");
+        showSuccessAlert("Empty Reduce successfully!");
+        handleCloseReduceModal();
+        handleSearch();
+        console.log("Success message set, refreshing data");
+      } else {
+        throw new Error("Update failed due to server error");
+      }
+    } catch (error) {
+      console.log(
+        "Error in modal submission process:",
+        error.response ? error.response.data : error.message
+      );
+      // setSubmissionStatus("error");
+      showErrorAlert("Error Empty Reduce. Please try again.");
+      setModalErrors("Error Empty Reduce Transfer. Please try again.");
     } finally {
       setIsSubmitting(false);
       setTimeout(() => setSubmissionStatus(null), 3000);
@@ -340,13 +509,17 @@ const useEmptyReturnsLogic = () => {
     searchTerm,
 
     showEditModal,
+    showReduceEmptyModal,
     selectedItem,
     transferDetails,
     modalErrors,
     handleTransfer,
+    handleReduceEmpty,
     handleCloseModal,
+    handleCloseReduceModal,
     handleModalInputChange,
     handleModalSubmit,
+    handleEmptyReduceModalSubmit,
 
     showToast,
     toastMessage,
