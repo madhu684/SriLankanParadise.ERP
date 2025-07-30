@@ -500,7 +500,8 @@ const useTransferRequisition = ({ onFormSubmit }) => {
   //   setSearchTerm("");
   // };
 
-  const handleSelectItem = async (item) => {
+  const handleSelectItem = async (item, event) => {
+    event.preventDefault();
     let currentStockDetails = null;
     let toStockDetails = null;
 
