@@ -24,6 +24,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
   const alertRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isUpdatingStock, setIsUpdatingStock] = useState(false); // Add this state
 
   const fetchLocations = async () => {
     try {
@@ -135,43 +136,58 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     }
   };
 
-  // New useEffect to update stock details when warehouse locations change
+  // Fixed useEffect to prevent unnecessary re-renders
   useEffect(() => {
     const updateStockDetails = async () => {
       if (
         formData.fromWarehouseLocation &&
         formData.toWarehouseLocation &&
-        formData.itemDetails.length > 0
+        formData.itemDetails.length > 0 &&
+        !isUpdatingStock // Prevent multiple simultaneous updates
       ) {
+        setIsUpdatingStock(true);
         setLoading(true);
-        const updatedItemDetails = await Promise.all(
-          formData.itemDetails.map(async (item) => {
-            const fromStockDetails = await fetchStockDetails(
-              formData.fromWarehouseLocation,
-              item.id
-            );
-            const toStockDetails = await fetchStockDetails(
-              formData.toWarehouseLocation,
-              item.id
-            );
-            return {
-              ...item,
-              totalStockInHand: fromStockDetails?.totalStockInHand || 0,
-              totalStockInHandTo: toStockDetails?.totalStockInHand || 0,
-              reOrderLevel: fromStockDetails?.minReOrderLevel || 0,
-              maxStockLevel: fromStockDetails?.maxStockLevel || 0,
-            };
-          })
-        );
-        setFormData((prevFormData) => ({
-          ...prevFormData,
-          itemDetails: updatedItemDetails,
-        }));
-        setLoading(false);
+
+        try {
+          const updatedItemDetails = await Promise.all(
+            formData.itemDetails.map(async (item) => {
+              const fromStockDetails = await fetchStockDetails(
+                formData.fromWarehouseLocation,
+                item.id
+              );
+              const toStockDetails = await fetchStockDetails(
+                formData.toWarehouseLocation,
+                item.id
+              );
+              return {
+                ...item,
+                totalStockInHand: fromStockDetails?.totalStockInHand || 0,
+                totalStockInHandTo: toStockDetails?.totalStockInHand || 0,
+                reOrderLevel: fromStockDetails?.minReOrderLevel || 0,
+                maxStockLevel: fromStockDetails?.maxStockLevel || 0,
+              };
+            })
+          );
+
+          setFormData((prevFormData) => ({
+            ...prevFormData,
+            itemDetails: updatedItemDetails,
+          }));
+        } catch (error) {
+          console.error("Error updating stock details:", error);
+        } finally {
+          setLoading(false);
+          setIsUpdatingStock(false);
+        }
       }
     };
+
     updateStockDetails();
-  }, [formData.fromWarehouseLocation, formData.toWarehouseLocation]);
+  }, [
+    formData.fromWarehouseLocation,
+    formData.toWarehouseLocation,
+    formData.itemDetails.length,
+  ]); // Changed dependency
 
   useEffect(() => {
     if (submissionStatus != null) {
@@ -472,36 +488,20 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     }));
   };
 
-  // const handleSelectItem = async (item) => {
-  //   const currentStockDetails = await fetchStockDetails(
-  //     formData.fromWarehouseLocation,
-  //     item.itemMasterId
-  //   );
-  //   const toStockDetails = await fetchStockDetails(
-  //     formData.toWarehouseLocation,
-  //     item.itemMasterId
-  //   );
-  //   setFormData((prevFormData) => ({
-  //     ...prevFormData,
-  //     itemDetails: [
-  //       ...prevFormData.itemDetails,
-  //       {
-  //         id: item.itemMasterId,
-  //         name: item.itemName,
-  //         unit: item.unit.unitName,
-  //         quantity: 0,
-  //         totalStockInHand: currentStockDetails?.totalStockInHand || 0,
-  //         totalStockInHandTo: toStockDetails?.totalStockInHand || 0,
-  //         reOrderLevel: currentStockDetails?.minReOrderLevel || 0,
-  //         maxStockLevel: currentStockDetails?.maxStockLevel || 0,
-  //       },
-  //     ],
-  //   }));
-  //   setSearchTerm("");
-  // };
+  // Improved handleSelectItem function
+  const handleSelectItem = async (item, e) => {
+    e.preventDefault();
+    // Check if item already exists
+    const itemExists = formData.itemDetails.some(
+      (detail) => detail.id === item.itemMasterId
+    );
 
-  const handleSelectItem = async (item, event) => {
-    event.preventDefault();
+    if (itemExists) {
+      console.log("Item already exists in the list");
+      setSearchTerm("");
+      return;
+    }
+
     let currentStockDetails = null;
     let toStockDetails = null;
 
@@ -520,22 +520,22 @@ const useTransferRequisition = ({ onFormSubmit }) => {
       );
     }
 
+    const newItem = {
+      id: item.itemMasterId,
+      name: item.itemName,
+      unit: item.unit.unitName,
+      quantity: 0,
+      totalStockInHand: currentStockDetails?.totalStockInHand || 0,
+      totalStockInHandTo: toStockDetails?.totalStockInHand || 0,
+      reOrderLevel: currentStockDetails?.minReOrderLevel || 0,
+      maxStockLevel: currentStockDetails?.maxStockLevel || 0,
+    };
+
     setFormData((prevFormData) => ({
       ...prevFormData,
-      itemDetails: [
-        ...prevFormData.itemDetails,
-        {
-          id: item.itemMasterId,
-          name: item.itemName,
-          unit: item.unit.unitName,
-          quantity: 0,
-          totalStockInHand: currentStockDetails?.totalStockInHand || 0,
-          totalStockInHandTo: toStockDetails?.totalStockInHand || 0,
-          reOrderLevel: currentStockDetails?.minReOrderLevel || 0,
-          maxStockLevel: currentStockDetails?.maxStockLevel || 0,
-        },
-      ],
+      itemDetails: [...prevFormData.itemDetails, newItem],
     }));
+
     setSearchTerm("");
   };
 
@@ -554,7 +554,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     isItemsLoading,
     isItemsError,
     itemsError,
-    loading,
+    loading: loading || isUpdatingStock,
     userLocations,
     userDepartments,
     handleInputChange,
