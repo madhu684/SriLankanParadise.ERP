@@ -15,7 +15,7 @@ import React from "react";
 const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   const currentDate = new Date().toISOString().split("T")[0];
   const [formData, setFormData] = useState({
-    supplierId: "",
+    supplierId: null,
     orderDate: currentDate,
     itemDetails: [],
     status: 0,
@@ -126,7 +126,9 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
         searchQuery,
         itemType
       );
-      return response.data.result;
+      return response.data.result.filter(
+        (item) => item.supplierId === formData?.supplierId
+      );
     } catch (error) {
       console.error("Error fetching items:", error);
     }
@@ -141,6 +143,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     queryKey: ["items", searchTerm],
     queryFn: () =>
       fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"),
+    enabled: !!formData.supplierId,
   });
 
   useEffect(() => {
@@ -797,7 +800,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
       selectedSupplier: "",
-      supplierId: "",
+      supplierId: null,
     }));
   };
 
@@ -928,7 +931,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     try {
       setLoading(true); // Show loading state
       setIsPOGenerated(true);
-      const response = await get_Low_Stock_Items_api();
+      const response = await get_Low_Stock_Items_api(formData.supplierId);
       const lowStockItems = response.data.result || [];
 
       if (lowStockItems.length === 0) {
@@ -936,7 +939,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
         setTimeout(() => {
           setIsPOGenerated(false);
           setShowToast(false);
-        }, 3000);
+        }, 5000);
         setLoading(false);
         return;
       }
@@ -958,10 +961,13 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
         const newItemDetails = lowStockItems.map((item) => ({
           id: item.itemMasterId,
           name: item.itemMaster.itemName,
-          unit: item.itemMaster.unit?.unitName || "", // Assuming unit is nested in itemMaster
-          quantity: 0, // Default quantity, can be adjusted later
-          unitPrice: 0.0, // Default unit price, can be adjusted later
+          unit: item.itemMaster.unit?.unitName || "",
+          quantity: 0,
+          unitPrice: 0.0,
           totalPrice: 0.0,
+          totalStockInHand: item.totalStockInHand,
+          minReOrderLevel: item.minReOrderLevel,
+          maxStockLevel: item.maxStockLevel,
           chargesAndDeductions: initializedCharges,
         }));
 
@@ -981,6 +987,8 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
       setLoading(false); // Reset loading state
     }
   };
+
+  console.log("formData", formData);
 
   return {
     formData,

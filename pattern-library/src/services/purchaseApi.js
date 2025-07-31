@@ -1126,6 +1126,46 @@ export const get_supplier_by_company_id_with_query_api = async (
   }
 };
 
+export const post_supplier_item_api = async (formData) => {
+  try {
+    const response = await api.post("/supplierItem", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const update_supplier_item_api = async (supplierItemId, formData) => {
+  try {
+    const response = await api.put(
+      `/supplierItem/${supplierItemId}`,
+      formData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const delete_supplier_item_api = async (supplierItemId) => {
+  try {
+    const response = await api.delete(`/supplierItem/${supplierItemId}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 //user location apis
 export const get_user_locations_by_user_id_api = async (userId) => {
   try {
@@ -1343,11 +1383,12 @@ export const get_location_inventory_by_locationInvemtoryId_api = async (
 
 //=============
 export const get_sum_location_inventories_by_locationId_itemMasterId_api =
-  async (locationId, itemMasterId) => {
+  async (itemMasterId, locationId = null) => {
     try {
       const response = await api.get(
-        `/locationInventory/GetSumLocationInventoriesByLocationIdItemMasterId/${locationId}/${itemMasterId}`,
+        `/locationInventory/GetSumLocationInventoriesByLocationIdItemMasterId/${itemMasterId}`,
         {
+          params: { locationId },
           withCredentials: true,
         }
       );
@@ -1358,9 +1399,22 @@ export const get_sum_location_inventories_by_locationId_itemMasterId_api =
     }
   };
 
-export const get_Low_Stock_Items_api = async () => {
+// export const get_Low_Stock_Items_api = async () => {
+//   try {
+//     const response = await api.get(`/locationInventory/GetLowStockItems`, {
+//       withCredentials: true,
+//     });
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error fetching low stock items:", error);
+//     throw error;
+//   }
+// };
+
+export const get_Low_Stock_Items_api = async (supplierId = null) => {
   try {
     const response = await api.get(`/locationInventory/GetLowStockItems`, {
+      params: { supplierId }, // Pass supplierId as a query parameter
       withCredentials: true,
     });
     return response.data;

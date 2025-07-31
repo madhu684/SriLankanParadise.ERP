@@ -364,8 +364,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
         }
 
-        [HttpGet("GetSumLocationInventoriesByLocationIdItemMasterId/{locationId}/{itemMasterId}")]
-        public async Task<ApiResponseModel> GetSumLocationInventoriesByLocationIdItemMasterId(int locationId, int itemMasterId)
+        [HttpGet("GetSumLocationInventoriesByLocationIdItemMasterId/{itemMasterId}")]
+        public async Task<ApiResponseModel> GetSumLocationInventoriesByLocationIdItemMasterId([FromRoute] int itemMasterId, [FromQuery] int? locationId = null)
         {
             try
             {
@@ -391,11 +391,11 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
 
         [HttpGet("GetLowStockItems")]
-        public async Task<ApiResponseModel> GetLowStockItems()
+        public async Task<ApiResponseModel> GetLowStockItems(int? supplierId = null)
         {
             try
             {
-                var lowStockItems = await _locationInventoryService.GetLowStockItems();
+                var lowStockItems = await _locationInventoryService.GetLowStockItems(supplierId);
                 if (lowStockItems != null && lowStockItems.Any())
                 {
                     var lowStockItemsDtos = _mapper.Map<IEnumerable<LocationInventorySummaryDto>>(lowStockItems);

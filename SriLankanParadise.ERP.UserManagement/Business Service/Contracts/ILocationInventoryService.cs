@@ -28,8 +28,8 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task UpdateLocationInventoryStockInHand(int locationId, int itemMasterId, int batchId, LocationInventory locationInventory, string operation);
         Task UpdateEmptyLocationInventoryStockInHand(int locationId, int itemMasterId, LocationInventory locationInventory, string operation);
 
-        Task<IEnumerable<LocationInventorySummary>> GetLowStockItems();
+        Task<IEnumerable<LocationInventorySummary>> GetLowStockItems(int? supplierId = null);
 
-        Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemMasterId(int locationId, int itemMasterId);
+        Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemMasterId(int? locationId, int itemMasterId);
     }
 }

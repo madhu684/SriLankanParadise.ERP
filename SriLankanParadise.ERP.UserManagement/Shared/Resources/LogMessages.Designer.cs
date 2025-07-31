@@ -2356,6 +2356,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Supplier item deleted.
+        /// </summary>
+        public static string SupplierItemDeleted {
+            get {
+                return ResourceManager.GetString("SupplierItemDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Supplier items not found.
         /// </summary>
         public static string SupplierItemNotFound {
@@ -2370,6 +2379,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string SupplierItemRetrived {
             get {
                 return ResourceManager.GetString("SupplierItemRetrived", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supplier item updated.
+        /// </summary>
+        public static string SupplierItemUpdated {
+            get {
+                return ResourceManager.GetString("SupplierItemUpdated", resourceCulture);
             }
         }
         

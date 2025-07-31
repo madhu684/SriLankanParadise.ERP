@@ -307,7 +307,10 @@ const PurchaseOrder = ({
                   className="btn btn-info"
                   onClick={handleGeneratePurchaseOrder}
                   disabled={
-                    loading || loadingDraft || submissionStatus !== null
+                    loading ||
+                    loadingDraft ||
+                    submissionStatus !== null ||
+                    formData.supplierId === null
                   }
                 >
                   Generate Purchase Order
@@ -319,7 +322,7 @@ const PurchaseOrder = ({
                 <ToastMessage
                   show={showToast}
                   onClose={() => setShowToast(false)}
-                  type="danger"
+                  type="warning"
                   message="No any low-stock items found"
                 />
               )}

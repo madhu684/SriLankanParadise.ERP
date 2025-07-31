@@ -11,7 +11,12 @@ import {
   get_sub_item_masters_by_item_master_id_api,
 } from "../../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
-import { get_supplier_by_company_id_with_query_api } from "../../../services/purchaseApi";
+import {
+  delete_supplier_item_api,
+  get_supplier_by_company_id_with_query_api,
+  post_supplier_item_api,
+  update_supplier_item_api,
+} from "../../../services/purchaseApi";
 
 const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -39,7 +44,8 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     stockClearance: "",
     bulkPrice: "",
     supplier: {},
-    supplierId: "",
+    supplierId: null,
+    previousSupplierId: null,
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -244,6 +250,7 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       bulkPrice: deepCopyItemMaster?.bulkPrice ?? "",
       supplier: deepCopyItemMaster?.supplier ?? {},
       supplierId: deepCopyItemMaster?.supplierId ?? null,
+      previousSupplierId: deepCopyItemMaster?.supplierId ?? null,
     });
 
     const fetchParentItem = async () => {
@@ -426,79 +433,219 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       isFOBInUSDValid
     );
   };
+  // const handleSubmit = async (isSaveAsDraft) => {
+  //   try {
+  //     console.log("handleSubmit triggered!", isSaveAsDraft);
+  //     const status = isSaveAsDraft ? false : true;
+
+  //     const isFormValid = validateForm();
+  //     if (isFormValid) {
+  //       if (isSaveAsDraft) {
+  //         setLoadingDraft(true);
+  //       } else {
+  //         setLoading(true);
+  //       }
+
+  //       const ItemMasterData = {
+  //         unitId: formData.unitId,
+  //         categoryId: formData.categoryId,
+  //         itemName: formData.itemName,
+  //         status: status,
+  //         companyId: sessionStorage.getItem("companyId"),
+  //         createdBy: sessionStorage.getItem("username"),
+  //         createdUserId: sessionStorage.getItem("userId"),
+  //         itemTypeId: formData.itemTypeId,
+  //         parentId:
+  //           formData.itemHierarchy === "sub"
+  //             ? selectedParentItem?.itemMasterId
+  //             : itemMaster.itemMasterId,
+  //         SubItemMasters: selectedChildItems.map((item) => ({
+  //           SubItemMasterId: item.id,
+  //           Quantity: parseFloat(item.quantity) || 0,
+  //         })),
+  //         inventoryUnitId: formData.inventoryUnitId,
+  //         conversionRate: formData.conversionValue,
+  //         //itemCode: formData.itemCode,
+  //         reorderLevel: formData.reorderLevel,
+  //         permissionId: 1040,
+  //         unitPrice: formData.unitPrice,
+  //         costRatio: formData.costRatio,
+  //         fobInUSD: formData.fobInUSD,
+  //         landedCost: formData.landedCost,
+  //         minNetSellingPrice: formData.minNetSellingPrice,
+  //         sellingPrice: formData.sellingPrice,
+  //         mrp: formData.mrp,
+  //         competitorPrice: formData.competitorPrice,
+  //         labelPrice: formData.labelPrice,
+  //         averageSellingPrice: formData.averageSellingPrice,
+  //         stockClearance: formData.stockClearance,
+  //         bulkPrice: formData.bulkPrice,
+  //         supplierId: formData.supplierId,
+  //       };
+
+  //       const putResponse = await put_item_master_api(
+  //         itemMaster.itemMasterId,
+  //         ItemMasterData
+  //       );
+
+  //       if (
+  //         formData.previousSupplierId === null &&
+  //         formData.supplierId !== null
+  //       ) {
+  //         await post_supplier_item_api({
+  //           supplierId: formData.supplierId,
+  //           itemMasterId: itemMaster.itemMasterId,
+  //         });
+  //       }
+  //       if (
+  //         formData.previousSupplierId !== null &&
+  //         formData.supplierId !== null
+  //       ) {
+  //         await update_supplier_item_api(itemMaster.itemMasterId, {
+  //           supplierId: formData.previousSupplierId,
+  //           itemMasterId: itemMaster.itemMasterId,
+  //         });
+  //       }
+  //       if (formData.supplierId === null) {
+  //         await delete_supplier_item_api(itemMaster.itemMasterId);
+  //       }
+
+  //       if (putResponse.status === 200) {
+  //         if (isSaveAsDraft) {
+  //           setSubmissionStatus("successSavedAsDraft");
+  //           console.log("Item master updated and saved as draft!", formData);
+  //         } else {
+  //           setSubmissionStatus("successSubmitted");
+  //           console.log("Item master updated successfully!", formData);
+  //         }
+
+  //         setTimeout(() => {
+  //           setSubmissionStatus(null);
+  //           onFormSubmit();
+  //           setLoading(false);
+  //           setLoadingDraft(false);
+  //         }, 3000);
+  //       } else {
+  //         setSubmissionStatus("error");
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error("Error submitting form:", error);
+  //     setSubmissionStatus("error");
+  //     setTimeout(() => {
+  //       setSubmissionStatus(null);
+  //       setLoading(false);
+  //       setLoadingDraft(false);
+  //     }, 3000);
+  //   }
+  // };
+
   const handleSubmit = async (isSaveAsDraft) => {
     try {
       console.log("handleSubmit triggered!", isSaveAsDraft);
       const status = isSaveAsDraft ? false : true;
 
       const isFormValid = validateForm();
-      if (isFormValid) {
+      if (!isFormValid) {
+        console.log("Form validation failed");
+        return;
+      }
+
+      if (isSaveAsDraft) {
+        setLoadingDraft(true);
+      } else {
+        setLoading(true);
+      }
+
+      const ItemMasterData = {
+        unitId: formData.unitId,
+        categoryId: formData.categoryId,
+        itemName: formData.itemName,
+        status: status,
+        companyId: sessionStorage.getItem("companyId"),
+        createdBy: sessionStorage.getItem("username"),
+        createdUserId: sessionStorage.getItem("userId"),
+        itemTypeId: formData.itemTypeId,
+        parentId:
+          formData.itemHierarchy === "sub"
+            ? selectedParentItem?.itemMasterId
+            : itemMaster.itemMasterId,
+        SubItemMasters: selectedChildItems.map((item) => ({
+          SubItemMasterId: item.id,
+          Quantity: parseFloat(item.quantity) || 0,
+        })),
+        inventoryUnitId: formData.inventoryUnitId,
+        conversionRate: formData.conversionValue,
+        reorderLevel: formData.reorderLevel,
+        permissionId: 1040,
+        unitPrice: formData.unitPrice,
+        costRatio: formData.costRatio,
+        fobInUSD: formData.fobInUSD,
+        landedCost: formData.landedCost,
+        minNetSellingPrice: formData.minNetSellingPrice,
+        sellingPrice: formData.sellingPrice,
+        mrp: formData.mrp,
+        competitorPrice: formData.competitorPrice,
+        labelPrice: formData.labelPrice,
+        averageSellingPrice: formData.averageSellingPrice,
+        stockClearance: formData.stockClearance,
+        bulkPrice: formData.bulkPrice,
+        supplierId: formData.supplierId || null,
+      };
+
+      // Update the item master
+      const putResponse = await put_item_master_api(
+        itemMaster.itemMasterId,
+        ItemMasterData
+      );
+
+      // Handle supplier updates
+      if (formData.previousSupplierId !== formData.supplierId) {
+        if (
+          formData.supplierId === null &&
+          formData.previousSupplierId !== null
+        ) {
+          // Case: Remove supplier
+          await delete_supplier_item_api(itemMaster.itemMasterId);
+        } else if (
+          formData.supplierId !== null &&
+          formData.previousSupplierId === null
+        ) {
+          // Case: Add new supplier
+          await post_supplier_item_api({
+            supplierId: formData.supplierId,
+            itemMasterId: itemMaster.itemMasterId,
+          });
+        } else if (
+          formData.supplierId !== null &&
+          formData.previousSupplierId !== null
+        ) {
+          // Case: Update existing supplier
+          await update_supplier_item_api(itemMaster.itemMasterId, {
+            supplierId: formData.supplierId,
+            itemMasterId: itemMaster.itemMasterId,
+          });
+        }
+      }
+
+      if (putResponse.status === 200) {
         if (isSaveAsDraft) {
-          setLoadingDraft(true);
+          setSubmissionStatus("successSavedAsDraft");
+          console.log("Item master updated and saved as draft!", formData);
         } else {
-          setLoading(true);
+          setSubmissionStatus("successSubmitted");
+          console.log("Item master updated successfully!", formData);
         }
 
-        const ItemMasterData = {
-          unitId: formData.unitId,
-          categoryId: formData.categoryId,
-          itemName: formData.itemName,
-          status: status,
-          companyId: sessionStorage.getItem("companyId"),
-          createdBy: sessionStorage.getItem("username"),
-          createdUserId: sessionStorage.getItem("userId"),
-          itemTypeId: formData.itemTypeId,
-          parentId:
-            formData.itemHierarchy === "sub"
-              ? selectedParentItem?.itemMasterId
-              : itemMaster.itemMasterId,
-          SubItemMasters: selectedChildItems.map((item) => ({
-            SubItemMasterId: item.id,
-            Quantity: parseFloat(item.quantity) || 0,
-          })),
-          inventoryUnitId: formData.inventoryUnitId,
-          conversionRate: formData.conversionValue,
-          //itemCode: formData.itemCode,
-          reorderLevel: formData.reorderLevel,
-          permissionId: 1040,
-          unitPrice: formData.unitPrice,
-          costRatio: formData.costRatio,
-          fobInUSD: formData.fobInUSD,
-          landedCost: formData.landedCost,
-          minNetSellingPrice: formData.minNetSellingPrice,
-          sellingPrice: formData.sellingPrice,
-          mrp: formData.mrp,
-          competitorPrice: formData.competitorPrice,
-          labelPrice: formData.labelPrice,
-          averageSellingPrice: formData.averageSellingPrice,
-          stockClearance: formData.stockClearance,
-          bulkPrice: formData.bulkPrice,
-          supplierId: formData.supplierId,
-        };
-
-        const putResponse = await put_item_master_api(
-          itemMaster.itemMasterId,
-          ItemMasterData
-        );
-
-        if (putResponse.status === 200) {
-          if (isSaveAsDraft) {
-            setSubmissionStatus("successSavedAsDraft");
-            console.log("Item master updated and saved as draft!", formData);
-          } else {
-            setSubmissionStatus("successSubmitted");
-            console.log("Item master updated successfully!", formData);
-          }
-
-          setTimeout(() => {
-            setSubmissionStatus(null);
-            onFormSubmit();
-            setLoading(false);
-            setLoadingDraft(false);
-          }, 3000);
-        } else {
-          setSubmissionStatus("error");
-        }
+        setTimeout(() => {
+          setSubmissionStatus(null);
+          onFormSubmit();
+          setLoading(false);
+          setLoadingDraft(false);
+        }, 3000);
+      } else {
+        setSubmissionStatus("error");
+        console.error("Item master update failed:", putResponse);
       }
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -626,7 +773,7 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     setFormData((prev) => ({
       ...prev,
       supplier: "",
-      supplierId: "",
+      supplierId: null,
     }));
     setSupplierSearchTerm("");
   };

@@ -126,8 +126,8 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     try {
       const response =
         await get_sum_location_inventories_by_locationId_itemMasterId_api(
-          locationId,
-          itemMasterId
+          itemMasterId,
+          locationId
         );
       return response.data.result;
     } catch (error) {

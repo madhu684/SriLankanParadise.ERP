@@ -1035,4 +1035,10 @@
   <data name="RequisitionMasterPatched" xml:space="preserve">
     <value>Requisition master patched</value>
   </data>
+  <data name="SupplierItemUpdated" xml:space="preserve">
+    <value>Supplier item updated</value>
+  </data>
+  <data name="SupplierItemDeleted" xml:space="preserve">
+    <value>Supplier item deleted</value>
+  </data>
 </root>
