@@ -1123,6 +1123,24 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Location inventory summary not found.
+        /// </summary>
+        public static string LocationInventorySummaryNotFound {
+            get {
+                return ResourceManager.GetString("LocationInventorySummaryNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Location inventory summary retrieved.
+        /// </summary>
+        public static string LocationInventorySummaryRetrieved {
+            get {
+                return ResourceManager.GetString("LocationInventorySummaryRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Location inventory updated.
         /// </summary>
         public static string LocationInventoryUpdated {

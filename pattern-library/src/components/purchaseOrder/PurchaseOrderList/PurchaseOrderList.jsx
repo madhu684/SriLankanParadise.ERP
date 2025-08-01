@@ -144,14 +144,16 @@ const PurchaseOrderList = () => {
                 Approve
               </button>
             )}
-          {hasPermission("Update Purchase Order") && isAnyRowSelected && (
-            <button
-              className="btn btn-warning"
-              onClick={() => setShowUpdatePOForm(true)}
-            >
-              Edit
-            </button>
-          )}
+          {hasPermission("Update Purchase Order") &&
+            isAnyRowSelected &&
+            areAnySelectedRowsPending(selectedRows) && (
+              <button
+                className="btn btn-warning"
+                onClick={() => setShowUpdatePOForm(true)}
+              >
+                Edit
+              </button>
+            )}
         </div>
       </div>
       <div className="d-flex justify-content-end mb-3">
@@ -172,8 +174,7 @@ const PurchaseOrderList = () => {
         <table className="table mt-2">
           <thead>
             <tr>
-              <th>
-              </th>
+              <th></th>
               <th>Reference No</th>
               <th>Ordered By</th>
               <th>Supplier Name</th>
@@ -194,7 +195,7 @@ const PurchaseOrderList = () => {
                       type="checkbox"
                       checked={selectedRows.includes(po.purchaseOrderId)}
                       onChange={() => handleRowSelect(po.purchaseOrderId)}
-                                    />
+                    />
                   </td>
                   <td>{po.referenceNo}</td>
                   <td>{po.orderedBy}</td>

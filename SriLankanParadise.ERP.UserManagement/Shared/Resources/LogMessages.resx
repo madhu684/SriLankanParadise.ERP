@@ -1041,4 +1041,10 @@
   <data name="SupplierItemDeleted" xml:space="preserve">
     <value>Supplier item deleted</value>
   </data>
+  <data name="LocationInventorySummaryRetrieved" xml:space="preserve">
+    <value>Location inventory summary retrieved</value>
+  </data>
+  <data name="LocationInventorySummaryNotFound" xml:space="preserve">
+    <value>Location inventory summary not found</value>
+  </data>
 </root>

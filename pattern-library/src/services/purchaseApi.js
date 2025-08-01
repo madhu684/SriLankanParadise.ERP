@@ -1414,7 +1414,7 @@ export const get_sum_location_inventories_by_locationId_itemMasterId_api =
 export const get_Low_Stock_Items_api = async (supplierId = null) => {
   try {
     const response = await api.get(`/locationInventory/GetLowStockItems`, {
-      params: { supplierId }, // Pass supplierId as a query parameter
+      params: { supplierId },
       withCredentials: true,
     });
     return response.data;
@@ -1423,7 +1423,28 @@ export const get_Low_Stock_Items_api = async (supplierId = null) => {
     throw error;
   }
 };
-//==============
+
+export const get_Location_Inventory_Summary_By_Item_Name_api = async (
+  locationId = null,
+  itemName = ""
+) => {
+  try {
+    const response = await api.get(
+      `/locationInventory/GetLocationInventorySummaryByItemName`,
+      {
+        params: { locationId, itemName },
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching location inventory summary by item name:",
+      error
+    );
+    throw error;
+  }
+};
 
 export const post_comapny_location_api = async (locationData) => {
   try {

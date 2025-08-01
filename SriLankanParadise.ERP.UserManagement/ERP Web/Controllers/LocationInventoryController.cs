@@ -389,7 +389,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
-
         [HttpGet("GetLowStockItems")]
         public async Task<ApiResponseModel> GetLowStockItems(int? supplierId = null)
         {
@@ -405,6 +404,32 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 {
                     _logger.LogInformation("All items are more than min re order level");
                     AddResponseMessage(Response, "All items are more than min re order level", new List<LocationInventorySummaryDto>(), true, HttpStatusCode.OK);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("GetLocationInventorySummaryByItemName")]
+        public async Task<ApiResponseModel> GetLocationInventorySummaryByItemName([FromQuery] int? locationId, [FromQuery] string itemName)
+        {
+            try
+            {
+                var summary = await _locationInventoryService.GetSumLocationInventoriesByItemName(locationId, itemName);
+
+                if (summary != null)
+                {
+                    var summaryDto = _mapper.Map<IEnumerable<LocationInventorySummaryDto>>(summary);
+                    AddResponseMessage(Response, LogMessages.LocationInventorySummaryRetrieved, summaryDto, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.LocationInventorySummaryNotFound);
+                    AddResponseMessage(Response, LogMessages.LocationInventorySummaryNotFound, null, true, HttpStatusCode.NotFound);
                 }
             }
             catch (Exception ex)

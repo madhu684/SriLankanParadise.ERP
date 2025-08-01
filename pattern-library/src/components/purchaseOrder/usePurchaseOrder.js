@@ -7,10 +7,10 @@ import {
   post_charges_and_deductions_applied_api,
   get_transaction_types_api,
   get_Low_Stock_Items_api,
+  get_Location_Inventory_Summary_By_Item_Name_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
 
 const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   const currentDate = new Date().toISOString().split("T")[0];
@@ -119,31 +119,57 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     }
   }, [submissionStatus]);
 
-  const fetchItems = async (companyId, searchQuery, itemType) => {
+  // const fetchItems = async (companyId, searchQuery, itemType) => {
+  //   try {
+  //     const response = await get_item_masters_by_company_id_with_query_api(
+  //       companyId,
+  //       searchQuery,
+  //       itemType
+  //     );
+  //     return response.data.result.filter(
+  //       (item) => item.supplierId === formData?.supplierId
+  //     );
+  //   } catch (error) {
+  //     console.error("Error fetching items:", error);
+  //   }
+  // };
+
+  const fetchItems = async (searchQuery) => {
     try {
-      const response = await get_item_masters_by_company_id_with_query_api(
-        companyId,
-        searchQuery,
-        itemType
+      const response = await get_Location_Inventory_Summary_By_Item_Name_api(
+        null,
+        searchQuery
       );
-      return response.data.result.filter(
-        (item) => item.supplierId === formData?.supplierId
+
+      const items = response.data?.result?.map((summary) => ({
+        itemMasterId: summary.itemMasterId,
+        itemName: summary.itemMaster?.itemName || "",
+        unit: summary.itemMaster?.unit || { unitName: "" },
+        supplierId: summary.itemMaster?.supplierId || null,
+        totalStockInHand: summary.totalStockInHand,
+        minReOrderLevel: summary.minReOrderLevel,
+        maxStockLevel: summary.maxStockLevel,
+      }));
+
+      return items.filter(
+        (item) =>
+          !formData.supplierId || item.supplierId === formData.supplierId
       );
     } catch (error) {
       console.error("Error fetching items:", error);
+      return [];
     }
   };
 
   const {
-    data: availableItems,
+    data: availableItems = [],
     isLoading: isItemsLoading,
     isError: isItemsError,
     error: itemsError,
   } = useQuery({
     queryKey: ["items", searchTerm],
-    queryFn: () =>
-      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"),
-    enabled: !!formData.supplierId,
+    queryFn: () => fetchItems(searchTerm),
+    enabled: !!formData.supplierId && !!searchTerm,
   });
 
   useEffect(() => {
@@ -690,8 +716,37 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     return totalAmount;
   };
 
+  // const handleSelectItem = (item) => {
+  //   // Generate chargesAndDeductions array for the newly added item
+  //   const initializedCharges = chargesAndDeductions
+  //     .filter((charge) => charge.isApplicableForLineItem)
+  //     .map((charge) => ({
+  //       id: charge.chargesAndDeductionId,
+  //       name: charge.displayName,
+  //       value: charge.amount || charge.percentage,
+  //       sign: charge.sign,
+  //       isPercentage: charge.percentage !== null,
+  //     }));
+
+  //   setFormData((prevFormData) => ({
+  //     ...prevFormData,
+  //     itemDetails: [
+  //       ...prevFormData.itemDetails,
+  //       {
+  //         id: item.itemMasterId,
+  //         name: item.itemName,
+  //         unit: item.unit.unitName,
+  //         quantity: 0,
+  //         unitPrice: 0.0,
+  //         totalPrice: 0.0,
+  //         chargesAndDeductions: initializedCharges, // Add the generated array to itemDetails
+  //       },
+  //     ],
+  //   }));
+  //   setSearchTerm(""); // Clear the search term
+  // };
+
   const handleSelectItem = (item) => {
-    // Generate chargesAndDeductions array for the newly added item
     const initializedCharges = chargesAndDeductions
       .filter((charge) => charge.isApplicableForLineItem)
       .map((charge) => ({
@@ -710,14 +765,17 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
           id: item.itemMasterId,
           name: item.itemName,
           unit: item.unit.unitName,
-          quantity: 0,
+          quantity: item.maxStockLevel - item.totalStockInHand || 0,
           unitPrice: 0.0,
           totalPrice: 0.0,
-          chargesAndDeductions: initializedCharges, // Add the generated array to itemDetails
+          totalStockInHand: item.totalStockInHand,
+          minReOrderLevel: item.minReOrderLevel,
+          maxStockLevel: item.maxStockLevel,
+          chargesAndDeductions: initializedCharges,
         },
       ],
     }));
-    setSearchTerm(""); // Clear the search term
+    setSearchTerm("");
   };
 
   const handleInitializeItem = (item) => {
@@ -962,7 +1020,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
           id: item.itemMasterId,
           name: item.itemMaster.itemName,
           unit: item.itemMaster.unit?.unitName || "",
-          quantity: 0,
+          quantity: item.maxStockLevel - item.totalStockInHand || 0,
           unitPrice: 0.0,
           totalPrice: 0.0,
           totalStockInHand: item.totalStockInHand,
@@ -989,6 +1047,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   };
 
   console.log("formData", formData);
+  console.log("availableItems", availableItems);
 
   return {
     formData,

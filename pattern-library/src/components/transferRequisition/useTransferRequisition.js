@@ -143,7 +143,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
         formData.fromWarehouseLocation &&
         formData.toWarehouseLocation &&
         formData.itemDetails.length > 0 &&
-        !isUpdatingStock // Prevent multiple simultaneous updates
+        !isUpdatingStock
       ) {
         setIsUpdatingStock(true);
         setLoading(true);
@@ -187,7 +187,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     formData.fromWarehouseLocation,
     formData.toWarehouseLocation,
     formData.itemDetails.length,
-  ]); // Changed dependency
+  ]);
 
   useEffect(() => {
     if (submissionStatus != null) {

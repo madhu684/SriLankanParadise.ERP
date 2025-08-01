@@ -344,6 +344,7 @@ const PurchaseOrder = ({
                   className="form-control"
                   placeholder="Search for an item..."
                   value={searchTerm}
+                  disabled={!formData.supplierId}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 {searchTerm && (
@@ -440,6 +441,8 @@ const PurchaseOrder = ({
                   <th>Unit</th>
                   <th>Quantity</th>
                   <th>Unit Price</th>
+                  <th>Stock in Hand</th>
+                  <th>Max order level</th>
                   {renderColumns()}
                   <th className="text-end">Total Price</th>
                   <th className="text-end">Action</th>
@@ -500,6 +503,8 @@ const PurchaseOrder = ({
                         </div>
                       )}
                     </td>
+                    <td>{item.totalStockInHand || 0}</td>
+                    <td>{item.maxStockLevel || 0}</td>
                     {item.chargesAndDeductions.map((charge, chargeIndex) => (
                       <td key={chargeIndex}>
                         <input

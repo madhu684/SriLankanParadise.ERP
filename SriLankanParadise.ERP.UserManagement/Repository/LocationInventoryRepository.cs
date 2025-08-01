@@ -392,9 +392,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     ItemMaster = null
                 };
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                throw new Exception("Error retrieving location inventory summary", ex);
+                throw;
             }
         }
 
@@ -430,46 +430,188 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         //    }
         //}
 
+        // Working first one
+        //public async Task<IEnumerable<LocationInventorySummary>> GetLowStockItems(int? supplierId = null)
+        //{
+        //    try
+        //    {
+        //        var query = _dbContext.LocationInventories
+        //            .Include(li => li.ItemMaster)
+        //            .ThenInclude(i => i.Unit)
+        //            .Include(li => li.ItemMaster)
+        //            .ThenInclude(i => i.Category)
+        //            .AsQueryable();
+
+        //        // Apply supplierId filter if provided
+        //        if (supplierId.HasValue)
+        //        {
+        //            query = query.Where(li => li.ItemMaster.SupplierId == supplierId.Value);
+        //        }
+
+        //        var allInventories = await query.ToListAsync();
+
+        //        var summaryData = allInventories
+        //            .GroupBy(li => li.ItemMasterId)
+        //            .Select(g => new LocationInventorySummary
+        //            {
+        //                LocationInventoryId = 0,
+        //                LocationId = 0, 
+        //                ItemMasterId = g.Key,
+        //                TotalStockInHand = g.Sum(li => li.StockInHand ?? 0),
+        //                MinReOrderLevel = g.Min(li => li.ReOrderLevel ?? 0),
+        //                MaxStockLevel = g.Max(li => li.MaxStockLevel ?? 0),
+        //                ItemMaster = g.FirstOrDefault()?.ItemMaster
+        //            })
+        //            .Where(s => s.TotalStockInHand < s.MaxStockLevel)
+        //            .ToList();
+
+        //        return summaryData.Any() ? summaryData : new List<LocationInventorySummary>();
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
+
         public async Task<IEnumerable<LocationInventorySummary>> GetLowStockItems(int? supplierId = null)
         {
             try
             {
-                var query = _dbContext.LocationInventories
-                    .Include(li => li.ItemMaster)
-                    .ThenInclude(i => i.Unit)
-                    .Include(li => li.ItemMaster)
-                    .ThenInclude(i => i.Category)
+                // Start with SupplierItem to get ItemMasters for the supplier
+                var query = _dbContext.SupplierItems
+                    .Include(si => si.ItemMaster)
+                    .ThenInclude(im => im.Unit)
+                    .Include(si => si.ItemMaster)
+                    .ThenInclude(im => im.Category)
                     .AsQueryable();
 
-                // Apply supplierId filter if provided
+
                 if (supplierId.HasValue)
                 {
-                    query = query.Where(li => li.ItemMaster.SupplierId == supplierId.Value);
+                    query = query.Where(si => si.SupplierId == supplierId.Value);
                 }
 
-                var allInventories = await query.ToListAsync();
+                var supplierItems = await query.ToListAsync();
 
-                var summaryData = allInventories
-                    .GroupBy(li => li.ItemMasterId)
+                var inventoryQuery = from si in supplierItems
+                                     join li in _dbContext.LocationInventories
+                                         on si.ItemMasterId equals li.ItemMasterId into liGroup
+                                     from li in liGroup.DefaultIfEmpty()
+                                     select new { SupplierItem = si, LocationInventory = li };
+
+                var summaryData = inventoryQuery
+                    .GroupBy(x => x.SupplierItem.ItemMasterId)
                     .Select(g => new LocationInventorySummary
                     {
-                        LocationInventoryId = 0, // Not relevant, set to 0
-                        LocationId = 0,         // Not relevant, set to 0
+                        LocationInventoryId = 0,
+                        LocationId = 0,
                         ItemMasterId = g.Key,
-                        TotalStockInHand = g.Sum(li => li.StockInHand ?? 0),
-                        MinReOrderLevel = g.Min(li => li.ReOrderLevel ?? 0),
-                        MaxStockLevel = g.Max(li => li.MaxStockLevel ?? 0),
-                        ItemMaster = g.FirstOrDefault()?.ItemMaster
+                        TotalStockInHand = g.Sum(x => x.LocationInventory != null ? x.LocationInventory.StockInHand ?? 0 : 0),
+                        MinReOrderLevel = g.Min(x => x.LocationInventory != null ? x.LocationInventory.ReOrderLevel ?? 0 : 0),
+                        MaxStockLevel = g.Max(x => x.LocationInventory != null ? x.LocationInventory.MaxStockLevel ?? 0 : 0),
+                        ItemMaster = g.First().SupplierItem.ItemMaster
                     })
-                    .Where(s => s.TotalStockInHand < s.MaxStockLevel)
+                    .Where(s => s.TotalStockInHand < s.MaxStockLevel || s.MaxStockLevel == 0)
                     .ToList();
 
                 return summaryData.Any() ? summaryData : new List<LocationInventorySummary>();
             }
             catch (Exception ex)
             {
-                // Log the exception (logging mechanism depends on your setup)
                 throw new Exception("Error retrieving low stock items", ex);
+            }
+        }
+
+        //public async Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByItemName(int? locationId, string itemName)
+        //{
+        //    try
+        //    {
+        //        // Check if itemName is provided
+        //        if (string.IsNullOrEmpty(itemName))
+        //        {
+        //            return new List<LocationInventorySummary> ();
+        //        }
+
+        //        var query = _dbContext.LocationInventories
+        //            .Include(li => li.ItemMaster)
+        //            .ThenInclude(i => i.Unit)
+        //            .Include(li => li.ItemMaster)
+        //            .ThenInclude(i => i.Category)
+        //            .Where(li => li.ItemMaster.ItemName.Contains(itemName))
+        //            .AsQueryable();
+
+        //        // Apply locationId filter if provided
+        //        if (locationId.HasValue)
+        //        {
+        //            query = query.Where(li => li.LocationId == locationId.Value);
+        //        }
+
+        //        var summaryData = await query
+        //            .GroupBy(li => new { li.LocationId, li.ItemMasterId })
+        //            .Select(g => new LocationInventorySummary
+        //            {
+        //                LocationInventoryId = g.FirstOrDefault().LocationInventoryId,
+        //                LocationId = g.Key.LocationId,
+        //                ItemMasterId = g.Key.ItemMasterId,
+        //                TotalStockInHand = g.Sum(li => li.StockInHand ?? 0),
+        //                MinReOrderLevel = g.Min(li => li.ReOrderLevel ?? 0),
+        //                MaxStockLevel = g.Max(li => li.MaxStockLevel ?? 0),
+        //                ItemMaster = g.FirstOrDefault().ItemMaster
+        //            })
+        //            .ToListAsync();
+
+        //        return summaryData ?? new List<LocationInventorySummary>();
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
+
+        public async Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByItemName(int? locationId, string itemName)
+        {
+            try
+            {
+                // Start with SupplierItem to get ItemMasters
+                var query = _dbContext.SupplierItems
+                    .Include(si => si.ItemMaster)
+                    .ThenInclude(im => im.Unit)
+                    .Include(si => si.ItemMaster)
+                    .ThenInclude(im => im.Category)
+                    .Where(si => si.ItemMaster.ItemName.Contains(itemName))
+                    .AsQueryable();
+
+                // Get SupplierItems with ItemMasters
+                var supplierItems = await query.ToListAsync();
+
+                // Left join with LocationInventories
+                var inventoryQuery = from si in supplierItems
+                                     join li in _dbContext.LocationInventories
+                                         on si.ItemMasterId equals li.ItemMasterId into liGroup
+                                     from li in liGroup.DefaultIfEmpty()
+                                     where li == null || li.LocationId == (locationId ?? li.LocationId)
+                                     select new { SupplierItem = si, LocationInventory = li };
+
+                // Group and aggregate
+                var summaryData = inventoryQuery
+                    .GroupBy(x => new { LocationId = x.LocationInventory != null ? x.LocationInventory.LocationId : 0, x.SupplierItem.ItemMasterId })
+                    .Select(g => new LocationInventorySummary
+                    {
+                        LocationInventoryId = g.FirstOrDefault()?.LocationInventory?.LocationInventoryId ?? 0,
+                        LocationId = g.Key.LocationId,
+                        ItemMasterId = g.Key.ItemMasterId,
+                        TotalStockInHand = g.Sum(x => x.LocationInventory != null ? x.LocationInventory.StockInHand ?? 0 : 0),
+                        MinReOrderLevel = g.Min(x => x.LocationInventory != null ? x.LocationInventory.ReOrderLevel ?? 0 : 0),
+                        MaxStockLevel = g.Max(x => x.LocationInventory != null ? x.LocationInventory.MaxStockLevel ?? 0 : 0),
+                        ItemMaster = g.First().SupplierItem.ItemMaster
+                    })
+                    .ToList();
+
+                return summaryData.Any() ? summaryData : new List<LocationInventorySummary>();
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
     }

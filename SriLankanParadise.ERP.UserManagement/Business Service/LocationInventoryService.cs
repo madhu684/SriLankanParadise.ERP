@@ -82,5 +82,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             return await _locationInventoryRepository.GetLowStockItems(supplierId);
         }
+
+        public async Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByItemName(int? locationId, string itemName)
+        {
+            return await _locationInventoryRepository.GetSumLocationInventoriesByItemName(locationId, itemName);
+        }
     }
 }
