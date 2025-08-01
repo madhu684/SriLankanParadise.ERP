@@ -7,11 +7,7 @@ import ErrorComponent from "../errorComponent/errorComponent";
 import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 import BatchSelectionModal from "../batchSelectionModal/batchSelectionModal";
 
-const SalesInvoice = ({
-  handleClose,
-  handleUpdated,
-  salesOrder,
-}) => {
+const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
   const {
     formData,
     submissionStatus,
@@ -55,15 +51,17 @@ const SalesInvoice = ({
     renderSubColumns,
     calculateSubTotal,
     userLocations,
+    isLocationInventoryLoading,
+    isWarehouseLocationLoading,
   } = useSalesInvoice({
     onFormSubmit: () => {
-      handleClose()
-      handleUpdated()
+      handleClose();
+      handleUpdated();
     },
     salesOrder,
-  })
+  });
 
-  const companyLogoUrl = useCompanyLogoUrl()
+  const companyLogoUrl = useCompanyLogoUrl();
 
   // if (
   //   isLoading ||
@@ -80,10 +78,10 @@ const SalesInvoice = ({
     isTransactionTypesError ||
     isCompanyError
   ) {
-    return <ErrorComponent error={'Error fetching data'} />
+    return <ErrorComponent error={"Error fetching data"} />;
   }
 
-  console.log('Available Items : ', availableItems)
+  console.log("Available Items : ", availableItems);
 
   return (
     <div className="container mt-4">
@@ -105,18 +103,18 @@ const SalesInvoice = ({
       </div>
 
       {/* Display success or error messages */}
-      {submissionStatus === 'successSubmitted' && (
+      {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
           Sales invoice submitted successfully! Reference Number: {referenceNo}
         </div>
       )}
-      {submissionStatus === 'successSavedAsDraft' && (
+      {submissionStatus === "successSavedAsDraft" && (
         <div className="alert alert-success mb-3" role="alert">
           Sales invoice saved as draft, you can edit and submit it later!
           Reference Number: {referenceNo}
         </div>
       )}
-      {submissionStatus === 'error' && (
+      {submissionStatus === "error" && (
         <div className="alert alert-danger mb-3" role="alert">
           Error submitting sales invoice. Please try again.
         </div>
@@ -134,13 +132,13 @@ const SalesInvoice = ({
               <input
                 type="date"
                 className={`form-control ${
-                  validFields.invoiceDate ? 'is-valid' : ''
-                } ${validationErrors.invoiceDate ? 'is-invalid' : ''}`}
+                  validFields.invoiceDate ? "is-valid" : ""
+                } ${validationErrors.invoiceDate ? "is-invalid" : ""}`}
                 id="invoiceDate"
                 placeholder="Enter order date"
                 value={formData.invoiceDate}
                 onChange={(e) =>
-                  handleInputChange('invoiceDate', e.target.value)
+                  handleInputChange("invoiceDate", e.target.value)
                 }
                 required
               />
@@ -157,12 +155,12 @@ const SalesInvoice = ({
               <input
                 type="date"
                 className={`form-control ${
-                  validFields.dueDate ? 'is-valid' : ''
-                } ${validationErrors.dueDate ? 'is-invalid' : ''}`}
+                  validFields.dueDate ? "is-valid" : ""
+                } ${validationErrors.dueDate ? "is-invalid" : ""}`}
                 id="dueDate"
                 placeholder="Enter delivery date"
                 value={formData.dueDate}
-                onChange={(e) => handleInputChange('dueDate', e.target.value)}
+                onChange={(e) => handleInputChange("dueDate", e.target.value)}
                 required
               />
               {validationErrors.dueDate && (
@@ -177,13 +175,13 @@ const SalesInvoice = ({
                 <input
                   type="text"
                   className={`form-control ${
-                    validFields.referenceNumber ? 'is-valid' : ''
-                  } ${validationErrors.referenceNumber ? 'is-invalid' : ''}`}
+                    validFields.referenceNumber ? "is-valid" : ""
+                  } ${validationErrors.referenceNumber ? "is-invalid" : ""}`}
                   id="referenceNumber"
                   placeholder="Enter reference number"
                   value={formData.referenceNumber}
                   onChange={(e) =>
-                    handleInputChange('referenceNumber', e.target.value)
+                    handleInputChange("referenceNumber", e.target.value)
                   }
                   required
                 />
@@ -200,12 +198,12 @@ const SalesInvoice = ({
               </label>
               <select
                 className={`form-select ${
-                  validFields.storeLocation ? 'is-valid' : ''
-                } ${validationErrors.storeLocation ? 'is-invalid' : ''}`}
+                  validFields.storeLocation ? "is-valid" : ""
+                } ${validationErrors.storeLocation ? "is-invalid" : ""}`}
                 id="storeLocation"
-                value={formData?.storeLocation ?? ''}
+                value={formData?.storeLocation ?? ""}
                 onChange={(e) =>
-                  handleInputChange('storeLocation', e.target.value)
+                  handleInputChange("storeLocation", e.target.value)
                 }
               >
                 <option value="">Select Location</option>
@@ -213,7 +211,7 @@ const SalesInvoice = ({
                   ? userLocations
                       .filter(
                         (location) =>
-                          location.location.locationType.name === 'Warehouse'
+                          location.location.locationType.name === "Warehouse"
                       )
                       .map((location) => (
                         <option
@@ -223,7 +221,7 @@ const SalesInvoice = ({
                           {location.location.locationName}
                         </option>
                       ))
-                  : ''}
+                  : ""}
               </select>
               {validationErrors.storeLocation && (
                 <div className="invalid-feedback">
@@ -246,16 +244,16 @@ const SalesInvoice = ({
                 <div className="card-header">Selected Sales Order</div>
                 <div className="card-body">
                   <p>Sales Order Reference No: {salesOrder.referenceNo}</p>
-                  <p>Order Date: {salesOrder.orderDate?.split('T')[0] ?? ''}</p>
+                  <p>Order Date: {salesOrder.orderDate?.split("T")[0] ?? ""}</p>
                   <p>
-                    Delivery Date:{' '}
-                    {salesOrder.deliveryDate?.split('T')[0] ?? ''}
+                    Delivery Date:{" "}
+                    {salesOrder.deliveryDate?.split("T")[0] ?? ""}
                   </p>
                   <p>
-                    Order Type:{' '}
+                    Order Type:{" "}
                     {salesOrder.customerId !== null
-                      ? 'Customer Order'
-                      : 'Direct Order'}
+                      ? "Customer Order"
+                      : "Direct Order"}
                   </p>
                 </div>
               </div>
@@ -287,9 +285,9 @@ const SalesInvoice = ({
                 <span
                   className="input-group-text bg-transparent"
                   style={{
-                    cursor: 'pointer',
+                    cursor: "pointer",
                   }}
-                  onClick={() => setSearchTerm('')}
+                  onClick={() => setSearchTerm("")}
                 >
                   <i className="bi bi-x"></i>
                 </span>
@@ -297,14 +295,14 @@ const SalesInvoice = ({
             </div>
             {/* Dropdown for filtered items */}
             {searchTerm && (
-              <div className="dropdown" style={{ width: '100%' }}>
+              <div className="dropdown" style={{ width: "100%" }}>
                 <ul
                   className="dropdown-menu"
                   style={{
-                    display: 'block',
-                    width: '100%',
-                    maxHeight: '200px',
-                    overflowY: 'auto',
+                    display: "block",
+                    width: "100%",
+                    maxHeight: "200px",
+                    overflowY: "auto",
                   }}
                 >
                   {isItemsLoading ? (
@@ -319,13 +317,13 @@ const SalesInvoice = ({
                     availableItems.length === 0 ||
                     availableItems.filter((item) => {
                       // If batchStockType is FIFO, filter out items already present in formData.itemDetails
-                      if (company.batchStockType === 'FIFO') {
+                      if (company.batchStockType === "FIFO") {
                         return !formData.itemDetails.some(
                           (detail) => detail.itemMasterId === item.itemMasterId
-                        )
+                        );
                       }
                       // Otherwise, include all items
-                      return true
+                      return true;
                     }).length === 0 ? (
                     <li className="dropdown-item">
                       <span className="me-3">
@@ -337,14 +335,14 @@ const SalesInvoice = ({
                     availableItems
                       .filter((item) => {
                         // If batchStockType is FIFO, filter out items already present in formData.itemDetails
-                        if (company.batchStockType === 'FIFO') {
+                        if (company.batchStockType === "FIFO") {
                           return !formData.itemDetails.some(
                             (detail) =>
                               detail.itemMasterId === item.itemMasterId
-                          )
+                          );
                         }
                         // Otherwise, include all items
-                        return true
+                        return true;
                       })
                       .map((item) => (
                         <li key={item.itemMasterId}>
@@ -426,14 +424,14 @@ const SalesInvoice = ({
           <div className="table-responsive mb-2">
             <table
               className="table"
-              style={{ minWidth: '1000px', overflowX: 'auto' }}
+              style={{ minWidth: "1000px", overflowX: "auto" }}
             >
               <thead>
                 <tr>
                   <th>Item Name</th>
                   <th>Unit</th>
-                  {company.batchStockType !== 'FIFO' && <th>Batch Ref</th>}
-                  <th>Temp Qty</th>
+                  {company.batchStockType !== "FIFO" && <th>Batch Ref</th>}
+                  <th>Total Stock In Hand</th>
                   <th>Quantity</th>
                   <th>Unit Price</th>
                   {renderColumns()}
@@ -446,7 +444,7 @@ const SalesInvoice = ({
                   <tr key={index}>
                     <td>{item.name}</td>
                     <td>{item.unit}</td>
-                    {company.batchStockType !== 'FIFO' && (
+                    {company.batchStockType !== "FIFO" && (
                       <td>{item.batchRef}</td>
                     )}
                     <td>{item.tempQuantity}</td>
@@ -454,17 +452,17 @@ const SalesInvoice = ({
                       <input
                         type="number"
                         className={`form-control ${
-                          validFields[`quantity_${index}`] ? 'is-valid' : ''
+                          validFields[`quantity_${index}`] ? "is-valid" : ""
                         } ${
                           validationErrors[`quantity_${index}`]
-                            ? 'is-invalid'
-                            : ''
+                            ? "is-invalid"
+                            : ""
                         }`}
                         value={item.quantity}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            'quantity',
+                            "quantity",
                             e.target.value
                           )
                         }
@@ -476,7 +474,7 @@ const SalesInvoice = ({
                       )}
                     </td>
                     <td>
-                      {item.unitPrice ? item.unitPrice.toFixed(2) : '0.00'}
+                      {item.unitPrice ? item.unitPrice.toFixed(2) : "0.00"}
                     </td>
                     {item.chargesAndDeductions.map((charge, chargeIndex) => (
                       <td key={chargeIndex}>
@@ -485,18 +483,18 @@ const SalesInvoice = ({
                           type="number"
                           value={charge.value}
                           onChange={(e) => {
-                            let newValue = parseFloat(e.target.value)
+                            let newValue = parseFloat(e.target.value);
 
                             // If the entered value is not a valid number, set it to 0
                             if (isNaN(newValue)) {
-                              newValue = 0
+                              newValue = 0;
                             } else {
                               // If the charge is a percentage, ensure the value is between 0 and 100
                               if (charge.isPercentage) {
-                                newValue = Math.min(100, Math.max(0, newValue)) // Clamp the value between 0 and 100
+                                newValue = Math.min(100, Math.max(0, newValue)); // Clamp the value between 0 and 100
                               } else {
                                 // For non-percentage charges, ensure the value is positive
-                                newValue = Math.max(0, newValue)
+                                newValue = Math.max(0, newValue);
                               }
                             }
 
@@ -504,7 +502,7 @@ const SalesInvoice = ({
                               index,
                               `chargesAndDeductions_${chargeIndex}_value`,
                               newValue
-                            )
+                            );
                           }}
                         />
                       </td>
@@ -528,7 +526,7 @@ const SalesInvoice = ({
                     colSpan={
                       5 +
                       formData.itemDetails[0].chargesAndDeductions.length -
-                      (company.batchStockType === 'FIFO' ? 1 : 0)
+                      (company.batchStockType === "FIFO" ? 1 : 0)
                     }
                   ></td>
                   <th>Sub Total</th>
@@ -541,7 +539,7 @@ const SalesInvoice = ({
                     colSpan={
                       5 +
                       formData.itemDetails[0].chargesAndDeductions.length -
-                      (company.batchStockType === 'FIFO' ? 1 : 0)
+                      (company.batchStockType === "FIFO" ? 1 : 0)
                     }
                   ></td>
                   <th>Total Amount</th>
@@ -564,8 +562,8 @@ const SalesInvoice = ({
           <input
             type="file"
             className={`form-control ${
-              validFields.attachments ? 'is-valid' : ''
-            } ${validationErrors.attachments ? 'is-invalid' : ''}`}
+              validFields.attachments ? "is-valid" : ""
+            } ${validationErrors.attachments ? "is-invalid" : ""}`}
             id="attachment"
             onChange={(e) => handleAttachmentChange(e.target.files)}
             multiple
@@ -594,7 +592,7 @@ const SalesInvoice = ({
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Submitting..." />
             ) : (
-              'Submit'
+              "Submit"
             )}
           </button>
           <button
@@ -611,7 +609,7 @@ const SalesInvoice = ({
             {loadingDraft && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Saving as Draft..." />
             ) : (
-              'Save as Draft'
+              "Save as Draft"
             )}
           </button>
           <button
@@ -642,8 +640,8 @@ const SalesInvoice = ({
         />
       )}
     </div>
-  )
-}
+  );
+};
 
 SalesInvoice.defaultProps = {
   salesOrder: null,

@@ -37,8 +37,9 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
     setSiSearchTerm,
     calculateTotalAmountReceived,
     calculateTotalExcessAmountAmount,
-    calculateTotalShortAmountAmount,
+    calculateTotalOutstandingAmountAmount,
     handleAddToExcess, // Add this line
+    calculateTotalAmountCollected,
   } = useSalesReceipt({
     onFormSubmit: () => {
       handleClose();
@@ -370,7 +371,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                       <input
                         type="number"
                         className="form-control"
-                        value={item.shortAmount}
+                        value={item.outstandingAmount}
                         onChange={(e) => {
                           const value = parseFloat(e.target.value);
                           const positiveValue = isNaN(value)
@@ -379,7 +380,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
 
                           handleItemDetailsChange(
                             index,
-                            "shortAmount",
+                            "outstandingAmount",
                             positiveValue
                           );
                         }}
@@ -442,9 +443,9 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                 </tr>
                 <tr>
                   <td colSpan="7"></td>
-                  <th>Total Short Amount</th>
+                  <th>Total Outstanding Amount</th>
                   <td className="text-end">
-                    {calculateTotalShortAmountAmount().toFixed(2)}
+                    {calculateTotalOutstandingAmountAmount().toFixed(2)}
                   </td>
                 </tr>
                 <tr>
@@ -452,6 +453,13 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                   <th>Total Amount Received</th>
                   <td className="text-end">
                     {calculateTotalAmount().toFixed(2)}
+                  </td>
+                </tr>
+                <tr>
+                  <td colSpan="7"></td>
+                  <th>Total Amount Collected</th>
+                  <td className="text-end">
+                    {calculateTotalAmountCollected().toFixed(2)}
                   </td>
                 </tr>
               </tfoot>

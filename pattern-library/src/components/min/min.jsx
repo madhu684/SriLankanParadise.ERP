@@ -376,7 +376,8 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                         style={{ cursor: "pointer" }} // Indicate clickable behavior
                       >
                         <span>
-                          {item.itemName} – Stock: {item.stockInHand}
+                          {item.itemName}
+                          {item.stockInHand}
                         </span>
                       </li>
                     ))}

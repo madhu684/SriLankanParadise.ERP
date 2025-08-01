@@ -101,6 +101,10 @@ const useMin = ({ onFormSubmit }) => {
       ...prev,
       itemDetails: [...prev.itemDetails, newItem],
     }));
+
+    // Clear search term after selection
+    setSearchTerm("");
+    setDummySearchTerm("");
   };
 
   // Fetch MRNs
@@ -574,6 +578,10 @@ const useMin = ({ onFormSubmit }) => {
   // Handle item selection from search
   const handleSearchItemSelect = (item) => {
     handleAddDummyItem(item);
+    // These lines are redundant now as handleAddDummyItem clears the terms
+    // but keeping it here in case you call this function directly elsewhere
+    setSearchTerm("");
+    setDummySearchTerm("");
   };
 
   // Handle mode change (MRN or without MRN)

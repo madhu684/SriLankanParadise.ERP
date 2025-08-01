@@ -19,11 +19,11 @@ const useSalesReceiptList = () => {
   const [showCreateSRForm, setShowCreateSRForm] = useState(false);
   const [showUpdateSRForm, setShowUpdateSRForm] = useState(false);
   const [SRDetail, setSRDetail] = useState("");
-  const [filter, setFilter] = useState("all"); // 'all', 'short', 'excess'
+  const [filter, setFilter] = useState("all"); // 'all', 'Outstanding', 'excess'
 
   const filteredSalesReceipts = salesReceipts.filter((receipt) => {
     if (filter === "all") return true;
-    if (filter === "short") return receipt.shortAmount > 0;
+    if (filter === "outstanding") return receipt.outstandingAmount > 0;
     if (filter === "excess") return receipt.excessAmount > 0;
     return true;
   });

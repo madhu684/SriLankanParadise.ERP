@@ -1129,7 +1129,7 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.PaymentReferenceNo).HasMaxLength(20);
             entity.Property(e => e.ReceiptDate).HasColumnType("date");
             entity.Property(e => e.ReferenceNumber).HasMaxLength(255);
-            entity.Property(e => e.ShortAmount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.OutstandingAmount).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.PaymentMode).WithMany(p => p.SalesReceipts)
                 .HasForeignKey(d => d.PaymentModeId)
@@ -1145,7 +1145,7 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.CustomerBalance).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.ExcessAmount).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.SettledAmount).HasColumnType("decimal(18, 2)");
-            entity.Property(e => e.ShortAmount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.OutstandingAmount).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.SalesInvoice).WithMany(p => p.SalesReceiptSalesInvoices)
                 .HasForeignKey(d => d.SalesInvoiceId)
