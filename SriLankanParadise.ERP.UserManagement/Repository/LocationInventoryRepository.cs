@@ -483,6 +483,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(im => im.Unit)
                     .Include(si => si.ItemMaster)
                     .ThenInclude(im => im.Category)
+                    .Include(si => si.ItemMaster)
+                    .ThenInclude(im => im.ItemType)
                     .AsQueryable();
 
 
@@ -578,6 +580,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(im => im.Unit)
                     .Include(si => si.ItemMaster)
                     .ThenInclude(im => im.Category)
+                    .Include(si => si.ItemMaster)
+                    .ThenInclude(im => im.ItemType)
                     .Where(si => si.ItemMaster.ItemName.Contains(itemName))
                     .AsQueryable();
 

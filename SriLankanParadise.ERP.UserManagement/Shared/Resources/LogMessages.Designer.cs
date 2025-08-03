@@ -2140,6 +2140,24 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Same Category &amp; item type supplier items not found.
+        /// </summary>
+        public static string SameCategoryTypeSupplierItemsNotFound {
+            get {
+                return ResourceManager.GetString("SameCategoryTypeSupplierItemsNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Same category &amp; item type supplier items retrieved.
+        /// </summary>
+        public static string SameCategoryTypeSupplierItemsRetrieved {
+            get {
+                return ResourceManager.GetString("SameCategoryTypeSupplierItemsRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Stock report not found.
         /// </summary>
         public static string StockReportNotFound {

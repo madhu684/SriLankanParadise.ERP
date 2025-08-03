@@ -9,7 +9,7 @@ import {
   get_Low_Stock_Items_api,
   get_Location_Inventory_Summary_By_Item_Name_api,
 } from "../../services/purchaseApi";
-import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
+import { get_supplier_items_by_type_category_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
 
 const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
@@ -47,8 +47,6 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
       const response = await get_company_suppliers_api(
         sessionStorage.getItem("companyId")
       );
-
-      // Filter suppliers with status equal to 1 (active)
       const filteredSuppliers = response.data.result?.filter(
         (supplier) => supplier.status === 1
       );
@@ -119,21 +117,6 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     }
   }, [submissionStatus]);
 
-  // const fetchItems = async (companyId, searchQuery, itemType) => {
-  //   try {
-  //     const response = await get_item_masters_by_company_id_with_query_api(
-  //       companyId,
-  //       searchQuery,
-  //       itemType
-  //     );
-  //     return response.data.result.filter(
-  //       (item) => item.supplierId === formData?.supplierId
-  //     );
-  //   } catch (error) {
-  //     console.error("Error fetching items:", error);
-  //   }
-  // };
-
   const fetchItems = async (searchQuery) => {
     try {
       const response = await get_Location_Inventory_Summary_By_Item_Name_api(
@@ -145,6 +128,8 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
         itemMasterId: summary.itemMasterId,
         itemName: summary.itemMaster?.itemName || "",
         unit: summary.itemMaster?.unit || { unitName: "" },
+        categoryId: summary.itemMaster?.category?.categoryId || "",
+        itemTypeId: summary.itemMaster?.itemType?.itemTypeId || "",
         supplierId: summary.itemMaster?.supplierId || null,
         totalStockInHand: summary.totalStockInHand,
         minReOrderLevel: summary.minReOrderLevel,
@@ -765,6 +750,8 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
           id: item.itemMasterId,
           name: item.itemName,
           unit: item.unit.unitName,
+          categoryId: item.categoryId,
+          itemTypeId: item.itemTypeId,
           quantity: item.maxStockLevel - item.totalStockInHand || 0,
           unitPrice: 0.0,
           totalPrice: 0.0,
@@ -939,7 +926,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
             <tr key={chargeIndex}>
               <td
                 colSpan={
-                  4 + formData.itemDetails[0].chargesAndDeductions.length - 1
+                  6 + formData.itemDetails[0].chargesAndDeductions.length - 1
                 }
               ></td>
               <th>
@@ -1020,6 +1007,8 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
           id: item.itemMasterId,
           name: item.itemMaster.itemName,
           unit: item.itemMaster.unit?.unitName || "",
+          categoryId: item.itemMaster?.category?.categoryId || "",
+          itemTypeId: item.itemMaster?.itemType?.itemTypeId || "",
           quantity: item.maxStockLevel - item.totalStockInHand || 0,
           unitPrice: 0.0,
           totalPrice: 0.0,
@@ -1098,7 +1087,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     renderColumns,
     renderSubColumns,
     calculateTotalAmount,
-    handleGeneratePurchaseOrder, // Added to the return object
+    handleGeneratePurchaseOrder,
     showToast,
     setShowToast,
   };

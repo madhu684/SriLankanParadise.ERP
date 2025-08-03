@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
@@ -13,6 +14,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             _dbContext = dbContext;
         }
+
         public async Task AddItemMaster(ItemMaster itemMaster)
         {
             try
@@ -45,7 +47,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
-
 
         public async Task<IEnumerable<ItemMaster>> GetItemMastersByCompanyId(int companyId)
         {
@@ -122,9 +123,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
-
-
-
 
         public async Task<ItemMaster> GetItemMasterByItemMasterId(int itemMasterId)
         {
@@ -251,6 +249,67 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ToListAsync();
 
                 return itemMaster;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<SameCategoryTypeSupplierItemDto>> GetSupplierItemsByTypeAndCategory(int companyId, int itemTypeId, int categoryId)
+        {
+            //try
+            //{
+            //    var items = await _dbContext.ItemMasters
+            //        .Where(im => im.Status == true
+            //            && im.ItemTypeId == itemTypeId
+            //            && im.CategoryId == categoryId)
+            //        .Include(im => im.Supplier)
+            //        .Include(im => im.Category)
+            //        .Include(im => im.ItemType)
+            //        .Select(im => new SameCategoryTypeSupplierItemDto
+            //        {
+            //            ItemMasterId = im.ItemMasterId,
+            //            ItemName = im.ItemName,
+            //            ItemCode = im.ItemCode,
+            //            UnitPrice = im.UnitPrice,
+            //            SellingPrice = im.SellingPrice,
+            //            SupplierName = im.Supplier != null ? im.Supplier.SupplierName : null,
+            //            CategoryName = im.Category.CategoryName,
+            //            ItemTypeName = im.ItemType != null ? im.ItemType.Name : null
+            //        })
+            //        .ToListAsync();
+
+            //    return items.Any() ? items : null!;
+            //}
+            try
+            {
+                var items = await _dbContext.ItemMasters
+                    .Include(im => im.Supplier)
+                    .Include(im => im.Category)
+                    .Include(im => im.ItemType)
+                    .Where(im => im.Status == true
+                        && im.ItemTypeId == itemTypeId
+                        && im.CategoryId == categoryId
+                        && im.CompanyId == companyId
+                        && im.SupplierId != null)
+                    .Join(_dbContext.SupplierItems,
+                        im => im.ItemMasterId,
+                        si => si.ItemMasterId,
+                        (im, si) => new SameCategoryTypeSupplierItemDto
+                        {
+                            ItemMasterId = im.ItemMasterId,
+                            ItemName = im.ItemName,
+                            ItemCode = im.ItemCode,
+                            UnitPrice = im.UnitPrice,
+                            SellingPrice = im.SellingPrice,
+                            SupplierName = im.Supplier.SupplierName,
+                            CategoryName = im.Category.CategoryName,
+                            ItemTypeName = im.ItemType != null ? im.ItemType.Name : null
+                        })
+                    .ToListAsync();
+
+                return items.Any() ? items : new List<SameCategoryTypeSupplierItemDto>();
             }
             catch (Exception)
             {

@@ -328,5 +328,29 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpGet("GetSupplierItemsByTypeAndCategory/{companyId}/{itemTypeId}/{categoryId}")]
+        public async Task<ApiResponseModel> GetSupplierItemsByTypeAndCategory(int companyId, int itemTypeId, int categoryId)
+        {
+            try
+            {
+                var supplierItems = await _itemMasterService.GetSupplierItemsByTypeAndCategory(companyId, itemTypeId, categoryId);
+                if (supplierItems != null)
+                {
+                    AddResponseMessage(Response, LogMessages.SameCategoryTypeSupplierItemsRetrieved, supplierItems, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.SameCategoryTypeSupplierItemsNotFound);
+                    AddResponseMessage(Response, LogMessages.SameCategoryTypeSupplierItemsNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

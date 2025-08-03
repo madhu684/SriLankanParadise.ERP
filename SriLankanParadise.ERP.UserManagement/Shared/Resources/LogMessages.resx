@@ -1047,4 +1047,10 @@
   <data name="LocationInventorySummaryNotFound" xml:space="preserve">
     <value>Location inventory summary not found</value>
   </data>
+  <data name="SameCategoryTypeSupplierItemsRetrieved" xml:space="preserve">
+    <value>Same category &amp; item type supplier items retrieved</value>
+  </data>
+  <data name="SameCategoryTypeSupplierItemsNotFound" xml:space="preserve">
+    <value>Same Category &amp; item type supplier items not found</value>
+  </data>
 </root>

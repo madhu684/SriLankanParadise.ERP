@@ -553,7 +553,7 @@ const PurchaseOrder = ({
                 <tr>
                   <td
                     colSpan={
-                      4 +
+                      6 +
                       formData.itemDetails[0].chargesAndDeductions.length -
                       1
                     }
@@ -567,7 +567,7 @@ const PurchaseOrder = ({
                 <tr>
                   <td
                     colSpan={
-                      4 +
+                      6 +
                       formData.itemDetails[0].chargesAndDeductions.length -
                       1
                     }
