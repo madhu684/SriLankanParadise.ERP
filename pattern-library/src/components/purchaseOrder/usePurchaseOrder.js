@@ -8,6 +8,7 @@ import {
   get_transaction_types_api,
   get_Low_Stock_Items_api,
   get_Location_Inventory_Summary_By_Item_Name_api,
+  get_user_locations_by_user_id_api,
 } from "../../services/purchaseApi";
 import { get_supplier_items_by_type_category_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
@@ -41,6 +42,24 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   const [initialized, setInitialized] = useState(false);
   const [isPOGenerated, setIsPOGenerated] = useState(false);
   const [showToast, setShowToast] = useState(false);
+
+  const fetchUserLocation = async () => {
+    try {
+      const response = await get_user_locations_by_user_id_api(
+        sessionStorage.getItem("userId")
+      );
+      return response.data.result.filter(
+        (location) => location.location.locationTypeId === 2
+      );
+    } catch (error) {
+      console.error("Error fetching user location:", error);
+    }
+  };
+
+  const { data: userLocation } = useQuery({
+    queryKey: ["userLocation"],
+    queryFn: fetchUserLocation,
+  });
 
   const fetchSuppliers = async () => {
     try {
@@ -124,17 +143,38 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
         searchQuery
       );
 
-      const items = response.data?.result?.map((summary) => ({
-        itemMasterId: summary.itemMasterId,
-        itemName: summary.itemMaster?.itemName || "",
-        unit: summary.itemMaster?.unit || { unitName: "" },
-        categoryId: summary.itemMaster?.category?.categoryId || "",
-        itemTypeId: summary.itemMaster?.itemType?.itemTypeId || "",
-        supplierId: summary.itemMaster?.supplierId || null,
-        totalStockInHand: summary.totalStockInHand,
-        minReOrderLevel: summary.minReOrderLevel,
-        maxStockLevel: summary.maxStockLevel,
-      }));
+      const companyId = sessionStorage.getItem("companyId");
+
+      const items = await Promise.all(
+        response.data?.result?.map(async (summary) => {
+          const supplierItemResponse =
+            await get_supplier_items_by_type_category_api(
+              companyId,
+              parseInt(summary.itemMaster?.itemType?.itemTypeId),
+              parseInt(summary.itemMaster?.category?.categoryId),
+              userLocation[0]?.locationId
+            );
+
+          const supplierItems = supplierItemResponse.data.result
+            ? supplierItemResponse.data.result.filter(
+                (si) => si.itemMasterId !== summary.itemMasterId
+              )
+            : [];
+
+          return {
+            itemMasterId: summary.itemMasterId,
+            itemName: summary.itemMaster?.itemName || "",
+            unit: summary.itemMaster?.unit || { unitName: "" },
+            categoryId: summary.itemMaster?.category?.categoryId || "",
+            itemTypeId: summary.itemMaster?.itemType?.itemTypeId || "",
+            supplierId: summary.itemMaster?.supplierId || null,
+            totalStockInHand: summary.totalStockInHand,
+            minReOrderLevel: summary.minReOrderLevel,
+            maxStockLevel: summary.maxStockLevel,
+            supplierItems: supplierItems,
+          };
+        }) || []
+      );
 
       return items.filter(
         (item) =>
@@ -759,6 +799,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
           minReOrderLevel: item.minReOrderLevel,
           maxStockLevel: item.maxStockLevel,
           chargesAndDeductions: initializedCharges,
+          supplierItems: item?.supplierItems || [],
         },
       ],
     }));
@@ -846,6 +887,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
       ...prevFormData,
       selectedSupplier: "",
       supplierId: null,
+      itemDetails: [],
     }));
   };
 
@@ -919,56 +961,54 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   }, [isLoadingchargesAndDeductions]);
 
   const renderSubColumns = () => {
-    {
-      return formData.commonChargesAndDeductions.map((charge, chargeIndex) => {
-        if (!charge.isApplicableForLineItem) {
-          return (
-            <tr key={chargeIndex}>
-              <td
-                colSpan={
-                  6 + formData.itemDetails[0].chargesAndDeductions.length - 1
-                }
-              ></td>
-              <th>
-                {charge.sign + " "}
-                {charge.name}
-                {charge.isPercentage === true && " (%)"}
-              </th>
-              <td>
-                <input
-                  className="form-control"
-                  type="number"
-                  value={charge.value}
-                  onChange={(e) => {
-                    let newValue = parseFloat(e.target.value);
+    return formData.commonChargesAndDeductions.map((charge, chargeIndex) => {
+      if (!charge.isApplicableForLineItem) {
+        return (
+          <tr key={chargeIndex}>
+            <td
+              colSpan={
+                7 + formData.itemDetails[0].chargesAndDeductions.length - 1
+              }
+            ></td>
+            <th>
+              {charge.sign + " "}
+              {charge.name}
+              {charge.isPercentage === true && " (%)"}
+            </th>
+            <td>
+              <input
+                className="form-control"
+                type="number"
+                value={charge.value}
+                onChange={(e) => {
+                  let newValue = parseFloat(e.target.value);
 
-                    // If the entered value is not a valid number, set it to 0
-                    if (isNaN(newValue)) {
-                      newValue = 0;
+                  // If the entered value is not a valid number, set it to 0
+                  if (isNaN(newValue)) {
+                    newValue = 0;
+                  } else {
+                    // If the charge is a percentage, ensure the value is between 0 and 100
+                    if (charge.isPercentage) {
+                      newValue = Math.min(100, Math.max(0, newValue)); // Clamp the value between 0 and 100
                     } else {
-                      // If the charge is a percentage, ensure the value is between 0 and 100
-                      if (charge.isPercentage) {
-                        newValue = Math.min(100, Math.max(0, newValue)); // Clamp the value between 0 and 100
-                      } else {
-                        // For non-percentage charges, ensure the value is positive
-                        newValue = Math.max(0, newValue);
-                      }
+                      // For non-percentage charges, ensure the value is positive
+                      newValue = Math.max(0, newValue);
                     }
+                  }
 
-                    handleInputChange(
-                      `commonChargesAndDeductions_${chargeIndex}_value`,
-                      newValue
-                    );
-                  }}
-                />
-              </td>
-              <td></td>
-            </tr>
-          );
-        }
-        return null;
-      });
-    }
+                  handleInputChange(
+                    `commonChargesAndDeductions_${chargeIndex}_value`,
+                    newValue
+                  );
+                }}
+              />
+            </td>
+            <td></td>
+          </tr>
+        );
+      }
+      return null;
+    });
   };
 
   // New function to handle generating purchase order from low-stock items
@@ -1002,21 +1042,42 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
               isPercentage: charge.percentage !== null,
             })) || [];
 
-        // Transform low-stock items into itemDetails format
-        const newItemDetails = lowStockItems.map((item) => ({
-          id: item.itemMasterId,
-          name: item.itemMaster.itemName,
-          unit: item.itemMaster.unit?.unitName || "",
-          categoryId: item.itemMaster?.category?.categoryId || "",
-          itemTypeId: item.itemMaster?.itemType?.itemTypeId || "",
-          quantity: item.maxStockLevel - item.totalStockInHand || 0,
-          unitPrice: 0.0,
-          totalPrice: 0.0,
-          totalStockInHand: item.totalStockInHand,
-          minReOrderLevel: item.minReOrderLevel,
-          maxStockLevel: item.maxStockLevel,
-          chargesAndDeductions: initializedCharges,
-        }));
+        const companyId = sessionStorage.getItem("companyId");
+
+        // Transform low-stock items into itemDetails format with API calls
+        const newItemDetails = await Promise.all(
+          lowStockItems.map(async (item) => {
+            const supplierItemResponse =
+              await get_supplier_items_by_type_category_api(
+                companyId,
+                parseInt(item.itemMaster?.itemType?.itemTypeId),
+                parseInt(item.itemMaster?.category?.categoryId),
+                userLocation[0]?.locationId
+              );
+
+            const supplierItems = supplierItemResponse.data.result
+              ? supplierItemResponse.data.result.filter(
+                  (si) => si.itemMasterId !== item.itemMasterId
+                )
+              : [];
+
+            return {
+              id: item.itemMasterId,
+              name: item.itemMaster.itemName,
+              unit: item.itemMaster.unit?.unitName || "",
+              categoryId: item.itemMaster?.category?.categoryId || "",
+              itemTypeId: item.itemMaster?.itemType?.itemTypeId || "",
+              quantity: item.maxStockLevel - item.totalStockInHand || 0,
+              unitPrice: 0.0,
+              totalPrice: 0.0,
+              supplierItems: supplierItems,
+              totalStockInHand: item.totalStockInHand,
+              minReOrderLevel: item.minReOrderLevel,
+              maxStockLevel: item.maxStockLevel,
+              chargesAndDeductions: initializedCharges,
+            };
+          })
+        );
 
         // Update formData with new itemDetails
         setFormData((prevFormData) => ({
@@ -1036,7 +1097,6 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   };
 
   console.log("formData", formData);
-  console.log("availableItems", availableItems);
 
   return {
     formData,
@@ -1067,6 +1127,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     isPOGenerated,
     loading,
     loadingDraft,
+    showToast,
     handleInputChange,
     handleSupplierChange,
     handleItemDetailsChange,
@@ -1088,7 +1149,6 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     renderSubColumns,
     calculateTotalAmount,
     handleGeneratePurchaseOrder,
-    showToast,
     setShowToast,
   };
 };

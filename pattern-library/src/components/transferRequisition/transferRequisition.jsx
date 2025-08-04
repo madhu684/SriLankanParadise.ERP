@@ -229,6 +229,9 @@ const TransferRequisition = ({
               )}
             </div>
           </div>
+          <div className="col-md-5">
+            <h4>4. Generate Transfer Requsition</h4>
+          </div>
         </div>
 
         <h4>2. Item Details</h4>

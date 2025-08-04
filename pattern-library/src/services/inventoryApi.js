@@ -401,11 +401,12 @@ export const update_empty_return_api = async (
 export const get_supplier_items_by_type_category_api = async (
   companyId,
   itemTypeId,
-  categoryId
+  categoryId,
+  locationId
 ) => {
   try {
     const response = await api.get(
-      `/itemMaster/GetSupplierItemsByTypeAndCategory/${companyId}/${itemTypeId}/${categoryId}`,
+      `/itemMaster/GetSupplierItemsByTypeAndCategory/${companyId}/${itemTypeId}/${categoryId}/${locationId}`,
       {
         withCredentials: true,
       }

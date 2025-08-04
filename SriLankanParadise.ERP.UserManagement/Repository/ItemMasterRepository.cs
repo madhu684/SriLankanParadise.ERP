@@ -256,31 +256,36 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<SameCategoryTypeSupplierItemDto>> GetSupplierItemsByTypeAndCategory(int companyId, int itemTypeId, int categoryId)
+        public async Task<IEnumerable<SameCategoryTypeSupplierItemDto>> GetSupplierItemsByTypeAndCategory(int companyId, int itemTypeId, int categoryId, int locationId)
         {
             //try
             //{
             //    var items = await _dbContext.ItemMasters
-            //        .Where(im => im.Status == true
-            //            && im.ItemTypeId == itemTypeId
-            //            && im.CategoryId == categoryId)
             //        .Include(im => im.Supplier)
             //        .Include(im => im.Category)
             //        .Include(im => im.ItemType)
-            //        .Select(im => new SameCategoryTypeSupplierItemDto
-            //        {
-            //            ItemMasterId = im.ItemMasterId,
-            //            ItemName = im.ItemName,
-            //            ItemCode = im.ItemCode,
-            //            UnitPrice = im.UnitPrice,
-            //            SellingPrice = im.SellingPrice,
-            //            SupplierName = im.Supplier != null ? im.Supplier.SupplierName : null,
-            //            CategoryName = im.Category.CategoryName,
-            //            ItemTypeName = im.ItemType != null ? im.ItemType.Name : null
-            //        })
+            //        .Where(im => im.Status == true
+            //            && im.ItemTypeId == itemTypeId
+            //            && im.CategoryId == categoryId
+            //            && im.CompanyId == companyId
+            //            && im.SupplierId != null)
+            //        .Join(_dbContext.SupplierItems,
+            //            im => im.ItemMasterId,
+            //            si => si.ItemMasterId,
+            //            (im, si) => new SameCategoryTypeSupplierItemDto
+            //            {
+            //                ItemMasterId = im.ItemMasterId,
+            //                ItemName = im.ItemName,
+            //                ItemCode = im.ItemCode,
+            //                UnitPrice = im.UnitPrice,
+            //                SellingPrice = im.SellingPrice,
+            //                SupplierName = im.Supplier.SupplierName,
+            //                CategoryName = im.Category.CategoryName,
+            //                ItemTypeName = im.ItemType != null ? im.ItemType.Name : null
+            //            })
             //        .ToListAsync();
 
-            //    return items.Any() ? items : null!;
+            //    return items.Any() ? items : new List<SameCategoryTypeSupplierItemDto>();
             //}
             try
             {
@@ -288,6 +293,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(im => im.Supplier)
                     .Include(im => im.Category)
                     .Include(im => im.ItemType)
+                    .Include(im => im.Unit)
                     .Where(im => im.Status == true
                         && im.ItemTypeId == itemTypeId
                         && im.CategoryId == categoryId
@@ -296,17 +302,24 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Join(_dbContext.SupplierItems,
                         im => im.ItemMasterId,
                         si => si.ItemMasterId,
-                        (im, si) => new SameCategoryTypeSupplierItemDto
-                        {
-                            ItemMasterId = im.ItemMasterId,
-                            ItemName = im.ItemName,
-                            ItemCode = im.ItemCode,
-                            UnitPrice = im.UnitPrice,
-                            SellingPrice = im.SellingPrice,
-                            SupplierName = im.Supplier.SupplierName,
-                            CategoryName = im.Category.CategoryName,
-                            ItemTypeName = im.ItemType != null ? im.ItemType.Name : null
-                        })
+                        (im, si) => new { ItemMaster = im, SupplierItem = si })
+                    .GroupJoin(_dbContext.LocationInventories.Where(li => li.LocationId == locationId),
+                        joined => joined.ItemMaster.ItemMasterId,
+                        li => li.ItemMasterId,
+                        (joined, locationInventories) => new { joined.ItemMaster, joined.SupplierItem, LocationInventory = locationInventories.FirstOrDefault() })
+                    .Select(joined => new SameCategoryTypeSupplierItemDto
+                    {
+                        ItemMasterId = joined.ItemMaster.ItemMasterId,
+                        ItemName = joined.ItemMaster.ItemName,
+                        ItemCode = joined.ItemMaster.ItemCode,
+                        UnitPrice = joined.ItemMaster.UnitPrice,
+                        SellingPrice = joined.ItemMaster.SellingPrice,
+                        SupplierName = joined.ItemMaster.Supplier.SupplierName,
+                        CategoryName = joined.ItemMaster.Category.CategoryName,
+                        ItemTypeName = joined.ItemMaster.ItemType != null ? joined.ItemMaster.ItemType.Name : null,
+                        StockInHand = joined.LocationInventory != null ? joined.LocationInventory.StockInHand : 0,
+                        UnitName = joined.ItemMaster.Unit != null ? joined.ItemMaster.Unit.UnitName : null
+                    })
                     .ToListAsync();
 
                 return items.Any() ? items : new List<SameCategoryTypeSupplierItemDto>();

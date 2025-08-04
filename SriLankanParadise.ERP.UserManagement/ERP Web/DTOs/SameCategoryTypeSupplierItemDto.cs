@@ -10,5 +10,7 @@
         public string SupplierName { get; set; }
         public string CategoryName { get; set; }
         public string ItemTypeName { get; set; }
+        public decimal? StockInHand { get; set; }
+        public string? UnitName { get; set; }
     }
 }

@@ -329,12 +329,12 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
-        [HttpGet("GetSupplierItemsByTypeAndCategory/{companyId}/{itemTypeId}/{categoryId}")]
-        public async Task<ApiResponseModel> GetSupplierItemsByTypeAndCategory(int companyId, int itemTypeId, int categoryId)
+        [HttpGet("GetSupplierItemsByTypeAndCategory/{companyId}/{itemTypeId}/{categoryId}/{locationId}")]
+        public async Task<ApiResponseModel> GetSupplierItemsByTypeAndCategory(int companyId, int itemTypeId, int categoryId, int locationId)
         {
             try
             {
-                var supplierItems = await _itemMasterService.GetSupplierItemsByTypeAndCategory(companyId, itemTypeId, categoryId);
+                var supplierItems = await _itemMasterService.GetSupplierItemsByTypeAndCategory(companyId, itemTypeId, categoryId, locationId);
                 if (supplierItems != null)
                 {
                     AddResponseMessage(Response, LogMessages.SameCategoryTypeSupplierItemsRetrieved, supplierItems, true, HttpStatusCode.OK);
