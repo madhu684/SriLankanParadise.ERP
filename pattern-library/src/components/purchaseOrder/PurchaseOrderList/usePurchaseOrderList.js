@@ -18,7 +18,10 @@ const usePurchaseOrderList = () => {
     useState(false);
   const [showCreatePOForm, setShowCreatePOForm] = useState(false);
   const [showUpdatePOForm, setShowUpdatePOForm] = useState(false);
+  const [showDeletePOForm, setShowDeletePOForm] = useState(false);
   const [PODetail, setPODetail] = useState("");
+
+  const [refetch, setRefetch] = useState(false);
 
   const fetchUserPermissions = async () => {
     try {
@@ -98,7 +101,7 @@ const usePurchaseOrderList = () => {
 
   useEffect(() => {
     fetchData();
-  }, [isLoadingPermissions, userPermissions]);
+  }, [isLoadingPermissions, userPermissions, refetch]);
 
   const handleShowApprovePOModal = () => {
     setShowApprovePOModal(true);
@@ -274,6 +277,9 @@ const usePurchaseOrderList = () => {
     PODetail,
     isPermissionsError,
     permissionError,
+    showDeletePOForm,
+    refetch,
+    setRefetch,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleViewDetails,
@@ -291,6 +297,7 @@ const usePurchaseOrderList = () => {
     handleUpdate,
     handleUpdated,
     handleClose,
+    setShowDeletePOForm,
   };
 };
 

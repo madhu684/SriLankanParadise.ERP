@@ -1519,6 +1519,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Purchase order deleted successfully.
+        /// </summary>
+        public static string PurchaseOrderDeleted {
+            get {
+                return ResourceManager.GetString("PurchaseOrderDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Purchase order detail created successfully.
         /// </summary>
         public static string PurchaseOrderDetailCreated {

@@ -165,5 +165,51 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task DeletePurchaseOrder(int purchaseOrderId)
+        {
+            try
+            {
+                var purchaseOrder = await _dbContext.PurchaseOrders.FirstOrDefaultAsync(x => x.PurchaseOrderId == purchaseOrderId);
+                if (purchaseOrder == null)
+                {
+                    throw new KeyNotFoundException($"Purchase order with ID {purchaseOrderId} not found");
+                }
+
+                var strategy = _dbContext.Database.CreateExecutionStrategy();
+
+                await strategy.ExecuteAsync(async () =>
+                {
+                    using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+                    try
+                    {
+                        var purchaseOrderDetails = await _dbContext.PurchaseOrderDetails
+                            .Where(pod => pod.PurchaseOrderId == purchaseOrderId)
+                            .ToListAsync();
+
+                        if (purchaseOrderDetails.Any())
+                        {
+                            _dbContext.PurchaseOrderDetails.RemoveRange(purchaseOrderDetails);
+                        }
+
+                        _dbContext.PurchaseOrders.Remove(purchaseOrder);
+
+                        await _dbContext.SaveChangesAsync();
+
+                        await transaction.CommitAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        await transaction.RollbackAsync();
+                        throw new Exception($"Error deleting purchase order with ID {purchaseOrderId}", ex);
+                    }
+                });
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

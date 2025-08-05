@@ -100,6 +100,5 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
-
     }
 }

@@ -300,6 +300,17 @@ export const delete_purchase_order_detail_api = async (
   }
 };
 
+export const delete_purchase_order_api = async (purchaseOrderId) => {
+  try {
+    const response = await api.delete(`/purchaseOrder/${purchaseOrderId}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
+
 //grn apis
 export const post_grn_master_api = async (formData) => {
   try {

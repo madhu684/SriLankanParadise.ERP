@@ -1053,4 +1053,7 @@
   <data name="SameCategoryTypeSupplierItemsNotFound" xml:space="preserve">
     <value>Same Category &amp; item type supplier items not found</value>
   </data>
+  <data name="PurchaseOrderDeleted" xml:space="preserve">
+    <value>Purchase order deleted successfully</value>
+  </data>
 </root>
