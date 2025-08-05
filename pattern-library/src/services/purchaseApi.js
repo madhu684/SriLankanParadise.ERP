@@ -1399,24 +1399,30 @@ export const get_sum_location_inventories_by_locationId_itemMasterId_api =
     }
   };
 
-// export const get_Low_Stock_Items_api = async () => {
-//   try {
-//     const response = await api.get(`/locationInventory/GetLowStockItems`, {
-//       withCredentials: true,
-//     });
-//     return response.data;
-//   } catch (error) {
-//     console.error("Error fetching low stock items:", error);
-//     throw error;
-//   }
-// };
-
-export const get_Low_Stock_Items_api = async (supplierId = null) => {
+export const get_Low_Stock_Items_api = async (
+  supplierId = null,
+  locationId = null
+) => {
   try {
     const response = await api.get(`/locationInventory/GetLowStockItems`, {
-      params: { supplierId },
+      params: { supplierId, locationId },
       withCredentials: true,
     });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching low stock items:", error);
+    throw error;
+  }
+};
+
+export const get_Low_Stock_Items_for_location_api = async (locationId) => {
+  try {
+    const response = await api.get(
+      `/locationInventory/GetLowStockItemsByLocationOnly/${locationId}`,
+      {
+        withCredentials: true,
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error fetching low stock items:", error);

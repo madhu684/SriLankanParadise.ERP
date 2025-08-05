@@ -792,7 +792,10 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
           unit: item.unit.unitName,
           categoryId: item.categoryId,
           itemTypeId: item.itemTypeId,
-          quantity: item.maxStockLevel - item.totalStockInHand || 0,
+          quantity:
+            item.maxStockLevel - item.totalStockInHand >= 0
+              ? item.maxStockLevel - item.totalStockInHand
+              : 0,
           unitPrice: 0.0,
           totalPrice: 0.0,
           totalStockInHand: item.totalStockInHand,
@@ -1016,7 +1019,10 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     try {
       setLoading(true); // Show loading state
       setIsPOGenerated(true);
-      const response = await get_Low_Stock_Items_api(formData.supplierId);
+      const response = await get_Low_Stock_Items_api(
+        formData.supplierId,
+        userLocation[0]?.locationId
+      );
       const lowStockItems = response.data.result || [];
 
       if (lowStockItems.length === 0) {
@@ -1067,7 +1073,10 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
               unit: item.itemMaster.unit?.unitName || "",
               categoryId: item.itemMaster?.category?.categoryId || "",
               itemTypeId: item.itemMaster?.itemType?.itemTypeId || "",
-              quantity: item.maxStockLevel - item.totalStockInHand || 0,
+              quantity:
+                item.maxStockLevel - item.totalStockInHand >= 0
+                  ? item.maxStockLevel - item.totalStockInHand
+                  : 0,
               unitPrice: 0.0,
               totalPrice: 0.0,
               supplierItems: supplierItems,

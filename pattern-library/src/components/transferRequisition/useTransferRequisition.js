@@ -5,6 +5,7 @@ import {
   post_requisition_detail_api,
   get_user_locations_by_user_id_api,
   get_sum_location_inventories_by_locationId_itemMasterId_api,
+  get_Low_Stock_Items_for_location_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
@@ -24,7 +25,10 @@ const useTransferRequisition = ({ onFormSubmit }) => {
   const alertRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isUpdatingStock, setIsUpdatingStock] = useState(false); // Add this state
+  const [trGenerating, setTRGenerating] = useState(false);
+  const [isUpdatingStock, setIsUpdatingStock] = useState(false);
+  const [isTRGenerated, setIsTRGenerated] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
   const fetchLocations = async () => {
     try {
@@ -429,6 +433,12 @@ const useTransferRequisition = ({ onFormSubmit }) => {
   };
 
   const handleInputChange = (field, value) => {
+    if (field === "toWarehouseLocation") {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        itemDetails: [],
+      }));
+    }
     setFormData((prevFormData) => ({
       ...prevFormData,
       [field]: value,
@@ -488,7 +498,6 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     }));
   };
 
-  // Improved handleSelectItem function
   const handleSelectItem = async (item, e) => {
     e.preventDefault();
     // Check if item already exists
@@ -539,6 +548,60 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     setSearchTerm("");
   };
 
+  const handleGenerateTRN = async () => {
+    try {
+      setTRGenerating(true);
+      setIsTRGenerated(true);
+      const response = await get_Low_Stock_Items_for_location_api(
+        formData.toWarehouseLocation
+      );
+      const lowStockItems = response.data.result || [];
+      if (lowStockItems.length === 0) {
+        setShowToast(true);
+        setTimeout(() => {
+          setTRGenerating(false);
+          setIsTRGenerated(false);
+          setShowToast(false);
+        }, 5000);
+        //setLoading(false);
+        return;
+      }
+
+      if (lowStockItems.length > 0) {
+        const newItemDetails = await Promise.all(
+          lowStockItems.map(async (item) => {
+            const fromStockDetails = await fetchStockDetails(
+              formData.fromWarehouseLocation,
+              item.itemMasterId
+            );
+
+            return {
+              id: item.itemMasterId,
+              maxStockLevel: item.maxStockLevel,
+              name: item.itemMaster.itemName,
+              quantity: 0,
+              minReOrderLevel: item.minReOrderLevel || 0,
+              totalStockInHand: fromStockDetails?.totalStockInHand || 0,
+              totalStockInHandTo: item.totalStockInHand || 0,
+              unit: item.itemMaster.unit?.unitName || "",
+            };
+          })
+        );
+
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          itemDetails: newItemDetails,
+        }));
+      }
+    } catch (error) {
+      console.error("Error generating purchase order:", error);
+    }finally{
+      setTRGenerating(false);
+    }
+  };
+
+  console.log("formData:", formData);
+
   return {
     formData,
     locations,
@@ -557,6 +620,10 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     loading: loading || isUpdatingStock,
     userLocations,
     userDepartments,
+    showToast,
+    isTRGenerated,
+    trGenerating,
+    setShowToast,
     handleInputChange,
     handleDepartmentChange,
     handleItemDetailsChange,
@@ -567,6 +634,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     setFormData,
     setSearchTerm,
     handleSelectItem,
+    handleGenerateTRN,
   };
 };
 

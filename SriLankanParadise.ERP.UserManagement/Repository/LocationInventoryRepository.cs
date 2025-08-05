@@ -1,6 +1,7 @@
 ﻿using Azure;
 using Microsoft.EntityFrameworkCore;
 using SriLankanParadise.ERP.UserManagement.Data;
+using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
@@ -38,16 +39,13 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 }
                 else
                 {
-                    // Insert a new record
                     _dbContext.LocationInventories.Add(locationInventory);
                 }
 
-                // Save changes
                 await _dbContext.SaveChangesAsync();
             }
             catch (Exception)
             {
-                // Handle exception (optional: log the exception, etc.)
                 throw;
             }
         }
@@ -65,7 +63,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
-
 
         public async Task<LocationInventory> GetLocationInventoryByLocationInventoryId(int locationInventoryId)
         {
@@ -136,8 +133,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-
-
         public async Task<IEnumerable<LocationInventory>> GetLocationInventoriesByLocationIdItemMasterId(int locationId , int itemMasterId)
         {
             try
@@ -154,9 +149,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var locationInventories = await _dbContext.LocationInventories
                     .Where(li => li.LocationId == locationId && li.ItemMasterId == itemMasterId)
                     .Include(li => li.ItemBatch)
-                        .ThenInclude(ib => ib.Batch)        // Include Batch details
+                        .ThenInclude(ib => ib.Batch)
                     .Include(li => li.ItemBatch)
-                        .ThenInclude(ib => ib.ItemMaster)   // Include ItemMaster details
+                        .ThenInclude(ib => ib.ItemMaster)
                     .ToListAsync();
 
                 return locationInventories.Any() ? locationInventories : null;
@@ -293,7 +288,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-
         public async Task<IEnumerable<LocationInventory>> GetItemLocationInventoriesByLocationId(int locationId)
         {
             return await _dbContext.LocationInventories
@@ -303,7 +297,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(ib => ib.Batch)
                 .ToListAsync();
         }
-
 
         public async Task<IEnumerable<LocationInventory>> GetLocationInventoryByBatchId(int batchId)
         {
@@ -323,34 +316,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
-
-        //public async Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemMasterId(int locationId, int itemMasterId)
-        //{
-        //    try
-        //    {
-        //        var summaryData = await _dbContext.LocationInventories
-        //            .Where(li => li.LocationId == locationId && li.ItemMasterId == itemMasterId)
-        //            .Include(li => li.ItemMaster)
-        //            .GroupBy(li => new { li.LocationId, li.ItemMasterId })
-        //            .Select(g => new LocationInventorySummary
-        //            {
-        //                LocationInventoryId = g.FirstOrDefault().LocationInventoryId,
-        //                LocationId = g.Key.LocationId,
-        //                ItemMasterId = g.Key.ItemMasterId,
-        //                TotalStockInHand = g.Sum(li => li.StockInHand ?? 0),
-        //                MinReOrderLevel = g.Min(li => li.ReOrderLevel ?? 0),
-        //                MaxStockLevel = g.Max(li => li.MaxStockLevel ?? 0),
-        //                ItemMaster = g.FirstOrDefault().ItemMaster
-        //            })
-        //            .FirstOrDefaultAsync();
-
-        //        return summaryData;
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-        //}
 
         public async Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemMasterId(int? locationId, int itemMasterId)
         {
@@ -398,82 +363,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        //public async Task<IEnumerable<LocationInventorySummary>> GetLowStockItems()
-        //{
-        //    try
-        //    {
-        //        var allInventories = await _dbContext.LocationInventories
-        //            .Include(li => li.ItemMaster)
-        //            .ToListAsync();
-
-        //        var summaryData = allInventories
-        //            .GroupBy(li => li.ItemMasterId)
-        //            .Select(g => new LocationInventorySummary
-        //            {
-        //                LocationInventoryId = 0, // Not relevant, set to 0
-        //                LocationId = 0,         // Not relevant, set to 0
-        //                ItemMasterId = g.Key,
-        //                TotalStockInHand = g.Sum(li => li.StockInHand ?? 0),
-        //                MinReOrderLevel = g.Min(li => li.ReOrderLevel ?? 0),
-        //                MaxStockLevel = g.Max(li => li.MaxStockLevel ?? 0),
-        //                ItemMaster = g.FirstOrDefault()?.ItemMaster
-        //            })
-        //            //.Where(s => s.TotalStockInHand < s.MinReOrderLevel)
-        //            .Where(s => s.TotalStockInHand < s.MaxStockLevel)
-        //            .ToList();
-
-        //        return summaryData.Any() ? summaryData : new List<LocationInventorySummary>();
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-        //}
-
-        // Working first one
-        //public async Task<IEnumerable<LocationInventorySummary>> GetLowStockItems(int? supplierId = null)
-        //{
-        //    try
-        //    {
-        //        var query = _dbContext.LocationInventories
-        //            .Include(li => li.ItemMaster)
-        //            .ThenInclude(i => i.Unit)
-        //            .Include(li => li.ItemMaster)
-        //            .ThenInclude(i => i.Category)
-        //            .AsQueryable();
-
-        //        // Apply supplierId filter if provided
-        //        if (supplierId.HasValue)
-        //        {
-        //            query = query.Where(li => li.ItemMaster.SupplierId == supplierId.Value);
-        //        }
-
-        //        var allInventories = await query.ToListAsync();
-
-        //        var summaryData = allInventories
-        //            .GroupBy(li => li.ItemMasterId)
-        //            .Select(g => new LocationInventorySummary
-        //            {
-        //                LocationInventoryId = 0,
-        //                LocationId = 0, 
-        //                ItemMasterId = g.Key,
-        //                TotalStockInHand = g.Sum(li => li.StockInHand ?? 0),
-        //                MinReOrderLevel = g.Min(li => li.ReOrderLevel ?? 0),
-        //                MaxStockLevel = g.Max(li => li.MaxStockLevel ?? 0),
-        //                ItemMaster = g.FirstOrDefault()?.ItemMaster
-        //            })
-        //            .Where(s => s.TotalStockInHand < s.MaxStockLevel)
-        //            .ToList();
-
-        //        return summaryData.Any() ? summaryData : new List<LocationInventorySummary>();
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-        //}
-
-        public async Task<IEnumerable<LocationInventorySummary>> GetLowStockItems(int? supplierId = null)
+        public async Task<IEnumerable<LocationInventorySummary>> GetLowStockItems(int? supplierId = null, int? locationId = null)
         {
             try
             {
@@ -487,7 +377,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(im => im.ItemType)
                     .AsQueryable();
 
-
                 if (supplierId.HasValue)
                 {
                     query = query.Where(si => si.SupplierId == supplierId.Value);
@@ -497,6 +386,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
 
                 var inventoryQuery = from si in supplierItems
                                      join li in _dbContext.LocationInventories
+                                         .Where(li => !locationId.HasValue || li.LocationId == locationId.Value)
                                          on si.ItemMasterId equals li.ItemMasterId into liGroup
                                      from li in liGroup.DefaultIfEmpty()
                                      select new { SupplierItem = si, LocationInventory = li };
@@ -505,8 +395,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .GroupBy(x => x.SupplierItem.ItemMasterId)
                     .Select(g => new LocationInventorySummary
                     {
-                        LocationInventoryId = 0,
-                        LocationId = 0,
+                        LocationInventoryId = g.First().LocationInventory != null ? g.First().LocationInventory.LocationInventoryId : 0,
+                        LocationId = locationId ?? 0,
                         ItemMasterId = g.Key,
                         TotalStockInHand = g.Sum(x => x.LocationInventory != null ? x.LocationInventory.StockInHand ?? 0 : 0),
                         MinReOrderLevel = g.Min(x => x.LocationInventory != null ? x.LocationInventory.ReOrderLevel ?? 0 : 0),
@@ -523,52 +413,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw new Exception("Error retrieving low stock items", ex);
             }
         }
-
-        //public async Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByItemName(int? locationId, string itemName)
-        //{
-        //    try
-        //    {
-        //        // Check if itemName is provided
-        //        if (string.IsNullOrEmpty(itemName))
-        //        {
-        //            return new List<LocationInventorySummary> ();
-        //        }
-
-        //        var query = _dbContext.LocationInventories
-        //            .Include(li => li.ItemMaster)
-        //            .ThenInclude(i => i.Unit)
-        //            .Include(li => li.ItemMaster)
-        //            .ThenInclude(i => i.Category)
-        //            .Where(li => li.ItemMaster.ItemName.Contains(itemName))
-        //            .AsQueryable();
-
-        //        // Apply locationId filter if provided
-        //        if (locationId.HasValue)
-        //        {
-        //            query = query.Where(li => li.LocationId == locationId.Value);
-        //        }
-
-        //        var summaryData = await query
-        //            .GroupBy(li => new { li.LocationId, li.ItemMasterId })
-        //            .Select(g => new LocationInventorySummary
-        //            {
-        //                LocationInventoryId = g.FirstOrDefault().LocationInventoryId,
-        //                LocationId = g.Key.LocationId,
-        //                ItemMasterId = g.Key.ItemMasterId,
-        //                TotalStockInHand = g.Sum(li => li.StockInHand ?? 0),
-        //                MinReOrderLevel = g.Min(li => li.ReOrderLevel ?? 0),
-        //                MaxStockLevel = g.Max(li => li.MaxStockLevel ?? 0),
-        //                ItemMaster = g.FirstOrDefault().ItemMaster
-        //            })
-        //            .ToListAsync();
-
-        //        return summaryData ?? new List<LocationInventorySummary>();
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-        //}
 
         public async Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByItemName(int? locationId, string itemName)
         {
@@ -616,6 +460,40 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             catch (Exception)
             {
                 throw;
+            }
+        }
+
+        public async Task<IEnumerable<LocationInventorySummary>> GetLowStockItemsByLocationOnly(int locationId)
+        {
+            try
+            {
+                var summaryData = await _dbContext.LocationInventories
+                    .Include(li => li.ItemMaster)
+                    .ThenInclude(im => im.Unit)
+                    .Include(li => li.ItemMaster)
+                    .ThenInclude(im => im.Category)
+                    .Include(li => li.ItemMaster)
+                    .ThenInclude(im => im.ItemType)
+                    .Where(li => li.LocationId == locationId)
+                    .GroupBy(li => li.ItemMasterId)
+                    .Select(g => new LocationInventorySummary
+                    {
+                        LocationInventoryId = g.First().LocationInventoryId,
+                        LocationId = locationId,
+                        ItemMasterId = g.Key,
+                        TotalStockInHand = g.Sum(li => li.StockInHand ?? 0),
+                        MinReOrderLevel = g.Min(li => li.ReOrderLevel ?? 0),
+                        MaxStockLevel = g.Max(li => li.MaxStockLevel ?? 0),
+                        ItemMaster = g.First().ItemMaster
+                    })
+                    .Where(s => s.TotalStockInHand < s.MaxStockLevel || s.MaxStockLevel == 0)
+                    .ToListAsync();
+
+                return summaryData.Any() ? summaryData : new List<LocationInventorySummary>();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error retrieving low stock items by location", ex);
             }
         }
     }

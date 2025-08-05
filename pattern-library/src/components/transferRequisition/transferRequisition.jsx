@@ -5,6 +5,7 @@ import LoadingSpinner from "../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../errorComponent/errorComponent";
 import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
+import ToastMessage from "../toastMessage/toastMessage";
 
 const TransferRequisition = ({
   handleClose,
@@ -29,6 +30,10 @@ const TransferRequisition = ({
     loading,
     userDepartments,
     userLocations,
+    showToast,
+    isTRGenerated,
+    trGenerating,
+    setShowToast,
     handleInputChange,
     handleDepartmentChange,
     handleItemDetailsChange,
@@ -39,6 +44,7 @@ const TransferRequisition = ({
     setFormData,
     setSearchTerm,
     handleSelectItem,
+    handleGenerateTRN,
   } = useTransferRequisition({
     onFormSubmit: () => {
       handleClose();
@@ -212,7 +218,12 @@ const TransferRequisition = ({
               >
                 <option value="">Select Warehouse</option>
                 {locations
-                  .filter((location) => location.locationTypeId === 2)
+                  .filter(
+                    (location) =>
+                      location.locationTypeId === 2 &&
+                      location.locationId !==
+                        parseInt(formData.fromWarehouseLocation)
+                  )
                   .map((location) => (
                     <option
                       key={location.locationId}
@@ -231,6 +242,39 @@ const TransferRequisition = ({
           </div>
           <div className="col-md-5">
             <h4>4. Generate Transfer Requsition</h4>
+            <div className="mb-3 mt-3">
+              <div>
+                <button
+                  type="button"
+                  className="btn btn-info"
+                  onClick={handleGenerateTRN}
+                  disabled={
+                    trGenerating ||
+                    formData.toWarehouseLocation === null ||
+                    formData.toWarehouseLocation === null ||
+                    formData.itemDetails.length > 0
+                  }
+                >
+                  {trGenerating ? (
+                    <div className="d-flex align-items-center w-100">
+                      <ButtonLoadingSpinner />
+                    </div>
+                  ) : (
+                    "Generate Transfer Requsition"
+                  )}
+                </button>
+              </div>
+            </div>
+            <div className="mt-3">
+              {formData.itemDetails.length === 0 && isTRGenerated === true && (
+                <ToastMessage
+                  show={showToast}
+                  onClose={() => setShowToast(false)}
+                  type="warning"
+                  message="No any available stocks in requested location"
+                />
+              )}
+            </div>
           </div>
         </div>
 
