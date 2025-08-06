@@ -11,10 +11,10 @@ const MinDetail = ({ show, handleClose, min }) => {
 
   const {
     receivedQuantities,
+    returnedQuantities,
     isRequester,
     handleQuantityChange,
     handleAccept,
-    returnedQuantities,
     handleReceivedQuantityChange,
     handleReturnedQuantityChange,
   } = useMinDetail(min, handleClose);
@@ -104,8 +104,8 @@ const MinDetail = ({ show, handleClose, min }) => {
               <th>Unit</th>
               <th>Item Batch</th>
               <th>Dispatched Quantity</th>
-              <th>Received Quantity</th>
-              <th>Returned Quantity</th>
+              {/* <th>Received Quantity</th>
+              <th>Returned Quantity</th> */}
             </tr>
           </thead>
           <tbody>
@@ -116,7 +116,7 @@ const MinDetail = ({ show, handleClose, min }) => {
                   <td>{item.itemMaster?.unit.unitName}</td>
                   <td>{item.batch?.batchRef}</td>
                   <td>{item.quantity}</td>
-                  <td>
+                  {/* <td>
                     {isRequester ? (
                       <Form.Control
                         type="number"
@@ -163,7 +163,7 @@ const MinDetail = ({ show, handleClose, min }) => {
                     ) : (
                       <span>-</span>
                     )}
-                  </td>
+                  </td> */}
                 </tr>
               ))
             ) : (
@@ -180,11 +180,11 @@ const MinDetail = ({ show, handleClose, min }) => {
         <Button variant="secondary" onClick={handleClose}>
           Close
         </Button>
-        {isRequester && (
+        {/* {isRequester && (
           <Button variant="primary" onClick={handleAccept}>
             Accept
           </Button>
-        )}
+        )} */}
       </Modal.Footer>
     </Modal>
   );

@@ -99,5 +99,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             }
         }
 
+        public async Task<IEnumerable<Supplier>> GetSuppliersByCompanyIdWithSearchQuery(int companyId, string searchQuery)
+        {
+            return await _supplierRepository.GetSuppliersByCompanyIdWithSearchQuery(companyId, searchQuery);
+        }
     }
 }

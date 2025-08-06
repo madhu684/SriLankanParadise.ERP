@@ -47,16 +47,16 @@ const useTinDetail = (tin, handleClose) => {
     }
   }, [issuedetails]);
 
-  useEffect(() => {
-    if (issuedetails?.length > 0) {
-      const updatedReturnedQuantities = issuedetails.reduce((acc, item) => {
-        acc[item.issueDetailId] =
-          item.returnedQuantity !== undefined ? item.returnedQuantity : "";
-        return acc;
-      }, {});
-      setReturnedQuantities(updatedReturnedQuantities);
-    }
-  }, [issuedetails]);
+  // useEffect(() => {
+  //   if (issuedetails?.length > 0) {
+  //     const updatedReturnedQuantities = issuedetails.reduce((acc, item) => {
+  //       acc[item.issueDetailId] =
+  //         item.returnedQuantity !== undefined ? item.returnedQuantity : "";
+  //       return acc;
+  //     }, {});
+  //     setReturnedQuantities(updatedReturnedQuantities);
+  //   }
+  // }, [issuedetails]);
 
   const mutation = useMutation({
     mutationFn: ({ issuemasterid, updatedDetails }) =>

@@ -27,6 +27,7 @@ const useTransferRequisitionList = () => {
   const [selectedWarehouse, setSelectedWarehouse] = useState(
     userWarehouses[0]?.id || ""
   );
+  const [refetch, setRefetch] = useState(false);
 
   const fetchUserPermissions = async () => {
     try {
@@ -150,7 +151,7 @@ const useTransferRequisitionList = () => {
 
   useEffect(() => {
     fetchData();
-  }, [isLoadingPermissions, userPermissions]);
+  }, [isLoadingPermissions, userPermissions, refetch]);
 
   const handleShowApproveTRModal = () => {
     setShowApproveTRModal(true);
@@ -334,6 +335,8 @@ const useTransferRequisitionList = () => {
     filter,
     filteredRequisitions,
     openTINsList,
+    refetch,
+    setRefetch,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleViewDetails,

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
@@ -13,17 +14,38 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             _dbContext = dbContext;
         }
 
+        //public async Task AddItemBatch(ItemBatch itemBatch)
+        //{
+        //    try
+        //    {
+        //        _dbContext.ItemBatches.Add(itemBatch);
+        //        await _dbContext.SaveChangesAsync();
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+
+        //        throw;
+        //    }
+        //}
         public async Task AddItemBatch(ItemBatch itemBatch)
         {
             try
             {
+                var existingBatch = await _dbContext.ItemBatches
+                    .FirstOrDefaultAsync(ib => ib.BatchId == itemBatch.BatchId && ib.ItemMasterId == itemBatch.ItemMasterId);
+
+                if (existingBatch != null)
+                {
+                    // Do not add new item batch if BatchId and ItemMasterId already exist
+                    return;
+                }
+
                 _dbContext.ItemBatches.Add(itemBatch);
                 await _dbContext.SaveChangesAsync();
-
             }
             catch (Exception ex)
             {
-
                 throw;
             }
         }

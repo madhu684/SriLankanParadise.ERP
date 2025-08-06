@@ -18,9 +18,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             await _issueDetailRepository.AddIssueDetail(issueDetail);
         }
 
-        public Task<IEnumerable<IssueDetail>> GetIssueDetails(int issueMasterId)
+        public async Task<IEnumerable<IssueDetail>> GetIssueDetails(int issueMasterId)
         {
-            throw new NotImplementedException();
+            return await _issueDetailRepository.GetIssueDetails(issueMasterId);
         }
 
         public async Task<List<IssueDetail>> UpdateIssueDetailReceivedQuantity(int issueMasterId, List<IssueDetail> issueDetailReceivedQtyUpdate)

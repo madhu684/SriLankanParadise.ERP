@@ -7,7 +7,7 @@ public partial class ItemMaster
 {
     public int ItemMasterId { get; set; }
 
-    public int UnitId { get; set; }
+    public int? UnitId { get; set; }
 
     public int CategoryId { get; set; }
 
@@ -27,8 +27,6 @@ public partial class ItemMaster
 
     public int? InventoryUnitId { get; set; }
 
-
-
     public decimal? ConversionRate { get; set; }
 
     public string? ItemCode { get; set; }
@@ -37,15 +35,8 @@ public partial class ItemMaster
 
     public bool? IsInventoryItem { get; set; }
 
-    public virtual Category Category { get; set; } = null!;
-
-    public virtual ICollection<GrnDetail> GrnDetails { get; set; } = new List<GrnDetail>();
-
-    public virtual Unit? InventoryUnit { get; set; }
-
     public decimal? UnitPrice { get; set; }
 
-    //new properties
     public decimal? CostRatio { get; set; }
 
     public decimal? FOBInUSD { get; set; }
@@ -67,30 +58,23 @@ public partial class ItemMaster
     public decimal? StockClearance { get; set; }
 
     public decimal? BulkPrice { get; set; }
+    public int? SupplierId { get; set; }
 
-    //new properties
-
-    public virtual ICollection<ItemMaster> InverseParent { get; set; } = new List<ItemMaster>();
-
-    public virtual ICollection<IssueDetail> IssueDetails { get; set; } = new List<IssueDetail>();
-
-    public virtual ICollection<ItemBatch> ItemBatches { get; set; } = new List<ItemBatch>();
-
+    //nav properties
+    public virtual Category Category { get; set; } = null!;
+    public virtual Unit? InventoryUnit { get; set; }
     public virtual ItemType? ItemType { get; set; }
-
     public virtual ItemMaster? Parent { get; set; }
-
-    public virtual ICollection<PurchaseOrderDetail> PurchaseOrderDetails { get; set; } = new List<PurchaseOrderDetail>();
-
-    public virtual ICollection<PurchaseRequisitionDetail> PurchaseRequisitionDetails { get; set; } = new List<PurchaseRequisitionDetail>();
-
-    public virtual ICollection<RequisitionDetail> RequisitionDetails { get; set; } = new List<RequisitionDetail>();
-
     public virtual Unit Unit { get; set; } = null!;
-
+    public virtual Supplier? Supplier { get; set; }
+    public virtual ICollection<PurchaseOrderDetail> PurchaseOrderDetails { get; set; } = new List<PurchaseOrderDetail>();
+    public virtual ICollection<PurchaseRequisitionDetail> PurchaseRequisitionDetails { get; set; } = new List<PurchaseRequisitionDetail>();
+    public virtual ICollection<RequisitionDetail> RequisitionDetails { get; set; } = new List<RequisitionDetail>();
     public virtual ICollection<SubItemMaster> SubItemMasters { get; set; } = new List<SubItemMaster>();
-
     public virtual ICollection<SupplyReturnDetail> SupplyReturnDetails { get; set; } = new List<SupplyReturnDetail>();
-
+    public virtual ICollection<GrnDetail> GrnDetails { get; set; } = new List<GrnDetail>();
+    public virtual ICollection<ItemMaster> InverseParent { get; set; } = new List<ItemMaster>();
+    public virtual ICollection<IssueDetail> IssueDetails { get; set; } = new List<IssueDetail>();
+    public virtual ICollection<ItemBatch> ItemBatches { get; set; } = new List<ItemBatch>();
     public virtual ICollection<DailyLocationInventory> DailyLocationInventories { get; set; } = new List<DailyLocationInventory>();
 }

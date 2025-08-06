@@ -33,11 +33,16 @@ public partial class RequisitionMaster
 
     public string? ReferenceNumber { get; set; }
 
+    public bool IsMINApproved { get; set; }
+
+    public bool IsMINAccepted { get; set; }
+
     public virtual ICollection<IssueMaster> IssueMasters { get; set; } = new List<IssueMaster>();
 
     public virtual Location? RequestedFromLocation { get; set; }
 
     public virtual Location? RequestedToLocation { get; set; }
+
 
     public virtual ICollection<RequisitionDetail> RequisitionDetails { get; set; } = new List<RequisitionDetail>();
 }

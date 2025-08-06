@@ -3,13 +3,13 @@ using SriLankanParadise.ERP.UserManagement.Business_Service;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.Repository;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
-using SriLankanParadise.ERP.UserManagement.DataModels;
 using AutoMapper;
 using SriLankanParadise.ERP.UserManagement.Shared.AutoMappers;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore.Query;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Middlewares;
 using Consul;
+using SriLankanParadise.ERP.UserManagement.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -205,6 +205,10 @@ builder.Services.AddScoped<ILeadRepository, LeadRepository>();
 builder.Services.AddScoped<ILeadService, LeadService>();
 builder.Services.AddScoped<IMeetingRepository, MeetingRepository>();
 builder.Services.AddScoped<IMeetingService, MeetingService>();
+builder.Services.AddScoped<IEmptyReturnService, EmptyReturnService>();
+builder.Services.AddScoped<IEmptyReturnRepository, EmptyReturnRepository>();
+builder.Services.AddScoped<ISupplierItemService, SupplierItemService>();
+builder.Services.AddScoped<ISupplierItemRepository, SupplierItemRepository>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

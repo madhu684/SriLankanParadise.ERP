@@ -89,6 +89,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<LocationType, LocationTypeDto>();
             CreateMap<RequisitionMasterRequestModel, RequisitionMaster>();
             CreateMap<ApproveRequisitionMasterRequestModel, RequisitionMaster>();
+            CreateMap<PatchIsMINApprovedMRNRequestModel, RequisitionMaster>();
             CreateMap<RequisitionMaster, RequisitionMasterDto>();
             CreateMap<RequisitionDetailRequestModel, RequisitionDetail>();
             CreateMap<RequisitionDetail, RequisitionDetailDto>();
@@ -124,6 +125,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<MeasurementType, MeasurementTypeDto>();
             CreateMap<LocationInventoryRequestModel, LocationInventory>();
             CreateMap<LocationInventory, LocationInventoryDto>();
+            CreateMap<LocationInventory, EmptyReturnItemLocationInventoryDto>();
             CreateMap<LocationInventoryMovementRequestModel, LocationInventoryMovement>();
             CreateMap<LocationInventoryMovement, LocationInventoryMovementDto>();
             CreateMap<LocationInventoryGoodsInTransitRequestModel, LocationInventoryGoodsInTransit>();
@@ -156,6 +158,14 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<RolePermission, RolePermissionDto>();
             CreateMap<LocationInventorySummary, LocationInventorySummaryDto>()
                  .ForMember(dest => dest.ItemMaster, opt => opt.MapFrom(src => src.ItemMaster)); // Explicitly map ItemMaster
+            CreateMap<AddEmptyReturnRequestModel, EmptyReturnMaster>();
+            //CreateMap<UpdateEmptyReturnRequestModel, EmptyReturnMaster>();
+            CreateMap<EmptyReturnDetailRequestModel, EmptyReturnDetail>()
+                .ForMember(dest => dest.EmptyReturnDetailId, opt => opt.Ignore());
+            CreateMap<EmptyReturnDetail, EmptyReturnDetailDto>();
+            CreateMap<EmptyReturnMaster, EmptyReturnMasterDto>();
+            CreateMap<SupplierItemRequestModel, SupplierItem>();
+            CreateMap<SupplierItem, SupplierItemDto>();
             // Add more mapping configurations if needed
 
         }

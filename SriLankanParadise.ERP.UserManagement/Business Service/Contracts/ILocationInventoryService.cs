@@ -12,6 +12,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task<LocationInventory> GetLocationInventoryByLocationInventoryId(int locationInventoryId);
 
         Task<IEnumerable<LocationInventory>> GetLocationInventoriesByLocationId(int locationId);
+        Task<IEnumerable<LocationInventory>> GetEmptyReturnItemLocationInventoriesByLocationId(int locationId);
 
         Task<IEnumerable<LocationInventory>> GetItemLocationInventoriesByLocationId(int locationId);
 
@@ -20,10 +21,13 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task<IEnumerable<LocationInventory>> GetLocationInventoryByBatchId(int batchId);
 
         Task<LocationInventory> GetLocationInventoryByDetails(int locationId, int itemMasterId, int batchId);
+        Task<LocationInventory> GetEmptyLocationInventoryByDetails(int locationId, int itemMasterId);
 
         Task UpdateLocationInventory(int locationInventoryId, LocationInventory locationInventory);
 
         Task UpdateLocationInventoryStockInHand(int locationId, int itemMasterId, int batchId, LocationInventory locationInventory, string operation);
+        Task UpdateEmptyLocationInventoryStockInHand(int locationId, int itemMasterId, LocationInventory locationInventory, string operation);
+
         Task<IEnumerable<LocationInventorySummary>> GetLowStockItems();
 
         // Updated Service Interface Method

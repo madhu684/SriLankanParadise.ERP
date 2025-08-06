@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using SriLankanParadise.ERP.UserManagement.DataModels;
 
-namespace SriLankanParadise.ERP.UserManagement.DataModels;
+namespace SriLankanParadise.ERP.UserManagement.Data;
 
 public partial class ErpSystemContext : DbContext
 {
@@ -158,6 +159,12 @@ public partial class ErpSystemContext : DbContext
     public virtual DbSet<SupplyReturnDetail> SupplyReturnDetails { get; set; }
 
     public virtual DbSet<DailyLocationInventory> DailyLocationInventories { get; set; }
+
+    public virtual DbSet<EmptyReturnMaster> EmptyReturnMasters { get; set; }
+    public virtual DbSet<EmptyReturnDetail> EmptyReturnDetails { get; set; }
+
+    public virtual DbSet<SupplierItem> SupplierItems { get; set; }
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:LocalSqlServerConnection");
@@ -1456,6 +1463,85 @@ public partial class ErpSystemContext : DbContext
                 .HasForeignKey(d => d.LocationId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_DailyLocationInventory_Location");
+        });
+
+        modelBuilder.Entity<EmptyReturnMaster>(entity =>
+        {
+            entity.HasKey(e => e.EmptyReturnMasterId)
+                  .HasName("PK__EmptyReturnMaster");
+
+            entity.ToTable("EmptyReturnMaster");
+
+            entity.Property(e => e.ApprovedBy).HasMaxLength(50);
+            entity.Property(e => e.ApprovedDate).HasColumnType("datetime");
+            entity.Property(e => e.CreateDate).HasColumnType("datetime");
+            entity.Property(e => e.ModifyDate).HasColumnType("datetime");
+            entity.Property(e => e.ReferenceNo).HasMaxLength(20)
+                  .HasDefaultValueSql("('ER' + CONVERT(NVARCHAR(20), NEXT VALUE FOR dbo.EmptyReturnReferenceNoSeq))");
+
+            entity.HasOne(d => d.Company)
+                  .WithMany()
+                  .HasForeignKey(d => d.CompanyId)
+                  .OnDelete(DeleteBehavior.ClientSetNull)
+                  .HasConstraintName("FK_EmptyReturnMaster_Company");
+
+            entity.HasOne(d => d.FromLocation)
+                  .WithMany()
+                  .HasForeignKey(d => d.FromLocationId)
+                  .OnDelete(DeleteBehavior.ClientSetNull)
+                  .HasConstraintName("FK_EmptyReturnMaster_FromLocation");
+
+            entity.HasOne(d => d.ToLocation)
+                  .WithMany()
+                  .HasForeignKey(d => d.ToLocationId)
+                  .OnDelete(DeleteBehavior.ClientSetNull)
+                  .HasConstraintName("FK_EmptyReturnMaster_ToLocation");
+        });
+
+        modelBuilder.Entity<EmptyReturnDetail>(entity =>
+        {
+            entity.HasKey(e => e.EmptyReturnDetailId)
+            .HasName("PK__EmptyReturnDetailId");
+
+            entity.ToTable("EmptyReturnDetail");
+
+            entity.Property(e => e.ReturnQuantity).HasColumnType("decimal(18,2)");
+            entity.Property(e => e.AddedQuantity).HasColumnType("decimal(18,2)");
+
+            entity.HasOne(d => d.EmptyReturnMaster)
+                .WithMany(p => p.EmptyReturnDetails)
+                .HasForeignKey(d => d.EmptyReturnMasterId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_EmptyReturnDetail_EmptyReturnMaster");
+
+            entity.HasOne(d => d.ItemMaster)
+                .WithMany()
+                .HasForeignKey(d => d.ItemMasterId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_EmptyReturnDetail_ItemMaster");
+        });
+
+        modelBuilder.Entity<SupplierItem>(entity =>
+        {
+            entity.HasKey(e => e.Id)
+                .HasName("PK_SupplierItem_Id");
+
+            entity.ToTable("SupplierItem");
+
+            entity.Property(e => e.SupplierId).HasColumnName("SupplierId");
+            entity.Property(e => e.ItemMasterId).HasColumnName("ItemMasterId");
+
+            entity.HasOne(e => e.Supplier)
+                  .WithMany()
+                  .HasForeignKey(e => e.SupplierId)
+                  .HasConstraintName("FK_SupplierItems_Supplier")
+                  .IsRequired();
+
+            entity.HasOne(e => e.ItemMaster)
+                  .WithMany()
+                  .HasForeignKey(e => e.ItemMasterId)
+                  .HasConstraintName("FK_SupplierItems_ItemMaster")
+                  .IsRequired();
         });
 
 

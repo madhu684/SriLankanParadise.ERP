@@ -5,6 +5,7 @@ import {
   post_location_inventory_api,
   post_location_inventory_movement_api,
   post_location_inventory_goods_in_transit_api,
+  update_min_state_in_mrn_api,
 } from "../../../services/purchaseApi";
 
 const useTinApproval = ({ tin, onFormSubmit }) => {
@@ -20,6 +21,7 @@ const useTinApproval = ({ tin, onFormSubmit }) => {
     }
   }, [approvalStatus, onFormSubmit]);
 
+  console.log(tin);
   useEffect(() => {
     if (approvalStatus != null) {
       // Scroll to the success alert when it becomes visible
@@ -39,7 +41,7 @@ const useTinApproval = ({ tin, onFormSubmit }) => {
 
         // Patch Location Inventory API
         await patch_location_inventory_api(
-          fromLocationId,
+          toLocationId,
           itemMasterId,
           batchId,
           "subtract",
@@ -51,46 +53,35 @@ const useTinApproval = ({ tin, onFormSubmit }) => {
 
         // Patch Location Inventory API (add stock to toLocation)
 
-        const patchLocationInventoryResponse =
-          await patch_location_inventory_api(
-            toLocationId,
-            itemMasterId,
-            batchId,
-            "add",
-            {
-              stockInHand: quantity,
-              permissionId: 1089,
-            }
-          );
+        // const patchLocationInventoryResponse =
+        //   await patch_location_inventory_api(
+        //     toLocationId,
+        //     itemMasterId,
+        //     batchId,
+        //     "add",
+        //     {
+        //       stockInHand: quantity,
+        //       permissionId: 1089,
+        //     }
+        //   );
 
-        if (
-          patchLocationInventoryResponse &&
-          patchLocationInventoryResponse.status === 404
-        ) {
-          // Location inventory not found, create it
-          await post_location_inventory_api({
-            itemMasterId,
-            batchId,
-            locationId: toLocationId,
-            stockInHand: quantity,
-            permissionId: 1088,
-          });
-        }
+        // if (
+        //   patchLocationInventoryResponse &&
+        //   patchLocationInventoryResponse.status === 404
+        // ) {
+        //   // Location inventory not found, create it
+        //   await post_location_inventory_api({
+        //     itemMasterId,
+        //     batchId,
+        //     locationId: toLocationId,
+        //     stockInHand: quantity,
+        //     permissionId: 1088,
+        //   });
+        // }
 
         // Post Location Inventory Movement API
         await post_location_inventory_movement_api({
           movementTypeId: 2,
-          transactionTypeId: 6,
-          itemMasterId,
-          batchId,
-          locationId: fromLocationId,
-          date: formattedDate,
-          qty: quantity,
-          permissionId: 1090,
-        });
-
-        await post_location_inventory_movement_api({
-          movementTypeId: 1,
           transactionTypeId: 6,
           itemMasterId,
           batchId,
@@ -99,6 +90,17 @@ const useTinApproval = ({ tin, onFormSubmit }) => {
           qty: quantity,
           permissionId: 1090,
         });
+
+        // await post_location_inventory_movement_api({
+        //   movementTypeId: 1,
+        //   transactionTypeId: 6,
+        //   itemMasterId,
+        //   batchId,
+        //   locationId: toLocationId,
+        //   date: formattedDate,
+        //   qty: quantity,
+        //   permissionId: 1090,
+        // });
 
         // Prepare the data for post_location_inventory_goods_in_transit_api
         const transitData = {
@@ -117,6 +119,17 @@ const useTinApproval = ({ tin, onFormSubmit }) => {
       }
     } catch (error) {
       throw new Error("Error updating inventory: " + error.message);
+    }
+  };
+
+  const updateMrnState = async () => {
+    try {
+      await update_min_state_in_mrn_api(tin.requisitionMasterId, {
+        isMINApproved: true,
+        isMINAccepted: false,
+      });
+    } catch (error) {
+      console.error("Error updating MRN state:", error);
     }
   };
 
@@ -147,6 +160,8 @@ const useTinApproval = ({ tin, onFormSubmit }) => {
           tin.requisitionMaster.requestedFromLocationId,
           tin.requisitionMaster.requestedToLocationId
         );
+
+        await updateMrnState();
 
         setApprovalStatus("approved");
         console.log(

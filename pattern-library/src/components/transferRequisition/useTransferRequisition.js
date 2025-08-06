@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 const useTransferRequisition = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
     deliveryLocation: "",
+    deliveryLocationId: null,
     toWarehouseLocation: null,
     fromWarehouseLocation: null,
     itemDetails: [],
@@ -23,6 +24,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
   const alertRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isUpdatingStock, setIsUpdatingStock] = useState(false); // Add this state
 
   const fetchLocations = async () => {
     try {
@@ -66,16 +68,33 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     queryFn: fetchUserLocations,
   });
 
+  const userDepartments =
+    userLocations?.filter(
+      (location) => location?.location?.locationTypeId === 3
+    ) || [];
+
   useEffect(() => {
     if (!isUserLocationsLoading && userLocations) {
-      const location = userLocations?.find(
+      const departments = userLocations?.filter(
         (location) => location?.location?.locationTypeId === 3
       );
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        department: location?.location.locationName,
-        deliveryLocation: location?.locationId,
-      }));
+
+      console.log("User departments: ", departments);
+
+      if (departments && departments.length === 1) {
+        const department = departments[0];
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          deliveryLocation: department?.location.locationName,
+          deliveryLocationId: department?.locationId,
+        }));
+      } else if (departments && departments.length > 1) {
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          deliveryLocation: "",
+          deliveryLocationId: "",
+        }));
+      }
     }
   }, [isUserLocationsLoading, userLocations]);
 
@@ -100,15 +119,9 @@ const useTransferRequisition = ({ onFormSubmit }) => {
   } = useQuery({
     queryKey: ["items", searchTerm],
     queryFn: () =>
-      fetchItems(
-        sessionStorage.getItem("companyId"),
-        searchTerm,
-        "Sellable",
-        "All"
-      ),
+      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"),
   });
 
-  // Fetch stock details for an item when selected
   const fetchStockDetails = async (locationId, itemMasterId) => {
     try {
       const response =
@@ -122,6 +135,59 @@ const useTransferRequisition = ({ onFormSubmit }) => {
       return null;
     }
   };
+
+  // Fixed useEffect to prevent unnecessary re-renders
+  useEffect(() => {
+    const updateStockDetails = async () => {
+      if (
+        formData.fromWarehouseLocation &&
+        formData.toWarehouseLocation &&
+        formData.itemDetails.length > 0 &&
+        !isUpdatingStock // Prevent multiple simultaneous updates
+      ) {
+        setIsUpdatingStock(true);
+        setLoading(true);
+
+        try {
+          const updatedItemDetails = await Promise.all(
+            formData.itemDetails.map(async (item) => {
+              const fromStockDetails = await fetchStockDetails(
+                formData.fromWarehouseLocation,
+                item.id
+              );
+              const toStockDetails = await fetchStockDetails(
+                formData.toWarehouseLocation,
+                item.id
+              );
+              return {
+                ...item,
+                totalStockInHand: fromStockDetails?.totalStockInHand || 0,
+                totalStockInHandTo: toStockDetails?.totalStockInHand || 0,
+                reOrderLevel: fromStockDetails?.minReOrderLevel || 0,
+                maxStockLevel: fromStockDetails?.maxStockLevel || 0,
+              };
+            })
+          );
+
+          setFormData((prevFormData) => ({
+            ...prevFormData,
+            itemDetails: updatedItemDetails,
+          }));
+        } catch (error) {
+          console.error("Error updating stock details:", error);
+        } finally {
+          setLoading(false);
+          setIsUpdatingStock(false);
+        }
+      }
+    };
+
+    updateStockDetails();
+  }, [
+    formData.fromWarehouseLocation,
+    formData.toWarehouseLocation,
+    formData.itemDetails.length,
+  ]); // Changed dependency
 
   useEffect(() => {
     if (submissionStatus != null) {
@@ -161,7 +227,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
   const validateAttachments = (files) => {
     let isAttachmentsValid = true;
     let errorMessage = "";
-    const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
+    const maxSizeInBytes = 10 * 1024 * 1024;
     const allowedTypes = [
       "image/jpeg",
       "image/png",
@@ -205,18 +271,8 @@ const useTransferRequisition = ({ onFormSubmit }) => {
         formData.deliveryLocation
       );
 
-      const isWarehouseLocationValid = validateField(
-        "warehouseLocation",
-        "Warehouse location",
-        formData.warehouseLocation
-      );
-
       const isAttachmentsValid = validateAttachments(formData.attachments);
-      return (
-        isAttachmentsValid &&
-        isDeliveryLocationValid &&
-        isWarehouseLocationValid
-      );
+      return isAttachmentsValid && isDeliveryLocationValid;
     }
 
     const isDeliveryLocationValid = validateField(
@@ -379,6 +435,18 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     }));
   };
 
+  const handleDepartmentChange = (departmentLocationId) => {
+    const selectedDepartment = userDepartments.find(
+      (dept) => dept.locationId === parseInt(departmentLocationId)
+    );
+
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      deliveryLocation: selectedDepartment?.location.locationName || "",
+      deliveryLocationId: parseInt(departmentLocationId),
+    }));
+  };
+
   const handleItemDetailsChange = (index, field, value) => {
     setFormData((prevFormData) => {
       const updatedItemDetails = [...prevFormData.itemDetails];
@@ -420,26 +488,54 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     }));
   };
 
-  const handleSelectItem = async (item) => {
-    const stockDetails = await fetchStockDetails(
-      formData.fromWarehouseLocation,
-      item.itemMasterId
+  // Improved handleSelectItem function
+  const handleSelectItem = async (item, e) => {
+    e.preventDefault();
+    // Check if item already exists
+    const itemExists = formData.itemDetails.some(
+      (detail) => detail.id === item.itemMasterId
     );
+
+    if (itemExists) {
+      console.log("Item already exists in the list");
+      setSearchTerm("");
+      return;
+    }
+
+    let currentStockDetails = null;
+    let toStockDetails = null;
+
+    // Only fetch stock details if both warehouse locations are selected
+    if (formData.fromWarehouseLocation) {
+      currentStockDetails = await fetchStockDetails(
+        formData.fromWarehouseLocation,
+        item.itemMasterId
+      );
+    }
+
+    if (formData.toWarehouseLocation) {
+      toStockDetails = await fetchStockDetails(
+        formData.toWarehouseLocation,
+        item.itemMasterId
+      );
+    }
+
+    const newItem = {
+      id: item.itemMasterId,
+      name: item.itemName,
+      unit: item.unit.unitName,
+      quantity: 0,
+      totalStockInHand: currentStockDetails?.totalStockInHand || 0,
+      totalStockInHandTo: toStockDetails?.totalStockInHand || 0,
+      reOrderLevel: currentStockDetails?.minReOrderLevel || 0,
+      maxStockLevel: currentStockDetails?.maxStockLevel || 0,
+    };
+
     setFormData((prevFormData) => ({
       ...prevFormData,
-      itemDetails: [
-        ...prevFormData.itemDetails,
-        {
-          id: item.itemMasterId,
-          name: item.itemName,
-          unit: item.unit.unitName,
-          quantity: 0,
-          totalStockInHand: stockDetails?.totalStockInHand || 0,
-          reOrderLevel: stockDetails?.minReOrderLevel || 0,
-          maxStockLevel: stockDetails?.maxStockLevel || 0,
-        },
-      ],
+      itemDetails: [...prevFormData.itemDetails, newItem],
     }));
+
     setSearchTerm("");
   };
 
@@ -458,8 +554,11 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     isItemsLoading,
     isItemsError,
     itemsError,
-    loading,
+    loading: loading || isUpdatingStock,
+    userLocations,
+    userDepartments,
     handleInputChange,
+    handleDepartmentChange,
     handleItemDetailsChange,
     handleSubmit,
     handleRemoveItem,

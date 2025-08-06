@@ -1,38 +1,45 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import moment from "moment";
 import "moment-timezone";
 import useTinList from "../../tin/tinList/useTinList";
 import { get_issue_masters_by_requisition_master_id_api } from "../../../services/purchaseApi";
 import CurrentDateTime from "../../currentDateTime/currentDateTime";
-import TinDetails from "../../tin/tinDetail/tinDetail";
+import TinDetails from "../tinAccept/tinAccept.jsx";
+import { useQuery } from "@tanstack/react-query";
 
-const TinsListDetail = ({ trnId, handleBack }) => {
-  const {
-    showDetailTinModal,
-    showDetailTinModalInParent,
-    TinDetail,
-    handleCloseDetailTinModal,
-    handleViewDetails,
-    getStatusBadgeClass,
-    getStatusLabel,
-  } = useTinList();
+const TinsListDetail = ({ refetch, setRefetch, trnId, handleBack }) => {
+  const { getStatusBadgeClass, getStatusLabel } = useTinList();
 
-  const [filteredTins, setFilteredTins] = useState([]);
+  const [tinDetail, setTinDetail] = useState("");
+  const [showTinAcceptModal, setShowTinAcceptModal] = useState(false);
 
-  //Fetch filtered TINs for a given TRN id
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const requisitionMasterResponse =
-          await get_issue_masters_by_requisition_master_id_api(trnId);
-        console.log("TINS for the selected TRN", requisitionMasterResponse);
-        setFilteredTins(requisitionMasterResponse.data.result);
-      } catch (error) {
-        console.log("Error fetching TINS for the given TRN id", error);
-      }
-    };
-    fetchData();
-  }, [trnId]);
+  const handleViewDetails = (tin) => {
+    setTinDetail(tin);
+    setShowTinAcceptModal(true);
+  };
+
+  const handleCloseDetailTinModal = () => {
+    setShowTinAcceptModal(false);
+    setTinDetail("");
+  };
+
+  const fetchData = async () => {
+    try {
+      const requisitionMasterResponse =
+        await get_issue_masters_by_requisition_master_id_api(trnId);
+      console.log("TINS for the selected TRN", requisitionMasterResponse);
+      return requisitionMasterResponse.data.result || [];
+    } catch (error) {
+      console.log("Error fetching TINS for the given TRN id", error);
+    }
+  };
+
+  const { data: filteredTins } = useQuery({
+    queryKey: ["tins", trnId],
+    queryFn: fetchData,
+    enabled: !!trnId,
+  });
+
   return (
     <div className="container mt-4">
       {/*Header*/}
@@ -108,11 +115,13 @@ const TinsListDetail = ({ trnId, handleBack }) => {
             ))}
           </tbody>
         </table>
-        {showDetailTinModalInParent && (
+        {showTinAcceptModal && (
           <TinDetails
-            show={showDetailTinModal}
+            refetch={refetch}
+            setRefetch={setRefetch}
+            show={showTinAcceptModal}
             handleClose={handleCloseDetailTinModal}
-            tin={TinDetail}
+            tin={tinDetail}
           />
         )}
       </div>

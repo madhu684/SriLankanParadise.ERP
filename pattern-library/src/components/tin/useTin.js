@@ -110,11 +110,11 @@ const useTin = ({ onFormSubmit }) => {
   const fetchLocationInventories = async () => {
     try {
       const response = await get_locations_inventories_by_location_id_api(
-        selectedTrn?.requestedFromLocationId
+        selectedTrn?.requestedToLocationId
       );
       console.log(
         "Fetched location inventories for location",
-        selectedTrn?.requestedFromLocationId,
+        selectedTrn?.requestedToLocationId,
         ":",
         response.data.result
       );
@@ -122,7 +122,7 @@ const useTin = ({ onFormSubmit }) => {
     } catch (error) {
       console.error(
         "Error fetching location inventories for location",
-        selectedTrn?.requestedFromLocationId,
+        selectedTrn?.requestedToLocationId,
         ":",
         error
       );
@@ -136,9 +136,9 @@ const useTin = ({ onFormSubmit }) => {
     isError: isLocationInventoriesError,
     refetch: refetchLocationInventories,
   } = useQuery({
-    queryKey: ["locationInventories", selectedTrn?.requestedFromLocationId],
+    queryKey: ["locationInventories", selectedTrn?.requestedToLocationId],
     queryFn: fetchLocationInventories,
-    enabled: !!selectedTrn?.requestedFromLocationId,
+    enabled: !!selectedTrn?.requestedToLocationId,
   });
 
   // Update itemDetails when selectedTrn or tins change

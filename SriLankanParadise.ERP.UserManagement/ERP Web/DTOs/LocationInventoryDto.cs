@@ -6,7 +6,7 @@ public class LocationInventoryDto
 
     public int ItemMasterId { get; set; }
 
-    public int BatchId { get; set; }
+    public int? BatchId { get; set; }
 
     public virtual ItemBatchDto? ItemBatch { get; set; }
 

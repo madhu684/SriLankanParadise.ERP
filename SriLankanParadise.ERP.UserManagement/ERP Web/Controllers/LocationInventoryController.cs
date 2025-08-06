@@ -133,6 +133,31 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpGet("GetEmptyReturnItemLocationInventoriesByLocationId/{locationId}")]
+        public async Task<ApiResponseModel> GetEmptyReturnItemLocationInventoriesByLocationId(int locationId)
+        {
+            try
+            {
+                var locationInventories = await _locationInventoryService.GetEmptyReturnItemLocationInventoriesByLocationId(locationId);
+                if (locationInventories != null)
+                {
+                    var locationInventoryDtos = _mapper.Map<IEnumerable<EmptyReturnItemLocationInventoryDto>>(locationInventories);
+                    AddResponseMessage(Response, LogMessages.EmptyReturnItemLocationInventoriesRetrieved, locationInventoryDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.LocationInventoriesNotFound);
+                    AddResponseMessage(Response, LogMessages.EmptyReturnItemLocationInventoriesNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
         [HttpGet("GetItemLocationInventoriesByLocationId/{locationId}")]
         public async Task<ApiResponseModel> GetItemLocationInventoriesByLocationId(int locationId)
         {
@@ -151,7 +176,16 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 {
                     // Ensure we're using the correct ID fields
                     var unit = await _unitService.GetUnitByUnitId(locationInventory.ItemMaster?.UnitId ?? 0);
-                    var batch = await _batchService.GetBatchById(locationInventory.BatchId);
+                    //var batch = await _batchService.GetBatchById(locationInventory.BatchId);
+
+                    // Initialize batch variable to ensure it's always available
+                    Batch batch = null;
+
+                    // Check if BatchId is not null before calling GetBatchById
+                    if (locationInventory.BatchId.HasValue)
+                    {
+                        batch = await _batchService.GetBatchById(locationInventory.BatchId.Value);
+                    }
 
                     locationInventoryDtos.Add(new LocationInventoryItemDto
                     {
@@ -272,6 +306,43 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 updatedLocationInventory.LocationInventoryId = existingLocationInventory.LocationInventoryId; // Ensure the ID is not changed
 
                 await _locationInventoryService.UpdateLocationInventoryStockInHand(locationId, itemMasterId, batchId, updatedLocationInventory, operation);
+
+                // Create action log
+                //var actionLog = new ActionLogModel()
+                //{
+                //    ActionId = locationInventoryStockInHandRequest.PermissionId,
+                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
+                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
+                //    Timestamp = DateTime.UtcNow
+                //};
+                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
+
+                _logger.LogInformation(LogMessages.LocationInventoryUpdated);
+                return AddResponseMessage(Response, LogMessages.LocationInventoryUpdated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
+
+        [HttpPatch("updateEmptyStockInHand/{locationId}/{itemMasterId}/{operation}")]
+        public async Task<ApiResponseModel> UpdateLocationInventoryEmptyStockInHand(int locationId, int itemMasterId, string operation, UpdateLocationInventoryStockInHandRequestModel locationInventoryStockInHandRequest)
+        {
+            try
+            {
+                var existingLocationInventory = await _locationInventoryService.GetEmptyLocationInventoryByDetails(locationId, itemMasterId);
+                if (existingLocationInventory == null)
+                {
+                    _logger.LogWarning(LogMessages.LocationInventoryNotFound);
+                    return AddResponseMessage(Response, LogMessages.LocationInventoryNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+                var updatedLocationInventory = _mapper.Map<LocationInventory>(locationInventoryStockInHandRequest);
+                updatedLocationInventory.LocationInventoryId = existingLocationInventory.LocationInventoryId; // Ensure the ID is not changed
+
+                await _locationInventoryService.UpdateEmptyLocationInventoryStockInHand(locationId, itemMasterId, updatedLocationInventory, operation);
 
                 // Create action log
                 //var actionLog = new ActionLogModel()

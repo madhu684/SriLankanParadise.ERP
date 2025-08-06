@@ -278,8 +278,46 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                 )}
               </div>
             )}
+            <div>
+              {selectedMrn && (
+                <div className="card mb-3">
+                  <div className="card-header">
+                    Selected Material Requisition
+                  </div>
+                  <div className="card-body">
+                    <p>
+                      Material Requisition Reference No:{" "}
+                      {selectedMrn.referenceNumber}
+                    </p>
+                    <p>Requested By: {selectedMrn.requestedBy}</p>
+                    <p>
+                      MRN Date:{" "}
+                      {moment
+                        .utc(selectedMrn.requisitionDate)
+                        .tz("Asia/Colombo")
+                        .format("YYYY-MM-DD hh:mm:ss A")}
+                    </p>
+                    <p>
+                      Delivery Location:{" "}
+                      {selectedMrn.requestedToLocation.locationName}
+                    </p>
+                    <p>
+                      Requested From:{" "}
+                      {selectedMrn.requestedFromLocation.locationName}
+                    </p>
+                    <button
+                      type="button"
+                      className="btn btn-outline-danger float-end"
+                      onClick={handleResetMrn}
+                    >
+                      Reset Material Requisition
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-          {selectedMrn && (
+          {/* {selectedMrn && (
             <div className="card mb-3">
               <div className="card-header">Selected Material Requisition</div>
               <div className="card-body">
@@ -312,7 +350,7 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                 </button>
               </div>
             </div>
-          )}
+          )} */}
         </div>
         {selectedMrn === null && (
           <div className="mb-3">
@@ -426,15 +464,15 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                       >
                         <option value="">Select item batch</option>
                         {locationInventories
-                          ?.filter((batch) => batch.itemMasterId === item.id)
-                          ?.map((batch, batchIndex) => (
+                          ?.filter((i) => i.itemMasterId === item.id)
+                          ?.map((i, batchIndex) => (
                             <option
                               key={batchIndex}
-                              value={batch.batchId}
-                              disabled={batch.stockInHand === 0}
+                              value={i.batchId}
+                              disabled={i.stockInHand === 0}
                             >
-                              {batch.itemBatch.batch.batchRef} - Stock in hand{" "}
-                              {batch.stockInHand}
+                              {i.itemBatch.batch.batchRef} - Stock in hand{" "}
+                              {i.stockInHand}
                             </option>
                           ))}
                       </select>

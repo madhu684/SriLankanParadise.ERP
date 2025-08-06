@@ -37,6 +37,8 @@ const TransferRequisitionList = () => {
     userWarehouses,
     filter,
     filteredRequisitions,
+    refetch,
+    setRefetch,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleRowSelect,
@@ -100,6 +102,8 @@ const TransferRequisitionList = () => {
   if (openTINsList) {
     return (
       <TinsListDetail
+        refetch={refetch}
+        setRefetch={setRefetch}
         trnId={selectedTrnId}
         handleBack={() => setOpenTINsList(false)}
       />
@@ -130,6 +134,8 @@ const TransferRequisitionList = () => {
       </div>
     );
   }
+
+  console.log("transferRequisitions: ", transferRequisitions);
 
   return (
     <div className="container mt-4">
@@ -301,21 +307,30 @@ const TransferRequisitionList = () => {
                   <td>
                     {/* Display Accept button and disable it if Pending Approval or Approved and user is not the creator */}
                     <button
-                      style={{
-                        backgroundColor: "#FFA07A",
-                        color: "white",
-                        border: "none",
-                      }}
-                      className="btn me-2"
+                      // style={{
+                      //   backgroundColor: "#FFA07A",
+                      //   color: "white",
+                      //   border: "none",
+                      // }}
+                      className={`btn me-2 ${
+                        mr.isMINAccepted ? "btn-info" : "btn-warning"
+                      }`}
                       onClick={() => {
                         setOpenTINsList(true);
                         setSelectedTrnId(mr.requisitionMasterId);
                       }}
+                      // disabled={
+                      //   mr.isMINApproved === false ||
+                      //   mr.status === 1 ||
+                      //   (mr.status === 2 &&
+                      //     mr.requestedUserId !==
+                      //       parseInt(sessionStorage.getItem("userId")))
+                      // }
                       disabled={
-                        mr.status === 1 ||
-                        (mr.status === 2 &&
-                          mr.requestedUserId !==
-                            parseInt(sessionStorage.getItem("userId")))
+                        mr.status !== 2 ||
+                        mr.isMINApproved === false ||
+                        mr.requestedUserId !==
+                          parseInt(sessionStorage.getItem("userId"))
                       }
                     >
                       <svg
@@ -331,7 +346,7 @@ const TransferRequisitionList = () => {
                           d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"
                         />
                       </svg>{" "}
-                      Accept
+                      {mr.isMINAccepted === true ? "Accepted" : "Accept"}
                     </button>
                   </td>
                 </tr>

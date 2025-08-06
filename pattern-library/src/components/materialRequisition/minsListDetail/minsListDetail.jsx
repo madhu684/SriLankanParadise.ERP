@@ -4,47 +4,52 @@ import "moment-timezone";
 import { get_issue_masters_by_requisition_master_id_api } from "../../../services/purchaseApi";
 import useMinList from "../../min/minList/useMinList";
 import CurrentDateTime from "../../currentDateTime/currentDateTime";
-import MinDetails from "../../min/minDetail/minDetail";
+import MinDetails from "../minAccept/minAccept.jsx";
+import { useQuery } from "@tanstack/react-query";
 
-const MinsListDetail = ({ mrnId, handleBack }) => {
-  const {
-    showDetailMinModal,
-    showDetailMinModalInParent,
-    MinDetail,
-    handleCloseDetailMinModal,
-    handleViewDetails,
-    getStatusBadgeClass,
-    getStatusLabel,
-  } = useMinList();
+const MinsListDetail = ({ refetch, setRefetch, mrnId, handleBack }) => {
+  const { getStatusBadgeClass, getStatusLabel } = useMinList();
 
-  const [filterdMins, setFilteredMins] = useState([]);
+  const [minDetail, setMinDetail] = useState("");
+  const [showMinAcceptModal, setShowMinAcceptModal] = useState(false);
 
-  //Fetch filtered MINs for a given MRN id
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const requisitionMasterResponse =
-          await get_issue_masters_by_requisition_master_id_api(mrnId);
-        console.log("MINS for the selected MRN", requisitionMasterResponse);
-        setFilteredMins(requisitionMasterResponse.data.result);
-      } catch (error) {
-        console.log("Error fetching MINS for the given MRN id", error);
-      }
-    };
-    fetchData();
-  }, [mrnId]);
+  const handleViewDetails = (min) => {
+    setMinDetail(min);
+    setShowMinAcceptModal(true);
+  };
+
+  const handleCloseDetailMinModal = () => {
+    setShowMinAcceptModal(false);
+    setMinDetail("");
+  };
+
+  const fetchData = async () => {
+    try {
+      const requisitionMasterResponse =
+        await get_issue_masters_by_requisition_master_id_api(mrnId);
+      console.log("MINS for the selected MRN", requisitionMasterResponse);
+      return requisitionMasterResponse.data.result || [];
+    } catch (error) {
+      console.log("Error fetching MINS for the given MRN id", error);
+    }
+  };
+
+  const { data: filterdMins } = useQuery({
+    queryKey: ["mins", mrnId],
+    queryFn: fetchData,
+    enabled: !!mrnId,
+  });
 
   return (
     <div className="container mt-4">
       {/* Header */}
       <div className="mb-4">
         <div className="d-flex justify-content-between">
-          <button
+          <i
+            class="bi bi-arrow-left"
             onClick={handleBack}
-            className="btn btn-dark d-flex align-items-center"
-          >
-            Back
-          </button>
+            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+          ></i>
           <p>
             <CurrentDateTime />
           </p>
@@ -109,11 +114,13 @@ const MinsListDetail = ({ mrnId, handleBack }) => {
             ))}
           </tbody>
         </table>
-        {showDetailMinModalInParent && (
+        {showMinAcceptModal && (
           <MinDetails
-            show={showDetailMinModal}
+            refetch={refetch}
+            setRefetch={setRefetch}
+            show={showMinAcceptModal}
             handleClose={handleCloseDetailMinModal}
-            min={MinDetail}
+            min={minDetail}
           />
         )}
       </div>

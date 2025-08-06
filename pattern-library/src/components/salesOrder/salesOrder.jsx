@@ -103,6 +103,9 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
     return <ErrorComponent error={"Error fetching data"} />;
   }
 
+  console.log("formData dinusha jeewanka", availableItems);
+  console.log("formData dinusha jeewanka2", formData);
+
   return (
     <div className="container mt-4">
       {/* Header */}
@@ -471,7 +474,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
         </div>
 
         {/* Item Details */}
-        <h4>3. Item Details</h4>
+        <h4>3. Item Details dinusha</h4>
 
         <div className="col-md-5">
           {/* Item Search */}

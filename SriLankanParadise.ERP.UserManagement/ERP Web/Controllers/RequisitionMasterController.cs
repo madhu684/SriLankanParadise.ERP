@@ -109,6 +109,30 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpGet("GetRequisitionMastersByUserId/{userId}")]
+        public async Task<ApiResponseModel> GetRequisitionMastersByUserId(int userId)
+        {
+            try
+            {
+                var requisitionMasters = await _requisitionMasterService.GetRequisitionMastersByUserId(userId);
+                if (requisitionMasters != null)
+                {
+                    var requisitionMasterDtos = _mapper.Map<IEnumerable<RequisitionMasterDto>>(requisitionMasters);
+                    AddResponseMessage(Response, LogMessages.RequisitionMastersRetrieved, requisitionMasterDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.RequisitionMastersNotFound);
+                    AddResponseMessage(Response, LogMessages.RequisitionMastersNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
         
         [HttpPatch("approve/{requisitionMasterId}")]
         public async Task<ApiResponseModel> ApproveRequisitionMaster(int requisitionMasterId, ApproveRequisitionMasterRequestModel approveRequisitionMasterRequest)
@@ -147,30 +171,29 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
         }
 
-        [HttpGet("GetRequisitionMastersByUserId/{userId}")]
-        public async Task<ApiResponseModel> GetRequisitionMastersByUserId(int userId)
+        [HttpPatch("patchMinApproved/{requisitionMasterId}")]
+        public async Task<ApiResponseModel> PatchIsMinApprovedState(int requisitionMasterId, PatchIsMINApprovedMRNRequestModel patchIsMINApprovedMRNRequestModel)
         {
             try
             {
-                var requisitionMasters = await _requisitionMasterService.GetRequisitionMastersByUserId(userId);
-                if (requisitionMasters != null)
+                var existingRequisitionMaster = await _requisitionMasterService.GetRequisitionMasterByRequisitionMasterId(requisitionMasterId);
+                if (existingRequisitionMaster == null)
                 {
-                    var requisitionMasterDtos = _mapper.Map<IEnumerable<RequisitionMasterDto>>(requisitionMasters);
-                    AddResponseMessage(Response, LogMessages.RequisitionMastersRetrieved, requisitionMasterDtos, true, HttpStatusCode.OK);
+                    _logger.LogWarning(LogMessages.RequisitionMasterNotFound);
+                    return AddResponseMessage(Response, LogMessages.RequisitionMasterNotFound, null, true, HttpStatusCode.NotFound);
                 }
-                else
-                {
-                    _logger.LogWarning(LogMessages.RequisitionMastersNotFound);
-                    AddResponseMessage(Response, LogMessages.RequisitionMastersNotFound, null, true, HttpStatusCode.NotFound);
-                }
+                var patchedRequisitionMaster = _mapper.Map<RequisitionMaster>(patchIsMINApprovedMRNRequestModel);
+                patchedRequisitionMaster.RequisitionMasterId = requisitionMasterId; // Ensure the ID is not changed
+
+                await _requisitionMasterService.PatchMinApproved(existingRequisitionMaster.RequisitionMasterId, patchedRequisitionMaster);
+                _logger.LogInformation(LogMessages.RequisitionMasterPatched);
+                return AddResponseMessage(Response, LogMessages.RequisitionMasterPatched, null, true, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, ErrorMessages.InternalServerError);
-                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
-            return Response;
         }
-
     }
 }

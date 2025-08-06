@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
@@ -58,6 +59,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(im => im.ItemType)
                     .Include(im => im.InventoryUnit)
                     .ThenInclude(u => u.MeasurementType)
+                    .Include(im => im.Supplier)
                     .ToListAsync();
 
                 return itemMasters;
@@ -137,6 +139,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(im => im.ItemType)
                     .Include(im => im.InventoryUnit)
                     .ThenInclude(u => u.MeasurementType)
+                    .Include(im => im.Supplier)
                     .FirstOrDefaultAsync();
 
                 return itemMaster;
@@ -200,6 +203,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(im => im.ItemType)
                     .Include(im => im.InventoryUnit)
                     .ThenInclude(u => u.MeasurementType)
+                    .Include(im => im.Supplier)
                     .ToListAsync();
 
                 return itemMasters.Any() ? itemMasters : null;

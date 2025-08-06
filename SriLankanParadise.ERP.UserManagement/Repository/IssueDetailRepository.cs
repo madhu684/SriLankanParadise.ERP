@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
@@ -27,6 +28,25 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task<IEnumerable<IssueDetail>> GetIssueDetails(int issueMasterId)
+        {
+            try
+            {
+                var issueDetails = await _dbContext.IssueDetails
+                    .Include(r => r.ItemMaster)
+                    .Include(r => r.Batch)
+                    .Where(r => r.IssueMasterId == issueMasterId)
+                    .ToListAsync();
+
+                return issueDetails.Any() ? issueDetails : new List<IssueDetail>();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<List<IssueDetail>> UpdateIssueDetailReceivedAndReturnedQuantity(int issueMasterId, List<IssueDetail> issueDetails)
         {
             try
