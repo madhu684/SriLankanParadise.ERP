@@ -4,8 +4,11 @@ import {
   post_purchase_requisition_api,
   post_purchase_requisition_detail_api,
   get_user_locations_by_user_id_api,
+  get_company_suppliers_api,
+  get_Location_Inventory_Summary_By_Item_Name_api,
+  get_Low_Stock_Items_api,
 } from "../../services/purchaseApi";
-import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
+import { get_supplier_items_by_type_category_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
 
 const usePurchaseRequisition = ({ onFormSubmit }) => {
@@ -24,6 +27,8 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     itemDetails: [],
     attachments: [],
     totalAmount: 0,
+    selectedSupplier: "",
+    supplierId: null,
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -32,33 +37,38 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
+  const [supplierSearchTerm, setSupplierSearchTerm] = useState("");
+  const [isPRGenerated, setIsPRGenerated] = useState(false);
+  const [prGenerating, setPRGenerating] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
-  const fetchLocations = async () => {
-    try {
-      const response = await get_company_locations_api(
-        sessionStorage.getItem("companyId")
-      );
-      return response.data.result;
-    } catch (error) {
-      console.error("Error fetching locations:", error);
-    }
-  };
+  // const fetchLocations = async () => {
+  //   try {
+  //     const response = await get_company_locations_api(
+  //       sessionStorage.getItem("companyId")
+  //     );
+  //     return response.data.result;
+  //   } catch (error) {
+  //     console.error("Error fetching locations:", error);
+  //   }
+  // };
 
-  const {
-    data: locations,
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
-    queryKey: ["locations"],
-    queryFn: fetchLocations,
-  });
+  // const {
+  //   data: locations,
+  //   isLoading,
+  //   isError,
+  //   error,
+  // } = useQuery({
+  //   queryKey: ["locations"],
+  //   queryFn: fetchLocations,
+  // });
 
   const fetchUserLocations = async () => {
     try {
       const response = await get_user_locations_by_user_id_api(
-        sessionStorage.getItem("userId")
+        parseInt(sessionStorage.getItem("userId"))
       );
+      console.log("User locations 66:", response.data.result);
       return response.data.result;
     } catch (error) {
       console.error("Error fetching user locations:", error);
@@ -66,7 +76,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
   };
 
   const {
-    data: userLocations,
+    data: userLocations = [],
     isLoading: isUserLocationsLoading,
     isError: isUserLocationsError,
     error: userLocationsError,
@@ -75,28 +85,110 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     queryFn: fetchUserLocations,
   });
 
-  const fetchItems = async (companyId, searchQuery, itemType) => {
+  // const fetchItems = async (companyId, searchQuery, itemType) => {
+  //   try {
+  //     const response = await get_item_masters_by_company_id_with_query_api(
+  //       companyId,
+  //       searchQuery,
+  //       itemType
+  //     );
+  //     return response.data.result;
+  //   } catch (error) {
+  //     console.error("Error fetching items:", error);
+  //   }
+  // };
+
+  // const {
+  //   data: availableItems,
+  //   isLoading: isItemsLoading,
+  //   isError: isItemsError,
+  //   error: itemsError,
+  // } = useQuery({
+  //   queryKey: ["items", searchTerm],
+  //   queryFn: () =>
+  //     fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"),
+  // });
+  const fetchItems = async (searchQuery) => {
     try {
-      const response = await get_item_masters_by_company_id_with_query_api(
-        companyId,
-        searchQuery,
-        itemType
+      const response = await get_Location_Inventory_Summary_By_Item_Name_api(
+        null,
+        searchQuery
       );
-      return response.data.result;
+
+      const companyId = sessionStorage.getItem("companyId");
+
+      const items = await Promise.all(
+        response.data?.result?.map(async (summary) => {
+          const supplierItemResponse =
+            await get_supplier_items_by_type_category_api(
+              companyId,
+              parseInt(summary.itemMaster?.itemType?.itemTypeId),
+              parseInt(summary.itemMaster?.category?.categoryId),
+              formData.expectedDeliveryLocation
+            );
+
+          const supplierItems = supplierItemResponse.data.result
+            ? supplierItemResponse.data.result.filter(
+                (si) => si.itemMasterId !== summary.itemMasterId
+              )
+            : [];
+
+          return {
+            itemMasterId: summary.itemMasterId,
+            itemName: summary.itemMaster?.itemName || "",
+            unit: summary.itemMaster?.unit || { unitName: "" },
+            categoryId: summary.itemMaster?.category?.categoryId || "",
+            itemTypeId: summary.itemMaster?.itemType?.itemTypeId || "",
+            supplierId: summary.itemMaster?.supplierId || null,
+            totalStockInHand: summary.totalStockInHand,
+            minReOrderLevel: summary.minReOrderLevel,
+            maxStockLevel: summary.maxStockLevel,
+            supplierItems: supplierItems,
+          };
+        }) || []
+      );
+
+      const filterItems = formData.supplierId
+        ? items.filter(
+            (item) =>
+              !formData.supplierId || item.supplierId === formData.supplierId
+          )
+        : items;
+      return filterItems;
     } catch (error) {
       console.error("Error fetching items:", error);
+      return [];
     }
   };
 
   const {
-    data: availableItems,
+    data: availableItems = [],
     isLoading: isItemsLoading,
     isError: isItemsError,
     error: itemsError,
   } = useQuery({
     queryKey: ["items", searchTerm],
-    queryFn: () =>
-      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"),
+    queryFn: () => fetchItems(searchTerm),
+    enabled: !!formData.expectedDeliveryLocation && !!searchTerm,
+  });
+
+  const fetchSuppliers = async () => {
+    try {
+      const response = await get_company_suppliers_api(
+        sessionStorage.getItem("companyId")
+      );
+      const filteredSuppliers = response.data.result?.filter(
+        (supplier) => supplier.status === 1
+      );
+      return filteredSuppliers || [];
+    } catch (error) {
+      console.error("Error fetching suppliers:", error);
+    }
+  };
+
+  const { data: suppliers } = useQuery({
+    queryKey: ["suppliers"],
+    queryFn: fetchSuppliers,
   });
 
   useEffect(() => {
@@ -389,6 +481,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
           companyId: sessionStorage.getItem("companyId"),
           createdDate: createdDate,
           lastUpdatedDate: createdDate,
+          supplierId: formData.supplierId,
           permissionId: 9,
         };
 
@@ -542,30 +635,152 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
       itemDetails: [
         ...prevFormData.itemDetails,
         {
+          // id: item.itemMasterId,
+          // name: item.itemName,
+          // unit: item.unit.unitName,
+          // quantity: 0,
+          // unitPrice: 0.0,
+          // totalPrice: 0.0,
           id: item.itemMasterId,
           name: item.itemName,
           unit: item.unit.unitName,
-          quantity: 0,
+          categoryId: item.categoryId,
+          itemTypeId: item.itemTypeId,
+          quantity:
+            item.maxStockLevel - item.totalStockInHand >= 0
+              ? item.maxStockLevel - item.totalStockInHand
+              : 0,
           unitPrice: 0.0,
           totalPrice: 0.0,
+          totalStockInHand: item.totalStockInHand,
+          minReOrderLevel: item.minReOrderLevel,
+          maxStockLevel: item.maxStockLevel,
+          supplierItems: item?.supplierItems || [],
         },
       ],
     }));
-    setSearchTerm(""); // Clear the search term
+    setSearchTerm("");
+  };
+
+  const handleSupplierChange = (supplierId) => {
+    const SelectedSupplierId = parseInt(supplierId, 10);
+
+    const selectedSupplier = suppliers.find(
+      (supplier) => supplier.supplierId === SelectedSupplierId
+    );
+
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      supplierId,
+      selectedSupplier,
+    }));
+  };
+
+  const handleSelectSupplier = (selectedSupplier) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      supplierId: selectedSupplier.supplierId,
+      selectedSupplier: selectedSupplier,
+    }));
+    setSupplierSearchTerm("");
+  };
+
+  const handleResetSupplier = () => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      selectedSupplier: "",
+      supplierId: null,
+      itemDetails: [],
+    }));
+  };
+
+  const handleGeneratePR = async () => {
+    try {
+      setPRGenerating(true);
+      setIsPRGenerated(true);
+      const response = await get_Low_Stock_Items_api(
+        formData.supplierId,
+        formData.expectedDeliveryLocation
+      );
+      const lowStockItems = response.data.result || [];
+
+      if (lowStockItems.length === 0) {
+        setShowToast(true);
+        setTimeout(() => {
+          setIsPRGenerated(false);
+          setShowToast(false);
+        }, 5000);
+        setPRGenerating(false);
+        return;
+      }
+
+      if (lowStockItems.length > 0) {
+        const companyId = sessionStorage.getItem("companyId");
+
+        // Transform low-stock items into itemDetails format with API calls
+        const newItemDetails = await Promise.all(
+          lowStockItems.map(async (item) => {
+            const supplierItemResponse =
+              await get_supplier_items_by_type_category_api(
+                companyId,
+                parseInt(item.itemMaster?.itemType?.itemTypeId),
+                parseInt(item.itemMaster?.category?.categoryId),
+                formData.expectedDeliveryLocation
+              );
+
+            const supplierItems = supplierItemResponse.data.result
+              ? supplierItemResponse.data.result.filter(
+                  (si) => si.itemMasterId !== item.itemMasterId
+                )
+              : [];
+
+            return {
+              id: item.itemMasterId,
+              name: item.itemMaster.itemName,
+              unit: item.itemMaster.unit?.unitName || "",
+              categoryId: item.itemMaster?.category?.categoryId || "",
+              itemTypeId: item.itemMaster?.itemType?.itemTypeId || "",
+              quantity:
+                item.maxStockLevel - item.totalStockInHand >= 0
+                  ? item.maxStockLevel - item.totalStockInHand
+                  : 0,
+              unitPrice: 0.0,
+              totalPrice: 0.0,
+              supplierItems: supplierItems,
+              totalStockInHand: item.totalStockInHand,
+              minReOrderLevel: item.minReOrderLevel,
+              maxStockLevel: item.maxStockLevel,
+            };
+          })
+        );
+
+        // Update formData with new itemDetails
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          itemDetails: newItemDetails,
+        }));
+      } else {
+        console.log("No low-stock items found.");
+      }
+    } catch (error) {
+      console.error("Error generating purchase order:", error);
+    } finally {
+      setPRGenerating(false);
+    }
   };
 
   console.log("formData", formData);
 
   return {
     formData,
-    locations,
+    // locations,
+    // isError,
+    // isLoading,
+    // error,
     submissionStatus,
     validFields,
     validationErrors,
     alertRef,
-    isError,
-    isLoading,
-    error,
     searchTerm,
     availableItems,
     isItemsLoading,
@@ -574,6 +789,13 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     loading,
     loadingDraft,
     userDepartments,
+    userLocations,
+    suppliers,
+    supplierSearchTerm,
+    showToast,
+    isPRGenerated,
+    prGenerating,
+    setShowToast,
     handleInputChange,
     handleDepartmentChange,
     handleItemDetailsChange,
@@ -584,7 +806,11 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     handleAttachmentChange,
     calculateTotalPrice,
     setSearchTerm,
-    userLocations,
+    setSupplierSearchTerm,
+    handleSelectSupplier,
+    handleSupplierChange,
+    handleResetSupplier,
+    handleGeneratePR,
   };
 };
 

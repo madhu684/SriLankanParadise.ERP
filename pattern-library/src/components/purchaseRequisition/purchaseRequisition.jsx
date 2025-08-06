@@ -1,19 +1,23 @@
-import React from "react";
 import usePurchaseRequisition from "./usePurchaseRequisition";
 import CurrentDateTime from "../currentDateTime/currentDateTime";
-import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
 import LoadingSpinner from "../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../errorComponent/errorComponent";
 import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
+import { useState } from "react";
+import SupplierItemsModal from "../purchaseOrder/SupplierItemsModal";
+import ToastMessage from "../toastMessage/toastMessage";
 
 const PurchaseRequisition = ({
   handleClose,
   handleUpdated,
   setShowCreatePRForm,
 }) => {
+  const [showSupplierItemsModal, setShowSupplierItemsModal] = useState(false);
+  const [selectedSupplierItems, setSelectedSupplierItems] = useState([]);
+  const [selectedItemName, setSelectedItemName] = useState("");
+
   const {
     formData,
-    locations,
     submissionStatus,
     validFields,
     validationErrors,
@@ -29,6 +33,13 @@ const PurchaseRequisition = ({
     isItemsError,
     itemsError,
     userDepartments,
+    userLocations,
+    suppliers,
+    supplierSearchTerm,
+    showToast,
+    isPRGenerated,
+    prGenerating,
+    setShowToast,
     handleInputChange,
     handleDepartmentChange,
     handleItemDetailsChange,
@@ -39,14 +50,31 @@ const PurchaseRequisition = ({
     handleAttachmentChange,
     calculateTotalPrice,
     setSearchTerm,
-    userLocations,
+    setSupplierSearchTerm,
+    handleSelectSupplier,
+    handleSupplierChange,
+    handleResetSupplier,
+    handleGeneratePR,
   } = usePurchaseRequisition({
     onFormSubmit: () => {
       handleClose();
       handleUpdated();
     },
   });
-  //const companyLogoUrl = useCompanyLogoUrl();
+
+  // Handler for showing supplier items modal
+  const handleShowSupplierItems = (item) => {
+    setSelectedSupplierItems(item.supplierItems || []);
+    setSelectedItemName(item.name);
+    setShowSupplierItemsModal(true);
+  };
+
+  // Handler for closing supplier items modal
+  const handleCloseSupplierItemsModal = () => {
+    setShowSupplierItemsModal(false);
+    setSelectedSupplierItems([]);
+    setSelectedItemName("");
+  };
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -56,24 +84,12 @@ const PurchaseRequisition = ({
     return <ErrorComponent error={"Error fetching data"} />;
   }
 
-  const handleBack = () => {
-    setShowCreatePRForm(false);
-  };
-
   return (
     <div className="container mt-4">
       {/* Header */}
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          {/* <img src={companyLogoUrl} alt="Company Logo" height={30} /> */}
-          {/* <button
-            onClick={handleBack}
-            className="btn btn-dark d-flex align-items-center"
-          >
-            Back
-          </button> */}
-
           <i
             class="bi bi-arrow-left"
             onClick={handleClose}
@@ -106,8 +122,8 @@ const PurchaseRequisition = ({
 
       <form>
         <div className="row g-3 mb-3 d-flex justify-content-between">
+          {/* Requestor Information */}
           <div className="col-md-5">
-            {/* Requestor Information */}
             <h4>1. Requestor Information</h4>
             <div className="mb-3 mt-3">
               <label htmlFor="requestorName" className="form-label">
@@ -200,6 +216,37 @@ const PurchaseRequisition = ({
               )}
             </div>
             <div className="mb-3">
+              <label htmlFor="expectedDeliveryLocation" className="form-label">
+                Delivery Location
+              </label>
+              <select
+                className={`form-select ${
+                  validFields.expectedDeliveryLocation ? "is-valid" : ""
+                } ${
+                  validationErrors.expectedDeliveryLocation ? "is-invalid" : ""
+                }`}
+                id="expectedDeliveryLocation"
+                value={formData?.expectedDeliveryLocation ?? ""}
+                onChange={(e) =>
+                  handleInputChange("expectedDeliveryLocation", e.target.value)
+                }
+              >
+                <option value="">Select Location</option>
+                {userLocations
+                  .filter((ul) => ul?.location?.locationTypeId === 2)
+                  .map((ul) => (
+                    <option key={ul.locationId} value={ul.locationId}>
+                      {ul?.location?.locationName}
+                    </option>
+                  ))}
+              </select>
+              {validationErrors.expectedDeliveryLocation && (
+                <div className="invalid-feedback">
+                  {validationErrors.expectedDeliveryLocation}
+                </div>
+              )}
+            </div>
+            <div className="mb-3">
               <label htmlFor="email" className="form-label">
                 Email
               </label>
@@ -242,8 +289,8 @@ const PurchaseRequisition = ({
               )}
             </div>
           </div>
+          {/* Request Information */}
           <div className="col-md-5">
-            {/* Request Information */}
             <h4>2. Request Information</h4>
             <div className="mb-3 mt-3">
               <label htmlFor="requisitionDate" className="form-label">
@@ -316,46 +363,6 @@ const PurchaseRequisition = ({
               )}
             </div>
             <div className="mb-3">
-              <label htmlFor="expectedDeliveryLocation" className="form-label">
-                Expected Delivery Location
-              </label>
-              <select
-                className={`form-select ${
-                  validFields.expectedDeliveryLocation ? "is-valid" : ""
-                } ${
-                  validationErrors.expectedDeliveryLocation ? "is-invalid" : ""
-                }`}
-                id="expectedDeliveryLocation"
-                value={formData?.expectedDeliveryLocation ?? ""}
-                onChange={(e) =>
-                  handleInputChange("expectedDeliveryLocation", e.target.value)
-                }
-              >
-                <option value="">Select Location</option>
-                {locations
-                  // .filter(
-                  //   (location) =>
-                  //     location.locationType.name === "Warehouse" &&
-                  //     location.parentId ===
-                  //       parseInt(sessionStorage.getItem("locationId"))
-                  // )
-                  .filter((location) => location.locationTypeId === 2)
-                  .map((location) => (
-                    <option
-                      key={location.locationId}
-                      value={location.locationId}
-                    >
-                      {location.locationName}
-                    </option>
-                  ))}
-              </select>
-              {validationErrors.expectedDeliveryLocation && (
-                <div className="invalid-feedback">
-                  {validationErrors.expectedDeliveryLocation}
-                </div>
-              )}
-            </div>
-            <div className="mb-3">
               <label htmlFor="referenceNumber" className="form-label">
                 Reference Number
               </label>
@@ -372,9 +379,161 @@ const PurchaseRequisition = ({
             </div>
           </div>
         </div>
+        <div className="row g-3 mb-3 d-flex justify-content-between">
+          {/* Supplier tagging */}
+          <div className="col-md-5">
+            <h4>3. Supplier Information (Optional)</h4>
+            <div className="mb-3 mt-3">
+              <label htmlFor="supplier" className="form-label">
+                Supplier
+              </label>
+              {formData.selectedSupplier === "" && (
+                <div className="mb-3 position-relative">
+                  <div className="input-group">
+                    <span className="input-group-text bg-transparent ">
+                      <i className="bi bi-search"></i>
+                    </span>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        validFields.supplierId ? "is-valid" : ""
+                      } ${validationErrors.supplierId ? "is-invalid" : ""}`}
+                      placeholder="Search for a supplier..."
+                      value={supplierSearchTerm}
+                      onChange={(e) => setSupplierSearchTerm(e.target.value)}
+                      autoFocus={false}
+                    />
+                    {supplierSearchTerm && (
+                      <span
+                        className="input-group-text bg-transparent"
+                        style={{
+                          cursor: "pointer",
+                        }}
+                        onClick={() => setSupplierSearchTerm("")}
+                      >
+                        <i className="bi bi-x"></i>
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Dropdown for filtered suppliers */}
+                  {supplierSearchTerm && (
+                    <div className="dropdown" style={{ width: "100%" }}>
+                      <ul
+                        className="dropdown-menu"
+                        style={{
+                          display: "block",
+                          width: "100%",
+                          maxHeight: "200px",
+                          overflowY: "auto",
+                        }}
+                      >
+                        {suppliers
+                          ?.filter(
+                            (supplier) =>
+                              supplier.supplierName
+                                .toLowerCase()
+                                .includes(supplierSearchTerm.toLowerCase()) ||
+                              supplier.phone
+                                .replace(/\s/g, "")
+                                .includes(supplierSearchTerm.replace(/\s/g, ""))
+                          )
+                          .map((supplier) => (
+                            <li key={supplier.supplierId}>
+                              <button
+                                className="dropdown-item"
+                                onClick={() => handleSelectSupplier(supplier)}
+                              >
+                                <span className="me-3">
+                                  <i className="bi bi-shop"></i>
+                                </span>{" "}
+                                {supplier?.supplierName} - {supplier?.phone}
+                              </button>
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
+                  )}
+                  {formData.selectedSupplier === "" && (
+                    <div className="mb-3">
+                      <small className="form-text text-muted">
+                        {validationErrors.supplierId && (
+                          <div className="text-danger mb-1">
+                            {validationErrors.supplierId}
+                          </div>
+                        )}
+                        Please search for a supplier and select it
+                      </small>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Additional Supplier Information */}
+            {formData.selectedSupplier && (
+              <div className="card mb-3">
+                <div className="card-header">Selected Supplier</div>
+                <div className="card-body">
+                  <p>Supplier Name: {formData.selectedSupplier.supplierName}</p>
+                  <p>
+                    Contact Person: {formData.selectedSupplier.contactPerson}
+                  </p>
+                  <p>Phone: {formData.selectedSupplier.phone}</p>
+                  <p>Email: {formData.selectedSupplier.email}</p>
+                  <button
+                    type="button"
+                    className="btn btn-outline-danger float-end"
+                    onClick={handleResetSupplier}
+                  >
+                    Reset Supplier
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+          {/* TRN Generation */}
+          <div className="col-md-5">
+            <h4>5. Generate Purchase Requisition</h4>
+            <div className="mb-3 mt-3">
+              {/* <label className="form-label">Generate Purchase Order</label> */}
+              <div>
+                <button
+                  type="button"
+                  className="btn btn-info"
+                  onClick={handleGeneratePR}
+                  disabled={
+                    prGenerating ||
+                    loadingDraft ||
+                    submissionStatus !== null ||
+                    formData.supplierId === null
+                  }
+                >
+                  {prGenerating ? (
+                    <div className="d-flex align-items-center w-100">
+                      <ButtonLoadingSpinner />
+                    </div>
+                  ) : (
+                    "Generate Transfer Requisition"
+                  )}
+                </button>
+              </div>
+            </div>
+            <div className="mt-3">
+              {formData.itemDetails.length === 0 && isPRGenerated === true && (
+                <ToastMessage
+                  show={showToast}
+                  onClose={() => setShowToast(false)}
+                  type="warning"
+                  message="No any low-stock items found"
+                />
+              )}
+            </div>
+          </div>
+        </div>
 
         {/* Item Details */}
-        <h4>3. Item Details</h4>
+        <h4>4. Item Details</h4>
         <div className="col-md-5">
           {/* Item Search */}
           <div className="mb-3 mt-3">
@@ -479,6 +638,9 @@ const PurchaseRequisition = ({
                   <th>Unit</th>
                   <th>Quantity</th>
                   <th>Unit Price</th>
+                  <th>Stock in Hand</th>
+                  <th>Reorder level</th>
+                  <th>Max order level</th>
                   <th className="text-end">Total Price</th>
                   <th className="text-end">Action</th>
                 </tr>
@@ -527,22 +689,44 @@ const PurchaseRequisition = ({
                         }
                       />
                     </td>
+                    <td>{item.totalStockInHand || 0}</td>
+                    <td>{item.minReOrderLevel || 0}</td>
+                    <td>{item.maxStockLevel || 0}</td>
                     <td className="text-end">{item.totalPrice.toFixed(2)}</td>
                     <td className="text-end">
-                      <button
-                        type="button"
-                        className="btn btn-outline-danger"
-                        onClick={() => handleRemoveItem(index)}
-                      >
-                        Delete
-                      </button>
+                      <div className="d-flex gap-1">
+                        {/* Show Supplier Items button - only if supplierItems exist */}
+                        <button
+                          type="button"
+                          className={`btn ${
+                            item?.supplierItems?.length === 0
+                              ? "btn-outline-secondary"
+                              : "btn-outline-info"
+                          } btn-sm`}
+                          onClick={() => handleShowSupplierItems(item)}
+                          disabled={item?.supplierItems?.length === 0}
+                          title="View Supplier Items"
+                        >
+                          <i className="bi bi-shop"></i>
+                        </button>
+
+                        {/* Delete button */}
+                        <button
+                          type="button"
+                          className="btn btn-outline-danger btn-sm"
+                          onClick={() => handleRemoveItem(index)}
+                          title="Delete Item"
+                        >
+                          <i className="bi bi-trash"></i>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
                 <tr>
-                  <td colSpan="3"></td>
+                  <td colSpan="6"></td>
                   <th>Total Amount</th>
                   <td className="text-end">
                     {calculateTotalPrice().toFixed(2)}
@@ -555,7 +739,7 @@ const PurchaseRequisition = ({
         )}
 
         {/* Attachments */}
-        <h4>4. Attachments</h4>
+        <h4>5. Attachments</h4>
         <div className="col-md-6 mb-3">
           <label htmlFor="attachment" className="form-label">
             Attachments (if any)
@@ -626,6 +810,14 @@ const PurchaseRequisition = ({
           </button>
         </div>
       </form>
+
+      {/* Supplier Items Modal */}
+      <SupplierItemsModal
+        show={showSupplierItemsModal}
+        onClose={handleCloseSupplierItemsModal}
+        supplierItems={selectedSupplierItems}
+        itemName={selectedItemName}
+      />
     </div>
   );
 };

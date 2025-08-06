@@ -150,6 +150,22 @@ export const delete_purchase_requisition_detail_api = async (
   }
 };
 
+export const delete_purchase_requisition_api = async (
+  purchaseRequisitionId
+) => {
+  try {
+    const response = await api.delete(
+      `/purchaseRequisition/${purchaseRequisitionId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 //purchase order apis
 export const post_purchase_order_api = async (formData) => {
   try {
@@ -309,7 +325,7 @@ export const delete_purchase_order_api = async (purchaseOrderId) => {
   } catch (error) {
     throw error;
   }
-}
+};
 
 //grn apis
 export const post_grn_master_api = async (formData) => {

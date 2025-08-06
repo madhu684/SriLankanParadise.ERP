@@ -15,7 +15,6 @@ const PurchaseOrder = ({
   purchaseRequisition,
   setShowCreatePOForm,
 }) => {
-  // Add state for the modal
   const [showSupplierItemsModal, setShowSupplierItemsModal] = useState(false);
   const [selectedSupplierItems, setSelectedSupplierItems] = useState([]);
   const [selectedItemName, setSelectedItemName] = useState("");
@@ -49,6 +48,7 @@ const PurchaseOrder = ({
     loading,
     loadingDraft,
     showToast,
+    poGenerating,
     handleInputChange,
     handleSupplierChange,
     handleItemDetailsChange,
@@ -327,13 +327,19 @@ const PurchaseOrder = ({
                   className="btn btn-info"
                   onClick={handleGeneratePurchaseOrder}
                   disabled={
-                    loading ||
+                    poGenerating ||
                     loadingDraft ||
                     submissionStatus !== null ||
                     formData.supplierId === null
                   }
                 >
-                  Generate Purchase Order
+                  {poGenerating ? (
+                    <div className="d-flex align-items-center w-100">
+                      <ButtonLoadingSpinner />
+                    </div>
+                  ) : (
+                    "Generate Purchase Order"
+                  )}
                 </button>
               </div>
             </div>

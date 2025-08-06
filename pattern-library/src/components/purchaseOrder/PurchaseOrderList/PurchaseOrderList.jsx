@@ -152,7 +152,8 @@ const PurchaseOrderList = () => {
             )}
           {hasPermission("Update Purchase Order") &&
             isAnyRowSelected &&
-            areAnySelectedRowsPending(selectedRows) && (
+            areAnySelectedRowsPending(selectedRows) &&
+            selectedRowData[0]?.status === 1 && (
               <button
                 className="btn btn-warning"
                 onClick={() => setShowUpdatePOForm(true)}

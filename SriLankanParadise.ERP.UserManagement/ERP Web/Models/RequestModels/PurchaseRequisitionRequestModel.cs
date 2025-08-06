@@ -38,6 +38,8 @@
 
         public DateTime? LastUpdatedDate { get; set; }
 
+        public int? SupplierId { get; set; }
+
         public int PermissionId { get; set; }
     }
 }

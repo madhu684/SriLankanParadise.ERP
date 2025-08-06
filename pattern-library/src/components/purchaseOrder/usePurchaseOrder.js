@@ -41,6 +41,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [isPOGenerated, setIsPOGenerated] = useState(false);
+  const [poGenerating, setPOGenerating] = useState(false);
   const [showToast, setShowToast] = useState(false);
 
   const fetchUserLocation = async () => {
@@ -809,7 +810,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     setSearchTerm("");
   };
 
-  const handleInitializeItem = (item) => {
+  const handleInitializeItem = async (item, purchaseRequisition) => {
     // Generate chargesAndDeductions array for the newly added item
     const initializedCharges = chargesAndDeductions
       .filter((charge) => charge.isApplicableForLineItem)
@@ -844,6 +845,20 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     // Ensure totalPrice is initialized and is a numerical value
     totalPrice = isNaN(totalPrice) ? 0 : totalPrice;
 
+    // Bind supplier items and
+    // const supplierItemResponse = await get_supplier_items_by_type_category_api(
+    //   sessionStorage.getItem("companyId"),
+    //   parseInt(item.itemMaster?.itemTypeId),
+    //   parseInt(item.itemMaster?.categoryId),
+    //   parseInt(purchaseRequisition?.expectedDeliveryLocation)
+    // );
+
+    // const supplierItems = supplierItemResponse?.data?.result
+    //   ? supplierItemResponse?.data?.result?.filter(
+    //       (si) => si.itemMasterId !== item.itemMasterId
+    //     )
+    //   : [];
+
     // Create the new item object with calculated total price
     const newItem = {
       id: item?.itemMasterId,
@@ -852,12 +867,15 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
       quantity: item?.quantity,
       unitPrice: item?.unitPrice,
       totalPrice: totalPrice,
+      //supplierItems: supplierItems,
       chargesAndDeductions: initializedCharges,
     };
 
     // Update formData with the new item
     setFormData((prevFormData) => ({
       ...prevFormData,
+      supplierId: purchaseRequisition?.supplierId,
+      selectedSupplier: purchaseRequisition?.supplier,
       itemDetails: [...prevFormData.itemDetails, newItem],
       subTotal: calculateSubTotal(),
       totalAmount: calculateTotalAmount(),
@@ -873,9 +891,13 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
         purchaseRequisition.purchaseRequisitionDetails.length > 0
       ) {
         // Loop through each item in purchaseRequisitionDetails
+        console.log(
+          "Purchase Requisition in initializing:",
+          purchaseRequisition
+        );
         purchaseRequisition.purchaseRequisitionDetails.forEach((item) => {
           // Call handleInitializeItem for each item
-          handleInitializeItem(item);
+          handleInitializeItem(item, purchaseRequisition);
         });
       }
       console.log("Initializing...");
@@ -1014,10 +1036,9 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     });
   };
 
-  // New function to handle generating purchase order from low-stock items
   const handleGeneratePurchaseOrder = async () => {
     try {
-      setLoading(true); // Show loading state
+      setPOGenerating(true);
       setIsPOGenerated(true);
       const response = await get_Low_Stock_Items_api(
         formData.supplierId,
@@ -1031,7 +1052,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
           setIsPOGenerated(false);
           setShowToast(false);
         }, 5000);
-        setLoading(false);
+        setPOGenerating(false);
         return;
       }
 
@@ -1101,7 +1122,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     } catch (error) {
       console.error("Error generating purchase order:", error);
     } finally {
-      setLoading(false); // Reset loading state
+      setPOGenerating(false);
     }
   };
 
@@ -1137,6 +1158,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     loading,
     loadingDraft,
     showToast,
+    poGenerating,
     handleInputChange,
     handleSupplierChange,
     handleItemDetailsChange,
