@@ -28,5 +28,6 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
 
         // Updated Service Interface Method
         Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemMasterId(int? locationId, int itemMasterId);
+        Task ReduceInventoryByFIFO(int locationId, int itemMasterId, int quantity);
     }
 }

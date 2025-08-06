@@ -27,6 +27,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task UpdateLocationInventoryStockInHand(int locationId, int itemMasterId, int batchId, LocationInventory locationInventory, string operation);
 
         Task<IEnumerable<LocationInventorySummary>> GetLowStockItems();
+
+        Task ReduceInventoryByFIFO(int locationId, int itemMasterId, int quantity);
     }
 
 }

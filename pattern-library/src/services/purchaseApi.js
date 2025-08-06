@@ -1351,6 +1351,19 @@ export const get_Low_Stock_Items_api = async () => {
     throw error;
   }
 };
+
+export const post_reduce_inventory_fifo_api = async (requestData) => {
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}/locationInventory/reduce-inventory-fifo`,
+      requestData
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
 //==============
 
 export const post_comapny_location_api = async (locationData) => {
