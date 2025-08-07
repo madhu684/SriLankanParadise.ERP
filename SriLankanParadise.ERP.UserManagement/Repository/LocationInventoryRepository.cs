@@ -324,27 +324,52 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemMasterId(int locationId, int itemMasterId)
+        public async Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemMasterId(int? locationId, int itemMasterId)
         {
             try
             {
-                var summaryData = await _dbContext.LocationInventories
-                    .Where(li => li.LocationId == locationId && li.ItemMasterId == itemMasterId)
-                    .Include(li => li.ItemMaster)
-                    .GroupBy(li => new { li.LocationId, li.ItemMasterId })
-                    .Select(g => new LocationInventorySummary
-                    {
-                        LocationInventoryId = g.FirstOrDefault().LocationInventoryId,
-                        LocationId = g.Key.LocationId,
-                        ItemMasterId = g.Key.ItemMasterId,
-                        TotalStockInHand = g.Sum(li => li.StockInHand ?? 0),
-                        MinReOrderLevel = g.Min(li => li.ReOrderLevel ?? 0),
-                        MaxStockLevel = g.Max(li => li.MaxStockLevel ?? 0),
-                        ItemMaster = g.FirstOrDefault().ItemMaster
-                    })
-                    .FirstOrDefaultAsync();
+                if (locationId.HasValue)
+                {
+                    // Query for specific location
+                    var summaryData = await _dbContext.LocationInventories
+                        .Where(li => li.LocationId == locationId.Value && li.ItemMasterId == itemMasterId)
+                        .Include(li => li.ItemMaster)
+                        .GroupBy(li => new { li.LocationId, li.ItemMasterId })
+                        .Select(g => new LocationInventorySummary
+                        {
+                            LocationInventoryId = g.FirstOrDefault().LocationInventoryId,
+                            LocationId = g.Key.LocationId,
+                            ItemMasterId = g.Key.ItemMasterId,
+                            TotalStockInHand = g.Sum(li => li.StockInHand ?? 0),
+                            MinReOrderLevel = g.Min(li => li.ReOrderLevel ?? 0),
+                            MaxStockLevel = g.Max(li => li.MaxStockLevel ?? 0),
+                            ItemMaster = g.FirstOrDefault().ItemMaster
+                        })
+                        .FirstOrDefaultAsync();
 
-                return summaryData;
+                    return summaryData;
+                }
+                else
+                {
+                    // Query for all locations
+                    var allLocationsSummary = await _dbContext.LocationInventories
+                        .Where(li => li.ItemMasterId == itemMasterId)
+                        .Include(li => li.ItemMaster)
+                        .GroupBy(li => li.ItemMasterId)
+                        .Select(g => new LocationInventorySummary
+                        {
+                            LocationInventoryId = 0,  // Not relevant for all locations
+                            LocationId = 0,           // 0 indicates all locations
+                            ItemMasterId = g.Key,
+                            TotalStockInHand = g.Sum(li => li.StockInHand ?? 0),
+                            MinReOrderLevel = g.Min(li => li.ReOrderLevel ?? 0),
+                            MaxStockLevel = g.Max(li => li.MaxStockLevel ?? 0),
+                            ItemMaster = g.FirstOrDefault().ItemMaster
+                        })
+                        .FirstOrDefaultAsync();
+
+                    return allLocationsSummary;
+                }
             }
             catch (Exception)
             {
@@ -381,6 +406,64 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 throw;
             }
+        }
+
+        public async Task ReduceInventoryByFIFO(int locationId, int itemMasterId, int quantity)
+        {
+            var strategy = _dbContext.Database.CreateExecutionStrategy();
+
+            await strategy.ExecuteAsync(async () =>
+            {
+                using var transaction = await _dbContext.Database.BeginTransactionAsync();
+                try
+                {
+                    // Get oldest batches for the item at the location (ordered by BatchId - smallest first)
+                    var availableBatches = await _dbContext.LocationInventories
+                        .Where(li => li.LocationId == locationId &&
+                                    li.ItemMasterId == itemMasterId &&
+                                    li.StockInHand > 0)
+                        .Include(li => li.ItemBatch)
+                        .OrderBy(li => li.BatchId) // FIFO by BatchId
+                        .ToListAsync();
+
+                    if (!availableBatches.Any())
+                    {
+                        throw new InvalidOperationException("No batches available for the specified location and item");
+                    }
+
+                    // Check total available stock - fix the type conversion here
+                    var totalAvailableStock = availableBatches.Sum(b => (int)(b.StockInHand ?? 0));
+                    if (totalAvailableStock < quantity)
+                    {
+                        throw new InvalidOperationException($"Insufficient stock. Available: {totalAvailableStock}, Requested: {quantity}");
+                    }
+
+                    int remainingQuantity = quantity;
+
+                    foreach (var batch in availableBatches)
+                    {
+                        if (remainingQuantity <= 0) break;
+
+                        // Fix the type conversion here
+                        int currentBatchStock = (int)(batch.StockInHand ?? 0);
+                        int quantityToReduce = Math.Min(remainingQuantity, currentBatchStock);
+
+                        // Update stock in hand
+                        batch.StockInHand -= quantityToReduce;
+                        remainingQuantity -= quantityToReduce;
+
+                        _dbContext.LocationInventories.Update(batch);
+                    }
+
+                    await _dbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            });
         }
     }
 }

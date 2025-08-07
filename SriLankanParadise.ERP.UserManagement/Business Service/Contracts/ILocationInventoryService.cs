@@ -30,6 +30,8 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
 
         Task<IEnumerable<LocationInventorySummary>> GetLowStockItems();
 
-        Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemMasterId(int locationId, int itemMasterId);
+        // Updated Service Interface Method
+        Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemMasterId(int? locationId, int itemMasterId);
+        Task ReduceInventoryByFIFO(int locationId, int itemMasterId, int quantity);
     }
 }

@@ -1,12 +1,57 @@
 import React from "react";
 import { Modal, Button } from "react-bootstrap";
-import useSalesReceiptDetial from "./useSalesReceiptDetail";
+import useSalesReceiptDetail from "./useSalesReceiptDetail";
 import useSalesReceiptList from "../salesReceiptList/useSalesReceiptList";
 import moment from "moment";
 import "moment-timezone";
 
 const SalesReceiptDetail = ({ show, handleClose, salesReceipt }) => {
   const { getStatusLabel, getStatusBadgeClass } = useSalesReceiptList();
+  const { refreshedSalesReceipt, isLoading, error } = useSalesReceiptDetail(
+    salesReceipt?.salesReceiptId
+  );
+
+  if (error) {
+    return (
+      <Modal show={show} onHide={handleClose} centered scrollable size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Sales Receipt</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Error loading sales receipt details: {error}</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <Modal show={show} onHide={handleClose} centered scrollable size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Sales Receipt</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Loading...</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    );
+  }
+
+  const displaySalesReceipt =
+    refreshedSalesReceipt?.salesReceiptSalesInvoices?.length > 0
+      ? refreshedSalesReceipt
+      : salesReceipt;
+
   return (
     <Modal show={show} onHide={handleClose} centered scrollable size="lg">
       <Modal.Header closeButton>
@@ -14,45 +59,54 @@ const SalesReceiptDetail = ({ show, handleClose, salesReceipt }) => {
       </Modal.Header>
       <Modal.Body>
         <div className="mb-3 d-flex justify-content-between">
-          <h6>Details for Sales Receipt : {salesReceipt.referenceNumber}</h6>
+          <h6>
+            Details for Sales Receipt :{" "}
+            {displaySalesReceipt?.referenceNumber || "N/A"}
+          </h6>
           <div>
             Status :{" "}
             <span
               className={`badge rounded-pill ${getStatusBadgeClass(
-                salesReceipt.status
+                displaySalesReceipt?.status
               )}`}
             >
-              {getStatusLabel(salesReceipt.status)}
+              {getStatusLabel(displaySalesReceipt?.status)}
             </span>
           </div>
         </div>
         <div className="row mb-3">
           <div className="col-md-6">
             <p>
-              <strong>Created By:</strong> {salesReceipt.createdBy}
+              <strong>Created By:</strong>{" "}
+              {displaySalesReceipt?.createdBy || "N/A"}
             </p>
             <p>
               <strong>Receipt Date:</strong>{" "}
-              {salesReceipt?.receiptDate?.split("T")[0]}
+              {displaySalesReceipt?.receiptDate?.split("T")[0] || "N/A"}
             </p>
             <p>
-              <strong>Payment Mode:</strong> {salesReceipt.paymentMode.mode}
+              <strong>Payment Mode:</strong>{" "}
+              {displaySalesReceipt?.paymentMode?.mode || "N/A"}
             </p>
           </div>
           <div className="col-md-6">
             <p>
               <strong>Created Date:</strong>{" "}
-              {moment
-                .utc(salesReceipt?.createdDate)
-                .tz("Asia/Colombo")
-                .format("YYYY-MM-DD hh:mm:ss A")}
+              {displaySalesReceipt?.createdDate
+                ? moment
+                    .utc(displaySalesReceipt.createdDate)
+                    .tz("Asia/Colombo")
+                    .format("YYYY-MM-DD hh:mm:ss A")
+                : "N/A"}
             </p>
             <p>
               <strong>Last Updated Date:</strong>{" "}
-              {moment
-                .utc(salesReceipt?.lastUpdatedDate)
-                .tz("Asia/Colombo")
-                .format("YYYY-MM-DD hh:mm:ss A")}
+              {displaySalesReceipt?.lastUpdatedDate
+                ? moment
+                    .utc(displaySalesReceipt.lastUpdatedDate)
+                    .tz("Asia/Colombo")
+                    .format("YYYY-MM-DD hh:mm:ss A")
+                : "N/A"}
             </p>
           </div>
         </div>
@@ -71,54 +125,77 @@ const SalesReceiptDetail = ({ show, handleClose, salesReceipt }) => {
                 <th>Invoice Total</th>
                 <th>Amount Due</th>
                 <th>Excess Amount</th>
-                <th>Short Amount</th>
-                <th>Amount Received</th>
+                <th>Outstanding Amount</th>
+                {/* <th>Amount Received</th> */}
                 <th className="text-end">Customer Balance</th>
               </tr>
             </thead>
             <tbody>
-              {salesReceipt.salesReceiptSalesInvoices.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.salesInvoice?.referenceNo}</td>
-                  <td>{item.salesInvoice?.referenceNumber}</td>
-                  <td>{item.salesInvoice?.totalAmount.toFixed(2)}</td>
-                  <td>{item.salesInvoice?.amountDue.toFixed(2)}</td>
-                  <td>{item.excessAmount?.toFixed(2)}</td>
-                  <td>{item.shortAmount?.toFixed(2)}</td>
-                  <td>
-                    {(
-                      item.settledAmount +
-                      item.customerBalance +
-                      item.excessAmount -
-                      item.shortAmount
-                    ).toFixed(2)}
-                  </td>
-                  <td className="text-end">
-                    {item.customerBalance?.toFixed(2)}
+              {displaySalesReceipt?.salesReceiptSalesInvoices?.length > 0 ? (
+                displaySalesReceipt.salesReceiptSalesInvoices.map(
+                  (item, index) => (
+                    <tr key={index}>
+                      <td>{item.salesInvoice?.referenceNo || "N/A"}</td>
+                      <td>{item.salesInvoice?.referenceNumber || "N/A"}</td>
+                      <td>
+                        {item.salesInvoice?.totalAmount?.toFixed(2) || "0.00"}
+                      </td>
+                      <td>
+                        {Math.max(0, item.salesInvoice?.amountDue || 0).toFixed(
+                          2
+                        )}
+                      </td>
+                      <td>{item.excessAmount?.toFixed(2) || "0.00"}</td>
+                      <td>{item.outstandingAmount?.toFixed(2) || "0.00"}</td>
+                      {/* <td>
+                        {(
+                          (item.settledAmount || 0) +
+                          (item.customerBalance || 0) +
+                          (item.excessAmount || 0) -
+                          (item.outstandingAmount || 0)
+                        ).toFixed(2)}
+                      </td> */}
+                      <td className="text-end">
+                        {item.customerBalance?.toFixed(2) || "0.00"}
+                      </td>
+                    </tr>
+                  )
+                )
+              ) : (
+                <tr>
+                  <td colSpan="7">
+                    No associated sales invoices found for this receipt.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan="6"></td>
+                <td colSpan="5"></td>
                 <th>Total Excess Amount</th>
                 <td className="text-end">
-                  {salesReceipt.excessAmount.toFixed(2)}
+                  {displaySalesReceipt?.excessAmount?.toFixed(2) || "0.00"}
                 </td>
               </tr>
               <tr>
-                <td colSpan="6"></td>
-                <th>Total Short Amount </th>
+                <td colSpan="5"></td>
+                <th>Total Outstanding Amount</th>
                 <td className="text-end">
-                  {salesReceipt.shortAmount.toFixed(2)}
+                  {displaySalesReceipt?.outstandingAmount?.toFixed(2) || "0.00"}
                 </td>
               </tr>
               <tr>
-                <td colSpan="6"></td>
+                <td colSpan="5"></td>
                 <th>Total Amount Received</th>
                 <td className="text-end">
-                  {salesReceipt.amountReceived.toFixed(2)}
+                  {displaySalesReceipt?.amountReceived?.toFixed(2) || "0.00"}
+                </td>
+              </tr>
+              <tr>
+                <td colSpan="5"></td>
+                <th>Total Amount Collected</th>
+                <td className="text-end">
+                  {displaySalesReceipt?.amountCollect?.toFixed(2) || "0.00"}
                 </td>
               </tr>
             </tfoot>

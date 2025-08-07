@@ -19,6 +19,14 @@ const useSalesReceiptList = () => {
   const [showCreateSRForm, setShowCreateSRForm] = useState(false);
   const [showUpdateSRForm, setShowUpdateSRForm] = useState(false);
   const [SRDetail, setSRDetail] = useState("");
+  const [filter, setFilter] = useState("all"); // 'all', 'Outstanding', 'excess'
+
+  const filteredSalesReceipts = salesReceipts.filter((receipt) => {
+    if (filter === "all") return true;
+    if (filter === "outstanding") return receipt.outstandingAmount > 0;
+    if (filter === "excess") return receipt.excessAmount > 0;
+    return true;
+  });
 
   // Retrieve the cashier session from session storage
   const cashierSessionJson = sessionStorage.getItem("cashierSession");
@@ -291,6 +299,9 @@ const useSalesReceiptList = () => {
     handleUpdated,
     handleClose,
     closeAlertAfterDelay,
+    filter,
+    setFilter,
+    filteredSalesReceipts,
   };
 };
 
