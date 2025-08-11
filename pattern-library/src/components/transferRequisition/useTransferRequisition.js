@@ -580,6 +580,10 @@ const useTransferRequisition = ({ onFormSubmit }) => {
               maxStockLevel: item.maxStockLevel,
               name: item.itemMaster.itemName,
               quantity: 0,
+              // quantity:
+              //   item.maxStockLevel - item.totalStockInHandTo >= 0
+              //     ? item.maxStockLevel - item.totalStockInHandTo
+              //     : 0,
               minReOrderLevel: item.minReOrderLevel || 0,
               totalStockInHand: fromStockDetails?.totalStockInHand || 0,
               totalStockInHandTo: item.totalStockInHand || 0,
@@ -595,7 +599,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
       }
     } catch (error) {
       console.error("Error generating purchase order:", error);
-    }finally{
+    } finally {
       setTRGenerating(false);
     }
   };

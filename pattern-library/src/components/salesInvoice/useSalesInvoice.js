@@ -1208,6 +1208,8 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     setShowModal(false);
   };
 
+  console.log("formData", formData);
+
   return {
     formData,
     submissionStatus,

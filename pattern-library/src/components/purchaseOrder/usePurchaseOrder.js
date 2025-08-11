@@ -9,6 +9,7 @@ import {
   get_Low_Stock_Items_api,
   get_Location_Inventory_Summary_By_Item_Name_api,
   get_user_locations_by_user_id_api,
+  get_locations_inventories_by_location_id_item_master_id_api,
 } from "../../services/purchaseApi";
 import { get_supplier_items_by_type_category_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
@@ -742,36 +743,6 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     return totalAmount;
   };
 
-  // const handleSelectItem = (item) => {
-  //   // Generate chargesAndDeductions array for the newly added item
-  //   const initializedCharges = chargesAndDeductions
-  //     .filter((charge) => charge.isApplicableForLineItem)
-  //     .map((charge) => ({
-  //       id: charge.chargesAndDeductionId,
-  //       name: charge.displayName,
-  //       value: charge.amount || charge.percentage,
-  //       sign: charge.sign,
-  //       isPercentage: charge.percentage !== null,
-  //     }));
-
-  //   setFormData((prevFormData) => ({
-  //     ...prevFormData,
-  //     itemDetails: [
-  //       ...prevFormData.itemDetails,
-  //       {
-  //         id: item.itemMasterId,
-  //         name: item.itemName,
-  //         unit: item.unit.unitName,
-  //         quantity: 0,
-  //         unitPrice: 0.0,
-  //         totalPrice: 0.0,
-  //         chargesAndDeductions: initializedCharges, // Add the generated array to itemDetails
-  //       },
-  //     ],
-  //   }));
-  //   setSearchTerm(""); // Clear the search term
-  // };
-
   const handleSelectItem = (item) => {
     const initializedCharges = chargesAndDeductions
       .filter((charge) => charge.isApplicableForLineItem)
@@ -810,7 +781,8 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     setSearchTerm("");
   };
 
-  const handleInitializeItem = async (item, purchaseRequisition) => {
+  // Helper function to create an initialized item
+  const createInitializedItem = async (item, purchaseRequisition) => {
     // Generate chargesAndDeductions array for the newly added item
     const initializedCharges = chargesAndDeductions
       .filter((charge) => charge.isApplicableForLineItem)
@@ -845,67 +817,113 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     // Ensure totalPrice is initialized and is a numerical value
     totalPrice = isNaN(totalPrice) ? 0 : totalPrice;
 
-    // Bind supplier items and
-    // const supplierItemResponse = await get_supplier_items_by_type_category_api(
-    //   sessionStorage.getItem("companyId"),
-    //   parseInt(item.itemMaster?.itemTypeId),
-    //   parseInt(item.itemMaster?.categoryId),
-    //   parseInt(purchaseRequisition?.expectedDeliveryLocation)
-    // );
+    // Bind supplier items
+    const supplierItemResponse = await get_supplier_items_by_type_category_api(
+      sessionStorage.getItem("companyId"),
+      parseInt(item.itemMaster?.itemTypeId),
+      parseInt(item.itemMaster?.categoryId),
+      parseInt(purchaseRequisition?.expectedDeliveryLocation)
+    );
 
-    // const supplierItems = supplierItemResponse?.data?.result
-    //   ? supplierItemResponse?.data?.result?.filter(
-    //       (si) => si.itemMasterId !== item.itemMasterId
-    //     )
-    //   : [];
+    const itemInventoryResponse =
+      await get_locations_inventories_by_location_id_item_master_id_api(
+        parseInt(purchaseRequisition?.expectedDeliveryLocation),
+        item.itemMasterId
+      );
 
-    // Create the new item object with calculated total price
-    const newItem = {
+    const itemInventory = itemInventoryResponse?.data?.result;
+    const totalStockInHand = itemInventory?.reduce(
+      (total, inventory) => total + (inventory.stockInHand || 0),
+      0
+    );
+    const minReOrderLevel =
+      itemInventory?.reduce(
+        (min, inventory) =>
+          min === null || inventory.reOrderLevel < min
+            ? inventory.reOrderLevel
+            : min,
+        null
+      ) || 0;
+    const maxStockLevel =
+      itemInventory?.reduce(
+        (max, inventory) =>
+          max === null || inventory.maxStockLevel > max
+            ? inventory.maxStockLevel
+            : max,
+        null
+      ) || 0;
+
+    const supplierItems = supplierItemResponse?.data?.result
+      ? supplierItemResponse?.data?.result?.filter(
+          (si) => si.itemMasterId !== item.itemMasterId
+        )
+      : [];
+
+    // Return the new item object
+    return {
       id: item?.itemMasterId,
       name: item?.itemMaster?.itemName,
       unit: item?.itemMaster?.unit.unitName,
       quantity: item?.quantity,
       unitPrice: item?.unitPrice,
       totalPrice: totalPrice,
-      //supplierItems: supplierItems,
+      supplierItems: supplierItems,
+      totalStockInHand: totalStockInHand,
+      minReOrderLevel: minReOrderLevel,
+      maxStockLevel: maxStockLevel,
       chargesAndDeductions: initializedCharges,
     };
-
-    // Update formData with the new item
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      supplierId: purchaseRequisition?.supplierId,
-      selectedSupplier: purchaseRequisition?.supplier,
-      itemDetails: [...prevFormData.itemDetails, newItem],
-      subTotal: calculateSubTotal(),
-      totalAmount: calculateTotalAmount(),
-    }));
   };
 
-  const initializeItems = () => {
-    if (!initialized) {
+  // Initialize items from purchase requisition (FIXED VERSION)
+  useEffect(() => {
+    const initializeAllItems = async () => {
       if (
+        !initialized &&
         !isLoadingchargesAndDeductions &&
         chargesAndDeductions &&
         purchaseRequisition !== null &&
-        purchaseRequisition.purchaseRequisitionDetails.length > 0
+        purchaseRequisition.purchaseRequisitionDetails?.length > 0
       ) {
-        // Loop through each item in purchaseRequisitionDetails
-        console.log(
-          "Purchase Requisition in initializing:",
-          purchaseRequisition
-        );
-        purchaseRequisition.purchaseRequisitionDetails.forEach((item) => {
-          // Call handleInitializeItem for each item
-          handleInitializeItem(item, purchaseRequisition);
-        });
-      }
-      console.log("Initializing...");
-      setInitialized(true);
-    }
-  };
+        try {
+          console.log(
+            "Initializing all items from purchase requisition...",
+            purchaseRequisition
+          );
 
-  chargesAndDeductions && initializeItems();
+          // Process all items in parallel
+          const newItemDetails = await Promise.all(
+            purchaseRequisition.purchaseRequisitionDetails.map(async (item) => {
+              return await createInitializedItem(item, purchaseRequisition);
+            })
+          );
+
+          // Set all items at once, replacing any existing items
+          setFormData((prevFormData) => ({
+            ...prevFormData,
+            supplierId: purchaseRequisition?.supplierId,
+            selectedSupplier: purchaseRequisition?.supplier,
+            itemDetails: newItemDetails, // Replace, don't append
+          }));
+
+          setInitialized(true);
+          console.log(
+            "Initialization completed. Items count:",
+            newItemDetails.length
+          );
+        } catch (error) {
+          console.error("Error initializing items:", error);
+        }
+      }
+    };
+
+    initializeAllItems();
+  }, [
+    isLoadingchargesAndDeductions,
+    chargesAndDeductions,
+    purchaseRequisition,
+    initialized,
+  ]);
 
   const handleResetSupplier = () => {
     setFormData((prevFormData) => ({
@@ -914,6 +932,8 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
       supplierId: null,
       itemDetails: [],
     }));
+    // Reset initialization flag to allow re-initialization if needed
+    setInitialized(false);
   };
 
   const handleShowCreateSupplierModal = () => {
@@ -982,8 +1002,10 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   };
 
   useEffect(() => {
-    chargesAndDeductions && handleAddCommonChargesAndDeductions();
-  }, [isLoadingchargesAndDeductions]);
+    if (chargesAndDeductions && !isLoadingchargesAndDeductions) {
+      handleAddCommonChargesAndDeductions();
+    }
+  }, [chargesAndDeductions, isLoadingchargesAndDeductions]);
 
   const renderSubColumns = () => {
     return formData.commonChargesAndDeductions.map((charge, chargeIndex) => {
@@ -992,7 +1014,9 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
           <tr key={chargeIndex}>
             <td
               colSpan={
-                7 + formData.itemDetails[0].chargesAndDeductions.length - 1
+                7 +
+                (formData.itemDetails[0]?.chargesAndDeductions?.length || 0) -
+                1
               }
             ></td>
             <th>

@@ -22,7 +22,7 @@ const PurchaseOrderDetail = ({ show, handleClose, purchaseOrder }) => {
 
   return (
     <Modal show={show} onHide={handleClose} centered scrollable size="lg">
-      <Modal.Header closeButton>
+      <Modal.Header>
         <Modal.Title>Purchase Order</Modal.Title>
       </Modal.Header>
       <Modal.Body>
@@ -60,6 +60,8 @@ const PurchaseOrderDetail = ({ show, handleClose, purchaseOrder }) => {
                 <p>
                   <strong>Email:</strong> {purchaseOrder.supplier.email}
                 </p>
+              </div>
+              <div className="col-md-6">
                 {purchaseOrder.status === 2 && (
                   <>
                     <p>
@@ -74,8 +76,6 @@ const PurchaseOrderDetail = ({ show, handleClose, purchaseOrder }) => {
                     </p>
                   </>
                 )}
-              </div>
-              <div className="col-md-6">
                 <p>
                   <strong>Order Date:</strong>{" "}
                   {moment
@@ -93,7 +93,7 @@ const PurchaseOrderDetail = ({ show, handleClose, purchaseOrder }) => {
               </div>
             </div>
 
-            <h6>Item Details</h6>
+            <h6 className="text-info-emphasis">Item Details</h6>
             <div className="table-responsive mb-2">
               <table
                 className="table mt-2"
