@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { get_requisition_masters_with_out_drafts_api } from "../../services/purchaseApi";
+import {
+  get_requisition_masters_with_out_drafts_api,
+  get_user_locations_by_user_id_api,
+} from "../../services/purchaseApi";
 import {
   post_issue_master_api,
   post_issue_detail_api,
@@ -29,26 +32,17 @@ const useMin = ({ onFormSubmit }) => {
   const [mrnSearchTerm, setMrnSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
-  const [searchByMrn, setSearchByMrn] = useState(true);
+  const [searchByMrn, setSearchByMrn] = useState(false);
   const [searchByWithoutMrn, setSearchByWithoutMrn] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [dummySearchTerm, setDummySearchTerm] = useState("");
-  const [selectedLocationId, setSelectedLocationId] = useState();
+  const [selectedLocationId, setSelectedLocationId] = useState(null);
 
   // Reset search modes on component mount
   useEffect(() => {
     setSearchByMrn(false);
     setSearchByWithoutMrn(false);
   }, []);
-
-  // Compute filtered items for search without MRN
-  const getFilteredItems = () => {
-    return (locationInventories || []).filter((inv) =>
-      inv?.itemMaster?.itemName
-        ?.toLowerCase()
-        ?.includes(dummySearchTerm.toLowerCase())
-    );
-  };
 
   // Fetch items for search
   const fetchItems = async (companyId, searchQuery, itemType) => {
@@ -73,32 +67,67 @@ const useMin = ({ onFormSubmit }) => {
     enabled: !!sessionStorage.getItem("companyId") && searchTerm.length > 0,
   });
 
+  const fetchUserLocations = async () => {
+    try {
+      const response = await get_user_locations_by_user_id_api(
+        sessionStorage.getItem("userId")
+      );
+      return response?.data?.result?.filter(
+        (loc) => loc.location.locationTypeId === 2
+      );
+    } catch (error) {
+      console.error("Error fetching user locations:", error);
+      return [];
+    }
+  };
+
+  const { data: userLocations = [] } = useQuery({
+    queryKey: ["userLocations", sessionStorage.getItem("userId")],
+    queryFn: fetchUserLocations,
+    enabled: !!sessionStorage.getItem("userId") && searchByWithoutMrn,
+  });
+
   // Handle adding an item to itemDetails
   const handleAddDummyItem = (item) => {
     const exists = formData.itemDetails.find(
       (d) => d.id === (item.itemMasterId || item.id)
     );
-    if (exists) return;
+    if (exists) {
+      console.log("Item already exists in the list");
+      return;
+    }
 
+    // For items added via search (without MRN), we need to get available batches from locationInventories
     const itemBatches = locationInventories?.filter(
       (batch) => batch.itemMasterId === (item.itemMasterId || item.id)
     );
+
+    if (!itemBatches || itemBatches.length === 0) {
+      console.log("No batches available for this item in selected location");
+      return;
+    }
+
     const defaultBatch = itemBatches?.[0] || { batchId: "", stockInHand: 0 };
 
     const newItem = {
       id: item.itemMasterId || item.id,
       name: item.itemMaster?.itemName || item.itemName,
       unit: item.itemMaster?.unit?.unitName || item.unit?.unitName || "Unit",
-      quantity: defaultBatch.stockInHand || 0,
-      remainingQuantity: defaultBatch.stockInHand || "-",
+      //quantity: defaultBatch.stockInHand || 0,
+      quantity: 0,
+      remainingQuantity: 0,
       issuedQuantity: "",
-      batchId: defaultBatch.batchId || "",
+      //batchId: defaultBatch.batchId || "",
+      batchId: "",
     };
 
     setFormData((prev) => ({
       ...prev,
       itemDetails: [...prev.itemDetails, newItem],
     }));
+
+    setSearchTerm("");
+    setDummySearchTerm("");
   };
 
   // Fetch MRNs
@@ -127,33 +156,6 @@ const useMin = ({ onFormSubmit }) => {
     queryFn: fetchMrns,
   });
 
-  // Fetch MINs by requisitionMasterId
-  // const fetchMinsByRequisitionMasterId = async (requisitionMasterId) => {
-  //   try {
-  //     const response = await get_issue_masters_by_requisition_master_id_api(
-  //       requisitionMasterId
-  //     );
-  //     const filteredMins = response.data.result?.filter(
-  //       (rm) => rm.issueType === "MIN"
-  //     );
-  //     return filteredMins || null;
-  //   } catch (error) {
-  //     console.error("Error fetching MINs:", error);
-  //     return null;
-  //   }
-  // };
-
-  // const {
-  //   data: mins,
-  //   isLoading: isMinsLoading,
-  //   refetch: refetchMins,
-  // } = useQuery({
-  //   queryKey: ["mins", selectedMrn?.requisitionMasterId],
-  //   queryFn: () =>
-  //     fetchMinsByRequisitionMasterId(selectedMrn?.requisitionMasterId),
-  //   enabled: !!selectedMrn || !!selectedMrn?.requisitionMasterId,
-  // });
-
   // Fetch item batches
   const fetchItemBatches = async () => {
     try {
@@ -179,15 +181,11 @@ const useMin = ({ onFormSubmit }) => {
   // Fetch location inventories
   const fetchLocationInventories = async (locationId) => {
     try {
+      if (!locationId) return [];
       const response = await get_locations_inventories_by_location_id_api(
         locationId
       );
-      console.log(
-        "Fetched location inventories for location",
-        locationId,
-        ":",
-        response.data.result
-      );
+      console.log("Location inventories:", response.data.result);
       return response.data.result || [];
     } catch (error) {
       console.error(
@@ -208,9 +206,7 @@ const useMin = ({ onFormSubmit }) => {
   } = useQuery({
     queryKey: ["locationInventories", selectedLocationId],
     queryFn: () => fetchLocationInventories(selectedLocationId),
-    enabled:
-      !!selectedLocationId &&
-      (searchByWithoutMrn || !!selectedMrn?.requestedFromLocationId),
+    enabled: !!selectedLocationId,
   });
 
   // Handle MRN selection and search without MRN
@@ -218,14 +214,14 @@ const useMin = ({ onFormSubmit }) => {
     try {
       if (selectedMrn) {
         setSelectedLocationId(selectedMrn?.requestedToLocationId);
-        refetchLocationInventories();
+
         const updatedItemDetails = selectedMrn.requisitionDetails.map(
           (requestItem) => ({
             id: requestItem.itemMaster?.itemMasterId,
             name: requestItem.itemMaster?.itemName,
             unit: requestItem.itemMaster?.unit?.unitName || "Unit",
             quantity: requestItem.quantity || 0,
-            remainingQuantity: "-",
+            remainingQuantity: 0,
             issuedQuantity: "",
             batchId: "",
           })
@@ -235,28 +231,8 @@ const useMin = ({ onFormSubmit }) => {
           itemDetails: updatedItemDetails,
           mrnId: selectedMrn.requisitionMasterId,
         }));
-      } else if (
-        searchByWithoutMrn &&
-        dummySearchTerm &&
-        locationInventories &&
-        !isLocationInventoriesLoading
-      ) {
-        const filteredItems = getFilteredItems();
-        console.log("Populating from filtered items:", filteredItems);
-        setFormData((prev) => ({
-          ...prev,
-          itemDetails: filteredItems.map((item) => ({
-            id: item.itemMasterId,
-            name: item.itemMaster?.itemName || "Unknown Item",
-            unit: item.itemMaster?.unit?.unitName || "Unit",
-            quantity: item.stockInHand || 0,
-            remainingQuantity: item.stockInHand || "-",
-            issuedQuantity: "",
-            batchId: item.batchId || "",
-          })),
-          mrnId: "",
-        }));
-      } else if (searchByWithoutMrn && !dummySearchTerm) {
+      } else if (searchByWithoutMrn) {
+        // Clear item details when switching to search without MRN mode
         setFormData((prev) => ({
           ...prev,
           itemDetails: [],
@@ -266,19 +242,24 @@ const useMin = ({ onFormSubmit }) => {
     } catch (error) {
       console.error("Error in useEffect:", error);
     }
-  }, [
-    selectedMrn,
-    searchByWithoutMrn,
-    dummySearchTerm,
-    locationInventories,
-    isLocationInventoriesLoading,
-    refetchLocationInventories,
-  ]);
+  }, [selectedMrn, searchByWithoutMrn]);
+
+  // Set default location when switching to "without MRN" mode
+  useEffect(() => {
+    if (
+      searchByWithoutMrn &&
+      userLocations?.length > 0 &&
+      !selectedLocationId
+    ) {
+      console.log("Setting default location:", userLocations[0]);
+      setSelectedLocationId(userLocations[0]?.locationId);
+    }
+  }, [searchByWithoutMrn, userLocations, selectedLocationId]);
 
   // Scroll to alert on submission status change
   useEffect(() => {
     if (submissionStatus != null) {
-      alertRef.current.scrollIntoView({ behavior: "smooth" });
+      alertRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [submissionStatus]);
 
@@ -328,21 +309,40 @@ const useMin = ({ onFormSubmit }) => {
     }
 
     let isItemQuantityValid = true;
+    let isBatchValid = true;
+
     formData.itemDetails.forEach((item, index) => {
-      const fieldName = `issuedQuantity_${index}`;
-      const fieldDisplayName = `Dispatched Quantity for ${item.name}`;
-      const additionalRules = {
-        validationFunction: (value) =>
-          parseFloat(value) > 0 && parseFloat(value) <= item.remainingQuantity,
-        errorMessage: `${fieldDisplayName} must be greater than 0 and less than or equal to remaining quantity ${item.remainingQuantity}`,
+      // Validate issued quantity
+      const quantityFieldName = `issuedQuantity_${index}`;
+      const quantityFieldDisplayName = `Dispatched Quantity for ${item.name}`;
+      const quantityAdditionalRules = {
+        validationFunction: (value) => {
+          const parsedValue = parseFloat(value);
+          return (
+            !isNaN(parsedValue) &&
+            parsedValue > 0 &&
+            parsedValue <= item.remainingQuantity
+          );
+        },
+        errorMessage: `${quantityFieldDisplayName} must be greater than 0 and less than or equal to remaining quantity ${item.remainingQuantity}`,
       };
       const isValidQuantity = validateField(
-        fieldName,
-        fieldDisplayName,
+        quantityFieldName,
+        quantityFieldDisplayName,
         item.issuedQuantity,
-        additionalRules
+        quantityAdditionalRules
       );
       isItemQuantityValid = isItemQuantityValid && isValidQuantity;
+
+      // Validate batch selection
+      const batchFieldName = `batchId_${index}`;
+      const batchFieldDisplayName = `Item Batch for ${item.name}`;
+      const isValidBatch = validateField(
+        batchFieldName,
+        batchFieldDisplayName,
+        item.batchId
+      );
+      isBatchValid = isBatchValid && isValidBatch;
     });
 
     const isItemsPresent = formData.itemDetails.length > 0;
@@ -354,7 +354,11 @@ const useMin = ({ onFormSubmit }) => {
     }
 
     return (
-      isStatusValid && isMrnIdValid && isItemQuantityValid && isItemsPresent
+      isStatusValid &&
+      isMrnIdValid &&
+      isItemQuantityValid &&
+      isBatchValid &&
+      isItemsPresent
     );
   };
 
@@ -400,8 +404,10 @@ const useMin = ({ onFormSubmit }) => {
         referenceNumber: generateReferenceNumber(),
         approvedUserId: null,
         permissionId: 1061,
-        fromLocationId: parseInt(selectedLocationId) || 4,
-        toLocationId: parseInt(selectedMrn?.requestedToLocationId) || 1,
+        // fromLocationId: parseInt(selectedLocationId),
+        // toLocationId: searchByMrn
+        //   ? parseInt(selectedMrn?.requestedToLocationId)
+        //   : null,
       };
 
       const response = await post_issue_master_api(MinData);
@@ -435,6 +441,11 @@ const useMin = ({ onFormSubmit }) => {
         }, 3000);
       } else {
         setSubmissionStatus("error");
+        setTimeout(() => {
+          setSubmissionStatus(null);
+          setLoading(false);
+          setLoadingDraft(false);
+        }, 3000);
       }
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -460,7 +471,7 @@ const useMin = ({ onFormSubmit }) => {
     setFormData((prev) => {
       const updatedItemDetails = [...prev.itemDetails];
       if (field === "batchId") {
-        const selectedBatch = locationInventories.find(
+        const selectedBatch = locationInventories?.find(
           (batch) =>
             batch.batchId === parseInt(value) &&
             batch.itemMasterId === updatedItemDetails[index].id
@@ -469,6 +480,13 @@ const useMin = ({ onFormSubmit }) => {
         updatedItemDetails[index].remainingQuantity =
           selectedBatch?.stockInHand ?? 0;
         updatedItemDetails[index].issuedQuantity = "";
+
+        // Clear validation errors for this batch
+        setValidationErrors((prevErrors) => {
+          const newErrors = { ...prevErrors };
+          delete newErrors[`batchId_${index}`];
+          return newErrors;
+        });
       } else {
         updatedItemDetails[index][field] = value;
       }
@@ -501,14 +519,18 @@ const useMin = ({ onFormSubmit }) => {
       updatedItemDetails.splice(index, 1);
       return { ...prev, itemDetails: updatedItemDetails };
     });
+
+    // Clean up validation states for removed item
     setValidFields((prev) => {
       const copy = { ...prev };
       delete copy[`issuedQuantity_${index}`];
+      delete copy[`batchId_${index}`];
       return copy;
     });
     setValidationErrors((prev) => {
       const copy = { ...prev };
       delete copy[`issuedQuantity_${index}`];
+      delete copy[`batchId_${index}`];
       return copy;
     });
   };
@@ -520,14 +542,12 @@ const useMin = ({ onFormSubmit }) => {
 
   // Handle MRN selection
   const handleMrnChange = (referenceId) => {
-    const foundMrn = mrns.find((mrn) => mrn.referenceNumber === referenceId);
+    const foundMrn = mrns?.find((mrn) => mrn.referenceNumber === referenceId);
     setSelectedMrn(foundMrn);
     setFormData((prev) => ({
       ...prev,
       mrnId: foundMrn?.requisitionMasterId ?? "",
     }));
-    //refetchMins();
-    refetchLocationInventories();
     setMrnSearchTerm("");
   };
 
@@ -554,18 +574,31 @@ const useMin = ({ onFormSubmit }) => {
   // Handle item selection from search
   const handleSearchItemSelect = (item) => {
     handleAddDummyItem(item);
+    setSearchTerm("");
+    setDummySearchTerm("");
+  };
+
+  // Handle location change for "without MRN" mode
+  const handleLocationChange = (locationId) => {
+    setSelectedLocationId(parseInt(locationId));
+    // Clear existing items when location changes
+    setFormData((prev) => ({
+      ...prev,
+      itemDetails: [],
+    }));
   };
 
   // Handle mode change (MRN or without MRN)
   const handleModeChange = (mode) => {
-    console.log(
-      "Mode changed to:",
-      mode,
-      "Setting selectedLocationId to:",
-      sessionStorage.getItem("defaultLocationId") || "4"
-    );
-    setSearchByMrn(mode === "mrn");
-    setSearchByWithoutMrn(mode === "withoutMrn");
+    if (mode === "withoutMrn") {
+      setSearchByWithoutMrn(true);
+      setSearchByMrn(false);
+    } else if (mode === "mrn") {
+      setSearchByMrn(true);
+      setSearchByWithoutMrn(false);
+      setSelectedLocationId(null);
+    }
+
     setFormData((prev) => ({
       ...prev,
       itemDetails: [],
@@ -573,15 +606,16 @@ const useMin = ({ onFormSubmit }) => {
     }));
     setSelectedMrn(null);
     setDummySearchTerm("");
-    if (mode === "withoutMrn") {
-      setSelectedLocationId(sessionStorage.getItem("defaultLocationId") || "4");
-      refetchLocationInventories();
-    }
+    setSearchTerm("");
+    setValidFields({});
+    setValidationErrors({});
   };
 
   console.log("FormData: ", formData);
   console.log("Selected MRN: ", selectedMrn);
   console.log("Selected Location ID: ", selectedLocationId);
+  console.log("locationInventories: ", locationInventories);
+  console.log("userLocations: ", userLocations);
 
   return {
     formData,
@@ -593,10 +627,7 @@ const useMin = ({ onFormSubmit }) => {
     submissionStatus,
     alertRef,
     isLoading:
-      isLoading ||
-      //isMinsLoading ||
-      isItemBatchesLoading ||
-      isLocationInventoriesLoading,
+      isLoading || isItemBatchesLoading || isLocationInventoriesLoading,
     isError,
     mrnSearchTerm,
     loading,
@@ -607,6 +638,8 @@ const useMin = ({ onFormSubmit }) => {
     isLocationInventoriesLoading,
     isLocationInventoriesError,
     locationInventories: locationInventories || [],
+    userLocations: userLocations || [],
+    selectedLocationId,
     handleItemDetailsChange,
     handleRemoveItem,
     handlePrint,
@@ -615,6 +648,7 @@ const useMin = ({ onFormSubmit }) => {
     handleResetMrn,
     handleSubmit,
     handleInputChange,
+    handleLocationChange,
     setMrnSearchTerm,
     setSearchByMrn,
     setSearchByWithoutMrn,
@@ -628,7 +662,6 @@ const useMin = ({ onFormSubmit }) => {
     handleAddDummyItem,
     dummySearchTerm,
     setDummySearchTerm,
-    getFilteredItems,
     handleSearchItemSelect,
     handleModeChange,
   };

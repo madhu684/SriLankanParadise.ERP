@@ -494,7 +494,7 @@ const PurchaseRequisition = ({
           </div>
           {/* TRN Generation */}
           <div className="col-md-5">
-            <h4>5. Generate Purchase Requisition</h4>
+            <h4>4. Generate Purchase Requisition</h4>
             <div className="mb-3 mt-3">
               {/* <label className="form-label">Generate Purchase Order</label> */}
               <div>
@@ -506,7 +506,8 @@ const PurchaseRequisition = ({
                     prGenerating ||
                     loadingDraft ||
                     submissionStatus !== null ||
-                    formData.supplierId === null
+                    formData.supplierId === null ||
+                    formData.expectedDeliveryLocation === null
                   }
                 >
                   {prGenerating ? (
@@ -533,7 +534,7 @@ const PurchaseRequisition = ({
         </div>
 
         {/* Item Details */}
-        <h4>4. Item Details</h4>
+        <h4>5. Item Details</h4>
         <div className="col-md-5">
           {/* Item Search */}
           <div className="mb-3 mt-3">
@@ -546,6 +547,7 @@ const PurchaseRequisition = ({
                 className="form-control"
                 placeholder="Search for an item..."
                 value={searchTerm}
+                disabled={formData.expectedDeliveryLocation === null}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
               {searchTerm && (
@@ -739,7 +741,7 @@ const PurchaseRequisition = ({
         )}
 
         {/* Attachments */}
-        <h4>5. Attachments</h4>
+        <h4>6. Attachments</h4>
         <div className="col-md-6 mb-3">
           <label htmlFor="attachment" className="form-label">
             Attachments (if any)

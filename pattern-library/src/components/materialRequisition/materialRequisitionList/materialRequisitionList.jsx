@@ -268,7 +268,7 @@ const MaterialRequisitionList = () => {
                       //       parseInt(sessionStorage.getItem("userId")))
                       // }
                       disabled={
-                        mr.status !== 5 ||
+                        mr.status === 1 ||
                         mr.isMINApproved === false ||
                         mr.requestedUserId !==
                           parseInt(sessionStorage.getItem("userId"))

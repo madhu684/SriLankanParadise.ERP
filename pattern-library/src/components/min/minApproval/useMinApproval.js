@@ -49,29 +49,31 @@ const useMinApproval = ({ min, onFormSubmit }) => {
           permissionId: 1065,
         });
 
-        // Patch Location Inventory API
-        // await patch_location_inventory_api(
-        //   locationId,
-        //   itemMasterId,
-        //   batchId,
-        //   "subtract",
-        //   {
-        //     stockInHand: quantity,
-        //     permissionId: 1089,
-        //   }
-        // );
+        if (min.requisitionMasterId === null) {
+          // Patch Location Inventory API
+          await patch_location_inventory_api(
+            locationId,
+            itemMasterId,
+            batchId,
+            "subtract",
+            {
+              stockInHand: quantity,
+              permissionId: 1089,
+            }
+          );
 
-        // Post Location Inventory Movement API
-        // await post_location_inventory_movement_api({
-        //   movementTypeId: 2,
-        //   transactionTypeId: 5,
-        //   itemMasterId,
-        //   batchId,
-        //   locationId: locationId,
-        //   date: formattedDate,
-        //   qty: quantity,
-        //   permissionId: 1090,
-        // });
+          // Post Location Inventory Movement API
+          await post_location_inventory_movement_api({
+            movementTypeId: 2,
+            transactionTypeId: 5,
+            itemMasterId,
+            batchId,
+            locationId: locationId,
+            date: formattedDate,
+            qty: quantity,
+            permissionId: 1090,
+          });
+        }
       }
     } catch (error) {
       throw new Error("Error updating inventory: " + error.message);
@@ -116,7 +118,9 @@ const useMinApproval = ({ min, onFormSubmit }) => {
           min.fromLocationId
         );
 
-        await updateMrnState();
+        if (min.requisitionMasterId !== null) {
+          await updateMrnState();
+        }
 
         console.log(
           "Material issue note approved and inventory updated successfully:",

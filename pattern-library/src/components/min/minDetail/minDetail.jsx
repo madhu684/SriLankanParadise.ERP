@@ -71,6 +71,20 @@ const MinDetail = ({ show, handleClose, min }) => {
                 )}
               </span>
             </p>
+          </div>
+          <div className="col-md-6">
+            <p>
+              <strong>MRN Reference No:</strong>{" "}
+              <span
+                className={`p-1 badge ${
+                  min.requisitionMaster ? "text-bg-secondary" : " text-bg-danger"
+                }`}
+              >
+                {min.requisitionMaster
+                  ? min.requisitionMaster.referenceNumber
+                  : "MIN Without MRN"}
+              </span>
+            </p>
             {parseInt(min.status.toString().charAt(1), 10) === 2 && (
               <>
                 <p>
@@ -85,14 +99,6 @@ const MinDetail = ({ show, handleClose, min }) => {
                 </p>
               </>
             )}
-          </div>
-          <div className="col-md-6">
-            <p>
-              <strong>Material Requisition Reference No:</strong>{" "}
-              {min.requisitionMaster
-                ? min.requisitionMaster.referenceNumber
-                : "MIN Without MRN"}
-            </p>
           </div>
         </div>
 

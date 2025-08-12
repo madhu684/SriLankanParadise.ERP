@@ -111,7 +111,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
   const fetchItems = async (searchQuery) => {
     try {
       const response = await get_Location_Inventory_Summary_By_Item_Name_api(
-        null,
+        formData.expectedDeliveryLocation,
         searchQuery
       );
 
@@ -129,7 +129,9 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
 
           const supplierItems = supplierItemResponse.data.result
             ? supplierItemResponse.data.result.filter(
-                (si) => si.itemMasterId !== summary.itemMasterId
+                (si) =>
+                  si.itemMasterId !== summary.itemMasterId &&
+                  si.supplierName !== formData?.selectedSupplier?.supplierName
               )
             : [];
 
@@ -730,7 +732,9 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
 
             const supplierItems = supplierItemResponse.data.result
               ? supplierItemResponse.data.result.filter(
-                  (si) => si.itemMasterId !== item.itemMasterId
+                  (si) =>
+                    si.itemMasterId !== item.itemMasterId &&
+                    si.supplierName !== formData?.selectedSupplier?.supplierName
                 )
               : [];
 

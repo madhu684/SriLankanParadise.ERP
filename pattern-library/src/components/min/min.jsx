@@ -30,6 +30,10 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
     isLocationInventoriesLoading,
     isLocationInventoriesError,
     locationInventories,
+    searchTerm,
+    availableItems,
+    isItemsLoading,
+    isItemsError,
     setSearchByMrn,
     setSearchByWithoutMrn,
     handleInputChange,
@@ -41,11 +45,8 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
     handleStatusChange,
     setMrnSearchTerm,
     handleResetMrn,
-    searchTerm,
     setSearchTerm,
-    availableItems,
-    isItemsLoading,
-    isItemsError,
+    handleModeChange,
     handleAddDummyItem,
   } = useMin({
     onFormSubmit: () => {
@@ -148,10 +149,7 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                 className="form-check-input"
                 id="searchByMrn"
                 checked={searchByMrn}
-                onChange={() => {
-                  setSearchByMrn(true);
-                  setSearchByWithoutMrn(false);
-                }}
+                onChange={() => handleModeChange("mrn")}
               />
               <label className="form-check-label" htmlFor="searchByMrn">
                 Search Using MRN
@@ -163,10 +161,7 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                 className="form-check-input"
                 id="searchByWithoutMrn"
                 checked={searchByWithoutMrn}
-                onChange={() => {
-                  setSearchByWithoutMrn(true);
-                  setSearchByMrn(false);
-                }}
+                onChange={() => handleModeChange("withoutMrn")}
               />
               <label className="form-check-label" htmlFor="searchByWithoutMrn">
                 Search By Without MRN
@@ -413,9 +408,7 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                         onClick={() => handleAddDummyItem(item)}
                         style={{ cursor: "pointer" }} // Indicate clickable behavior
                       >
-                        <span>
-                          {item.itemName} – Stock: {item.stockInHand}
-                        </span>
+                        <span>{item.itemName}</span>
                       </li>
                     ))}
                   </ul>
@@ -435,8 +428,8 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                 <tr>
                   <th>Item Name</th>
                   <th>Unit</th>
-                  <th>Requested Quantity</th>
-                  <th>Remaining Quantity</th>
+                  {searchByMrn && formData.mrnId && <th>Requested Quantity</th>}
+                  <th>Stock In Hand</th>
                   <th>Item Batch</th>
                   <th>Dispatched Quantity</th>
                   <th>Action</th>
@@ -447,7 +440,7 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                   <tr key={index}>
                     <td>{item.name}</td>
                     <td>{item.unit}</td>
-                    <td>{item.quantity}</td>
+                    {searchByMrn && formData.mrnId && <td>{item.quantity}</td>}
                     <td>{item.remainingQuantity}</td>
                     <td>
                       <select
@@ -470,8 +463,7 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                               value={i.batchId}
                               disabled={i.stockInHand === 0}
                             >
-                              {i.itemBatch.batch.batchRef} - Stock in hand{" "}
-                              {i.stockInHand}
+                              {i.itemBatch.batch.batchRef}
                             </option>
                           ))}
                       </select>
