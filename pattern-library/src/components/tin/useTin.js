@@ -336,9 +336,9 @@ const useTin = ({ onFormSubmit }) => {
         issueType: "TIN",
         referenceNumber: generateReferenceNumber(),
         approvedUserId: null,
+        issuedLocationId: parseInt(selectedTrn?.requestedToLocationId) || null,
         permissionId: 1061,
-        fromLocationId: parseInt(selectedTrn?.requestedFromLocationId) || null,
-        toLocationId: parseInt(selectedTrn?.requestedToLocationId) || null,
+        //toLocationId: parseInt(selectedTrn?.requestedToLocationId) || null,
       };
 
       const response = await post_issue_master_api(TinData);

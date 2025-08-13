@@ -24,6 +24,8 @@
 
         public int? ApprovedUserId { get; set; }
 
+        public int? IssuedLocationId { get; set; }
+
         public int PermissionId { get; set; }
     }
 }

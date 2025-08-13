@@ -335,6 +335,8 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
       );
       await updateMrnState();
       queryClient.invalidateQueries(["tins", tinId]);
+      queryClient.invalidateQueries(["locationInventories", toLocationId]);
+      queryClient.invalidateQueries(["locationInventories", fromLocationId]);
       setRefetch(!refetch);
       setApprovalStatus("approved");
     } catch (error) {

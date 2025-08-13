@@ -30,8 +30,7 @@ const useMinApproval = ({ min, onFormSubmit }) => {
 
   const updateInventory = async (details, formattedDate, fromLocationId) => {
     try {
-      const locationId =
-        fromLocationId || sessionStorage.getItem("defaultLocationId") || "4";
+      const locationId = fromLocationId || 4;
       for (const detail of details) {
         const { itemMasterId, batchId, quantity } = detail;
 
@@ -115,7 +114,7 @@ const useMinApproval = ({ min, onFormSubmit }) => {
         await updateInventory(
           min.issueDetails,
           formattedDate,
-          min.fromLocationId
+          min.issuedLocationId
         );
 
         if (min.requisitionMasterId !== null) {
