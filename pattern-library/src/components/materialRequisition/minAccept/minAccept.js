@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
+  approve_requisition_master_api,
   get_issue_details_api,
   patch_issue_detail_api,
   patch_location_inventory_api,
@@ -71,6 +72,26 @@ const useMinAccept = ({ min, refetch, setRefetch, onFormSubmit }) => {
       ...prev,
       [issueDetailId]: newQuantity,
     }));
+  };
+
+  const getStatusLabel = () => {
+    let statusLabel = "Unknown Status";
+    if (min?.requisitionMaster?.isMINAccepted === false) {
+      statusLabel = "In Progress";
+    } else {
+      statusLabel = "Completed";
+    }
+    return statusLabel;
+  };
+
+  const getStatusBadgeClass = () => {
+    let statusClass = "bg-secondary";
+    if (min?.requisitionMaster?.isMINAccepted === false) {
+      statusClass = "bg-info";
+    } else {
+      statusClass = "bg-success";
+    }
+    return statusClass;
   };
 
   const mutation = useMutation({
@@ -149,6 +170,15 @@ const useMinAccept = ({ min, refetch, setRefetch, onFormSubmit }) => {
         isMINApproved: min?.requisitionMaster?.isMINApproved,
         isMINAccepted: true,
       });
+      if (min?.requisitionMaster?.status !== 5) {
+        await approve_requisition_master_api(min.requisitionMasterId, {
+          status: 5,
+          approvedBy: min?.requisitionMaster?.approvedBy,
+          approvedUserId: min?.requisitionMaster?.approvedUserId,
+          approvedDate: min?.requisitionMaster?.approvedDate,
+          permissionId: 1053,
+        });
+      }
     } catch (error) {
       console.error("Error updating MRN state:", error);
     }
@@ -250,9 +280,7 @@ const useMinAccept = ({ min, refetch, setRefetch, onFormSubmit }) => {
         setLoading(false);
       }, 3000);
     } finally {
-      if (approvalStatus !== "error") {
-        setLoading(false);
-      }
+      setLoading(false);
     }
   };
 
@@ -266,6 +294,8 @@ const useMinAccept = ({ min, refetch, setRefetch, onFormSubmit }) => {
     handleReceivedQuantityChange,
     handleReturnedQuantityChange,
     validateQuantities,
+    getStatusBadgeClass,
+    getStatusLabel,
   };
 };
 

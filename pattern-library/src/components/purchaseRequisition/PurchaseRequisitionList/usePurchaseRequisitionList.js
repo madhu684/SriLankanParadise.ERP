@@ -20,6 +20,9 @@ const usePurchaseRequisitionList = () => {
   const [showUpdatePRForm, setShowUpdatePRForm] = useState(false);
   const [showConvertPRForm, setShowConvertPRForm] = useState(false);
   const [PRDetail, setPRDetail] = useState("");
+  const [showDeletePRForm, setShowDeletePRForm] = useState(false);
+
+  const [refetch, setRefetch] = useState(false);
 
   const fetchUserPermissions = async () => {
     try {
@@ -107,7 +110,7 @@ const usePurchaseRequisitionList = () => {
 
   useEffect(() => {
     fetchData();
-  }, [isLoadingPermissions, userPermissions]);
+  }, [isLoadingPermissions, userPermissions, refetch]);
 
   const handleShowApprovePRModal = () => {
     setShowApprovePRModal(true);
@@ -184,25 +187,41 @@ const usePurchaseRequisitionList = () => {
     setShowConvertPRForm(true);
   };
 
+  // const handleRowSelect = (id) => {
+  //   const selectedRow = purchaseRequisitions.find(
+  //     (pr) => pr.purchaseRequisitionId === id
+  //   );
+  //   const isSelected = selectedRows.includes(id);
+
+  //   if (isSelected) {
+  //     setSelectedRows((prevSelected) =>
+  //       prevSelected.filter((selectedId) => selectedId !== id)
+  //     );
+  //     setSelectedRowData((prevSelectedData) =>
+  //       prevSelectedData.filter((data) => data.purchaseRequisitionId !== id)
+  //     );
+  //   } else {
+  //     setSelectedRows((prevSelected) => [...prevSelected, id]);
+  //     setSelectedRowData((prevSelectedData) => [
+  //       ...prevSelectedData,
+  //       selectedRow,
+  //     ]);
+  //   }
+  // };
   const handleRowSelect = (id) => {
-    const isSelected = selectedRows.includes(id);
     const selectedRow = purchaseRequisitions.find(
       (pr) => pr.purchaseRequisitionId === id
     );
+    const isSelected = selectedRows.includes(id);
 
     if (isSelected) {
-      setSelectedRows((prevSelected) =>
-        prevSelected.filter((selectedId) => selectedId !== id)
-      );
-      setSelectedRowData((prevSelectedData) =>
-        prevSelectedData.filter((data) => data.purchaseRequisitionId !== id)
-      );
+      // If already selected, uncheck it
+      setSelectedRows([]);
+      setSelectedRowData([]);
     } else {
-      setSelectedRows((prevSelected) => [...prevSelected, id]);
-      setSelectedRowData((prevSelectedData) => [
-        ...prevSelectedData,
-        selectedRow,
-      ]);
+      // Deselect previous and select only the new one
+      setSelectedRows([id]);
+      setSelectedRowData([selectedRow]);
     }
   };
 
@@ -239,11 +258,17 @@ const usePurchaseRequisitionList = () => {
   };
 
   const areAnySelectedRowsPending = (selectedRows) => {
-    return selectedRows.some(
-      (id) =>
-        purchaseRequisitions.find((pr) => pr.purchaseRequisitionId === id)
-          ?.status === 1
-    );
+    // return selectedRows.some(
+    //   (id) =>
+    //     purchaseRequisitions.find((pr) => pr.purchaseRequisitionId === id)
+    //       ?.status === 1
+    // );
+    return selectedRows.some((id) => {
+      const po = purchaseRequisitions.find(
+        (po) => po.purchaseRequisitionId === id
+      );
+      return po && (po.status === 0 || po.status === 1);
+    });
   };
 
   const areAnySelectedRowsApproved = (selectedRows) => {
@@ -280,6 +305,10 @@ const usePurchaseRequisitionList = () => {
     showConvertPRForm,
     isPermissionsError,
     permissionError,
+    showDeletePRForm,
+    refetch,
+    setRefetch,
+    setShowDeletePRForm,
     areAnySelectedRowsPending,
     areAnySelectedRowsApproved,
     setSelectedRows,

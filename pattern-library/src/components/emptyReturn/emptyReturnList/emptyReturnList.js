@@ -120,8 +120,11 @@ const useEmptyReturnsLogic = () => {
         const fetchedIds = inventory.data.result.map(
           (item) => item.locationInventoryId
         );
-
-        setInventories(inventory.data.result);
+        const filteredStock = inventory.data?.result?.filter(
+          (item) => item.stockInHand > 0
+        );
+        //setInventories(inventory.data.result);
+        setInventories(filteredStock);
       } else {
         setInventories([]);
       }

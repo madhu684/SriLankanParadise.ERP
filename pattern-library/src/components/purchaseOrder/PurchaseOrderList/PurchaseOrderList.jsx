@@ -8,6 +8,8 @@ import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
 import Pagination from "../../common/Pagination/Pagination";
 import { FaSearch } from "react-icons/fa";
+import ConfirmationModal from "../../confirmationModals/confirmationModal/confirmationModal";
+import PurchaseOrderDelete from "../PurchaseOrderDelete/PurchaseOrderDelete";
 
 const PurchaseOrderList = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -31,6 +33,9 @@ const PurchaseOrderList = () => {
     PODetail,
     isPermissionsError,
     permissionError,
+    showDeletePOForm,
+    refetch,
+    setRefetch,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleRowSelect,
@@ -47,6 +52,7 @@ const PurchaseOrderList = () => {
     handleUpdate,
     handleUpdated,
     handleClose,
+    setShowDeletePOForm,
   } = usePurchaseOrderList();
 
   //Handler for search input
@@ -144,14 +150,28 @@ const PurchaseOrderList = () => {
                 Approve
               </button>
             )}
-          {hasPermission("Update Purchase Order") && isAnyRowSelected && (
-            <button
-              className="btn btn-warning"
-              onClick={() => setShowUpdatePOForm(true)}
-            >
-              Edit
-            </button>
-          )}
+          {hasPermission("Update Purchase Order") &&
+            isAnyRowSelected &&
+            areAnySelectedRowsPending(selectedRows) &&
+            selectedRowData[0]?.status === 1 && (
+              <button
+                className="btn btn-warning"
+                onClick={() => setShowUpdatePOForm(true)}
+              >
+                Edit
+              </button>
+            )}
+          {hasPermission("Update Purchase Order") &&
+            isAnyRowSelected &&
+            areAnySelectedRowsPending(selectedRows) &&
+            selectedRowData[0]?.status === 1 && (
+              <button
+                className="btn btn-danger"
+                onClick={() => setShowDeletePOForm(true)}
+              >
+                Delete
+              </button>
+            )}
         </div>
       </div>
       <div className="d-flex justify-content-end mb-3">
@@ -172,8 +192,7 @@ const PurchaseOrderList = () => {
         <table className="table mt-2">
           <thead>
             <tr>
-              <th>
-              </th>
+              <th></th>
               <th>Reference No</th>
               <th>Ordered By</th>
               <th>Supplier Name</th>
@@ -194,7 +213,7 @@ const PurchaseOrderList = () => {
                       type="checkbox"
                       checked={selectedRows.includes(po.purchaseOrderId)}
                       onChange={() => handleRowSelect(po.purchaseOrderId)}
-                                    />
+                    />
                   </td>
                   <td>{po.referenceNo}</td>
                   <td>{po.orderedBy}</td>
@@ -271,6 +290,15 @@ const PurchaseOrderList = () => {
             show={showDetailPOModal}
             handleClose={handleCloseDetailPOModal}
             purchaseOrder={PODetail}
+          />
+        )}
+        {showDeletePOForm && (
+          <PurchaseOrderDelete
+            show={showDeletePOForm}
+            handleClose={() => setShowDeletePOForm(false)}
+            purchaseOrder={selectedRowData[0]}
+            refetch={refetch}
+            setRefetch={setRefetch}
           />
         )}
       </div>

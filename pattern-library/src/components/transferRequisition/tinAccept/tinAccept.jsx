@@ -6,7 +6,6 @@ import useTinAccept from "./tinAccept";
 import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 
 const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
-  const { getStatusLabel, getStatusBadgeClass } = useMinList();
   const {
     approvalStatus,
     loading,
@@ -17,6 +16,8 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
     handleReceivedQuantityChange,
     handleReturnedQuantityChange,
     validateQuantities,
+    getStatusBadgeClass,
+    getStatusLabel,
   } = useTinAccept({
     tin,
     refetch,
@@ -63,11 +64,7 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
           </h6>
           <div>
             TIN Status :{" "}
-            <span
-              className={`badge rounded-pill ${getStatusBadgeClass(
-                tin.status
-              )}`}
-            >
+            <span className={`badge rounded-pill ${getStatusBadgeClass()}`}>
               {getStatusLabel(tin.status)}
             </span>
           </div>
@@ -86,14 +83,8 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
             </p>
             <p>
               <strong>Transfer Accepting Status:</strong>{" "}
-              <span
-                className={`badge rounded-pill ${getStatusBadgeClass(
-                  parseInt(`${1}${tin.status.toString().charAt(0)}`, 10)
-                )}`}
-              >
-                {getStatusLabel(
-                  parseInt(`${1}${tin.status.toString().charAt(0)}`, 10)
-                )}
+              <span className={`badge rounded-pill ${getStatusBadgeClass()}`}>
+                {getStatusLabel()}
               </span>
             </p>
             {parseInt(tin.status.toString().charAt(1), 10) === 2 && (

@@ -1,4 +1,5 @@
 ﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using System.Threading.Tasks;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
@@ -24,5 +25,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task<IEnumerable<ItemMaster>> GetSubItemsByItemMasterId(int itemMaster);
 
         Task<IEnumerable<ItemMaster>> GetItemMastersByItemMasterIds(int[] itemMasterIds);
+
+        Task<IEnumerable<SameCategoryTypeSupplierItemDto>> GetSupplierItemsByTypeAndCategory(int companyId, int itemTypeId, int categoryId, int locationId);
     }
 }

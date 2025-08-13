@@ -1,7 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Consul;
+using Microsoft.EntityFrameworkCore;
 using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
 {
@@ -20,6 +22,23 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 _dbContext.SupplierItems.Add(supplierItem);
                 await _dbContext.SaveChangesAsync();
+            }
+            catch(Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task Delete(int itemMasterId)
+        {
+            try
+            {
+                var supplierItem = await _dbContext.SupplierItems.FirstOrDefaultAsync(x => x.ItemMasterId == itemMasterId);
+                if (supplierItem != null)
+                {
+                    _dbContext.SupplierItems.Remove(supplierItem);
+                    await _dbContext.SaveChangesAsync();
+                }
             }
             catch(Exception)
             {
@@ -52,6 +71,26 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                                         .ToListAsync();
 
                 return supplierItems.Any() ? supplierItems : null!;
+            }
+            catch(Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task Update(int itemMasterId, SupplierItem supplierItem)
+        {
+            try
+            {
+                var existingItem = await _dbContext.SupplierItems.FirstOrDefaultAsync(x => x.ItemMasterId == itemMasterId);
+                if (existingItem != null)
+                {
+                    
+                    existingItem.ItemMasterId = supplierItem.ItemMasterId;
+                    existingItem.SupplierId = supplierItem.SupplierId;
+
+                    await _dbContext.SaveChangesAsync();
+                }
             }
             catch(Exception)
             {

@@ -1,7 +1,6 @@
 import React from "react";
 import usePurchaseRequisitionUpdate from "./usePurchaseRequisitionUpdate";
 import CurrentDateTime from "../../currentDateTime/currentDateTime";
-import useCompanyLogoUrl from "../../companyLogo/useCompanyLogoUrl";
 import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
 import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
@@ -13,7 +12,7 @@ const PurchaseRequisitionUpdate = ({
 }) => {
   const {
     formData,
-    locations,
+    userLocations,
     submissionStatus,
     validFields,
     validationErrors,
@@ -47,8 +46,6 @@ const PurchaseRequisitionUpdate = ({
     },
   });
 
-  const companyLogoUrl = useCompanyLogoUrl();
-
   if (isLoading) {
     return <LoadingSpinner />;
   }
@@ -63,7 +60,11 @@ const PurchaseRequisitionUpdate = ({
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img src={companyLogoUrl} alt="Company Logo" height={30} />
+          <i
+            class="bi bi-arrow-left"
+            onClick={handleClose}
+            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+          ></i>
           <p>
             <CurrentDateTime />
           </p>
@@ -91,8 +92,8 @@ const PurchaseRequisitionUpdate = ({
 
       <form>
         <div className="row g-3 mb-3 d-flex justify-content-between">
+          {/* Requestor Information */}
           <div className="col-md-5">
-            {/* Requestor Information */}
             <h4>1. Requestor Information</h4>
             <div className="mb-3 mt-3">
               <label htmlFor="requestorName" className="form-label">
@@ -185,6 +186,43 @@ const PurchaseRequisitionUpdate = ({
               )}
             </div>
             <div className="mb-3">
+              <label htmlFor="expectedDeliveryLocation" className="form-label">
+                Delivery Location
+              </label>
+              <select
+                className={`form-select ${
+                  validFields.expectedDeliveryLocation ? "is-valid" : ""
+                } ${
+                  validationErrors.expectedDeliveryLocation ? "is-invalid" : ""
+                }`}
+                id="expectedDeliveryLocation"
+                value={formData?.expectedDeliveryLocation ?? ""}
+                onChange={(e) =>
+                  handleInputChange("expectedDeliveryLocation", e.target.value)
+                }
+              >
+                <option value="">Select Location</option>
+                {userLocations
+                  // .filter(
+                  //   (location) =>
+                  //     location.locationType.name === "Warehouse" &&
+                  //     location.parentId ===
+                  //       parseInt(sessionStorage.getItem("locationId"))
+                  // )
+                  .filter((ul) => ul?.location?.locationTypeId === 2)
+                  .map((ul) => (
+                    <option key={ul.locationId} value={ul.locationId}>
+                      {ul?.location?.locationName}
+                    </option>
+                  ))}
+              </select>
+              {validationErrors.expectedDeliveryLocation && (
+                <div className="invalid-feedback">
+                  {validationErrors.expectedDeliveryLocation}
+                </div>
+              )}
+            </div>
+            <div className="mb-3">
               <label htmlFor="email" className="form-label">
                 Email
               </label>
@@ -227,8 +265,8 @@ const PurchaseRequisitionUpdate = ({
               )}
             </div>
           </div>
+          {/* Request Information */}
           <div className="col-md-5">
-            {/* Request Information */}
             <h4>2. Request Information</h4>
             <div className="mb-3 mt-3">
               <label htmlFor="requisitionDate" className="form-label">
@@ -301,46 +339,6 @@ const PurchaseRequisitionUpdate = ({
               )}
             </div>
             <div className="mb-3">
-              <label htmlFor="expectedDeliveryLocation" className="form-label">
-                Expected Delivery Location
-              </label>
-              <select
-                className={`form-select ${
-                  validFields.expectedDeliveryLocation ? "is-valid" : ""
-                } ${
-                  validationErrors.expectedDeliveryLocation ? "is-invalid" : ""
-                }`}
-                id="expectedDeliveryLocation"
-                value={formData?.expectedDeliveryLocation ?? ""}
-                onChange={(e) =>
-                  handleInputChange("expectedDeliveryLocation", e.target.value)
-                }
-              >
-                <option value="">Select Location</option>
-                {locations
-                  // .filter(
-                  //   (location) =>
-                  //     location.locationType.name === "Warehouse" &&
-                  //     location.parentId ===
-                  //       parseInt(sessionStorage.getItem("locationId"))
-                  // )
-                  .filter((location) => location.locationTypeId === 2)
-                  .map((location) => (
-                    <option
-                      key={location.locationId}
-                      value={location.locationId}
-                    >
-                      {location.locationName}
-                    </option>
-                  ))}
-              </select>
-              {validationErrors.expectedDeliveryLocation && (
-                <div className="invalid-feedback">
-                  {validationErrors.expectedDeliveryLocation}
-                </div>
-              )}
-            </div>
-            <div className="mb-3">
               <label htmlFor="referenceNumber" className="form-label">
                 Reference Number
               </label>
@@ -358,6 +356,31 @@ const PurchaseRequisitionUpdate = ({
           </div>
         </div>
 
+        {formData.selectedSupplier && (
+          <div className="row g-3 mb-3 d-flex justify-content-between">
+            {/* Supplier tagging */}
+            <div className="col-md-5">
+              <h4>Supplier Information</h4>
+              <div className="mb-3 mt-3">
+                <label htmlFor="supplier" className="form-label">
+                  Supplier
+                </label>
+              </div>
+              <div className="card mb-3">
+                <div className="card-header">Selected Supplier</div>
+                <div className="card-body">
+                  <p>Supplier Name: {formData.selectedSupplier.supplierName}</p>
+                  <p>
+                    Contact Person: {formData.selectedSupplier.contactPerson}
+                  </p>
+                  <p>Phone: {formData.selectedSupplier.phone}</p>
+                  <p>Email: {formData.selectedSupplier.email}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Item Details */}
         <h4>3. Item Details</h4>
         <div className="col-md-5">
@@ -373,6 +396,7 @@ const PurchaseRequisitionUpdate = ({
                 placeholder="Search for an item..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                disabled={formData.selectedSupplier}
               />
               {searchTerm && (
                 <span

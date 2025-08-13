@@ -28,8 +28,8 @@ const useTransferRequisitionApproval = ({ onFormSubmit }) => {
       const formattedDate = currentDate.toISOString();
       const approvalData = {
         status: 2,
-        approvedBy: sessionStorage.getItem("username"), //username
-        approvedUserId: sessionStorage.getItem("userId"), //userid
+        approvedBy: sessionStorage.getItem("username"),
+        approvedUserId: sessionStorage.getItem("userId"),
         approvedDate: formattedDate,
         permissionId: 1053,
       };

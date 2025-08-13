@@ -6,7 +6,6 @@ import useMinAccept from "./minAccept";
 import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 
 const MinAccept = ({ refetch, setRefetch, show, handleClose, min }) => {
-  const { getStatusLabel, getStatusBadgeClass } = useMinList();
   const {
     approvalStatus,
     loading,
@@ -17,6 +16,8 @@ const MinAccept = ({ refetch, setRefetch, show, handleClose, min }) => {
     handleReceivedQuantityChange,
     handleReturnedQuantityChange,
     validateQuantities,
+    getStatusBadgeClass,
+    getStatusLabel,
   } = useMinAccept({
     min,
     refetch,
@@ -63,12 +64,8 @@ const MinAccept = ({ refetch, setRefetch, show, handleClose, min }) => {
           </h6>
           <div>
             MIN Status :{" "}
-            <span
-              className={`badge rounded-pill ${getStatusBadgeClass(
-                min.status
-              )}`}
-            >
-              {getStatusLabel(min.status)}
+            <span className={`badge rounded-pill ${getStatusBadgeClass()}`}>
+              {getStatusLabel()}
             </span>
           </div>
         </div>
@@ -86,14 +83,8 @@ const MinAccept = ({ refetch, setRefetch, show, handleClose, min }) => {
             </p>
             <p>
               <strong>Material Accepting Status:</strong>{" "}
-              <span
-                className={`badge rounded-pill ${getStatusBadgeClass(
-                  parseInt(`${1}${min.status.toString().charAt(0)}`, 10)
-                )}`}
-              >
-                {getStatusLabel(
-                  parseInt(`${1}${min.status.toString().charAt(0)}`, 10)
-                )}
+              <span className={`badge rounded-pill ${getStatusBadgeClass()}`}>
+                {getStatusLabel()}
               </span>
             </p>
             {parseInt(min.status.toString().charAt(1), 10) === 2 && (

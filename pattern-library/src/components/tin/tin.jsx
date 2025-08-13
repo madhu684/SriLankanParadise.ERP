@@ -294,7 +294,7 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
                   <th>Item Name</th>
                   <th>Unit</th>
                   <th>Requested Quantity</th>
-                  <th>Remaining Quantity</th>
+                  <th>Stock In Hand</th>
                   <th>Item Batch</th>
                   <th>Dispatched Quantity</th>
                   <th>Action</th>
@@ -328,8 +328,7 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
                               value={batch.batchId}
                               disabled={batch.stockInHand === 0}
                             >
-                              {batch.itemBatch.batch.batchRef} - Stock in hand{" "}
-                              {batch.stockInHand}
+                              {batch.itemBatch.batch.batchRef}
                             </option>
                           ))}
                       </select>

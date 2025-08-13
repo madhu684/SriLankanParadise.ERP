@@ -16,6 +16,8 @@ const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
     manageItem,
     showManageItemModal,
     grnTypeDisplayMap,
+    isLoadingPurchaseOrder,
+    isLoadingPurchaseRequisition,
     handleApprove,
     handleCostPriceChange,
     handleSellingPriceChange,
@@ -209,7 +211,12 @@ const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
             <Button
               variant="success"
               onClick={() => handleApprove(grn.grnMasterId)}
-              disabled={loading || approvalStatus !== null}
+              disabled={
+                isLoadingPurchaseOrder ||
+                isLoadingPurchaseRequisition ||
+                loading ||
+                approvalStatus !== null
+              }
             >
               {loading && approvalStatus === null ? (
                 <ButtonLoadingSpinner text="Approving..." />

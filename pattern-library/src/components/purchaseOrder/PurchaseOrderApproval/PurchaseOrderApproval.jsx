@@ -25,6 +25,7 @@ const PurchaseOrderApproval = ({
     commonChargesAndDeductions,
     alertRef,
     loading,
+    isLoadingPurchaseRequisition,
     handleApprove,
     calculateSubTotal,
   } = usePurchaseOrderApproval({
@@ -262,7 +263,9 @@ const PurchaseOrderApproval = ({
         <Button
           variant="success"
           onClick={() => handleApprove(purchaseOrder.purchaseOrderId)}
-          disabled={loading || approvalStatus !== null}
+          disabled={
+            loading || isLoadingPurchaseRequisition || approvalStatus !== null
+          }
         >
           {loading && approvalStatus === null ? (
             <ButtonLoadingSpinner text="Approving..." />

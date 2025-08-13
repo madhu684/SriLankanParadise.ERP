@@ -42,10 +42,12 @@ public partial class PurchaseRequisition
     public DateTime? CreatedDate { get; set; }
 
     public DateTime? LastUpdatedDate { get; set; }
+    public int? SupplierId { get; set; }
 
     public virtual Location? DepartmentNavigation { get; set; }
 
     public virtual Location ExpectedDeliveryLocationNavigation { get; set; } = null!;
+    public virtual Supplier? Supplier { get; set; }
 
     public virtual ICollection<PurchaseRequisitionDetail> PurchaseRequisitionDetails { get; set; } = new List<PurchaseRequisitionDetail>();
 }

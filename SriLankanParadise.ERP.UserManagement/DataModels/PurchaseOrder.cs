@@ -33,6 +33,8 @@ public partial class PurchaseOrder
 
     public DateTime? LastUpdatedDate { get; set; }
 
+    public int? PurchaseRequisitionId { get; set; }
+
     public virtual ICollection<GrnMaster> GrnMasters { get; set; } = new List<GrnMaster>();
 
     public virtual ICollection<PurchaseOrderDetail> PurchaseOrderDetails { get; set; } = new List<PurchaseOrderDetail>();

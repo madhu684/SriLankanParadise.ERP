@@ -397,3 +397,23 @@ export const update_empty_return_api = async (
     throw error;
   }
 };
+
+export const get_supplier_items_by_type_category_api = async (
+  companyId,
+  itemTypeId,
+  categoryId,
+  locationId
+) => {
+  try {
+    const response = await api.get(
+      `/itemMaster/GetSupplierItemsByTypeAndCategory/${companyId}/${itemTypeId}/${categoryId}/${locationId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

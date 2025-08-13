@@ -30,6 +30,8 @@ const usePurchaseRequisitionUpdate = ({
     itemDetails: [],
     attachments: [],
     totalAmount: 0,
+    supplierId: "",
+    selectedSupplier: "",
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -73,7 +75,7 @@ const usePurchaseRequisitionUpdate = ({
   };
 
   const {
-    data: userLocations,
+    data: userLocations = [],
     isLoading: isUserLocationsLoading,
     isError: isUserLocationsError,
     error: userLocationsError,
@@ -127,7 +129,9 @@ const usePurchaseRequisitionUpdate = ({
       purchaseRequisitionId:
         deepCopyPurchaseRequisition?.purchaseRequisitionId ?? "",
       requestorName: deepCopyPurchaseRequisition?.requestedBy ?? "",
-      department: deepCopyPurchaseRequisition?.department ?? "",
+      department:
+        deepCopyPurchaseRequisition?.departmentNavigation?.locationName ?? "",
+      departmentLocation: deepCopyPurchaseRequisition?.department ?? "",
       email: deepCopyPurchaseRequisition?.email ?? "",
       contactNumber: deepCopyPurchaseRequisition?.contactNo ?? "",
       expectedDeliveryLocation:
@@ -143,6 +147,8 @@ const usePurchaseRequisitionUpdate = ({
         deepCopyPurchaseRequisition?.purchaseRequisitionDetails ?? [],
       attachments: deepCopyPurchaseRequisition?.attachments ?? [],
       totalAmount: deepCopyPurchaseRequisition?.totalAmount ?? "",
+      supplierId: deepCopyPurchaseRequisition?.supplierId ?? null,
+      selectedSupplier: deepCopyPurchaseRequisition?.supplier ?? null,
     });
   }, [purchaseRequisition]);
 
@@ -418,7 +424,8 @@ const usePurchaseRequisitionUpdate = ({
         const purchaseRequisitionData = {
           requestedBy: formData.requestorName,
           requestedUserId: sessionStorage.getItem("userId"),
-          department: purchaseRequisition?.department,
+          department:
+            formData.departmentLocation ?? purchaseRequisition?.department,
           email: formData.email,
           contactNo: formData.contactNumber,
           requisitionDate: formData.requisitionDate,
@@ -434,6 +441,7 @@ const usePurchaseRequisitionUpdate = ({
           companyId: sessionStorage.getItem("companyId"),
           createdDate: formData.createdDate,
           lastUpdatedDate: lastUpdatedDate,
+          supplierId: formData.supplierId,
           permissionId: 16,
         };
 
@@ -650,6 +658,7 @@ const usePurchaseRequisitionUpdate = ({
     loading,
     loadingDraft,
     userDepartments,
+    userLocations,
     handleInputChange,
     handleDepartmentChange,
     handleItemDetailsChange,

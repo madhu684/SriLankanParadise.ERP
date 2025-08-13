@@ -71,5 +71,40 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpPut("{itemMasterId}")]
+        public async Task<ApiResponseModel> UpdateSupplierItem(int itemMasterId, SupplierItemRequestModel supplierItemRequestModel)
+        {
+            try
+            {
+                var supplierItem = _mapper.Map<SupplierItem>(supplierItemRequestModel);
+                await _supplierItemService.Update(itemMasterId, supplierItem);
+                _logger.LogInformation(LogMessages.SupplierItemUpdated);
+                AddResponseMessage(Response, LogMessages.SupplierItemUpdated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpDelete("{itemMasterId}")]
+        public async Task<ApiResponseModel> DeleteSupplierItem(int itemMasterId)
+        {
+            try
+            {
+                await _supplierItemService.Delete(itemMasterId);
+                _logger.LogInformation(LogMessages.SupplierItemDeleted);
+                AddResponseMessage(Response, LogMessages.SupplierItemDeleted, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

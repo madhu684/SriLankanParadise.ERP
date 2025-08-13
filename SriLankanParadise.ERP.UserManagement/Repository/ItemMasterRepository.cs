@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
@@ -13,6 +14,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             _dbContext = dbContext;
         }
+
         public async Task AddItemMaster(ItemMaster itemMaster)
         {
             try
@@ -45,7 +47,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
-
 
         public async Task<IEnumerable<ItemMaster>> GetItemMastersByCompanyId(int companyId)
         {
@@ -122,9 +123,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
-
-
-
 
         public async Task<ItemMaster> GetItemMasterByItemMasterId(int itemMasterId)
         {
@@ -251,6 +249,80 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ToListAsync();
 
                 return itemMaster;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<SameCategoryTypeSupplierItemDto>> GetSupplierItemsByTypeAndCategory(int companyId, int itemTypeId, int categoryId, int locationId)
+        {
+            //try
+            //{
+            //    var items = await _dbContext.ItemMasters
+            //        .Include(im => im.Supplier)
+            //        .Include(im => im.Category)
+            //        .Include(im => im.ItemType)
+            //        .Where(im => im.Status == true
+            //            && im.ItemTypeId == itemTypeId
+            //            && im.CategoryId == categoryId
+            //            && im.CompanyId == companyId
+            //            && im.SupplierId != null)
+            //        .Join(_dbContext.SupplierItems,
+            //            im => im.ItemMasterId,
+            //            si => si.ItemMasterId,
+            //            (im, si) => new SameCategoryTypeSupplierItemDto
+            //            {
+            //                ItemMasterId = im.ItemMasterId,
+            //                ItemName = im.ItemName,
+            //                ItemCode = im.ItemCode,
+            //                UnitPrice = im.UnitPrice,
+            //                SellingPrice = im.SellingPrice,
+            //                SupplierName = im.Supplier.SupplierName,
+            //                CategoryName = im.Category.CategoryName,
+            //                ItemTypeName = im.ItemType != null ? im.ItemType.Name : null
+            //            })
+            //        .ToListAsync();
+
+            //    return items.Any() ? items : new List<SameCategoryTypeSupplierItemDto>();
+            //}
+            try
+            {
+                var items = await _dbContext.ItemMasters
+                    .Include(im => im.Supplier)
+                    .Include(im => im.Category)
+                    .Include(im => im.ItemType)
+                    .Include(im => im.Unit)
+                    .Where(im => im.Status == true
+                        && im.ItemTypeId == itemTypeId
+                        && im.CategoryId == categoryId
+                        && im.CompanyId == companyId
+                        && im.SupplierId != null)
+                    .Join(_dbContext.SupplierItems,
+                        im => im.ItemMasterId,
+                        si => si.ItemMasterId,
+                        (im, si) => new { ItemMaster = im, SupplierItem = si })
+                    .GroupJoin(_dbContext.LocationInventories.Where(li => li.LocationId == locationId),
+                        joined => joined.ItemMaster.ItemMasterId,
+                        li => li.ItemMasterId,
+                        (joined, locationInventories) => new { joined.ItemMaster, joined.SupplierItem, LocationInventory = locationInventories.FirstOrDefault() })
+                    .Select(joined => new SameCategoryTypeSupplierItemDto
+                    {
+                        ItemMasterId = joined.ItemMaster.ItemMasterId,
+                        ItemName = joined.ItemMaster.ItemName,
+                        ItemCode = joined.ItemMaster.ItemCode,
+                        UnitPrice = joined.ItemMaster.UnitPrice,
+                        SellingPrice = joined.ItemMaster.SellingPrice,
+                        SupplierName = joined.ItemMaster.Supplier.SupplierName,
+                        CategoryName = joined.ItemMaster.Category.CategoryName,
+                        ItemTypeName = joined.ItemMaster.ItemType != null ? joined.ItemMaster.ItemType.Name : null,
+                        StockInHand = joined.LocationInventory != null ? joined.LocationInventory.StockInHand : 0,
+                        UnitName = joined.ItemMaster.Unit != null ? joined.ItemMaster.Unit.UnitName : null
+                    })
+                    .ToListAsync();
+
+                return items.Any() ? items : new List<SameCategoryTypeSupplierItemDto>();
             }
             catch (Exception)
             {

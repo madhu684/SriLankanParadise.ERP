@@ -78,9 +78,19 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             return await _locationInventoryRepository.GetSumLocationInventoriesByLocationIdItemMasterId(locationId, itemMasterId);
         }
 
-        public async Task<IEnumerable<LocationInventorySummary>> GetLowStockItems()
+        public async Task<IEnumerable<LocationInventorySummary>> GetLowStockItems(int? supplierId = null, int? locationId = null)
         {
-            return await _locationInventoryRepository.GetLowStockItems();
+            return await _locationInventoryRepository.GetLowStockItems(supplierId, locationId);
+        }
+
+        public async Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByItemName(int? locationId, string itemName)
+        {
+            return await _locationInventoryRepository.GetSumLocationInventoriesByItemName(locationId, itemName);
+        }
+
+        public async Task<IEnumerable<LocationInventorySummary>> GetLowStockItemsByLocationOnly(int locationId)
+        {
+            return await _locationInventoryRepository.GetLowStockItemsByLocationOnly(locationId);
         }
 
         public async Task ReduceInventoryByFIFO(int locationId, int itemMasterId, int quantity)

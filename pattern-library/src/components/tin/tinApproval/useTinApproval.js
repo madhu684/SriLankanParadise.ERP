@@ -136,15 +136,15 @@ const useTinApproval = ({ tin, onFormSubmit }) => {
   const handleApprove = async (tinId) => {
     try {
       setLoading(true);
-      const firstDigit = parseInt(tin.status.toString().charAt(0), 10); // Extract the first digit
-      const combinedStatus = parseInt(`${firstDigit}2`, 10);
+      // const firstDigit = parseInt(tin.status.toString().charAt(0), 10);
+      // const combinedStatus = parseInt(`${firstDigit}2`, 10);
       const currentDate = new Date();
       const formattedDate = currentDate.toISOString();
 
       const approvalData = {
-        status: combinedStatus,
-        approvedBy: sessionStorage.getItem("username"), //username
-        approvedUserId: sessionStorage.getItem("userId"), //userid
+        status: 52,
+        approvedBy: sessionStorage.getItem("username"),
+        approvedUserId: sessionStorage.getItem("userId"),
         approvedDate: formattedDate,
         permissionId: 1064,
       };

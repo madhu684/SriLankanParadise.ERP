@@ -50,7 +50,6 @@ const usePurchaseOrderUpdate = ({ purchaseOrder, onFormSubmit }) => {
       const response = await get_company_suppliers_api(
         sessionStorage.getItem("companyId")
       );
-      // Filter suppliers with status equal to 1 (active)
       const filteredSuppliers = response.data.result?.filter(
         (supplier) => supplier.status === 1
       );
@@ -179,13 +178,13 @@ const usePurchaseOrderUpdate = ({ purchaseOrder, onFormSubmit }) => {
             .map((charge) => {
               let value;
               //if (charge.chargesAndDeduction.percentage) {
-                // Calculate percentage value
-                value =
-                  (Math.abs(charge.appliedValue) /
-                    (item.unitPrice * item.quantity)) *
-                  100;
+              // Calculate percentage value
+              value =
+                (Math.abs(charge.appliedValue) /
+                  (item.unitPrice * item.quantity)) *
+                100;
               //} else {
-                //value = Math.abs(charge.appliedValue);
+              //value = Math.abs(charge.appliedValue);
               //}
               return {
                 id: charge.chargesAndDeduction.chargesAndDeductionId,
@@ -229,10 +228,10 @@ const usePurchaseOrderUpdate = ({ purchaseOrder, onFormSubmit }) => {
         .map((charge) => {
           let value;
           //if (charge.chargesAndDeduction.percentage) {
-            // Calculate percentage value based on subtotal
-            value = (Math.abs(charge.appliedValue) / subTotal) * 100;
+          // Calculate percentage value based on subtotal
+          value = (Math.abs(charge.appliedValue) / subTotal) * 100;
           //} else {
-            //value = Math.abs(charge.appliedValue);
+          //value = Math.abs(charge.appliedValue);
           //}
           console.log(value);
           return {

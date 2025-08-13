@@ -36,6 +36,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(pr => pr.PurchaseRequisitionDetails)
                     .ThenInclude(prd => prd.ItemMaster)
                     .ThenInclude(im => im.Unit)
+                    .Include(pr => pr.Supplier)
                     .Include(pr => pr.ExpectedDeliveryLocationNavigation).ToListAsync();
             }
             catch (Exception)
@@ -56,6 +57,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(im => im.Unit)
                     .Include(pr => pr.ExpectedDeliveryLocationNavigation)
                     .Include(pr => pr.DepartmentNavigation)
+                    .Include(pr => pr.Supplier)
                     .ToListAsync();
 
                 if (purchaseRequisitions.Any())
@@ -106,6 +108,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(im => im.Unit)
                     .Include(pr => pr.ExpectedDeliveryLocationNavigation)
                     .Include(pr => pr.DepartmentNavigation)
+                    .Include(pr => pr.Supplier)
                     .FirstOrDefaultAsync();
 
                 return purchaseRequisition;
@@ -129,6 +132,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(im => im.Unit)
                     .Include(pr => pr.ExpectedDeliveryLocationNavigation)
                     .Include(pr => pr.DepartmentNavigation)
+                    .Include(pr => pr.Supplier)
                     .ToListAsync();
 
                 
@@ -160,6 +164,53 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             catch (Exception)
             {
 
+                throw;
+            }
+        }
+
+        public async Task DeletePurchaseOrder(int purchaseRequisitionId)
+        {
+            try
+            {
+                var purchaseRequisition = await _dbContext.PurchaseRequisitions.FirstOrDefaultAsync(pr => pr.PurchaseRequisitionId == purchaseRequisitionId);
+
+                if (purchaseRequisition == null)
+                {
+                    throw new KeyNotFoundException($"Purchase order with ID {purchaseRequisitionId} not found");
+                }
+
+                var strategy = _dbContext.Database.CreateExecutionStrategy();
+
+                await strategy.ExecuteAsync(async () =>
+                {
+                    using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+                    try
+                    {
+                        var purchaseRequisitionDetails = await _dbContext.PurchaseRequisitionDetails
+                            .Where(pod => pod.PurchaseRequisitionId == purchaseRequisitionId)
+                            .ToListAsync();
+
+                        if (purchaseRequisitionDetails.Any())
+                        {
+                            _dbContext.PurchaseRequisitionDetails.RemoveRange(purchaseRequisitionDetails);
+                        }
+
+                        _dbContext.PurchaseRequisitions.Remove(purchaseRequisition);
+
+                        await _dbContext.SaveChangesAsync();
+
+                        await transaction.CommitAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        await transaction.RollbackAsync();
+                        throw new Exception($"Error deleting purchase order with ID {purchaseRequisitionId}", ex);
+                    }
+                });
+            }
+            catch(Exception)
+            {
                 throw;
             }
         }

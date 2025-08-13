@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import usePurchaseOrder from "./usePurchaseOrder";
 import CurrentDateTime from "../currentDateTime/currentDateTime";
 import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
@@ -7,6 +7,7 @@ import LoadingSpinner from "../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../errorComponent/errorComponent";
 import Supplier from "../supplier/supplier";
 import ToastMessage from "../toastMessage/toastMessage";
+import SupplierItemsModal from "./SupplierItemsModal"; // Import the new modal component
 
 const PurchaseOrder = ({
   handleClose,
@@ -14,6 +15,10 @@ const PurchaseOrder = ({
   purchaseRequisition,
   setShowCreatePOForm,
 }) => {
+  const [showSupplierItemsModal, setShowSupplierItemsModal] = useState(false);
+  const [selectedSupplierItems, setSelectedSupplierItems] = useState([]);
+  const [selectedItemName, setSelectedItemName] = useState("");
+
   const {
     formData,
     suppliers,
@@ -42,6 +47,8 @@ const PurchaseOrder = ({
     transactionTypesError,
     loading,
     loadingDraft,
+    showToast,
+    poGenerating,
     handleInputChange,
     handleSupplierChange,
     handleItemDetailsChange,
@@ -62,8 +69,7 @@ const PurchaseOrder = ({
     renderColumns,
     renderSubColumns,
     calculateTotalAmount,
-    handleGeneratePurchaseOrder, // New function to handle button click
-    showToast,
+    handleGeneratePurchaseOrder,
     setShowToast,
   } = usePurchaseOrder({
     onFormSubmit: () => {
@@ -72,6 +78,20 @@ const PurchaseOrder = ({
     },
     purchaseRequisition,
   });
+
+  // Handler for showing supplier items modal
+  const handleShowSupplierItems = (item) => {
+    setSelectedSupplierItems(item.supplierItems || []);
+    setSelectedItemName(item.name);
+    setShowSupplierItemsModal(true);
+  };
+
+  // Handler for closing supplier items modal
+  const handleCloseSupplierItemsModal = () => {
+    setShowSupplierItemsModal(false);
+    setSelectedSupplierItems([]);
+    setSelectedItemName("");
+  };
 
   //const companyLogoUrl = useCompanyLogoUrl();
 
@@ -307,10 +327,19 @@ const PurchaseOrder = ({
                   className="btn btn-info"
                   onClick={handleGeneratePurchaseOrder}
                   disabled={
-                    loading || loadingDraft || submissionStatus !== null
+                    poGenerating ||
+                    loadingDraft ||
+                    submissionStatus !== null ||
+                    formData.supplierId === null
                   }
                 >
-                  Generate Purchase Order
+                  {poGenerating ? (
+                    <div className="d-flex align-items-center w-100">
+                      <ButtonLoadingSpinner />
+                    </div>
+                  ) : (
+                    "Generate Purchase Order"
+                  )}
                 </button>
               </div>
             </div>
@@ -319,7 +348,7 @@ const PurchaseOrder = ({
                 <ToastMessage
                   show={showToast}
                   onClose={() => setShowToast(false)}
-                  type="danger"
+                  type="warning"
                   message="No any low-stock items found"
                 />
               )}
@@ -341,6 +370,7 @@ const PurchaseOrder = ({
                   className="form-control"
                   placeholder="Search for an item..."
                   value={searchTerm}
+                  disabled={!formData.supplierId}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
                 {searchTerm && (
@@ -437,6 +467,9 @@ const PurchaseOrder = ({
                   <th>Unit</th>
                   <th>Quantity</th>
                   <th>Unit Price</th>
+                  <th>Stock in Hand</th>
+                  <th>Reorder level</th>
+                  <th>Max order level</th>
                   {renderColumns()}
                   <th className="text-end">Total Price</th>
                   <th className="text-end">Action</th>
@@ -445,7 +478,7 @@ const PurchaseOrder = ({
               <tbody>
                 {formData.itemDetails.map((item, index) => (
                   <tr key={index}>
-                    <td>{item.name}</td>
+                    <td className="text-nowrap">{item.name}</td>
                     <td>{item.unit}</td>
                     <td>
                       <input
@@ -497,6 +530,9 @@ const PurchaseOrder = ({
                         </div>
                       )}
                     </td>
+                    <td>{item.totalStockInHand || 0}</td>
+                    <td>{item.minReOrderLevel || 0}</td>
+                    <td>{item.maxStockLevel || 0}</td>
                     {item.chargesAndDeductions.map((charge, chargeIndex) => (
                       <td key={chargeIndex}>
                         <input
@@ -530,13 +566,44 @@ const PurchaseOrder = ({
                     ))}
                     <td className="text-end">{item.totalPrice.toFixed(2)}</td>
                     <td className="text-end">
-                      <button
-                        type="button"
-                        className="btn btn-outline-danger"
-                        onClick={() => handleRemoveItem(index)}
-                      >
-                        Delete
-                      </button>
+                      <div className="d-flex gap-1">
+                        {/* Show Supplier Items button - only if supplierItems exist */}
+                        {/* {item.supplierItems &&
+                          item.supplierItems.length > 0 && (
+                            <button
+                              type="button"
+                              className="btn btn-outline-info btn-sm"
+                              onClick={() => handleShowSupplierItems(item)}
+                              disabled={item.supplierItems.length === 0}
+                              title="View Supplier Items"
+                            >
+                              <i className="bi bi-shop"></i>
+                            </button>
+                          )} */}
+                        <button
+                          type="button"
+                          className={`btn ${
+                            item?.supplierItems?.length === 0
+                              ? "btn-outline-secondary"
+                              : "btn-outline-info"
+                          } btn-sm`}
+                          onClick={() => handleShowSupplierItems(item)}
+                          disabled={item?.supplierItems?.length === 0}
+                          title="View Supplier Items"
+                        >
+                          <i className="bi bi-shop"></i>
+                        </button>
+
+                        {/* Delete button */}
+                        <button
+                          type="button"
+                          className="btn btn-outline-danger btn-sm"
+                          onClick={() => handleRemoveItem(index)}
+                          title="Delete Item"
+                        >
+                          <i className="bi bi-trash"></i>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -545,7 +612,7 @@ const PurchaseOrder = ({
                 <tr>
                   <td
                     colSpan={
-                      4 +
+                      7 +
                       formData.itemDetails[0].chargesAndDeductions.length -
                       1
                     }
@@ -559,7 +626,7 @@ const PurchaseOrder = ({
                 <tr>
                   <td
                     colSpan={
-                      4 +
+                      7 +
                       formData.itemDetails[0].chargesAndDeductions.length -
                       1
                     }
@@ -652,6 +719,15 @@ const PurchaseOrder = ({
           </button>
         </div>
       </form>
+
+      {/* Supplier Items Modal */}
+      <SupplierItemsModal
+        show={showSupplierItemsModal}
+        onClose={handleCloseSupplierItemsModal}
+        supplierItems={selectedSupplierItems}
+        itemName={selectedItemName}
+      />
+
       {showCreateSupplierMoalInParent && (
         <Supplier
           show={showCreateSupplierModal}

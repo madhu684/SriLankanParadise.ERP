@@ -18,7 +18,10 @@ const usePurchaseOrderList = () => {
     useState(false);
   const [showCreatePOForm, setShowCreatePOForm] = useState(false);
   const [showUpdatePOForm, setShowUpdatePOForm] = useState(false);
+  const [showDeletePOForm, setShowDeletePOForm] = useState(false);
   const [PODetail, setPODetail] = useState("");
+
+  const [refetch, setRefetch] = useState(false);
 
   const fetchUserPermissions = async () => {
     try {
@@ -98,7 +101,7 @@ const usePurchaseOrderList = () => {
 
   useEffect(() => {
     fetchData();
-  }, [isLoadingPermissions, userPermissions]);
+  }, [isLoadingPermissions, userPermissions, refetch]);
 
   const handleShowApprovePOModal = () => {
     setShowApprovePOModal(true);
@@ -191,20 +194,19 @@ const usePurchaseOrderList = () => {
   // };
 
   const handleRowSelect = (id) => {
-  const selectedRow = purchaseOrders.find((pr) => pr.purchaseOrderId === id);
-  const isSelected = selectedRows.includes(id);
+    const selectedRow = purchaseOrders.find((pr) => pr.purchaseOrderId === id);
+    const isSelected = selectedRows.includes(id);
 
-  if (isSelected) {
-    // If already selected, uncheck it
-    setSelectedRows([]);
-    setSelectedRowData([]);
-  } else {
-    // Deselect previous and select only the new one
-    setSelectedRows([id]);
-    setSelectedRowData([selectedRow]);
-  }
-};
-
+    if (isSelected) {
+      // If already selected, uncheck it
+      setSelectedRows([]);
+      setSelectedRowData([]);
+    } else {
+      // Deselect previous and select only the new one
+      setSelectedRows([id]);
+      setSelectedRowData([selectedRow]);
+    }
+  };
 
   const isAnyRowSelected = selectedRows.length === 1;
 
@@ -239,10 +241,14 @@ const usePurchaseOrderList = () => {
   };
 
   const areAnySelectedRowsPending = (selectedRows) => {
-    return selectedRows.some(
-      (id) =>
-        purchaseOrders.find((po) => po.purchaseOrderId === id)?.status === 1
-    );
+    // return selectedRows.some(
+    //   (id) =>
+    //     purchaseOrders.find((po) => po.purchaseOrderId === id)?.status === 1
+    // );
+    return selectedRows.some((id) => {
+      const po = purchaseOrders.find((po) => po.purchaseOrderId === id);
+      return po && (po.status === 0 || po.status === 1);
+    });
   };
 
   const hasPermission = (permissionName) => {
@@ -269,9 +275,11 @@ const usePurchaseOrderList = () => {
     showUpdatePOForm,
     userPermissions,
     PODetail,
-    isLoadingPermissions,
     isPermissionsError,
     permissionError,
+    showDeletePOForm,
+    refetch,
+    setRefetch,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleViewDetails,
@@ -289,6 +297,7 @@ const usePurchaseOrderList = () => {
     handleUpdate,
     handleUpdated,
     handleClose,
+    setShowDeletePOForm,
   };
 };
 

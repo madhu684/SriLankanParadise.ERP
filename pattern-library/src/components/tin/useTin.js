@@ -182,7 +182,8 @@ const useTin = ({ onFormSubmit }) => {
             name: requestItem.itemMaster?.itemName,
             unit: requestItem.itemMaster?.unit.unitName || "Unit",
             quantity: requestItem.quantity,
-            remainingQuantity: requestItem.quantity,
+            //remainingQuantity: requestItem.quantity,
+            remainingQuantity: 0,
             issuedQuantity: "",
             batchId: "",
           })

@@ -9,7 +9,10 @@ import {
   put_item_master_api,
 } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
-import { get_supplier_by_company_id_with_query_api } from "../../services/purchaseApi";
+import {
+  get_supplier_by_company_id_with_query_api,
+  post_supplier_item_api,
+} from "../../services/purchaseApi";
 
 const useItemMaster = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -546,6 +549,14 @@ const useItemMaster = ({ onFormSubmit }) => {
           } else {
             setSubmissionStatus("successSubmitted");
             console.log("Item master created successfully!", formData);
+          }
+
+          if (formData.supplierId !== null) {
+            const supplierData = {
+              supplierId: formData.supplierId,
+              itemMasterId: itemMasterId,
+            };
+            await post_supplier_item_api(supplierData);
           }
 
           setTimeout(() => {

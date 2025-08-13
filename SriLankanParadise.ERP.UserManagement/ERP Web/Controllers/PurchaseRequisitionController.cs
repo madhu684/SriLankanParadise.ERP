@@ -83,7 +83,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
-
         [HttpGet("GetPurchaseRequisitionsWithoutDraftsByCompanyId/{companyId}")]
         public async Task<ApiResponseModel> GetPurchaseRequisitionsWithoutDraftsByCompanyId(int companyId)
         {
@@ -233,5 +232,26 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
         }
 
+        [HttpDelete("{purchaseRequisitionId}")]
+        public async Task<ApiResponseModel> DeletePurchaseOrder(int purchaseRequisitionId)
+        {
+            try
+            {
+                var existingPurchaseRequisition = await _purchaseRequisitionService.GetPurchaseRequisitionByPurchaseRequisitionId(purchaseRequisitionId);
+                if (existingPurchaseRequisition == null)
+                {
+                    _logger.LogWarning(LogMessages.PurchaseRequisitionNotFound);
+                    return AddResponseMessage(Response, LogMessages.PurchaseRequisitionNotFound, null, true, HttpStatusCode.NotFound);
+                }
+                await _purchaseRequisitionService.DeletePurchaseOrder(existingPurchaseRequisition.PurchaseRequisitionId);
+                _logger.LogInformation(LogMessages.PurchaseRequisitionDeleted);
+                return AddResponseMessage(Response, LogMessages.PurchaseRequisitionDeleted, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
     }
 }

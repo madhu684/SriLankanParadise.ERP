@@ -327,7 +327,7 @@ const TransferRequisitionList = () => {
                       //       parseInt(sessionStorage.getItem("userId")))
                       // }
                       disabled={
-                        mr.status !== 2 ||
+                        mr.status === 1 ||
                         mr.isMINApproved === false ||
                         mr.requestedUserId !==
                           parseInt(sessionStorage.getItem("userId"))
