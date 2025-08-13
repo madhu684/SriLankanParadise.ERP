@@ -318,7 +318,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         }
 
         public async Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemMasterId(int? locationId, int itemMasterId)
-        public async Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemMasterId(int? locationId, int itemMasterId)
         {
             try
             {

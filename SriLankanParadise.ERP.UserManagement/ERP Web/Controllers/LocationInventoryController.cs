@@ -437,8 +437,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
-
-
         [HttpGet("GetLowStockItemsByLocationOnly/{locationId}")]
         public async Task<ApiResponseModel> GetLowStockItemsByLocationOnly(int locationId)
         {
