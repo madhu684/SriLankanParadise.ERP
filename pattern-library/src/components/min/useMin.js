@@ -38,6 +38,8 @@ const useMin = ({ onFormSubmit }) => {
   const [dummySearchTerm, setDummySearchTerm] = useState("");
   const [selectedLocationId, setSelectedLocationId] = useState(null);
 
+  const [noItembatchesError, setNoItembatchesError] = useState(false);
+
   // Reset search modes on component mount
   useEffect(() => {
     setSearchByMrn(false);
@@ -104,6 +106,10 @@ const useMin = ({ onFormSubmit }) => {
 
     if (!itemBatches || itemBatches.length === 0) {
       console.log("No batches available for this item in selected location");
+      setNoItembatchesError(true);
+      setSearchTerm("");
+      setDummySearchTerm("");
+      setTimeout(() => setNoItembatchesError(false), 3500);
       return;
     }
 
@@ -403,8 +409,8 @@ const useMin = ({ onFormSubmit }) => {
         issueType: "MIN",
         referenceNumber: generateReferenceNumber(),
         approvedUserId: null,
+        issuedLocationId: parseInt(selectedLocationId),
         permissionId: 1061,
-        // fromLocationId: parseInt(selectedLocationId),
         // toLocationId: searchByMrn
         //   ? parseInt(selectedMrn?.requestedToLocationId)
         //   : null,
@@ -612,10 +618,7 @@ const useMin = ({ onFormSubmit }) => {
   };
 
   console.log("FormData: ", formData);
-  console.log("Selected MRN: ", selectedMrn);
-  console.log("Selected Location ID: ", selectedLocationId);
   console.log("locationInventories: ", locationInventories);
-  console.log("userLocations: ", userLocations);
 
   return {
     formData,
@@ -640,6 +643,15 @@ const useMin = ({ onFormSubmit }) => {
     locationInventories: locationInventories || [],
     userLocations: userLocations || [],
     selectedLocationId,
+    searchByMrn,
+    searchByWithoutMrn,
+    searchTerm,
+    availableItems,
+    isItemsLoading,
+    isItemsError,
+    dummySearchTerm,
+    noItembatchesError,
+    setNoItembatchesError,
     handleItemDetailsChange,
     handleRemoveItem,
     handlePrint,
@@ -652,15 +664,8 @@ const useMin = ({ onFormSubmit }) => {
     setMrnSearchTerm,
     setSearchByMrn,
     setSearchByWithoutMrn,
-    searchByMrn,
-    searchByWithoutMrn,
-    searchTerm,
     setSearchTerm,
-    availableItems,
-    isItemsLoading,
-    isItemsError,
     handleAddDummyItem,
-    dummySearchTerm,
     setDummySearchTerm,
     handleSearchItemSelect,
     handleModeChange,

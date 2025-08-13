@@ -33,7 +33,10 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
     searchTerm,
     availableItems,
     isItemsLoading,
+    userLocations,
     isItemsError,
+    noItembatchesError,
+    setNoItembatchesError,
     setSearchByMrn,
     setSearchByWithoutMrn,
     handleInputChange,
@@ -347,7 +350,7 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
             </div>
           )} */}
         </div>
-        {selectedMrn === null && (
+        {selectedMrn === null && searchByWithoutMrn === false && (
           <div className="mb-3">
             <small className="form-text text-muted">
               Please select a material requisition to add item details.
@@ -395,6 +398,12 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                     </span>
                   )}
                 </div>
+                {noItembatchesError && (
+                  <span className="text-danger">
+                    No batches available for this item in user location,{" "}
+                    {userLocations[0]?.location?.locationName}
+                  </span>
+                )}
                 {isItemsLoading && <LoadingSpinner />}
                 {isItemsError && (
                   <ErrorComponent error="Error fetching items" />
