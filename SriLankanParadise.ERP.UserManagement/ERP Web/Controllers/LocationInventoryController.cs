@@ -414,6 +414,31 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpPost("reduce-inventory-fifo")]
+        public async Task<ApiResponseModel> ReduceInventoryByFIFO(ReduceInventoryRequestModel request)
+        {
+            try
+            {
+                await _locationInventoryService.ReduceInventoryByFIFO(request.LocationId, request.ItemMasterId, request.Quantity);
+
+                _logger.LogInformation("Inventory reduced successfully using FIFO method");
+                AddResponseMessage(Response, "Inventory reduced successfully", null, true, HttpStatusCode.OK);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex.Message);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.BadRequest);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+
+
         [HttpGet("GetLowStockItemsByLocationOnly/{locationId}")]
         public async Task<ApiResponseModel> GetLowStockItemsByLocationOnly(int locationId)
         {

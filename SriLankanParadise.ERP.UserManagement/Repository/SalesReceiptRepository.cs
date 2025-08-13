@@ -93,9 +93,17 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var salesReceipt = await _dbContext.SalesReceipts
                     .Where(sr => sr.SalesReceiptId == salesReceiptId)
                     .Include(sr => sr.PaymentMode)
-                    .Include(sr => sr.SalesReceiptSalesInvoices)
-                    .ThenInclude(srsi => srsi.SalesInvoice)
                     .FirstOrDefaultAsync();
+
+                if (salesReceipt != null)
+                {
+                    // Manually load all related invoices including write-offed ones
+                    // This ensures we get all invoices regardless of their status
+                    salesReceipt.SalesReceiptSalesInvoices = await _dbContext.SalesReceiptSalesInvoices
+                        .Where(srsi => srsi.SalesReceiptId == salesReceiptId)
+                        .Include(srsi => srsi.SalesInvoice) // This will include all invoices even with status 8
+                        .ToListAsync();
+                }
 
                 return salesReceipt;
             }

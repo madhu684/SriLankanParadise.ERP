@@ -1456,6 +1456,26 @@ export const get_sum_location_inventories_by_locationId_itemMasterId_api =
     }
   };
 
+export const get_sum_location_inventories_by_itemMasterId_api = async (
+  itemMasterId
+) => {
+  try {
+    const response = await api.get(
+      `/locationInventory/GetSumLocationInventoriesByLocationIdItemMasterId?itemMasterId=${itemMasterId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching sum location inventories for all locations:",
+      error
+    );
+    throw error;
+  }
+};
+
 export const get_Low_Stock_Items_api = async (
   supplierId = null,
   locationId = null
@@ -1471,6 +1491,19 @@ export const get_Low_Stock_Items_api = async (
     throw error;
   }
 };
+
+export const post_reduce_inventory_fifo_api = async (requestData) => {
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}/locationInventory/reduce-inventory-fifo`,
+      requestData
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
 
 export const get_Low_Stock_Items_for_location_api = async (locationId) => {
   try {

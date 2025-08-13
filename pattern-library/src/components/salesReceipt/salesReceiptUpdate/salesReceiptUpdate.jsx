@@ -41,7 +41,7 @@ const SalesReceiptUpdate = ({ handleClose, salesReceipt, handleUpdated }) => {
     setSiSearchTerm,
     calculateTotalAmountReceived,
     calculateTotalExcessAmountAmount,
-    calculateTotalShortAmountAmount,
+    calculateTotalOutstandingAmountAmount,
   } = useSalesReceiptUpdate({
     salesReceipt,
     onFormSubmit: () => {
@@ -338,7 +338,7 @@ const SalesReceiptUpdate = ({ handleClose, salesReceipt, handleUpdated }) => {
                     <th>Invoice Total</th>
                     <th>Amount Due</th>
                     <th>Excess Amount</th>
-                    <th>Short Amount</th>
+                    <th>Outstanding Amount</th>
                     <th>Amount Received</th>
                     <th className="text-end">Customer Balance</th>
                   </tr>
@@ -373,7 +373,7 @@ const SalesReceiptUpdate = ({ handleClose, salesReceipt, handleUpdated }) => {
                         <input
                           type="number"
                           className="form-control"
-                          value={item.shortAmount}
+                          value={item.outstandingAmount}
                           onChange={(e) => {
                             const value = parseFloat(e.target.value);
                             const positiveValue = isNaN(value)
@@ -382,7 +382,7 @@ const SalesReceiptUpdate = ({ handleClose, salesReceipt, handleUpdated }) => {
 
                             handleItemDetailsChange(
                               index,
-                              "shortAmount",
+                              "outstandingAmount",
                               positiveValue
                             );
                           }}
@@ -429,9 +429,9 @@ const SalesReceiptUpdate = ({ handleClose, salesReceipt, handleUpdated }) => {
                   </tr>
                   <tr>
                     <td colSpan="6"></td>
-                    <th>Total Short Amount</th>
+                    <th>Total Outstanding Amount</th>
                     <td className="text-end">
-                      {calculateTotalShortAmountAmount().toFixed(2)}
+                      {calculateTotalOutstandingAmountAmount().toFixed(2)}
                     </td>
                   </tr>
                   <tr>

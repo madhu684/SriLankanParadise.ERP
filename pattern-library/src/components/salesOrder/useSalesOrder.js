@@ -12,6 +12,11 @@ import {
   get_charges_and_deductions_by_company_id_api,
   post_charges_and_deductions_applied_api,
   get_transaction_types_api,
+  patch_location_inventory_api,
+  post_location_inventory_movement_api,
+  get_sum_location_inventories_by_locationId_itemMasterId_api,
+  get_user_locations_by_user_id_api,
+  post_reduce_inventory_fifo_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
@@ -33,6 +38,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
     salesPersonId: "",
     selectedSalesPerson: "",
     commonChargesAndDeductions: [],
+    //fifoBatchDetails: [],
   });
 
   const [submissionStatus, setSubmissionStatus] = useState(null);
@@ -51,6 +57,32 @@ const useSalesOrder = ({ onFormSubmit }) => {
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [warehouseLocationId, setWarehouseLocationId] = useState(null);
+
+  const fetchWarehouseLocation = async () => {
+    try {
+      const userId = sessionStorage.getItem("userId");
+      const response = await get_user_locations_by_user_id_api(userId);
+      const warehouseLocations = response.data.result.filter(
+        (userLocation) => userLocation.location.locationTypeId === 2
+      );
+
+      if (warehouseLocations.length > 0) {
+        const locationId = warehouseLocations[0].locationId;
+        setWarehouseLocationId(locationId);
+        return locationId;
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Error fetching warehouse location:", error);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    fetchWarehouseLocation();
+  }, []);
 
   const fetchItemBatches = async (itemMasterId) => {
     try {
@@ -63,16 +95,50 @@ const useSalesOrder = ({ onFormSubmit }) => {
       console.error("Error fetching item batches:", error);
     }
   };
+  const fetchLocationInventory = async (itemMasterId) => {
+    try {
+      let locationId = warehouseLocationId;
+
+      // If warehouseLocationId is not set, fetch it first
+      if (!locationId) {
+        locationId = await fetchWarehouseLocation();
+      }
+
+      if (!locationId || !itemMasterId) return null;
+
+      const response =
+        await get_sum_location_inventories_by_locationId_itemMasterId_api(
+          locationId,
+          itemMasterId
+        );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching location inventory:", error);
+      return null;
+    }
+  };
 
   const {
     data: itemBatches,
-    isLoading,
-    isError,
-    error,
+    isLoading: isBatchesLoading,
+    isError: isBatchesError,
+    error: batchesError,
     refetch: refetchItemBatches,
   } = useQuery({
     queryKey: ["itemBatches", formData.itemMasterId],
     queryFn: () => fetchItemBatches(formData.itemMasterId),
+  });
+
+  const {
+    data: locationInventory,
+    isLoading,
+    isError,
+    error,
+    refetch: refetchLocationInventory,
+  } = useQuery({
+    queryKey: ["locationInventory", formData.itemMasterId, warehouseLocationId], // Add warehouseLocationId
+    queryFn: () => fetchLocationInventory(formData.itemMasterId),
+    enabled: !!warehouseLocationId && !!formData.itemMasterId, // Only run when both are available
   });
 
   const fetchItems = async (companyId, searchQuery, itemType) => {
@@ -467,8 +533,8 @@ const useSalesOrder = ({ onFormSubmit }) => {
       const status = isSaveAsDraft ? 0 : 1;
       const isFormValid = validateForm();
       const currentDate = new Date().toISOString();
-      let allDetailsBatchSuccessful;
-      let allDetailsSuccessful;
+      let allDetailsBatchSuccessful = true;
+      let allDetailsSuccessful = true;
 
       if (isFormValid) {
         if (isSaveAsDraft) {
@@ -498,80 +564,140 @@ const useSalesOrder = ({ onFormSubmit }) => {
         console.log("Sale order data", salesOrderData);
         const response = await post_sales_order_api(salesOrderData);
         setReferenceNo(response.data.result.referenceNo);
-
         const salesOrderId = response.data.result.salesOrderId;
+        const locationId = warehouseLocationId;
+
+        // Replace your FIFO processing section with this corrected version:
+
+        // Replace your FIFO processing section with this corrected version:
 
         if (company.batchStockType === "FIFO") {
-          const batchUpdates = [];
-          const detailsPromises = [];
+          console.log("Processing FIFO inventory reduction...");
 
-          const itemDetailsBatchData = formData.itemDetails.map(
-            async (item) => {
-              let remainingQuantity = item.quantity;
-
-              for (const batch of item.batch) {
-                const quantityToConsume = Math.min(
-                  remainingQuantity,
-                  batch.tempQuantity
-                );
-
-                const itemBatchUpdateData = {
-                  batchId: batch.batchId,
-                  itemMasterId: batch.itemMasterId,
-                  costPrice: batch.costPrice,
-                  sellingPrice: batch.sellingPrice,
-                  status: batch.status,
-                  companyId: batch.companyId,
-                  createdBy: batch.createdBy,
-                  createdUserId: batch.createdUserId,
-                  tempQuantity: batch.tempQuantity - quantityToConsume,
-                  locationId: batch.locationId,
-                  expiryDate: batch.expiryDate,
-                  qty: batch.qty,
-                  permissionId: 1065,
-                };
-                console.log("Item Batch Update Data", itemBatchUpdateData);
-                batchUpdates.push(
-                  put_item_batch_api(
-                    batch.batchId,
-                    batch.itemMasterId,
-                    itemBatchUpdateData
-                  )
-                );
-
-                if (quantityToConsume > 0) {
-                  detailsPromises.push(
-                    post_sales_order_detail_api({
-                      itemBatchItemMasterId: batch.itemMasterId,
-                      itemBatchBatchId: batch.batchId,
-                      salesOrderId,
-                      quantity: quantityToConsume,
-                      unitPrice: item.unitPrice,
-                      totalPrice:
-                        (item.totalPrice / item.quantity) * quantityToConsume,
-                      permissionId: 25,
-                    })
+          // Validate stock availability before processing
+          const validateStockAvailability = async () => {
+            for (const item of formData.itemDetails) {
+              try {
+                const inventory =
+                  await get_sum_location_inventories_by_locationId_itemMasterId_api(
+                    locationId,
+                    item.itemMasterId
+                  );
+                if (
+                  !inventory.data.result ||
+                  inventory.data.result.totalStockInHand < item.quantity
+                ) {
+                  throw new Error(
+                    `Insufficient stock for ${item.name}. Available: ${
+                      inventory.data.result?.totalStockInHand || 0
+                    }, Required: ${item.quantity}`
                   );
                 }
-
-                remainingQuantity -= quantityToConsume;
-
-                if (remainingQuantity <= 0) break; // Stop iterating if all quantity consumed
+              } catch (error) {
+                throw error;
               }
             }
-          );
+          };
 
-          await Promise.all(itemDetailsBatchData);
+          await validateStockAvailability();
 
-          // Check if all details were successful
-          allDetailsBatchSuccessful = (await Promise.all(batchUpdates)).every(
-            (response) => response.status === 200
-          );
+          // Step 1: Reduce inventory using FIFO API (handles inventory movements automatically)
+          const fifoPromises = formData.itemDetails.map(async (item) => {
+            try {
+              console.log(
+                `Processing FIFO for item: ${item.name}, quantity: ${item.quantity}`
+              );
 
-          allDetailsSuccessful = (await Promise.all(detailsPromises)).every(
-            (response) => response.status === 201
-          );
+              // FIFO API only needs these 3 parameters
+              const fifoResponse = await post_reduce_inventory_fifo_api({
+                locationId: locationId,
+                itemMasterId: item.itemMasterId,
+                quantity: item.quantity,
+              });
+
+              console.log(`FIFO response for ${item.name}:`, fifoResponse.data);
+
+              if (fifoResponse.status !== 200) {
+                throw new Error(
+                  `FIFO reduction failed for item ${item.name}: ${
+                    fifoResponse.data?.message || "Unknown error"
+                  }`
+                );
+              }
+
+              return fifoResponse;
+            } catch (error) {
+              console.error(
+                `Error processing FIFO for item ${item.name}:`,
+                error
+              );
+              throw new Error(
+                `Failed to process inventory for ${item.name}: ${error.message}`
+              );
+            }
+          });
+
+          // Step 2: Create sales order details (still need to do this manually)
+          const detailsPromises = formData.itemDetails.map(async (item) => {
+            const detailsData = {
+              itemBatchItemMasterId: item.itemMasterId,
+              // Don't include itemBatchBatchId for FIFO since no specific batch is used
+              salesOrderId,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              totalPrice: item.totalPrice,
+              permissionId: 25,
+            };
+
+            console.log(
+              `Sales order detail payload for ${item.name}:`,
+              detailsData
+            );
+
+            return await post_sales_order_detail_api(detailsData);
+          });
+
+          // Wait for all operations to complete
+          try {
+            console.log(
+              "Waiting for all FIFO and detail operations to complete..."
+            );
+
+            const [fifoResponses, detailsResponses] = await Promise.all([
+              Promise.all(fifoPromises),
+              Promise.all(detailsPromises),
+            ]);
+
+            console.log("FIFO responses:", fifoResponses);
+            console.log("Sales order detail responses:", detailsResponses);
+
+            const allFifoSuccessful = fifoResponses.every(
+              (response) => response.status === 200
+            );
+
+            const allDetailsSuccessful = detailsResponses.every(
+              (response) => response.status === 201
+            );
+
+            if (!allFifoSuccessful || !allDetailsSuccessful) {
+              console.error("Operation results:", {
+                fifoSuccessful: allFifoSuccessful,
+                detailsSuccessful: allDetailsSuccessful,
+              });
+              throw new Error("Some FIFO operations failed");
+            }
+
+            // Set success flags
+            allDetailsSuccessful = true;
+            allDetailsBatchSuccessful = true;
+
+            console.log("FIFO processing completed successfully");
+          } catch (error) {
+            console.error("Error in FIFO processing:", error);
+            throw error;
+          }
         } else {
+          // Non-FIFO processing (unchanged)
           const itemDetailsBatchData = formData.itemDetails.map(
             async (item) => {
               const itemBatchUpdateData = {
@@ -583,7 +709,10 @@ const useSalesOrder = ({ onFormSubmit }) => {
                 companyId: item.batch.companyId,
                 createdBy: item.batch.createdBy,
                 createdUserId: item.batch.createdUserId,
-                tempQuantity: item.batch.tempQuantity - item.quantity,
+                tempQuantity: Math.max(
+                  0,
+                  item.batch.tempQuantity - item.quantity
+                ),
                 locationId: item.batch.locationId,
                 expiryDate: item.batch.expiryDate,
                 permissionId: 1065,
@@ -595,49 +724,87 @@ const useSalesOrder = ({ onFormSubmit }) => {
                 itemBatchUpdateData
               );
 
-              return detailsBatchApiResponse;
+              const locationUpdateResponse = await patch_location_inventory_api(
+                locationId,
+                item.itemMasterId,
+                item.batch.batchId,
+                "subtract",
+                {
+                  stockInHand: item.quantity,
+                  permissionId: 1089,
+                }
+              );
+
+              const locationMovementResponse =
+                await post_location_inventory_movement_api({
+                  movementTypeId: 2,
+                  transactionTypeId: 1,
+                  itemMasterId: item.itemMasterId,
+                  batchId: item.batch.batchId,
+                  locationId: locationId,
+                  date: new Date().toISOString(),
+                  qty: -Math.abs(item.quantity),
+                  permissionId: 1090,
+                  companyId: sessionStorage?.getItem("companyId") ?? null,
+                  createdBy: sessionStorage?.getItem("userId") ?? null,
+                  createdDate: new Date().toISOString(),
+                  referenceId: salesOrderId,
+                  referenceType: "SalesOrder",
+                });
+
+              return {
+                detailsBatchApiResponse,
+                locationUpdateResponse,
+                locationMovementResponse,
+              };
             }
           );
 
           const detailsBatchResponse = await Promise.all(itemDetailsBatchData);
-
           allDetailsBatchSuccessful = detailsBatchResponse.every(
-            (detailsResponse) => detailsResponse.status === 200
+            (response) => response.detailsBatchApiResponse.status === 200
+          );
+          const allLocationUpdatesSuccessful = detailsBatchResponse.every(
+            (response) => response.locationUpdateResponse.status === 200
+          );
+          const allLocationMovementsSuccessful = detailsBatchResponse.every(
+            (response) => response.locationMovementResponse.status === 201
           );
 
           const itemDetailsData = formData.itemDetails.map(async (item) => {
             const detailsData = {
               itemBatchItemMasterId: item.itemMasterId,
-              itemBatchBatchId: item.itemBatchId,
+              // Completely remove itemBatchBatchId
               salesOrderId,
               quantity: item.quantity,
-              unitPrice: item.unitPrice,
-              totalPrice: item.totalPrice,
+              unitPrice: parseFloat(item.unitPrice),
+              totalPrice: parseFloat(item.totalPrice),
               permissionId: 25,
             };
-
             const detailsApiResponse = await post_sales_order_detail_api(
               detailsData
             );
-
             return detailsApiResponse;
           });
 
           const detailsResponses = await Promise.all(itemDetailsData);
-
-          allDetailsSuccessful = detailsResponses.every(
-            (detailsResponse) => detailsResponse.status === 201
-          );
+          allDetailsSuccessful =
+            detailsResponses.every(
+              (detailsResponse) => detailsResponse.status === 201
+            ) &&
+            allLocationUpdatesSuccessful &&
+            allLocationMovementsSuccessful;
         }
 
+        // Process charges and deductions
         const postChargesAndDeductionsAppliedResponse =
           await postChargesAndDeductionsApplied(salesOrderId);
-
         const allAppliedSuccessful =
           postChargesAndDeductionsAppliedResponse.every(
             (detailsResponse) => detailsResponse.status === 201
           );
 
+        // Check final success
         if (
           allDetailsSuccessful &&
           allAppliedSuccessful &&
@@ -651,6 +818,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
             console.log("Sales order submitted successfully!", formData);
           }
 
+          refetchLocationInventory();
           setTimeout(() => {
             setSubmissionStatus(null);
             setLoading(false);
@@ -659,11 +827,22 @@ const useSalesOrder = ({ onFormSubmit }) => {
           }, 3000);
         } else {
           setSubmissionStatus("error");
+          console.error("Some operations failed:", {
+            allDetailsSuccessful,
+            allAppliedSuccessful,
+            allDetailsBatchSuccessful,
+          });
+          throw new Error("Some operations failed during submission");
         }
       }
     } catch (error) {
       console.error("Error submitting form:", error);
       setSubmissionStatus("error");
+      if (error.response?.data?.message) {
+        console.error("API Error:", error.response.data.message);
+      } else if (error.response?.data?.errors) {
+        console.error("Validation errors:", error.response.data.errors);
+      }
       setTimeout(() => {
         setSubmissionStatus(null);
         setLoading(false);
@@ -671,7 +850,6 @@ const useSalesOrder = ({ onFormSubmit }) => {
       }, 3000);
     }
   };
-
   const handleInputChange = (field, value) => {
     setFormData((prevFormData) => {
       // Check if the field belongs to commonChargesAndDeductions
@@ -889,137 +1067,212 @@ const useSalesOrder = ({ onFormSubmit }) => {
 
   // Handler to add the selected item to itemDetails
   const handleSelectItem = async (item) => {
+    // Set the current item selection
     setFormData((prevFormData) => ({
       ...prevFormData,
       itemMasterId: item.itemMasterId,
       itemMaster: item,
     }));
-    console.log(item, "dinusha item");
-    setSearchTerm(""); // Clear the search term
 
-    setSelectedBatch(null);
-    refetchItemBatches();
-    setValidFields({});
-    setValidationErrors({});
+    setSearchTerm("");
 
-    if (company.batchStockType === "FIFO") {
+    if (company?.batchStockType === "FIFO") {
+      // For FIFO, directly add the item without batch selection
+      const initializedCharges =
+        chargesAndDeductions
+          ?.filter((charge) => charge.isApplicableForLineItem)
+          ?.map((charge) => ({
+            id: charge.chargesAndDeductionId,
+            name: charge.displayName,
+            value: charge.amount || charge.percentage,
+            sign: charge.sign,
+            isPercentage: charge.percentage !== null,
+          })) || [];
+
+      // Get available stock for this item
+      try {
+        const inventory = await fetchLocationInventory(item.itemMasterId);
+        const availableStock = inventory?.totalStockInHand || 0;
+
+        if (availableStock <= 0) {
+          console.warn("No stock available for this item");
+          alert("No stock available for this item");
+          return;
+        }
+
+        // Get highest selling price from available batches
+        const batchesResponse = await fetchItemBatches(item.itemMasterId);
+        const highestSellingPrice =
+          batchesResponse?.reduce(
+            (maxPrice, batch) =>
+              batch.sellingPrice > maxPrice ? batch.sellingPrice : maxPrice,
+            0
+          ) || 0;
+
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          itemDetails: [
+            ...prevFormData.itemDetails,
+            {
+              itemMasterId: item.itemMasterId,
+              itemBatchId: null, // No specific batch for FIFO
+              name: item.itemName || "",
+              unit: item.unit?.unitName || "",
+              batchRef: "FIFO", // Indicate this is FIFO
+              quantity: 0,
+              unitPrice: highestSellingPrice,
+              totalPrice: 0.0,
+              chargesAndDeductions: initializedCharges,
+              batch: null, // No specific batch
+              tempQuantity: availableStock,
+            },
+          ],
+        }));
+      } catch (error) {
+        console.error("Error processing FIFO item:", error);
+        alert("Error processing item. Please try again.");
+      }
     } else {
+      // For non-FIFO, open batch selection modal
       openModal();
     }
   };
 
   const handleBatchSelection = (batchId) => {
-    const selectedBatchId = batchId;
-    console.log(selectedBatchId);
-    const batch = itemBatches.find(
-      (batch) => batch.batchId === parseInt(selectedBatchId, 10)
-    );
+    const selectedBatchId = parseInt(batchId, 10);
 
-    // Generate chargesAndDeductions array for the newly added item
-    const initializedCharges = chargesAndDeductions
-      .filter((charge) => charge.isApplicableForLineItem)
-      .map((charge) => ({
-        id: charge.chargesAndDeductionId,
-        name: charge.displayName,
-        value: charge.amount || charge.percentage,
-        sign: charge.sign,
-        isPercentage: charge.percentage !== null,
-      }));
-
-    // Ensure batch exists
-    if (batch) {
-      setSelectedBatch(batch);
-
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        itemDetails: [
-          ...prevFormData.itemDetails,
-          {
-            itemMasterId: batch.itemMasterId,
-            itemBatchId: batch.batchId,
-            name: formData.itemMaster.itemName,
-            unit: formData.itemMaster.unit.unitName,
-            batchRef: batch.batch.batchRef,
-            quantity: 0,
-            unitPrice: batch.sellingPrice,
-            totalPrice: 0.0,
-            chargesAndDeductions: initializedCharges,
-            batch: batch,
-            tempQuantity: batch.tempQuantity,
-          },
-        ],
-      }));
-    } else {
-      setSelectedBatch(null);
+    if (!formData.fifoBatchDetails || formData.fifoBatchDetails.length === 0) {
+      console.error("No batch details available");
+      return;
     }
-    closeModal();
-  };
 
-  const handleBatchSelectionFIFO = () => {
-    const sortedBatches = itemBatches?.sort((a, b) => {
-      return new Date(a.batch.date) - new Date(b.batch.date);
-    });
-
-    // Select the oldest batch
-    const selectedBatch = sortedBatches[0];
-
-    // Calculate total temporary quantity
-    const totalTempQuantity = sortedBatches.reduce(
-      (accumulator, currentBatch) => accumulator + currentBatch.tempQuantity,
-      0
+    const batch = formData.fifoBatchDetails.find(
+      (batch) => batch.batchId === selectedBatchId
     );
 
-    // Find the highest selling price among the batches
-    const highestSellingPrice = sortedBatches.reduce(
-      (maxPrice, currentBatch) =>
-        currentBatch.sellingPrice > maxPrice
-          ? currentBatch.sellingPrice
-          : maxPrice,
-      0
-    );
+    if (!batch) {
+      console.error("Batch not found");
+      return;
+    }
 
     // Generate chargesAndDeductions array for the newly added item
-    const initializedCharges = chargesAndDeductions
-      .filter((charge) => charge.isApplicableForLineItem)
-      .map((charge) => ({
-        id: charge.chargesAndDeductionId,
-        name: charge.displayName,
-        value: charge.amount || charge.percentage,
-        sign: charge.sign,
-        isPercentage: charge.percentage !== null,
-      }));
+    const initializedCharges =
+      chargesAndDeductions
+        ?.filter((charge) => charge.isApplicableForLineItem)
+        ?.map((charge) => ({
+          id: charge.chargesAndDeductionId,
+          name: charge.displayName,
+          value: charge.amount || charge.percentage,
+          sign: charge.sign,
+          isPercentage: charge.percentage !== null,
+        })) || [];
+
+    setSelectedBatch(batch);
 
     setFormData((prevFormData) => ({
       ...prevFormData,
       itemDetails: [
         ...prevFormData.itemDetails,
         {
-          itemMasterId: formData.itemMasterId,
-          itemBatchId: null,
-          name: formData.itemMaster.itemName,
-          unit: formData.itemMaster.unit.unitName,
-          batchRef: null,
+          itemMasterId: batch.itemMasterId,
+          itemBatchId: batch.batchId,
+          name: formData.itemMaster?.itemName || "",
+          unit: formData.itemMaster?.unit?.unitName || "",
+          batchRef: batch.batch?.batchRef || "",
           quantity: 0,
-          unitPrice: highestSellingPrice,
+          unitPrice: batch.sellingPrice,
           totalPrice: 0.0,
           chargesAndDeductions: initializedCharges,
-          batch: sortedBatches,
-          tempQuantity: totalTempQuantity,
+          batch: batch,
+          tempQuantity: batch.tempQuantity,
         },
       ],
     }));
+
+    closeModal();
   };
 
-  useEffect(() => {
-    // Check if itemBatches is defined and not empty
-    if (
-      itemBatches &&
-      itemBatches.length > 0 &&
-      company.batchStockType === "FIFO"
-    ) {
-      handleBatchSelectionFIFO();
-    }
-  }, [itemBatches]);
+  // const handleBatchSelectionFIFO = () => {
+  //   if (
+  //     !locationInventory ||
+  //     !formData.fifoBatchDetails ||
+  //     !chargesAndDeductions ||
+  //     !formData.itemMasterId
+  //   )
+  //     return;
+
+  //   const sortedBatches = formData.fifoBatchDetails?.sort((a, b) => {
+  //     return new Date(a.batch.date) - new Date(b.batch.date);
+  //   });
+
+  //   const totalTempQuantity = locationInventory.totalStockInHand;
+
+  //   if (totalTempQuantity <= 0) {
+  //     console.warn("No stock available for this item");
+  //     return;
+  //   }
+
+  //   const highestSellingPrice = sortedBatches.reduce(
+  //     (maxPrice, currentBatch) =>
+  //       currentBatch.sellingPrice > maxPrice
+  //         ? currentBatch.sellingPrice
+  //         : maxPrice,
+  //     0
+  //   );
+
+  //   const initializedCharges = chargesAndDeductions
+  //     .filter((charge) => charge.isApplicableForLineItem)
+  //     .map((charge) => ({
+  //       id: charge.chargesAndDeductionId,
+  //       name: charge.displayName,
+  //       value: charge.amount || charge.percentage,
+  //       sign: charge.sign,
+  //       isPercentage: charge.percentage !== null,
+  //     }));
+
+  //   setFormData((prevFormData) => ({
+  //     ...prevFormData,
+  //     itemDetails: [
+  //       ...prevFormData.itemDetails,
+  //       {
+  //         itemMasterId: formData.itemMasterId,
+  //         itemBatchId: null,
+  //         name: formData.itemMaster?.itemName || "",
+  //         unit: formData.itemMaster?.unit?.unitName || "",
+  //         batchRef: null,
+  //         quantity: 0,
+  //         unitPrice: highestSellingPrice,
+  //         totalPrice: 0.0,
+  //         chargesAndDeductions: initializedCharges,
+  //         batch: sortedBatches,
+  //         tempQuantity: totalTempQuantity,
+  //       },
+  //     ],
+  //   }));
+  // };
+
+  // useEffect(() => {
+  //   if (
+  //     locationInventory &&
+  //     locationInventory.totalStockInHand > 0 &&
+  //     formData.fifoBatchDetails &&
+  //     formData.fifoBatchDetails.length > 0 &&
+  //     company?.batchStockType === "FIFO" &&
+  //     warehouseLocationId &&
+  //     chargesAndDeductions &&
+  //     formData.itemMasterId
+  //     // Remove this condition: formData.itemDetails.length === 0
+  //   ) {
+  //     handleBatchSelectionFIFO();
+  //   }
+  // }, [
+  //   locationInventory,
+  //   formData.fifoBatchDetails,
+  //   warehouseLocationId,
+  //   company,
+  //   chargesAndDeductions,
+  //   formData.itemMasterId,
+  // ]);
 
   const handleResetCustomer = () => {
     setFormData((prevFormData) => ({
@@ -1197,6 +1450,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
     itemsError,
     selectedBatch,
     itemBatches,
+    locationInventory,
     customerSearchTerm,
     salesPersonSearchTerm,
     isCustomersLoading,
@@ -1243,6 +1497,8 @@ const useSalesOrder = ({ onFormSubmit }) => {
     calculateSubTotal,
     renderColumns,
     renderSubColumns,
+    warehouseLocationId,
+    isWarehouseLocationLoading: !warehouseLocationId,
   };
 };
 

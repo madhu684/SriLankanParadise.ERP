@@ -37,7 +37,9 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
     setSiSearchTerm,
     calculateTotalAmountReceived,
     calculateTotalExcessAmountAmount,
-    calculateTotalShortAmountAmount,
+    calculateTotalOutstandingAmountAmount,
+    handleAddToExcess, // Add this line
+    calculateTotalAmountCollected,
   } = useSalesReceipt({
     onFormSubmit: () => {
       handleClose();
@@ -76,19 +78,19 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
       </div>
 
       {/* Display success or error messages */}
-      {submissionStatus === 'successSubmitted' && (
+      {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
           Sales receipt created successfully!
           {/* Reference Number: {referenceNo} */}
         </div>
       )}
-      {submissionStatus === 'successSavedAsDraft' && (
+      {submissionStatus === "successSavedAsDraft" && (
         <div className="alert alert-success mb-3" role="alert">
           Sales receipt saved as draft, you can edit and create it later!
           {/* Reference Number: {referenceNo} */}
         </div>
       )}
-      {submissionStatus === 'error' && (
+      {submissionStatus === "error" && (
         <div className="alert alert-danger mb-3" role="alert">
           Error submitting sales receipt. Please try again.
         </div>
@@ -106,13 +108,13 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
               <input
                 type="date"
                 className={`form-control ${
-                  validFields.receiptDate ? 'is-valid' : ''
-                } ${validationErrors.receiptDate ? 'is-invalid' : ''}`}
+                  validFields.receiptDate ? "is-valid" : ""
+                } ${validationErrors.receiptDate ? "is-invalid" : ""}`}
                 id="receiptDate"
                 placeholder="Enter receipt date"
                 value={formData.receiptDate}
                 onChange={(e) =>
-                  handleInputChange('receiptDate', e.target.value)
+                  handleInputChange("receiptDate", e.target.value)
                 }
                 required
               />
@@ -131,10 +133,10 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
               <select
                 id="paymentMode"
                 className={`form-select ${
-                  validFields.paymentModeId ? 'is-valid' : ''
-                } ${validationErrors.paymentModeId ? 'is-invalid' : ''}`}
+                  validFields.paymentModeId ? "is-valid" : ""
+                } ${validationErrors.paymentModeId ? "is-invalid" : ""}`}
                 onChange={(e) =>
-                  handleInputChange('paymentModeId', e.target.value)
+                  handleInputChange("paymentModeId", e.target.value)
                 }
                 value={formData.paymentModeId}
                 required
@@ -161,13 +163,13 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.referenceNo ? 'is-valid' : ''
-                } ${validationErrors.referenceNo ? 'is-invalid' : ''}`}
+                  validFields.referenceNo ? "is-valid" : ""
+                } ${validationErrors.referenceNo ? "is-invalid" : ""}`}
                 id="referenceNo"
                 placeholder="Enter payment reference number"
                 value={formData.referenceNo}
                 onChange={(e) =>
-                  handleInputChange('referenceNo', e.target.value)
+                  handleInputChange("referenceNo", e.target.value)
                 }
                 required
               />
@@ -193,8 +195,8 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                   <input
                     type="text"
                     className={`form-control ${
-                      validFields.trnId ? 'is-valid' : ''
-                    } ${validationErrors.trnId ? 'is-invalid' : ''}`}
+                      validFields.trnId ? "is-valid" : ""
+                    } ${validationErrors.trnId ? "is-invalid" : ""}`}
                     placeholder="Search for a sales invoice..."
                     value={siSearchTerm}
                     onChange={(e) => setSiSearchTerm(e.target.value)}
@@ -204,9 +206,9 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                     <span
                       className="input-group-text bg-transparent"
                       style={{
-                        cursor: 'pointer',
+                        cursor: "pointer",
                       }}
-                      onClick={() => setSiSearchTerm('')}
+                      onClick={() => setSiSearchTerm("")}
                     >
                       <i className="bi bi-x"></i>
                     </span>
@@ -215,23 +217,23 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
 
                 {/* Dropdown for filtered suppliers */}
                 {siSearchTerm && (
-                  <div className="dropdown" style={{ width: '100%' }}>
+                  <div className="dropdown" style={{ width: "100%" }}>
                     <ul
                       className="dropdown-menu"
                       style={{
-                        display: 'block',
-                        width: '100%',
-                        maxHeight: '200px',
-                        overflowY: 'auto',
+                        display: "block",
+                        width: "100%",
+                        maxHeight: "200px",
+                        overflowY: "auto",
                       }}
                     >
                       {salesInvoiceOptions
                         .filter((si) =>
                           si.referenceNo
-                            ?.replace(/\s/g, '')
+                            ?.replace(/\s/g, "")
                             ?.toLowerCase()
                             .includes(
-                              siSearchTerm.toLowerCase().replace(/\s/g, '')
+                              siSearchTerm.toLowerCase().replace(/\s/g, "")
                             )
                         )
                         .map((si) => (
@@ -245,17 +247,17 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                             >
                               <span className="me-3">
                                 <i className="bi bi-file-earmark-text"></i>
-                              </span>{' '}
+                              </span>{" "}
                               {si?.referenceNo}
                             </button>
                           </li>
                         ))}
                       {salesInvoiceOptions.filter((si) =>
                         si.referenceNo
-                          ?.replace(/\s/g, '')
+                          ?.replace(/\s/g, "")
                           ?.toLowerCase()
                           .includes(
-                            siSearchTerm.toLowerCase().replace(/\s/g, '')
+                            siSearchTerm.toLowerCase().replace(/\s/g, "")
                           )
                       ).length === 0 && (
                         <li className="dropdown-item text-center">
@@ -313,17 +315,18 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
         <h4>3. Payments</h4>
         {!formData.selectedSalesInvoices.length > 0 && (
           <div className="mb-3">
-            {' '}
+            {" "}
             <small className="form-text text-muted">
               Please select sales invoices to make payment
             </small>
           </div>
         )}
+
         {formData.selectedSalesInvoices.length > 0 && (
           <div className="table-responsive mb-2">
             <table
               className="table"
-              style={{ minWidth: '1000px', overflowX: 'auto' }}
+              style={{ minWidth: "1000px", overflowX: "auto" }}
             >
               <thead>
                 <tr>
@@ -332,9 +335,10 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                   <th>Invoice Total</th>
                   <th>Amount Due</th>
                   <th>Excess Amount</th>
-                  <th>Short Amount</th>
+                  <th>Outstanding Amount</th>
                   <th>Amount Received</th>
                   <th className="text-end">Customer Balance</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -350,16 +354,16 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                         className="form-control"
                         value={item.excessAmount}
                         onChange={(e) => {
-                          const value = parseFloat(e.target.value)
+                          const value = parseFloat(e.target.value);
                           const positiveValue = isNaN(value)
                             ? 0
-                            : Math.max(0, value)
+                            : Math.max(0, value);
 
                           handleItemDetailsChange(
                             index,
-                            'excessAmount',
+                            "excessAmount",
                             positiveValue
-                          )
+                          );
                         }}
                       />
                     </td>
@@ -367,18 +371,18 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                       <input
                         type="number"
                         className="form-control"
-                        value={item.shortAmount}
+                        value={item.outstandingAmount}
                         onChange={(e) => {
-                          const value = parseFloat(e.target.value)
+                          const value = parseFloat(e.target.value);
                           const positiveValue = isNaN(value)
                             ? 0
-                            : Math.max(0, value)
+                            : Math.max(0, value);
 
                           handleItemDetailsChange(
                             index,
-                            'shortAmount',
+                            "outstandingAmount",
                             positiveValue
-                          )
+                          );
                         }}
                       />
                     </td>
@@ -386,24 +390,24 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                       <input
                         type="number"
                         className={`form-control ${
-                          validFields[`payment_${index}`] ? 'is-valid' : ''
+                          validFields[`payment_${index}`] ? "is-valid" : ""
                         } ${
                           validationErrors[`payment_${index}`]
-                            ? 'is-invalid'
-                            : ''
+                            ? "is-invalid"
+                            : ""
                         }`}
                         value={item.payment}
                         onChange={(e) => {
-                          const value = parseFloat(e.target.value)
+                          const value = parseFloat(e.target.value);
                           const positiveValue = isNaN(value)
                             ? 0
-                            : Math.max(0, value)
+                            : Math.max(0, value);
 
                           handleItemDetailsChange(
                             index,
-                            'payment',
+                            "payment",
                             positiveValue
-                          )
+                          );
                         }}
                       />
                       {validationErrors[`payment_${index}`] && (
@@ -415,29 +419,47 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                     <td className="text-end">
                       {item.customerBalance.toFixed(2)}
                     </td>
+                    <td>
+                      {item.customerBalance > 0 && (
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-primary"
+                          onClick={() => handleAddToExcess(index)}
+                        >
+                          Add to Excess
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
               <tfoot>
                 <tr>
-                  <td colSpan="6"></td>
+                  <td colSpan="7"></td>
                   <th>Total Excess Amount</th>
                   <td className="text-end">
                     {calculateTotalExcessAmountAmount().toFixed(2)}
                   </td>
                 </tr>
                 <tr>
-                  <td colSpan="6"></td>
-                  <th>Total Short Amount</th>
+                  <td colSpan="7"></td>
+                  <th>Total Outstanding Amount</th>
                   <td className="text-end">
-                    {calculateTotalShortAmountAmount().toFixed(2)}
+                    {calculateTotalOutstandingAmountAmount().toFixed(2)}
                   </td>
                 </tr>
                 <tr>
-                  <td colSpan="6"></td>
+                  <td colSpan="7"></td>
                   <th>Total Amount Received</th>
                   <td className="text-end">
                     {calculateTotalAmount().toFixed(2)}
+                  </td>
+                </tr>
+                <tr>
+                  <td colSpan="7"></td>
+                  <th>Total Amount Collected</th>
+                  <td className="text-end">
+                    {calculateTotalAmountCollected().toFixed(2)}
                   </td>
                 </tr>
               </tfoot>
@@ -454,8 +476,8 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
           <input
             type="file"
             className={`form-control ${
-              validFields.attachments ? 'is-valid' : ''
-            } ${validationErrors.attachments ? 'is-invalid' : ''}`}
+              validFields.attachments ? "is-valid" : ""
+            } ${validationErrors.attachments ? "is-invalid" : ""}`}
             id="attachment"
             onChange={(e) => handleAttachmentChange(e.target.files)}
             multiple
@@ -484,7 +506,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Submitting..." />
             ) : (
-              'Submit'
+              "Submit"
             )}
           </button>
           <button
@@ -501,7 +523,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
             {loadingDraft && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Saving as Draft..." />
             ) : (
-              'Save as Draft'
+              "Save as Draft"
             )}
           </button>
           <button
@@ -523,7 +545,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
         </div>
       </form>
     </div>
-  )
+  );
 };
 
 export default SalesReceipt;
