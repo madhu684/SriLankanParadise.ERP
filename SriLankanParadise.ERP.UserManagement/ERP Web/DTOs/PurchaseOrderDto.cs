@@ -34,6 +34,8 @@
 
         public DateTime? LastUpdatedDate { get; set; }
 
+        public int? PurchaseRequisitionId { get; set; }
+
         public virtual IEnumerable<PurchaseOrderDetailDto>? PurchaseOrderDetails { get; set; }
 
     }

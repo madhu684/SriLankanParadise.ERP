@@ -10,6 +10,8 @@
 
         public DateTime? ApprovedDate { get; set; }
 
+        public int? PurchaseRequisitionId { get; set; }
+
         public int PermissionId { get; set; }
     }
 }

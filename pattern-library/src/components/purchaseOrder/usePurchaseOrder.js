@@ -10,6 +10,7 @@ import {
   get_Location_Inventory_Summary_By_Item_Name_api,
   get_user_locations_by_user_id_api,
   get_locations_inventories_by_location_id_item_master_id_api,
+  approve_purchase_requisition_api,
 } from "../../services/purchaseApi";
 import { get_supplier_items_by_type_category_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
@@ -474,6 +475,9 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
           approvedUserId: null,
           companyId: sessionStorage?.getItem("companyId") ?? null,
           lastUpdatedDate: currentDate,
+          purchaseRequisitionId: purchaseRequisition
+            ? purchaseRequisition.purchaseRequisitionId
+            : null,
           permissionId: 11,
         };
 
@@ -1157,6 +1161,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   };
 
   console.log("formData", formData);
+  console.log("purchaseRequisition", purchaseRequisition);
 
   return {
     formData,

@@ -217,6 +217,7 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
         approvedBy: purchaseOrder.approvedBy,
         approvedUserId: purchaseOrder.approvedUserId,
         approvedDate: purchaseOrder.approvedDate,
+        purchaseRequisitionId: null,
         permissionId: 14,
       });
     } catch (error) {

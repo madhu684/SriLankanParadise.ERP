@@ -98,8 +98,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     existPurchaseOrder.ApprovedBy = purchaseOrder.ApprovedBy;
                     existPurchaseOrder.ApprovedUserId = purchaseOrder.ApprovedUserId;
                     existPurchaseOrder.ApprovedDate = purchaseOrder.ApprovedDate;
+                    existPurchaseOrder.PurchaseRequisitionId = purchaseOrder.PurchaseRequisitionId;
 
-                    
+
                     await _dbContext.SaveChangesAsync();
                 }
             }
