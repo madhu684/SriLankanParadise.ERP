@@ -307,9 +307,9 @@ const useTransferRequisition = ({ onFormSubmit }) => {
       const additionalRules = {
         validationFunction: (value) =>
           parseFloat(value) > 0 &&
-          parseFloat(value) <= (item.totalStockInHand || Infinity),
+          parseFloat(value) <= (item.totalStockInHandTo || Infinity),
         errorMessage: `${fieldDisplayName} must be greater than 0 and not exceed available stock (${
-          item.totalStockInHand || 0
+          item.totalStockInHandTo || 0
         })`,
       };
 
