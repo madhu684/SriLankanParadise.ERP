@@ -40,7 +40,7 @@ const useItemMaster = ({ onFormSubmit }) => {
     stockClearance: "0.00",
     bulkPrice: "0.00",
     supplier: {},
-    supplierId: "",
+    supplierId: null,
   });
 
   const [validFields, setValidFields] = useState({});

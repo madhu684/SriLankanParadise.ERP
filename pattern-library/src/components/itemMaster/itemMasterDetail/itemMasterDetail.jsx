@@ -46,6 +46,8 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
     return false;
   };
 
+  const colSize = isServiceItemType() ? 4 : 3;
+
   const InfoCard = ({ icon: Icon, title, children, variant = "light" }) => (
     <Card className="h-100 shadow-sm border-start border-3 border-primary">
       <Card.Header className="bg-light">
@@ -314,7 +316,7 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
 
           {/* Quick Stats */}
           <Row className="g-3">
-            <Col sm={6} lg={3}>
+            <Col sm={6} lg={colSize}>
               <StatCard
                 icon={FaDollarSign}
                 label="Unit Price"
@@ -324,7 +326,7 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
             </Col>
             {!isServiceItemType() && (
               <>
-                <Col sm={6} lg={3}>
+                <Col sm={6} lg={colSize}>
                   <StatCard
                     icon={FaTag}
                     label="Selling Price"
@@ -334,7 +336,7 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
                 </Col>
               </>
             )}
-            <Col sm={6} lg={3}>
+            <Col sm={6} lg={colSize}>
               <StatCard
                 icon={FaChartLine}
                 label="Item Category"
@@ -342,7 +344,7 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
                 variant="warning"
               />
             </Col>
-            <Col sm={6} lg={3}>
+            <Col sm={6} lg={colSize}>
               <StatCard
                 icon={FaLayerGroup}
                 label="Item Type"

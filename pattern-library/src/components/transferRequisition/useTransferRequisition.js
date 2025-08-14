@@ -307,9 +307,9 @@ const useTransferRequisition = ({ onFormSubmit }) => {
       const additionalRules = {
         validationFunction: (value) =>
           parseFloat(value) > 0 &&
-          parseFloat(value) <= (item.totalStockInHand || Infinity),
+          parseFloat(value) <= (item.totalStockInHandTo || Infinity),
         errorMessage: `${fieldDisplayName} must be greater than 0 and not exceed available stock (${
-          item.totalStockInHand || 0
+          item.totalStockInHandTo || 0
         })`,
       };
 
@@ -577,13 +577,20 @@ const useTransferRequisition = ({ onFormSubmit }) => {
 
             return {
               id: item.itemMasterId,
-              maxStockLevel: item.maxStockLevel,
               name: item.itemMaster.itemName,
-              quantity: 0,
-              // quantity:
-              //   item.maxStockLevel - item.totalStockInHandTo >= 0
-              //     ? item.maxStockLevel - item.totalStockInHandTo
-              //     : 0,
+              //quantity: 0,
+              quantity:
+                fromStockDetails?.maxStockLevel -
+                  fromStockDetails?.totalStockInHand >
+                0
+                  ? fromStockDetails?.maxStockLevel -
+                      fromStockDetails?.totalStockInHand >
+                    item.totalStockInHand
+                    ? item.totalStockInHand
+                    : fromStockDetails?.maxStockLevel -
+                      fromStockDetails?.totalStockInHand
+                  : 0,
+              maxStockLevel: item.maxStockLevel || 0,
               minReOrderLevel: item.minReOrderLevel || 0,
               totalStockInHand: fromStockDetails?.totalStockInHand || 0,
               totalStockInHandTo: item.totalStockInHand || 0,
