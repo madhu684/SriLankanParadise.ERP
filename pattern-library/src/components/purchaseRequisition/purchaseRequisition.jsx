@@ -515,7 +515,7 @@ const PurchaseRequisition = ({
                       <ButtonLoadingSpinner />
                     </div>
                   ) : (
-                    "Generate Transfer Requisition"
+                    "Generate Purchase Requisition"
                   )}
                 </button>
               </div>
