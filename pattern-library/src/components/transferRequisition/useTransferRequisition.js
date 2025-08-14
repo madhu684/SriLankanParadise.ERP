@@ -5,6 +5,7 @@ import {
   post_requisition_detail_api,
   get_user_locations_by_user_id_api,
   get_sum_location_inventories_by_locationId_itemMasterId_api,
+  get_Low_Stock_Items_for_location_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
@@ -24,6 +25,10 @@ const useTransferRequisition = ({ onFormSubmit }) => {
   const alertRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
+  const [trGenerating, setTRGenerating] = useState(false);
+  const [isUpdatingStock, setIsUpdatingStock] = useState(false);
+  const [isTRGenerated, setIsTRGenerated] = useState(false);
+  const [showToast, setShowToast] = useState(false);
 
   const fetchLocations = async () => {
     try {
@@ -125,8 +130,8 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     try {
       const response =
         await get_sum_location_inventories_by_locationId_itemMasterId_api(
-          locationId,
-          itemMasterId
+          itemMasterId,
+          locationId
         );
       return response.data.result;
     } catch (error) {
@@ -135,43 +140,58 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     }
   };
 
-  // New useEffect to update stock details when warehouse locations change
+  // Fixed useEffect to prevent unnecessary re-renders
   useEffect(() => {
     const updateStockDetails = async () => {
       if (
         formData.fromWarehouseLocation &&
         formData.toWarehouseLocation &&
-        formData.itemDetails.length > 0
+        formData.itemDetails.length > 0 &&
+        !isUpdatingStock
       ) {
+        setIsUpdatingStock(true);
         setLoading(true);
-        const updatedItemDetails = await Promise.all(
-          formData.itemDetails.map(async (item) => {
-            const fromStockDetails = await fetchStockDetails(
-              formData.fromWarehouseLocation,
-              item.id
-            );
-            const toStockDetails = await fetchStockDetails(
-              formData.toWarehouseLocation,
-              item.id
-            );
-            return {
-              ...item,
-              totalStockInHand: fromStockDetails?.totalStockInHand || 0,
-              totalStockInHandTo: toStockDetails?.totalStockInHand || 0,
-              reOrderLevel: fromStockDetails?.minReOrderLevel || 0,
-              maxStockLevel: fromStockDetails?.maxStockLevel || 0,
-            };
-          })
-        );
-        setFormData((prevFormData) => ({
-          ...prevFormData,
-          itemDetails: updatedItemDetails,
-        }));
-        setLoading(false);
+
+        try {
+          const updatedItemDetails = await Promise.all(
+            formData.itemDetails.map(async (item) => {
+              const fromStockDetails = await fetchStockDetails(
+                formData.fromWarehouseLocation,
+                item.id
+              );
+              const toStockDetails = await fetchStockDetails(
+                formData.toWarehouseLocation,
+                item.id
+              );
+              return {
+                ...item,
+                totalStockInHand: fromStockDetails?.totalStockInHand || 0,
+                totalStockInHandTo: toStockDetails?.totalStockInHand || 0,
+                reOrderLevel: fromStockDetails?.minReOrderLevel || 0,
+                maxStockLevel: fromStockDetails?.maxStockLevel || 0,
+              };
+            })
+          );
+
+          setFormData((prevFormData) => ({
+            ...prevFormData,
+            itemDetails: updatedItemDetails,
+          }));
+        } catch (error) {
+          console.error("Error updating stock details:", error);
+        } finally {
+          setLoading(false);
+          setIsUpdatingStock(false);
+        }
       }
     };
+
     updateStockDetails();
-  }, [formData.fromWarehouseLocation, formData.toWarehouseLocation]);
+  }, [
+    formData.fromWarehouseLocation,
+    formData.toWarehouseLocation,
+    formData.itemDetails.length,
+  ]);
 
   useEffect(() => {
     if (submissionStatus != null) {
@@ -413,6 +433,12 @@ const useTransferRequisition = ({ onFormSubmit }) => {
   };
 
   const handleInputChange = (field, value) => {
+    if (field === "toWarehouseLocation") {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        itemDetails: [],
+      }));
+    }
     setFormData((prevFormData) => ({
       ...prevFormData,
       [field]: value,
@@ -472,36 +498,19 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     }));
   };
 
-  // const handleSelectItem = async (item) => {
-  //   const currentStockDetails = await fetchStockDetails(
-  //     formData.fromWarehouseLocation,
-  //     item.itemMasterId
-  //   );
-  //   const toStockDetails = await fetchStockDetails(
-  //     formData.toWarehouseLocation,
-  //     item.itemMasterId
-  //   );
-  //   setFormData((prevFormData) => ({
-  //     ...prevFormData,
-  //     itemDetails: [
-  //       ...prevFormData.itemDetails,
-  //       {
-  //         id: item.itemMasterId,
-  //         name: item.itemName,
-  //         unit: item.unit.unitName,
-  //         quantity: 0,
-  //         totalStockInHand: currentStockDetails?.totalStockInHand || 0,
-  //         totalStockInHandTo: toStockDetails?.totalStockInHand || 0,
-  //         reOrderLevel: currentStockDetails?.minReOrderLevel || 0,
-  //         maxStockLevel: currentStockDetails?.maxStockLevel || 0,
-  //       },
-  //     ],
-  //   }));
-  //   setSearchTerm("");
-  // };
+  const handleSelectItem = async (item, e) => {
+    e.preventDefault();
+    // Check if item already exists
+    const itemExists = formData.itemDetails.some(
+      (detail) => detail.id === item.itemMasterId
+    );
 
-  const handleSelectItem = async (item, event) => {
-    event.preventDefault();
+    if (itemExists) {
+      console.log("Item already exists in the list");
+      setSearchTerm("");
+      return;
+    }
+
     let currentStockDetails = null;
     let toStockDetails = null;
 
@@ -520,24 +529,82 @@ const useTransferRequisition = ({ onFormSubmit }) => {
       );
     }
 
+    const newItem = {
+      id: item.itemMasterId,
+      name: item.itemName,
+      unit: item.unit.unitName,
+      quantity: 0,
+      totalStockInHand: currentStockDetails?.totalStockInHand || 0,
+      totalStockInHandTo: toStockDetails?.totalStockInHand || 0,
+      reOrderLevel: currentStockDetails?.minReOrderLevel || 0,
+      maxStockLevel: currentStockDetails?.maxStockLevel || 0,
+    };
+
     setFormData((prevFormData) => ({
       ...prevFormData,
-      itemDetails: [
-        ...prevFormData.itemDetails,
-        {
-          id: item.itemMasterId,
-          name: item.itemName,
-          unit: item.unit.unitName,
-          quantity: 0,
-          totalStockInHand: currentStockDetails?.totalStockInHand || 0,
-          totalStockInHandTo: toStockDetails?.totalStockInHand || 0,
-          reOrderLevel: currentStockDetails?.minReOrderLevel || 0,
-          maxStockLevel: currentStockDetails?.maxStockLevel || 0,
-        },
-      ],
+      itemDetails: [...prevFormData.itemDetails, newItem],
     }));
+
     setSearchTerm("");
   };
+
+  const handleGenerateTRN = async () => {
+    try {
+      setTRGenerating(true);
+      setIsTRGenerated(true);
+      const response = await get_Low_Stock_Items_for_location_api(
+        formData.toWarehouseLocation
+      );
+      const lowStockItems = response.data.result || [];
+      if (lowStockItems.length === 0) {
+        setShowToast(true);
+        setTimeout(() => {
+          setTRGenerating(false);
+          setIsTRGenerated(false);
+          setShowToast(false);
+        }, 5000);
+        //setLoading(false);
+        return;
+      }
+
+      if (lowStockItems.length > 0) {
+        const newItemDetails = await Promise.all(
+          lowStockItems.map(async (item) => {
+            const fromStockDetails = await fetchStockDetails(
+              formData.fromWarehouseLocation,
+              item.itemMasterId
+            );
+
+            return {
+              id: item.itemMasterId,
+              maxStockLevel: item.maxStockLevel,
+              name: item.itemMaster.itemName,
+              quantity: 0,
+              // quantity:
+              //   item.maxStockLevel - item.totalStockInHandTo >= 0
+              //     ? item.maxStockLevel - item.totalStockInHandTo
+              //     : 0,
+              minReOrderLevel: item.minReOrderLevel || 0,
+              totalStockInHand: fromStockDetails?.totalStockInHand || 0,
+              totalStockInHandTo: item.totalStockInHand || 0,
+              unit: item.itemMaster.unit?.unitName || "",
+            };
+          })
+        );
+
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          itemDetails: newItemDetails,
+        }));
+      }
+    } catch (error) {
+      console.error("Error generating purchase order:", error);
+    } finally {
+      setTRGenerating(false);
+    }
+  };
+
+  console.log("formData:", formData);
 
   return {
     formData,
@@ -554,9 +621,13 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     isItemsLoading,
     isItemsError,
     itemsError,
-    loading,
+    loading: loading || isUpdatingStock,
     userLocations,
     userDepartments,
+    showToast,
+    isTRGenerated,
+    trGenerating,
+    setShowToast,
     handleInputChange,
     handleDepartmentChange,
     handleItemDetailsChange,
@@ -567,6 +638,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     setFormData,
     setSearchTerm,
     handleSelectItem,
+    handleGenerateTRN,
   };
 };
 

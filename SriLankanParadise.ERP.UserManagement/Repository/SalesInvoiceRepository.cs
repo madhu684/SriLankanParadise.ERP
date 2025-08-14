@@ -48,7 +48,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             try
             {
                 var salesInvoices = await _dbContext.SalesInvoices
-                    .Where(si => si.Status != 0 && si.CompanyId == companyId)
+                    .Where(si => si.Status != 0 && si.CompanyId == companyId) // This already includes status 8 (write-offed)
                     .Include(si => si.SalesInvoiceDetails)
                     .ThenInclude(sid => sid.ItemBatch)
                     .ThenInclude(ib => ib.Batch)
@@ -58,9 +58,10 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(im => im.Unit)
                     .Include(si => si.SalesOrder)
                     .ThenInclude(so => so.SalesOrderDetails)
+                    .OrderByDescending(si => si.CreatedDate) // Add ordering to ensure consistent results
                     .ToListAsync();
 
-                return salesInvoices.Any() ? salesInvoices : null;
+                return salesInvoices.Any() ? salesInvoices : new List<SalesInvoice>(); // Return empty list instead of null
             }
             catch (Exception)
             {

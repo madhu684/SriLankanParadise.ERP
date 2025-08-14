@@ -19,5 +19,6 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task UpdatePurchaseOrder(int purchaseOrderId, PurchaseOrder purchaseOrder);
 
         Task<IEnumerable<PurchaseOrder>> GetPurchaseOrdersByCompanyId(int companyId);
+        Task DeletePurchaseOrder(int purchaseOrderId);
     }
 }

@@ -15,7 +15,9 @@ public partial class SalesReceiptSalesInvoice
 
     public decimal? ExcessAmount { get; set; }
 
-    public decimal? ShortAmount { get; set; }
+    public decimal? OutstandingAmount { get; set; }
+
+    public decimal? AmountCollect { get; set; }
 
     public decimal? CustomerBalance { get; set; }
 

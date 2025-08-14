@@ -150,6 +150,39 @@ export const delete_purchase_requisition_detail_api = async (
   }
 };
 
+export const delete_purchase_requisition_api = async (
+  purchaseRequisitionId
+) => {
+  try {
+    const response = await api.delete(
+      `/purchaseRequisition/${purchaseRequisitionId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const get_purchase_requisition_by_id_api = async (
+  purchaseRequisitionId
+) => {
+  try {
+    const response = await api.get(
+      `/purchaseRequisition/${purchaseRequisitionId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 //purchase order apis
 export const post_purchase_order_api = async (formData) => {
   try {
@@ -294,6 +327,30 @@ export const delete_purchase_order_detail_api = async (
         withCredentials: true,
       }
     );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const delete_purchase_order_api = async (purchaseOrderId) => {
+  try {
+    const response = await api.delete(`/purchaseOrder/${purchaseOrderId}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const get_purchase_order_by_purchase_order_id_api = async (
+  purchaseOrderId
+) => {
+  try {
+    const response = await api.get(`/purchaseOrder/${purchaseOrderId}`, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     throw error;
@@ -1126,6 +1183,46 @@ export const get_supplier_by_company_id_with_query_api = async (
   }
 };
 
+export const post_supplier_item_api = async (formData) => {
+  try {
+    const response = await api.post("/supplierItem", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const update_supplier_item_api = async (supplierItemId, formData) => {
+  try {
+    const response = await api.put(
+      `/supplierItem/${supplierItemId}`,
+      formData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const delete_supplier_item_api = async (supplierItemId) => {
+  try {
+    const response = await api.delete(`/supplierItem/${supplierItemId}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 //user location apis
 export const get_user_locations_by_user_id_api = async (userId) => {
   try {
@@ -1343,11 +1440,12 @@ export const get_location_inventory_by_locationInvemtoryId_api = async (
 
 //=============
 export const get_sum_location_inventories_by_locationId_itemMasterId_api =
-  async (locationId, itemMasterId) => {
+  async (itemMasterId, locationId = null) => {
     try {
       const response = await api.get(
-        `/locationInventory/GetSumLocationInventoriesByLocationIdItemMasterId/${locationId}/${itemMasterId}`,
+        `/locationInventory/GetSumLocationInventoriesByLocationIdItemMasterId/${itemMasterId}`,
         {
+          params: { locationId },
           withCredentials: true,
         }
       );
@@ -1358,9 +1456,33 @@ export const get_sum_location_inventories_by_locationId_itemMasterId_api =
     }
   };
 
-export const get_Low_Stock_Items_api = async () => {
+export const get_sum_location_inventories_by_itemMasterId_api = async (
+  itemMasterId
+) => {
+  try {
+    const response = await api.get(
+      `/locationInventory/GetSumLocationInventoriesByLocationIdItemMasterId?itemMasterId=${itemMasterId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching sum location inventories for all locations:",
+      error
+    );
+    throw error;
+  }
+};
+
+export const get_Low_Stock_Items_api = async (
+  supplierId = null,
+  locationId = null
+) => {
   try {
     const response = await api.get(`/locationInventory/GetLowStockItems`, {
+      params: { supplierId, locationId },
       withCredentials: true,
     });
     return response.data;
@@ -1369,7 +1491,56 @@ export const get_Low_Stock_Items_api = async () => {
     throw error;
   }
 };
-//==============
+
+export const post_reduce_inventory_fifo_api = async (requestData) => {
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}/locationInventory/reduce-inventory-fifo`,
+      requestData
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+export const get_Low_Stock_Items_for_location_api = async (locationId) => {
+  try {
+    const response = await api.get(
+      `/locationInventory/GetLowStockItemsByLocationOnly/${locationId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching low stock items:", error);
+    throw error;
+  }
+};
+
+export const get_Location_Inventory_Summary_By_Item_Name_api = async (
+  locationId = null,
+  itemName = ""
+) => {
+  try {
+    const response = await api.get(
+      `/locationInventory/GetLocationInventorySummaryByItemName`,
+      {
+        params: { locationId, itemName },
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching location inventory summary by item name:",
+      error
+    );
+    throw error;
+  }
+};
 
 export const post_comapny_location_api = async (locationData) => {
   try {

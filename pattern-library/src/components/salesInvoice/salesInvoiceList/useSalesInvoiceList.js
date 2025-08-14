@@ -16,6 +16,9 @@ const useSalesInvoiceList = () => {
   const [showDetailSIModal, setShowDetailSIModal] = useState(false);
   const [showDetailSIModalInParent, setShowDetailSIModalInParent] =
     useState(false);
+  const [showRightOffSIModal, setShowRightOffSIModal] = useState(false);
+  const [showRightOffSIModalInParent, setShowRightOffSIModalInParent] =
+    useState(false);
   const [showCreateSIForm, setShowCreateSIForm] = useState(false);
   const [showUpdateSIForm, setShowUpdateSIForm] = useState(false);
   const [SIDetail, setSIDetail] = useState("");
@@ -70,8 +73,6 @@ const useSalesInvoiceList = () => {
           ) {
             additionalInvoices = SalesInvoiceByUserIdResponse.data.result;
           }
-          //let newSalesInvoices = SalesInvoiceWithoutDraftsResponse.data.result;
-          //const additionalInvoices = SalesInvoiceByUserIdResponse.data.result;
 
           const uniqueNewInvoices = additionalInvoices.filter(
             (invoice) =>
@@ -122,6 +123,23 @@ const useSalesInvoiceList = () => {
     }, delay);
   };
 
+  const handleShowRightOffSIModal = () => {
+    setShowRightOffSIModal(true);
+    setShowRightOffSIModalInParent(true);
+  };
+
+  const handleCloseRightOffSIModal = () => {
+    setShowRightOffSIModal(false);
+    handleCloseRightOffSIModalInParent();
+  };
+
+  const handleCloseRightOffSIModalInParent = () => {
+    const delay = 300;
+    setTimeout(() => {
+      setShowRightOffSIModalInParent(false);
+    }, delay);
+  };
+
   const handleApproved = async () => {
     fetchData();
     setSelectedRows([]);
@@ -131,22 +149,48 @@ const useSalesInvoiceList = () => {
     }, delay);
   };
 
+  const handleRightOff = async () => {
+    // Update local state immediately to show the "Write Offed" status
+    setSalesInvoices((prevInvoices) =>
+      prevInvoices.map((invoice) =>
+        selectedRows.includes(invoice.salesInvoiceId)
+          ? { ...invoice, status: 8 } // Set to Write Offed status
+          : invoice
+      )
+    );
+
+    setSelectedRows([]);
+    const delay = 300;
+    setTimeout(() => {
+      setSelectedRowData([]);
+    }, delay);
+
+    // Remove this line - don't call fetchData()
+    // fetchData(); // <-- REMOVE THIS LINE
+  };
+
   const handleShowDetailSIModal = () => {
     setShowDetailSIModal(true);
     setShowDetailSIModalInParent(true);
   };
 
+  // const handleCloseDetailSIModal = () => {
+  //   setShowDetailSIModal(false);
+  //   handleCloseDetailSIModalInParent();
+  // };
+
+  // const handleCloseDetailSIModalInParent = () => {
+  //   const delay = 300;
+  //   setTimeout(() => {
+  //     setShowDetailSIModalInParent(false);
+  //     setSIDetail("");
+  //   }, delay);
+  // };
+
   const handleCloseDetailSIModal = () => {
     setShowDetailSIModal(false);
-    handleCloseDetailSIModalInParent();
-  };
-
-  const handleCloseDetailSIModalInParent = () => {
-    const delay = 300;
-    setTimeout(() => {
-      setShowDetailSIModalInParent(false);
-      setSIDetail("");
-    }, delay);
+    setShowDetailSIModalInParent(false);
+    setSIDetail("");
   };
 
   const handleViewDetails = (salesInvoice) => {
@@ -206,6 +250,7 @@ const useSalesInvoiceList = () => {
       5: "Settled",
       6: "Cancelled",
       7: "On Hold",
+      8: "Write Offed", // Add this new status
     };
 
     return statusLabels[statusCode] || "Unknown Status";
@@ -221,6 +266,7 @@ const useSalesInvoiceList = () => {
       5: "bg-primary",
       6: "bg-dark",
       7: "bg-secondary",
+      8: "bg-danger", // Red color for Write Offed
     };
 
     return statusClasses[statusCode] || "bg-secondary";
@@ -229,6 +275,12 @@ const useSalesInvoiceList = () => {
   const areAnySelectedRowsPending = (selectedRows) => {
     return selectedRows.some(
       (id) => salesInvoices.find((si) => si.salesInvoiceId === id)?.status === 1
+    );
+  };
+
+  const areAnySelectedRowsApproved = (selectedRows) => {
+    return selectedRows.some(
+      (id) => salesInvoices.find((si) => si.salesInvoiceId === id)?.status === 2
     );
   };
 
@@ -252,12 +304,15 @@ const useSalesInvoiceList = () => {
     showApproveSIModalInParent,
     showDetailSIModal,
     showDetailSIModalInParent,
+    showRightOffSIModal,
+    showRightOffSIModalInParent,
     selectedRowData,
     showCreateSIForm,
     showUpdateSIForm,
     userPermissions,
     SIDetail,
     areAnySelectedRowsPending,
+    areAnySelectedRowsApproved,
     setSelectedRows,
     handleViewDetails,
     getStatusLabel,
@@ -265,15 +320,17 @@ const useSalesInvoiceList = () => {
     handleRowSelect,
     handleShowApproveSIModal,
     handleCloseApproveSIModal,
-    handleShowDetailSIModal,
-    handleCloseDetailSIModal,
+    handleShowRightOffSIModal,
+    handleCloseRightOffSIModal,
     handleApproved,
+    handleRightOff,
     setShowCreateSIForm,
     setShowUpdateSIForm,
     hasPermission,
     handleUpdate,
     handleUpdated,
     handleClose,
+    handleCloseDetailSIModal,
   };
 };
 

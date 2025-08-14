@@ -1,7 +1,6 @@
 import React from "react";
 import usePurchaseOrderUpdate from "./usePurchaseOrderUpdate";
 import CurrentDateTime from "../../currentDateTime/currentDateTime";
-import useCompanyLogoUrl from "../../companyLogo/useCompanyLogoUrl";
 import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
 import Supplier from "../../supplier/supplier";
@@ -64,8 +63,6 @@ const PurchaseOrderUpdate = ({ handleClose, purchaseOrder, handleUpdated }) => {
     },
   });
 
-  const companyLogoUrl = useCompanyLogoUrl();
-
   if (
     isLoading ||
     isLoadingchargesAndDeductions ||
@@ -90,7 +87,11 @@ const PurchaseOrderUpdate = ({ handleClose, purchaseOrder, handleUpdated }) => {
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img src={companyLogoUrl} alt="Company Logo" height={30} />
+          <i
+            class="bi bi-arrow-left"
+            onClick={handleClose}
+            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+          ></i>
           <p>
             <CurrentDateTime />
           </p>
@@ -140,6 +141,7 @@ const PurchaseOrderUpdate = ({ handleClose, purchaseOrder, handleUpdated }) => {
                       value={supplierSearchTerm}
                       onChange={(e) => setSupplierSearchTerm(e.target.value)}
                       autoFocus={false}
+                      disabled
                     />
                     {supplierSearchTerm && (
                       <span
@@ -250,7 +252,7 @@ const PurchaseOrderUpdate = ({ handleClose, purchaseOrder, handleUpdated }) => {
                   </p>
                   <p>Phone: {formData.selectedSupplier.phone}</p>
                   <p>Email: {formData.selectedSupplier.email}</p>
-                  <button
+                  {/* <button
                     type="button"
                     className="btn btn-outline-danger float-end"
                     onClick={handleResetSupplier}
@@ -259,7 +261,7 @@ const PurchaseOrderUpdate = ({ handleClose, purchaseOrder, handleUpdated }) => {
                     }
                   >
                     Reset Supplier
-                  </button>
+                  </button> */}
                 </div>
               </div>
             )}
@@ -309,6 +311,7 @@ const PurchaseOrderUpdate = ({ handleClose, purchaseOrder, handleUpdated }) => {
                   placeholder="Search for an item..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  disabled
                 />
                 {searchTerm && (
                   <span

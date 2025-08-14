@@ -22,12 +22,13 @@ const useGrn = ({ onFormSubmit }) => {
     receivedDate: "",
     itemDetails: [],
     status: "",
-    purchaseOrderId: "",
-    supplierId: "",
-    purchaseRequisitionId: "",
-    supplyReturnMasterId: "",
+    purchaseOrderId: null,
+    supplierId: null,
+    purchaseRequisitionId: null,
+    supplyReturnMasterId: null,
     grnType: "goodsReceivedNote",
     warehouseLocation: null,
+    selectedSupplier: null,
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -878,7 +879,9 @@ const useGrn = ({ onFormSubmit }) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
       purchaseRequisitionId:
-        selectedPurchaseRequisition?.purchaseRequisitionId ?? "",
+        selectedPurchaseRequisition?.purchaseRequisitionId ?? null,
+      selectedSupplier: selectedPurchaseRequisition?.supplier ?? null,
+      supplierId: selectedPurchaseRequisition?.supplier?.supplierId ?? null,
     }));
     // Refetch GRNs for the selected PO
     refetchGrns();
@@ -909,7 +912,7 @@ const useGrn = ({ onFormSubmit }) => {
   const handleResetPurchaseOrder = () => {
     setFormData((prevFormData) => ({
       ...prevFormData,
-      purchaseOrderId: "",
+      purchaseOrderId: null,
       itemDetails: [],
     }));
 
@@ -922,7 +925,7 @@ const useGrn = ({ onFormSubmit }) => {
   const handleResetPurchaseRequisition = () => {
     setFormData((prevFormData) => ({
       ...prevFormData,
-      purchaseRequisitionId: "",
+      purchaseRequisitionId: null,
       itemDetails: [],
     }));
 
@@ -935,7 +938,7 @@ const useGrn = ({ onFormSubmit }) => {
   const handleResetSupplyReturn = () => {
     setFormData((prevFormData) => ({
       ...prevFormData,
-      supplyReturnMasterId: "",
+      supplyReturnMasterId: null,
       itemDetails: [],
     }));
 
@@ -982,10 +985,12 @@ const useGrn = ({ onFormSubmit }) => {
   const handleResetSupplier = () => {
     setFormData((prevFormData) => ({
       ...prevFormData,
-      selectedSupplier: "",
-      supplierId: "",
+      selectedSupplier: null,
+      supplierId: null,
     }));
   };
+
+  console.log("formData", formData);
 
   return {
     formData,

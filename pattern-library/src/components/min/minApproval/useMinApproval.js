@@ -30,8 +30,7 @@ const useMinApproval = ({ min, onFormSubmit }) => {
 
   const updateInventory = async (details, formattedDate, fromLocationId) => {
     try {
-      const locationId =
-        fromLocationId || sessionStorage.getItem("defaultLocationId") || "4";
+      const locationId = fromLocationId || 4;
       for (const detail of details) {
         const { itemMasterId, batchId, quantity } = detail;
 
@@ -49,29 +48,31 @@ const useMinApproval = ({ min, onFormSubmit }) => {
           permissionId: 1065,
         });
 
-        // Patch Location Inventory API
-        // await patch_location_inventory_api(
-        //   locationId,
-        //   itemMasterId,
-        //   batchId,
-        //   "subtract",
-        //   {
-        //     stockInHand: quantity,
-        //     permissionId: 1089,
-        //   }
-        // );
+        if (min.requisitionMasterId === null) {
+          // Patch Location Inventory API
+          await patch_location_inventory_api(
+            locationId,
+            itemMasterId,
+            batchId,
+            "subtract",
+            {
+              stockInHand: quantity,
+              permissionId: 1089,
+            }
+          );
 
-        // Post Location Inventory Movement API
-        // await post_location_inventory_movement_api({
-        //   movementTypeId: 2,
-        //   transactionTypeId: 5,
-        //   itemMasterId,
-        //   batchId,
-        //   locationId: locationId,
-        //   date: formattedDate,
-        //   qty: quantity,
-        //   permissionId: 1090,
-        // });
+          // Post Location Inventory Movement API
+          await post_location_inventory_movement_api({
+            movementTypeId: 2,
+            transactionTypeId: 5,
+            itemMasterId,
+            batchId,
+            locationId: locationId,
+            date: formattedDate,
+            qty: quantity,
+            permissionId: 1090,
+          });
+        }
       }
     } catch (error) {
       throw new Error("Error updating inventory: " + error.message);
@@ -92,15 +93,15 @@ const useMinApproval = ({ min, onFormSubmit }) => {
   const handleApprove = async (minId) => {
     try {
       setLoading(true);
-      const firstDigit = parseInt(min.status.toString().charAt(0), 10); // Extract the first digit
-      const combinedStatus = parseInt(`${firstDigit}2`, 10);
+      // const firstDigit = parseInt(min.status.toString().charAt(0), 10);
+      // const combinedStatus = parseInt(`${firstDigit}2`, 10);
       const currentDate = new Date();
       const formattedDate = currentDate.toISOString();
 
       const approvalData = {
-        status: combinedStatus,
-        approvedBy: sessionStorage.getItem("username"), //username
-        approvedUserId: sessionStorage.getItem("userId"), //userid
+        status: 52,
+        approvedBy: sessionStorage.getItem("username"),
+        approvedUserId: sessionStorage.getItem("userId"),
         approvedDate: formattedDate,
         permissionId: 1062,
       };
@@ -113,10 +114,12 @@ const useMinApproval = ({ min, onFormSubmit }) => {
         await updateInventory(
           min.issueDetails,
           formattedDate,
-          min.fromLocationId
+          min.issuedLocationId
         );
 
-        await updateMrnState();
+        if (min.requisitionMasterId !== null) {
+          await updateMrnState();
+        }
 
         console.log(
           "Material issue note approved and inventory updated successfully:",

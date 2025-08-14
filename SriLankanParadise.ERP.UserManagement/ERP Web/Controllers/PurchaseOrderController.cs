@@ -142,7 +142,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             try
             {
                 var purchaseOrder = await _purchaseOrderService.GetPurchaseOrderByPurchaseOrderId(purchaseOrderId);
-                if (purchaseOrder!= null)
+                if (purchaseOrder != null)
                 {
                     var purchaseOrderDto = _mapper.Map<PurchaseOrderDto>(purchaseOrder);
                     AddResponseMessage(Response, LogMessages.PurchaseOrderRetrieved, purchaseOrderDto, true, HttpStatusCode.OK);
@@ -260,6 +260,28 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
             return Response;
+        }
+
+        [HttpDelete("{purchaseOrderId}")]
+        public async Task<ApiResponseModel> DeletePurchaseOrder(int purchaseOrderId)
+        {
+            try
+            {
+                var existingPurchaseOrder = await _purchaseOrderService.GetPurchaseOrderByPurchaseOrderId(purchaseOrderId);
+                if (existingPurchaseOrder == null)
+                {
+                    _logger.LogWarning(LogMessages.PurchaseOrderNotFound);
+                    return AddResponseMessage(Response, LogMessages.PurchaseOrderNotFound, null, true, HttpStatusCode.NotFound);
+                }
+                await _purchaseOrderService.DeletePurchaseOrder(purchaseOrderId);
+                _logger.LogInformation(LogMessages.PurchaseOrderDeleted);
+                return AddResponseMessage(Response, LogMessages.PurchaseOrderDeleted, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
         }
     }
 }

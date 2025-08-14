@@ -18,6 +18,11 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
            await _repository.Create(supplierItem);
         }
 
+        public async Task Delete(int itemMasterId)
+        {
+            await _repository.Delete(itemMasterId);
+        }
+
         public async Task<SupplierItem> GetById(int id)
         {
             return await _repository.GetById(id);
@@ -26,6 +31,11 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         public async Task<IEnumerable<SupplierItem>> GetItemsBySupplierId(int supplierId)
         {
             return await _repository.GetItemsBySupplierId(supplierId);
+        }
+
+        public async Task Update(int itemMasterId, SupplierItem supplierItem)
+        {
+            await _repository.Update(itemMasterId, supplierItem);
         }
     }
 }

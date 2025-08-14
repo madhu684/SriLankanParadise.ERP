@@ -118,6 +118,12 @@ const PurchaseRequisitionApproval = ({
               <strong>Reference Number:</strong>{" "}
               {purchaseRequisition.referenceNo}
             </p>
+            <p>
+              <strong>Supplier:</strong> {purchaseRequisition.remarks}
+              {purchaseRequisition.supplier
+                ? purchaseRequisition.supplier.supplierName
+                : "No Supplier any tagged"}
+            </p>
           </div>
         </div>
 

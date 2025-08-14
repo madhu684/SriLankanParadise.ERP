@@ -12,8 +12,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public int? Department { get; set; }
 
-        public virtual LocationDto? DepartmentNavigation { get; set; }
-
         public string Email { get; set; } = null!;
 
         public string ContactNo { get; set; } = null!;
@@ -24,8 +22,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
         public DateTime ExpectedDeliveryDate { get; set; }
 
         public int ExpectedDeliveryLocation { get; set; }
-
-        public virtual LocationDto? ExpectedDeliveryLocationNavigation { get; set; }
 
         public string? ReferenceNo { get; set; }
 
@@ -44,7 +40,10 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
         public DateTime? CreatedDate { get; set; }
 
         public DateTime? LastUpdatedDate { get; set; }
-
+        public int? SupplierId { get; set; }
+        public virtual LocationDto? ExpectedDeliveryLocationNavigation { get; set; }
+        public virtual LocationDto? DepartmentNavigation { get; set; }
+        public virtual SupplierDto? Supplier { get; set; }
         public virtual IEnumerable<PurchaseRequisitionDetailDto>? PurchaseRequisitionDetails { get; set;}
     }
 }

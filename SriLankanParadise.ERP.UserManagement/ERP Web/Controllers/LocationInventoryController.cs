@@ -364,8 +364,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
         }
 
-        [HttpGet("GetSumLocationInventoriesByLocationIdItemMasterId/{locationId}/{itemMasterId}")]
-        public async Task<ApiResponseModel> GetSumLocationInventoriesByLocationIdItemMasterId(int locationId, int itemMasterId)
+        [HttpGet("GetSumLocationInventoriesByLocationIdItemMasterId/{itemMasterId}")]
+        public async Task<ApiResponseModel> GetSumLocationInventoriesByLocationIdItemMasterId([FromRoute] int itemMasterId, [FromQuery] int? locationId = null)
         {
             try
             {
@@ -389,13 +389,12 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
-
         [HttpGet("GetLowStockItems")]
-        public async Task<ApiResponseModel> GetLowStockItems()
+        public async Task<ApiResponseModel> GetLowStockItems(int? supplierId = null, int? locationId = null)
         {
             try
             {
-                var lowStockItems = await _locationInventoryService.GetLowStockItems();
+                var lowStockItems = await _locationInventoryService.GetLowStockItems(supplierId, locationId);
                 if (lowStockItems != null && lowStockItems.Any())
                 {
                     var lowStockItemsDtos = _mapper.Map<IEnumerable<LocationInventorySummaryDto>>(lowStockItems);
@@ -405,6 +404,80 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 {
                     _logger.LogInformation("All items are more than min re order level");
                     AddResponseMessage(Response, "All items are more than min re order level", new List<LocationInventorySummaryDto>(), true, HttpStatusCode.OK);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpPost("reduce-inventory-fifo")]
+        public async Task<ApiResponseModel> ReduceInventoryByFIFO(ReduceInventoryRequestModel request)
+        {
+            try
+            {
+                await _locationInventoryService.ReduceInventoryByFIFO(request.LocationId, request.ItemMasterId, request.Quantity);
+
+                _logger.LogInformation("Inventory reduced successfully using FIFO method");
+                AddResponseMessage(Response, "Inventory reduced successfully", null, true, HttpStatusCode.OK);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex.Message);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.BadRequest);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("GetLowStockItemsByLocationOnly/{locationId}")]
+        public async Task<ApiResponseModel> GetLowStockItemsByLocationOnly(int locationId)
+        {
+            try
+            {
+                var lowStockItems = await _locationInventoryService.GetLowStockItemsByLocationOnly(locationId);
+                if (lowStockItems != null && lowStockItems.Any())
+                {
+                    var lowStockItemsDtos = _mapper.Map<IEnumerable<LocationInventorySummaryDto>>(lowStockItems);
+                    AddResponseMessage(Response, LogMessages.LocationInventoriesRetrieved, lowStockItemsDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogInformation("All items are more than min re order level for the specified location");
+                    AddResponseMessage(Response, "All items are more than min re order level for the specified location", new List<LocationInventorySummaryDto>(), true, HttpStatusCode.OK);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("GetLocationInventorySummaryByItemName")]
+        public async Task<ApiResponseModel> GetLocationInventorySummaryByItemName([FromQuery] int? locationId, [FromQuery] string itemName)
+        {
+            try
+            {
+                var summary = await _locationInventoryService.GetSumLocationInventoriesByItemName(locationId, itemName);
+
+                if (summary != null)
+                {
+                    var summaryDto = _mapper.Map<IEnumerable<LocationInventorySummaryDto>>(summary);
+                    AddResponseMessage(Response, LogMessages.LocationInventorySummaryRetrieved, summaryDto, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.LocationInventorySummaryNotFound);
+                    AddResponseMessage(Response, LogMessages.LocationInventorySummaryNotFound, null, true, HttpStatusCode.NotFound);
                 }
             }
             catch (Exception ex)

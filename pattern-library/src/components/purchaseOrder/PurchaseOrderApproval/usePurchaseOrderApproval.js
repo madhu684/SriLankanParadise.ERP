@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { approve_purchase_order_api } from "../../../services/purchaseApi";
+import {
+  approve_purchase_order_api,
+  approve_purchase_requisition_api,
+  get_purchase_requisition_by_id_api,
+} from "../../../services/purchaseApi";
 import { useQuery } from "@tanstack/react-query";
 import { get_charges_and_deductions_applied_api } from "../../../services/purchaseApi";
 
@@ -7,6 +11,19 @@ const usePurchaseOrderApproval = ({ onFormSubmit, purchaseOrder }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const alertRef = useRef(null);
+
+  const { data: purchaseRequisition, isLoading: isLoadingPurchaseRequisition } =
+    useQuery({
+      queryKey: ["purchaseRequisition", purchaseOrder?.purchaseRequisitionId],
+      queryFn: async () => {
+        const response = await get_purchase_requisition_by_id_api(
+          parseInt(purchaseOrder?.purchaseRequisitionId)
+        );
+        return response.data.result;
+      },
+      enabled: !!purchaseOrder?.purchaseRequisitionId,
+      retry: 1,
+    });
 
   useEffect(() => {
     if (approvalStatus === "approved") {
@@ -23,6 +40,21 @@ const usePurchaseOrderApproval = ({ onFormSubmit, purchaseOrder }) => {
     }
   }, [approvalStatus]);
 
+  const handleUpdatePR = async () => {
+    try {
+      await approve_purchase_requisition_api(
+        purchaseRequisition.purchaseRequisitionId,
+        {
+          status: 5,
+          approvedBy: purchaseRequisition.approvedBy,
+          approvedUserId: purchaseRequisition.approvedUserId,
+          approvedDate: purchaseRequisition.approvedDate,
+          permissionId: 14,
+        }
+      );
+    } catch (error) {}
+  };
+
   const handleApprove = async (purchaseOrderId) => {
     try {
       setLoading(true);
@@ -33,12 +65,17 @@ const usePurchaseOrderApproval = ({ onFormSubmit, purchaseOrder }) => {
         approvedBy: sessionStorage.getItem("username"), //username
         approvedUserId: sessionStorage.getItem("userId"), //userid
         approvedDate: formattedDate,
+        isPRConverted: purchaseOrder?.isPRConverted,
         permissionId: 14,
       };
       const approvalResponse = await approve_purchase_order_api(
         purchaseOrderId,
         approvalData
       );
+
+      if (purchaseOrder?.purchaseRequisitionId) {
+        await handleUpdatePR();
+      }
 
       if (approvalResponse.status === 200) {
         setApprovalStatus("approved");
@@ -139,6 +176,7 @@ const usePurchaseOrderApproval = ({ onFormSubmit, purchaseOrder }) => {
     approvalStatus,
     alertRef,
     loading,
+    isLoadingPurchaseRequisition,
     handleApprove,
     calculateSubTotal,
   };

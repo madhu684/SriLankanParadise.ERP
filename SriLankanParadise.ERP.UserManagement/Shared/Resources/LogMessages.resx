@@ -1035,4 +1035,28 @@
   <data name="RequisitionMasterPatched" xml:space="preserve">
     <value>Requisition master patched</value>
   </data>
+  <data name="SupplierItemUpdated" xml:space="preserve">
+    <value>Supplier item updated</value>
+  </data>
+  <data name="SupplierItemDeleted" xml:space="preserve">
+    <value>Supplier item deleted</value>
+  </data>
+  <data name="LocationInventorySummaryRetrieved" xml:space="preserve">
+    <value>Location inventory summary retrieved</value>
+  </data>
+  <data name="LocationInventorySummaryNotFound" xml:space="preserve">
+    <value>Location inventory summary not found</value>
+  </data>
+  <data name="SameCategoryTypeSupplierItemsRetrieved" xml:space="preserve">
+    <value>Same category &amp; item type supplier items retrieved</value>
+  </data>
+  <data name="SameCategoryTypeSupplierItemsNotFound" xml:space="preserve">
+    <value>Same Category &amp; item type supplier items not found</value>
+  </data>
+  <data name="PurchaseOrderDeleted" xml:space="preserve">
+    <value>Purchase order deleted successfully</value>
+  </data>
+  <data name="PurchaseRequisitionDeleted" xml:space="preserve">
+    <value>Purchase requisition deleted successfully</value>
+  </data>
 </root>

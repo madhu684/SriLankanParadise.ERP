@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import {
+  approve_requisition_master_api,
   get_issue_details_api,
   patch_issue_detail_api,
   patch_location_inventory_api,
@@ -57,6 +58,26 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
       setReturnedQuantities(updatedReturnedQuantities);
     }
   }, [issuedetails]);
+
+  const getStatusLabel = () => {
+    let statusLabel = "Unknown Status";
+    if (tin?.requisitionMaster?.isMINAccepted === false) {
+      statusLabel = "In Progress";
+    } else {
+      statusLabel = "Completed";
+    }
+    return statusLabel;
+  };
+
+  const getStatusBadgeClass = () => {
+    let statusClass = "bg-secondary";
+    if (tin?.requisitionMaster?.isMINAccepted === false) {
+      statusClass = "bg-info";
+    } else {
+      statusClass = "bg-success";
+    }
+    return statusClass;
+  };
 
   const handleReceivedQuantityChange = (issueDetailId, newQuantity) => {
     setReceivedQuantities((prev) => ({
@@ -213,6 +234,15 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
         isMINApproved: tin?.requisitionMaster?.isMINApproved,
         isMINAccepted: true,
       });
+      if (tin?.requisitionMaster?.status !== 5) {
+        await approve_requisition_master_api(tin.requisitionMasterId, {
+          status: 5,
+          approvedBy: tin?.requisitionMaster?.approvedBy,
+          approvedUserId: tin?.requisitionMaster?.approvedUserId,
+          approvedDate: tin?.requisitionMaster?.approvedDate,
+          permissionId: 1053,
+        });
+      }
     } catch (error) {
       console.error("Error updating MRN state:", error);
     }
@@ -304,8 +334,10 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
         fromLocationId
       );
       await updateMrnState();
-      // queryClient.invalidateQueries(["tins", tinId]);
-      // setRefetch(!refetch);
+      queryClient.invalidateQueries(["tins", tinId]);
+      queryClient.invalidateQueries(["locationInventories", toLocationId]);
+      queryClient.invalidateQueries(["locationInventories", fromLocationId]);
+      setRefetch(!refetch);
       setApprovalStatus("approved");
     } catch (error) {
       setApprovalStatus("error");
@@ -314,6 +346,8 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
         setApprovalStatus(null);
         setLoading(false);
       }, 2000);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -327,6 +361,8 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
     handleReceivedQuantityChange,
     handleReturnedQuantityChange,
     validateQuantities,
+    getStatusBadgeClass,
+    getStatusLabel,
   };
 };
 

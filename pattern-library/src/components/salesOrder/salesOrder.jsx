@@ -75,6 +75,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
     setSalesPersonSearchTerm,
     renderColumns,
     renderSubColumns,
+    locationInventory,
   } = useSalesOrder({
     onFormSubmit: () => {
       handleClose();
@@ -112,10 +113,9 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
           <i
-            class="bi bi-arrow-left"
-            onClick={handleClose}
             className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
-          ></i>
+            onClick={handleClose}
+          />
           <p>
             <CurrentDateTime />
           </p>
@@ -571,18 +571,19 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
               </div>
             )}
 
-            {formData.itemMasterId === 0 && (
+            {!locationInventory && formData.itemMasterId !== 0 && (
               <div className="mb-3">
-                <small className="form-text text-muted">
-                  Please search for an item to add
+                <small className="form-text text-danger">
+                  Selected item does not have sufficient stock. Please select
+                  another item
                 </small>
               </div>
             )}
             {formData.itemMasterId !== 0 && (
               <div className="mb-3">
-                <p className="form-text text-muted">
+                {/* <p className="form-text text-muted">
                   Selected item: {formData.itemMaster.itemName}
-                </p>
+                </p> */}
               </div>
             )}
           </div>
@@ -640,7 +641,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                   <th>Item Name</th>
                   <th>Unit</th>
                   {company.batchStockType !== "FIFO" && <th>Batch Ref</th>}
-                  <th>Temp Qty</th>
+                  <th>Total Stock In Hand</th>
                   <th>Quantity</th>
                   <th>Unit Price</th>
                   {renderColumns()}

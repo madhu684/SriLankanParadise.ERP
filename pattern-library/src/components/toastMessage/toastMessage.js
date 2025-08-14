@@ -21,7 +21,7 @@ function ToastMessage({ show, onClose, type, message }) {
             alignItems: "center",
           }}
         >
-          <span>{message}</span>
+          <span className="text-dark fw-bold">{message}</span>
           <button
             type="button"
             className="btn-close"

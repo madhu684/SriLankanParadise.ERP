@@ -117,6 +117,27 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
       fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"), //Sellable
   });
 
+  const {
+    data: locationInventory,
+    isLoading: isLocationInventoryLoading,
+    isError: isLocationInventoryError,
+    error: locationInventoryError,
+    refetch: refetchLocationInventory,
+  } = useQuery({
+    queryKey: [
+      "locationInventory",
+      formData.storeLocation,
+      formData.itemMasterId,
+    ],
+    queryFn: () =>
+      get_locations_inventories_by_location_id_item_master_id_api(
+        formData.storeLocation,
+        formData.itemMasterId
+      ),
+    enabled: !!formData.storeLocation && !!formData.itemMasterId,
+    select: (data) => data.data.result,
+  });
+
   useEffect(() => {
     if (submissionStatus != null) {
       alertRef.current.scrollIntoView({ behavior: "smooth" });
@@ -331,19 +352,22 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
           };
         });
 
-      setFormData({
-        itemMasterId: 0,
-        itemMaster: "",
-        invoiceDate: "",
-        dueDate: "",
-        referenceNumber: "",
+      // Update form data while preserving existing structure - don't reset completely
+      setFormData((prevFormData) => ({
+        ...prevFormData, // Keep existing data like invoiceDate, dueDate, etc.
         itemDetails: initializedLineItemCharges,
-        attachments: [],
-        totalAmount: 0,
-        salesOrderId: "",
-        subTotal: 0,
+        salesOrderId: salesOrder.salesOrderId,
         commonChargesAndDeductions: initializedCommonCharges,
-      });
+        // Remove the lines that were resetting other fields:
+        // itemMasterId: 0,
+        // itemMaster: "",
+        // invoiceDate: "",
+        // dueDate: "",
+        // referenceNumber: "",
+        // attachments: [],
+        // totalAmount: 0,
+        // subTotal: 0,
+      }));
     }
   }, [
     salesOrder,
@@ -614,7 +638,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
 
         const salesInvoiceId = response.data.result.salesInvoiceId;
 
-        if (company.batchStockType === "FIFO") {
+        if (company && company.batchStockType === "FIFO") {
           const batchUpdates = [];
           const detailsPromises = [];
 
@@ -622,7 +646,11 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
             async (item) => {
               let remainingQuantity = item.quantity;
 
-              for (const batch of item.batch) {
+              const batches = Array.isArray(item.batch)
+                ? item.batch
+                : [item.batch];
+
+              for (const batch of batches) {
                 const quantityToConsume = Math.min(
                   remainingQuantity,
                   batch.tempQuantity
@@ -668,14 +696,13 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
 
                 remainingQuantity -= quantityToConsume;
 
-                if (remainingQuantity <= 0) break; // Stop iterating if all quantity consumed
+                if (remainingQuantity <= 0) break;
               }
             }
           );
 
           await Promise.all(itemDetailsBatchData);
 
-          // Check if all details were successful
           allDetailsBatchSuccessful = (await Promise.all(batchUpdates)).every(
             (response) => response.status === 200
           );
@@ -684,7 +711,6 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
             (response) => response.status === 201
           );
         } else {
-          console.log(formData.itemDetails);
           const itemDetailsBatchData = formData.itemDetails.map(
             async (item) => {
               const itemBatchUpdateData = {
@@ -971,15 +997,15 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
       itemMasterId: item.itemMasterId,
       itemMaster: item,
     }));
-    setSearchTerm(""); // Clear the search term
 
+    setSearchTerm(""); // Clear the search term
     setSelectedBatch(null);
     refetchItemBatches();
-    setValidFields({});
-    setValidationErrors({});
+    refetchLocationInventory(); // Refetch location inventory
 
-    if (company.batchStockType === "FIFO") {
-    } else {
+    if (company && company.batchStockType === "FIFO") {
+      // FIFO logic will be handled in useEffect
+    } else if (company) {
       openModal();
     }
   };
@@ -1020,7 +1046,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
             totalPrice: 0.0,
             chargesAndDeductions: initializedCharges,
             batch: batch,
-            tempQuantity: batch.stockInHand,
+            tempQuantity: locationInventory?.totalStockInHand || 0, // Use total stock across all batches
           },
         ],
       }));
@@ -1031,18 +1057,26 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   };
 
   const handleBatchSelectionFIFO = () => {
+    if (
+      !itemBatches ||
+      !chargesAndDeductions ||
+      !formData.itemMasterId ||
+      !locationInventory
+    )
+      return;
+
     const sortedBatches = itemBatches?.sort((a, b) => {
       return new Date(a.batch.date) - new Date(b.batch.date);
     });
 
-    // Select the oldest batch
-    const selectedBatch = sortedBatches[0];
+    // Use totalStockInHand from location inventory as available quantity
+    const totalTempQuantity = locationInventory.totalStockInHand;
 
-    // Calculate total temporary quantity
-    const totalTempQuantity = sortedBatches.reduce(
-      (accumulator, currentBatch) => accumulator + currentBatch.tempQuantity,
-      0
-    );
+    // Only proceed if there's stock available
+    if (totalTempQuantity <= 0) {
+      console.warn("No stock available for this item");
+      return;
+    }
 
     // Find the highest selling price among the batches
     const highestSellingPrice = sortedBatches.reduce(
@@ -1067,34 +1101,50 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
       itemDetails: [
-        ...prevFormData.itemDetails,
+        ...prevFormData.itemDetails, // Keep existing items
         {
           itemMasterId: formData.itemMasterId,
           itemBatchId: null,
-          name: formData.itemMaster.itemName,
-          unit: formData.itemMaster.unit.unitName,
+          name: formData.itemMaster?.itemName || "",
+          unit: formData.itemMaster?.unit?.unitName || "",
           batchRef: null,
           quantity: 0,
-          unitPrice: formData.itemMaster.sellingPrice,
+          unitPrice: formData.itemMaster?.sellingPrice || highestSellingPrice,
           totalPrice: 0.0,
           chargesAndDeductions: initializedCharges,
           batch: sortedBatches,
-          tempQuantity: totalTempQuantity,
+          tempQuantity: totalTempQuantity, // Use totalStockInHand from location inventory
         },
       ],
     }));
   };
 
   useEffect(() => {
-    // Check if itemBatches is defined and not empty
     if (
       itemBatches &&
       itemBatches.length > 0 &&
-      company.batchStockType === "FIFO"
+      locationInventory &&
+      locationInventory.totalStockInHand > 0 &&
+      company &&
+      company.batchStockType === "FIFO" &&
+      formData.itemMasterId &&
+      chargesAndDeductions
     ) {
-      handleBatchSelectionFIFO();
+      const itemAlreadyExists = formData.itemDetails.some(
+        (item) => item.itemMasterId === formData.itemMasterId
+      );
+
+      if (!itemAlreadyExists) {
+        handleBatchSelectionFIFO();
+      }
     }
-  }, [itemBatches]);
+  }, [
+    itemBatches,
+    locationInventory,
+    company,
+    formData.itemMasterId,
+    chargesAndDeductions,
+  ]);
 
   const renderColumns = () => {
     return chargesAndDeductions.map((charge) => {
@@ -1207,6 +1257,8 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   const closeModal = () => {
     setShowModal(false);
   };
+
+  console.log("formData", formData);
 
   return {
     formData,

@@ -7,15 +7,18 @@ import {
   post_charges_and_deductions_applied_api,
   get_transaction_types_api,
   get_Low_Stock_Items_api,
+  get_Location_Inventory_Summary_By_Item_Name_api,
+  get_user_locations_by_user_id_api,
+  get_locations_inventories_by_location_id_item_master_id_api,
+  approve_purchase_requisition_api,
 } from "../../services/purchaseApi";
-import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
+import { get_supplier_items_by_type_category_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
 
 const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   const currentDate = new Date().toISOString().split("T")[0];
   const [formData, setFormData] = useState({
-    supplierId: "",
+    supplierId: null,
     orderDate: currentDate,
     itemDetails: [],
     status: 0,
@@ -40,15 +43,32 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [isPOGenerated, setIsPOGenerated] = useState(false);
+  const [poGenerating, setPOGenerating] = useState(false);
   const [showToast, setShowToast] = useState(false);
+
+  const fetchUserLocation = async () => {
+    try {
+      const response = await get_user_locations_by_user_id_api(
+        sessionStorage.getItem("userId")
+      );
+      return response.data.result.filter(
+        (location) => location.location.locationTypeId === 2
+      );
+    } catch (error) {
+      console.error("Error fetching user location:", error);
+    }
+  };
+
+  const { data: userLocation } = useQuery({
+    queryKey: ["userLocation"],
+    queryFn: fetchUserLocation,
+  });
 
   const fetchSuppliers = async () => {
     try {
       const response = await get_company_suppliers_api(
         sessionStorage.getItem("companyId")
       );
-
-      // Filter suppliers with status equal to 1 (active)
       const filteredSuppliers = response.data.result?.filter(
         (supplier) => supplier.status === 1
       );
@@ -119,28 +139,67 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     }
   }, [submissionStatus]);
 
-  const fetchItems = async (companyId, searchQuery, itemType) => {
+  const fetchItems = async (searchQuery) => {
     try {
-      const response = await get_item_masters_by_company_id_with_query_api(
-        companyId,
-        searchQuery,
-        itemType
+      const response = await get_Location_Inventory_Summary_By_Item_Name_api(
+        userLocation[0]?.locationId,
+        searchQuery
       );
-      return response.data.result;
+
+      const companyId = sessionStorage.getItem("companyId");
+
+      const items = await Promise.all(
+        response.data?.result?.map(async (summary) => {
+          const supplierItemResponse =
+            await get_supplier_items_by_type_category_api(
+              companyId,
+              parseInt(summary.itemMaster?.itemType?.itemTypeId),
+              parseInt(summary.itemMaster?.category?.categoryId),
+              userLocation[0]?.locationId
+            );
+
+          const supplierItems = supplierItemResponse.data.result
+            ? supplierItemResponse.data.result.filter(
+                (si) =>
+                  si.itemMasterId !== summary.itemMasterId &&
+                  si.supplierName !== formData?.selectedSupplier?.supplierName
+              )
+            : [];
+
+          return {
+            itemMasterId: summary.itemMasterId,
+            itemName: summary.itemMaster?.itemName || "",
+            unit: summary.itemMaster?.unit || { unitName: "" },
+            categoryId: summary.itemMaster?.category?.categoryId || "",
+            itemTypeId: summary.itemMaster?.itemType?.itemTypeId || "",
+            supplierId: summary.itemMaster?.supplierId || null,
+            totalStockInHand: summary.totalStockInHand,
+            minReOrderLevel: summary.minReOrderLevel,
+            maxStockLevel: summary.maxStockLevel,
+            supplierItems: supplierItems,
+          };
+        }) || []
+      );
+
+      return items.filter(
+        (item) =>
+          !formData.supplierId || item.supplierId === formData.supplierId
+      );
     } catch (error) {
       console.error("Error fetching items:", error);
+      return [];
     }
   };
 
   const {
-    data: availableItems,
+    data: availableItems = [],
     isLoading: isItemsLoading,
     isError: isItemsError,
     error: itemsError,
   } = useQuery({
     queryKey: ["items", searchTerm],
-    queryFn: () =>
-      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"),
+    queryFn: () => fetchItems(searchTerm),
+    enabled: !!formData.supplierId && !!searchTerm,
   });
 
   useEffect(() => {
@@ -416,6 +475,9 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
           approvedUserId: null,
           companyId: sessionStorage?.getItem("companyId") ?? null,
           lastUpdatedDate: currentDate,
+          purchaseRequisitionId: purchaseRequisition
+            ? purchaseRequisition.purchaseRequisitionId
+            : null,
           permissionId: 11,
         };
 
@@ -688,7 +750,6 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   };
 
   const handleSelectItem = (item) => {
-    // Generate chargesAndDeductions array for the newly added item
     const initializedCharges = chargesAndDeductions
       .filter((charge) => charge.isApplicableForLineItem)
       .map((charge) => ({
@@ -707,17 +768,27 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
           id: item.itemMasterId,
           name: item.itemName,
           unit: item.unit.unitName,
-          quantity: 0,
+          categoryId: item.categoryId,
+          itemTypeId: item.itemTypeId,
+          quantity:
+            item.maxStockLevel - item.totalStockInHand >= 0
+              ? item.maxStockLevel - item.totalStockInHand
+              : 0,
           unitPrice: 0.0,
           totalPrice: 0.0,
-          chargesAndDeductions: initializedCharges, // Add the generated array to itemDetails
+          totalStockInHand: item.totalStockInHand,
+          minReOrderLevel: item.minReOrderLevel,
+          maxStockLevel: item.maxStockLevel,
+          chargesAndDeductions: initializedCharges,
+          supplierItems: item?.supplierItems || [],
         },
       ],
     }));
-    setSearchTerm(""); // Clear the search term
+    setSearchTerm("");
   };
 
-  const handleInitializeItem = (item) => {
+  // Helper function to create an initialized item
+  const createInitializedItem = async (item, purchaseRequisition) => {
     // Generate chargesAndDeductions array for the newly added item
     const initializedCharges = chargesAndDeductions
       .filter((charge) => charge.isApplicableForLineItem)
@@ -752,53 +823,125 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     // Ensure totalPrice is initialized and is a numerical value
     totalPrice = isNaN(totalPrice) ? 0 : totalPrice;
 
-    // Create the new item object with calculated total price
-    const newItem = {
+    // Bind supplier items
+    const supplierItemResponse = await get_supplier_items_by_type_category_api(
+      sessionStorage.getItem("companyId"),
+      parseInt(item.itemMaster?.itemTypeId),
+      parseInt(item.itemMaster?.categoryId),
+      parseInt(purchaseRequisition?.expectedDeliveryLocation)
+    );
+
+    const itemInventoryResponse =
+      await get_locations_inventories_by_location_id_item_master_id_api(
+        parseInt(purchaseRequisition?.expectedDeliveryLocation),
+        item.itemMasterId
+      );
+
+    const itemInventory = itemInventoryResponse?.data?.result;
+    const totalStockInHand = itemInventory?.reduce(
+      (total, inventory) => total + (inventory.stockInHand || 0),
+      0
+    );
+    const minReOrderLevel =
+      itemInventory?.reduce(
+        (min, inventory) =>
+          min === null || inventory.reOrderLevel < min
+            ? inventory.reOrderLevel
+            : min,
+        null
+      ) || 0;
+    const maxStockLevel =
+      itemInventory?.reduce(
+        (max, inventory) =>
+          max === null || inventory.maxStockLevel > max
+            ? inventory.maxStockLevel
+            : max,
+        null
+      ) || 0;
+
+    const supplierItems = supplierItemResponse?.data?.result
+      ? supplierItemResponse?.data?.result?.filter(
+          (si) =>
+            si.itemMasterId !== item.itemMasterId &&
+            si.supplierName !== formData?.selectedSupplier?.supplierName
+        )
+      : [];
+
+    // Return the new item object
+    return {
       id: item?.itemMasterId,
       name: item?.itemMaster?.itemName,
       unit: item?.itemMaster?.unit.unitName,
       quantity: item?.quantity,
       unitPrice: item?.unitPrice,
       totalPrice: totalPrice,
+      supplierItems: supplierItems,
+      totalStockInHand: totalStockInHand,
+      minReOrderLevel: minReOrderLevel,
+      maxStockLevel: maxStockLevel,
       chargesAndDeductions: initializedCharges,
     };
-
-    // Update formData with the new item
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      itemDetails: [...prevFormData.itemDetails, newItem],
-      subTotal: calculateSubTotal(),
-      totalAmount: calculateTotalAmount(),
-    }));
   };
 
-  const initializeItems = () => {
-    if (!initialized) {
+  // Initialize items from purchase requisition (FIXED VERSION)
+  useEffect(() => {
+    const initializeAllItems = async () => {
       if (
+        !initialized &&
         !isLoadingchargesAndDeductions &&
         chargesAndDeductions &&
         purchaseRequisition !== null &&
-        purchaseRequisition.purchaseRequisitionDetails.length > 0
+        purchaseRequisition.purchaseRequisitionDetails?.length > 0
       ) {
-        // Loop through each item in purchaseRequisitionDetails
-        purchaseRequisition.purchaseRequisitionDetails.forEach((item) => {
-          // Call handleInitializeItem for each item
-          handleInitializeItem(item);
-        });
-      }
-      console.log("Initializing...");
-      setInitialized(true);
-    }
-  };
+        try {
+          console.log(
+            "Initializing all items from purchase requisition...",
+            purchaseRequisition
+          );
 
-  chargesAndDeductions && initializeItems();
+          // Process all items in parallel
+          const newItemDetails = await Promise.all(
+            purchaseRequisition.purchaseRequisitionDetails.map(async (item) => {
+              return await createInitializedItem(item, purchaseRequisition);
+            })
+          );
+
+          // Set all items at once, replacing any existing items
+          setFormData((prevFormData) => ({
+            ...prevFormData,
+            supplierId: purchaseRequisition?.supplierId,
+            selectedSupplier: purchaseRequisition?.supplier,
+            itemDetails: newItemDetails, // Replace, don't append
+          }));
+
+          setInitialized(true);
+          console.log(
+            "Initialization completed. Items count:",
+            newItemDetails.length
+          );
+        } catch (error) {
+          console.error("Error initializing items:", error);
+        }
+      }
+    };
+
+    initializeAllItems();
+  }, [
+    isLoadingchargesAndDeductions,
+    chargesAndDeductions,
+    purchaseRequisition,
+    initialized,
+  ]);
 
   const handleResetSupplier = () => {
     setFormData((prevFormData) => ({
       ...prevFormData,
       selectedSupplier: "",
-      supplierId: "",
+      supplierId: null,
+      itemDetails: [],
     }));
+    // Reset initialization flag to allow re-initialization if needed
+    setInitialized(false);
   };
 
   const handleShowCreateSupplierModal = () => {
@@ -867,68 +1010,72 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   };
 
   useEffect(() => {
-    chargesAndDeductions && handleAddCommonChargesAndDeductions();
-  }, [isLoadingchargesAndDeductions]);
+    if (chargesAndDeductions && !isLoadingchargesAndDeductions) {
+      handleAddCommonChargesAndDeductions();
+    }
+  }, [chargesAndDeductions, isLoadingchargesAndDeductions]);
 
   const renderSubColumns = () => {
-    {
-      return formData.commonChargesAndDeductions.map((charge, chargeIndex) => {
-        if (!charge.isApplicableForLineItem) {
-          return (
-            <tr key={chargeIndex}>
-              <td
-                colSpan={
-                  4 + formData.itemDetails[0].chargesAndDeductions.length - 1
-                }
-              ></td>
-              <th>
-                {charge.sign + " "}
-                {charge.name}
-                {charge.isPercentage === true && " (%)"}
-              </th>
-              <td>
-                <input
-                  className="form-control"
-                  type="number"
-                  value={charge.value}
-                  onChange={(e) => {
-                    let newValue = parseFloat(e.target.value);
+    return formData.commonChargesAndDeductions.map((charge, chargeIndex) => {
+      if (!charge.isApplicableForLineItem) {
+        return (
+          <tr key={chargeIndex}>
+            <td
+              colSpan={
+                7 +
+                (formData.itemDetails[0]?.chargesAndDeductions?.length || 0) -
+                1
+              }
+            ></td>
+            <th>
+              {charge.sign + " "}
+              {charge.name}
+              {charge.isPercentage === true && " (%)"}
+            </th>
+            <td>
+              <input
+                className="form-control"
+                type="number"
+                value={charge.value}
+                onChange={(e) => {
+                  let newValue = parseFloat(e.target.value);
 
-                    // If the entered value is not a valid number, set it to 0
-                    if (isNaN(newValue)) {
-                      newValue = 0;
+                  // If the entered value is not a valid number, set it to 0
+                  if (isNaN(newValue)) {
+                    newValue = 0;
+                  } else {
+                    // If the charge is a percentage, ensure the value is between 0 and 100
+                    if (charge.isPercentage) {
+                      newValue = Math.min(100, Math.max(0, newValue)); // Clamp the value between 0 and 100
                     } else {
-                      // If the charge is a percentage, ensure the value is between 0 and 100
-                      if (charge.isPercentage) {
-                        newValue = Math.min(100, Math.max(0, newValue)); // Clamp the value between 0 and 100
-                      } else {
-                        // For non-percentage charges, ensure the value is positive
-                        newValue = Math.max(0, newValue);
-                      }
+                      // For non-percentage charges, ensure the value is positive
+                      newValue = Math.max(0, newValue);
                     }
+                  }
 
-                    handleInputChange(
-                      `commonChargesAndDeductions_${chargeIndex}_value`,
-                      newValue
-                    );
-                  }}
-                />
-              </td>
-              <td></td>
-            </tr>
-          );
-        }
-        return null;
-      });
-    }
+                  handleInputChange(
+                    `commonChargesAndDeductions_${chargeIndex}_value`,
+                    newValue
+                  );
+                }}
+              />
+            </td>
+            <td></td>
+          </tr>
+        );
+      }
+      return null;
+    });
   };
 
-  // New function to handle generating purchase order from low-stock items
   const handleGeneratePurchaseOrder = async () => {
     try {
-      setLoading(true); // Show loading state
+      setPOGenerating(true);
       setIsPOGenerated(true);
-      const response = await get_Low_Stock_Items_api();
+      const response = await get_Low_Stock_Items_api(
+        formData.supplierId,
+        userLocation[0]?.locationId
+      );
       const lowStockItems = response.data.result || [];
 
       if (lowStockItems.length === 0) {
@@ -936,8 +1083,8 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
         setTimeout(() => {
           setIsPOGenerated(false);
           setShowToast(false);
-        }, 3000);
-        setLoading(false);
+        }, 5000);
+        setPOGenerating(false);
         return;
       }
 
@@ -954,16 +1101,47 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
               isPercentage: charge.percentage !== null,
             })) || [];
 
-        // Transform low-stock items into itemDetails format
-        const newItemDetails = lowStockItems.map((item) => ({
-          id: item.itemMasterId,
-          name: item.itemMaster.itemName,
-          unit: item.itemMaster.unit?.unitName || "", // Assuming unit is nested in itemMaster
-          quantity: 0, // Default quantity, can be adjusted later
-          unitPrice: 0.0, // Default unit price, can be adjusted later
-          totalPrice: 0.0,
-          chargesAndDeductions: initializedCharges,
-        }));
+        const companyId = sessionStorage.getItem("companyId");
+
+        // Transform low-stock items into itemDetails format with API calls
+        const newItemDetails = await Promise.all(
+          lowStockItems.map(async (item) => {
+            const supplierItemResponse =
+              await get_supplier_items_by_type_category_api(
+                companyId,
+                parseInt(item.itemMaster?.itemType?.itemTypeId),
+                parseInt(item.itemMaster?.category?.categoryId),
+                userLocation[0]?.locationId
+              );
+
+            const supplierItems = supplierItemResponse.data.result
+              ? supplierItemResponse.data.result.filter(
+                  (si) =>
+                    si.itemMasterId !== item.itemMasterId &&
+                    si.supplierName !== formData?.selectedSupplier?.supplierName
+                )
+              : [];
+
+            return {
+              id: item.itemMasterId,
+              name: item.itemMaster.itemName,
+              unit: item.itemMaster.unit?.unitName || "",
+              categoryId: item.itemMaster?.category?.categoryId || "",
+              itemTypeId: item.itemMaster?.itemType?.itemTypeId || "",
+              quantity:
+                item.maxStockLevel - item.totalStockInHand >= 0
+                  ? item.maxStockLevel - item.totalStockInHand
+                  : 0,
+              unitPrice: 0.0,
+              totalPrice: 0.0,
+              supplierItems: supplierItems,
+              totalStockInHand: item.totalStockInHand,
+              minReOrderLevel: item.minReOrderLevel,
+              maxStockLevel: item.maxStockLevel,
+              chargesAndDeductions: initializedCharges,
+            };
+          })
+        );
 
         // Update formData with new itemDetails
         setFormData((prevFormData) => ({
@@ -978,9 +1156,12 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     } catch (error) {
       console.error("Error generating purchase order:", error);
     } finally {
-      setLoading(false); // Reset loading state
+      setPOGenerating(false);
     }
   };
+
+  console.log("formData", formData);
+  console.log("purchaseRequisition", purchaseRequisition);
 
   return {
     formData,
@@ -1011,6 +1192,8 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     isPOGenerated,
     loading,
     loadingDraft,
+    showToast,
+    poGenerating,
     handleInputChange,
     handleSupplierChange,
     handleItemDetailsChange,
@@ -1031,8 +1214,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     renderColumns,
     renderSubColumns,
     calculateTotalAmount,
-    handleGeneratePurchaseOrder, // Added to the return object
-    showToast,
+    handleGeneratePurchaseOrder,
     setShowToast,
   };
 };
