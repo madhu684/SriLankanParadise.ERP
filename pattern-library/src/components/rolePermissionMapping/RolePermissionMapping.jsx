@@ -131,11 +131,15 @@ const RolePermissionMapping = () => {
                 type="button"
                 className="btn btn-primary me-2"
                 onClick={handleCreate}
-                // disabled={
-                //   !hasPermission(PermissionIndex.CR_ROLE_PERMISSION_MAPPING)
-                // }
+                disabled={roleMappings.length === 0 || isSubmiting}
               >
-                {isSubmiting ? <LoadingSpinner /> : "Create"}
+                {isSubmiting ? (
+                  <LoadingSpinner />
+                ) : roleMappings.length > 0 ? (
+                  "Update"
+                ) : (
+                  "Create"
+                )}
               </button>
               <button
                 type="button"
