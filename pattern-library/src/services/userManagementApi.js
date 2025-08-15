@@ -153,6 +153,19 @@ export const role_permissions_api = async (moduleIds) => {
     throw error;
   }
 };
+
+export const delete_role_permission_api = async (roleId) => {
+  try {
+    const response = await api.delete(
+      `/rolePermission/DeleteRolePermissionByRoleId/${roleId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 // Company Subscription Module User API's
 export const company_subscription_module_user_api = async (
   userModulesFromData

@@ -31,6 +31,7 @@ import PackingSlipList from "../packingSlip/packingSlipList/packingSlipList.jsx"
 import SupplierReturnList from "../supplierReturn/supplierReturnList/supplierReturnList.jsx";
 import EmptyReturnList from "../emptyReturn/emptyReturnList/emptyReturnList.jsx";
 import AddEmpties from "../emptyReturn/addEmpties/addEmpties.jsx";
+import RolePermissionMapping from "../rolePermissionMapping/RolePermissionMapping.jsx";
 
 const useMain = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -149,6 +150,8 @@ const useMain = () => {
         return <StockLevel />;
       case "Empty Return":
         return <EmptyReturnList />;
+      case "Role Permission Mapping":
+        return <RolePermissionMapping />;
       default:
         return null;
     }

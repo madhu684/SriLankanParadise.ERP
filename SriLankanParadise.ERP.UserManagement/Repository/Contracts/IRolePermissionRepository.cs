@@ -6,6 +6,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
     {
         Task AddRolePermission(RolePermission rolePermission);
         Task<Dictionary<int, List<RolePermission>>> GetRolePermissionsByRoleIds(int[] roleIds);
-
+        Task DeleteRolePermissionByRoleId(int roleId);
+        Task<IEnumerable<RolePermission>> GetRolePermissionsByRoleId(int roleId);
     }
 }

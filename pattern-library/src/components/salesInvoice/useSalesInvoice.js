@@ -1194,58 +1194,56 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   }, [isLoadingchargesAndDeductions]);
 
   const renderSubColumns = () => {
-    {
-      return formData.commonChargesAndDeductions.map((charge, chargeIndex) => {
-        if (!charge.isApplicableForLineItem) {
-          return (
-            <tr key={chargeIndex}>
-              <td
-                colSpan={
-                  5 +
-                  formData.itemDetails[0].chargesAndDeductions.length -
-                  (company.batchStockType === "FIFO" ? 1 : 0)
-                }
-              ></td>
-              <th>
-                {charge.sign + " "}
-                {charge.name}
-                {charge.isPercentage === true && " (%)"}
-              </th>
-              <td>
-                <input
-                  className="form-control"
-                  type="number"
-                  value={charge.value}
-                  onChange={(e) => {
-                    let newValue = parseFloat(e.target.value);
+    return formData.commonChargesAndDeductions.map((charge, chargeIndex) => {
+      if (!charge.isApplicableForLineItem) {
+        return (
+          <tr key={chargeIndex}>
+            <td
+              colSpan={
+                5 +
+                formData.itemDetails[0].chargesAndDeductions.length -
+                (company.batchStockType === "FIFO" ? 1 : 0)
+              }
+            ></td>
+            <th>
+              {charge.sign + " "}
+              {charge.name}
+              {charge.isPercentage === true && " (%)"}
+            </th>
+            <td>
+              <input
+                className="form-control"
+                type="number"
+                value={charge.value}
+                onChange={(e) => {
+                  let newValue = parseFloat(e.target.value);
 
-                    // If the entered value is not a valid number, set it to 0
-                    if (isNaN(newValue)) {
-                      newValue = 0;
+                  // If the entered value is not a valid number, set it to 0
+                  if (isNaN(newValue)) {
+                    newValue = 0;
+                  } else {
+                    // If the charge is a percentage, ensure the value is between 0 and 100
+                    if (charge.isPercentage) {
+                      newValue = Math.min(100, Math.max(0, newValue)); // Clamp the value between 0 and 100
                     } else {
-                      // If the charge is a percentage, ensure the value is between 0 and 100
-                      if (charge.isPercentage) {
-                        newValue = Math.min(100, Math.max(0, newValue)); // Clamp the value between 0 and 100
-                      } else {
-                        // For non-percentage charges, ensure the value is positive
-                        newValue = Math.max(0, newValue);
-                      }
+                      // For non-percentage charges, ensure the value is positive
+                      newValue = Math.max(0, newValue);
                     }
+                  }
 
-                    handleInputChange(
-                      `commonChargesAndDeductions_${chargeIndex}_value`,
-                      newValue
-                    );
-                  }}
-                />
-              </td>
-              <td></td>
-            </tr>
-          );
-        }
-        return null;
-      });
-    }
+                  handleInputChange(
+                    `commonChargesAndDeductions_${chargeIndex}_value`,
+                    newValue
+                  );
+                }}
+              />
+            </td>
+            <td></td>
+          </tr>
+        );
+      }
+      return null;
+    });
   };
 
   // Function to open modal
