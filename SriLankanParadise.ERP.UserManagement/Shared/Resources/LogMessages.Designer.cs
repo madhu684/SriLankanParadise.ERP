@@ -862,6 +862,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Item batch retrieved.
+        /// </summary>
+        public static string ItemBatchRetrieved {
+            get {
+                return ResourceManager.GetString("ItemBatchRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Item batch updated successfully.
         /// </summary>
         public static string ItemBatchUpdated {

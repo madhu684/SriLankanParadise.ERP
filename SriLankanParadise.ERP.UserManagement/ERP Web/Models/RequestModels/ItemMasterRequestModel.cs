@@ -25,6 +25,7 @@
         public decimal? ConversionRate { get; set; }
 
         public int? ReorderLevel { get; set; }
+        public bool? IsInventoryItem { get; set; }
 
         public decimal? UnitPrice { get; set; }
 
@@ -56,7 +57,6 @@
         //new properties
 
         public int PermissionId { get; set; }
-
         public IEnumerable<SubItemMasterRequestModel>? SubItemMasters { get; set; }
     }
 }

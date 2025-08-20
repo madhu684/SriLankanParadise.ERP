@@ -21,5 +21,6 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task UpdateItemBatch(int batchId, int itemMasterId, ItemBatch itemBatch);
 
         Task UpdateItemBatchQty(int batchId, int itemMasterId, ItemBatch itemBatch, string operation);
+        Task<ItemBatch> GetItemBatchByItemMasterIdBatchId(int itemMasterId, int batchId);
     }
 }

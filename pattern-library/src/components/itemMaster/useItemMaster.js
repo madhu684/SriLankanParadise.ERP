@@ -445,6 +445,7 @@ const useItemMaster = ({ onFormSubmit }) => {
             formData.itemTypeName === "Service" ? 1 : formData.conversionValue,
           reorderLevel:
             formData.itemTypeName === "Service" ? 0 : formData.reorderLevel,
+          isInventoryItem: formData.itemTypeName === "Service" ? false : true,
           permissionId: 1039,
           unitPrice: formData.unitPrice,
           costRatio:
@@ -506,6 +507,7 @@ const useItemMaster = ({ onFormSubmit }) => {
                 : formData.conversionValue,
             reorderLevel:
               formData.itemTypeName === "Service" ? 0 : formData.reorderLevel,
+            isInventoryItem: formData.itemTypeName === "Service" ? false : true,
             permissionId: 1040,
             unitPrice: formData.unitPrice,
             costRatio:
