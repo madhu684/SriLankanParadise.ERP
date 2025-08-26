@@ -26,7 +26,7 @@ const useItemMaster = ({ onFormSubmit }) => {
     inventoryMeasurementType: "",
     inventoryUnitId: "",
     conversionValue: "",
-    reorderLevel: "",
+    itemCode: "",
     unitPrice: "",
     costRatio: "",
     fobInUSD: "",
@@ -46,7 +46,6 @@ const useItemMaster = ({ onFormSubmit }) => {
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
   const [unitOptions, setUnitOptions] = useState([]);
-  const [itemCode, setItemCode] = useState(null);
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const alertRef = useRef(null);
@@ -322,6 +321,11 @@ const useItemMaster = ({ onFormSubmit }) => {
       "Unit price",
       formData.unitPrice
     );
+    const isItemCodeValid = validateField(
+      "itemCode",
+      "Item code",
+      formData.itemCode
+    );
 
     // Skip validation for Service items
     if (formData.itemTypeName === "Service") {
@@ -330,7 +334,8 @@ const useItemMaster = ({ onFormSubmit }) => {
         isCategoryValid &&
         isItemNameValid &&
         isItemTypeValid &&
-        isUnitPriceValid
+        isUnitPriceValid &&
+        isItemCodeValid
       );
     }
 
@@ -375,12 +380,6 @@ const useItemMaster = ({ onFormSubmit }) => {
         errorMessage: `Conversion rate must be greater than 0`,
       }
     );
-
-    const isReorderLevelValid = validateField(
-      "reorderLevel",
-      "Reorder level",
-      formData.reorderLevel
-    );
     const isCostRatioValid = validateField(
       "costRatio",
       "Cost Ratio",
@@ -403,10 +402,10 @@ const useItemMaster = ({ onFormSubmit }) => {
       isInventoryMeasurementTypeValid &&
       isInventoryUnitValid &&
       isConversionValueValid &&
-      isReorderLevelValid &&
       isUnitPriceValid &&
       isCostRatioValid &&
-      isFOBInUSDValid
+      isFOBInUSDValid &&
+      isItemCodeValid
     );
   };
 
@@ -443,8 +442,10 @@ const useItemMaster = ({ onFormSubmit }) => {
               : formData.inventoryUnitId,
           conversionRate:
             formData.itemTypeName === "Service" ? 1 : formData.conversionValue,
+          itemCode: formData.itemCode,
           reorderLevel:
             formData.itemTypeName === "Service" ? 0 : formData.reorderLevel,
+          isInventoryItem: formData.itemTypeName === "Service" ? false : true,
           permissionId: 1039,
           unitPrice: formData.unitPrice,
           costRatio:
@@ -477,8 +478,6 @@ const useItemMaster = ({ onFormSubmit }) => {
 
         console.log("sending request : ", itemMasterData);
         const response = await post_item_master_api(itemMasterData);
-        console.log("response after POST request : ", response);
-        setItemCode(response.data.result.itemCode);
         const itemMasterId = response.data.result.itemMasterId;
 
         if (formData.itemHierarchy === "main") {
@@ -504,8 +503,10 @@ const useItemMaster = ({ onFormSubmit }) => {
               formData.itemTypeName === "Service"
                 ? 0
                 : formData.conversionValue,
+            itemCode: formData.itemCode,
             reorderLevel:
               formData.itemTypeName === "Service" ? 0 : formData.reorderLevel,
+            isInventoryItem: formData.itemTypeName === "Service" ? false : true,
             permissionId: 1040,
             unitPrice: formData.unitPrice,
             costRatio:
@@ -639,8 +640,8 @@ const useItemMaster = ({ onFormSubmit }) => {
     setSupplierSearchTerm("");
   };
 
-  console.log("unitOptions 229", unitOptions);
-  console.log("formData : ", formData);
+  console.log("formData: ", formData);
+  console.log("Valuation Error: ", validationErrors);
 
   return {
     formData,
@@ -671,7 +672,6 @@ const useItemMaster = ({ onFormSubmit }) => {
     searchChildTerm,
     selectedParentItem,
     selectedChildItems,
-    itemCode,
     supplierSearchTerm,
     availableSuppliers,
     isSuppliersLoading,

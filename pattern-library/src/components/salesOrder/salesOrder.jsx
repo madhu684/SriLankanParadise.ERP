@@ -474,7 +474,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
         </div>
 
         {/* Item Details */}
-        <h4>3. Item Details dinusha</h4>
+        <h4>3. Item Details</h4>
 
         <div className="col-md-5">
           {/* Item Search */}

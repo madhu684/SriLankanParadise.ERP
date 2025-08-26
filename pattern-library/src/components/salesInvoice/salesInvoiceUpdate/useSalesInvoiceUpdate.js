@@ -15,14 +15,14 @@ import {
   get_charges_and_deductions_applied_api,
   put_charges_and_deductions_applied_api,
   delete_charges_and_deductions_applied_api,
+  get_locations_inventories_by_location_id_api,
 } from "../../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
 
 const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   const [formData, setFormData] = useState({
-    itemMasterId: 0,
-    itemMaster: "",
+    storeLocation: null,
     invoiceDate: "",
     dueDate: "",
     referenceNumber: "",
@@ -32,7 +32,6 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     salesOrderId: "",
     referenceNo: "",
     subTotal: 0,
-    selectedCustomer: "",
     commonChargesAndDeductions: [],
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
@@ -51,29 +50,6 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   const [showModal, setShowModal] = useState(false);
   const [processedItems, setProcessedItems] = useState(false);
 
-  const fetchItemBatches = async (itemMasterId) => {
-    try {
-      const response = await get_item_batches_by_item_master_id_api(
-        itemMasterId,
-        sessionStorage.getItem("companyId")
-      );
-      return response.data.result;
-    } catch (error) {
-      console.error("Error fetching item batches:", error);
-    }
-  };
-
-  const {
-    data: itemBatches,
-    isLoading,
-    isError,
-    error,
-    refetch: refetchItemBatches,
-  } = useQuery({
-    queryKey: ["itemBatches", formData.itemMasterId],
-    queryFn: () => fetchItemBatches(formData.itemMasterId),
-  });
-
   const fetchItems = async (companyId, searchQuery, itemType) => {
     try {
       const response = await get_item_masters_by_company_id_with_query_api(
@@ -88,7 +64,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   };
 
   const {
-    data: availableItems,
+    data: availableItems = [],
     isLoading: isItemsLoading,
     isError: isItemsError,
     error: itemsError,
@@ -96,6 +72,36 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     queryKey: ["items", searchTerm],
     queryFn: () =>
       fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"), //Sellable
+  });
+
+  const fetchLocationInventories = async (locationId) => {
+    try {
+      if (!locationId) return [];
+      const response = await get_locations_inventories_by_location_id_api(
+        locationId
+      );
+      console.log("Location inventories:", response.data.result);
+      return response.data.result || [];
+    } catch (error) {
+      console.error(
+        "Error fetching location inventories for location",
+        locationId,
+        ":",
+        error
+      );
+      return [];
+    }
+  };
+
+  const {
+    data: locationInventories,
+    isLoading: isLocationInventoriesLoading,
+    isError: isLocationInventoriesError,
+    refetch: refetchLocationInventories,
+  } = useQuery({
+    queryKey: ["locationInventories", formData.storeLocation],
+    queryFn: () => fetchLocationInventories(formData.storeLocation),
+    enabled: !!formData.storeLocation,
   });
 
   useEffect(() => {
@@ -207,7 +213,12 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   );
 
   useEffect(() => {
-    if (!isCompanyLoading && company && company.batchStockType === "FIFO") {
+    if (
+      !isCompanyLoading &&
+      company &&
+      company.batchStockType === "FIFO" &&
+      groupedSalesInvoiceDetails
+    ) {
       const promises = Object.values(groupedSalesInvoiceDetails).map(
         async (item) => {
           try {
@@ -216,6 +227,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
               item.itemBatchItemMasterId,
               sessionStorage.getItem("companyId")
             );
+            console.log("Item batches 230:", response.data.result);
 
             // Calculate total temporary quantity from batches
             const tempQuantity = response.data.result.reduce(
@@ -323,8 +335,8 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           itemBatchId: item.itemBatch.batchId,
           name: item.itemBatch.itemMaster.itemName,
           unit: item.itemBatch.itemMaster.unit.unitName,
-          batchRef: item.itemBatch.batch.batchRef,
-          tempQuantity: item.itemBatch.tempQuantity + item.quantity,
+          //batchRef: item.itemBatch.batch.batchRef,
+          stockInHand: item.quantity,
           chargesAndDeductions: sortedLineItemCharges,
           batch: item.itemBatch,
         };
@@ -360,15 +372,14 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
         salesInvoiceId: deepCopySalesInvoice?.salesInvoiceId ?? "",
         invoiceDate: deepCopySalesInvoice?.invoiceDate?.split("T")[0] ?? "",
         dueDate: deepCopySalesInvoice?.dueDate?.split("T")[0] ?? "",
-        referenceNumber: deepCopySalesInvoice?.referenceNumber ?? "",
+        referenceNumber: deepCopySalesInvoice?.referenceNo ?? "",
         itemDetails: initializedLineItemCharges,
         attachments: deepCopySalesInvoice?.attachments ?? [],
         totalAmount: deepCopySalesInvoice?.totalAmount ?? "",
-        itemMasterId: 0,
-        itemMaster: "",
         subTotal: 0,
         commonChargesAndDeductions: initializedCommonCharges,
         salesOrderId: deepCopySalesInvoice?.salesOrderId ?? null,
+        storeLocation: deepCopySalesInvoice?.locationId ?? null,
       });
     }
   }, [
@@ -1309,130 +1320,12 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
       itemMasterId: item.itemMasterId,
       itemMaster: item,
     }));
-    setSearchTerm(""); // Clear the search term
+    setSearchTerm("");
 
     setSelectedBatch(null);
-    refetchItemBatches();
     setValidFields({});
     setValidationErrors({});
-
-    if (company.batchStockType === "FIFO") {
-    } else {
-      openModal();
-    }
   };
-
-  const handleBatchSelection = (batchId) => {
-    const selectedBatchId = batchId;
-    const batch = itemBatches.find(
-      (batch) => batch.batchId === parseInt(selectedBatchId, 10)
-    );
-
-    // Generate chargesAndDeductions array for the newly added item
-    const initializedCharges = chargesAndDeductions
-      .filter((charge) => charge.isApplicableForLineItem)
-      .map((charge) => ({
-        id: charge.chargesAndDeductionId,
-        name: charge.displayName,
-        value: charge.amount || charge.percentage,
-        sign: charge.sign,
-        isPercentage: charge.percentage !== null,
-      }));
-
-    // Ensure batch exists
-    if (batch) {
-      setSelectedBatch(batch);
-
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        itemDetails: [
-          ...prevFormData.itemDetails,
-          {
-            itemMasterId: batch.itemMasterId,
-            itemBatchId: batch.batchId,
-            name: formData.itemMaster.itemName,
-            unit: formData.itemMaster.unit.unitName,
-            batchRef: batch.batch.batchRef,
-            quantity: 0,
-            unitPrice: batch.sellingPrice,
-            totalPrice: 0.0,
-            chargesAndDeductions: initializedCharges,
-            batch: batch,
-            tempQuantity: batch.tempQuantity,
-          },
-        ],
-      }));
-    } else {
-      setSelectedBatch(null);
-    }
-    closeModal();
-  };
-
-  const handleBatchSelectionFIFO = () => {
-    const sortedBatches = itemBatches?.sort((a, b) => {
-      return new Date(a.batch.date) - new Date(b.batch.date);
-    });
-
-    // Select the oldest batch
-    const selectedBatch = sortedBatches[0];
-
-    // Calculate total temporary quantity
-    const totalTempQuantity = sortedBatches.reduce(
-      (accumulator, currentBatch) => accumulator + currentBatch.tempQuantity,
-      0
-    );
-
-    // Find the highest selling price among the batches
-    const highestSellingPrice = sortedBatches.reduce(
-      (maxPrice, currentBatch) =>
-        currentBatch.sellingPrice > maxPrice
-          ? currentBatch.sellingPrice
-          : maxPrice,
-      0
-    );
-
-    // Generate chargesAndDeductions array for the newly added item
-    const initializedCharges = chargesAndDeductions
-      .filter((charge) => charge.isApplicableForLineItem)
-      .map((charge) => ({
-        id: charge.chargesAndDeductionId,
-        name: charge.displayName,
-        value: charge.amount || charge.percentage,
-        sign: charge.sign,
-        isPercentage: charge.percentage !== null,
-      }));
-
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      itemDetails: [
-        ...prevFormData.itemDetails,
-        {
-          itemMasterId: formData.itemMasterId,
-          itemBatchId: null,
-          name: formData.itemMaster.itemName,
-          unit: formData.itemMaster.unit.unitName,
-          batchRef: null,
-          quantity: 0,
-          unitPrice: highestSellingPrice,
-          totalPrice: 0.0,
-          chargesAndDeductions: initializedCharges,
-          batches: sortedBatches,
-          tempQuantity: totalTempQuantity,
-        },
-      ],
-    }));
-  };
-
-  useEffect(() => {
-    // Check if itemBatches is defined and not empty
-    if (
-      itemBatches &&
-      itemBatches.length > 0 &&
-      company.batchStockType === "FIFO"
-    ) {
-      handleBatchSelectionFIFO();
-    }
-  }, [itemBatches]);
 
   const renderColumns = () => {
     return chargesAndDeductions.map((charge) => {
@@ -1451,69 +1344,59 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   };
 
   const renderSubColumns = () => {
-    {
-      return formData.commonChargesAndDeductions.map((charge, chargeIndex) => {
-        if (!charge.isApplicableForLineItem) {
-          return (
-            <tr key={chargeIndex}>
-              <td
-                colSpan={
-                  5 +
-                  formData.itemDetails[0].chargesAndDeductions.length -
-                  (company.batchStockType === "FIFO" ? 1 : 0)
-                }
-              ></td>
-              <th>
-                {charge.sign + " "}
-                {charge.name}
-                {charge.isPercentage === true && " (%)"}
-              </th>
-              <td>
-                <input
-                  className="form-control"
-                  type="number"
-                  value={charge.value}
-                  onChange={(e) => {
-                    let newValue = parseFloat(e.target.value);
+    return formData.commonChargesAndDeductions.map((charge, chargeIndex) => {
+      if (!charge.isApplicableForLineItem) {
+        return (
+          <tr key={chargeIndex}>
+            <td
+              colSpan={
+                6 +
+                formData.itemDetails[0].chargesAndDeductions.length -
+                (company.batchStockType === "FIFO" ? 1 : 0)
+              }
+            ></td>
+            <th>
+              {charge.sign + " "}
+              {charge.name}
+              {charge.isPercentage === true && " (%)"}
+            </th>
+            <td>
+              <input
+                className="form-control"
+                type="number"
+                value={charge.value}
+                onChange={(e) => {
+                  let newValue = parseFloat(e.target.value);
 
-                    // If the entered value is not a valid number, set it to 0
-                    if (isNaN(newValue)) {
-                      newValue = 0;
+                  // If the entered value is not a valid number, set it to 0
+                  if (isNaN(newValue)) {
+                    newValue = 0;
+                  } else {
+                    // If the charge is a percentage, ensure the value is between 0 and 100
+                    if (charge.isPercentage) {
+                      newValue = Math.min(100, Math.max(0, newValue)); // Clamp the value between 0 and 100
                     } else {
-                      // If the charge is a percentage, ensure the value is between 0 and 100
-                      if (charge.isPercentage) {
-                        newValue = Math.min(100, Math.max(0, newValue)); // Clamp the value between 0 and 100
-                      } else {
-                        // For non-percentage charges, ensure the value is positive
-                        newValue = Math.max(0, newValue);
-                      }
+                      // For non-percentage charges, ensure the value is positive
+                      newValue = Math.max(0, newValue);
                     }
+                  }
 
-                    handleInputChange(
-                      `commonChargesAndDeductions_${chargeIndex}_value`,
-                      newValue
-                    );
-                  }}
-                />
-              </td>
-              <td></td>
-            </tr>
-          );
-        }
-        return null;
-      });
-    }
+                  handleInputChange(
+                    `commonChargesAndDeductions_${chargeIndex}_value`,
+                    newValue
+                  );
+                }}
+              />
+            </td>
+            <td></td>
+          </tr>
+        );
+      }
+      return null;
+    });
   };
 
-  // Function to open modal
-  const openModal = () => {
-    setShowModal(true);
-  };
-
-  // Function to close modal
-  const closeModal = () => {
-    setShowModal(false);
-  };
+  console.log("formData", formData);
 
   return {
     formData,
@@ -1521,16 +1404,12 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     validFields,
     validationErrors,
     alertRef,
-    isError,
-    isLoading,
-    error,
     searchTerm,
     availableItems,
     isItemsLoading,
     isItemsError,
     itemsError,
     selectedBatch,
-    itemBatches,
     isLoadingchargesAndDeductions,
     ischargesAndDeductionsError,
     isLoadingTransactionTypes,
@@ -1543,7 +1422,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     showModal,
     company,
     itemIdsToBeDeleted,
-    closeModal,
+    locationInventories,
     handleInputChange,
     handleItemDetailsChange,
     handleSubmit,
@@ -1553,7 +1432,6 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     handleAttachmentChange,
     calculateTotalAmount,
     setSearchTerm,
-    handleBatchSelection,
     handleSelectItem,
     renderColumns,
     calculateSubTotal,

@@ -429,7 +429,6 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
           </div>
         )}
         <h4>3. Item Details</h4>
-        {/* {console.log('formdata: ', formData)} */}
         {formData.itemDetails.length > 0 && (
           <div className="table-responsive mb-2">
             <table className="table">

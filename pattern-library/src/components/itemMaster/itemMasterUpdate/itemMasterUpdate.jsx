@@ -150,19 +150,19 @@ const ItemMasterUpdate = ({
               )}
             </div>
 
-            {/* <div className="mb-3 mt-3">
+            <div className="mb-3 mt-3">
               <label htmlFor="itemCode" className="form-label">
                 Item Code
               </label>
               <input
                 type="text"
                 className={`form-control ${
-                  validFields.itemCode ? 'is-valid' : ''
-                } ${validationErrors.itemCode ? 'is-invalid' : ''}`}
+                  validFields.itemCode ? "is-valid" : ""
+                } ${validationErrors.itemCode ? "is-invalid" : ""}`}
                 id="itemCode"
                 placeholder="Enter Item Code"
                 value={formData.itemCode}
-                onChange={(e) => handleInputChange('itemCode', e.target.value)}
+                onChange={(e) => handleInputChange("itemCode", e.target.value)}
                 required
               />
               {validationErrors.itemCode && (
@@ -170,7 +170,7 @@ const ItemMasterUpdate = ({
                   {validationErrors.itemCode}
                 </div>
               )}
-            </div> */}
+            </div>
 
             <div className="mb-3 mt-3">
               <label htmlFor="itemType" className="form-label">
@@ -434,7 +434,7 @@ const ItemMasterUpdate = ({
               </div>
             )}
 
-            <div className="mb-3 mt-3">
+            {/* <div className="mb-3 mt-3">
               <label htmlFor="reorderLevel" className="form-label">
                 Reorder level
               </label>
@@ -458,7 +458,7 @@ const ItemMasterUpdate = ({
                   {validationErrors.reorderLevel}
                 </div>
               )}
-            </div>
+            </div> */}
 
             {/* Supplier tagging */}
             <h4>Supplier Tagging</h4>

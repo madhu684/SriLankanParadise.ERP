@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { approve_sales_invoice_api } from "../../../services/salesApi";
-import { get_charges_and_deductions_applied_api, post_location_inventory_api, post_location_inventory_movement_api } from "../../../services/purchaseApi";
+import {
+  get_charges_and_deductions_applied_api,
+  post_location_inventory_api,
+  post_location_inventory_movement_api,
+} from "../../../services/purchaseApi";
 import { get_company_api } from "../../../services/salesApi";
 import { useQuery } from "@tanstack/react-query";
 
@@ -25,8 +29,8 @@ const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
       const formattedDate = currentDate.toISOString();
       const approvalData = {
         status: 2,
-        approvedBy: sessionStorage.getItem("username"), //username
-        approvedUserId: sessionStorage.getItem("userId"), //userid
+        approvedBy: sessionStorage.getItem("username"),
+        approvedUserId: sessionStorage.getItem("userId"),
         approvedDate: formattedDate,
         permissionId: 26,
       };
@@ -43,7 +47,7 @@ const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
           locationId: salesInvoice.locationId,
           stockInHand: invoiceDetail.quantity,
           permissionId: 1088,
-          movementTypeId: 2
+          movementTypeId: 2,
         };
 
         await post_location_inventory_api(locationInventoryData);
@@ -60,8 +64,9 @@ const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
           permissionId: 1090,
         };
 
-        await post_location_inventory_movement_api(locationInventoryMovementData);
-        
+        await post_location_inventory_movement_api(
+          locationInventoryMovementData
+        );
       }
 
       if (approvalResponse.status === 200) {
