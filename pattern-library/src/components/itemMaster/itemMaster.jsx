@@ -111,7 +111,7 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
       {/* Display success or error messages */}
       {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
-          Item master created successfully! Item Code : {itemCode}
+          Item master created successfully! Item Code : {formData.itemCode}
         </div>
       )}
       {submissionStatus === "successSavedAsDraft" && (
@@ -148,6 +148,28 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
               {validationErrors.itemName && (
                 <div className="invalid-feedback">
                   {validationErrors.itemName}
+                </div>
+              )}
+            </div>
+
+            <div className="mb-3 mt-3">
+              <label htmlFor="itemCode" className="form-label">
+                Item Code
+              </label>
+              <input
+                type="text"
+                className={`form-control ${
+                  validFields.itemCode ? "is-valid" : ""
+                } ${validationErrors.itemCode ? "is-invalid" : ""}`}
+                id="itemCode"
+                placeholder="Enter Item Code"
+                value={formData.itemCode}
+                onChange={(e) => handleInputChange("itemCode", e.target.value)}
+                required
+              />
+              {validationErrors.itemCode && (
+                <div className="invalid-feedback">
+                  {validationErrors.itemCode}
                 </div>
               )}
             </div>
@@ -433,7 +455,7 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
                   </div>
                 )}
 
-                <div className="mb-3 mt-3">
+                {/* <div className="mb-3 mt-3">
                   <label htmlFor="reorderLevel" className="form-label">
                     Reorder level
                   </label>
@@ -459,7 +481,7 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
                       {validationErrors.reorderLevel}
                     </div>
                   )}
-                </div>
+                </div> */}
 
                 {/* Supplier tagging */}
                 <h4>Supplier Tagging</h4>

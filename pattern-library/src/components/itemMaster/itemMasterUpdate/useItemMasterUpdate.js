@@ -23,7 +23,7 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     unitId: "",
     categoryId: "",
     itemName: "",
-    //itemCode: '',
+    itemCode: "",
     itemTypeId: "",
     measurementType: "",
     itemHierarchy: "",
@@ -240,6 +240,7 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       isInventoryItem: deepCopyItemMaster?.isInventoryItem ?? false,
       unitPrice: deepCopyItemMaster?.unitPrice ?? "",
       costRatio: deepCopyItemMaster?.costRatio ?? "",
+      itemCode: deepCopyItemMaster?.itemCode ?? "",
       fobInUSD: deepCopyItemMaster?.fobInUSD ?? "",
       landedCost: deepCopyItemMaster?.landedCost ?? "",
       minNetSellingPrice: deepCopyItemMaster?.minNetSellingPrice ?? "",
@@ -389,17 +390,17 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       }
     );
 
-    // const isItemCodeValid = validateField(
-    //   "itemCode",
-    //   "Item code",
-    //   formData.itemCode
-    // );
-
-    const isReorderLevelValid = validateField(
-      "reorderLevel",
-      "Reorder level",
-      formData.reorderLevel
+    const isItemCodeValid = validateField(
+      "itemCode",
+      "Item code",
+      formData.itemCode
     );
+
+    // const isReorderLevelValid = validateField(
+    //   "reorderLevel",
+    //   "Reorder level",
+    //   formData.reorderLevel
+    // );
 
     const isUnitPriceValid = validateField(
       "unitPrice",
@@ -428,8 +429,8 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       isparentItemValid &&
       isInventoryUnitValid &&
       isConversionValueValid &&
-      //isItemCodeValid &&
-      isReorderLevelValid &&
+      isItemCodeValid &&
+      // isReorderLevelValid &&
       isUnitPriceValid &&
       isCostRatioValid &&
       isFOBInUSDValid
@@ -578,6 +579,7 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
         })),
         inventoryUnitId: formData.inventoryUnitId,
         conversionRate: formData.conversionValue,
+        itemCode: formData.itemCode,
         reorderLevel: formData.reorderLevel,
         isInventoryItem: formData.isInventoryItem,
         permissionId: 1040,
