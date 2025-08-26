@@ -1,58 +1,48 @@
-import React from "react";
 import useSalesInvoiceUpdate from "./useSalesInvoiceUpdate";
 import CurrentDateTime from "../../currentDateTime/currentDateTime";
-import useCompanyLogoUrl from "../../companyLogo/useCompanyLogoUrl";
-import Customer from "../../customer/customer";
 import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
-import BatchSelectionModal from "../../batchSelectionModal/batchSelectionModal";
 
 const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
   const {
+    salesOrder,
     formData,
     submissionStatus,
     validFields,
     validationErrors,
     alertRef,
-    selectedSalesOrder,
-    salesOrderOptions,
-    salesOrder,
     searchTerm,
+    availableItems,
     isItemsLoading,
     isItemsError,
     itemsError,
-    availableItems,
     selectedBatch,
-    itemBatches,
-    isLoading,
-    isError,
-    isLoadingTransactionTypes,
     isLoadingchargesAndDeductions,
-    isTransactionTypesError,
     ischargesAndDeductionsError,
+    isLoadingTransactionTypes,
+    isTransactionTypesError,
     transactionTypesError,
     loading,
     loadingDraft,
     isCompanyLoading,
     isCompanyError,
-    showModal,
     company,
     itemIdsToBeDeleted,
-    closeModal,
-    setSearchTerm,
+    locationInventories,
     handleInputChange,
     handleItemDetailsChange,
+    handleSubmit,
+    handleAddItem,
     handleRemoveItem,
     handlePrint,
     handleAttachmentChange,
     calculateTotalAmount,
+    setSearchTerm,
     handleSelectItem,
-    handleBatchSelection,
     renderColumns,
-    renderSubColumns,
     calculateSubTotal,
-    handleSubmit,
+    renderSubColumns,
   } = useSalesInvoiceUpdate({
     salesInvoice,
     onFormSubmit: () => {
@@ -60,7 +50,6 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
       handleUpdated();
     },
   });
-  const companyLogoUrl = useCompanyLogoUrl();
 
   if (isLoadingchargesAndDeductions || isLoadingTransactionTypes) {
     return <LoadingSpinner />;
@@ -76,7 +65,11 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img src={companyLogoUrl} alt="Company Logo" height={30} />
+          <i
+            class="bi bi-arrow-left"
+            onClick={handleClose}
+            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+          ></i>
           <p>
             <CurrentDateTime />
           </p>
@@ -166,7 +159,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                 onChange={(e) =>
                   handleInputChange("referenceNumber", e.target.value)
                 }
-                required
+                disabled
               />
               {validationErrors.referenceNumber && (
                 <div className="invalid-feedback">
@@ -339,14 +332,14 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
           </div>
         </div>
 
-        {!itemBatches && formData.itemMasterId !== 0 && (
+        {/* {!itemBatches && formData.itemMasterId !== 0 && (
           <div className="mb-3">
             <small className="form-text  text-danger">
               Selected item does not have any associated item batches. Please
               select another item
             </small>
           </div>
-        )}
+        )} */}
 
         {formData.itemDetails.length > 0 && (
           <div className="table-responsive mb-2">
@@ -358,9 +351,9 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                 <tr>
                   <th>Item Name</th>
                   <th>Unit</th>
-                  {company.batchStockType !== "FIFO" && <th>Batch Ref</th>}
-                  <th>Temp Qty</th>
+                  <th>Item Batch</th>
                   <th>Quantity</th>
+                  <th>Stock In Hand</th>
                   <th>Unit Price</th>
                   {renderColumns()}
                   <th className="text-end">Total Price</th>
@@ -372,10 +365,34 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                   <tr key={index}>
                     <td>{item.name}</td>
                     <td>{item.unit}</td>
-                    {company.batchStockType !== "FIFO" && (
-                      <td>{item.batchRef}</td>
-                    )}
-                    <td>{item.tempQuantity}</td>
+                    <td>
+                      <select
+                        className="form-select"
+                        //value={item.batch.batchId}
+                        onChange={(e) =>
+                          handleItemDetailsChange(
+                            index,
+                            "batchId",
+                            e.target.value
+                          )
+                        }
+                      >
+                        <option value="">Select batch</option>
+                        {locationInventories
+                          ?.filter(
+                            (i) => i.itemMasterId === item.itemBatchItemMasterId
+                          )
+                          ?.map((i, batchIndex) => (
+                            <option
+                              key={batchIndex}
+                              value={i.batchId}
+                              disabled={i.stockInHand === 0}
+                            >
+                              {i.itemBatch.batch.batchRef}
+                            </option>
+                          ))}
+                      </select>
+                    </td>
                     <td>
                       <input
                         type="number"
@@ -401,6 +418,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                         </div>
                       )}
                     </td>
+                    <td>{item.stockInHand}</td>
                     <td>{item.unitPrice.toFixed(2)}</td>
                     {item.chargesAndDeductions.map((charge, chargeIndex) => (
                       <td key={chargeIndex}>
@@ -456,7 +474,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                 <tr>
                   <td
                     colSpan={
-                      5 +
+                      6 +
                       formData.itemDetails[0].chargesAndDeductions.length -
                       (company.batchStockType === "FIFO" ? 1 : 0)
                     }
@@ -469,7 +487,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                 <tr>
                   <td
                     colSpan={
-                      5 +
+                      6 +
                       formData.itemDetails[0].chargesAndDeductions.length -
                       (company.batchStockType === "FIFO" ? 1 : 0)
                     }
@@ -557,16 +575,6 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
           </button>
         </div>
       </form>
-      {itemBatches && (
-        <BatchSelectionModal
-          show={showModal}
-          handleClose={closeModal}
-          itemBatches={itemBatches}
-          itemDetails={formData.itemDetails}
-          itemIdsToBeDeleted={itemIdsToBeDeleted}
-          handleBatchSelect={handleBatchSelection}
-        />
-      )}
     </div>
   );
 };
