@@ -1,17 +1,19 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SriLankanParadise.ERP.UserManagement.Business_Service;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
-using System.Net;
 using SriLankanParadise.ERP.UserManagement.Shared.Resources;
-using SriLankanParadise.ERP.UserManagement.Business_Service;
+using System.Net;
 using System.Transactions;
 
 namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 {
+    [AllowAnonymous]
     [ApiController]
     [Route("api/itemMaster")]
     public class ItemMasterController : BaseApiController
