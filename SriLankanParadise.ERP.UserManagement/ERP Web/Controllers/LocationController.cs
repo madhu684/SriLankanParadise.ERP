@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
@@ -10,6 +11,7 @@ using SriLankanParadise.ERP.UserManagement.Shared.Resources;
 
 namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 {
+    [AllowAnonymous]
     [ApiController]
     [Route("api/location")]
     public class LocationController : BaseApiController
