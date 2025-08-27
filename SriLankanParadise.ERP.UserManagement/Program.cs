@@ -24,14 +24,15 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers(options =>
-{
-    var policy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .Build();
+//builder.Services.AddControllers(options =>
+//{
+//    var policy = new AuthorizationPolicyBuilder()
+//        .RequireAuthenticatedUser()
+//        .Build();
 
-    options.Filters.Add(new AuthorizeFilter(policy));
-});
+//    options.Filters.Add(new AuthorizeFilter(policy));
+//});
+builder.Services.AddControllers();
 
 // Register HttpContextAccessor
 builder.Services.AddHttpContextAccessor();
