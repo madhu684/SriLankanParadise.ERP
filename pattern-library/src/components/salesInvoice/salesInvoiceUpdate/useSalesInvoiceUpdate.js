@@ -8,7 +8,6 @@ import {
 } from "../../../services/salesApi";
 import {
   get_item_batches_by_item_master_id_api,
-  put_item_batch_api,
   get_charges_and_deductions_by_company_id_api,
   post_charges_and_deductions_applied_api,
   get_transaction_types_api,
@@ -16,6 +15,7 @@ import {
   put_charges_and_deductions_applied_api,
   delete_charges_and_deductions_applied_api,
   get_locations_inventories_by_location_id_api,
+  get_item_batch_by_itemMasterId_batchId_api,
 } from "../../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
@@ -94,14 +94,14 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   };
 
   const {
-    data: locationInventories,
+    data: locationInventories = [],
     isLoading: isLocationInventoriesLoading,
     isError: isLocationInventoriesError,
     refetch: refetchLocationInventories,
   } = useQuery({
     queryKey: ["locationInventories", formData.storeLocation],
-    queryFn: () => fetchLocationInventories(formData.storeLocation),
-    enabled: !!formData.storeLocation,
+    queryFn: () => fetchLocationInventories(parseInt(salesInvoice.locationId)),
+    enabled: !!salesInvoice.locationId,
   });
 
   useEffect(() => {
@@ -212,65 +212,60 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     {}
   );
 
-  useEffect(() => {
-    if (
-      !isCompanyLoading &&
-      company &&
-      company.batchStockType === "FIFO" &&
-      groupedSalesInvoiceDetails
-    ) {
-      const promises = Object.values(groupedSalesInvoiceDetails).map(
-        async (item) => {
-          try {
-            // Fetch batches for the current itemMasterId
-            const response = await get_item_batches_by_item_master_id_api(
-              item.itemBatchItemMasterId,
-              sessionStorage.getItem("companyId")
-            );
-            console.log("Item batches 230:", response.data.result);
+  // useEffect(() => {
+  //   if (groupedSalesInvoiceDetails) {
+  //     const promises = Object.values(groupedSalesInvoiceDetails).map(
+  //       async (item) => {
+  //         try {
+  //           // Fetch batches for the current itemMasterId
+  //           const response = await get_item_batches_by_item_master_id_api(
+  //             item.itemBatchItemMasterId,
+  //             sessionStorage.getItem("companyId")
+  //           );
+  //           console.log("Item batches 230:", response.data.result);
 
-            // Calculate total temporary quantity from batches
-            const tempQuantity = response.data.result.reduce(
-              (total, batch) => total + (batch.tempQuantity || 0),
-              0
-            );
+  //           // Calculate total temporary quantity from batches
+  //           const tempQuantity = response.data.result.reduce(
+  //             (total, batch) => total + (batch.tempQuantity || 0),
+  //             0
+  //           );
 
-            // Update quantity and totalPrice
-            item.itemBatch.tempQuantity = tempQuantity;
+  //           // Update quantity and totalPrice
+  //           item.itemBatch.tempQuantity = tempQuantity;
 
-            // Update tempQuantity of fetched batches based on salesOrderDetails
-            const updatedBatches = response.data.result.map((batch) => {
-              const correspondingDetail = salesInvoice.salesInvoiceDetails.find(
-                (detail) => detail.itemBatchBatchId === batch.batchId
-              );
-              if (correspondingDetail) {
-                batch.tempQuantity += correspondingDetail.quantity;
-              }
-              return batch;
-            });
+  //           // Update tempQuantity of fetched batches based on salesOrderDetails
+  //           const updatedBatches = response.data.result.map((batch) => {
+  //             const correspondingDetail = salesInvoice.salesInvoiceDetails.find(
+  //               (detail) => detail.itemBatchBatchId === batch.batchId
+  //             );
+  //             if (correspondingDetail) {
+  //               batch.tempQuantity += correspondingDetail.quantity;
+  //             }
+  //             return batch;
+  //           });
 
-            // Update item.batches with the updated batches
-            item.batches = updatedBatches;
+  //           // Update item.batches with the updated batches
+  //           item.batches = updatedBatches;
 
-            return item;
-          } catch (error) {
-            console.error("Error processing item:", error);
-            throw error; // Propagate the error
-          }
-        }
-      );
+  //           return item;
+  //         } catch (error) {
+  //           console.error("Error processing item:", error);
+  //           throw error; // Propagate the error
+  //         }
+  //       }
+  //     );
 
-      Promise.all(promises)
-        .then((processedItems) => {
-          // Handle processed items here
-          setProcessedItems(processedItems);
-        })
-        .catch((error) => {
-          // Handle error if any
-          console.error("Error processing items:", error);
-        });
-    }
-  }, [isCompanyLoading, company]);
+  //     Promise.all(promises)
+  //       .then((processedItems) => {
+  //         // Handle processed items here
+  //         setProcessedItems(processedItems);
+  //       })
+  //       .catch((error) => {
+  //         // Handle error if any
+  //         console.error("Error processing items:", error);
+  //       });
+  //   }
+  // }, []);
 
   useEffect(() => {
     if (
@@ -279,7 +274,8 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
       !isLoadingchargesAndDeductions &&
       chargesAndDeductions &&
       !isCompanyLoading &&
-      company
+      company &&
+      locationInventories.length > 0
     ) {
       const deepCopySalesInvoice = JSON.parse(JSON.stringify(salesInvoice));
 
@@ -329,14 +325,19 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
             return matchedCharge || null; // Return null if no matching charge is found
           });
 
+        const selectedBatch = locationInventories?.find(
+          (batch) =>
+            batch.batchId === item.itemBatchBatchId &&
+            batch.itemMasterId === item.itemBatchItemMasterId
+        );
+
         return {
           ...item,
           itemMasterId: item.itemBatch.itemMasterId,
           itemBatchId: item.itemBatch.batchId,
           name: item.itemBatch.itemMaster.itemName,
           unit: item.itemBatch.itemMaster.unit.unitName,
-          //batchRef: item.itemBatch.batch.batchRef,
-          stockInHand: item.quantity,
+          stockInHand: selectedBatch?.stockInHand ?? 0,
           chargesAndDeductions: sortedLineItemCharges,
           batch: item.itemBatch,
         };
@@ -391,6 +392,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     isCompanyLoading,
     company,
     processedItems,
+    locationInventories,
   ]);
 
   const getTransactionTypeIdByName = (name) => {
@@ -607,8 +609,8 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
 
       const additionalRules = {
         validationFunction: (value) =>
-          parseFloat(value) > 0 && parseFloat(value) <= item.tempQuantity,
-        errorMessage: `${fieldDisplayName} must be greater than 0 and less than or equal to temporary quantity ${item.tempQuantity}`,
+          parseFloat(value) > 0 && parseFloat(value) <= item.stockInHand,
+        errorMessage: `${fieldDisplayName} must be greater than 0 and less than or equal to stock in hand ${item.stockInHand}`,
       };
 
       const isValidQuantity = validateField(
@@ -635,9 +637,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     try {
       const status = isSaveAsDraft ? 0 : 1;
       const currentDate = new Date().toISOString();
-      let allDetailsBatchSuccessful;
-      let allDetailsSuccessful;
-      let allDetailsDeleteBatchSuccessful;
+      let putSalesInvoiceSuccessful;
 
       const isFormValid = validateForm(isSaveAsDraft);
       if (isFormValid) {
@@ -671,398 +671,25 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           salesInvoiceData
         );
 
-        if (company.batchStockType === "FIFO") {
-          const batchUpdates = [];
-          const detailsPromises = [];
+        putSalesInvoiceSuccessful =
+          response.status === 201 || response.status === 200;
 
-          const itemDetailsBatchData = formData.itemDetails.map(
-            async (item) => {
-              let remainingQuantity = item.quantity;
+        for (const itemDetail of formData.itemDetails) {
+          const itemDetailData = {
+            salesInvoiceId: itemDetail.salesInvoiceId,
+            quantity: itemDetail.quantity,
+            unitPrice: itemDetail.unitPrice,
+            totalPrice: itemDetail.totalPrice,
+            itemBatchItemMasterId: itemDetail.itemMasterId,
+            itemBatchBatchId: itemDetail.batchId,
+            permissionId: 31,
+          };
 
-              for (const batch of item.batches) {
-                const quantityToConsume = Math.min(
-                  remainingQuantity,
-                  batch.tempQuantity
-                );
-
-                const itemBatchUpdateData = {
-                  batchId: batch.batchId,
-                  itemMasterId: batch.itemMasterId,
-                  costPrice: batch.costPrice,
-                  sellingPrice: batch.sellingPrice,
-                  status: batch.status,
-                  companyId: batch.companyId,
-                  createdBy: batch.createdBy,
-                  createdUserId: batch.createdUserId,
-                  tempQuantity: batch.tempQuantity - quantityToConsume,
-                  locationId: batch.locationId,
-                  expiryDate: batch.expiryDate,
-                  permissionId: 1065,
-                };
-
-                batchUpdates.push(
-                  put_item_batch_api(
-                    batch.batchId,
-                    batch.itemMasterId,
-                    itemBatchUpdateData
-                  )
-                );
-
-                if (quantityToConsume > 0) {
-                  if (item.salesInvoiceDetailId != null) {
-                    detailsPromises.push(
-                      put_sales_invoice_detail_api(item.salesInvoiceDetailId, {
-                        itemBatchItemMasterId: batch.itemMasterId,
-                        itemBatchBatchId: batch.batchId,
-                        salesInvoiceId: salesInvoice.salesInvoiceId,
-                        quantity: quantityToConsume,
-                        unitPrice: item.unitPrice,
-                        totalPrice:
-                          (item.totalPrice / item.quantity) * quantityToConsume,
-                        permissionId: 25,
-                      })
-                    );
-                  } else {
-                    detailsPromises.push(
-                      post_sales_invoice_detail_api({
-                        itemBatchItemMasterId: batch.itemMasterId,
-                        itemBatchBatchId: batch.batchId,
-                        salesInvoiceId: salesInvoice.salesInvoiceId,
-                        quantity: quantityToConsume,
-                        unitPrice: item.unitPrice,
-                        totalPrice:
-                          (item.totalPrice / item.quantity) * quantityToConsume,
-                        permissionId: 25,
-                      })
-                    );
-                  }
-                }
-
-                remainingQuantity -= quantityToConsume;
-
-                if (remainingQuantity <= 0) break; // Stop iterating if all quantity consumed
-              }
-            }
+          await put_sales_invoice_detail_api(
+            itemDetail.salesInvoiceDetailId,
+            itemDetailData
           );
-
-          await Promise.all(itemDetailsBatchData);
-
-          // Check if all details were successful
-          allDetailsBatchSuccessful = (await Promise.all(batchUpdates)).every(
-            (response) => response.status === 200
-          );
-
-          allDetailsSuccessful = (await Promise.all(detailsPromises)).every(
-            (response) => response.status === 201 || 200
-          );
-
-          const itemDetailsDeletedBatchData = itemIdsToBeDeleted.map(
-            async (item) => {
-              const batchUpdatePromises = item.batches.map(async (batch) => {
-                const itemBatchUpdateData = {
-                  batchId: batch.batchId,
-                  itemMasterId: batch.itemMasterId,
-                  costPrice: batch.costPrice,
-                  sellingPrice: batch.sellingPrice,
-                  status: batch.status,
-                  companyId: batch.companyId,
-                  createdBy: batch.createdBy,
-                  createdUserId: batch.createdUserId,
-                  tempQuantity: batch.tempQuantity,
-                  locationId: batch.locationId,
-                  expiryDate: batch.expiryDate,
-                  permissionId: 1065,
-                };
-
-                const detailsBatchApiResponse = await put_item_batch_api(
-                  batch.batchId,
-                  batch.itemMasterId,
-                  itemBatchUpdateData
-                );
-
-                return detailsBatchApiResponse;
-              });
-
-              // Wait for all batch update promises to resolve
-              const batchResponses = await Promise.all(batchUpdatePromises);
-
-              // Check if all batch updates were successful
-              const allBatchUpdatesSuccessful = batchResponses.every(
-                (detailsResponse) => detailsResponse.status === 200
-              );
-
-              return allBatchUpdatesSuccessful;
-            }
-          );
-
-          const detailsDeleteBatchResponse = await Promise.all(
-            itemDetailsDeletedBatchData
-          );
-
-          // Check if all batch updates for all items were successful
-          allDetailsDeleteBatchSuccessful = detailsDeleteBatchResponse.every(
-            (response) => response
-          );
-
-          // Define an array to store the salesInvoiceDetailIds to be deleted
-          const salesInvoiceDetailIdsToBeDeleted = [];
-
-          // Loop through each item in itemIdsToBeDeleted
-          for (const itemIdToBeDeleted of itemIdsToBeDeleted) {
-            const matchingSalesInvoiceDetails =
-              salesInvoice.salesInvoiceDetails.filter(
-                (detail) =>
-                  detail.itemBatchItemMasterId ===
-                  itemIdToBeDeleted.itemBatchItemMasterId
-              );
-
-            // If matching salesInvoiceDetails are found, add their salesInvoiceDetailIds to the array
-            if (matchingSalesInvoiceDetails.length > 0) {
-              matchingSalesInvoiceDetails.forEach((detail) => {
-                salesInvoiceDetailIdsToBeDeleted.push(
-                  detail.salesInvoiceDetailId
-                );
-              });
-            }
-          }
-
-          for (const salesInvoiceDetailId of salesInvoiceDetailIdsToBeDeleted) {
-            const response = await delete_sales_invoice_detail_api(
-              salesInvoiceDetailId
-            );
-            console.log(
-              `Successfully deleted item with ID: ${salesInvoiceDetailId}`
-            );
-          }
-
-          // Clear the itemIdsToBeDeleted array after deletion
-          setItemIdsToBeDeleted([]);
-        } else {
-          const itemDetailsBatchData = formData.itemDetails.map(
-            async (item) => {
-              const itemBatchUpdateData = {
-                batchId: item.batch.batchId,
-                itemMasterId: item.batch.itemMasterId,
-                costPrice: item.batch.costPrice,
-                sellingPrice: item.batch.sellingPrice,
-                status: item.batch.status,
-                companyId: item.batch.companyId,
-                createdBy: item.batch.createdBy,
-                createdUserId: item.batch.createdUserId,
-                tempQuantity: item.tempQuantity - item.quantity,
-                locationId: item.batch.locationId,
-                expiryDate: item.batch.expiryDate,
-                permissionId: 1065,
-              };
-
-              const detailsBatchApiResponse = await put_item_batch_api(
-                item.batch.batchId,
-                item.batch.itemMasterId,
-                itemBatchUpdateData
-              );
-
-              return detailsBatchApiResponse;
-            }
-          );
-
-          const detailsBatchResponse = await Promise.all(itemDetailsBatchData);
-
-          allDetailsBatchSuccessful = detailsBatchResponse.every(
-            (detailsResponse) => detailsResponse.status === 200
-          );
-
-          const itemDetailsData = formData.itemDetails.map(async (item) => {
-            let detailsApiResponse;
-            const detailsData = {
-              itemBatchItemMasterId: item.itemMasterId,
-              itemBatchBatchId: item.itemBatchId,
-              salesInvoiceId: salesInvoice.salesInvoiceId,
-              quantity: item.quantity,
-              unitPrice: item.unitPrice,
-              totalPrice: item.totalPrice,
-              permissionId: 25,
-            };
-
-            if (item.salesInvoiceDetailId != null) {
-              // Call put_slaes_invoice_detail_api for each item
-              detailsApiResponse = await put_sales_invoice_detail_api(
-                item.salesInvoiceDetailId,
-                detailsData
-              );
-            } else {
-              // Call post_slaes_invoice_detail_api for each item
-              detailsApiResponse = await post_sales_invoice_detail_api(
-                detailsData
-              );
-            }
-
-            return detailsApiResponse;
-          });
-
-          const detailsResponses = await Promise.all(itemDetailsData);
-
-          allDetailsSuccessful = detailsResponses.every(
-            (detailsResponse) => detailsResponse.status === 201 || 200
-          );
-
-          const itemDetailsDeletedBatchData = itemIdsToBeDeleted.map(
-            async (item) => {
-              const itemBatchUpdateData = {
-                batchId: item.batch.batchId,
-                itemMasterId: item.batch.itemMasterId,
-                costPrice: item.batch.costPrice,
-                sellingPrice: item.batch.sellingPrice,
-                status: item.batch.status,
-                companyId: item.batch.companyId,
-                createdBy: item.batch.createdBy,
-                createdUserId: item.batch.createdUserId,
-                tempQuantity: item.tempQuantity,
-                locationId: item.batch.locationId,
-                expiryDate: item.batch.expiryDate,
-                permissionId: 1065,
-              };
-
-              const detailsBatchApiResponse = await put_item_batch_api(
-                item.batch.batchId,
-                item.batch.itemMasterId,
-                itemBatchUpdateData
-              );
-
-              return detailsBatchApiResponse;
-            }
-          );
-
-          const detailsDeleteBatchResponse = await Promise.all(
-            itemDetailsDeletedBatchData
-          );
-
-          allDetailsDeleteBatchSuccessful = detailsDeleteBatchResponse.every(
-            (detailsResponse) => detailsResponse.status === 200
-          );
-
-          for (const itemIdToBeDeleted of itemIdsToBeDeleted) {
-            const response = await delete_sales_invoice_detail_api(
-              itemIdToBeDeleted.salesInvoiceDetailId
-            );
-            console.log(
-              `Successfully deleted item with ID: ${itemIdToBeDeleted.salesInvoiceDetailId}`
-            );
-          }
-          // Clear the itmeIdsToBeDeleted array after deletion
-          setItemIdsToBeDeleted([]);
         }
-
-        // // Extract itemDetails from formData
-        // const itemDetailsData = formData.itemDetails.map(async (item) => {
-        //   let detailsApiResponse;
-        //   const detailsData = {
-        //     salesInvoiceId: salesInvoice.salesInvoiceId,
-        //     itemBatchItemMasterId: item.itemMasterId,
-        //     itemBatchBatchId: item.itemBatchId,
-        //     quantity: item.quantity,
-        //     unitPrice: item.unitPrice,
-        //     totalPrice: item.totalPrice,
-        //     permissionId: 31,
-        //   };
-
-        //   if (item.salesInvoiceDetailId != null) {
-        //     // Call put_sales_invoice_detail_api for each item
-        //     detailsApiResponse = await put_sales_invoice_detail_api(
-        //       item.salesInvoiceDetailId,
-        //       detailsData
-        //     );
-        //   } else {
-        //     // Call post_slaes_invocie_detail_api for each item
-        //     detailsApiResponse = await post_sales_invoice_detail_api(
-        //       detailsData
-        //     );
-        //   }
-        //   return detailsApiResponse;
-        // });
-
-        // const detailsResponses = await Promise.all(itemDetailsData);
-
-        // const allDetailsSuccessful = detailsResponses.every(
-        //   (detailsResponse) => detailsResponse.status === 201 || 200
-        // );
-
-        // const itemDetailsBatchData = formData.itemDetails.map(async (item) => {
-        //   const itemBatchUpdateData = {
-        //     batchId: item.batch.batchId,
-        //     itemMasterId: item.batch.itemMasterId,
-        //     costPrice: item.batch.costPrice,
-        //     sellingPrice: item.batch.sellingPrice,
-        //     status: item.batch.status,
-        //     companyId: item.batch.companyId,
-        //     createdBy: item.batch.createdBy,
-        //     createdUserId: item.batch.createdUserId,
-        //     tempQuantity: item.tempQuantity - item.quantity,
-        //     locationId: item.batch.locationId,
-        //     expiryDate: item.batch.expiryDate,
-        //     permissionId: 1065,
-        //   };
-
-        //   const detailsBatchApiResponse = await put_item_batch_api(
-        //     item.batch.batchId,
-        //     item.batch.itemMasterId,
-        //     itemBatchUpdateData
-        //   );
-
-        //   return detailsBatchApiResponse;
-        // });
-
-        // const detailsBatchResponse = await Promise.all(itemDetailsBatchData);
-
-        // const allDetailsBatchSuccessful = detailsBatchResponse.every(
-        //   (detailsResponse) => detailsResponse.status === 200
-        // );
-
-        // const itemDetailsDeletedBatchData = itemIdsToBeDeleted.map(
-        //   async (item) => {
-        //     const itemBatchUpdateData = {
-        //       batchId: item.batch.batchId,
-        //       itemMasterId: item.batch.itemMasterId,
-        //       costPrice: item.batch.costPrice,
-        //       sellingPrice: item.batch.sellingPrice,
-        //       status: item.batch.status,
-        //       companyId: item.batch.companyId,
-        //       createdBy: item.batch.createdBy,
-        //       createdUserId: item.batch.createdUserId,
-        //       tempQuantity: item.tempQuantity,
-        //       locationId: item.batch.locationId,
-        //       expiryDate: item.batch.expiryDate,
-        //       permissionId: 1065,
-        //     };
-
-        //     const detailsBatchApiResponse = await put_item_batch_api(
-        //       item.batch.batchId,
-        //       item.batch.itemMasterId,
-        //       itemBatchUpdateData
-        //     );
-
-        //     return detailsBatchApiResponse;
-        //   }
-        // );
-
-        // const detailsDeleteBatchResponse = await Promise.all(
-        //   itemDetailsDeletedBatchData
-        // );
-
-        // const allDetailsDeleteBatchSuccessful =
-        //   detailsDeleteBatchResponse.every(
-        //     (detailsResponse) => detailsResponse.status === 200
-        //   );
-
-        // for (const itemIdToBeDeleted of itemIdsToBeDeleted) {
-        //   const response = await delete_sales_invoice_detail_api(
-        //     itemIdToBeDeleted.salesInvoiceId
-        //   );
-        //   console.log(
-        //     `Successfully deleted item with ID: ${itemIdToBeDeleted.salesInvoiceId}`
-        //   );
-        // }
-        // // Clear the itmeIdsToBeDeleted array after deletion
-        // setItemIdsToBeDeleted([]);
 
         const updateChargesAndDeductionsAppliedResponse =
           await updateChargesAndDeductionsApplied(salesInvoice.salesInvoiceId);
@@ -1083,12 +710,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
         // Clear the itmeIdsToBeDeleted array after deletion
         setChargesAndDeductionsAppliedIdsToBeDeleted([]);
 
-        if (
-          allDetailsSuccessful &&
-          allAppliedSuccessful &&
-          allDetailsBatchSuccessful &&
-          allDetailsDeleteBatchSuccessful
-        ) {
+        if (putSalesInvoiceSuccessful && allAppliedSuccessful) {
           if (isSaveAsDraft) {
             setSubmissionStatus("successSavedAsDraft");
             console.log("Sales invoice updated and saved as draft!", formData);
@@ -1150,8 +772,68 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     setFormData((prevFormData) => {
       const updatedItemDetails = [...prevFormData.itemDetails];
 
+      if (field === "batchId") {
+        const selectedBatch = locationInventories?.find(
+          (batch) =>
+            batch.batchId === parseInt(value) &&
+            batch.itemMasterId === updatedItemDetails[index].itemMasterId
+        );
+
+        // Update batchId and stockInHand immediately
+        updatedItemDetails[index].batchId = parseInt(value, 10);
+        updatedItemDetails[index].itemBatch = selectedBatch?.itemBatch;
+        updatedItemDetails[index].stockInHand = selectedBatch?.stockInHand ?? 0;
+
+        (async () => {
+          try {
+            const batchResponse =
+              await get_item_batch_by_itemMasterId_batchId_api(
+                updatedItemDetails[index].itemMasterId,
+                parseInt(value, 10)
+              );
+            const itemBatch = batchResponse?.data?.result;
+
+            // Update unitPrice with the sellingPrice from the API response
+            setFormData((prev) => {
+              const newItemDetails = [...prev.itemDetails];
+              newItemDetails[index].unitPrice = itemBatch?.sellingPrice || 0;
+
+              // Recalculate totalPrice based on the new unitPrice
+              const grandTotalPrice =
+                newItemDetails[index].quantity *
+                newItemDetails[index].unitPrice;
+              let totalPrice =
+                newItemDetails[index].quantity *
+                newItemDetails[index].unitPrice;
+
+              newItemDetails[index].chargesAndDeductions.forEach((charge) => {
+                if (charge.isPercentage) {
+                  const amount = (grandTotalPrice * charge.value) / 100;
+                  totalPrice += charge.sign === "+" ? amount : -amount;
+                } else {
+                  totalPrice +=
+                    charge.sign === "+" ? charge.value : -charge.value;
+                }
+              });
+
+              totalPrice = isNaN(totalPrice) ? 0 : totalPrice;
+              newItemDetails[index].totalPrice = totalPrice;
+
+              return {
+                ...prev,
+                itemDetails: newItemDetails,
+                subTotal: calculateSubTotal(),
+                totalAmount: calculateTotalAmount(),
+              };
+            });
+          } catch (error) {
+            console.error("Error fetching item batch:", error);
+          }
+        })();
+      }
+
       // Check if the field belongs to chargesAndDeductions
-      if (field.startsWith("chargesAndDeductions")) {
+      else if (field.startsWith("chargesAndDeductions")) {
         // Get the charge or deduction index
         const chargeIndex = parseInt(field.split("_")[1]);
 

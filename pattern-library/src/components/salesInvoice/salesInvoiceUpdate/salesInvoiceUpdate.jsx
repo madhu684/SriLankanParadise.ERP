@@ -218,6 +218,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                 placeholder="Search for an item..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                disabled
               />
               {searchTerm && (
                 <span
@@ -368,7 +369,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                     <td>
                       <select
                         className="form-select"
-                        //value={item.batch.batchId}
+                        value={item.itemBatch.batchId}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
@@ -379,9 +380,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                       >
                         <option value="">Select batch</option>
                         {locationInventories
-                          ?.filter(
-                            (i) => i.itemMasterId === item.itemBatchItemMasterId
-                          )
+                          ?.filter((i) => i.itemMasterId === item.itemMasterId)
                           ?.map((i, batchIndex) => (
                             <option
                               key={batchIndex}
