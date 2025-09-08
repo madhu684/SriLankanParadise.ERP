@@ -22,6 +22,9 @@ const useSalesInvoiceList = () => {
   const [showCreateSIForm, setShowCreateSIForm] = useState(false);
   const [showUpdateSIForm, setShowUpdateSIForm] = useState(false);
   const [SIDetail, setSIDetail] = useState("");
+  const [showDeleteSIForm, setShowDeleteSIForm] = useState(false);
+
+  const [refetch, setRefetch] = useState(false);
 
   const fetchUserPermissions = async () => {
     try {
@@ -104,7 +107,7 @@ const useSalesInvoiceList = () => {
 
   useEffect(() => {
     fetchData();
-  }, [isLoadingPermissions, userPermissions]);
+  }, [isLoadingPermissions, userPermissions, refetch]);
 
   const handleShowApproveSIModal = () => {
     setShowApproveSIModal(true);
@@ -311,6 +314,10 @@ const useSalesInvoiceList = () => {
     showUpdateSIForm,
     userPermissions,
     SIDetail,
+    showDeleteSIForm,
+    refetch,
+    setShowDeleteSIForm,
+    setRefetch,
     areAnySelectedRowsPending,
     areAnySelectedRowsApproved,
     setSelectedRows,

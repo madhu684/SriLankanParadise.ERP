@@ -400,6 +400,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                             e.target.value
                           )
                         }
+                        disabled={item.isInventoryItem === false}
                       >
                         <option value="">Select batch</option>
                         {locationInventories
@@ -433,6 +434,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                             e.target.value
                           )
                         }
+                        disabled={item.isInventoryItem === false}
                       />
                       {validationErrors[`quantity_${index}`] && (
                         <div className="invalid-feedback">
@@ -440,7 +442,9 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                         </div>
                       )}
                     </td>
-                    <td>{item.stockInHand}</td>
+                    <td>
+                      {item.isInventoryItem === false ? "-" : item.stockInHand}
+                    </td>
                     <td>
                       {item.unitPrice ? item.unitPrice.toFixed(2) : "0.00"}
                     </td>

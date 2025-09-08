@@ -1888,6 +1888,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Sales Invoice deleted successfully.
+        /// </summary>
+        public static string SalesInvoiceDeleted {
+            get {
+                return ResourceManager.GetString("SalesInvoiceDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Sales invoice detail created successfully.
         /// </summary>
         public static string SalesInvoiceDetailCreated {

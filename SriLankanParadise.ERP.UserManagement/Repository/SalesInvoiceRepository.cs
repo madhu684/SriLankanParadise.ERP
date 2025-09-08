@@ -71,21 +71,41 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
 
         public async Task<IEnumerable<SalesInvoice>> GetSalesInvoicesByUserId(int userId)
         {
+            //try
+            //{
+            //    var salesInvoices = await _dbContext.SalesInvoices
+            //        .Where(si => si.CreatedUserId == userId)
+            //        .Include(si => si.SalesInvoiceDetails)
+            //        .ThenInclude(sid => sid.ItemBatch)
+            //        .ThenInclude(ib => ib.Batch)
+            //        .Include(si => si.SalesInvoiceDetails)
+            //        .ThenInclude(sod => sod.ItemBatch)
+            //        .ThenInclude(ib => ib.ItemMaster)
+            //        .ThenInclude(im => im.Unit)
+            //        .Include(si => si.SalesOrder)
+            //        .ToListAsync();
+
+            //    return salesInvoices.Any() ? salesInvoices : null;
+            //}
+            //catch (Exception)
+            //{
+            //    throw;
+            //}
             try
             {
                 var salesInvoices = await _dbContext.SalesInvoices
                     .Where(si => si.CreatedUserId == userId)
                     .Include(si => si.SalesInvoiceDetails)
-                    .ThenInclude(sid => sid.ItemBatch)
-                    .ThenInclude(ib => ib.Batch)
+                        .ThenInclude(sid => sid.ItemBatch)
+                            .ThenInclude(ib => ib.Batch)
                     .Include(si => si.SalesInvoiceDetails)
-                    .ThenInclude(sod => sod.ItemBatch)
-                    .ThenInclude(ib => ib.ItemMaster)
-                    .ThenInclude(im => im.Unit)
+                        .ThenInclude(sid => sid.ItemBatch)
+                            .ThenInclude(ib => ib.ItemMaster)
+                                .ThenInclude(im => im.Unit)
                     .Include(si => si.SalesOrder)
                     .ToListAsync();
 
-                return salesInvoices.Any() ? salesInvoices : null;
+                return salesInvoices.Any() ? salesInvoices : Enumerable.Empty<SalesInvoice>();
             }
             catch (Exception)
             {
@@ -155,6 +175,67 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             catch (Exception)
             {
 
+                throw;
+            }
+        }
+
+        public async Task DeleteSalesInvoice(int salesInvoiceId)
+        {
+            try
+            {
+                var salesInvoice = await _dbContext.SalesInvoices.FirstOrDefaultAsync(po => po.SalesInvoiceId == salesInvoiceId);
+                if (salesInvoice == null)
+                {
+                    throw new KeyNotFoundException($"Sales Invoice with ID {salesInvoiceId} not found");
+                }
+
+                var strategy = _dbContext.Database.CreateExecutionStrategy();
+
+                await strategy.ExecuteAsync(async () =>
+                {
+                    using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+                    try
+                    {
+                        var salesInvoiceDetails = await _dbContext.SalesInvoiceDetails
+                            .Where(si => si.SalesInvoiceId == salesInvoiceId)
+                            .ToListAsync();
+
+                        if (salesInvoiceDetails.Any())
+                        {
+                            _dbContext.SalesInvoiceDetails.RemoveRange(salesInvoiceDetails);
+                        }
+
+                        _dbContext.SalesInvoices.Remove(salesInvoice);
+
+                        await _dbContext.SaveChangesAsync();
+
+                        await transaction.CommitAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        await transaction.RollbackAsync();
+                        throw new Exception($"Error deleting sales invoice with ID {salesInvoiceId}", ex);
+                    }
+                });
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<SalesInvoice> GetSalesInvoiceById(int salesInvoiceId)
+        {
+            try
+            {
+                var salesInvoice = await _dbContext.SalesInvoices
+                    .Include(si => si.SalesInvoiceDetails)
+                    .FirstOrDefaultAsync(si => si.SalesInvoiceId == salesInvoiceId);
+                return salesInvoice;
+            }
+            catch(Exception)
+            {
                 throw;
             }
         }

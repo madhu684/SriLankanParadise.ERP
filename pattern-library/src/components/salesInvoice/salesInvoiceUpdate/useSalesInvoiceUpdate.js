@@ -652,18 +652,19 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           dueDate: formData.dueDate,
           totalAmount: formData.totalAmount,
           status: status,
-          createdBy: sessionStorage?.getItem("username") ?? null,
-          createdUserId: sessionStorage?.getItem("userId") ?? null,
+          createdBy: salesInvoice.createdBy,
+          createdUserId: salesInvoice.createdUserId,
           approvedBy: null,
           approvedUserId: null,
           approvedDate: null,
-          companyId: sessionStorage?.getItem("companyId") ?? null,
+          companyId: salesInvoice.companyId,
           salesOrderId: formData?.salesOrderId,
           amountDue: formData.totalAmount,
           createdDate: salesInvoice.createdDate,
           lastUpdatedDate: currentDate,
-          referenceNumber: formData.referenceNumber,
+          referenceNumber: salesInvoice.referenceNumber,
           permissionId: 31,
+          locationId: salesInvoice.locationId,
         };
 
         const response = await put_sales_invoice_api(
@@ -681,7 +682,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
             unitPrice: itemDetail.unitPrice,
             totalPrice: itemDetail.totalPrice,
             itemBatchItemMasterId: itemDetail.itemMasterId,
-            itemBatchBatchId: itemDetail.batchId,
+            itemBatchBatchId: itemDetail.itemBatchBatchId,
             permissionId: 31,
           };
 
@@ -780,8 +781,10 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
         );
 
         // Update batchId and stockInHand immediately
-        updatedItemDetails[index].batchId = parseInt(value, 10);
+        updatedItemDetails[index].itemBatchBatchId = parseInt(value, 10);
+        updatedItemDetails[index].itemBatchId = parseInt(value, 10);
         updatedItemDetails[index].itemBatch = selectedBatch?.itemBatch;
+        updatedItemDetails[index].batch = selectedBatch?.itemBatch;
         updatedItemDetails[index].stockInHand = selectedBatch?.stockInHand ?? 0;
 
         (async () => {

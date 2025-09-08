@@ -1062,4 +1062,7 @@
   <data name="ItemBatchRetrieved" xml:space="preserve">
     <value>Item batch retrieved</value>
   </data>
+  <data name="SalesInvoiceDeleted" xml:space="preserve">
+    <value>Sales Invoice deleted successfully</value>
+  </data>
 </root>

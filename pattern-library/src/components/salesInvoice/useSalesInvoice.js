@@ -308,6 +308,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
             tempQuantity: item.itemBatch.tempQuantity + item.quantity,
             chargesAndDeductions: sortedLineItemCharges,
             batch: item.itemBatch,
+            isInventoryItem: item.isInventoryItem,
           };
         });
 
@@ -451,6 +452,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     let isItemQuantityValid = true;
     // Validate item details
     formData.itemDetails.forEach((item, index) => {
+      if (item.isInventoryItem === false) return;
       const fieldName = `quantity_${index}`;
       const fieldDisplayName = `Quantity for ${item.name}`;
 
@@ -497,7 +499,9 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
               if (charge.isPercentage) {
                 // Calculate the amount based on percentage and sign
                 const amount =
-                  (item.quantity * item.unitPrice * charge.value) / 100;
+                  item.IsInventoryItem === true
+                    ? (item.quantity * item.unitPrice * charge.value) / 100
+                    : (item.unitPrice * charge.value) / 100;
                 appliedValue = charge.sign === "+" ? amount : -amount;
               } else {
                 // Use the value directly based on the sign
@@ -1018,8 +1022,9 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
           batchId: "",
           stockInHand: 0,
           quantity: 0,
-          unitPrice: 0,
-          totalPrice: 0.0,
+          unitPrice: item.isInventoryItem === false ? item.unitPrice : 0,
+          totalPrice: item.isInventoryItem === false ? item.unitPrice : 0.0,
+          isInventoryItem: item?.isInventoryItem,
           chargesAndDeductions: initializedCharges,
         },
       ],
