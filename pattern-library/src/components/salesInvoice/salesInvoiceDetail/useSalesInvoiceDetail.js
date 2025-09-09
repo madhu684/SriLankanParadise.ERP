@@ -93,7 +93,7 @@ const useSalesInvoiceDetail = (salesInvoice) => {
   // Group sales invoice details by item master ID
   const groupedSalesInvoiceDetails = salesInvoice.salesInvoiceDetails.reduce(
     (acc, item) => {
-      const itemMasterId = item.itemBatch?.itemMaster?.itemMasterId;
+      const itemMasterId = item.itemMaster?.itemMasterId;
       if (!acc[itemMasterId]) {
         acc[itemMasterId] = { ...item, quantity: 0, totalPrice: 0 };
       }

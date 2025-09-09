@@ -291,7 +291,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
       const initializedLineItemCharges = salesInvoiceDetails.map((item) => {
         const initializedCharges = chargesAndDeductionsApplied
           ?.filter(
-            (charge) => charge.lineItemId === item.itemBatch.itemMasterId
+            (charge) => charge.lineItemId === item?.itemMaster?.itemMasterId
           )
           .map((charge) => {
             let value;
@@ -333,13 +333,13 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
 
         return {
           ...item,
-          itemMasterId: item.itemBatch.itemMasterId,
-          itemBatchId: item.itemBatch.batchId,
-          name: item.itemBatch.itemMaster.itemName,
-          unit: item.itemBatch.itemMaster.unit.unitName,
+          itemMasterId: item?.itemMaster?.itemMasterId,
+          itemBatchId: item?.batch?.batchId,
+          name: item?.itemMaster?.itemName,
+          unit: item?.itemMaster?.unit.unitName,
           stockInHand: selectedBatch?.stockInHand ?? 0,
           chargesAndDeductions: sortedLineItemCharges,
-          batch: item.itemBatch,
+          batch: item.batch,
         };
       });
 
@@ -413,7 +413,9 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
               if (charge.isPercentage) {
                 // Calculate the amount based on percentage and sign
                 const amount =
-                  (item.quantity * item.unitPrice * charge.value) / 100;
+                  item.IsInventoryItem === true
+                    ? (item.quantity * item.unitPrice * charge.value) / 100
+                    : (item.unitPrice * charge.value) / 100;
                 appliedValue = charge.sign === "+" ? amount : -amount;
               } else {
                 // Use the value directly based on the sign
@@ -604,6 +606,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     let isItemQuantityValid = true;
     // Validate item details
     formData.itemDetails.forEach((item, index) => {
+      if (item.itemMaster.isInventoryItem === false) return;
       const fieldName = `quantity_${index}`;
       const fieldDisplayName = `Quantity for ${item.name}`;
 
@@ -676,20 +679,33 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           response.status === 201 || response.status === 200;
 
         for (const itemDetail of formData.itemDetails) {
-          const itemDetailData = {
-            salesInvoiceId: itemDetail.salesInvoiceId,
-            quantity: itemDetail.quantity,
-            unitPrice: itemDetail.unitPrice,
-            totalPrice: itemDetail.totalPrice,
-            itemBatchItemMasterId: itemDetail.itemMasterId,
-            itemBatchBatchId: itemDetail.itemBatchBatchId,
-            permissionId: 31,
-          };
+          if (itemDetail.salesInvoiceDetailId === null) {
+            const itemDetailData = {
+              salesInvoiceId: salesInvoice.salesInvoiceId,
+              quantity: itemDetail.quantity,
+              unitPrice: itemDetail.unitPrice,
+              totalPrice: itemDetail.totalPrice,
+              itemBatchItemMasterId: itemDetail.itemMasterId,
+              itemBatchBatchId: itemDetail.itemBatchBatchId,
+              permissionId: 31,
+            };
+            await post_sales_invoice_detail_api(itemDetailData);
+          } else {
+            const itemDetailData = {
+              salesInvoiceId: itemDetail.salesInvoiceId,
+              quantity: itemDetail.quantity,
+              unitPrice: itemDetail.unitPrice,
+              totalPrice: itemDetail.totalPrice,
+              itemBatchItemMasterId: itemDetail.itemMasterId,
+              itemBatchBatchId: itemDetail.itemBatchBatchId,
+              permissionId: 31,
+            };
 
-          await put_sales_invoice_detail_api(
-            itemDetail.salesInvoiceDetailId,
-            itemDetailData
-          );
+            await put_sales_invoice_detail_api(
+              itemDetail.salesInvoiceDetailId,
+              itemDetailData
+            );
+          }
         }
 
         const updateChargesAndDeductionsAppliedResponse =
@@ -708,8 +724,19 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
             `Successfully deleted item with ID: ${chargesAndDeductionsAppliedIdToBeDeleted}`
           );
         }
-        // Clear the itmeIdsToBeDeleted array after deletion
         setChargesAndDeductionsAppliedIdsToBeDeleted([]);
+
+        if (itemIdsToBeDeleted.length > 0) {
+          for (const itemIdToBeDeleted of itemIdsToBeDeleted) {
+            await delete_sales_invoice_detail_api(
+              itemIdToBeDeleted.salesInvoiceDetailId
+            );
+            console.log(
+              `Successfully deleted item with ID: ${itemIdToBeDeleted.salesInvoiceDetailId}`
+            );
+          }
+          setItemIdsToBeDeleted([]);
+        }
 
         if (putSalesInvoiceSuccessful && allAppliedSuccessful) {
           if (isSaveAsDraft) {
@@ -803,11 +830,15 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
 
               // Recalculate totalPrice based on the new unitPrice
               const grandTotalPrice =
-                newItemDetails[index].quantity *
-                newItemDetails[index].unitPrice;
+                newItemDetails[index].itemMaster.isInventoryItem === true
+                  ? newItemDetails[index].quantity *
+                    newItemDetails[index].unitPrice
+                  : newItemDetails[index].unitPrice;
               let totalPrice =
-                newItemDetails[index].quantity *
-                newItemDetails[index].unitPrice;
+                newItemDetails[index].itemMaster.isInventoryItem === true
+                  ? newItemDetails[index].quantity *
+                    newItemDetails[index].unitPrice
+                  : newItemDetails[index].unitPrice;
 
               newItemDetails[index].chargesAndDeductions.forEach((charge) => {
                 if (charge.isPercentage) {
@@ -862,12 +893,16 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
 
       // Calculate total price based on charges and deductions
       const grandTotalPrice =
-        updatedItemDetails[index].quantity *
-        updatedItemDetails[index].unitPrice;
+        updatedItemDetails[index].itemMaster.isInventoryItem === true
+          ? updatedItemDetails[index].quantity *
+            updatedItemDetails[index].unitPrice
+          : updatedItemDetails[index].unitPrice;
 
       let totalPrice =
-        updatedItemDetails[index].quantity *
-        updatedItemDetails[index].unitPrice;
+        updatedItemDetails[index].itemMaster.isInventoryItem === true
+          ? updatedItemDetails[index].quantity *
+            updatedItemDetails[index].unitPrice
+          : updatedItemDetails[index].unitPrice;
 
       // Add or subtract charges and deductions from total price
       updatedItemDetails[index].chargesAndDeductions.forEach((charge) => {
@@ -999,17 +1034,54 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   };
 
   // Handler to add the selected item to itemDetails
+  // const handleSelectItem = (item) => {
+  //   setFormData((prevFormData) => ({
+  //     ...prevFormData,
+  //     itemMasterId: item.itemMasterId,
+  //     itemMaster: item,
+  //   }));
+  //   setSearchTerm("");
+
+  //   setSelectedBatch(null);
+  //   setValidFields({});
+  //   setValidationErrors({});
+  // };
   const handleSelectItem = (item) => {
+    const initializedCharges = chargesAndDeductions
+      .filter((charge) => charge.isApplicableForLineItem)
+      .map((charge) => ({
+        id: charge.chargesAndDeductionId,
+        name: charge.displayName,
+        value: charge.amount || charge.percentage,
+        sign: charge.sign,
+        isPercentage: charge.percentage !== null,
+      }));
+
     setFormData((prevFormData) => ({
       ...prevFormData,
-      itemMasterId: item.itemMasterId,
-      itemMaster: item,
+      itemDetails: [
+        ...prevFormData.itemDetails,
+        {
+          batch: "",
+          itemBatchBatchId: "",
+          salesInvoiceDetailId: null,
+          salesInvoiceId: salesInvoice.salesInvoiceId,
+          itemBatchItemMasterId: item?.itemMasterId,
+          itemMaster: item,
+          name: item?.itemName,
+          itemMasterId: item?.itemMasterId,
+          unit: item?.unit?.unitName,
+          stockInHand: 0,
+          quantity: 0,
+          unitPrice: item.isInventoryItem === false ? item.unitPrice : 0,
+          totalPrice: item.isInventoryItem === false ? item.unitPrice : 0.0,
+          chargesAndDeductions: initializedCharges,
+        },
+      ],
     }));
-    setSearchTerm("");
 
+    setSearchTerm("");
     setSelectedBatch(null);
-    setValidFields({});
-    setValidationErrors({});
   };
 
   const renderColumns = () => {
@@ -1082,6 +1154,11 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   };
 
   console.log("formData", formData);
+  console.log(
+    "chargesAndDeductionsAppliedIdsToBeDeleted: ",
+    chargesAndDeductionsAppliedIdsToBeDeleted
+  );
+  console.log("itemIdsToBeDeleted: ", itemIdsToBeDeleted);
 
   return {
     formData,

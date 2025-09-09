@@ -218,7 +218,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                 placeholder="Search for an item..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                disabled
+                //disabled
               />
               {searchTerm && (
                 <span
@@ -369,7 +369,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                     <td>
                       <select
                         className="form-select"
-                        value={item.itemBatch.batchId}
+                        value={item?.batch?.batchId}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
@@ -377,6 +377,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                             e.target.value
                           )
                         }
+                        disabled={item.itemMaster.isInventoryItem === false}
                       >
                         <option value="">Select batch</option>
                         {locationInventories
@@ -410,6 +411,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                             e.target.value
                           )
                         }
+                        disabled={item.itemMaster.isInventoryItem === false}
                       />
                       {validationErrors[`quantity_${index}`] && (
                         <div className="invalid-feedback">

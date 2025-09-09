@@ -499,7 +499,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
               if (charge.isPercentage) {
                 // Calculate the amount based on percentage and sign
                 const amount =
-                  item.IsInventoryItem === true
+                  item.isInventoryItem === true
                     ? (item.quantity * item.unitPrice * charge.value) / 100
                     : (item.unitPrice * charge.value) / 100;
                 appliedValue = charge.sign === "+" ? amount : -amount;

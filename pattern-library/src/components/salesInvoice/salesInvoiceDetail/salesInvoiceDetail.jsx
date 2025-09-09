@@ -166,8 +166,8 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                 <tbody>
                   {renderSalesInvoiceDetails().map((item, index) => (
                     <tr key={index}>
-                      <td>{item.itemBatch?.itemMaster?.itemName}</td>
-                      <td>{item.itemBatch?.itemMaster?.unit.unitName}</td>
+                      <td>{item.itemMaster?.itemName}</td>
+                      <td>{item.itemMaster?.unit.unitName}</td>
                       {company.batchStockType !== "FIFO" && (
                         <td>{item.itemBatch?.batch?.batchRef}</td>
                       )}

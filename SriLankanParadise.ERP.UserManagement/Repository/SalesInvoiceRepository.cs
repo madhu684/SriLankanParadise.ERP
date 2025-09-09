@@ -48,20 +48,18 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             try
             {
                 var salesInvoices = await _dbContext.SalesInvoices
-                    .Where(si => si.Status != 0 && si.CompanyId == companyId) // This already includes status 8 (write-offed)
+                    .Where(si => si.Status != 0 && si.CompanyId == companyId)
                     .Include(si => si.SalesInvoiceDetails)
-                    .ThenInclude(sid => sid.ItemBatch)
                     .ThenInclude(ib => ib.Batch)
                     .Include(si => si.SalesInvoiceDetails)
-                    .ThenInclude(sod => sod.ItemBatch)
                     .ThenInclude(ib => ib.ItemMaster)
                     .ThenInclude(im => im.Unit)
                     .Include(si => si.SalesOrder)
                     .ThenInclude(so => so.SalesOrderDetails)
-                    .OrderByDescending(si => si.CreatedDate) // Add ordering to ensure consistent results
+                    .OrderByDescending(si => si.CreatedDate)
                     .ToListAsync();
 
-                return salesInvoices.Any() ? salesInvoices : new List<SalesInvoice>(); // Return empty list instead of null
+                return salesInvoices.Any() ? salesInvoices : new List<SalesInvoice>();
             }
             catch (Exception)
             {
@@ -71,37 +69,15 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
 
         public async Task<IEnumerable<SalesInvoice>> GetSalesInvoicesByUserId(int userId)
         {
-            //try
-            //{
-            //    var salesInvoices = await _dbContext.SalesInvoices
-            //        .Where(si => si.CreatedUserId == userId)
-            //        .Include(si => si.SalesInvoiceDetails)
-            //        .ThenInclude(sid => sid.ItemBatch)
-            //        .ThenInclude(ib => ib.Batch)
-            //        .Include(si => si.SalesInvoiceDetails)
-            //        .ThenInclude(sod => sod.ItemBatch)
-            //        .ThenInclude(ib => ib.ItemMaster)
-            //        .ThenInclude(im => im.Unit)
-            //        .Include(si => si.SalesOrder)
-            //        .ToListAsync();
-
-            //    return salesInvoices.Any() ? salesInvoices : null;
-            //}
-            //catch (Exception)
-            //{
-            //    throw;
-            //}
             try
             {
                 var salesInvoices = await _dbContext.SalesInvoices
                     .Where(si => si.CreatedUserId == userId)
                     .Include(si => si.SalesInvoiceDetails)
-                        .ThenInclude(sid => sid.ItemBatch)
-                            .ThenInclude(ib => ib.Batch)
+                        .ThenInclude(ib => ib.Batch)
                     .Include(si => si.SalesInvoiceDetails)
-                        .ThenInclude(sid => sid.ItemBatch)
-                            .ThenInclude(ib => ib.ItemMaster)
-                                .ThenInclude(im => im.Unit)
+                        .ThenInclude(ib => ib.ItemMaster)
+                            .ThenInclude(im => im.Unit)
                     .Include(si => si.SalesOrder)
                     .ToListAsync();
 
@@ -143,10 +119,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var salesInvoice = await _dbContext.SalesInvoices
                     .Where(si => si.SalesInvoiceId == salesInvoiceId)
                     .Include(si => si.SalesInvoiceDetails)
-                    .ThenInclude(sid => sid.ItemBatch)
                     .ThenInclude(ib => ib.Batch)
                     .Include(si => si.SalesInvoiceDetails)
-                    .ThenInclude(sod => sod.ItemBatch)
                     .ThenInclude(ib => ib.ItemMaster)
                     .ThenInclude(im => im.Unit)
                     .Include(si => si.SalesOrder)
