@@ -69,6 +69,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<Category, CategoryDto>();
             CreateMap<ItemMasterRequestModel, ItemMaster>();
             CreateMap<ItemMaster, ItemMasterDto>();
+            CreateMap<ItemMasterActiveDeactiveRequestModel, ItemMaster>();
             CreateMap<PaymentMode, PaymentModeDto>();
             CreateMap<PaymentModeRequestModel, PaymentMode>();
             CreateMap<SalesReceipt, SalesReceiptDto>();

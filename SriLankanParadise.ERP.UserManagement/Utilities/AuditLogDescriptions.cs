@@ -97,10 +97,11 @@ public static class AuditLogDescriptions
             // PATCH
             { ("/api/user/reset-password/{param}", "PATCH"), "Reset password" },
             { ("/api/user/reset-password-admin/{param}/{param}", "PATCH"), "Reset password admin" },
+            { ("/api/itemMaster/ActiveDeactiveItemMaster/{param}", "PATCH"), "Activate/ Deactivate Item Master" },
 
             // DELETE
             { ("/api/rolePermission/DeleteRolePermissionByRoleId/{param}", "DELETE"), "Role permission delete" },
-            { ("/api/role/{param}", "DELETE"), "Eole delete" },
+            { ("/api/role/{param}", "DELETE"), "Role delete" },
             { ("/api/permission/{param}", "DELETE"), "Permission delete" },
             { ("/api/itemMaster/{param}", "DELETE"), "Item master delete" },
             { ("/api/unit/{param}", "DELETE"), "Unit delete" },

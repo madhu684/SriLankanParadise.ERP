@@ -16,6 +16,30 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             try
             {
+                if (itemMaster == null)
+                {
+                    throw new ArgumentNullException(nameof(itemMaster), "ItemMaster cannot be null.");
+                }
+
+                var existingItem = await _dbContext.ItemMasters
+                    .FirstOrDefaultAsync(im =>
+                        (im.ItemName != null && itemMaster.ItemName != null &&
+                         im.ItemName.Replace(" ", "").ToLower() == itemMaster.ItemName.Replace(" ", "").ToLower()) ||
+                        (im.ItemCode == itemMaster.ItemCode));
+
+                if (existingItem != null)
+                {
+                    if (existingItem.ItemName != null && itemMaster.ItemName != null &&
+                        existingItem.ItemName.Replace(" ", "").ToLower() == itemMaster.ItemName.Replace(" ", "").ToLower())
+                    {
+                        throw new InvalidOperationException("An item with the same name already exists.");
+                    }
+                    if (existingItem.ItemCode == itemMaster.ItemCode)
+                    {
+                        throw new InvalidOperationException("An item with the same code already exists.");
+                    }
+                }
+
                 _dbContext.ItemMasters.Add(itemMaster);
                 await _dbContext.SaveChangesAsync();
 
@@ -44,7 +68,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
-
 
         public async Task<IEnumerable<ItemMaster>> GetItemMastersByCompanyId(int companyId)
         {
@@ -94,7 +117,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         .Include(im => im.ItemType)
                         .Include(im => im.InventoryUnit)
                         .ThenInclude(u => u.MeasurementType)
-                        .Where(im => im.ItemType.Name == itemType);
+                        .Where(im => im.ItemType.Name == itemType && im.Status == true);
                 }
                 else
                 {
@@ -103,7 +126,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         .ThenInclude(u => u.MeasurementType)
                         .Include(im => im.ItemType)
                         .Include(im => im.InventoryUnit)
-                        .ThenInclude(u => u.MeasurementType);
+                        .ThenInclude(u => u.MeasurementType)
+                        .Where(im => im.Status == true);
 
                 }
 
@@ -269,7 +293,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-
         public async Task<IEnumerable<ItemMaster>> GetItemMastersWithSameParentItemMasterByItemMasterId(int itemMasterId)
         {
             try
@@ -291,6 +314,23 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 return itemMastersWithSameParent.Any() ? itemMastersWithSameParent : null;
             }
             catch (Exception) {
+                throw;
+            }
+        }
+
+        public async Task ActiveDeactiveItemMaster(int itemMasterId, ItemMaster itemMaster)
+        {
+            try
+            {
+                var item = await _dbContext.ItemMasters.FindAsync(itemMasterId);
+                if (item != null)
+                {
+                    item.Status = itemMaster.Status;
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch
+            {
                 throw;
             }
         }
