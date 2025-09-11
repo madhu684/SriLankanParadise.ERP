@@ -75,5 +75,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             return await _itemMasterRepository.GetItemMastersByItemTypeId(itemtypeId);
         }
+
+        public async Task ActiveDeactiveItemMaster(int itemMasterId, ItemMaster itemMaster)
+        {
+            await _itemMasterRepository.ActiveDeactiveItemMaster(itemMasterId, itemMaster);
+        }
     }
 }
