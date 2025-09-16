@@ -6,15 +6,11 @@ import {
   get_company_api,
 } from "../../services/salesApi";
 import {
-  get_item_batches_by_item_master_id_api,
-  put_item_batch_api,
   get_charges_and_deductions_by_company_id_api,
   post_charges_and_deductions_applied_api,
   get_charges_and_deductions_applied_api,
   get_transaction_types_api,
   get_user_locations_by_user_id_api,
-  get_locations_inventories_by_location_id_item_master_id_api,
-  get_Location_Inventory_Summary_By_Item_Name_api,
   get_locations_inventories_by_location_id_api,
   get_item_batch_by_itemMasterId_batchId_api,
 } from "../../services/purchaseApi";

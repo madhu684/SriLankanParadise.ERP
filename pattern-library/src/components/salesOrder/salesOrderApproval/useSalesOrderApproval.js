@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { approve_sales_order_api } from "../../../services/salesApi";
-import { get_charges_and_deductions_applied_api } from "../../../services/purchaseApi";
+import {
+  get_charges_and_deductions_applied_api,
+  post_reduce_inventory_fifo_api,
+} from "../../../services/purchaseApi";
 import { get_company_api } from "../../../services/salesApi";
 import { useQuery } from "@tanstack/react-query";
 
@@ -8,6 +11,8 @@ const useSalesOrderApproval = ({ onFormSubmit, salesOrder }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const alertRef = useRef(null);
+
+  console.log(salesOrder);
 
   useEffect(() => {
     if (approvalStatus === "approved") {
@@ -20,6 +25,7 @@ const useSalesOrderApproval = ({ onFormSubmit, salesOrder }) => {
   const handleApprove = async (salesOrderId) => {
     try {
       setLoading(true);
+      let detailFifo = [];
       const currentDate = new Date();
       const formattedDate = currentDate.toISOString();
       const approvalData = {
@@ -35,8 +41,20 @@ const useSalesOrderApproval = ({ onFormSubmit, salesOrder }) => {
       );
 
       if (approvalResponse.status === 200) {
-        setApprovalStatus("approved");
-        console.log("Sales order approved successfully:", approvalResponse);
+        //setApprovalStatus("approved");
+        for (const item of salesOrder.salesOrderDetails) {
+          const fifoResponse = await post_reduce_inventory_fifo_api({
+            locationId: salesOrder.inventoryLocationId,
+            itemMasterId: item.itemBatchItemMasterId,
+            quantity: item.quantity,
+          });
+          detailFifo.push(fifoResponse.data);
+        }
+        if (detailFifo.every((item) => item.status === 200)) {
+          setApprovalStatus("approved");
+        } else {
+          setApprovalStatus("error");
+        }
       } else {
         setApprovalStatus("error");
       }

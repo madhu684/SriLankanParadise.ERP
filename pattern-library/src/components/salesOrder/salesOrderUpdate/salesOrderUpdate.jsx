@@ -81,11 +81,10 @@ const SalesOrderUpdate = ({
   } = useSalesOrderUpdate({
     salesOrder,
     onFormSubmit: () => {
-      handleClose()
-      handleUpdated()
+      handleClose();
+      handleUpdated();
     },
-  })
-
+  });
 
   if (
     isCustomersLoading ||
@@ -93,7 +92,7 @@ const SalesOrderUpdate = ({
     isLoadingTransactionTypes ||
     isCompanyLoading
   ) {
-    return <LoadingSpinner />
+    return <LoadingSpinner />;
   }
 
   if (
@@ -102,14 +101,14 @@ const SalesOrderUpdate = ({
     isTransactionTypesError ||
     isCompanyError
   ) {
-    return <ErrorComponent error={'Error fetching data'} />
+    return <ErrorComponent error={"Error fetching data"} />;
   }
 
-  console.log('Available Items', availableItems)
+  console.log("Available Items", availableItems);
 
   const handleBack = () => {
-    setShowUpdateSOForm(false)
-  }
+    setShowUpdateSOForm(false);
+  };
 
   return (
     <div className="container mt-4">
@@ -132,18 +131,18 @@ const SalesOrderUpdate = ({
       </div>
 
       {/* Display success or error messages */}
-      {submissionStatus === 'successSubmitted' && (
+      {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
           Sales order submitted successfully!
         </div>
       )}
-      {submissionStatus === 'successSavedAsDraft' && (
+      {submissionStatus === "successSavedAsDraft" && (
         <div className="alert alert-success mb-3" role="alert">
           Sales order updated and saved as draft, you can edit and submit it
           later!
         </div>
       )}
-      {submissionStatus === 'error' && (
+      {submissionStatus === "error" && (
         <div className="alert alert-danger mb-3" role="alert">
           Error submitting sales Order. Please try again.
         </div>
@@ -172,7 +171,7 @@ const SalesOrderUpdate = ({
                 <label htmlFor="customerId" className="form-label">
                   Customer
                 </label>
-                {formData.selectedCustomer === '' && (
+                {formData.selectedCustomer === "" && (
                   <div className="mb-3 position-relative">
                     <div className="input-group">
                       <span className="input-group-text bg-transparent ">
@@ -181,8 +180,8 @@ const SalesOrderUpdate = ({
                       <input
                         type="text"
                         className={`form-control ${
-                          validFields.supplierId ? 'is-valid' : ''
-                        } ${validationErrors.supplierId ? 'is-invalid' : ''}`}
+                          validFields.supplierId ? "is-valid" : ""
+                        } ${validationErrors.supplierId ? "is-invalid" : ""}`}
                         placeholder="Search for a customer..."
                         value={customerSearchTerm}
                         onChange={(e) => setCustomerSearchTerm(e.target.value)}
@@ -192,9 +191,9 @@ const SalesOrderUpdate = ({
                         <span
                           className="input-group-text bg-transparent"
                           style={{
-                            cursor: 'pointer',
+                            cursor: "pointer",
                           }}
-                          onClick={() => setCustomerSearchTerm('')}
+                          onClick={() => setCustomerSearchTerm("")}
                         >
                           <i className="bi bi-x"></i>
                         </span>
@@ -203,14 +202,14 @@ const SalesOrderUpdate = ({
 
                     {/* Dropdown for filtered customers */}
                     {customerSearchTerm && (
-                      <div className="dropdown" style={{ width: '100%' }}>
+                      <div className="dropdown" style={{ width: "100%" }}>
                         <ul
                           className="dropdown-menu"
                           style={{
-                            display: 'block',
-                            width: '100%',
-                            maxHeight: '200px',
-                            overflowY: 'auto',
+                            display: "block",
+                            width: "100%",
+                            maxHeight: "200px",
+                            overflowY: "auto",
                           }}
                         >
                           {customers
@@ -220,9 +219,9 @@ const SalesOrderUpdate = ({
                                   .toLowerCase()
                                   .includes(customerSearchTerm.toLowerCase()) ||
                                 customer.phone
-                                  .replace(/\s/g, '')
+                                  .replace(/\s/g, "")
                                   .includes(
-                                    customerSearchTerm.replace(/\s/g, '')
+                                    customerSearchTerm.replace(/\s/g, "")
                                   )
                             )
                             .map((customer) => (
@@ -233,7 +232,7 @@ const SalesOrderUpdate = ({
                                 >
                                   <span className="me-3">
                                     <i className="bi-person-lines-fill"></i>
-                                  </span>{' '}
+                                  </span>{" "}
                                   {customer?.customerName} - {customer?.phone}
                                 </button>
                               </li>
@@ -244,8 +243,8 @@ const SalesOrderUpdate = ({
                                 .toLowerCase()
                                 .includes(customerSearchTerm.toLowerCase()) ||
                               customer.phone
-                                .replace(/\s/g, '')
-                                .includes(customerSearchTerm.replace(/\s/g, ''))
+                                .replace(/\s/g, "")
+                                .includes(customerSearchTerm.replace(/\s/g, ""))
                           ).length === 0 && (
                             <>
                               <li className="dropdown-item text-center">
@@ -272,7 +271,7 @@ const SalesOrderUpdate = ({
                         </ul>
                       </div>
                     )}
-                    {formData.selectedCustomer === '' && (
+                    {formData.selectedCustomer === "" && (
                       <div className="mb-3">
                         <small className="form-text text-muted">
                           {validationErrors.customerId && (
@@ -295,7 +294,7 @@ const SalesOrderUpdate = ({
                         Customer Name: {formData.selectedCustomer.customerName}
                       </p>
                       <p>
-                        Contact Person:{' '}
+                        Contact Person:{" "}
                         {formData.selectedCustomer.contactPerson}
                       </p>
                       <p>Phone: {formData.selectedCustomer.phone}</p>
@@ -317,7 +316,7 @@ const SalesOrderUpdate = ({
             <label htmlFor="salesPersonId" className="form-label mt-3">
               Sales Person
             </label>
-            {formData.selectedSalesPerson === '' && (
+            {formData.selectedSalesPerson === "" && (
               <div className="mb-3 position-relative">
                 <div className="input-group">
                   <span className="input-group-text bg-transparent">
@@ -326,8 +325,8 @@ const SalesOrderUpdate = ({
                   <input
                     type="text"
                     className={`form-control ${
-                      validFields.salesPersonId ? 'is-valid' : ''
-                    } ${validationErrors.salesPersonId ? 'is-invalid' : ''}`}
+                      validFields.salesPersonId ? "is-valid" : ""
+                    } ${validationErrors.salesPersonId ? "is-invalid" : ""}`}
                     placeholder="Search for a sales person..."
                     value={salesPersonSearchTerm}
                     onChange={(e) => setSalesPersonSearchTerm(e.target.value)}
@@ -336,9 +335,9 @@ const SalesOrderUpdate = ({
                     <span
                       className="input-group-text bg-transparent"
                       style={{
-                        cursor: 'pointer',
+                        cursor: "pointer",
                       }}
-                      onClick={() => setSalesPersonSearchTerm('')}
+                      onClick={() => setSalesPersonSearchTerm("")}
                     >
                       <i className="bi bi-x"></i>
                     </span>
@@ -347,14 +346,14 @@ const SalesOrderUpdate = ({
 
                 {/* Dropdown for filtered sales persons */}
                 {salesPersonSearchTerm && (
-                  <div className="dropdown" style={{ width: '100%' }}>
+                  <div className="dropdown" style={{ width: "100%" }}>
                     <ul
                       className="dropdown-menu"
                       style={{
-                        display: 'block',
-                        width: '100%',
-                        maxHeight: '200px',
-                        overflowY: 'auto',
+                        display: "block",
+                        width: "100%",
+                        maxHeight: "200px",
+                        overflowY: "auto",
                       }}
                     >
                       {salesPersons
@@ -364,9 +363,9 @@ const SalesOrderUpdate = ({
                               .toLowerCase()
                               .includes(salesPersonSearchTerm.toLowerCase()) ||
                             salesPerson.contactNo
-                              .replace(/\s/g, '')
+                              .replace(/\s/g, "")
                               .includes(
-                                salesPersonSearchTerm.replace(/\s/g, '')
+                                salesPersonSearchTerm.replace(/\s/g, "")
                               )
                         )
                         .map((salesPerson) => (
@@ -379,8 +378,8 @@ const SalesOrderUpdate = ({
                             >
                               <span className="me-3">
                                 <i className="bi-person-lines-fill"></i>
-                              </span>{' '}
-                              {salesPerson?.firstname} -{' '}
+                              </span>{" "}
+                              {salesPerson?.firstname} -{" "}
                               {salesPerson?.contactNo}
                             </button>
                           </li>
@@ -391,8 +390,8 @@ const SalesOrderUpdate = ({
                             .toLowerCase()
                             .includes(salesPersonSearchTerm.toLowerCase()) ||
                           salesPerson.contactNo
-                            .replace(/\s/g, '')
-                            .includes(salesPersonSearchTerm.replace(/\s/g, ''))
+                            .replace(/\s/g, "")
+                            .includes(salesPersonSearchTerm.replace(/\s/g, ""))
                       ).length === 0 && (
                         <li className="dropdown-item text-center">
                           <span className="me-3">
@@ -439,12 +438,12 @@ const SalesOrderUpdate = ({
               <input
                 type="date"
                 className={`form-control ${
-                  validFields.orderDate ? 'is-valid' : ''
-                } ${validationErrors.orderDate ? 'is-invalid' : ''}`}
+                  validFields.orderDate ? "is-valid" : ""
+                } ${validationErrors.orderDate ? "is-invalid" : ""}`}
                 id="orderDate"
                 placeholder="Enter order date"
                 value={formData.orderDate}
-                onChange={(e) => handleInputChange('orderDate', e.target.value)}
+                onChange={(e) => handleInputChange("orderDate", e.target.value)}
                 required
               />
               {validationErrors.orderDate && (
@@ -460,13 +459,13 @@ const SalesOrderUpdate = ({
               <input
                 type="date"
                 className={`form-control ${
-                  validFields.deliveryDate ? 'is-valid' : ''
-                } ${validationErrors.deliveryDate ? 'is-invalid' : ''}`}
+                  validFields.deliveryDate ? "is-valid" : ""
+                } ${validationErrors.deliveryDate ? "is-invalid" : ""}`}
                 id="deliveryDate"
                 placeholder="Enter delivery date"
                 value={formData.deliveryDate}
                 onChange={(e) =>
-                  handleInputChange('deliveryDate', e.target.value)
+                  handleInputChange("deliveryDate", e.target.value)
                 }
                 required
               />
@@ -499,9 +498,9 @@ const SalesOrderUpdate = ({
                 <span
                   className="input-group-text bg-transparent"
                   style={{
-                    cursor: 'pointer',
+                    cursor: "pointer",
                   }}
-                  onClick={() => setSearchTerm('')}
+                  onClick={() => setSearchTerm("")}
                 >
                   <i className="bi bi-x"></i>
                 </span>
@@ -509,14 +508,14 @@ const SalesOrderUpdate = ({
             </div>
             {/* Dropdown for filtered items */}
             {searchTerm && (
-              <div className="dropdown" style={{ width: '100%' }}>
+              <div className="dropdown" style={{ width: "100%" }}>
                 <ul
                   className="dropdown-menu"
                   style={{
-                    display: 'block',
-                    width: '100%',
-                    maxHeight: '200px',
-                    overflowY: 'auto',
+                    display: "block",
+                    width: "100%",
+                    maxHeight: "200px",
+                    overflowY: "auto",
                   }}
                 >
                   {isItemsLoading ? (
@@ -531,7 +530,7 @@ const SalesOrderUpdate = ({
                     availableItems.length === 0 ||
                     availableItems.filter((item) => {
                       // If batchStockType is FIFO, filter out items already present in formData.itemDetails and itemIdToBeDeleted
-                      if (company.batchStockType === 'FIFO') {
+                      if (company.batchStockType === "FIFO") {
                         return (
                           !formData.itemDetails.some(
                             (detail) =>
@@ -542,10 +541,10 @@ const SalesOrderUpdate = ({
                               itemIdToBeDeleted.itemBatchItemMasterId ===
                               item.itemMasterId
                           )
-                        )
+                        );
                       }
                       // Otherwise, include all items
-                      return true
+                      return true;
                     }).length === 0 ? (
                     <li className="dropdown-item">
                       <span className="me-3">
@@ -557,7 +556,7 @@ const SalesOrderUpdate = ({
                     availableItems
                       .filter((item) => {
                         // If batchStockType is FIFO, filter out items already present in formData.itemDetails and itemIdToBeDeleted
-                        if (company.batchStockType === 'FIFO') {
+                        if (company.batchStockType === "FIFO") {
                           return (
                             !formData.itemDetails.some(
                               (detail) =>
@@ -568,10 +567,10 @@ const SalesOrderUpdate = ({
                                 itemIdToBeDeleted.itemBatchItemMasterId ===
                                 item.itemMasterId
                             )
-                          )
+                          );
                         }
                         // Otherwise, include all items
-                        return true
+                        return true;
                       })
                       .map((item) => (
                         <li key={item.itemMasterId}>
@@ -588,21 +587,6 @@ const SalesOrderUpdate = ({
                       ))
                   )}
                 </ul>
-              </div>
-            )}
-
-            {formData.itemMasterId === 0 && (
-              <div className="mb-3">
-                <small className="form-text text-muted">
-                  Please search for an item to add
-                </small>
-              </div>
-            )}
-            {formData.itemMasterId !== 0 && (
-              <div className="mb-3">
-                <p className="form-text text-muted">
-                  Selected item: {formData?.itemMaster?.itemName}
-                </p>
               </div>
             )}
           </div>
@@ -641,27 +625,27 @@ const SalesOrderUpdate = ({
           </div>
         </div> */}
 
-        {!itemBatches && formData.itemMasterId !== 0 && (
+        {/* {!itemBatches && formData.itemMasterId !== 0 && (
           <div className="mb-3">
             <small className="form-text  text-danger">
               Selected item does not have any associated item batches. Please
               select another item
             </small>
           </div>
-        )}
+        )} */}
 
         {formData.itemDetails.length > 0 && (
           <div className="table-responsive mb-2">
             <table
               className="table"
-              style={{ minWidth: '1000px', overflowX: 'auto' }}
+              style={{ minWidth: "1000px", overflowX: "auto" }}
             >
               <thead>
                 <tr>
                   <th>Item Name</th>
                   <th>Unit</th>
-                  {company.batchStockType !== 'FIFO' && <th>Batch Ref</th>}
-                  <th>Temp Qty</th>
+                  {company.batchStockType !== "FIFO" && <th>Batch Ref</th>}
+                  <th>Total Stock In Hand</th>
                   <th>Quantity</th>
                   <th>Unit Price</th>
                   {renderColumns()}
@@ -674,7 +658,7 @@ const SalesOrderUpdate = ({
                   <tr key={index}>
                     <td>{item.name}</td>
                     <td>{item.unit}</td>
-                    {company.batchStockType !== 'FIFO' && (
+                    {company.batchStockType !== "FIFO" && (
                       <td>{item.batchRef}</td>
                     )}
                     <td>{item.tempQuantity}</td>
@@ -682,17 +666,17 @@ const SalesOrderUpdate = ({
                       <input
                         type="number"
                         className={`form-control ${
-                          validFields[`quantity_${index}`] ? 'is-valid' : ''
+                          validFields[`quantity_${index}`] ? "is-valid" : ""
                         } ${
                           validationErrors[`quantity_${index}`]
-                            ? 'is-invalid'
-                            : ''
+                            ? "is-invalid"
+                            : ""
                         }`}
                         value={item.quantity}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
-                            'quantity',
+                            "quantity",
                             e.target.value
                           )
                         }
@@ -711,18 +695,18 @@ const SalesOrderUpdate = ({
                           type="number"
                           value={charge?.value}
                           onChange={(e) => {
-                            let newValue = parseFloat(e.target.value)
+                            let newValue = parseFloat(e.target.value);
 
                             // If the entered value is not a valid number, set it to 0
                             if (isNaN(newValue)) {
-                              newValue = 0
+                              newValue = 0;
                             } else {
                               // If the charge is a percentage, ensure the value is between 0 and 100
                               if (charge.isPercentage) {
-                                newValue = Math.min(100, Math.max(0, newValue)) // Clamp the value between 0 and 100
+                                newValue = Math.min(100, Math.max(0, newValue)); // Clamp the value between 0 and 100
                               } else {
                                 // For non-percentage charges, ensure the value is positive
-                                newValue = Math.max(0, newValue)
+                                newValue = Math.max(0, newValue);
                               }
                             }
 
@@ -730,7 +714,7 @@ const SalesOrderUpdate = ({
                               index,
                               `chargesAndDeductions_${chargeIndex}_value`,
                               newValue
-                            )
+                            );
                           }}
                         />
                       </td>
@@ -760,7 +744,7 @@ const SalesOrderUpdate = ({
                     colSpan={
                       5 +
                       formData.itemDetails[0].chargesAndDeductions.length -
-                      (company.batchStockType === 'FIFO' ? 1 : 0)
+                      (company.batchStockType === "FIFO" ? 1 : 0)
                     }
                   ></td>
                   <th>Sub Total</th>
@@ -773,7 +757,7 @@ const SalesOrderUpdate = ({
                     colSpan={
                       5 +
                       formData.itemDetails[0].chargesAndDeductions.length -
-                      (company.batchStockType === 'FIFO' ? 1 : 0)
+                      (company.batchStockType === "FIFO" ? 1 : 0)
                     }
                   ></td>
                   <th>Total Amount</th>
@@ -796,8 +780,8 @@ const SalesOrderUpdate = ({
           <input
             type="file"
             className={`form-control ${
-              validFields.attachments ? 'is-valid' : ''
-            } ${validationErrors.attachments ? 'is-invalid' : ''}`}
+              validFields.attachments ? "is-valid" : ""
+            } ${validationErrors.attachments ? "is-invalid" : ""}`}
             id="attachment"
             onChange={(e) => handleAttachmentChange(e.target.files)}
             multiple
@@ -826,7 +810,7 @@ const SalesOrderUpdate = ({
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Updating..." />
             ) : (
-              'Update and Submit'
+              "Update and Submit"
             )}
           </button>
           <button
@@ -838,7 +822,7 @@ const SalesOrderUpdate = ({
             {loadingDraft && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Saving as Draft..." />
             ) : (
-              'Save as Draft'
+              "Save as Draft"
             )}
           </button>
           <button
@@ -877,7 +861,7 @@ const SalesOrderUpdate = ({
         />
       )}
     </div>
-  )
-}
+  );
+};
 
 export default SalesOrderUpdate;

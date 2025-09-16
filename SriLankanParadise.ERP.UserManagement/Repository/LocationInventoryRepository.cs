@@ -497,10 +497,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task ReduceInventoryByFIFO(int locationId, int itemMasterId, int quantity)
+        public async Task ReduceInventoryByFIFO(int locationId, int itemMasterId, decimal quantity)
         {
             var strategy = _dbContext.Database.CreateExecutionStrategy();
-
             await strategy.ExecuteAsync(async () =>
             {
                 using var transaction = await _dbContext.Database.BeginTransactionAsync();
@@ -514,36 +513,40 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         .Include(li => li.ItemBatch)
                         .OrderBy(li => li.BatchId) // FIFO by BatchId
                         .ToListAsync();
-
                     if (!availableBatches.Any())
                     {
                         throw new InvalidOperationException("No batches available for the specified location and item");
                     }
-
-                    // Check total available stock - fix the type conversion here
-                    var totalAvailableStock = availableBatches.Sum(b => (int)(b.StockInHand ?? 0));
+                    // Check total available stock
+                    var totalAvailableStock = availableBatches.Sum(b => b.StockInHand ?? 0m);
                     if (totalAvailableStock < quantity)
                     {
                         throw new InvalidOperationException($"Insufficient stock. Available: {totalAvailableStock}, Requested: {quantity}");
                     }
-
-                    int remainingQuantity = quantity;
-
+                    decimal remainingQuantity = quantity;
                     foreach (var batch in availableBatches)
                     {
                         if (remainingQuantity <= 0) break;
-
-                        // Fix the type conversion here
-                        int currentBatchStock = (int)(batch.StockInHand ?? 0);
-                        int quantityToReduce = Math.Min(remainingQuantity, currentBatchStock);
-
+                        decimal currentBatchStock = batch.StockInHand ?? 0m;
+                        decimal quantityToReduce = Math.Min(remainingQuantity, currentBatchStock);
                         // Update stock in hand
                         batch.StockInHand -= quantityToReduce;
                         remainingQuantity -= quantityToReduce;
-
                         _dbContext.LocationInventories.Update(batch);
-                    }
 
+                        // Create LocationInventoryMovement record
+                        var inventoryMovement = new LocationInventoryMovement
+                        {
+                            MovementTypeId = 2,
+                            TransactionTypeId = 1,
+                            ItemMasterId = itemMasterId,
+                            BatchId = batch.BatchId,
+                            LocationId = locationId,
+                            Date = DateTime.UtcNow,
+                            Qty = quantityToReduce,
+                        };
+                        _dbContext.LocationInventoryMovements.Add(inventoryMovement);
+                    }
                     await _dbContext.SaveChangesAsync();
                     await transaction.CommitAsync();
                 }

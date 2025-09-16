@@ -40,6 +40,8 @@ public partial class SalesOrder
 
     public double? Longitude { get; set; }
 
+    public int InventoryLocationId { get; set; }
+
     public virtual Customer? Customer { get; set; }
 
     public virtual User SalesPerson { get; set; }

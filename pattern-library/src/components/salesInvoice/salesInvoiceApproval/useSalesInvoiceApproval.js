@@ -40,10 +40,11 @@ const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
       );
 
       for (const invoiceDetail of salesInvoice.salesInvoiceDetails) {
+        if (invoiceDetail.batch === null) continue;
         // Add to location inventory
         const locationInventoryData = {
-          itemMasterId: invoiceDetail.itemBatch.itemMasterId,
-          batchId: invoiceDetail.itemBatch.batchId,
+          itemMasterId: invoiceDetail.itemMaster.itemMasterId,
+          batchId: invoiceDetail.batch.batchId,
           locationId: salesInvoice.locationId,
           stockInHand: invoiceDetail.quantity,
           permissionId: 1088,
@@ -56,10 +57,10 @@ const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
         const locationInventoryMovementData = {
           movementTypeId: 2,
           transactionTypeId: 3,
-          itemMasterId: invoiceDetail.itemBatch.itemMasterId,
-          batchId: invoiceDetail.itemBatch.batchId,
+          itemMasterId: invoiceDetail.itemMaster.itemMasterId,
+          batchId: invoiceDetail.batch.batchId,
           locationId: salesInvoice.locationId,
-          date: new Date().toISOString(), // Current date and time
+          date: new Date().toISOString(),
           qty: invoiceDetail.quantity,
           permissionId: 1090,
         };
@@ -187,7 +188,7 @@ const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
   // Group sales invoice details by item master ID
   const groupedSalesInvoiceDetails = salesInvoice.salesInvoiceDetails.reduce(
     (acc, item) => {
-      const itemMasterId = item.itemBatch?.itemMaster?.itemMasterId;
+      const itemMasterId = item?.itemMaster?.itemMasterId;
       if (!acc[itemMasterId]) {
         acc[itemMasterId] = { ...item, quantity: 0, totalPrice: 0 };
       }
