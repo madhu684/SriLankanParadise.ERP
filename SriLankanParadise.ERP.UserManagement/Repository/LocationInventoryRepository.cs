@@ -497,7 +497,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task ReduceInventoryByFIFO(int locationId, int itemMasterId, decimal quantity)
+        public async Task ReduceInventoryByFIFO(int locationId, int itemMasterId, int transactionTypeId, decimal quantity)
         {
             var strategy = _dbContext.Database.CreateExecutionStrategy();
             await strategy.ExecuteAsync(async () =>
@@ -505,7 +505,25 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 using var transaction = await _dbContext.Database.BeginTransactionAsync();
                 try
                 {
-                    // Get oldest batches for the item at the location (ordered by BatchId - smallest first)
+                    // Check if the item is a service item
+                    var itemMaster = await _dbContext.ItemMasters
+                        .Where(im => im.ItemMasterId == itemMasterId)
+                        .FirstOrDefaultAsync();
+
+                    if (itemMaster == null)
+                    {
+                        throw new InvalidOperationException($"ItemMaster with ID {itemMasterId} not found.");
+                    }
+
+                    if (itemMaster.IsInventoryItem == false)
+                    {
+                        // For service items, skip inventory checks and movements
+                        await _dbContext.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return;
+                    }
+
+                    // Existing logic for non-service items
                     var availableBatches = await _dbContext.LocationInventories
                         .Where(li => li.LocationId == locationId &&
                                     li.ItemMasterId == itemMasterId &&
@@ -513,32 +531,33 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         .Include(li => li.ItemBatch)
                         .OrderBy(li => li.BatchId) // FIFO by BatchId
                         .ToListAsync();
+
                     if (!availableBatches.Any())
                     {
                         throw new InvalidOperationException("No batches available for the specified location and item");
                     }
-                    // Check total available stock
+
                     var totalAvailableStock = availableBatches.Sum(b => b.StockInHand ?? 0m);
                     if (totalAvailableStock < quantity)
                     {
                         throw new InvalidOperationException($"Insufficient stock. Available: {totalAvailableStock}, Requested: {quantity}");
                     }
+
                     decimal remainingQuantity = quantity;
                     foreach (var batch in availableBatches)
                     {
                         if (remainingQuantity <= 0) break;
                         decimal currentBatchStock = batch.StockInHand ?? 0m;
                         decimal quantityToReduce = Math.Min(remainingQuantity, currentBatchStock);
-                        // Update stock in hand
+
                         batch.StockInHand -= quantityToReduce;
                         remainingQuantity -= quantityToReduce;
                         _dbContext.LocationInventories.Update(batch);
 
-                        // Create LocationInventoryMovement record
                         var inventoryMovement = new LocationInventoryMovement
                         {
                             MovementTypeId = 2,
-                            TransactionTypeId = 1,
+                            TransactionTypeId = transactionTypeId,
                             ItemMasterId = itemMasterId,
                             BatchId = batch.BatchId,
                             LocationId = locationId,
@@ -547,6 +566,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         };
                         _dbContext.LocationInventoryMovements.Add(inventoryMovement);
                     }
+
                     await _dbContext.SaveChangesAsync();
                     await transaction.CommitAsync();
                 }

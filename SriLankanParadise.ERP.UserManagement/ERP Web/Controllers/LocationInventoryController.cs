@@ -419,7 +419,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         {
             try
             {
-                await _locationInventoryService.ReduceInventoryByFIFO(request.LocationId, request.ItemMasterId, request.Quantity);
+                await _locationInventoryService.ReduceInventoryByFIFO(request.LocationId, request.ItemMasterId, request.TransactionTypeId, request.Quantity);
 
                 _logger.LogInformation("Inventory reduced successfully using FIFO method");
                 AddResponseMessage(Response, "Inventory reduced successfully", null, true, HttpStatusCode.OK);

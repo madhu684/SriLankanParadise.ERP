@@ -164,7 +164,6 @@ const SalesInvoiceApproval = ({
                   <tr>
                     <th>Item Name</th>
                     <th>Unit</th>
-                    <th>Batch Ref</th>
                     <th>Quantity</th>
                     <th>Unit Price</th>
                     {uniqueLineItemDisplayNames.map((displayName, index) => {
@@ -192,7 +191,6 @@ const SalesInvoiceApproval = ({
                     <tr key={index}>
                       <td>{item?.itemMaster?.itemName}</td>
                       <td>{item?.itemMaster?.unit.unitName}</td>
-                      <td>{item?.batch?.batchRef ?? "-"}</td>
                       <td>{item.quantity}</td>
                       <td>{item.unitPrice.toFixed(2)}</td>
                       {/* Render line item charges/deductions */}
@@ -235,7 +233,7 @@ const SalesInvoiceApproval = ({
                   <tr>
                     <td
                       colSpan={
-                        5 +
+                        4 +
                         uniqueLineItemDisplayNames.length -
                         (company.batchStockType === "FIFO" ? 1 : 0)
                       }
@@ -273,7 +271,7 @@ const SalesInvoiceApproval = ({
                         <tr key={`${index}-${chargeIndex}`}>
                           <td
                             colSpan={
-                              5 +
+                              4 +
                               uniqueLineItemDisplayNames.length -
                               (company.batchStockType === "FIFO" ? 1 : 0)
                             }
@@ -290,7 +288,7 @@ const SalesInvoiceApproval = ({
                   <tr>
                     <td
                       colSpan={
-                        5 +
+                        4 +
                         uniqueLineItemDisplayNames.length -
                         (company.batchStockType === "FIFO" ? 1 : 0)
                       }

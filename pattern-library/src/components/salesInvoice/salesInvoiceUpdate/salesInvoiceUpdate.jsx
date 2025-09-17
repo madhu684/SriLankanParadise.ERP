@@ -352,9 +352,9 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                 <tr>
                   <th>Item Name</th>
                   <th>Unit</th>
-                  <th>Item Batch</th>
-                  <th>Quantity</th>
+                  {/* <th>Item Batch</th> */}
                   <th>Stock In Hand</th>
+                  <th>Quantity</th>
                   <th>Unit Price</th>
                   {renderColumns()}
                   <th className="text-end">Total Price</th>
@@ -366,7 +366,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                   <tr key={index}>
                     <td>{item.name}</td>
                     <td>{item.unit}</td>
-                    <td>
+                    {/* <td>
                       <select
                         className="form-select"
                         value={item?.batch?.batchId}
@@ -392,7 +392,8 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                             </option>
                           ))}
                       </select>
-                    </td>
+                    </td> */}
+                    <td>{item.stockInHand}</td>
                     <td>
                       <input
                         type="number"
@@ -411,7 +412,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                             e.target.value
                           )
                         }
-                        disabled={item.itemMaster.isInventoryItem === false}
+                        disabled={item.isInventoryItem === false}
                       />
                       {validationErrors[`quantity_${index}`] && (
                         <div className="invalid-feedback">
@@ -419,7 +420,6 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                         </div>
                       )}
                     </td>
-                    <td>{item.stockInHand}</td>
                     <td>{item.unitPrice.toFixed(2)}</td>
                     {item.chargesAndDeductions.map((charge, chargeIndex) => (
                       <td key={chargeIndex}>
@@ -475,7 +475,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                 <tr>
                   <td
                     colSpan={
-                      6 +
+                      5 +
                       formData.itemDetails[0].chargesAndDeductions.length -
                       (company.batchStockType === "FIFO" ? 1 : 0)
                     }
@@ -488,7 +488,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                 <tr>
                   <td
                     colSpan={
-                      6 +
+                      5 +
                       formData.itemDetails[0].chargesAndDeductions.length -
                       (company.batchStockType === "FIFO" ? 1 : 0)
                     }

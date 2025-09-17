@@ -16,9 +16,11 @@ import {
   delete_charges_and_deductions_applied_api,
   get_locations_inventories_by_location_id_api,
   get_item_batch_by_itemMasterId_batchId_api,
+  get_sum_location_inventories_by_locationId_itemMasterId_api,
 } from "../../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
+import { batch } from "react-redux";
 
 const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -48,7 +50,6 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     setChargesAndDeductionsAppliedIdsToBeDeleted,
   ] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [processedItems, setProcessedItems] = useState(false);
 
   const fetchItems = async (companyId, searchQuery, itemType) => {
     try {
@@ -198,20 +199,6 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     queryFn: fetchCompany,
   });
 
-  // Group sales order details by item master ID
-  const groupedSalesInvoiceDetails = salesInvoice.salesInvoiceDetails.reduce(
-    (acc, item) => {
-      const itemMasterId = item.itemBatch?.itemMaster?.itemMasterId;
-      if (!acc[itemMasterId]) {
-        acc[itemMasterId] = { ...item, quantity: 0, totalPrice: 0 };
-      }
-      acc[itemMasterId].quantity += item.quantity;
-      acc[itemMasterId].totalPrice += item.totalPrice;
-      return acc;
-    },
-    {}
-  );
-
   // useEffect(() => {
   //   if (groupedSalesInvoiceDetails) {
   //     const promises = Object.values(groupedSalesInvoiceDetails).map(
@@ -277,30 +264,124 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
       company &&
       locationInventories.length > 0
     ) {
-      const deepCopySalesInvoice = JSON.parse(JSON.stringify(salesInvoice));
+      const fetchData = async () => {
+        const deepCopySalesInvoice = JSON.parse(JSON.stringify(salesInvoice));
+        let salesInvoiceDetails = salesInvoice.salesInvoiceDetails;
 
-      let salesInvoiceDetails;
-
-      if (processedItems && company.batchStockType === "FIFO") {
-        salesInvoiceDetails = processedItems;
-      } else {
-        salesInvoiceDetails = salesInvoice.salesInvoiceDetails;
-      }
-
-      // Initialize line item charges and deductions
-      const initializedLineItemCharges = salesInvoiceDetails.map((item) => {
-        const initializedCharges = chargesAndDeductionsApplied
-          ?.filter(
-            (charge) => charge.lineItemId === item?.itemMaster?.itemMasterId
+        // Fetch inventory data for all items in parallel
+        const inventoryPromises = salesInvoiceDetails.map((item) =>
+          get_sum_location_inventories_by_locationId_itemMasterId_api(
+            item.itemBatchItemMasterId,
+            salesInvoice.locationId
           )
+        );
+        const inventoryResults = await Promise.all(inventoryPromises);
+
+        // Initialize line item charges and deductions
+        const initializedLineItemCharges = salesInvoiceDetails.map(
+          (item, index) => {
+            // const initializedCharges = chargesAndDeductionsApplied
+            //   ?.filter(
+            //     (charge) => charge.lineItemId === item?.itemMaster?.itemMasterId
+            //   )
+            //   .map((charge) => {
+            //     let value;
+            //     if (charge.chargesAndDeduction.percentage) {
+            //       // Calculate percentage value
+            //       value =
+            //         (Math.abs(charge.appliedValue) /
+            //           (item.unitPrice * item.quantity)) *
+            //         100;
+            //     } else {
+            //       value = Math.abs(charge.appliedValue);
+            //     }
+            //     return {
+            //       id: charge.chargesAndDeduction.chargesAndDeductionId,
+            //       name: charge.chargesAndDeduction.displayName,
+            //       value: value.toFixed(2),
+            //       sign: charge.chargesAndDeduction.sign,
+            //       isPercentage: charge.chargesAndDeduction.percentage !== null,
+            //       chargesAndDeductionAppliedId:
+            //         charge.chargesAndDeductionAppliedId,
+            //     };
+            //   });
+
+            // // Sort the charges and deductions according to the order of display names
+            // const sortedLineItemCharges = chargesAndDeductions
+            //   .filter((charge) => charge.isApplicableForLineItem)
+            //   .map((charge) => {
+            //     const displayName = charge.displayName; // Extract display name from charge
+            //     const matchedCharge = initializedCharges.find(
+            //       (c) => c.name === displayName
+            //     );
+            //     return matchedCharge || null; // Return null if no matching charge is found
+            //   });
+            const inventory = inventoryResults[index];
+            const availableStock =
+              inventory?.data?.result?.totalStockInHand || 0;
+
+            const initializedCharges = chargesAndDeductionsApplied
+              ?.filter((charge) => charge.lineItemId === item.itemMasterId)
+              .map((charge) => {
+                let value;
+                if (charge.chargesAndDeduction.percentage) {
+                  value =
+                    (Math.abs(charge.appliedValue) /
+                      (item.unitPrice * item.quantity)) *
+                    100;
+                } else {
+                  value = Math.abs(charge.appliedValue);
+                }
+                return {
+                  id: charge.chargesAndDeduction.chargesAndDeductionId,
+                  name: charge.chargesAndDeduction.displayName,
+                  value: value.toFixed(2),
+                  sign: charge.chargesAndDeduction.sign,
+                  isPercentage: charge.chargesAndDeduction.percentage !== null,
+                  chargesAndDeductionAppliedId:
+                    charge.chargesAndDeductionAppliedId,
+                };
+              });
+
+            const sortedLineItemCharges = chargesAndDeductions
+              .filter((charge) => charge.isApplicableForLineItem)
+              .map((charge) => {
+                const displayName = charge.displayName;
+                const matchedCharge = initializedCharges.find(
+                  (c) => c.name === displayName
+                );
+                return matchedCharge || null;
+              });
+
+            return {
+              salesInvoiceDetailId: item?.salesInvoiceDetailId,
+              salesInvoiceId: item?.salesInvoiceId,
+              itemMasterId: item?.itemMaster?.itemMasterId,
+              isInventoryItem: item?.itemMaster?.isInventoryItem,
+              name: item?.itemMaster?.itemName,
+              unit: item?.itemMaster?.unit.unitName,
+              stockInHand: availableStock,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              totalPrice: item.totalPrice,
+              chargesAndDeductions: sortedLineItemCharges,
+            };
+          }
+        );
+
+        const subTotal = deepCopySalesInvoice.salesInvoiceDetails.reduce(
+          (total, item) => total + item.totalPrice,
+          0
+        );
+
+        // Initialize common charges and deductions
+        const initializedCommonCharges = chargesAndDeductionsApplied
+          ?.filter((charge) => !charge.lineItemId)
           .map((charge) => {
             let value;
             if (charge.chargesAndDeduction.percentage) {
-              // Calculate percentage value
-              value =
-                (Math.abs(charge.appliedValue) /
-                  (item.unitPrice * item.quantity)) *
-                100;
+              // Calculate percentage value based on subtotal
+              value = (Math.abs(charge.appliedValue) / subTotal) * 100;
             } else {
               value = Math.abs(charge.appliedValue);
             }
@@ -314,74 +395,22 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
             };
           });
 
-        // Sort the charges and deductions according to the order of display names
-        const sortedLineItemCharges = chargesAndDeductions
-          .filter((charge) => charge.isApplicableForLineItem)
-          .map((charge) => {
-            const displayName = charge.displayName; // Extract display name from charge
-            const matchedCharge = initializedCharges.find(
-              (c) => c.name === displayName
-            );
-            return matchedCharge || null; // Return null if no matching charge is found
-          });
-
-        const selectedBatch = locationInventories?.find(
-          (batch) =>
-            batch.batchId === item.itemBatchBatchId &&
-            batch.itemMasterId === item.itemBatchItemMasterId
-        );
-
-        return {
-          ...item,
-          itemMasterId: item?.itemMaster?.itemMasterId,
-          itemBatchId: item?.batch?.batchId,
-          name: item?.itemMaster?.itemName,
-          unit: item?.itemMaster?.unit.unitName,
-          stockInHand: selectedBatch?.stockInHand ?? 0,
-          chargesAndDeductions: sortedLineItemCharges,
-          batch: item.batch,
-        };
-      });
-
-      const subTotal = deepCopySalesInvoice.salesInvoiceDetails.reduce(
-        (total, item) => total + item.totalPrice,
-        0
-      );
-
-      // Initialize common charges and deductions
-      const initializedCommonCharges = chargesAndDeductionsApplied
-        ?.filter((charge) => !charge.lineItemId)
-        .map((charge) => {
-          let value;
-          if (charge.chargesAndDeduction.percentage) {
-            // Calculate percentage value based on subtotal
-            value = (Math.abs(charge.appliedValue) / subTotal) * 100;
-          } else {
-            value = Math.abs(charge.appliedValue);
-          }
-          return {
-            id: charge.chargesAndDeduction.chargesAndDeductionId,
-            name: charge.chargesAndDeduction.displayName,
-            value: value.toFixed(2),
-            sign: charge.chargesAndDeduction.sign,
-            isPercentage: charge.chargesAndDeduction.percentage !== null,
-            chargesAndDeductionAppliedId: charge.chargesAndDeductionAppliedId,
-          };
+        setFormData({
+          salesInvoiceId: deepCopySalesInvoice?.salesInvoiceId ?? "",
+          invoiceDate: deepCopySalesInvoice?.invoiceDate?.split("T")[0] ?? "",
+          dueDate: deepCopySalesInvoice?.dueDate?.split("T")[0] ?? "",
+          referenceNumber: deepCopySalesInvoice?.referenceNo ?? "",
+          itemDetails: initializedLineItemCharges,
+          attachments: deepCopySalesInvoice?.attachments ?? [],
+          totalAmount: deepCopySalesInvoice?.totalAmount ?? "",
+          subTotal: 0,
+          commonChargesAndDeductions: initializedCommonCharges,
+          salesOrderId: deepCopySalesInvoice?.salesOrderId ?? null,
+          storeLocation: deepCopySalesInvoice?.locationId ?? null,
         });
+      };
 
-      setFormData({
-        salesInvoiceId: deepCopySalesInvoice?.salesInvoiceId ?? "",
-        invoiceDate: deepCopySalesInvoice?.invoiceDate?.split("T")[0] ?? "",
-        dueDate: deepCopySalesInvoice?.dueDate?.split("T")[0] ?? "",
-        referenceNumber: deepCopySalesInvoice?.referenceNo ?? "",
-        itemDetails: initializedLineItemCharges,
-        attachments: deepCopySalesInvoice?.attachments ?? [],
-        totalAmount: deepCopySalesInvoice?.totalAmount ?? "",
-        subTotal: 0,
-        commonChargesAndDeductions: initializedCommonCharges,
-        salesOrderId: deepCopySalesInvoice?.salesOrderId ?? null,
-        storeLocation: deepCopySalesInvoice?.locationId ?? null,
-      });
+      fetchData();
     }
   }, [
     salesInvoice,
@@ -391,7 +420,6 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     chargesAndDeductions,
     isCompanyLoading,
     company,
-    processedItems,
     locationInventories,
   ]);
 
@@ -606,7 +634,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     let isItemQuantityValid = true;
     // Validate item details
     formData.itemDetails.forEach((item, index) => {
-      if (item.itemMaster.isInventoryItem === false) return;
+      if (item.isInventoryItem === false) return;
       const fieldName = `quantity_${index}`;
       const fieldDisplayName = `Quantity for ${item.name}`;
 
@@ -686,7 +714,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
               unitPrice: itemDetail.unitPrice,
               totalPrice: itemDetail.totalPrice,
               itemBatchItemMasterId: itemDetail.itemMasterId,
-              itemBatchBatchId: itemDetail.itemBatchBatchId,
+              itemBatchBatchId: null,
               permissionId: 31,
             };
             await post_sales_invoice_detail_api(itemDetailData);
@@ -697,7 +725,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
               unitPrice: itemDetail.unitPrice,
               totalPrice: itemDetail.totalPrice,
               itemBatchItemMasterId: itemDetail.itemMasterId,
-              itemBatchBatchId: itemDetail.itemBatchBatchId,
+              itemBatchBatchId: null,
               permissionId: 31,
             };
 
@@ -800,74 +828,8 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     setFormData((prevFormData) => {
       const updatedItemDetails = [...prevFormData.itemDetails];
 
-      if (field === "batchId") {
-        const selectedBatch = locationInventories?.find(
-          (batch) =>
-            batch.batchId === parseInt(value) &&
-            batch.itemMasterId === updatedItemDetails[index].itemMasterId
-        );
-
-        // Update batchId and stockInHand immediately
-        updatedItemDetails[index].itemBatchBatchId = parseInt(value, 10);
-        updatedItemDetails[index].itemBatchId = parseInt(value, 10);
-        updatedItemDetails[index].itemBatch = selectedBatch?.itemBatch;
-        updatedItemDetails[index].batch = selectedBatch?.itemBatch;
-        updatedItemDetails[index].stockInHand = selectedBatch?.stockInHand ?? 0;
-
-        (async () => {
-          try {
-            const batchResponse =
-              await get_item_batch_by_itemMasterId_batchId_api(
-                updatedItemDetails[index].itemMasterId,
-                parseInt(value, 10)
-              );
-            const itemBatch = batchResponse?.data?.result;
-
-            // Update unitPrice with the sellingPrice from the API response
-            setFormData((prev) => {
-              const newItemDetails = [...prev.itemDetails];
-              newItemDetails[index].unitPrice = itemBatch?.sellingPrice || 0;
-
-              // Recalculate totalPrice based on the new unitPrice
-              const grandTotalPrice =
-                newItemDetails[index].itemMaster.isInventoryItem === true
-                  ? newItemDetails[index].quantity *
-                    newItemDetails[index].unitPrice
-                  : newItemDetails[index].unitPrice;
-              let totalPrice =
-                newItemDetails[index].itemMaster.isInventoryItem === true
-                  ? newItemDetails[index].quantity *
-                    newItemDetails[index].unitPrice
-                  : newItemDetails[index].unitPrice;
-
-              newItemDetails[index].chargesAndDeductions.forEach((charge) => {
-                if (charge.isPercentage) {
-                  const amount = (grandTotalPrice * charge.value) / 100;
-                  totalPrice += charge.sign === "+" ? amount : -amount;
-                } else {
-                  totalPrice +=
-                    charge.sign === "+" ? charge.value : -charge.value;
-                }
-              });
-
-              totalPrice = isNaN(totalPrice) ? 0 : totalPrice;
-              newItemDetails[index].totalPrice = totalPrice;
-
-              return {
-                ...prev,
-                itemDetails: newItemDetails,
-                subTotal: calculateSubTotal(),
-                totalAmount: calculateTotalAmount(),
-              };
-            });
-          } catch (error) {
-            console.error("Error fetching item batch:", error);
-          }
-        })();
-      }
-
       // Check if the field belongs to chargesAndDeductions
-      else if (field.startsWith("chargesAndDeductions")) {
+      if (field.startsWith("chargesAndDeductions")) {
         // Get the charge or deduction index
         const chargeIndex = parseInt(field.split("_")[1]);
 
@@ -893,13 +855,13 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
 
       // Calculate total price based on charges and deductions
       const grandTotalPrice =
-        updatedItemDetails[index].itemMaster.isInventoryItem === true
+        updatedItemDetails[index].isInventoryItem === true
           ? updatedItemDetails[index].quantity *
             updatedItemDetails[index].unitPrice
           : updatedItemDetails[index].unitPrice;
 
       let totalPrice =
-        updatedItemDetails[index].itemMaster.isInventoryItem === true
+        updatedItemDetails[index].isInventoryItem === true
           ? updatedItemDetails[index].quantity *
             updatedItemDetails[index].unitPrice
           : updatedItemDetails[index].unitPrice;
@@ -1034,54 +996,78 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   };
 
   // Handler to add the selected item to itemDetails
-  // const handleSelectItem = (item) => {
-  //   setFormData((prevFormData) => ({
-  //     ...prevFormData,
-  //     itemMasterId: item.itemMasterId,
-  //     itemMaster: item,
-  //   }));
-  //   setSearchTerm("");
+  const handleSelectItem = async (item) => {
+    const initializedCharges =
+      chargesAndDeductions
+        ?.filter((charge) => charge.isApplicableForLineItem)
+        ?.map((charge) => ({
+          id: charge.chargesAndDeductionId,
+          name: charge.displayName,
+          value: charge.amount || charge.percentage,
+          sign: charge.sign,
+          isPercentage: charge.percentage !== null,
+        })) || [];
 
-  //   setSelectedBatch(null);
-  //   setValidFields({});
-  //   setValidationErrors({});
-  // };
-  const handleSelectItem = (item) => {
-    const initializedCharges = chargesAndDeductions
-      .filter((charge) => charge.isApplicableForLineItem)
-      .map((charge) => ({
-        id: charge.chargesAndDeductionId,
-        name: charge.displayName,
-        value: charge.amount || charge.percentage,
-        sign: charge.sign,
-        isPercentage: charge.percentage !== null,
+    let availableStock = 0;
+    let highestSellingPrice = 0;
+
+    try {
+      if (item.isInventoryItem === true) {
+        const inventory =
+          await get_sum_location_inventories_by_locationId_itemMasterId_api(
+            item.itemMasterId,
+            formData.storeLocation
+          );
+        availableStock = inventory?.data?.result?.totalStockInHand || 0;
+
+        if (availableStock <= 0) {
+          console.warn("No stock available for this item");
+          alert("No stock available for this item");
+          return;
+        }
+
+        // Get highest selling price from available batches
+        const batchesResponse = await get_item_batches_by_item_master_id_api(
+          item.itemMasterId,
+          sessionStorage.getItem("companyId")
+        );
+        highestSellingPrice =
+          batchesResponse?.data?.result?.reduce(
+            (maxPrice, batch) =>
+              batch.sellingPrice > maxPrice ? batch.sellingPrice : maxPrice,
+            0
+          ) || 0;
+      }
+
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        itemDetails: [
+          ...prevFormData.itemDetails,
+          {
+            salesInvoiceDetailId: null,
+            salesInvoiceId: salesInvoice.salesInvoiceId,
+            itemMasterId: item?.itemMasterId,
+            isInventoryItem: item?.isInventoryItem,
+            name: item?.itemName,
+            unit: item?.unit?.unitName,
+            stockInHand: item.isInventoryItem === true ? availableStock : 0,
+            quantity: 0,
+            unitPrice:
+              item.isInventoryItem === false
+                ? item.unitPrice
+                : highestSellingPrice,
+            totalPrice: item.isInventoryItem === false ? item.unitPrice : 0.0,
+            chargesAndDeductions: initializedCharges,
+          },
+        ],
       }));
 
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      itemDetails: [
-        ...prevFormData.itemDetails,
-        {
-          batch: "",
-          itemBatchBatchId: "",
-          salesInvoiceDetailId: null,
-          salesInvoiceId: salesInvoice.salesInvoiceId,
-          itemBatchItemMasterId: item?.itemMasterId,
-          itemMaster: item,
-          name: item?.itemName,
-          itemMasterId: item?.itemMasterId,
-          unit: item?.unit?.unitName,
-          stockInHand: 0,
-          quantity: 0,
-          unitPrice: item.isInventoryItem === false ? item.unitPrice : 0,
-          totalPrice: item.isInventoryItem === false ? item.unitPrice : 0.0,
-          chargesAndDeductions: initializedCharges,
-        },
-      ],
-    }));
-
-    setSearchTerm("");
-    setSelectedBatch(null);
+      setSearchTerm("");
+      setSelectedBatch(null);
+    } catch (error) {
+      console.error("Error processing item:", error);
+      alert("Error processing item. Please try again.");
+    }
   };
 
   const renderColumns = () => {
@@ -1107,7 +1093,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           <tr key={chargeIndex}>
             <td
               colSpan={
-                6 +
+                5 +
                 formData.itemDetails[0].chargesAndDeductions.length -
                 (company.batchStockType === "FIFO" ? 1 : 0)
               }

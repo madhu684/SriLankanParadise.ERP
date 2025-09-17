@@ -54,15 +54,6 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
     salesOrder,
   });
 
-  // if (
-  //   isLoading ||
-  //   isLoadingchargesAndDeductions ||
-  //   isLoadingTransactionTypes ||
-  //   isCompanyLoading
-  // ) {
-  //   return <LoadingSpinner />;
-  // }
-
   if (
     isError ||
     ischargesAndDeductionsError ||
@@ -71,8 +62,6 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
   ) {
     return <ErrorComponent error={"Error fetching data"} />;
   }
-
-  console.log("Available Items : ", availableItems);
 
   return (
     <div className="container mt-4">
@@ -174,7 +163,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                   onChange={(e) =>
                     handleInputChange("referenceNumber", e.target.value)
                   }
-                  required
+                  //required
                 />
                 {validationErrors.referenceNumber && (
                   <div className="invalid-feedback">
@@ -333,6 +322,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                       .map((item) => (
                         <li key={item.itemMasterId}>
                           <button
+                            type="button"
                             className="dropdown-item"
                             onClick={() => handleSelectItem(item)}
                           >
@@ -347,21 +337,6 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                 </ul>
               </div>
             )}
-
-            {/* {formData.itemMasterId === 0 && (
-              <div className="mb-3">
-                <small className="form-text text-muted">
-                  Please search for an item to add
-                </small>
-              </div>
-            )} */}
-            {/* {formData.itemMasterId !== 0 && (
-              <div className="mb-3">
-                <p className="form-text text-muted">
-                  Selected item: {formData.itemMaster.itemName}
-                </p>
-              </div>
-            )} */}
           </div>
         </div>
 
@@ -375,9 +350,8 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                 <tr>
                   <th>Item Name</th>
                   <th>Unit</th>
-                  <th>Item Batch</th>
-                  <th>Quantity</th>
                   <th>Stock In Hand</th>
+                  <th>Quantity</th>
                   <th>Unit Price</th>
                   {renderColumns()}
                   <th className="text-end">Total Price</th>
@@ -389,7 +363,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                   <tr key={index}>
                     <td>{item.name}</td>
                     <td>{item.unit}</td>
-                    <td>
+                    {/* <td>
                       <select
                         className="form-select"
                         value={item.batchId}
@@ -415,6 +389,9 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                             </option>
                           ))}
                       </select>
+                    </td> */}
+                    <td>
+                      {item.isInventoryItem === false ? "-" : item.stockInHand}
                     </td>
                     <td>
                       <input
@@ -441,9 +418,6 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                           {validationErrors[`quantity_${index}`]}
                         </div>
                       )}
-                    </td>
-                    <td>
-                      {item.isInventoryItem === false ? "-" : item.stockInHand}
                     </td>
                     <td>
                       {item.unitPrice ? item.unitPrice.toFixed(2) : "0.00"}
@@ -496,7 +470,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                 <tr>
                   <td
                     colSpan={
-                      6 +
+                      5 +
                       formData.itemDetails[0].chargesAndDeductions.length -
                       (company.batchStockType === "FIFO" ? 1 : 0)
                     }
@@ -509,7 +483,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                 <tr>
                   <td
                     colSpan={
-                      6 +
+                      5 +
                       formData.itemDetails[0].chargesAndDeductions.length -
                       (company.batchStockType === "FIFO" ? 1 : 0)
                     }

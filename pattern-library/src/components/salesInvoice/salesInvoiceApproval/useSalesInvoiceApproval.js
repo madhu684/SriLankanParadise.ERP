@@ -2,8 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { approve_sales_invoice_api } from "../../../services/salesApi";
 import {
   get_charges_and_deductions_applied_api,
-  post_location_inventory_api,
-  post_location_inventory_movement_api,
+  post_reduce_inventory_fifo_api,
 } from "../../../services/purchaseApi";
 import { get_company_api } from "../../../services/salesApi";
 import { useQuery } from "@tanstack/react-query";
@@ -14,7 +13,6 @@ const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
   const alertRef = useRef(null);
 
   useEffect(() => {
-    console.log(salesInvoice);
     if (approvalStatus === "approved") {
       setTimeout(() => {
         onFormSubmit();
@@ -22,9 +20,12 @@ const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
     }
   }, [approvalStatus, onFormSubmit]);
 
+  console.log(salesInvoice);
+
   const handleApprove = async (salesInvoiceId) => {
     try {
       setLoading(true);
+      let detailFifo = [];
       const currentDate = new Date();
       const formattedDate = currentDate.toISOString();
       const approvalData = {
@@ -40,39 +41,21 @@ const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
       );
 
       for (const invoiceDetail of salesInvoice.salesInvoiceDetails) {
-        if (invoiceDetail.batch === null) continue;
-        // Add to location inventory
-        const locationInventoryData = {
-          itemMasterId: invoiceDetail.itemMaster.itemMasterId,
-          batchId: invoiceDetail.batch.batchId,
-          locationId: salesInvoice.locationId,
-          stockInHand: invoiceDetail.quantity,
-          permissionId: 1088,
-          movementTypeId: 2,
-        };
-
-        await post_location_inventory_api(locationInventoryData);
-
-        // Add to location inventory movement
-        const locationInventoryMovementData = {
-          movementTypeId: 2,
+        const fifoResponse = await post_reduce_inventory_fifo_api({
+          locationId: salesInvoice?.locationId,
+          itemMasterId: invoiceDetail?.itemBatchItemMasterId,
           transactionTypeId: 3,
-          itemMasterId: invoiceDetail.itemMaster.itemMasterId,
-          batchId: invoiceDetail.batch.batchId,
-          locationId: salesInvoice.locationId,
-          date: new Date().toISOString(),
-          qty: invoiceDetail.quantity,
-          permissionId: 1090,
-        };
-
-        await post_location_inventory_movement_api(
-          locationInventoryMovementData
-        );
+          quantity: invoiceDetail?.quantity,
+        });
+        detailFifo.push(fifoResponse.data);
       }
 
       if (approvalResponse.status === 200) {
-        setApprovalStatus("approved");
-        console.log("Sales invoice approved successfully:", approvalResponse);
+        if (detailFifo.every((item) => item.status === 200)) {
+          setApprovalStatus("approved");
+        } else {
+          setApprovalStatus("error");
+        }
       } else {
         setApprovalStatus("error");
       }

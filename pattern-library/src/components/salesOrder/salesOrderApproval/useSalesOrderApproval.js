@@ -30,8 +30,8 @@ const useSalesOrderApproval = ({ onFormSubmit, salesOrder }) => {
       const formattedDate = currentDate.toISOString();
       const approvalData = {
         status: 2,
-        approvedBy: sessionStorage.getItem("username"), //username
-        approvedUserId: sessionStorage.getItem("userId"), //userid
+        approvedBy: sessionStorage.getItem("username"),
+        approvedUserId: sessionStorage.getItem("userId"),
         approvedDate: formattedDate,
         permissionId: 26,
       };
@@ -46,6 +46,7 @@ const useSalesOrderApproval = ({ onFormSubmit, salesOrder }) => {
           const fifoResponse = await post_reduce_inventory_fifo_api({
             locationId: salesOrder.inventoryLocationId,
             itemMasterId: item.itemBatchItemMasterId,
+            transactionTypeId: 1,
             quantity: item.quantity,
           });
           detailFifo.push(fifoResponse.data);

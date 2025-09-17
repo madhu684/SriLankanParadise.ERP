@@ -23,6 +23,6 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemMasterId(int? locationId, int itemMasterId);
         Task<IEnumerable<LocationInventorySummary>> GetLowStockItemsByLocationOnly(int locationId);
         Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByItemName(int? locationId, string itemName);
-        Task ReduceInventoryByFIFO(int locationId, int itemMasterId, decimal quantity);
+        Task ReduceInventoryByFIFO(int locationId, int itemMasterId, int transactionTypeId, decimal quantity);
     }
 }
