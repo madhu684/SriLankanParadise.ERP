@@ -8,6 +8,8 @@
 
         public int? CompanyId { get; set; }
 
+        public bool IsTreatment { get; set; } = false;
+
         public int PermissionId { get; set; }
     }
 }

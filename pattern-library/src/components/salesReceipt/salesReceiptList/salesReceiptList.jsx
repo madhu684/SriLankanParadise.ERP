@@ -155,7 +155,7 @@ const SalesReceiptList = () => {
           </button>
           <button
             type="button"
-            className={`btn btn-outline-primary ${
+            className={`btn btn-outline-danger ${
               filter === "outstanding" ? "active" : ""
             }`}
             onClick={() => setFilter("outstanding")}
@@ -164,7 +164,7 @@ const SalesReceiptList = () => {
           </button>
           <button
             type="button"
-            className={`btn btn-outline-primary ${
+            className={`btn btn-outline-secondary ${
               filter === "excess" ? "active" : ""
             }`}
             onClick={() => setFilter("excess")}
@@ -173,13 +173,7 @@ const SalesReceiptList = () => {
           </button>
         </div>
       </div>
-      {showCreateSRForm && !cashierSessionOpen && (
-        <div className="alert alert-warning mt-3 mb-3" role="alert">
-          Please open a cashier session to create sales receipts.
-          {closeAlertAfterDelay()}
-        </div>
-      )}
-      <div className="d-flex justify-content-end mb-3">
+      <div className="d-flex justify-content-start mt-3">
         <div className="search-bar input-group">
           <input
             type="text"
@@ -193,8 +187,28 @@ const SalesReceiptList = () => {
           </span>
         </div>
       </div>
+      {showCreateSRForm && !cashierSessionOpen && (
+        <div className="alert alert-warning mt-3 mb-3" role="alert">
+          Please open a cashier session to create sales receipts.
+          {closeAlertAfterDelay()}
+        </div>
+      )}
+      {/* <div className="d-flex justify-content-end mb-3">
+        <div className="search-bar input-group">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Search"
+            value={searchQuery}
+            onChange={handleSearch}
+          />
+          <span className="input-group-text">
+            <FaSearch />
+          </span>
+        </div>
+      </div> */}
       <div className="table-responsive">
-        <table className="table mt-2">
+        <table className="table mt-3">
           <thead>
             <tr>
               <th>

@@ -12,6 +12,7 @@ public partial class Category
     public bool Status { get; set; }
 
     public int? CompanyId { get; set; }
+    public bool IsTreatment { get; set; } = false;
 
     public virtual ICollection<ItemMaster> ItemMasters { get; set; } = new List<ItemMaster>();
 
