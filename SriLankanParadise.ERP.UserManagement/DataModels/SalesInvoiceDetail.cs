@@ -19,7 +19,9 @@ public partial class SalesInvoiceDetail
 
     public int? ItemBatchBatchId { get; set; }
 
-    public virtual ItemBatch? ItemBatch { get; set; }
+    public virtual Batch? Batch { get; set; }
+
+    public virtual ItemMaster? ItemMaster { get; set; }
 
     public virtual SalesInvoice SalesInvoice { get; set; } = null!;
 }

@@ -141,8 +141,6 @@ const useItemMaster = ({ onFormSubmit }) => {
     queryFn: fetchItemTypes,
   });
 
-  console.log("itemTypes 141", itemTypes);
-
   const fetchMeasurementTypes = async () => {
     try {
       const response = await get_measurement_types_by_company_id_api(
@@ -443,8 +441,8 @@ const useItemMaster = ({ onFormSubmit }) => {
           conversionRate:
             formData.itemTypeName === "Service" ? 1 : formData.conversionValue,
           itemCode: formData.itemCode,
-          reorderLevel:
-            formData.itemTypeName === "Service" ? 0 : formData.reorderLevel,
+          // reorderLevel:
+          //   formData.itemTypeName === "Service" ? 0 : formData.reorderLevel,
           isInventoryItem: formData.itemTypeName === "Service" ? false : true,
           permissionId: 1039,
           unitPrice: formData.unitPrice,
@@ -504,8 +502,8 @@ const useItemMaster = ({ onFormSubmit }) => {
                 ? 0
                 : formData.conversionValue,
             itemCode: formData.itemCode,
-            reorderLevel:
-              formData.itemTypeName === "Service" ? 0 : formData.reorderLevel,
+            // reorderLevel:
+            //   formData.itemTypeName === "Service" ? 0 : formData.reorderLevel,
             isInventoryItem: formData.itemTypeName === "Service" ? false : true,
             permissionId: 1040,
             unitPrice: formData.unitPrice,
@@ -641,7 +639,6 @@ const useItemMaster = ({ onFormSubmit }) => {
   };
 
   console.log("formData: ", formData);
-  console.log("Valuation Error: ", validationErrors);
 
   return {
     formData,

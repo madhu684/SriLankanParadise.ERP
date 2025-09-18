@@ -165,6 +165,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Where(ib => ib.ItemMasterId == itemMasterId && ib.CompanyId == companyId)
                     .Include(ib => ib.Batch)
                     .Include(ib => ib.ItemMaster)
+                    .OrderBy(ib => ib.BatchId)
                     .ToListAsync();
 
                 return itemBatches.Any() ? itemBatches : null;

@@ -9,5 +9,6 @@
         public bool Status { get; set; }
 
         public int? CompanyId { get; set; }
+        public bool IsTreatment { get; set; } = false;
     }
 }

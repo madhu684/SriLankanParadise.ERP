@@ -17,5 +17,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task<SalesInvoice> GetSalesInvoiceBySalesInvoiceId(int salesInvoiceId);
 
         Task UpdateSalesInvoice(int salesInvoiceId, SalesInvoice salesInvoice);
+
+        Task DeleteSalesInvoice(int salesInvoiceId);
+
+        Task<SalesInvoice> GetSalesInvoiceById(int salesInvoiceId);
     }
 }
