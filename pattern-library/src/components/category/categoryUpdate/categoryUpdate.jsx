@@ -112,6 +112,51 @@ const CategoryUpdate = ({ handleClose, category, handleUpdated }) => {
                 </div>
               )}
             </div>
+
+            <div className="mb-3">
+              <label className="form-label">Is Treatment Category ?</label>
+              <div className="form-check">
+                <input
+                  type="radio"
+                  className={`form-check-input ${
+                    validFields.isTreatment ? "is-valid" : ""
+                  } ${validationErrors.isTreatment ? "is-invalid" : ""}`}
+                  name="isTreatmentCategory"
+                  value="1"
+                  id="treatmentYes"
+                  checked={formData.isTreatment === "1"}
+                  onChange={(e) =>
+                    handleInputChange("isTreatment", e.target.value)
+                  }
+                />
+                <label className="form-check-label" htmlFor="treatmentYes">
+                  Yes
+                </label>
+              </div>
+              <div className="form-check">
+                <input
+                  type="radio"
+                  className={`form-check-input ${
+                    validFields.isTreatment ? "is-valid" : ""
+                  } ${validationErrors.isTreatment ? "is-invalid" : ""}`}
+                  name="isTreatmentCategory"
+                  value="0"
+                  id="treatmentNo"
+                  checked={formData.isTreatment === "0"}
+                  onChange={(e) =>
+                    handleInputChange("isTreatment", e.target.value)
+                  }
+                />
+                <label className="form-check-label" htmlFor="treatmentNo">
+                  No
+                </label>
+              </div>
+              {validationErrors.isTreatment && (
+                <div className="invalid-feedback">
+                  {validationErrors.isTreatment}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

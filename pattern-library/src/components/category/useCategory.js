@@ -5,6 +5,7 @@ const useCategory = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
     categoryName: "",
     status: "",
+    isTreatment: "0",
   });
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
@@ -13,10 +14,10 @@ const useCategory = ({ onFormSubmit }) => {
   const [loading, setLoading] = useState(false);
 
   const handleInputChange = (field, value) => {
-    setFormData({
-      ...formData,
+    setFormData((prevFormData) => ({
+      ...prevFormData,
       [field]: value,
-    });
+    }));
   };
 
   useEffect(() => {
@@ -65,7 +66,13 @@ const useCategory = ({ onFormSubmit }) => {
 
     const isStatusValid = validateField("status", "Status", formData.status);
 
-    return isCategoryNameValid && isStatusValid;
+    const isTreatmentValid = validateField(
+      "isTreatment",
+      "Treatment Category",
+      formData.isTreatment
+    );
+
+    return isCategoryNameValid && isStatusValid && isTreatmentValid;
   };
 
   const handleSubmit = async () => {
@@ -78,6 +85,7 @@ const useCategory = ({ onFormSubmit }) => {
         const categoryData = {
           categoryName: formData.categoryName,
           status: status,
+          isTreatment: formData.isTreatment === "1" ? true : false,
           companyId: sessionStorage.getItem("companyId"),
           permissionId: 1038,
         };
@@ -111,6 +119,8 @@ const useCategory = ({ onFormSubmit }) => {
       }, 3000);
     }
   };
+
+  console.log("formData", formData);
 
   return {
     formData,

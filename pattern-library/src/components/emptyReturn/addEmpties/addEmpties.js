@@ -65,12 +65,12 @@ export const AddEmptiesManagement = (handleClose) => {
   });
 
   // fetch items
-  const fetchItems = async (companyId, searchQuery, itemType) => {
+  const fetchItems = async (companyId, searchQuery) => {
     try {
       const response = await get_item_masters_by_company_id_with_query_api(
         companyId,
         searchQuery,
-        itemType
+        false
       );
       return response.data.result;
     } catch (error) {}
@@ -83,8 +83,7 @@ export const AddEmptiesManagement = (handleClose) => {
     error: itemsError,
   } = useQuery({
     queryKey: ["items", searchItem],
-    queryFn: () =>
-      fetchItems(sessionStorage.getItem("companyId"), searchItem, "Empty"),
+    queryFn: () => fetchItems(sessionStorage.getItem("companyId"), searchItem),
   });
 
   const batchId = async () => {

@@ -66,12 +66,12 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     queryFn: fetchUserLocations,
   });
 
-  const fetchItems = async (companyId, searchQuery, itemType) => {
+  const fetchItems = async (companyId, searchQuery) => {
     try {
       const response = await get_item_masters_by_company_id_with_query_api(
         companyId,
         searchQuery,
-        itemType
+        true
       );
       return response.data.result;
     } catch (error) {
@@ -86,8 +86,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     error: itemsError,
   } = useQuery({
     queryKey: ["items", searchTerm],
-    queryFn: () =>
-      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"),
+    queryFn: () => fetchItems(sessionStorage.getItem("companyId"), searchTerm),
     enabled: !!formData.storeLocation && !!searchTerm,
   });
 
@@ -895,7 +894,10 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
             batchId: null,
             stockInHand: availableStock,
             quantity: 0,
-            unitPrice: item.isInventoryItem === true ? highestSellingPrice : 0,
+            unitPrice:
+              item.isInventoryItem === true
+                ? highestSellingPrice
+                : item.unitPrice,
             totalPrice: item.isInventoryItem === false ? item.unitPrice : 0.0,
             isInventoryItem: item?.isInventoryItem,
             chargesAndDeductions: initializedCharges,

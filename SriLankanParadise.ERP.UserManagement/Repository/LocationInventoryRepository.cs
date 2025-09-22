@@ -495,7 +495,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                           .Include(im => im.Unit)
                           .Include(im => im.Category)
                           .Include(im => im.ItemType)
-                          .Where(im => !string.IsNullOrEmpty(itemName) && im.ItemName.Contains(itemName))
+                          .Where(im => (!string.IsNullOrEmpty(itemName) && im.ItemName.Contains(itemName)) && im.IsInventoryItem == true)
                       join li in _dbContext.LocationInventories
                           on im.ItemMasterId equals li.ItemMasterId into liGroup
                       from li in liGroup.DefaultIfEmpty()
