@@ -5,6 +5,7 @@ const useCategoryUpdate = ({ category, onFormSubmit }) => {
   const [formData, setFormData] = useState({
     categoryName: "",
     status: "",
+    isTreatment: "",
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -16,7 +17,8 @@ const useCategoryUpdate = ({ category, onFormSubmit }) => {
     const deepCopyCategory = JSON.parse(JSON.stringify(category));
     setFormData({
       categoryName: deepCopyCategory?.categoryName,
-      status: deepCopyCategory?.status == true ? "1" : "0",
+      status: deepCopyCategory?.status === true ? "1" : "0",
+      isTreatment: deepCopyCategory?.isTreatment === true ? "1" : "0",
     });
   }, [category]);
 
@@ -67,7 +69,13 @@ const useCategoryUpdate = ({ category, onFormSubmit }) => {
 
     const isStatusValid = validateField("status", "Status", formData.status);
 
-    return isCategoryNameValid && isStatusValid;
+    const isTreatmentValid = validateField(
+      "isTreatment",
+      "Treatment Category",
+      formData.isTreatment
+    );
+
+    return isCategoryNameValid && isStatusValid && isTreatmentValid;
   };
 
   const handleSubmit = async () => {
@@ -81,6 +89,7 @@ const useCategoryUpdate = ({ category, onFormSubmit }) => {
         const categoryData = {
           categoryName: formData.categoryName,
           status: status,
+          isTreatment: formData.isTreatment === "1" ? true : false,
           companyId: sessionStorage.getItem("companyId"),
           permissionId: 1043,
         };

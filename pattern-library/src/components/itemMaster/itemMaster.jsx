@@ -70,7 +70,15 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
     const selectedItemType = itemTypes?.find(
       (type) => type.itemTypeId === parseInt(formData.itemTypeId)
     );
-    return selectedItemType?.name === "Service";
+    return selectedItemType?.name === "Treatments";
+  };
+
+  // Treatment type
+  const isTreatmentType = () => {
+    const selectedItemType = itemTypes?.find(
+      (type) => type.name === "Treatments"
+    );
+    return selectedItemType?.itemTypeId === parseInt(formData.itemTypeId);
   };
 
   if (isLoading) {
@@ -219,11 +227,18 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
                 required
               >
                 <option value="">Select Category</option>
-                {categoryOptions?.map((category) => (
-                  <option key={category.categoryId} value={category.categoryId}>
-                    {category.categoryName}
-                  </option>
-                ))}
+                {categoryOptions
+                  ?.filter((category) =>
+                    isTreatmentType() ? category.isTreatment === true : true
+                  )
+                  .map((category) => (
+                    <option
+                      key={category.categoryId}
+                      value={category.categoryId}
+                    >
+                      {category.categoryName}
+                    </option>
+                  ))}
               </select>
               {validationErrors.categoryId && (
                 <div className="invalid-feedback">

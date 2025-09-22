@@ -124,11 +124,11 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         }
 
         [HttpGet("GetItemMastersByCompanyIdWithQuery/{companyId}")]
-        public async Task<ApiResponseModel> GetItemMastersByCompanyId(int companyId, string? searchQuery = null, string? itemType = null)
+        public async Task<ApiResponseModel> GetItemMastersByCompanyIdWithQuery(int companyId, string? searchQuery = null, bool isTreatment = false)
         {
             try
             {
-                var itemMasters = await _itemMasterService.GetItemMastersByCompanyId(companyId, searchQuery, itemType);
+                var itemMasters = await _itemMasterService.GetItemMastersByCompanyWithQueryId(companyId, searchQuery, isTreatment);
 
                 if (itemMasters != null)
                 {
