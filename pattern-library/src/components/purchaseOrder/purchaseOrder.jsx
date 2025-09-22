@@ -79,6 +79,8 @@ const PurchaseOrder = ({
     purchaseRequisition,
   });
 
+  console.log("availableItems: ", availableItems);
+
   // Handler for showing supplier items modal
   const handleShowSupplierItems = (item) => {
     setSelectedSupplierItems(item.supplierItems || []);

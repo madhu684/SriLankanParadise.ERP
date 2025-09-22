@@ -53,7 +53,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             try
             {
                 var itemMasters = await _dbContext.ItemMasters
-                    .Where(im => im.Status == true && im.CompanyId == companyId)
+                    .Where(im => im.CompanyId == companyId)
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
                     .ThenInclude(u => u.MeasurementType)

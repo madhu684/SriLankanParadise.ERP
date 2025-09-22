@@ -760,6 +760,8 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
         isPercentage: charge.percentage !== null,
       }));
 
+    console.log("selected Item: ", item);
+
     setFormData((prevFormData) => ({
       ...prevFormData,
       itemDetails: [
@@ -1159,9 +1161,6 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
       setPOGenerating(false);
     }
   };
-
-  console.log("formData", formData);
-  console.log("purchaseRequisition", purchaseRequisition);
 
   return {
     formData,
