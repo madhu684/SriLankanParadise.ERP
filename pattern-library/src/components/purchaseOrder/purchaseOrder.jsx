@@ -432,6 +432,7 @@ const PurchaseOrder = ({
                         .map((item) => (
                           <li key={item.itemMasterId}>
                             <button
+                              type="button"
                               className="dropdown-item"
                               onClick={() => handleSelectItem(item)}
                             >

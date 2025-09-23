@@ -5,12 +5,14 @@ import {
   post_reduce_inventory_fifo_api,
 } from "../../../services/purchaseApi";
 import { get_company_api } from "../../../services/salesApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const alertRef = useRef(null);
+
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (approvalStatus === "approved") {
@@ -63,6 +65,11 @@ const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
       setTimeout(() => {
         setApprovalStatus(null);
         setLoading(false);
+
+        queryClient.invalidateQueries([
+          "salesInvoicesByUserId",
+          sessionStorage.getItem("userId"),
+        ]);
       }, 2000);
     } catch (error) {
       setApprovalStatus("error");

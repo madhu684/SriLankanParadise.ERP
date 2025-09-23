@@ -504,7 +504,7 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                   ) && (
                     <>
                       <th>Ordered Quantity</th>
-                      <th>Remaining Quantity</th>
+                      {/* <th>Remaining Quantity</th> */}
                     </>
                   )}
                   <th>Received Quantity</th>
@@ -525,7 +525,7 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                     ) && (
                       <>
                         <td>{item.quantity}</td>
-                        <td>{item.remainingQuantity}</td>
+                        {/* <td>{item.remainingQuantity}</td> */}
                       </>
                     )}
                     <td>
