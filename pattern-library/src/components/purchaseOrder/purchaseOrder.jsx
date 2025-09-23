@@ -156,7 +156,7 @@ const PurchaseOrder = ({
               <label htmlFor="supplierId" className="form-label">
                 Supplier
               </label>
-              {formData.selectedSupplier === "" && (
+              {formData.selectedSupplier === null && (
                 <div className="mb-3 position-relative">
                   <div className="input-group">
                     <span className="input-group-text bg-transparent ">
