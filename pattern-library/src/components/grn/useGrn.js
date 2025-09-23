@@ -519,9 +519,8 @@ const useGrn = ({ onFormSubmit }) => {
         // Default rule
         additionalRules = {
           validationFunction: (value) =>
-            parseFloat(value) > 0 &&
-            parseFloat(value) <= item.remainingQuantity,
-          errorMessage: `${fieldDisplayName} must be greater than 0 and less than or equal to remaining quantity ${item.remainingQuantity}`,
+            parseFloat(value) > 0 && parseFloat(value) <= item.quantity,
+          errorMessage: `${fieldDisplayName} must be greater than 0 and less than or equal to remaining quantity ${item.quantity}`,
         };
       }
 

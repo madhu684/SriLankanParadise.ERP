@@ -79,6 +79,8 @@ const PurchaseOrder = ({
     purchaseRequisition,
   });
 
+  console.log("availableItems: ", availableItems);
+
   // Handler for showing supplier items modal
   const handleShowSupplierItems = (item) => {
     setSelectedSupplierItems(item.supplierItems || []);
@@ -430,6 +432,7 @@ const PurchaseOrder = ({
                         .map((item) => (
                           <li key={item.itemMasterId}>
                             <button
+                              type="button"
                               className="dropdown-item"
                               onClick={() => handleSelectItem(item)}
                             >

@@ -10,7 +10,7 @@ import {
   get_sub_items_by_item_master_id_api,
   get_sub_item_masters_by_item_master_id_api,
 } from "../../../services/inventoryApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   delete_supplier_item_api,
   get_supplier_by_company_id_with_query_api,
@@ -25,6 +25,7 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     itemName: "",
     itemCode: "",
     itemTypeId: "",
+    itemTypeName: "",
     measurementType: "",
     itemHierarchy: "",
     inventoryMeasurementType: "",
@@ -60,6 +61,8 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
   const [selectedParentItem, setSelectedParentItem] = useState("");
   const [supplierSearchTerm, setSupplierSearchTerm] = useState("");
   const [selectedChildItems, setSelectedChildItems] = useState([]);
+
+  const queryClient = useQueryClient();
 
   const fetchItems = async (companyId, searchQuery) => {
     try {
@@ -198,22 +201,24 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
   });
 
   useEffect(() => {
-    const costRatio = parseFloat(formData.costRatio) || 0;
-    const fobInUSD = parseFloat(formData.fobInUSD) || 0;
+    if (formData.itemTypeName !== "Treatments") {
+      const costRatio = parseFloat(formData.costRatio) || 0;
+      const fobInUSD = parseFloat(formData.fobInUSD) || 0;
 
-    const landedCost = costRatio * fobInUSD;
-    const minNetSellingPrice = landedCost / 0.9;
-    const sellingPrice = landedCost / 0.75;
-    const mrp = sellingPrice / 0.7;
+      const landedCost = costRatio * fobInUSD;
+      const minNetSellingPrice = landedCost / 0.9;
+      const sellingPrice = landedCost / 0.75;
+      const mrp = sellingPrice / 0.7;
 
-    setFormData((prev) => ({
-      ...prev,
-      landedCost: landedCost.toFixed(2),
-      minNetSellingPrice: minNetSellingPrice.toFixed(2),
-      sellingPrice: sellingPrice.toFixed(2),
-      mrp: mrp.toFixed(2),
-    }));
-  }, [formData.costRatio, formData.fobInUSD]);
+      setFormData((prev) => ({
+        ...prev,
+        landedCost: landedCost.toFixed(2),
+        minNetSellingPrice: minNetSellingPrice.toFixed(2),
+        sellingPrice: sellingPrice.toFixed(2),
+        mrp: mrp.toFixed(2),
+      }));
+    }
+  }, [formData.costRatio, formData.fobInUSD, formData.itemTypeName]);
 
   useEffect(() => {
     const deepCopyItemMaster = JSON.parse(JSON.stringify(itemMaster));
@@ -227,6 +232,7 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       categoryId: deepCopyItemMaster?.categoryId,
       itemName: deepCopyItemMaster?.itemName,
       itemTypeId: deepCopyItemMaster?.itemTypeId,
+      itemTypeName: deepCopyItemMaster?.itemType?.name,
       measurementType:
         deepCopyItemMaster?.unit?.measurementType?.measurementTypeId,
       itemHierarchy: itemHierarchy,
@@ -234,12 +240,11 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
         deepCopyItemMaster?.inventoryUnit?.measurementTypeId,
       inventoryUnitId: deepCopyItemMaster?.inventoryUnitId,
       conversionValue: deepCopyItemMaster?.conversionRate,
-      //itemCode: deepCopyItemMaster?.itemCode ?? '',
+      itemCode: deepCopyItemMaster?.itemCode ?? "",
       reorderLevel: deepCopyItemMaster?.reorderLevel ?? "",
       isInventoryItem: deepCopyItemMaster?.isInventoryItem ?? false,
       unitPrice: deepCopyItemMaster?.unitPrice ?? "",
       costRatio: deepCopyItemMaster?.costRatio ?? "",
-      itemCode: deepCopyItemMaster?.itemCode ?? "",
       fobInUSD: deepCopyItemMaster?.fobInUSD ?? "",
       landedCost: deepCopyItemMaster?.landedCost ?? "",
       minNetSellingPrice: deepCopyItemMaster?.minNetSellingPrice ?? "",
@@ -334,30 +339,153 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     return isFieldValid;
   };
 
+  // const validateForm = () => {
+  //   setValidFields({});
+  //   setValidationErrors({});
+
+  //   const isUnitValid = validateField("unitId", "Unit", formData.unitId);
+  //   const isCategoryValid = validateField(
+  //     "categoryId",
+  //     "Category",
+  //     formData.categoryId
+  //   );
+  //   const isItemNameValid = validateField(
+  //     "itemName",
+  //     "Item name",
+  //     formData.itemName
+  //   );
+  //   const isItemTypeValid = validateField(
+  //     "itemTypeId",
+  //     "Item type",
+  //     formData.itemTypeId
+  //   );
+  //   const isItemHierarchyValid = validateField(
+  //     "itemHierarchy",
+  //     "Item hierarchy",
+  //     formData.itemHierarchy
+  //   );
+
+  //   let isparentItemValid = true;
+  //   if (formData.itemHierarchy === "sub") {
+  //     isparentItemValid = validateField(
+  //       "selectedParentItem",
+  //       "Parent item",
+  //       selectedParentItem
+  //     );
+  //   }
+
+  //   const isInventoryUnitValid = validateField(
+  //     "inventoryUnitId",
+  //     "Inventory unit",
+  //     formData.inventoryUnitId
+  //   );
+
+  //   const isConversionValueValid = validateField(
+  //     "conversionValue",
+  //     "Conversion rate",
+  //     formData.conversionValue,
+  //     {
+  //       validationFunction: (value) => parseFloat(value) > 0,
+  //       errorMessage: `Conversion rate must be greater than 0`,
+  //     }
+  //   );
+
+  //   const isItemCodeValid = validateField(
+  //     "itemCode",
+  //     "Item code",
+  //     formData.itemCode
+  //   );
+
+  //   // const isReorderLevelValid = validateField(
+  //   //   "reorderLevel",
+  //   //   "Reorder level",
+  //   //   formData.reorderLevel
+  //   // );
+
+  //   const isUnitPriceValid = validateField(
+  //     "unitPrice",
+  //     "Unit price",
+  //     formData.unitPrice
+  //   );
+
+  //   const isCostRatioValid = validateField(
+  //     "costRatio",
+  //     "Cost Ratio",
+  //     formData.costRatio
+  //   );
+
+  //   const isFOBInUSDValid = validateField(
+  //     "fobInUSD",
+  //     "FOB In USD",
+  //     formData.fobInUSD
+  //   );
+
+  //   return (
+  //     isUnitValid &&
+  //     isCategoryValid &&
+  //     isItemNameValid &&
+  //     isItemTypeValid &&
+  //     isItemHierarchyValid &&
+  //     isparentItemValid &&
+  //     isInventoryUnitValid &&
+  //     isConversionValueValid &&
+  //     isItemCodeValid &&
+  //     // isReorderLevelValid &&
+  //     isUnitPriceValid &&
+  //     isCostRatioValid &&
+  //     isFOBInUSDValid
+  //   );
+  // };
   const validateForm = () => {
     setValidFields({});
     setValidationErrors({});
 
-    const isUnitValid = validateField("unitId", "Unit", formData.unitId);
-
+    // Always validate these fields
     const isCategoryValid = validateField(
       "categoryId",
       "Category",
       formData.categoryId
     );
-
     const isItemNameValid = validateField(
       "itemName",
       "Item name",
       formData.itemName
     );
-
     const isItemTypeValid = validateField(
       "itemTypeId",
       "Item type",
       formData.itemTypeId
     );
+    const isUnitPriceValid = validateField(
+      "unitPrice",
+      "Unit price",
+      formData.unitPrice
+    );
+    const isItemCodeValid = validateField(
+      "itemCode",
+      "Item code",
+      formData.itemCode
+    );
 
+    // Skip validation for Service items
+    if (formData.itemTypeName === "Treatments") {
+      console.log("Service item detected - skipping additional validations");
+      return (
+        isCategoryValid &&
+        isItemNameValid &&
+        isItemTypeValid &&
+        isUnitPriceValid &&
+        isItemCodeValid
+      );
+    }
+
+    // For non-Service items, validate all fields
+    const isUnitValid = validateField("unitId", "Unit", formData.unitId);
+    const isMeasurementTypeValid = validateField(
+      "measurementType",
+      "Measurement Type",
+      formData.measurementType
+    );
     const isItemHierarchyValid = validateField(
       "itemHierarchy",
       "Item hierarchy",
@@ -373,12 +501,16 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       );
     }
 
+    const isInventoryMeasurementTypeValid = validateField(
+      "inventoryMeasurementType",
+      "Inventory Measurement Type",
+      formData.inventoryMeasurementType
+    );
     const isInventoryUnitValid = validateField(
       "inventoryUnitId",
       "Inventory unit",
       formData.inventoryUnitId
     );
-
     const isConversionValueValid = validateField(
       "conversionValue",
       "Conversion rate",
@@ -388,31 +520,11 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
         errorMessage: `Conversion rate must be greater than 0`,
       }
     );
-
-    const isItemCodeValid = validateField(
-      "itemCode",
-      "Item code",
-      formData.itemCode
-    );
-
-    // const isReorderLevelValid = validateField(
-    //   "reorderLevel",
-    //   "Reorder level",
-    //   formData.reorderLevel
-    // );
-
-    const isUnitPriceValid = validateField(
-      "unitPrice",
-      "Unit price",
-      formData.unitPrice
-    );
-
     const isCostRatioValid = validateField(
       "costRatio",
       "Cost Ratio",
       formData.costRatio
     );
-
     const isFOBInUSDValid = validateField(
       "fobInUSD",
       "FOB In USD",
@@ -421,18 +533,19 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
 
     return (
       isUnitValid &&
+      isMeasurementTypeValid &&
       isCategoryValid &&
       isItemNameValid &&
       isItemTypeValid &&
       isItemHierarchyValid &&
       isparentItemValid &&
+      isInventoryMeasurementTypeValid &&
       isInventoryUnitValid &&
       isConversionValueValid &&
-      isItemCodeValid &&
-      // isReorderLevelValid &&
       isUnitPriceValid &&
       isCostRatioValid &&
-      isFOBInUSDValid
+      isFOBInUSDValid &&
+      isItemCodeValid
     );
   };
   // const handleSubmit = async (isSaveAsDraft) => {
@@ -560,7 +673,7 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       }
 
       const ItemMasterData = {
-        unitId: formData.unitId,
+        unitId: formData.itemTypeName === "Treatments" ? 6 : formData.unitId,
         categoryId: formData.categoryId,
         itemName: formData.itemName,
         status: status,
@@ -576,25 +689,46 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
           SubItemMasterId: item.id,
           Quantity: parseFloat(item.quantity) || 0,
         })),
-        inventoryUnitId: formData.inventoryUnitId,
-        conversionRate: formData.conversionValue,
+        inventoryUnitId:
+          formData.itemTypeName === "Treatments"
+            ? null
+            : formData.inventoryUnitId,
+        conversionRate:
+          formData.itemTypeName === "Treatments" ? 1 : formData.conversionValue,
         itemCode: formData.itemCode,
         reorderLevel: formData.reorderLevel,
-        isInventoryItem: formData.isInventoryItem,
+        isInventoryItem: formData.itemTypeName === "Treatments" ? false : true,
         permissionId: 1040,
         unitPrice: formData.unitPrice,
-        costRatio: formData.costRatio,
-        fobInUSD: formData.fobInUSD,
-        landedCost: formData.landedCost,
-        minNetSellingPrice: formData.minNetSellingPrice,
-        sellingPrice: formData.sellingPrice,
-        mrp: formData.mrp,
-        competitorPrice: formData.competitorPrice,
-        labelPrice: formData.labelPrice,
-        averageSellingPrice: formData.averageSellingPrice,
-        stockClearance: formData.stockClearance,
-        bulkPrice: formData.bulkPrice,
-        supplierId: formData.supplierId || null,
+        costRatio:
+          formData.itemTypeName === "Treatments" ? 0 : formData.costRatio,
+        fobInUSD:
+          formData.itemTypeName === "Treatments" ? 0 : formData.fobInUSD,
+        landedCost:
+          formData.itemTypeName === "Treatments" ? 0 : formData.landedCost,
+        minNetSellingPrice:
+          formData.itemTypeName === "Treatments"
+            ? 0
+            : formData.minNetSellingPrice,
+        sellingPrice:
+          formData.itemTypeName === "Treatments"
+            ? formData.unitPrice
+            : formData.sellingPrice,
+        mrp: formData.itemTypeName === "Treatments" ? 0 : formData.mrp,
+        competitorPrice:
+          formData.itemTypeName === "Treatments" ? 0 : formData.competitorPrice,
+        labelPrice:
+          formData.itemTypeName === "Treatments" ? 0 : formData.labelPrice,
+        averageSellingPrice:
+          formData.itemTypeName === "Treatments"
+            ? 0
+            : formData.averageSellingPrice,
+        stockClearance:
+          formData.itemTypeName === "Treatments" ? 0 : formData.stockClearance,
+        bulkPrice:
+          formData.itemTypeName === "Treatments" ? 0 : formData.bulkPrice,
+        supplierId:
+          formData.itemTypeName === "Treatments" ? null : formData.supplierId,
       };
 
       // Update the item master
@@ -646,6 +780,10 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
           onFormSubmit();
           setLoading(false);
           setLoadingDraft(false);
+          queryClient.invalidateQueries([
+            "itemMasters",
+            sessionStorage.getItem("companyId"),
+          ]);
         }, 3000);
       } else {
         setSubmissionStatus("error");
@@ -677,6 +815,14 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
         [field]: value,
         inventoryUnitId: "",
         conversionValue: "",
+      });
+    } else if (field === "itemTypeId") {
+      setFormData({
+        ...formData,
+        [field]: value,
+        itemTypeName: itemTypes.find(
+          (type) => type.itemTypeId === parseInt(value)
+        )?.name,
       });
     } else {
       // For other fields, update formData without changing unitId
@@ -781,8 +927,6 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     }));
     setSupplierSearchTerm("");
   };
-
-  console.log("formData", formData);
 
   return {
     formData,

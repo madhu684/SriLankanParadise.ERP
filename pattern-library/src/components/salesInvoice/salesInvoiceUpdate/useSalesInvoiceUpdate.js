@@ -19,7 +19,7 @@ import {
   get_sum_location_inventories_by_locationId_itemMasterId_api,
 } from "../../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../../services/inventoryApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { batch } from "react-redux";
 
 const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
@@ -50,6 +50,8 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     setChargesAndDeductionsAppliedIdsToBeDeleted,
   ] = useState([]);
   const [showModal, setShowModal] = useState(false);
+
+  const queryClient = useQueryClient();
 
   const fetchItems = async (companyId, searchQuery) => {
     try {
@@ -779,6 +781,11 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
             setLoading(false);
             setLoadingDraft(false);
             onFormSubmit();
+
+            queryClient.invalidateQueries([
+              "salesInvoicesByUserId",
+              sessionStorage.getItem("userId"),
+            ]);
           }, 3000);
         } else {
           setSubmissionStatus("error");

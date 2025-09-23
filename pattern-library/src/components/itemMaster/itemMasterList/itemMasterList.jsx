@@ -16,9 +16,9 @@ const ItemMasterList = () => {
 
   const {
     itemMasters,
-    isLoadingData,
+    isLoadingItemMasters,
     isLoadingPermissions,
-    error,
+    itemMastersError,
     isAnyRowSelected,
     selectedRows,
     selectedRowData,
@@ -56,22 +56,20 @@ const ItemMasterList = () => {
   };
 
   //Filter ItemMasters based on search query
-  const filteredItemMasters = itemMasters.filter((im) =>
-    im.itemName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredItemMasters = itemMasters
+    ? itemMasters?.filter((im) =>
+        im.itemName.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
 
   //Pagination Handler
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  if (error) {
-    return <ErrorComponent error={error} />;
+  if (itemMastersError) {
+    return <ErrorComponent error={itemMastersError} />;
   }
 
-  if (
-    isLoadingData ||
-    isLoadingPermissions ||
-    (itemMasters && !(itemMasters.length >= 0))
-  ) {
+  if (isLoadingItemMasters || isLoadingPermissions) {
     return <LoadingSpinner />;
   }
 
@@ -252,7 +250,7 @@ const ItemMasterList = () => {
         </table>
         <Pagination
           itemsPerPage={itemsPerPage}
-          totalItems={filteredItemMasters.length}
+          totalItems={filteredItemMasters ? filteredItemMasters.length : 0}
           paginate={paginate}
           currentPage={currentPage}
         />

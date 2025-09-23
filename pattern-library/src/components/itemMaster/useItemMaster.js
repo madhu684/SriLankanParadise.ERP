@@ -8,7 +8,7 @@ import {
   get_item_masters_by_company_id_with_query_api,
   put_item_master_api,
 } from "../../services/inventoryApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   get_supplier_by_company_id_with_query_api,
   post_supplier_item_api,
@@ -58,6 +58,8 @@ const useItemMaster = ({ onFormSubmit }) => {
   const [selectedChildItems, setSelectedChildItems] = useState([]);
 
   const [isSupplierSelected, setIsSupplierSelected] = useState(false);
+
+  const queryClient = useQueryClient();
 
   const fetchItems = async (companyId, searchQuery) => {
     try {
@@ -210,9 +212,9 @@ const useItemMaster = ({ onFormSubmit }) => {
         const response = await get_units_by_company_id_api(
           sessionStorage.getItem("companyId")
         );
-        // Filter out the unit with 'Service Unit'
+        // Filter out the unit with 'Treatments'
         const filteredUnits = response.data.result.filter(
-          (unit) => unit.unitName !== "Service Unit"
+          (unit) => unit.unitName !== "Treatments"
         );
         setUnitOptions(filteredUnits);
       } catch (error) {
@@ -580,6 +582,10 @@ const useItemMaster = ({ onFormSubmit }) => {
             onFormSubmit();
             setLoading(false);
             setLoadingDraft(false);
+            queryClient.invalidateQueries([
+              "itemMasters",
+              sessionStorage.getItem("companyId"),
+            ]);
           }, 3000);
         } else {
           setSubmissionStatus("error");
@@ -654,8 +660,6 @@ const useItemMaster = ({ onFormSubmit }) => {
     setIsSupplierSelected(false);
     setSupplierSearchTerm("");
   };
-
-  console.log("formData: ", formData);
 
   return {
     formData,
