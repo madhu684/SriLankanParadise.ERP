@@ -8,7 +8,7 @@ import {
   get_item_masters_by_company_id_with_query_api,
   put_item_master_api,
 } from "../../services/inventoryApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   get_supplier_by_company_id_with_query_api,
   post_supplier_item_api,
@@ -26,7 +26,7 @@ const useItemMaster = ({ onFormSubmit }) => {
     inventoryMeasurementType: "",
     inventoryUnitId: "",
     conversionValue: "",
-    reorderLevel: "",
+    itemCode: "",
     unitPrice: "",
     costRatio: "",
     fobInUSD: "",
@@ -46,7 +46,6 @@ const useItemMaster = ({ onFormSubmit }) => {
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
   const [unitOptions, setUnitOptions] = useState([]);
-  const [itemCode, setItemCode] = useState(null);
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const alertRef = useRef(null);
@@ -60,12 +59,14 @@ const useItemMaster = ({ onFormSubmit }) => {
 
   const [isSupplierSelected, setIsSupplierSelected] = useState(false);
 
-  const fetchItems = async (companyId, searchQuery, itemType) => {
+  const queryClient = useQueryClient();
+
+  const fetchItems = async (companyId, searchQuery) => {
     try {
       const response = await get_item_masters_by_company_id_with_query_api(
         companyId,
         searchQuery,
-        itemType
+        false
       );
       return response.data.result;
     } catch (error) {
@@ -80,8 +81,7 @@ const useItemMaster = ({ onFormSubmit }) => {
     error: itemsError,
   } = useQuery({
     queryKey: ["items", searchTerm],
-    queryFn: () =>
-      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"),
+    queryFn: () => fetchItems(sessionStorage.getItem("companyId"), searchTerm),
     enabled: !!searchTerm,
   });
 
@@ -93,7 +93,7 @@ const useItemMaster = ({ onFormSubmit }) => {
   } = useQuery({
     queryKey: ["childItems", searchChildTerm],
     queryFn: () =>
-      fetchItems(sessionStorage.getItem("companyId"), searchChildTerm, "All"),
+      fetchItems(sessionStorage.getItem("companyId"), searchChildTerm),
     enabled: !!searchChildTerm,
   });
 
@@ -141,8 +141,6 @@ const useItemMaster = ({ onFormSubmit }) => {
     queryKey: ["itemTypes"],
     queryFn: fetchItemTypes,
   });
-
-  console.log("itemTypes 141", itemTypes);
 
   const fetchMeasurementTypes = async () => {
     try {
@@ -214,9 +212,9 @@ const useItemMaster = ({ onFormSubmit }) => {
         const response = await get_units_by_company_id_api(
           sessionStorage.getItem("companyId")
         );
-        // Filter out the unit with 'Service Unit'
+        // Filter out the unit with 'Treatments'
         const filteredUnits = response.data.result.filter(
-          (unit) => unit.unitName !== "Service Unit"
+          (unit) => unit.unitName !== "Treatments"
         );
         setUnitOptions(filteredUnits);
       } catch (error) {
@@ -249,7 +247,7 @@ const useItemMaster = ({ onFormSubmit }) => {
   }, [submissionStatus]);
 
   useEffect(() => {
-    if (formData.itemTypeName !== "Service") {
+    if (formData.itemTypeName !== "Treatments") {
       const costRatio = parseFloat(formData.costRatio) || 0;
       const fobInUSD = parseFloat(formData.fobInUSD) || 0;
 
@@ -322,15 +320,21 @@ const useItemMaster = ({ onFormSubmit }) => {
       "Unit price",
       formData.unitPrice
     );
+    const isItemCodeValid = validateField(
+      "itemCode",
+      "Item code",
+      formData.itemCode
+    );
 
     // Skip validation for Service items
-    if (formData.itemTypeName === "Service") {
+    if (formData.itemTypeName === "Treatments") {
       console.log("Service item detected - skipping additional validations");
       return (
         isCategoryValid &&
         isItemNameValid &&
         isItemTypeValid &&
-        isUnitPriceValid
+        isUnitPriceValid &&
+        isItemCodeValid
       );
     }
 
@@ -375,12 +379,6 @@ const useItemMaster = ({ onFormSubmit }) => {
         errorMessage: `Conversion rate must be greater than 0`,
       }
     );
-
-    const isReorderLevelValid = validateField(
-      "reorderLevel",
-      "Reorder level",
-      formData.reorderLevel
-    );
     const isCostRatioValid = validateField(
       "costRatio",
       "Cost Ratio",
@@ -403,10 +401,10 @@ const useItemMaster = ({ onFormSubmit }) => {
       isInventoryMeasurementTypeValid &&
       isInventoryUnitValid &&
       isConversionValueValid &&
-      isReorderLevelValid &&
       isUnitPriceValid &&
       isCostRatioValid &&
-      isFOBInUSDValid
+      isFOBInUSDValid &&
+      isItemCodeValid
     );
   };
 
@@ -424,7 +422,7 @@ const useItemMaster = ({ onFormSubmit }) => {
         }
 
         const itemMasterData = {
-          unitId: formData.itemTypeName === "Service" ? 6 : formData.unitId,
+          unitId: formData.itemTypeName === "Treatments" ? 6 : formData.unitId,
           categoryId: formData.categoryId,
           itemName: formData.itemName,
           status: status,
@@ -438,52 +436,63 @@ const useItemMaster = ({ onFormSubmit }) => {
             Quantity: parseFloat(item.quantity) || 0,
           })),
           inventoryUnitId:
-            formData.itemTypeName === "Service"
+            formData.itemTypeName === "Treatments"
               ? null
               : formData.inventoryUnitId,
           conversionRate:
-            formData.itemTypeName === "Service" ? 1 : formData.conversionValue,
-          reorderLevel:
-            formData.itemTypeName === "Service" ? 0 : formData.reorderLevel,
+            formData.itemTypeName === "Treatments"
+              ? 1
+              : formData.conversionValue,
+          itemCode: formData.itemCode,
+          // reorderLevel:
+          //   formData.itemTypeName === "Treatments" ? 0 : formData.reorderLevel,
+          isInventoryItem:
+            formData.itemTypeName === "Treatments" ? false : true,
           permissionId: 1039,
           unitPrice: formData.unitPrice,
           costRatio:
-            formData.itemTypeName === "Service" ? 0 : formData.costRatio,
-          fobInUSD: formData.itemTypeName === "Service" ? 0 : formData.fobInUSD,
+            formData.itemTypeName === "Treatments" ? 0 : formData.costRatio,
+          fobInUSD:
+            formData.itemTypeName === "Treatments" ? 0 : formData.fobInUSD,
           landedCost:
-            formData.itemTypeName === "Service" ? 0 : formData.landedCost,
+            formData.itemTypeName === "Treatments" ? 0 : formData.landedCost,
           minNetSellingPrice:
-            formData.itemTypeName === "Service"
+            formData.itemTypeName === "Treatments"
               ? 0
               : formData.minNetSellingPrice,
           sellingPrice:
-            formData.itemTypeName === "Service" ? 0 : formData.sellingPrice,
-          mrp: formData.itemTypeName === "Service" ? 0 : formData.mrp,
+            formData.itemTypeName === "Treatments"
+              ? formData.unitPrice
+              : formData.sellingPrice,
+          mrp: formData.itemTypeName === "Treatments" ? 0 : formData.mrp,
           competitorPrice:
-            formData.itemTypeName === "Service" ? 0 : formData.competitorPrice,
+            formData.itemTypeName === "Treatments"
+              ? 0
+              : formData.competitorPrice,
           labelPrice:
-            formData.itemTypeName === "Service" ? 0 : formData.labelPrice,
+            formData.itemTypeName === "Treatments" ? 0 : formData.labelPrice,
           averageSellingPrice:
-            formData.itemTypeName === "Service"
+            formData.itemTypeName === "Treatments"
               ? 0
               : formData.averageSellingPrice,
           stockClearance:
-            formData.itemTypeName === "Service" ? 0 : formData.stockClearance,
+            formData.itemTypeName === "Treatments"
+              ? 0
+              : formData.stockClearance,
           bulkPrice:
-            formData.itemTypeName === "Service" ? 0 : formData.bulkPrice,
+            formData.itemTypeName === "Treatments" ? 0 : formData.bulkPrice,
           supplierId:
-            formData.itemTypeName === "Service" ? null : formData.supplierId,
+            formData.itemTypeName === "Treatments" ? null : formData.supplierId,
         };
 
         console.log("sending request : ", itemMasterData);
         const response = await post_item_master_api(itemMasterData);
-        console.log("response after POST request : ", response);
-        setItemCode(response.data.result.itemCode);
         const itemMasterId = response.data.result.itemMasterId;
 
         if (formData.itemHierarchy === "main") {
           const itemMasterData = {
-            unitId: formData.itemTypeName === "Service" ? 6 : formData.unitId,
+            unitId:
+              formData.itemTypeName === "Treatments" ? 6 : formData.unitId,
             categoryId: formData.categoryId,
             itemName: formData.itemName,
             status: status,
@@ -497,46 +506,55 @@ const useItemMaster = ({ onFormSubmit }) => {
               Quantity: parseFloat(item.quantity) || 0,
             })),
             inventoryUnitId:
-              formData.itemTypeName === "Service"
+              formData.itemTypeName === "Treatments"
                 ? null
                 : formData.inventoryUnitId,
             conversionRate:
-              formData.itemTypeName === "Service"
+              formData.itemTypeName === "Treatments"
                 ? 0
                 : formData.conversionValue,
-            reorderLevel:
-              formData.itemTypeName === "Service" ? 0 : formData.reorderLevel,
+            itemCode: formData.itemCode,
+            // reorderLevel:
+            //   formData.itemTypeName === "Treatments" ? 0 : formData.reorderLevel,
+            isInventoryItem:
+              formData.itemTypeName === "Treatments" ? false : true,
             permissionId: 1040,
             unitPrice: formData.unitPrice,
             costRatio:
-              formData.itemTypeName === "Service" ? 0 : formData.costRatio,
+              formData.itemTypeName === "Treatments" ? 0 : formData.costRatio,
             fobInUSD:
-              formData.itemTypeName === "Service" ? 0 : formData.fobInUSD,
+              formData.itemTypeName === "Treatments" ? 0 : formData.fobInUSD,
             landedCost:
-              formData.itemTypeName === "Service" ? 0 : formData.landedCost,
+              formData.itemTypeName === "Treatments" ? 0 : formData.landedCost,
             minNetSellingPrice:
-              formData.itemTypeName === "Service"
+              formData.itemTypeName === "Treatments"
                 ? 0
                 : formData.minNetSellingPrice,
             sellingPrice:
-              formData.itemTypeName === "Service" ? 0 : formData.sellingPrice,
-            mrp: formData.itemTypeName === "Service" ? 0 : formData.mrp,
+              formData.itemTypeName === "Treatments"
+                ? formData.unitPrice
+                : formData.sellingPrice,
+            mrp: formData.itemTypeName === "Treatments" ? 0 : formData.mrp,
             competitorPrice:
-              formData.itemTypeName === "Service"
+              formData.itemTypeName === "Treatments"
                 ? 0
                 : formData.competitorPrice,
             labelPrice:
-              formData.itemTypeName === "Service" ? 0 : formData.labelPrice,
+              formData.itemTypeName === "Treatments" ? 0 : formData.labelPrice,
             averageSellingPrice:
-              formData.itemTypeName === "Service"
+              formData.itemTypeName === "Treatments"
                 ? 0
                 : formData.averageSellingPrice,
             stockClearance:
-              formData.itemTypeName === "Service" ? 0 : formData.stockClearance,
+              formData.itemTypeName === "Treatments"
+                ? 0
+                : formData.stockClearance,
             bulkPrice:
-              formData.itemTypeName === "Service" ? 0 : formData.bulkPrice,
+              formData.itemTypeName === "Treatments" ? 0 : formData.bulkPrice,
             supplierId:
-              formData.itemTypeName === "Service" ? null : formData.supplierId,
+              formData.itemTypeName === "Treatments"
+                ? null
+                : formData.supplierId,
           };
 
           putResponse = await put_item_master_api(itemMasterId, itemMasterData);
@@ -564,6 +582,10 @@ const useItemMaster = ({ onFormSubmit }) => {
             onFormSubmit();
             setLoading(false);
             setLoadingDraft(false);
+            queryClient.invalidateQueries([
+              "itemMasters",
+              sessionStorage.getItem("companyId"),
+            ]);
           }, 3000);
         } else {
           setSubmissionStatus("error");
@@ -639,9 +661,6 @@ const useItemMaster = ({ onFormSubmit }) => {
     setSupplierSearchTerm("");
   };
 
-  console.log("unitOptions 229", unitOptions);
-  console.log("formData : ", formData);
-
   return {
     formData,
     validFields,
@@ -671,7 +690,6 @@ const useItemMaster = ({ onFormSubmit }) => {
     searchChildTerm,
     selectedParentItem,
     selectedChildItems,
-    itemCode,
     supplierSearchTerm,
     availableSuppliers,
     isSuppliersLoading,

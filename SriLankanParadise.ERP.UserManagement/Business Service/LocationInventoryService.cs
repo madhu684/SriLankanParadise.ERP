@@ -93,9 +93,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             return await _locationInventoryRepository.GetLowStockItemsByLocationOnly(locationId);
         }
 
-        public async Task ReduceInventoryByFIFO(int locationId, int itemMasterId, int quantity)
+        public async Task ReduceInventoryByFIFO(int locationId, int itemMasterId, int transactionTypeId, decimal quantity)
         {
-            await _locationInventoryRepository.ReduceInventoryByFIFO(locationId, itemMasterId, quantity);
+            await _locationInventoryRepository.ReduceInventoryByFIFO(locationId, itemMasterId, transactionTypeId, quantity);
         }
     }
 }

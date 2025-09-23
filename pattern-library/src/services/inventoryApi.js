@@ -210,11 +210,11 @@ export const get_item_masters_by_user_id_api = async (userId) => {
 export const get_item_masters_by_company_id_with_query_api = async (
   companyId,
   searchQuery,
-  itemType
+  isTreatment = false
 ) => {
   try {
     const response = await api.get(
-      `/itemMaster/GetItemMastersByCompanyIdWithQuery/${companyId}?searchQuery=${searchQuery}&itemType=${itemType}`,
+      `/itemMaster/GetItemMastersByCompanyIdWithQuery/${companyId}?searchQuery=${searchQuery}&isTreatment=${isTreatment}`,
       {
         withCredentials: true,
       }

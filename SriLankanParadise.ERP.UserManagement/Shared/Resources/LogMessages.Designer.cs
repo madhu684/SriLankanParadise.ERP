@@ -862,6 +862,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Item batch retrieved.
+        /// </summary>
+        public static string ItemBatchRetrieved {
+            get {
+                return ResourceManager.GetString("ItemBatchRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Item batch updated successfully.
         /// </summary>
         public static string ItemBatchUpdated {
@@ -1875,6 +1884,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string SalesInvoiceCreated {
             get {
                 return ResourceManager.GetString("SalesInvoiceCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales Invoice deleted successfully.
+        /// </summary>
+        public static string SalesInvoiceDeleted {
+            get {
+                return ResourceManager.GetString("SalesInvoiceDeleted", resourceCulture);
             }
         }
         

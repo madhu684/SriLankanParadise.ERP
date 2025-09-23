@@ -20,9 +20,10 @@ const BatchSelectionModal = ({
           itemIdToBeDeleted.itemBatch.batchId === batch.batchId
       )
   );
-console.log(itemBatches);
+  console.log(itemBatches);
   // Safely get item name from the first itemBatch
-  const itemName = itemBatches?.[0]?.itemBatch?.itemMaster?.itemName || "Unknown Item";
+  const itemName =
+    itemBatches?.[0]?.itemBatch?.itemMaster?.itemName || "Unknown Item";
 
   return (
     <Modal show={show} onHide={handleClose} centered size="lg">
@@ -49,33 +50,35 @@ console.log(itemBatches);
                     style={{ marginRight: "5px", color: "#007bff" }}
                   ></i>{" "}
                   {/* Bootstrap 5 icon */}
-                  <strong>Batch Reference:</strong> {batch.itemBatch?.batch?.
-batchRef || "No batch reference available"} |{" "}
-<strong>Temp Qty:</strong> {batch.stockInHand} |{" "}
-<strong>Unit Price:</strong> {batch.itemBatch?.sellingPrice} |{" "}
-<strong>Expiry Date:</strong>{" "}
-{batch.itemBatch?.expiryDate?.split("T")[0] || "No expiry date"}
-</div>
-</ListGroup.Item>
-))
-) : (
-<div className="text-danger">
-You have selected all batches for this item.
-</div>
-)}
-</ListGroup>
-</Modal.Body>
-<Modal.Footer>
-<Button variant="secondary" onClick={handleClose}>
-Close
-</Button>
-</Modal.Footer>
-</Modal>
-);
+                  <strong>Batch Reference:</strong>{" "}
+                  {batch.itemBatch?.batch?.batchRef ||
+                    "No batch reference available"}{" "}
+                  | <strong>Temp Qty:</strong> {batch.stockInHand} |{" "}
+                  <strong>Unit Price:</strong> {batch.itemBatch?.sellingPrice} |{" "}
+                  <strong>Expiry Date:</strong>{" "}
+                  {batch.itemBatch?.expiryDate?.split("T")[0] ||
+                    "No expiry date"}
+                </div>
+              </ListGroup.Item>
+            ))
+          ) : (
+            <div className="text-danger">
+              You have selected all batches for this item.
+            </div>
+          )}
+        </ListGroup>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={handleClose}>
+          Close
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  );
 };
 
 BatchSelectionModal.defaultProps = {
-itemIdsToBeDeleted: [],
+  itemIdsToBeDeleted: [],
 };
 
 export default BatchSelectionModal;

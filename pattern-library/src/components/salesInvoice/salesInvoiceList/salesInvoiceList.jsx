@@ -9,6 +9,7 @@ import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
 import Pagination from "../../common/Pagination/Pagination";
 import { FaSearch } from "react-icons/fa";
+import SalesInvoiceDelete from "../salesInvoiceDelete/salesInvoiceDelete";
 
 const SalesInvoiceList = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,6 +34,10 @@ const SalesInvoiceList = () => {
     showRightOffSIModal,
     showRightOffSIModalInParent,
     SIDetail,
+    showDeleteSIForm,
+    refetch,
+    setShowDeleteSIForm,
+    setRefetch,
     areAnySelectedRowsPending,
     areAnySelectedRowsApproved,
     setSelectedRows,
@@ -148,14 +153,26 @@ const SalesInvoiceList = () => {
                 Approve
               </button>
             )}
-          {hasPermission("Update Sales Invoice") && isAnyRowSelected && (
-            <button
-              className="btn btn-warning"
-              onClick={() => setShowUpdateSIForm(true)}
-            >
-              Edit
-            </button>
-          )}
+          {hasPermission("Update Sales Invoice") &&
+            isAnyRowSelected &&
+            selectedRowData[0]?.status === 1 && (
+              <button
+                className="btn btn-warning"
+                onClick={() => setShowUpdateSIForm(true)}
+              >
+                Edit
+              </button>
+            )}
+          {isAnyRowSelected &&
+            areAnySelectedRowsPending(selectedRows) &&
+            selectedRowData[0]?.status === 1 && (
+              <button
+                className="btn btn-danger"
+                onClick={() => setShowDeleteSIForm(true)}
+              >
+                Delete
+              </button>
+            )}
           {hasPermission("Sales Invoice Right Off") &&
             isAnyRowSelected &&
             areAnySelectedRowsApproved(selectedRows) && (
@@ -294,6 +311,15 @@ const SalesInvoiceList = () => {
             handleClose={handleCloseRightOffSIModal}
             salesInvoice={selectedRowData[0]}
             handleRightOff={handleRightOff}
+          />
+        )}
+        {showDeleteSIForm && (
+          <SalesInvoiceDelete
+            show={showDeleteSIForm}
+            handleClose={() => setShowDeleteSIForm(false)}
+            salesInvoice={selectedRowData[0]}
+            refetch={refetch}
+            setRefetch={setRefetch}
           />
         )}
       </div>

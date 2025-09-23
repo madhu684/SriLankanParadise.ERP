@@ -160,12 +160,12 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
                     label="Unit Price"
                     value={formatCurrency(itemMaster?.unitPrice)}
                   />
-                  {!isServiceItemType() && (
+                  {/* {!isServiceItemType() && (
                     <InfoRow
                       label="Reorder Level"
                       value={itemMaster?.reorderLevel}
                     />
-                  )}
+                  )} */}
 
                   <InfoRow
                     label="Hierarchy Type"

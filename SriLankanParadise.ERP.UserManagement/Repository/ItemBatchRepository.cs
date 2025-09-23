@@ -165,6 +165,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Where(ib => ib.ItemMasterId == itemMasterId && ib.CompanyId == companyId)
                     .Include(ib => ib.Batch)
                     .Include(ib => ib.ItemMaster)
+                    .OrderBy(ib => ib.BatchId)
                     .ToListAsync();
 
                 return itemBatches.Any() ? itemBatches : null;
@@ -235,6 +236,22 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
 
                 throw;
             };
+        }
+
+        public async Task<ItemBatch> GetItemBatchByItemMasterIdBatchId(int itemMasterId, int batchId)
+        {
+            try
+            {
+                var itemBatch = await _dbContext.ItemBatches
+                    .Where(ib => ib.ItemMasterId == itemMasterId && ib.BatchId == batchId)
+                    .FirstOrDefaultAsync();
+
+                return itemBatch != null ? itemBatch : null!;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

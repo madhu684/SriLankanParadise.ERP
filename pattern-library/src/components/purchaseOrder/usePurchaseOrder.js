@@ -139,6 +139,58 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     }
   }, [submissionStatus]);
 
+  // const fetchItems = async (searchQuery) => {
+  //   try {
+  //     const response = await get_Location_Inventory_Summary_By_Item_Name_api(
+  //       userLocation[0]?.locationId,
+  //       searchQuery
+  //     );
+
+  //     const companyId = sessionStorage.getItem("companyId");
+
+  //     const items = await Promise.all(
+  //       response.data?.result?.map(async (summary) => {
+  //         const supplierItemResponse =
+  //           await get_supplier_items_by_type_category_api(
+  //             companyId,
+  //             parseInt(summary.itemMaster?.itemType?.itemTypeId),
+  //             parseInt(summary.itemMaster?.category?.categoryId),
+  //             userLocation[0]?.locationId
+  //           );
+
+  //         const supplierItems = supplierItemResponse.data.result
+  //           ? supplierItemResponse.data.result.filter(
+  //               (si) =>
+  //                 si.itemMasterId !== summary.itemMasterId &&
+  //                 si.supplierName !== formData?.selectedSupplier?.supplierName
+  //             )
+  //           : [];
+
+  //         return {
+  //           itemMasterId: summary.itemMasterId,
+  //           itemName: summary.itemMaster?.itemName || "",
+  //           unit: summary.itemMaster?.unit || { unitName: "" },
+  //           categoryId: summary.itemMaster?.category?.categoryId || "",
+  //           itemTypeId: summary.itemMaster?.itemType?.itemTypeId || "",
+  //           supplierId: summary.itemMaster?.supplierId || null,
+  //           totalStockInHand: summary.totalStockInHand,
+  //           minReOrderLevel: summary.minReOrderLevel,
+  //           maxStockLevel: summary.maxStockLevel,
+  //           supplierItems: supplierItems,
+  //         };
+  //       }) || []
+  //     );
+
+  //     return items.filter(
+  //       (item) =>
+  //         !formData.supplierId || item.supplierId === formData.supplierId
+  //     );
+  //   } catch (error) {
+  //     console.error("Error fetching items:", error);
+  //     return [];
+  //   }
+  // };
+
   const fetchItems = async (searchQuery) => {
     try {
       const response = await get_Location_Inventory_Summary_By_Item_Name_api(
@@ -146,40 +198,19 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
         searchQuery
       );
 
-      const companyId = sessionStorage.getItem("companyId");
-
-      const items = await Promise.all(
-        response.data?.result?.map(async (summary) => {
-          const supplierItemResponse =
-            await get_supplier_items_by_type_category_api(
-              companyId,
-              parseInt(summary.itemMaster?.itemType?.itemTypeId),
-              parseInt(summary.itemMaster?.category?.categoryId),
-              userLocation[0]?.locationId
-            );
-
-          const supplierItems = supplierItemResponse.data.result
-            ? supplierItemResponse.data.result.filter(
-                (si) =>
-                  si.itemMasterId !== summary.itemMasterId &&
-                  si.supplierName !== formData?.selectedSupplier?.supplierName
-              )
-            : [];
-
-          return {
-            itemMasterId: summary.itemMasterId,
-            itemName: summary.itemMaster?.itemName || "",
-            unit: summary.itemMaster?.unit || { unitName: "" },
-            categoryId: summary.itemMaster?.category?.categoryId || "",
-            itemTypeId: summary.itemMaster?.itemType?.itemTypeId || "",
-            supplierId: summary.itemMaster?.supplierId || null,
-            totalStockInHand: summary.totalStockInHand,
-            minReOrderLevel: summary.minReOrderLevel,
-            maxStockLevel: summary.maxStockLevel,
-            supplierItems: supplierItems,
-          };
-        }) || []
-      );
+      const items =
+        response.data?.result?.map((summary) => ({
+          itemMasterId: summary.itemMasterId,
+          itemName: summary.itemMaster?.itemName || "",
+          unit: summary.itemMaster?.unit || { unitName: "" },
+          categoryId: summary.itemMaster?.category?.categoryId || "",
+          itemTypeId: summary.itemMaster?.itemType?.itemTypeId || "",
+          supplierId: summary.itemMaster?.supplierId || null,
+          totalStockInHand: summary.totalStockInHand,
+          minReOrderLevel: summary.minReOrderLevel,
+          maxStockLevel: summary.maxStockLevel,
+          supplierItems: [],
+        })) || [];
 
       return items.filter(
         (item) =>
@@ -749,7 +780,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     return totalAmount;
   };
 
-  const handleSelectItem = (item) => {
+  const handleSelectItem = async (item) => {
     const initializedCharges = chargesAndDeductions
       .filter((charge) => charge.isApplicableForLineItem)
       .map((charge) => ({
@@ -759,6 +790,21 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
         sign: charge.sign,
         isPercentage: charge.percentage !== null,
       }));
+
+    const supplierItemResponse = await get_supplier_items_by_type_category_api(
+      sessionStorage.getItem("companyId"),
+      parseInt(item?.itemTypeId),
+      parseInt(item?.categoryId),
+      userLocation[0]?.locationId
+    );
+
+    const supplierItems = supplierItemResponse.data.result
+      ? supplierItemResponse.data.result.filter(
+          (si) =>
+            si.itemMasterId !== item.itemMasterId &&
+            si.supplierName !== formData?.selectedSupplier?.supplierName
+        )
+      : [];
 
     setFormData((prevFormData) => ({
       ...prevFormData,
@@ -780,7 +826,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
           minReOrderLevel: item.minReOrderLevel,
           maxStockLevel: item.maxStockLevel,
           chargesAndDeductions: initializedCharges,
-          supplierItems: item?.supplierItems || [],
+          supplierItems: supplierItems,
         },
       ],
     }));
@@ -1159,9 +1205,6 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
       setPOGenerating(false);
     }
   };
-
-  console.log("formData", formData);
-  console.log("purchaseRequisition", purchaseRequisition);
 
   return {
     formData,

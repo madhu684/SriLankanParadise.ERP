@@ -5,7 +5,7 @@ using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
 {
-    public class RolePermissionRepository :IRolePermissionRepository
+    public class RolePermissionRepository : IRolePermissionRepository
     {
         private readonly ErpSystemContext _dbContext;
 
@@ -27,6 +27,41 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task DeleteRolePermissionByRoleId(int roleId)
+        {
+            try
+            {
+                var rolePermissions = await _dbContext.RolePermissions
+                    .Where(rp => rp.RoleId == roleId)
+                    .ToListAsync();
+
+                if (rolePermissions.Any())
+                {
+                    _dbContext.RolePermissions.RemoveRange(rolePermissions);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<RolePermission>> GetRolePermissionsByRoleId(int roleId)
+        {
+            try
+            {
+                return await _dbContext.RolePermissions
+                    .Where(rp => rp.RoleId == roleId)
+                    .ToListAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<Dictionary<int, List<RolePermission>>> GetRolePermissionsByRoleIds(int[] roleIds)
         {
             try

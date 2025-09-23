@@ -2,7 +2,6 @@ import React from "react";
 import useUnitUpdate from "./useUnitUpdate";
 import CurrentDateTime from "../../currentDateTime/currentDateTime";
 import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
-import useCompanyLogoUrl from "../../companyLogo/useCompanyLogoUrl";
 
 const UnitUpdate = ({ handleClose, unit, handleUpdated }) => {
   const {
@@ -25,15 +24,17 @@ const UnitUpdate = ({ handleClose, unit, handleUpdated }) => {
     },
   });
 
-  const companyLogoUrl = useCompanyLogoUrl();
-
   return (
     <div className="container mt-4">
       {/* Header */}
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img src={companyLogoUrl} alt="Company Logo" height={30} />
+          <i
+            class="bi bi-arrow-left"
+            onClick={handleClose}
+            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+          ></i>
           <p>
             {" "}
             <CurrentDateTime />

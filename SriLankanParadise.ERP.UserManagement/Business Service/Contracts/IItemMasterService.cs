@@ -11,7 +11,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
 
         Task<IEnumerable<ItemMaster>> GetItemMastersByCompanyId(int companyId);
 
-        Task<IEnumerable<ItemMaster>> GetItemMastersByCompanyId(int companyId, string searchQuery, string itemType);
+        Task<IEnumerable<ItemMaster>> GetItemMastersByCompanyWithQueryId(int companyId, string searchQuery, bool isTreatment = false);
 
         Task<ItemMaster> GetItemMasterByItemMasterId(int itemMasterId);
 

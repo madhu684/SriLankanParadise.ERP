@@ -75,7 +75,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
     setSalesPersonSearchTerm,
     renderColumns,
     renderSubColumns,
-    locationInventory,
+    //locationInventory,
   } = useSalesOrder({
     onFormSubmit: () => {
       handleClose();
@@ -102,9 +102,6 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
   ) {
     return <ErrorComponent error={"Error fetching data"} />;
   }
-
-  console.log("formData dinusha jeewanka", availableItems);
-  console.log("formData dinusha jeewanka2", formData);
 
   return (
     <div className="container mt-4">
@@ -474,7 +471,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
         </div>
 
         {/* Item Details */}
-        <h4>3. Item Details dinusha</h4>
+        <h4>3. Item Details</h4>
 
         <div className="col-md-5">
           {/* Item Search */}
@@ -571,14 +568,14 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
               </div>
             )}
 
-            {!locationInventory && formData.itemMasterId !== 0 && (
+            {/* {!locationInventory && formData.itemMasterId !== 0 && (
               <div className="mb-3">
                 <small className="form-text text-danger">
                   Selected item does not have sufficient stock. Please select
                   another item
                 </small>
               </div>
-            )}
+            )} */}
             {formData.itemMasterId !== 0 && (
               <div className="mb-3">
                 {/* <p className="form-text text-muted">
@@ -622,14 +619,14 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
           </div>
         </div> */}
 
-        {!itemBatches && formData.itemMasterId !== 0 && (
+        {/* {!itemBatches && formData.itemMasterId !== 0 && (
           <div className="mb-3">
             <small className="form-text  text-danger">
               Selected item does not have any associated item batches. Please
               select another item
             </small>
           </div>
-        )}
+        )} */}
         {formData.itemDetails.length > 0 && (
           <div className="table-responsive mb-2">
             <table

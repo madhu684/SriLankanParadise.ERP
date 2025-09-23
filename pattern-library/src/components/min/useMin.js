@@ -47,12 +47,12 @@ const useMin = ({ onFormSubmit }) => {
   }, []);
 
   // Fetch items for search
-  const fetchItems = async (companyId, searchQuery, itemType) => {
+  const fetchItems = async (companyId, searchQuery) => {
     if (!companyId) throw new Error("Company ID is required");
     const response = await get_item_masters_by_company_id_with_query_api(
       companyId,
       searchQuery,
-      itemType
+      false
     );
     if (!response.data.result) throw new Error("No items found");
     return response.data.result;
@@ -64,8 +64,7 @@ const useMin = ({ onFormSubmit }) => {
     isError: isItemsError,
   } = useQuery({
     queryKey: ["items", searchTerm],
-    queryFn: () =>
-      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"),
+    queryFn: () => fetchItems(sessionStorage.getItem("companyId"), searchTerm),
     enabled: !!sessionStorage.getItem("companyId") && searchTerm.length > 0,
   });
 

@@ -1068,9 +1068,19 @@ public partial class ErpSystemContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__SalesInvo__Sales__19AACF41");
 
-            entity.HasOne(d => d.ItemBatch).WithMany(p => p.SalesInvoiceDetails)
-                .HasForeignKey(d => new { d.ItemBatchBatchId, d.ItemBatchItemMasterId })
-                .HasConstraintName("FK_SalesInvoiceDetail_ItemBatch");
+            entity.HasOne(d => d.ItemMaster).WithMany(p => p.SalesInvoiceDetails)
+                .HasForeignKey(d => d.ItemBatchItemMasterId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_SalesInvoiceDetail_ItemMaster");
+
+            entity.HasOne(d => d.Batch).WithMany(p => p.SalesInvoiceDetails)
+                .HasForeignKey(d => d.ItemBatchBatchId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_SalesInvoiceDetail_Batch");
+
+            //entity.HasOne(d => d.ItemBatch).WithMany(p => p.SalesInvoiceDetails)
+            //    .HasForeignKey(d => new { d.ItemBatchBatchId, d.ItemBatchItemMasterId })
+            //    .HasConstraintName("FK_SalesInvoiceDetail_ItemBatch");
         });
 
         modelBuilder.Entity<SalesOrder>(entity =>

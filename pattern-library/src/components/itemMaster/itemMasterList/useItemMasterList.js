@@ -1,16 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   get_item_masters_by_company_id_api,
-  get_item_masters_by_user_id_api,
   delete_item_master_api,
 } from "../../../services/inventoryApi";
 import { get_user_permissions_api } from "../../../services/userManagementApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const useItemMasterList = () => {
-  const [itemMasters, setItemMasters] = useState([]);
-  const [isLoadingData, setIsLoadingData] = useState(true);
-  const [error, setError] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedRowData, setSelectedRowData] = useState([]);
   const [showDetailIMModal, setShowDetailIMModal] = useState(false);
@@ -23,6 +19,8 @@ const useItemMasterList = () => {
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [submissionMessage, setSubmissionMessage] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const queryClient = useQueryClient();
 
   const fetchUserPermissions = async () => {
     try {
@@ -45,67 +43,25 @@ const useItemMasterList = () => {
     queryFn: fetchUserPermissions,
   });
 
-  const fetchData = async () => {
+  const fetchItems = async () => {
     try {
-      if (!isLoadingPermissions && userPermissions) {
-        if (hasPermission("View All Item Masters")) {
-          const itemMasterWithoutDraftsResponse =
-            await get_item_masters_by_company_id_api(
-              sessionStorage.getItem("companyId")
-            );
-
-          const itemMasterByUserIdResponse =
-            await get_item_masters_by_user_id_api(
-              sessionStorage.getItem("userId")
-            );
-
-          let newItemMasters = [];
-          if (
-            itemMasterWithoutDraftsResponse &&
-            itemMasterWithoutDraftsResponse.data.result
-          ) {
-            newItemMasters = itemMasterWithoutDraftsResponse.data.result;
-          }
-
-          let additionalItemMasters = [];
-          if (
-            itemMasterByUserIdResponse &&
-            itemMasterByUserIdResponse.data.result
-          ) {
-            additionalItemMasters = itemMasterByUserIdResponse.data.result;
-          }
-
-          const uniqueNewItemMasters = additionalItemMasters.filter(
-            (itemMaster) =>
-              !newItemMasters.some(
-                (existingItemMaster) =>
-                  existingItemMaster.itemMasterId === itemMaster.itemMasterId
-              )
-          );
-
-          newItemMasters = [...newItemMasters, ...uniqueNewItemMasters];
-          setItemMasters(newItemMasters);
-        } else {
-          const itemMasterResponse = await get_item_masters_by_user_id_api(
-            sessionStorage.getItem("userId")
-          );
-          setItemMasters(itemMasterResponse.data.result || []);
-        }
-      }
+      const response = await get_item_masters_by_company_id_api(
+        sessionStorage.getItem("companyId")
+      );
+      return response.data.result || [];
     } catch (error) {
-      setError("Error fetching data");
-    } finally {
-      setIsLoadingData(false);
+      console.error("Error fetching items:", error);
     }
   };
 
-  useEffect(() => {
-    fetchUserPermissions();
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [isLoadingPermissions, userPermissions]);
+  const {
+    data: itemMasters = [],
+    isLoading: isLoadingItemMasters,
+    error: itemMastersError,
+  } = useQuery({
+    queryKey: ["itemMasters", sessionStorage.getItem("companyId")],
+    queryFn: fetchItems,
+  });
 
   const handleShowDetailIMModal = () => {
     setShowDetailIMModal(true);
@@ -136,7 +92,6 @@ const useItemMasterList = () => {
   };
 
   const handleUpdated = async () => {
-    fetchData();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -171,14 +126,15 @@ const useItemMasterList = () => {
         setTimeout(() => {
           setSubmissionStatus(null);
           setSubmissionMessage(null);
-
           handleCloseDeleteConfirmation();
-          fetchData();
-
           setSelectedRows([]);
           setSelectedRowData([]);
           setIMDetail("");
           setLoading(false);
+          queryClient.invalidateQueries([
+            "itemMasters",
+            sessionStorage.getItem("companyId"),
+          ]);
         }, 3000);
       } else {
         setSubmissionStatus("error");
@@ -253,11 +209,13 @@ const useItemMasterList = () => {
     );
   };
 
+  if (itemMasters.length > 0) console.log("itemMasters: ", itemMasters);
+
   return {
     itemMasters,
-    isLoadingData,
+    isLoadingItemMasters,
     isLoadingPermissions,
-    error,
+    itemMastersError,
     isAnyRowSelected,
     selectedRows,
     showDetailIMModal,

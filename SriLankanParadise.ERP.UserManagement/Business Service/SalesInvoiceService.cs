@@ -33,7 +33,6 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             return await _salesInvoiceRepository.GetSalesInvoicesByUserId(userId);
         }
 
-
         public async Task ApproveSalesInvoice(int salesInvoiceId, SalesInvoice salesInvoice)
         {
             await _salesInvoiceRepository.ApproveSalesInvoice(salesInvoiceId, salesInvoice);
@@ -47,6 +46,16 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         public async Task UpdateSalesInvoice(int salesInvoiceId, SalesInvoice salesInvoice)
         {
             await _salesInvoiceRepository.UpdateSalesInvoice(salesInvoiceId, salesInvoice);
+        }
+
+        public async Task DeleteSalesInvoice(int salesInvoiceId)
+        {
+            await _salesInvoiceRepository.DeleteSalesInvoice(salesInvoiceId);
+        }
+
+        public async Task<SalesInvoice> GetSalesInvoiceById(int salesInvoiceId)
+        {
+            return await _salesInvoiceRepository.GetSalesInvoiceById(salesInvoiceId);
         }
     }
 }

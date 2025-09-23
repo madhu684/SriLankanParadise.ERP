@@ -79,6 +79,8 @@ const PurchaseOrder = ({
     purchaseRequisition,
   });
 
+  console.log("availableItems: ", availableItems);
+
   // Handler for showing supplier items modal
   const handleShowSupplierItems = (item) => {
     setSelectedSupplierItems(item.supplierItems || []);
@@ -154,7 +156,7 @@ const PurchaseOrder = ({
               <label htmlFor="supplierId" className="form-label">
                 Supplier
               </label>
-              {formData.selectedSupplier === "" && (
+              {formData.selectedSupplier === null && (
                 <div className="mb-3 position-relative">
                   <div className="input-group">
                     <span className="input-group-text bg-transparent ">
@@ -430,6 +432,7 @@ const PurchaseOrder = ({
                         .map((item) => (
                           <li key={item.itemMasterId}>
                             <button
+                              type="button"
                               className="dropdown-item"
                               onClick={() => handleSelectItem(item)}
                             >

@@ -1042,7 +1042,7 @@ const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
                   ) && (
                     <>
                       <th>Ordered Quantity</th>
-                      <th>Remaining Quantity</th>
+                      {/* <th>Remaining Quantity</th> */}
                     </>
                   )}
                   <th>Received Quantity</th>
@@ -1063,7 +1063,7 @@ const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
                     ) && (
                       <>
                         <td>{item.quantity}</td>
-                        <td>{item.remainingQuantity}</td>
+                        {/* <td>{item.remainingQuantity}</td> */}
                       </>
                     )}
                     <td>

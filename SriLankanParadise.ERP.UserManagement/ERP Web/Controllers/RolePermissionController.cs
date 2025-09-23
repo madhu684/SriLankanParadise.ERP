@@ -92,5 +92,29 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
             return Response;
         }
+
+        [HttpDelete("DeleteRolePermissionByRoleId/{roleId}")]
+        public async Task<ApiResponseModel> DeleteRolePermissionByRoleId(int roleId)
+        {
+            try
+            {
+                var existingmappings = await _rolePermissionService.GetRolePermissionsByRoleId(roleId);
+                if (existingmappings != null)
+                {
+                    await _rolePermissionService.DeleteRolePermissionByRoleId(roleId);
+                    AddResponseMessage(Response, "Role permissions deleted successfully.", null, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    AddResponseMessage(Response, "No role permissions found for the given roleId.", null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

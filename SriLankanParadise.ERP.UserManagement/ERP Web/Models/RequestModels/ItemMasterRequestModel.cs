@@ -19,13 +19,11 @@
         public int? ItemTypeId { get; set; }
 
         public int? ParentId { get; set; }
-
         public int? InventoryUnitId { get; set; }
-
         public decimal? ConversionRate { get; set; }
-
+        public string? ItemCode { get; set; }
         public int? ReorderLevel { get; set; }
-
+        public bool? IsInventoryItem { get; set; }
         public decimal? UnitPrice { get; set; }
 
         //new properties
@@ -56,7 +54,6 @@
         //new properties
 
         public int PermissionId { get; set; }
-
         public IEnumerable<SubItemMasterRequestModel>? SubItemMasters { get; set; }
     }
 }

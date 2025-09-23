@@ -47,7 +47,7 @@ const StockManagement = () => {
             )}
           </select>
         </div>
-        <div className="col-md-3">
+        {/* <div className="col-md-3">
           <label htmlFor="transactionType" className="form-label">
             Transaction Type
           </label>
@@ -60,7 +60,7 @@ const StockManagement = () => {
               Select a Transaction type
             </option>
             <option>Adjustment</option>
-            {/* {transactionTypes && transactionTypes.length > 0 ? (
+            {transactionTypes && transactionTypes.length > 0 ? (
               transactionTypes.map((tr) => (
                 <option key={tr.id} value={tr.id}>
                   {tr.name}
@@ -68,10 +68,10 @@ const StockManagement = () => {
               ))
             ) : (
               <option>No Trasaction Types available</option>
-            )} */}
+            )}
           </select>
-        </div>
-        <div className="col-md-3">
+        </div> */}
+        {/* <div className="col-md-3">
           <label htmlFor="transactionDate" className="form-label">
             Adjusted Date
           </label>
@@ -83,7 +83,7 @@ const StockManagement = () => {
             //value={transactionDate}
             onChange={handleDateChange}
           />
-        </div>
+        </div> */}
       </div>
       <div className="mt-4">
         <button
@@ -138,7 +138,7 @@ const StockManagement = () => {
                 <th>UOM</th>
                 <th>Stock in Hand</th>
                 <th>Batch Number</th>
-                <th>Adjusted Quantity</th>
+                {/* <th>Adjusted Quantity</th> */}
               </tr>
             </thead>
             <tbody>
@@ -159,25 +159,25 @@ const StockManagement = () => {
                     <td>{item.unitName}</td>
                     <td>{item.stockInHand}</td>
                     <td>{item.batchNo}</td>
-                    <td>
+                    {/* <td>
                       <input
                         type="number"
                         className="form-control form-input rounded-4"
                         placeholder="Enter quantity"
-                        // value={
-                        //   adjustedVolumes[
-                        //     itemsPerPage * (currentPage - 1) + index
-                        //   ]
-                        // }
-                        // onChange={(e) =>
-                        //   handleSetAdjustedVolumes(
-                        //     itemsPerPage * (currentPage - 1) + index,
-                        //     parseFloat(e.target.value)
-                        //   )
-                        // }
+                        value={
+                          adjustedVolumes[
+                            itemsPerPage * (currentPage - 1) + index
+                          ]
+                        }
+                        onChange={(e) =>
+                          handleSetAdjustedVolumes(
+                            itemsPerPage * (currentPage - 1) + index,
+                            parseFloat(e.target.value)
+                          )
+                        }
                         step="any"
                       />
-                    </td>
+                    </td> */}
                   </tr>
                 ))
               ) : (

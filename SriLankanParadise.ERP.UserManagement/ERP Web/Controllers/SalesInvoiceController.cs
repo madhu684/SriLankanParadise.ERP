@@ -236,5 +236,27 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
         }
+
+        [HttpDelete("{salesInvoiceId}")]
+        public async Task<ApiResponseModel> DeleteSalesIvoice(int salesInvoiceId)
+        {
+            try
+            {
+                var salesInvoice = await _salesInvoiceService.GetSalesInvoiceBySalesInvoiceId(salesInvoiceId);
+                if (salesInvoice == null)
+                {
+                    _logger.LogWarning(LogMessages.SalesInvoiceNotFound);
+                    return AddResponseMessage(Response, LogMessages.SalesInvoiceNotFound, null, true, HttpStatusCode.NotFound);
+                }
+                await _salesInvoiceService.DeleteSalesInvoice(salesInvoice.SalesInvoiceId);
+                _logger.LogInformation(LogMessages.SalesInvoiceDeleted);
+                return AddResponseMessage(Response, LogMessages.SalesInvoiceDeleted, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
     }
 }

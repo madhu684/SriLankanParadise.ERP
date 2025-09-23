@@ -88,10 +88,10 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         {
             try
             {
-                var itemBatches= await _itemBatchService.GetItemBatchesByCompanyId(companyId);
+                var itemBatches = await _itemBatchService.GetItemBatchesByCompanyId(companyId);
                 if (itemBatches != null)
                 {
-                    var itemBatchDtos= _mapper.Map<IEnumerable<ItemBatchDto>>(itemBatches);
+                    var itemBatchDtos = _mapper.Map<IEnumerable<ItemBatchDto>>(itemBatches);
                     AddResponseMessage(Response, LogMessages.ItemBatchesRetrieved, itemBatchDtos, true, HttpStatusCode.OK);
                 }
                 else
@@ -139,7 +139,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         {
             try
             {
-                var itemBatches = await _itemBatchService.GetItemBatchesByItemMasterId(itemMasterId,companyId);
+                var itemBatches = await _itemBatchService.GetItemBatchesByItemMasterId(itemMasterId, companyId);
                 if (itemBatches != null)
                 {
                     var itemBatchDtos = _mapper.Map<IEnumerable<ItemBatchDto>>(itemBatches);
@@ -258,6 +258,31 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 _logger.LogError(ex, ErrorMessages.InternalServerError);
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
+        }
+
+        [HttpGet("GetItemBatchByItemMasterIdBatchId/{itemMasterId}/{batchId}")]
+        public async Task<ApiResponseModel> GetItemBatchByItemMasterIdBatchId(int itemMasterId, int batchId)
+        {
+            try
+            {
+                var itemBatch = await _itemBatchService.GetItemBatchByItemMasterIdBatchId(itemMasterId, batchId);
+                if (itemBatch != null)
+                {
+                    var itemBatchDto = _mapper.Map<ItemBatchDto>(itemBatch);
+                    AddResponseMessage(Response, LogMessages.ItemBatchRetrieved, itemBatchDto, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.ItemBatchNotFound);
+                    AddResponseMessage(Response, LogMessages.ItemBatchNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
         }
     }
 }

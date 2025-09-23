@@ -53,7 +53,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             try
             {
                 var itemMasters = await _dbContext.ItemMasters
-                    .Where(im => im.Status == true && im.CompanyId == companyId)
+                    .Where(im => im.CompanyId == companyId)
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
                     .ThenInclude(u => u.MeasurementType)
@@ -72,7 +72,59 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<ItemMaster>> GetItemMastersByCompanyId(int companyId, string searchQuery, string itemType)
+        //public async Task<IEnumerable<ItemMaster>> GetItemMastersByCompanyId(int companyId, string searchQuery, string itemType)
+        //{
+        //    try
+        //    {
+        //        // Check if searchQuery is provided
+        //        if (string.IsNullOrEmpty(searchQuery))
+        //        {
+        //            return null;
+        //        }
+
+        //        var query = _dbContext.ItemMasters
+        //            .Where(im => im.Status == true && im.CompanyId == companyId);
+
+        //        // Apply search query
+        //        query = query.Where(im => im.ItemName.Contains(searchQuery));
+        //        var itemMastersTemp = await query.ToListAsync();
+
+        //        // Process itemType to handle multiple types separated by commas
+        //        if (!string.IsNullOrEmpty(itemType) && itemType.ToUpper() != "ALL")
+        //        {
+        //            string[] itemTypes = itemType.Split(',')
+        //                                         .Select(it => it.Trim())
+        //                                         .ToArray();
+
+        //            query = query.Include(im => im.Category)
+        //                .Include(im => im.Unit)
+        //                .ThenInclude(u => u.MeasurementType)
+        //                .Include(im => im.ItemType)
+        //                .Include(im => im.InventoryUnit)
+        //                .ThenInclude(u => u.MeasurementType)
+        //                .Where(im => itemTypes.Contains(im.ItemType.Name));
+        //        }
+        //        else
+        //        {
+        //            query = query.Include(im => im.Category)
+        //                .Include(im => im.Unit)
+        //                .ThenInclude(u => u.MeasurementType)
+        //                .Include(im => im.ItemType)
+        //                .Include(im => im.InventoryUnit)
+        //                .ThenInclude(u => u.MeasurementType);
+        //        }
+
+        //        var itemMasters = await query.ToListAsync();
+
+        //        return itemMasters.Any() ? itemMasters : null;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
+
+        public async Task<IEnumerable<ItemMaster>> GetItemMastersByCompanyId(int companyId, string searchQuery, bool isTreatment = false)
         {
             try
             {
@@ -87,35 +139,21 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
 
                 // Apply search query
                 query = query.Where(im => im.ItemName.Contains(searchQuery));
-                var itemMastersTemp = await query.ToListAsync();
 
-                // Process itemType to handle multiple types separated by commas
-                if (!string.IsNullOrEmpty(itemType) && itemType.ToUpper() != "ALL")
+                // Apply isTreatment filter
+                if (!isTreatment)
                 {
-                    string[] itemTypes = itemType.Split(',')
-                                                 .Select(it => it.Trim())
-                                                 .ToArray();
+                    query = query.Where(im => im.IsInventoryItem == true);
+                }
 
-                    query = query.Include(im => im.Category)
-                        .Include(im => im.Unit)
-                        .ThenInclude(u => u.MeasurementType)
-                        .Include(im => im.ItemType)
-                        .Include(im => im.InventoryUnit)
-                        .ThenInclude(u => u.MeasurementType)
-                        .Where(im => itemTypes.Contains(im.ItemType.Name));
-                }
-                else
-                {
-                    query = query.Include(im => im.Category)
-                        .Include(im => im.Unit)
-                        .ThenInclude(u => u.MeasurementType)
-                        .Include(im => im.ItemType)
-                        .Include(im => im.InventoryUnit)
-                        .ThenInclude(u => u.MeasurementType);
-                }
+                query = query.Include(im => im.Category)
+                    .Include(im => im.Unit)
+                    .ThenInclude(u => u.MeasurementType)
+                    .Include(im => im.ItemType)
+                    .Include(im => im.InventoryUnit)
+                    .ThenInclude(u => u.MeasurementType);
 
                 var itemMasters = await query.ToListAsync();
-
                 return itemMasters.Any() ? itemMasters : null;
             }
             catch (Exception)

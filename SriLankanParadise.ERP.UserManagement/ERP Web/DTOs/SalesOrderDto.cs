@@ -38,6 +38,7 @@
         public double? Latitude { get; set; }
 
         public double? Longitude { get; set; }
+        public int InventoryLocationId { get; set; }
 
         public virtual IEnumerable<SalesOrderDetailDto>? SalesOrderDetails { get; set; }
     }

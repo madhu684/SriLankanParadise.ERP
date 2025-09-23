@@ -70,7 +70,15 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
     const selectedItemType = itemTypes?.find(
       (type) => type.itemTypeId === parseInt(formData.itemTypeId)
     );
-    return selectedItemType?.name === "Service";
+    return selectedItemType?.name === "Treatments";
+  };
+
+  // Treatment type
+  const isTreatmentType = () => {
+    const selectedItemType = itemTypes?.find(
+      (type) => type.name === "Treatments"
+    );
+    return selectedItemType?.itemTypeId === parseInt(formData.itemTypeId);
   };
 
   if (isLoading) {
@@ -111,7 +119,7 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
       {/* Display success or error messages */}
       {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
-          Item master created successfully! Item Code : {itemCode}
+          Item master created successfully! Item Code : {formData.itemCode}
         </div>
       )}
       {submissionStatus === "successSavedAsDraft" && (
@@ -148,6 +156,28 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
               {validationErrors.itemName && (
                 <div className="invalid-feedback">
                   {validationErrors.itemName}
+                </div>
+              )}
+            </div>
+
+            <div className="mb-3 mt-3">
+              <label htmlFor="itemCode" className="form-label">
+                Item Code
+              </label>
+              <input
+                type="text"
+                className={`form-control ${
+                  validFields.itemCode ? "is-valid" : ""
+                } ${validationErrors.itemCode ? "is-invalid" : ""}`}
+                id="itemCode"
+                placeholder="Enter Item Code"
+                value={formData.itemCode}
+                onChange={(e) => handleInputChange("itemCode", e.target.value)}
+                required
+              />
+              {validationErrors.itemCode && (
+                <div className="invalid-feedback">
+                  {validationErrors.itemCode}
                 </div>
               )}
             </div>
@@ -197,11 +227,18 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
                 required
               >
                 <option value="">Select Category</option>
-                {categoryOptions?.map((category) => (
-                  <option key={category.categoryId} value={category.categoryId}>
-                    {category.categoryName}
-                  </option>
-                ))}
+                {categoryOptions
+                  ?.filter((category) =>
+                    isTreatmentType() ? category.isTreatment === true : true
+                  )
+                  .map((category) => (
+                    <option
+                      key={category.categoryId}
+                      value={category.categoryId}
+                    >
+                      {category.categoryName}
+                    </option>
+                  ))}
               </select>
               {validationErrors.categoryId && (
                 <div className="invalid-feedback">
@@ -433,7 +470,7 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
                   </div>
                 )}
 
-                <div className="mb-3 mt-3">
+                {/* <div className="mb-3 mt-3">
                   <label htmlFor="reorderLevel" className="form-label">
                     Reorder level
                   </label>
@@ -459,7 +496,7 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
                       {validationErrors.reorderLevel}
                     </div>
                   )}
-                </div>
+                </div> */}
 
                 {/* Supplier tagging */}
                 <h4>Supplier Tagging</h4>

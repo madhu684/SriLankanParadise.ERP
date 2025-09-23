@@ -996,6 +996,24 @@ export const patch_item_batch_api = async (
   }
 };
 
+export const get_item_batch_by_itemMasterId_batchId_api = async (
+  itemMasterId,
+  batchId
+) => {
+  try {
+    const response = await api.get(
+      `/itemBatch/GetItemBatchByItemMasterIdBatchId/${itemMasterId}/${batchId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 //supplier ralated apis
 export const get_company_types_api = async () => {
   try {
@@ -1503,7 +1521,6 @@ export const post_reduce_inventory_fifo_api = async (requestData) => {
     throw error;
   }
 };
-
 
 export const get_Low_Stock_Items_for_location_api = async (locationId) => {
   try {

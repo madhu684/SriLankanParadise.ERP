@@ -84,12 +84,12 @@ const usePurchaseRequisitionUpdate = ({
     queryFn: fetchUserLocations,
   });
 
-  const fetchItems = async (companyId, searchQuery, itemType) => {
+  const fetchItems = async (companyId, searchQuery) => {
     try {
       const response = await get_item_masters_by_company_id_with_query_api(
         companyId,
         searchQuery,
-        itemType
+        false
       );
       return response.data.result;
     } catch (error) {
@@ -104,8 +104,7 @@ const usePurchaseRequisitionUpdate = ({
     error: itemsError,
   } = useQuery({
     queryKey: ["items", searchTerm],
-    queryFn: () =>
-      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "All"),
+    queryFn: () => fetchItems(sessionStorage.getItem("companyId"), searchTerm),
   });
 
   useEffect(() => {

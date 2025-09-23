@@ -7,24 +7,18 @@ import {
   get_sales_persons_by_company_id_api,
 } from "../../services/salesApi";
 import {
-  get_item_batches_by_item_master_id_api,
-  put_item_batch_api,
   get_charges_and_deductions_by_company_id_api,
   post_charges_and_deductions_applied_api,
   get_transaction_types_api,
-  patch_location_inventory_api,
-  post_location_inventory_movement_api,
   get_sum_location_inventories_by_locationId_itemMasterId_api,
   get_user_locations_by_user_id_api,
-  post_reduce_inventory_fifo_api,
+  get_item_batches_by_item_master_id_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
 
 const useSalesOrder = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
-    itemMasterId: 0,
-    itemMaster: "",
     customerId: "",
     orderDate: "",
     deliveryDate: "",
@@ -34,11 +28,9 @@ const useSalesOrder = ({ onFormSubmit }) => {
     totalAmount: 0,
     subTotal: 0,
     selectedCustomer: "",
-    customerId: "",
     salesPersonId: "",
     selectedSalesPerson: "",
     commonChargesAndDeductions: [],
-    //fifoBatchDetails: [],
   });
 
   const [submissionStatus, setSubmissionStatus] = useState(null);
@@ -59,94 +51,58 @@ const useSalesOrder = ({ onFormSubmit }) => {
   const [showModal, setShowModal] = useState(false);
   const [warehouseLocationId, setWarehouseLocationId] = useState(null);
 
-  const fetchWarehouseLocation = async () => {
+  const fetchUserLocations = async () => {
     try {
-      const userId = sessionStorage.getItem("userId");
-      const response = await get_user_locations_by_user_id_api(userId);
-      const warehouseLocations = response.data.result.filter(
-        (userLocation) => userLocation.location.locationTypeId === 2
+      const response = await get_user_locations_by_user_id_api(
+        sessionStorage.getItem("userId")
       );
-
-      if (warehouseLocations.length > 0) {
-        const locationId = warehouseLocations[0].locationId;
-        setWarehouseLocationId(locationId);
-        return locationId;
-      }
-
-      return null;
-    } catch (error) {
-      console.error("Error fetching warehouse location:", error);
-      return null;
-    }
-  };
-
-  useEffect(() => {
-    fetchWarehouseLocation();
-  }, []);
-
-  const fetchItemBatches = async (itemMasterId) => {
-    try {
-      const response = await get_item_batches_by_item_master_id_api(
-        itemMasterId,
-        sessionStorage.getItem("companyId")
+      setWarehouseLocationId(response.data.result[0].locationId);
+      return response.data.result.filter(
+        (location) => location.location.locationTypeId === 2
       );
-      return response.data.result;
     } catch (error) {
-      console.error("Error fetching item batches:", error);
+      console.error("Error fetching user locations:", error);
     }
   };
-  const fetchLocationInventory = async (itemMasterId) => {
-    try {
-      let locationId = warehouseLocationId;
-
-      // If warehouseLocationId is not set, fetch it first
-      if (!locationId) {
-        locationId = await fetchWarehouseLocation();
-      }
-
-      if (!locationId || !itemMasterId) return null;
-
-      const response =
-        await get_sum_location_inventories_by_locationId_itemMasterId_api(
-          locationId,
-          itemMasterId
-        );
-      return response.data.result;
-    } catch (error) {
-      console.error("Error fetching location inventory:", error);
-      return null;
-    }
-  };
-
   const {
-    data: itemBatches,
-    isLoading: isBatchesLoading,
-    isError: isBatchesError,
-    error: batchesError,
-    refetch: refetchItemBatches,
+    data: userLocations = [],
+    isLoading: isUserLocationsLoading,
+    isError: isUserLocationsError,
+    error: userLocationsError,
   } = useQuery({
-    queryKey: ["itemBatches", formData.itemMasterId],
-    queryFn: () => fetchItemBatches(formData.itemMasterId),
+    queryKey: ["userLocations", sessionStorage.getItem("userId")],
+    queryFn: fetchUserLocations,
   });
 
-  const {
-    data: locationInventory,
-    isLoading,
-    isError,
-    error,
-    refetch: refetchLocationInventory,
-  } = useQuery({
-    queryKey: ["locationInventory", formData.itemMasterId, warehouseLocationId], // Add warehouseLocationId
-    queryFn: () => fetchLocationInventory(formData.itemMasterId),
-    enabled: !!warehouseLocationId && !!formData.itemMasterId, // Only run when both are available
-  });
+  // const fetchItemBatches = async (itemMasterId) => {
+  //   try {
+  //     const response = await get_item_batches_by_item_master_id_api(
+  //       itemMasterId,
+  //       sessionStorage.getItem("companyId")
+  //     );
+  //     return response.data.result;
+  //   } catch (error) {
+  //     console.error("Error fetching item batches:", error);
+  //   }
+  // };
 
-  const fetchItems = async (companyId, searchQuery, itemType) => {
+  // const {
+  //   data: itemBatches,
+  //   isLoading: isBatchesLoading,
+  //   isError: isBatchesError,
+  //   error: batchesError,
+  //   refetch: refetchItemBatches,
+  // } = useQuery({
+  //   queryKey: ["itemBatches", formData.itemMasterId],
+  //   queryFn: () => fetchItemBatches(formData.itemMasterId),
+  // });
+
+  const fetchItems = async (companyId, searchQuery) => {
     try {
       const response = await get_item_masters_by_company_id_with_query_api(
         companyId,
         searchQuery,
-        itemType
+        false
       );
       return response.data.result;
     } catch (error) {
@@ -161,8 +117,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
     error: itemsError,
   } = useQuery({
     queryKey: ["items", searchTerm],
-    queryFn: () =>
-      fetchItems(sessionStorage.getItem("companyId"), searchTerm, "Sellable"), //Sellable
+    queryFn: () => fetchItems(sessionStorage.getItem("companyId"), searchTerm),
   });
 
   useEffect(() => {
@@ -235,12 +190,6 @@ const useSalesOrder = ({ onFormSubmit }) => {
     queryKey: ["company"],
     queryFn: fetchCompany,
   });
-
-  useEffect(() => {
-    if (submissionStatus != null) {
-      alertRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [submissionStatus]);
 
   const fetchchargesAndDeductions = async () => {
     try {
@@ -533,8 +482,8 @@ const useSalesOrder = ({ onFormSubmit }) => {
       const status = isSaveAsDraft ? 0 : 1;
       const isFormValid = validateForm();
       const currentDate = new Date().toISOString();
-      let allDetailsBatchSuccessful = true;
-      let allDetailsSuccessful = true;
+      let salesOrderSuccessfull = false;
+      let allDetailsSuccessful = false;
 
       if (isFormValid) {
         if (isSaveAsDraft) {
@@ -559,242 +508,39 @@ const useSalesOrder = ({ onFormSubmit }) => {
           lastUpdatedDate: currentDate,
           permissionId: 25,
           salesPersonId: formData.salesPersonId,
+          inventoryLocationId: warehouseLocationId,
         };
 
         console.log("Sale order data", salesOrderData);
         const response = await post_sales_order_api(salesOrderData);
+        if (response.status === 201) {
+          salesOrderSuccessfull = true;
+        }
         setReferenceNo(response.data.result.referenceNo);
         const salesOrderId = response.data.result.salesOrderId;
-        const locationId = warehouseLocationId;
 
-        // Replace your FIFO processing section with this corrected version:
-
-        // Replace your FIFO processing section with this corrected version:
-
-        if (company.batchStockType === "FIFO") {
-          console.log("Processing FIFO inventory reduction...");
-
-          // Validate stock availability before processing
-          const validateStockAvailability = async () => {
-            for (const item of formData.itemDetails) {
-              try {
-                const inventory =
-                  await get_sum_location_inventories_by_locationId_itemMasterId_api(
-                    locationId,
-                    item.itemMasterId
-                  );
-                if (
-                  !inventory.data.result ||
-                  inventory.data.result.totalStockInHand < item.quantity
-                ) {
-                  throw new Error(
-                    `Insufficient stock for ${item.name}. Available: ${
-                      inventory.data.result?.totalStockInHand || 0
-                    }, Required: ${item.quantity}`
-                  );
-                }
-              } catch (error) {
-                throw error;
-              }
-            }
+        let detailResponses = [];
+        for (const item of formData.itemDetails) {
+          const salesOrderDetail = {
+            itemBatchItemMasterId: item.itemMasterId,
+            itemBatchBatchId: item.batchId,
+            salesOrderId: salesOrderId,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            totalPrice: item.totalPrice,
+            permissionId: 25,
           };
 
-          await validateStockAvailability();
-
-          // Step 1: Reduce inventory using FIFO API (handles inventory movements automatically)
-          const fifoPromises = formData.itemDetails.map(async (item) => {
-            try {
-              console.log(
-                `Processing FIFO for item: ${item.name}, quantity: ${item.quantity}`
-              );
-
-              // FIFO API only needs these 3 parameters
-              const fifoResponse = await post_reduce_inventory_fifo_api({
-                locationId: locationId,
-                itemMasterId: item.itemMasterId,
-                quantity: item.quantity,
-              });
-
-              console.log(`FIFO response for ${item.name}:`, fifoResponse.data);
-
-              if (fifoResponse.status !== 200) {
-                throw new Error(
-                  `FIFO reduction failed for item ${item.name}: ${
-                    fifoResponse.data?.message || "Unknown error"
-                  }`
-                );
-              }
-
-              return fifoResponse;
-            } catch (error) {
-              console.error(
-                `Error processing FIFO for item ${item.name}:`,
-                error
-              );
-              throw new Error(
-                `Failed to process inventory for ${item.name}: ${error.message}`
-              );
-            }
-          });
-
-          // Step 2: Create sales order details (still need to do this manually)
-          const detailsPromises = formData.itemDetails.map(async (item) => {
-            const detailsData = {
-              itemBatchItemMasterId: item.itemMasterId,
-              // Don't include itemBatchBatchId for FIFO since no specific batch is used
-              salesOrderId,
-              quantity: item.quantity,
-              unitPrice: item.unitPrice,
-              totalPrice: item.totalPrice,
-              permissionId: 25,
-            };
-
-            console.log(
-              `Sales order detail payload for ${item.name}:`,
-              detailsData
-            );
-
-            return await post_sales_order_detail_api(detailsData);
-          });
-
-          // Wait for all operations to complete
-          try {
-            console.log(
-              "Waiting for all FIFO and detail operations to complete..."
-            );
-
-            const [fifoResponses, detailsResponses] = await Promise.all([
-              Promise.all(fifoPromises),
-              Promise.all(detailsPromises),
-            ]);
-
-            console.log("FIFO responses:", fifoResponses);
-            console.log("Sales order detail responses:", detailsResponses);
-
-            const allFifoSuccessful = fifoResponses.every(
-              (response) => response.status === 200
-            );
-
-            const allDetailsSuccessful = detailsResponses.every(
-              (response) => response.status === 201
-            );
-
-            if (!allFifoSuccessful || !allDetailsSuccessful) {
-              console.error("Operation results:", {
-                fifoSuccessful: allFifoSuccessful,
-                detailsSuccessful: allDetailsSuccessful,
-              });
-              throw new Error("Some FIFO operations failed");
-            }
-
-            // Set success flags
-            allDetailsSuccessful = true;
-            allDetailsBatchSuccessful = true;
-
-            console.log("FIFO processing completed successfully");
-          } catch (error) {
-            console.error("Error in FIFO processing:", error);
-            throw error;
-          }
-        } else {
-          // Non-FIFO processing (unchanged)
-          const itemDetailsBatchData = formData.itemDetails.map(
-            async (item) => {
-              const itemBatchUpdateData = {
-                batchId: item.batch.batchId,
-                itemMasterId: item.batch.itemMasterId,
-                costPrice: item.batch.costPrice,
-                sellingPrice: item.batch.sellingPrice,
-                status: item.batch.status,
-                companyId: item.batch.companyId,
-                createdBy: item.batch.createdBy,
-                createdUserId: item.batch.createdUserId,
-                tempQuantity: Math.max(
-                  0,
-                  item.batch.tempQuantity - item.quantity
-                ),
-                locationId: item.batch.locationId,
-                expiryDate: item.batch.expiryDate,
-                permissionId: 1065,
-              };
-
-              const detailsBatchApiResponse = await put_item_batch_api(
-                item.batch.batchId,
-                item.batch.itemMasterId,
-                itemBatchUpdateData
-              );
-
-              const locationUpdateResponse = await patch_location_inventory_api(
-                locationId,
-                item.itemMasterId,
-                item.batch.batchId,
-                "subtract",
-                {
-                  stockInHand: item.quantity,
-                  permissionId: 1089,
-                }
-              );
-
-              const locationMovementResponse =
-                await post_location_inventory_movement_api({
-                  movementTypeId: 2,
-                  transactionTypeId: 1,
-                  itemMasterId: item.itemMasterId,
-                  batchId: item.batch.batchId,
-                  locationId: locationId,
-                  date: new Date().toISOString(),
-                  qty: -Math.abs(item.quantity),
-                  permissionId: 1090,
-                  companyId: sessionStorage?.getItem("companyId") ?? null,
-                  createdBy: sessionStorage?.getItem("userId") ?? null,
-                  createdDate: new Date().toISOString(),
-                  referenceId: salesOrderId,
-                  referenceType: "SalesOrder",
-                });
-
-              return {
-                detailsBatchApiResponse,
-                locationUpdateResponse,
-                locationMovementResponse,
-              };
-            }
+          const detailsResponse = await post_sales_order_detail_api(
+            salesOrderDetail
           );
-
-          const detailsBatchResponse = await Promise.all(itemDetailsBatchData);
-          allDetailsBatchSuccessful = detailsBatchResponse.every(
-            (response) => response.detailsBatchApiResponse.status === 200
-          );
-          const allLocationUpdatesSuccessful = detailsBatchResponse.every(
-            (response) => response.locationUpdateResponse.status === 200
-          );
-          const allLocationMovementsSuccessful = detailsBatchResponse.every(
-            (response) => response.locationMovementResponse.status === 201
-          );
-
-          const itemDetailsData = formData.itemDetails.map(async (item) => {
-            const detailsData = {
-              itemBatchItemMasterId: item.itemMasterId,
-              // Completely remove itemBatchBatchId
-              salesOrderId,
-              quantity: item.quantity,
-              unitPrice: parseFloat(item.unitPrice),
-              totalPrice: parseFloat(item.totalPrice),
-              permissionId: 25,
-            };
-            const detailsApiResponse = await post_sales_order_detail_api(
-              detailsData
-            );
-            return detailsApiResponse;
-          });
-
-          const detailsResponses = await Promise.all(itemDetailsData);
-          allDetailsSuccessful =
-            detailsResponses.every(
-              (detailsResponse) => detailsResponse.status === 201
-            ) &&
-            allLocationUpdatesSuccessful &&
-            allLocationMovementsSuccessful;
+          detailResponses.push(detailsResponse);
         }
+
+        // Process sales order details
+        allDetailsSuccessful = detailResponses.every(
+          (detailsResponse) => detailsResponse.status === 201
+        );
 
         // Process charges and deductions
         const postChargesAndDeductionsAppliedResponse =
@@ -808,7 +554,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
         if (
           allDetailsSuccessful &&
           allAppliedSuccessful &&
-          allDetailsBatchSuccessful
+          salesOrderSuccessfull
         ) {
           if (isSaveAsDraft) {
             setSubmissionStatus("successSavedAsDraft");
@@ -818,7 +564,6 @@ const useSalesOrder = ({ onFormSubmit }) => {
             console.log("Sales order submitted successfully!", formData);
           }
 
-          refetchLocationInventory();
           setTimeout(() => {
             setSubmissionStatus(null);
             setLoading(false);
@@ -830,7 +575,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
           console.error("Some operations failed:", {
             allDetailsSuccessful,
             allAppliedSuccessful,
-            allDetailsBatchSuccessful,
+            salesOrderSuccessfull,
           });
           throw new Error("Some operations failed during submission");
         }
@@ -1067,13 +812,6 @@ const useSalesOrder = ({ onFormSubmit }) => {
 
   // Handler to add the selected item to itemDetails
   const handleSelectItem = async (item) => {
-    // Set the current item selection
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      itemMasterId: item.itemMasterId,
-      itemMaster: item,
-    }));
-
     setSearchTerm("");
 
     if (company?.batchStockType === "FIFO") {
@@ -1091,8 +829,12 @@ const useSalesOrder = ({ onFormSubmit }) => {
 
       // Get available stock for this item
       try {
-        const inventory = await fetchLocationInventory(item.itemMasterId);
-        const availableStock = inventory?.totalStockInHand || 0;
+        const inventory =
+          await get_sum_location_inventories_by_locationId_itemMasterId_api(
+            item.itemMasterId,
+            userLocations[0]?.locationId
+          );
+        const availableStock = inventory?.data?.result?.totalStockInHand || 0;
 
         if (availableStock <= 0) {
           console.warn("No stock available for this item");
@@ -1101,9 +843,12 @@ const useSalesOrder = ({ onFormSubmit }) => {
         }
 
         // Get highest selling price from available batches
-        const batchesResponse = await fetchItemBatches(item.itemMasterId);
+        const batchesResponse = await get_item_batches_by_item_master_id_api(
+          item.itemMasterId,
+          sessionStorage.getItem("companyId")
+        );
         const highestSellingPrice =
-          batchesResponse?.reduce(
+          batchesResponse?.data?.result?.reduce(
             (maxPrice, batch) =>
               batch.sellingPrice > maxPrice ? batch.sellingPrice : maxPrice,
             0
@@ -1115,15 +860,13 @@ const useSalesOrder = ({ onFormSubmit }) => {
             ...prevFormData.itemDetails,
             {
               itemMasterId: item.itemMasterId,
-              itemBatchId: null, // No specific batch for FIFO
               name: item.itemName || "",
               unit: item.unit?.unitName || "",
-              batchRef: "FIFO", // Indicate this is FIFO
               quantity: 0,
               unitPrice: highestSellingPrice,
               totalPrice: 0.0,
               chargesAndDeductions: initializedCharges,
-              batch: null, // No specific batch
+              batchId: batchesResponse?.data?.result[0]?.batchId,
               tempQuantity: availableStock,
             },
           ],
@@ -1362,58 +1105,56 @@ const useSalesOrder = ({ onFormSubmit }) => {
   }, [isLoadingchargesAndDeductions]);
 
   const renderSubColumns = () => {
-    {
-      return formData.commonChargesAndDeductions.map((charge, chargeIndex) => {
-        if (!charge.isApplicableForLineItem) {
-          return (
-            <tr key={chargeIndex}>
-              <td
-                colSpan={
-                  5 +
-                  formData.itemDetails[0].chargesAndDeductions.length -
-                  (company.batchStockType === "FIFO" ? 1 : 0)
-                }
-              ></td>
-              <th>
-                {charge.sign + " "}
-                {charge.name}
-                {charge.isPercentage === true && " (%)"}
-              </th>
-              <td>
-                <input
-                  className="form-control"
-                  type="number"
-                  value={charge.value}
-                  onChange={(e) => {
-                    let newValue = parseFloat(e.target.value);
+    return formData.commonChargesAndDeductions.map((charge, chargeIndex) => {
+      if (!charge.isApplicableForLineItem) {
+        return (
+          <tr key={chargeIndex}>
+            <td
+              colSpan={
+                5 +
+                formData.itemDetails[0].chargesAndDeductions.length -
+                (company.batchStockType === "FIFO" ? 1 : 0)
+              }
+            ></td>
+            <th>
+              {charge.sign + " "}
+              {charge.name}
+              {charge.isPercentage === true && " (%)"}
+            </th>
+            <td>
+              <input
+                className="form-control"
+                type="number"
+                value={charge.value}
+                onChange={(e) => {
+                  let newValue = parseFloat(e.target.value);
 
-                    // If the entered value is not a valid number, set it to 0
-                    if (isNaN(newValue)) {
-                      newValue = 0;
+                  // If the entered value is not a valid number, set it to 0
+                  if (isNaN(newValue)) {
+                    newValue = 0;
+                  } else {
+                    // If the charge is a percentage, ensure the value is between 0 and 100
+                    if (charge.isPercentage) {
+                      newValue = Math.min(100, Math.max(0, newValue)); // Clamp the value between 0 and 100
                     } else {
-                      // If the charge is a percentage, ensure the value is between 0 and 100
-                      if (charge.isPercentage) {
-                        newValue = Math.min(100, Math.max(0, newValue)); // Clamp the value between 0 and 100
-                      } else {
-                        // For non-percentage charges, ensure the value is positive
-                        newValue = Math.max(0, newValue);
-                      }
+                      // For non-percentage charges, ensure the value is positive
+                      newValue = Math.max(0, newValue);
                     }
+                  }
 
-                    handleInputChange(
-                      `commonChargesAndDeductions_${chargeIndex}_value`,
-                      newValue
-                    );
-                  }}
-                />
-              </td>
-              <td></td>
-            </tr>
-          );
-        }
-        return null;
-      });
-    }
+                  handleInputChange(
+                    `commonChargesAndDeductions_${chargeIndex}_value`,
+                    newValue
+                  );
+                }}
+              />
+            </td>
+            <td></td>
+          </tr>
+        );
+      }
+      return null;
+    });
   };
 
   // Function to open modal
@@ -1440,17 +1181,14 @@ const useSalesOrder = ({ onFormSubmit }) => {
     showCreateCustomerModal,
     showCreateCustomerMoalInParent,
     directOrder,
-    isError,
-    isLoading,
-    error,
     searchTerm,
     availableItems,
     isItemsLoading,
     isItemsError,
     itemsError,
     selectedBatch,
-    itemBatches,
-    locationInventory,
+    //itemBatches,
+    // locationInventory,
     customerSearchTerm,
     salesPersonSearchTerm,
     isCustomersLoading,
