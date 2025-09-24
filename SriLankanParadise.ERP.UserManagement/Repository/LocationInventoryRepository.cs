@@ -639,5 +639,68 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 }
             });
         }
+
+        public async Task<IEnumerable<LocationInventorySummary>> GetSumOfItemInventoryByLocationId(int locationId)
+        {
+            try
+            {
+                var summaryData = await _dbContext.LocationInventories
+                    .Include(li => li.ItemMaster)
+                    .ThenInclude(im => im.Unit)
+                    .Include(li => li.ItemMaster)
+                    .ThenInclude(im => im.Category)
+                    .Include(li => li.ItemMaster)
+                    .ThenInclude(im => im.ItemType)
+                    .Where(li => li.LocationId == locationId)
+                    .GroupBy(li => li.ItemMasterId)
+                    .Select(g => new LocationInventorySummary
+                    {
+                        LocationInventoryId = g.First().LocationInventoryId,
+                        LocationId = locationId,
+                        ItemMasterId = g.Key,
+                        TotalStockInHand = g.Sum(li => li.StockInHand ?? 0),
+                        MinReOrderLevel = g.Min(li => li.ReOrderLevel ?? 0),
+                        MaxStockLevel = g.Max(li => li.MaxStockLevel ?? 0),
+                        ItemMaster = g.First().ItemMaster
+                    })
+                    .Where(s => s.TotalStockInHand > 0)
+                    .ToListAsync();
+
+                return summaryData.Any() ? summaryData : new List<LocationInventorySummary>();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error retrieving low stock items by location", ex);
+            }
+        }
+
+        public async Task UpdateReorderLevelMaxStockLevel(int locationId, int itemMasterId, LocationInventory locationInventory)
+        {
+            try
+            {
+                var existUserLocationInventories = await _dbContext.LocationInventories
+                    .Where(li => li.LocationId == locationId && li.ItemMasterId == itemMasterId)
+                    .ToListAsync();
+
+                if (existUserLocationInventories != null && existUserLocationInventories.Any())
+                {
+                    foreach (var existUserLocationInventory in existUserLocationInventories)
+                    {
+                        existUserLocationInventory.ReOrderLevel = locationInventory.ReOrderLevel;
+                        existUserLocationInventory.MaxStockLevel = locationInventory.MaxStockLevel;
+                        _dbContext.Entry(existUserLocationInventory).State = EntityState.Modified;
+                    }
+                    await _dbContext.SaveChangesAsync();
+                }
+                else
+                {
+                    throw new InvalidOperationException($"No LocationInventory records found for LocationId {locationId} and ItemMasterId {itemMasterId}.");
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

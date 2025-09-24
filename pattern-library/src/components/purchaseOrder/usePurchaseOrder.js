@@ -11,6 +11,7 @@ import {
   get_user_locations_by_user_id_api,
   get_locations_inventories_by_location_id_item_master_id_api,
   approve_purchase_requisition_api,
+  get_item_batches_by_item_master_id_api,
 } from "../../services/purchaseApi";
 import { get_supplier_items_by_type_category_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
@@ -791,6 +792,15 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
         isPercentage: charge.percentage !== null,
       }));
 
+    const itemBatch = await get_item_batches_by_item_master_id_api(
+      item.itemMasterId,
+      sessionStorage.getItem("companyId")
+    );
+
+    const latestBatch = itemBatch.data.result
+      ? itemBatch.data.result.sort((a, b) => b.batchId - a.batchId)[0]
+      : null;
+
     const supplierItemResponse = await get_supplier_items_by_type_category_api(
       sessionStorage.getItem("companyId"),
       parseInt(item?.itemTypeId),
@@ -820,7 +830,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
             item.maxStockLevel - item.totalStockInHand >= 0
               ? item.maxStockLevel - item.totalStockInHand
               : 0,
-          unitPrice: 0.0,
+          unitPrice: latestBatch?.costPrice || 0.0,
           totalPrice: 0.0,
           totalStockInHand: item.totalStockInHand,
           minReOrderLevel: item.minReOrderLevel,
@@ -982,7 +992,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   const handleResetSupplier = () => {
     setFormData((prevFormData) => ({
       ...prevFormData,
-      selectedSupplier: "",
+      selectedSupplier: null,
       supplierId: null,
       itemDetails: [],
     }));
@@ -1152,6 +1162,15 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
         // Transform low-stock items into itemDetails format with API calls
         const newItemDetails = await Promise.all(
           lowStockItems.map(async (item) => {
+            const itemBatch = await get_item_batches_by_item_master_id_api(
+              item.itemMasterId,
+              sessionStorage.getItem("companyId")
+            );
+
+            const latestBatch = itemBatch.data.result
+              ? itemBatch.data.result.sort((a, b) => b.batchId - a.batchId)[0]
+              : null;
+
             const supplierItemResponse =
               await get_supplier_items_by_type_category_api(
                 companyId,
@@ -1178,7 +1197,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
                 item.maxStockLevel - item.totalStockInHand >= 0
                   ? item.maxStockLevel - item.totalStockInHand
                   : 0,
-              unitPrice: 0.0,
+              unitPrice: latestBatch?.costPrice || 0.0,
               totalPrice: 0.0,
               supplierItems: supplierItems,
               totalStockInHand: item.totalStockInHand,

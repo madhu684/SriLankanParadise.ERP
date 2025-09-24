@@ -31,13 +31,6 @@ const StockLevel = () => {
     handleModalSubmit,
   } = useStockLevel();
 
-  console.log(
-    "Render - currentItems:",
-    currentItems.length,
-    "submissionStatus:",
-    submissionStatus
-  );
-
   return (
     <div className="container-sm mt-4" style={{ maxWidth: "1200px" }}>
       <h2 className="text-black fw-bold">Stock Level</h2>
@@ -124,7 +117,6 @@ const StockLevel = () => {
                 <th>Item Name</th>
                 <th>UOM</th>
                 <th>Stock in Hand</th>
-                <th>Batch Number</th>
                 <th>Reorder Level</th>
                 <th>Max Stock Level</th>
                 <th>Action</th>
@@ -144,23 +136,22 @@ const StockLevel = () => {
                   <tr
                     key={index}
                     className={
-                      item.stockInHand < item.reOrderLevel
+                      item.totalStockInHand < item.minReOrderLevel
                         ? "table-warning"
-                        : item.stockInHand > item.maxStockLevel
+                        : item.totalStockInHand > item.maxStockLevel
                         ? "table-danger"
                         : ""
                     }
                   >
                     <td></td>
-                    <td>{item.itemCode || "-"}</td>
-                    <td>{item.itemName || "-"}</td>
-                    <td>{item.unitName || "-"}</td>
-                    <td>{item.stockInHand || "-"}</td>
-                    <td>{item.batchNo || "-"}</td>
+                    <td>{item?.itemMaster?.itemCode || "-"}</td>
+                    <td>{item?.itemMaster?.itemName || "-"}</td>
+                    <td>{item?.itemMaster?.unit?.unitName || "-"}</td>
+                    <td>{item.totalStockInHand || "-"}</td>
                     <td>
-                      {item.reOrderLevel !== null &&
-                      item.reOrderLevel !== undefined
-                        ? item.reOrderLevel
+                      {item.minReOrderLevel !== null &&
+                      item.minReOrderLevel !== undefined
+                        ? item.minReOrderLevel
                         : "-"}
                     </td>
                     <td>
@@ -239,13 +230,13 @@ const StockLevel = () => {
                         <label className="form-label">
                           <strong>Item Code:</strong>
                         </label>
-                        <p>{selectedItem.itemCode || "-"}</p>
+                        <p>{selectedItem?.itemMaster?.itemCode || "-"}</p>
                       </div>
                       <div className="col-md-6">
                         <label className="form-label">
                           <strong>Item Name:</strong>
                         </label>
-                        <p>{selectedItem.itemName || "-"}</p>
+                        <p>{selectedItem?.itemMaster?.itemName || "-"}</p>
                       </div>
                     </div>
                     <div className="row mb-3 mx-auto">
@@ -253,13 +244,7 @@ const StockLevel = () => {
                         <label className="form-label">
                           <strong>UOM:</strong>
                         </label>
-                        <p>{selectedItem.unitName || "-"}</p>
-                      </div>
-                      <div className="col-md-6">
-                        <label className="form-label">
-                          <strong>Batch Number:</strong>
-                        </label>
-                        <p>{selectedItem.batchNo || "-"}</p>
+                        <p>{selectedItem?.itemMaster?.unit?.unitName || "-"}</p>
                       </div>
                     </div>
                     <hr />

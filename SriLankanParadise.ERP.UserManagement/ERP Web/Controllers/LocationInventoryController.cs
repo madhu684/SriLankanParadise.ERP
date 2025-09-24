@@ -219,7 +219,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         {
             try
             {
-                var locationInventories = await _locationInventoryService.GetLocationInventoriesByLocationIdItemMasterId(locationId,itemMasterId);
+                var locationInventories = await _locationInventoryService.GetLocationInventoriesByLocationIdItemMasterId(locationId, itemMasterId);
                 if (locationInventories != null)
                 {
                     var locationInventoryDtos = _mapper.Map<IEnumerable<LocationInventoryDto>>(locationInventories);
@@ -245,7 +245,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             try
             {
                 var locationInventories = await _locationInventoryService.GetLocationInventoryByBatchId(batchId);
-                if (locationInventories != null) {
+                if (locationInventories != null)
+                {
                     var locationInventoryDtos = _mapper.Map<IEnumerable<LocationInventoryDto>>(locationInventories);
                     AddResponseMessage(Response, LogMessages.LocationInventoriesRetrieved, locationInventoryDtos, true, HttpStatusCode.OK);
                 }
@@ -488,5 +489,47 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpGet("GetSumOfItemInventoryByLocationId/{locationId}")]
+        public async Task<ApiResponseModel> GetSumOfItemInventoryByLocationId(int locationId)
+        {
+            try
+            {
+                var summary = await _locationInventoryService.GetSumOfItemInventoryByLocationId(locationId);
+                if (summary != null && summary.Any())
+                {
+                    var summaryDto = _mapper.Map<IEnumerable<LocationInventorySummaryDto>>(summary);
+                    AddResponseMessage(Response, LogMessages.LocationInventorySummaryRetrieved, summaryDto, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.LocationInventorySummaryNotFound);
+                    AddResponseMessage(Response, LogMessages.LocationInventorySummaryNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+
+        }
+
+        [HttpPatch("updateReorderLevelMaxStockLevel/{locationId}/{itemMasterId}")]
+        public async Task<ApiResponseModel> UpdateReorderLevelMaxStockLevel(int locationId, int itemMasterId, UpdateMaxStockReorderLevelRequestModel request)
+        {
+            try
+            {
+                var updatedLocationInventory = _mapper.Map<LocationInventory>(request);
+                await _locationInventoryService.UpdateReorderLevelMaxStockLevel(locationId, itemMasterId, updatedLocationInventory);
+                _logger.LogInformation(LogMessages.LocationInventoryUpdated);
+                return AddResponseMessage(Response, LogMessages.LocationInventoryUpdated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
     }
 }
