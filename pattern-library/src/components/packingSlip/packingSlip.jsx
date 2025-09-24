@@ -454,7 +454,7 @@ const PackingSlip = ({ handleRefetchSlip, handleClose }) => {
                               <span className="me-3">
                                 <i className="bi bi-cart4"></i>
                               </span>
-                              {item.itemName}
+                              {item.itemCode} - {item.itemName}
                             </button>
                           </li>
                         ))
