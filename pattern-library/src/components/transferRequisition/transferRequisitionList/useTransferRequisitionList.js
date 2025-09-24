@@ -146,6 +146,7 @@ const useTransferRequisitionList = () => {
         (location) => location?.location?.locationType.name === "Warehouse"
       );
       setUserWarehouses(locations);
+      setSelectedWarehouse(locations[0]?.locationId);
     }
   }, [isUserLocationsLoading, userLocations]);
 

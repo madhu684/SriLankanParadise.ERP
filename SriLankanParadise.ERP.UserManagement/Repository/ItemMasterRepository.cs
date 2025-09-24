@@ -138,7 +138,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Where(im => im.Status == true && im.CompanyId == companyId);
 
                 // Apply search query
-                query = query.Where(im => im.ItemName.Contains(searchQuery));
+                query = query.Where(im => im.ItemName.Contains(searchQuery) || im.ItemCode.Contains(searchQuery));
 
                 // Apply isTreatment filter
                 if (!isTreatment)
