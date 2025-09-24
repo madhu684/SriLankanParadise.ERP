@@ -772,6 +772,8 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     }
   };
 
+  console.log("PR formData:", formData);
+
   return {
     formData,
     // locations,

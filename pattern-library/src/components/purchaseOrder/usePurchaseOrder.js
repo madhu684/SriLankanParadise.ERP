@@ -26,7 +26,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     attachments: [],
     totalAmount: 0,
     subTotal: 0,
-    selectedSupplier: "",
+    selectedSupplier: null,
     commonChargesAndDeductions: [],
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);

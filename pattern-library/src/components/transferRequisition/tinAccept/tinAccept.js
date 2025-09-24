@@ -44,7 +44,7 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
     if (issuedetails?.length > 0) {
       const updatedReceivedQuantities = issuedetails.reduce((acc, item) => {
         acc[item.issueDetailId] =
-          item.receivedQuantity !== undefined ? item.receivedQuantity : "";
+          item.receivedQuantity !== undefined ? item.quantity : "";
         return acc;
       }, {});
 

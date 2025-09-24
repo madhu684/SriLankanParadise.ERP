@@ -25,6 +25,8 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     invoiceDate: "",
     dueDate: "",
     referenceNumber: "",
+    patientName: "",
+    patientNo: "",
     itemDetails: [],
     attachments: [],
     totalAmount: 0,
@@ -607,6 +609,8 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
           referenceNumber: formData.referenceNumber,
           permissionId: 29,
           locationId: formData.storeLocation,
+          inVoicedPersonName: formData.patientName,
+          inVoicedPersonMobileNo: formData.patientNo,
         };
 
         const response = await post_sales_invoice_api(salesInvoiceData);

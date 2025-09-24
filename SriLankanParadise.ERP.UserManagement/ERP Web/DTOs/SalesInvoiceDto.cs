@@ -37,7 +37,12 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
         public DateTime? LastUpdatedDate { get; set; }
 
         public string? ReferenceNumber { get; set; }
+
         public int? LocationId { get; set; }
+
+        public string? InVoicedPersonName { get; set; }
+
+        public string? InVoicedPersonMobileNo { get; set; }
 
         public virtual SalesOrderDto? SalesOrder { get; set; }
 

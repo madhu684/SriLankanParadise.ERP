@@ -28,6 +28,8 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     invoiceDate: "",
     dueDate: "",
     referenceNumber: "",
+    patientName: "",
+    patientNo: "",
     itemDetails: [],
     attachments: [],
     totalAmount: 0,
@@ -401,6 +403,8 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           invoiceDate: deepCopySalesInvoice?.invoiceDate?.split("T")[0] ?? "",
           dueDate: deepCopySalesInvoice?.dueDate?.split("T")[0] ?? "",
           referenceNumber: deepCopySalesInvoice?.referenceNo ?? "",
+          patientName: deepCopySalesInvoice?.inVoicedPersonName ?? "",
+          patientNo: deepCopySalesInvoice?.inVoicedPersonMobileNo ?? "",
           itemDetails: initializedLineItemCharges,
           attachments: deepCopySalesInvoice?.attachments ?? [],
           totalAmount: deepCopySalesInvoice?.totalAmount ?? "",
@@ -697,6 +701,8 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           referenceNumber: salesInvoice.referenceNumber,
           permissionId: 31,
           locationId: salesInvoice.locationId,
+          inVoicedPersonName: formData.patientName,
+          inVoicedPersonMobileNo: formData.patientNo,
         };
 
         const response = await put_sales_invoice_api(

@@ -71,6 +71,14 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                   <strong>Reference Number:</strong>{" "}
                   {salesInvoice?.referenceNumber}
                 </p>
+                <p>
+                  <strong>Patient Name:</strong>{" "}
+                  {salesInvoice?.inVoicedPersonName || "-"}
+                </p>
+                <p>
+                  <strong>Patient Contact No:</strong>{" "}
+                  {salesInvoice?.inVoicedPersonMobileNo || "-"}
+                </p>
                 {salesInvoice.status === 2 && (
                   <>
                     <p>
