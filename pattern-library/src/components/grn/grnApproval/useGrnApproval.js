@@ -29,6 +29,11 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
     goodsReceivedNote: "Goods Received Note",
   };
 
+  console.log("grn: ", grn);
+  const isComplete = grn?.grnDetails.every(
+    (detail) => detail.acceptedQuantity === detail.receivedQuantity
+  );
+
   // Fetch Purchase Order
   const {
     data: purchaseOrder = {},
@@ -198,7 +203,7 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
       await approve_purchase_requisition_api(
         purchaseRequisition.purchaseRequisitionId,
         {
-          status: 5,
+          status: isComplete ? 5 : 4,
           approvedBy: purchaseRequisition.approvedBy,
           approvedUserId: purchaseRequisition.approvedUserId,
           approvedDate: purchaseRequisition.approvedDate,
@@ -214,7 +219,7 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
   const updatePO = async () => {
     try {
       await approve_purchase_order_api(purchaseOrder.purchaseOrderId, {
-        status: 5,
+        status: isComplete ? 5 : 4,
         approvedBy: purchaseOrder.approvedBy,
         approvedUserId: purchaseOrder.approvedUserId,
         approvedDate: purchaseOrder.approvedDate,
