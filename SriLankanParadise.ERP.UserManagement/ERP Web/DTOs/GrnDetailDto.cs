@@ -24,5 +24,9 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public string? ItemBarcode { get; set; }
 
+        public int? OrderedQuantity { get; set; }
+
+        public DateTime? ExpiryDate { get; set; }
+
     }
 }

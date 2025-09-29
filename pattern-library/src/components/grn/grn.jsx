@@ -1048,7 +1048,8 @@ const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
                   <th>Received Quantity</th>
                   <th>Rejected Quantity</th>
                   <th>Free Quantity</th>
-                  <th>Item Barcode</th>
+                  {/* <th>Item Barcode</th> */}
+                  <th>Expiry Date</th>
                   <th>Unit Price</th>
                   <th>Action</th>
                 </tr>
@@ -1134,7 +1135,7 @@ const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
                         }
                       />
                     </td>
-                    <td>
+                    {/* <td>
                       <input
                         type="text"
                         className="form-control"
@@ -1145,6 +1146,22 @@ const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
                           handleItemDetailsChange(
                             index,
                             "itemBarcode",
+                            e.target.value
+                          )
+                        }
+                        required
+                      />
+                    </td> */}
+                    <td>
+                      <input
+                        type="date"
+                        className="form-control"
+                        id="expiryDate"
+                        // value={item.expiryDate || ""}
+                        onChange={(e) =>
+                          handleItemDetailsChange(
+                            index,
+                            "expiryDate",
                             e.target.value
                           )
                         }

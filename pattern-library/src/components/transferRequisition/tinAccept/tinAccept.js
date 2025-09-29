@@ -155,7 +155,7 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
                   itemMasterId
                 );
               const reOrderMaxOrderDetails =
-                existingItemDetails?.data?.result[0];
+                existingItemDetails?.data?.result?.[0] || {};
               const payload = {
                 itemMasterId,
                 batchId,

@@ -21,7 +21,7 @@ const useGrn = ({ onFormSubmit }) => {
     receivedBy: "",
     receivedDate: "",
     itemDetails: [],
-    status: "",
+    status: "4",
     purchaseOrderId: null,
     supplierId: null,
     purchaseRequisitionId: null,
@@ -231,28 +231,34 @@ const useGrn = ({ onFormSubmit }) => {
           .map((poItem) => {
             const receivedQuantity = grns.reduce((total, grn) => {
               const grnDetail = grn.grnDetails.find(
-                (detail) => detail.itemId === poItem.itemMaster?.itemMasterId
+                (detail) => detail.itemId === poItem?.itemMaster?.itemMasterId
               );
-              return total + (grnDetail ? grnDetail.receivedQuantity : 0);
+              return total + (grnDetail ? grnDetail.acceptedQuantity : 0);
             }, 0);
 
+            console.log("receivedQuantity", receivedQuantity);
             const remainingQuantity = poItem.quantity - receivedQuantity;
+            console.log("remainingQuantity", remainingQuantity);
 
             return {
               id: poItem.itemMaster?.itemMasterId,
               name: poItem.itemMaster?.itemName,
               unit: poItem.itemMaster?.unit.unitName,
-              quantity: poItem.quantity,
+              //quantity: poItem.quantity,
+              quantity: Math.max(0, remainingQuantity),
               remainingQuantity: Math.max(0, remainingQuantity),
               receivedQuantity: 0,
               rejectedQuantity: 0,
               freeQuantity: 0,
-              //expiryDate: '',
+              orderedQuantity: poItem.quantity,
+              expiryDate: "",
               itemBarcode: "",
               unitPrice: poItem.unitPrice,
             };
           })
           .filter((item) => item.remainingQuantity > 0);
+
+        console.log("updatedItemDetails", updatedItemDetails);
 
         // Update form data with filtered items
         setFormData((prevFormData) => ({
@@ -272,7 +278,8 @@ const useGrn = ({ onFormSubmit }) => {
             receivedQuantity: 0,
             rejectedQuantity: 0,
             freeQuantity: 0,
-            //expiryDate: '',
+            orderedQuantity: poItem.quantity,
+            expiryDate: "",
             itemBarcode: "",
             unitPrice: poItem.unitPrice,
             // Other item properties...
@@ -696,7 +703,8 @@ const useGrn = ({ onFormSubmit }) => {
             unitPrice: item.unitPrice,
             itemId: item.id,
             freeQuantity: item.freeQuantity,
-            //expiryDate: item.expiryDate,
+            orderedQuantity: item.quantity,
+            expiryDate: item.expiryDate,
             itemBarcode: item.itemBarcode,
             permissionId: 20,
           };

@@ -31,8 +31,9 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
 
   console.log("grn: ", grn);
   const isComplete = grn?.grnDetails.every(
-    (detail) => detail.acceptedQuantity === detail.receivedQuantity
+    (detail) => detail.acceptedQuantity === detail.orderedQuantity
   );
+  console.log("isComplete: ", isComplete);
 
   // Fetch Purchase Order
   const {
@@ -276,7 +277,8 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
           itemBatchResponse.data.result?.itemMasterId
         );
 
-      const reOrderMaxOrderDetails = existingItemDetails?.data?.result[0];
+      const reOrderMaxOrderDetails =
+        existingItemDetails?.data?.result?.[0] || {};
 
       const locationInventoryData = {
         itemMasterId: itemBatchResponse.data.result?.itemMasterId,

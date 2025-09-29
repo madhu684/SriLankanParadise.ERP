@@ -110,7 +110,8 @@ const GrnDetail = ({ show, handleClose, grn }) => {
                 <th>Received Quantity</th>
                 <th>Rejected Quantity</th>
                 <th>Free Quantity</th>
-                <th>Item Barcode</th>
+                {/* <th>Item Barcode</th> */}
+                <th>Expiry Date</th>
                 <th>Unit Price</th>
               </tr>
             </thead>
@@ -122,7 +123,8 @@ const GrnDetail = ({ show, handleClose, grn }) => {
                   <td>{item.receivedQuantity}</td>
                   <td>{item.rejectedQuantity}</td>
                   <td>{item.freeQuantity}</td>
-                  <td>{item.itemBarcode}</td>
+                  {/* <td>{item.itemBarcode}</td> */}
+                  <td>{item.expiryDate.split("T")[0]}</td>
                   <td>{item.unitPrice.toFixed(2)}</td>
                 </tr>
               ))}

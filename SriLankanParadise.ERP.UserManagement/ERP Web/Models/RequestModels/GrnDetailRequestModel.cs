@@ -18,6 +18,10 @@
 
         public string? ItemBarcode { get; set; }
 
+        public int? OrderedQuantity { get; set; }
+
+        public DateTime? ExpiryDate { get; set; }
+
         public int PermissionId { get; set; }
     }
 }
