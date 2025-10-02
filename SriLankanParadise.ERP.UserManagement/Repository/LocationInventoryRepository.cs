@@ -1,5 +1,6 @@
 ﻿using Azure;
 using Microsoft.EntityFrameworkCore;
+using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
@@ -13,56 +14,145 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             _dbContext = dbContext;
         }
-        public async Task<LocationInventory> AddLocationInventory(LocationInventory locationInventory, int m)
-        {
-            try
-            {
-                var existingInventory = await _dbContext.LocationInventories
-                    .FirstOrDefaultAsync(li => li.ItemMasterId == locationInventory.ItemMasterId
-                                            && li.BatchNo == locationInventory.BatchNo
-                                            && li.LocationId == locationInventory.LocationId);
+        //public async Task<LocationInventory> AddLocationInventory(LocationInventory locationInventory, int m)
+        //{
+        //    try
+        //    {
+        //        var existingInventory = await _dbContext.LocationInventories
+        //            .FirstOrDefaultAsync(li => li.ItemMasterId == locationInventory.ItemMasterId
+        //                                    && li.BatchNo == locationInventory.BatchNo
+        //                                    && li.LocationId == locationInventory.LocationId);
 
-                if (existingInventory != null)
+        //        if (existingInventory != null)
+        //        {
+        //            if (m == 1)
+        //            {
+        //                existingInventory.StockInHand += locationInventory.StockInHand;
+        //            }
+        //            else if (m == 2)
+        //            {
+        //                existingInventory.StockInHand -= locationInventory.StockInHand;
+        //            }
+        //            else
+        //            {
+        //                existingInventory.StockInHand = locationInventory.StockInHand;
+        //            }
+
+        //            await _dbContext.SaveChangesAsync();
+        //            return existingInventory;
+        //        }
+        //        else
+        //        {
+        //            var batchInventory = await _dbContext.LocationInventories
+        //                .FirstOrDefaultAsync(li => li.ItemMasterId == locationInventory.ItemMasterId
+        //                                        && li.BatchNo == locationInventory.BatchNo);
+
+        //            if (batchInventory != null && batchInventory.ExpirationDate != null)
+        //            {
+        //                locationInventory.ExpirationDate = batchInventory.ExpirationDate;
+        //            }
+
+        //            _dbContext.LocationInventories.Add(locationInventory);
+        //            await _dbContext.SaveChangesAsync();
+
+        //            return locationInventory;
+        //        }
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
+
+        public async Task<LocationInventory> AddLocationInventory(LocationInventory locationInventory, int m, int userId)
+        {
+            var executionStrategy = _dbContext.Database.CreateExecutionStrategy();
+            return await executionStrategy.ExecuteAsync(async () =>
+            {
+                using var transaction = await _dbContext.Database.BeginTransactionAsync();
+                try
                 {
-                    if (m == 1)
+                    var existingInventory = await _dbContext.LocationInventories
+                        .FirstOrDefaultAsync(li => li.ItemMasterId == locationInventory.ItemMasterId
+                                                && li.BatchNo == locationInventory.BatchNo
+                                                && li.LocationId == locationInventory.LocationId);
+
+                    if (existingInventory != null)
                     {
-                        existingInventory.StockInHand += locationInventory.StockInHand;
-                    }
-                    else if (m == 2)
-                    {
-                        existingInventory.StockInHand -= locationInventory.StockInHand;
+                        var initialQuantity = existingInventory.StockInHand;
+                        string logType;
+
+                        if (m == 1)
+                        {
+                            existingInventory.StockInHand += locationInventory.StockInHand;
+                            logType = "Increase";
+                        }
+                        else if (m == 2)
+                        {
+                            existingInventory.StockInHand -= locationInventory.StockInHand;
+                            logType = "Decrease";
+                        }
+                        else
+                        {
+                            existingInventory.StockInHand = locationInventory.StockInHand;
+                            logType = "Replace";
+                        }
+
+                        var logEntry = new LocationInventoryLog
+                        {
+                            LocationInventoryId = existingInventory.LocationInventoryId,
+                            LocationId = existingInventory.LocationId,
+                            ItemMasterId = existingInventory.ItemMasterId,
+                            InitialQuantity = initialQuantity,
+                            ChangedQuantity = locationInventory.StockInHand,
+                            Type = logType,
+                            CreatedBy = userId,
+                            CreatedDate = DateTime.UtcNow
+                        };
+
+                        _dbContext.LocationInventoryLogs.Add(logEntry);
+                        await _dbContext.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return existingInventory;
                     }
                     else
                     {
-                        existingInventory.StockInHand = locationInventory.StockInHand;
-                    }
+                        var batchInventory = await _dbContext.LocationInventories
+                            .FirstOrDefaultAsync(li => li.ItemMasterId == locationInventory.ItemMasterId
+                                                    && li.BatchNo == locationInventory.BatchNo);
+                        if (batchInventory != null && batchInventory.ExpirationDate != null)
+                        {
+                            locationInventory.ExpirationDate = batchInventory.ExpirationDate;
+                        }
 
-                    await _dbContext.SaveChangesAsync();
-                    return existingInventory;
+                        _dbContext.LocationInventories.Add(locationInventory);
+                        await _dbContext.SaveChangesAsync();
+
+                        var logEntry = new LocationInventoryLog
+                        {
+                            LocationInventoryId = locationInventory.LocationInventoryId,
+                            LocationId = locationInventory.LocationId,
+                            ItemMasterId = locationInventory.ItemMasterId,
+                            InitialQuantity = 0,
+                            ChangedQuantity = locationInventory.StockInHand,
+                            Type = "Add",
+                            CreatedBy = userId,
+                            CreatedDate = DateTime.UtcNow
+                        };
+
+                        _dbContext.LocationInventoryLogs.Add(logEntry);
+                        await _dbContext.SaveChangesAsync();
+                        await transaction.CommitAsync();
+                        return locationInventory;
+                    }
                 }
-                else
+                catch (Exception)
                 {
-                    var batchInventory = await _dbContext.LocationInventories
-                        .FirstOrDefaultAsync(li => li.ItemMasterId == locationInventory.ItemMasterId
-                                                && li.BatchNo == locationInventory.BatchNo);
-
-                    if (batchInventory != null && batchInventory.ExpirationDate != null)
-                    {
-                        locationInventory.ExpirationDate = batchInventory.ExpirationDate;
-                    }
-
-                    _dbContext.LocationInventories.Add(locationInventory);
-                    await _dbContext.SaveChangesAsync();
-
-                    return locationInventory;
+                    await transaction.RollbackAsync();
+                    throw;
                 }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            });
         }
-
 
         public async Task<IEnumerable<LocationInventory>> GetAll()
         {

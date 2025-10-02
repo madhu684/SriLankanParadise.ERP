@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using SriLankanParadise.ERP.UserManagement.DataModels;
 
-namespace SriLankanParadise.ERP.UserManagement.DataModels;
+namespace SriLankanParadise.ERP.UserManagement.Data;
 
 public partial class ErpSystemContext : DbContext
 {
@@ -146,6 +147,8 @@ public partial class ErpSystemContext : DbContext
     public virtual DbSet<DailyLocationInventory> DailyLocationInventories { get; set; }
 
     public virtual DbSet<DailyLocationInventoryLog> DailyLocationInventoryLogs { get; set; }
+
+    public virtual DbSet<LocationInventoryLog> LocationInventoryLogs { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:LocalSqlServerConnection");
@@ -1302,6 +1305,8 @@ public partial class ErpSystemContext : DbContext
                   .OnDelete(DeleteBehavior.Cascade)
                   .HasConstraintName("FK_DailyLocationInventoryLog_DailyLocationInventory");
         });
+
+        modelBuilder.Entity<LocationInventoryLog>().ToTable("LocationInventoryLog");
 
         OnModelCreatingPartial(modelBuilder);
     }
