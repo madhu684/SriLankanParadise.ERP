@@ -468,6 +468,7 @@ const PurchaseOrder = ({
                   <th>Unit</th>
                   <th>Quantity</th>
                   <th>Unit Price</th>
+                  <th>Discount (%)</th>
                   <th>Stock in Hand</th>
                   <th>Reorder level</th>
                   <th>Max order level</th>
@@ -528,6 +529,34 @@ const PurchaseOrder = ({
                       {validationErrors[`unitPrice_${index}`] && (
                         <div className="invalid-feedback">
                           {validationErrors[`unitPrice_${index}`]}
+                        </div>
+                      )}
+                    </td>
+                    <td>
+                      <input
+                        type="number"
+                        className={`form-control ${
+                          validFields[`discount_${index}`] ? "is-valid" : ""
+                        } ${
+                          validationErrors[`discount_${index}`]
+                            ? "is-invalid"
+                            : ""
+                        }`}
+                        value={item.discount}
+                        onChange={(e) =>
+                          handleItemDetailsChange(
+                            index,
+                            "discount",
+                            e.target.value
+                          )
+                        }
+                        max={100}
+                        min={0}
+                        step={0.01}
+                      />
+                      {validationErrors[`discount_${index}`] && (
+                        <div className="invalid-feedback">
+                          {validationErrors[`discount_${index}`]}
                         </div>
                       )}
                     </td>
@@ -613,7 +642,7 @@ const PurchaseOrder = ({
                 <tr>
                   <td
                     colSpan={
-                      7 +
+                      8 +
                       formData.itemDetails[0].chargesAndDeductions.length -
                       1
                     }
@@ -627,7 +656,7 @@ const PurchaseOrder = ({
                 <tr>
                   <td
                     colSpan={
-                      7 +
+                      8 +
                       formData.itemDetails[0].chargesAndDeductions.length -
                       1
                     }

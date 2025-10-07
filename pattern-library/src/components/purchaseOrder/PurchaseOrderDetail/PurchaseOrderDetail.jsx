@@ -11,6 +11,7 @@ const PurchaseOrderDetail = ({ show, handleClose, purchaseOrder }) => {
   const { getStatusLabel, getStatusBadgeClass } = usePurchaseOrderList();
   const {
     calculateSubTotal,
+    calculateLineItemDiscount,
     isLoading,
     isError,
     error,
@@ -105,6 +106,7 @@ const PurchaseOrderDetail = ({ show, handleClose, purchaseOrder }) => {
                     <th>Unit</th>
                     <th>Quantity</th>
                     <th>Unit Price</th>
+                    <th>Discount (%)</th>
                     {uniqueLineItemDisplayNames.map((displayName, index) => {
                       // Find the charge/deduction associated with the current display name
                       const charge = lineItemChargesAndDeductions.find(
@@ -132,6 +134,13 @@ const PurchaseOrderDetail = ({ show, handleClose, purchaseOrder }) => {
                       <td>{item.itemMaster?.unit.unitName}</td>
                       <td>{item.quantity}</td>
                       <td>{item.unitPrice.toFixed(2)}</td>
+                      <td>
+                        {calculateLineItemDiscount(
+                          item.quantity,
+                          item.unitPrice,
+                          item.totalPrice
+                        )}
+                      </td>
                       {/* Render line item charges/deductions */}
                       {uniqueLineItemDisplayNames.map((displayName, idx) => {
                         const charge = lineItemChargesAndDeductions.find(
@@ -171,7 +180,7 @@ const PurchaseOrderDetail = ({ show, handleClose, purchaseOrder }) => {
                 </tbody>
                 <tfoot>
                   <tr>
-                    <td colSpan={3 + uniqueLineItemDisplayNames.length}></td>
+                    <td colSpan={4 + uniqueLineItemDisplayNames.length}></td>
                     <th>Sub Total</th>
                     <td className="text-end">
                       {calculateSubTotal().toFixed(2)}
@@ -204,7 +213,7 @@ const PurchaseOrderDetail = ({ show, handleClose, purchaseOrder }) => {
                       return (
                         <tr key={`${index}-${chargeIndex}`}>
                           <td
-                            colSpan={3 + uniqueLineItemDisplayNames.length}
+                            colSpan={4 + uniqueLineItemDisplayNames.length}
                           ></td>
                           <th>
                             {charge.chargesAndDeduction.sign}{" "}
@@ -216,7 +225,7 @@ const PurchaseOrderDetail = ({ show, handleClose, purchaseOrder }) => {
                     });
                   })}
                   <tr>
-                    <td colSpan={3 + uniqueLineItemDisplayNames.length}></td>
+                    <td colSpan={4 + uniqueLineItemDisplayNames.length}></td>
                     <th>Total Amount</th>
                     <td className="text-end">
                       {purchaseOrder.totalAmount.toFixed(2)}
