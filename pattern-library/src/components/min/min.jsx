@@ -417,7 +417,9 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                         onClick={() => handleAddDummyItem(item)}
                         style={{ cursor: "pointer" }} // Indicate clickable behavior
                       >
-                        <span>{item.itemName}</span>
+                        <span>
+                          {item.itemCode} - {item.itemName}
+                        </span>
                       </li>
                     ))}
                   </ul>

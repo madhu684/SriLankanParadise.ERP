@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   approve_requisition_master_api,
   get_issue_details_api,
+  get_locations_inventories_by_location_id_item_master_id_api,
   patch_issue_detail_api,
   patch_location_inventory_api,
   post_location_inventory_api,
@@ -44,7 +45,7 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
     if (issuedetails?.length > 0) {
       const updatedReceivedQuantities = issuedetails.reduce((acc, item) => {
         acc[item.issueDetailId] =
-          item.receivedQuantity !== undefined ? item.receivedQuantity : "";
+          item.receivedQuantity !== undefined ? item.quantity : "";
         return acc;
       }, {});
 
@@ -148,13 +149,23 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
               }
             );
             if (patchResponse && patchResponse.status === 404) {
-              await post_location_inventory_api({
+              const existingItemDetails =
+                await get_locations_inventories_by_location_id_item_master_id_api(
+                  tin?.requisitionMaster?.requestedFromLocationId,
+                  itemMasterId
+                );
+              const reOrderMaxOrderDetails =
+                existingItemDetails?.data?.result?.[0] || {};
+              const payload = {
                 itemMasterId,
                 batchId,
                 locationId: fromLocId,
                 stockInHand: receivedQty,
                 permissionId: 1088,
-              });
+                reOrderLevel: reOrderMaxOrderDetails?.reOrderLevel || 0,
+                maxStockLevel: reOrderMaxOrderDetails?.maxStockLevel || 0,
+              };
+              await post_location_inventory_api(payload);
             }
 
             console.log(

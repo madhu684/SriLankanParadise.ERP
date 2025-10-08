@@ -38,12 +38,6 @@ const Routers = () => {
         <Route path="/salesorder" element={<SalesOrder />} />
         <Route path="/salesinvoice" element={<SalesInvoice />} />
         <Route path="/salesreceipt" element={<SalesReceipt />} />
-        {/* <Route path="/main" element={<Main />}>
-          <Route index element={<PurchaseRequisition />} />
-          <Route path="purchase Orders" element={<PurchaseOrder />} />
-          <Route path="grn" element={<Grn />} />
-          <Route path="purchaselist" element={<PurchaseRequisitionList />} />
-        </Route> */}
         <Route path="/itemmaster" element={<ItemMaster />} />
         <Route path="/category" element={<Category />} />
         <Route path="/unit" element={<Unit />} />

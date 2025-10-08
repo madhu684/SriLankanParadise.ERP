@@ -471,7 +471,7 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                                 <span className="me-3">
                                   <i className="bi bi-cart4"></i>
                                 </span>{" "}
-                                {item.itemName}
+                                {item.itemCode} - {item.itemName}
                               </button>
                             </li>
                           ))
@@ -510,8 +510,8 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                   <th>Received Quantity</th>
                   <th>Rejected Quantity</th>
                   <th>Free Quantity</th>
-                  {/* <th>Expiry Date</th> */}
-                  <th>Item Barcode</th>
+                  {/* <th>Item Barcode</th> */}
+                  <th>Expiry Date</th>
                   <th>Unit Price</th>
                 </tr>
               </thead>
@@ -598,31 +598,6 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                     </td>
                     {/* <td>
                       <input
-                        type="date"
-                        className={`form-control ${
-                          validFields[`expiryDate_${index}`] ? 'is-valid' : ''
-                        } ${
-                          validationErrors[`expiryDate_${index}`]
-                            ? 'is-invalid'
-                            : ''
-                        }`}
-                        value={item.expiryDate}
-                        onChange={(e) =>
-                          handleItemDetailsChange(
-                            index,
-                            'expiryDate',
-                            e.target.value
-                          )
-                        }
-                      />
-                      {validationErrors[`expiryDate_${index}`] && (
-                        <div className="invalid-feedback">
-                          {validationErrors[`expiryDate_${index}`]}
-                        </div>
-                      )}
-                    </td> */}
-                    <td>
-                      <input
                         type="text"
                         className="form-control"
                         id="itemBarcode"
@@ -632,6 +607,22 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                           handleItemDetailsChange(
                             index,
                             "itemBarcode",
+                            e.target.value
+                          )
+                        }
+                        required
+                      />
+                    </td> */}
+                    <td>
+                      <input
+                        type="date"
+                        className="form-control"
+                        id="expiryDate"
+                        value={item.expiryDate || ""}
+                        onChange={(e) =>
+                          handleItemDetailsChange(
+                            index,
+                            "expiryDate",
                             e.target.value
                           )
                         }

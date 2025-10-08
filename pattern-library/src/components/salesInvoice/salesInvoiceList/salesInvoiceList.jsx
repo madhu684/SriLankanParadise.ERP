@@ -35,9 +35,7 @@ const SalesInvoiceList = () => {
     showRightOffSIModalInParent,
     SIDetail,
     showDeleteSIForm,
-    refetch,
     setShowDeleteSIForm,
-    setRefetch,
     areAnySelectedRowsPending,
     areAnySelectedRowsApproved,
     setSelectedRows,
@@ -318,8 +316,6 @@ const SalesInvoiceList = () => {
             show={showDeleteSIForm}
             handleClose={() => setShowDeleteSIForm(false)}
             salesInvoice={selectedRowData[0]}
-            refetch={refetch}
-            setRefetch={setRefetch}
           />
         )}
       </div>

@@ -130,6 +130,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
         response.data?.result?.map((summary) => ({
           itemMasterId: summary.itemMasterId,
           itemName: summary.itemMaster?.itemName || "",
+          itemCode: summary.itemMaster?.itemCode || "",
           unit: summary.itemMaster?.unit || { unitName: "" },
           categoryId: summary.itemMaster?.category?.categoryId || "",
           itemTypeId: summary.itemMaster?.itemType?.itemTypeId || "",
@@ -771,6 +772,8 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
       setPRGenerating(false);
     }
   };
+
+  console.log("PR formData:", formData);
 
   return {
     formData,

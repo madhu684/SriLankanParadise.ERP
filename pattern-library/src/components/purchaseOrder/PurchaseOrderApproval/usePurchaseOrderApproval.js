@@ -164,6 +164,14 @@ const usePurchaseOrderApproval = ({ onFormSubmit, purchaseOrder }) => {
     )
   );
 
+  const calculateLineItemDiscount = (quantity, unitPrice, totalPrice) => {
+    const priceDifference = parseFloat(quantity * unitPrice - totalPrice);
+
+    const lineItemDiscount = (priceDifference / (quantity * unitPrice)) * 100;
+
+    return lineItemDiscount.toFixed(2);
+  };
+
   return {
     chargesAndDeductionsApplied,
     isLoading,
@@ -179,6 +187,7 @@ const usePurchaseOrderApproval = ({ onFormSubmit, purchaseOrder }) => {
     isLoadingPurchaseRequisition,
     handleApprove,
     calculateSubTotal,
+    calculateLineItemDiscount,
   };
 };
 

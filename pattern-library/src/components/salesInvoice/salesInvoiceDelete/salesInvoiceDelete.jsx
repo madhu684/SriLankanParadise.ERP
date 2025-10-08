@@ -3,19 +3,15 @@ import {
   delete_charges_and_deductions_applied_api,
   get_charges_and_deductions_applied_api,
 } from "../../../services/purchaseApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Modal } from "react-bootstrap";
 import { delete_sales_invoice_api } from "../../../services/salesApi";
 
-const SalesInvoiceDelete = ({
-  show,
-  handleClose,
-  salesInvoice,
-  refetch,
-  setRefetch,
-}) => {
+const SalesInvoiceDelete = ({ show, handleClose, salesInvoice }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
+
+  const queryClient = useQueryClient();
 
   const fetchChargesAndDeductionsApplied = async () => {
     try {
@@ -55,10 +51,17 @@ const SalesInvoiceDelete = ({
       setIsDeleting(false);
 
       setTimeout(() => {
-        setRefetch(!refetch);
         handleClose();
         // Reset states when modal closes
         setIsDeleted(false);
+        queryClient.invalidateQueries([
+          "salesInvoicesByUserId",
+          sessionStorage.getItem("userId"),
+        ]);
+        queryClient.invalidateQueries([
+          "salesInvoicesWithoutDrafts",
+          sessionStorage.getItem("companyId"),
+        ]);
       }, 2000);
     } catch (error) {
       console.error("Error deleting purchase order:", error);

@@ -97,5 +97,15 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             await _locationInventoryRepository.ReduceInventoryByFIFO(locationId, itemMasterId, transactionTypeId, quantity);
         }
+
+        public async Task<IEnumerable<LocationInventorySummary>> GetSumOfItemInventoryByLocationId(int locationId)
+        {
+            return await _locationInventoryRepository.GetSumOfItemInventoryByLocationId(locationId);
+        }
+
+        public async Task UpdateReorderLevelMaxStockLevel(int locationId, int itemMasterId, LocationInventory locationInventory)
+        {
+            await _locationInventoryRepository.UpdateReorderLevelMaxStockLevel(locationId, itemMasterId, locationInventory);
+        }
     }
 }

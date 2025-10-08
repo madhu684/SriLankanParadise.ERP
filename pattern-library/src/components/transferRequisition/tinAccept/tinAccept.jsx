@@ -148,7 +148,7 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
                       value={
                         receivedQuantities[item.issueDetailId] !== undefined
                           ? receivedQuantities[item.issueDetailId]
-                          : item.receivedQuantity ?? 0
+                          : item.quantity ?? 0
                       }
                       onChange={(e) =>
                         handleReceivedQuantityChange(

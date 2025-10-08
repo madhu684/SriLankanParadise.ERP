@@ -162,7 +162,8 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
   };
 
   const {
-    data: grns,
+    data: grns = [],
+    isFetched: isGrnsFetched,
     isLoading: isGrnsLoading,
     isError: isGrnsError,
     error: grnError,
@@ -257,83 +258,90 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
   }, [grn, isLoading]);
 
   useEffect(() => {
-    if (grns && selectedPurchaseOrder) {
-      const updatedItemDetails = selectedPurchaseOrder.purchaseOrderDetails
-        .map((poItem) => {
-          const receivedQuantity = grns.reduce((total, grn) => {
-            const grnDetail = grn.grnDetails.find(
-              (detail) => detail.itemId === poItem.itemMaster?.itemMasterId
+    if (isGrnsFetched) {
+      if (grns && selectedPurchaseOrder) {
+        const updatedItemDetails = selectedPurchaseOrder.purchaseOrderDetails
+          .map((poItem) => {
+            const receivedQuantity = grns.reduce((total, grn) => {
+              const grnDetail = grn.grnDetails.find(
+                (detail) => detail.itemId === poItem.itemMaster?.itemMasterId
+              );
+              return total + (grnDetail ? grnDetail.acceptedQuantity : 0);
+            }, 0);
+
+            console.log("receivedQuantity", receivedQuantity);
+            const remainingQuantity = poItem.quantity - receivedQuantity;
+            console.log("remainingQuantity", remainingQuantity);
+
+            const matchingGrnDetail = grn.grnDetails.find(
+              (detail) => detail.itemId === poItem.itemMaster.itemMasterId
             );
-            return total + (grnDetail ? grnDetail.receivedQuantity : 0);
-          }, 0);
 
-          const remainingQuantity = poItem.quantity - receivedQuantity;
+            console.log(matchingGrnDetail);
 
-          const matchingGrnDetail = grn.grnDetails.find(
-            (detail) => detail.itemId === poItem.itemMaster.itemMasterId
-          );
+            return {
+              id: poItem.itemMaster.itemMasterId,
+              name: poItem.itemMaster.itemName,
+              unit: poItem.itemMaster.unit.unitName,
+              quantity: Math.max(0, remainingQuantity),
+              // remainingQuantity:
+              //   Math.max(0, remainingQuantity) +
+              //   (matchingGrnDetail ? matchingGrnDetail.receivedQuantity : 0),
+              remainingQuantity: Math.max(0, remainingQuantity),
+              receivedQuantity: matchingGrnDetail
+                ? matchingGrnDetail.receivedQuantity
+                : 0,
+              rejectedQuantity: matchingGrnDetail
+                ? matchingGrnDetail.rejectedQuantity
+                : 0,
+              freeQuantity: matchingGrnDetail
+                ? matchingGrnDetail.freeQuantity
+                : 0,
+              orderedQuantity: poItem.quantity,
+              expiryDate: matchingGrnDetail
+                ? matchingGrnDetail.expiryDate.split("T")[0]
+                : "",
+              itemBarcode: poItem.itemBarcode,
+              unitPrice: poItem.unitPrice,
+              grnDetailId: matchingGrnDetail
+                ? matchingGrnDetail.grnDetailId
+                : null,
+              grnMasterId: matchingGrnDetail
+                ? matchingGrnDetail.grnMasterId
+                : null,
+            };
+          })
+          .filter((item) => item.grnMasterId === grn.grnMasterId);
 
-          console.log(matchingGrnDetail);
+        // Update form data with filtered items
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          itemDetails: updatedItemDetails,
+        }));
+      } else {
+        const formattedItemDetails = grn.grnDetails.map((detail) => ({
+          id: detail.item.itemMasterId,
+          name: detail.item.itemName,
+          unit: detail.item.unit.unitName,
+          quantity: detail.receivedQuantity,
+          remainingQuantity: detail.remainingQuantity,
+          receivedQuantity: detail.receivedQuantity,
+          rejectedQuantity: detail.rejectedQuantity,
+          freeQuantity: detail.freeQuantity,
+          orderedQuantity: detail.orderedQuantity,
+          expiryDate: detail.expiryDate,
+          itemBarcode: detail.itemBarcode,
+          unitPrice: detail.unitPrice,
+          grnDetailId: detail.grnDetailId,
+        }));
 
-          return {
-            id: poItem.itemMaster.itemMasterId,
-            name: poItem.itemMaster.itemName,
-            unit: poItem.itemMaster.unit.unitName,
-            quantity: poItem.quantity,
-            remainingQuantity:
-              Math.max(0, remainingQuantity) +
-              (matchingGrnDetail ? matchingGrnDetail.receivedQuantity : 0),
-            receivedQuantity: matchingGrnDetail
-              ? matchingGrnDetail.receivedQuantity
-              : 0,
-            rejectedQuantity: matchingGrnDetail
-              ? matchingGrnDetail.rejectedQuantity
-              : 0,
-            freeQuantity: matchingGrnDetail
-              ? matchingGrnDetail.freeQuantity
-              : 0,
-            // expiryDate: matchingGrnDetail
-            //   ? matchingGrnDetail.expiryDate?.split("T")[0]
-            //   : "",
-            itemBarcode: poItem.itemBarcode,
-            unitPrice: poItem.unitPrice,
-            grnDetailId: matchingGrnDetail
-              ? matchingGrnDetail.grnDetailId
-              : null,
-            grnMasterId: matchingGrnDetail
-              ? matchingGrnDetail.grnMasterId
-              : null,
-          };
-        })
-        .filter((item) => item.grnMasterId === grn.grnMasterId);
-
-      // Update form data with filtered items
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        itemDetails: updatedItemDetails,
-      }));
-    } else {
-      const formattedItemDetails = grn.grnDetails.map((detail) => ({
-        id: detail.item.itemMasterId,
-        name: detail.item.itemName,
-        unit: detail.item.unit.unitName,
-        quantity: detail.receivedQuantity,
-        remainingQuantity: detail.remainingQuantity,
-        receivedQuantity: detail.receivedQuantity,
-        rejectedQuantity: detail.rejectedQuantity,
-        freeQuantity: detail.freeQuantity,
-        //expiryDate: detail.expiryDate ? detail.expiryDate.split("T")[0] : "",
-        itemBarcode: detail.itemBarcode,
-        unitPrice: detail.unitPrice,
-        grnDetailId: detail.grnDetailId,
-      }));
-
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        itemDetails: formattedItemDetails,
-      }));
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          itemDetails: formattedItemDetails,
+        }));
+      }
     }
-  }, [selectedPurchaseOrder, grns]);
+  }, [selectedPurchaseOrder, grns, isGrnsFetched]);
 
   /* Purchase requisition selected */
 
@@ -748,7 +756,8 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
             unitPrice: item.unitPrice,
             itemId: item.id,
             freeQuantity: item.freeQuantity,
-            //expiryDate: item.expiryDate,
+            orderedQuantity: item.orderedQuantity,
+            expiryDate: item.expiryDate,
             itemBarcode: item.itemBarcode,
             permissionId: 22,
           };

@@ -207,11 +207,19 @@ const usePurchaseOrderUpdate = ({ purchaseOrder, onFormSubmit }) => {
               return matchedCharge || null; // Return null if no matching charge is found
             });
 
+          const priceDifference = parseFloat(
+            item.quantity * item.unitPrice - item.totalPrice
+          );
+
+          const lineItemDiscount =
+            (priceDifference / (item.quantity * item.unitPrice)) * 100;
+
           return {
             ...item,
             id: item.itemMasterId,
             name: item.itemMaster.itemName,
             unit: item.itemMaster.unit.unitName,
+            discount: lineItemDiscount.toFixed(2),
             chargesAndDeductions: sortedLineItemCharges,
           };
         });
@@ -729,10 +737,11 @@ const usePurchaseOrderUpdate = ({ purchaseOrder, onFormSubmit }) => {
           value;
       } else {
         // If the field is not part of chargesAndDeductions, update other fields
-        updatedItemDetails[index][field] = value;
+        updatedItemDetails[index][field] =
+          field === "discount" ? parseFloat(value) : value;
       }
 
-      // Ensure positive values for Quantities and Unit Prices
+      // Ensure positive values for Quantities, Unit Prices and discounts
       updatedItemDetails[index].quantity = Math.max(
         0,
         updatedItemDetails[index].quantity
@@ -744,14 +753,23 @@ const usePurchaseOrderUpdate = ({ purchaseOrder, onFormSubmit }) => {
         ? Math.max(0, parseFloat(updatedItemDetails[index].unitPrice))
         : 0;
 
+      updatedItemDetails[index].discount = Math.max(
+        0,
+        updatedItemDetails[index].discount
+      );
+
       // Calculate total price based on charges and deductions
       const grandTotalPrice =
-        updatedItemDetails[index].quantity *
-        updatedItemDetails[index].unitPrice;
+        (updatedItemDetails[index].quantity *
+          updatedItemDetails[index].unitPrice *
+          (100 - updatedItemDetails[index].discount)) /
+        100;
 
       let totalPrice =
-        updatedItemDetails[index].quantity *
-        updatedItemDetails[index].unitPrice;
+        (updatedItemDetails[index].quantity *
+          updatedItemDetails[index].unitPrice *
+          (100 - updatedItemDetails[index].discount)) /
+        100;
 
       // Add or subtract charges and deductions from total price
       updatedItemDetails[index].chargesAndDeductions.forEach((charge) => {
@@ -905,6 +923,7 @@ const usePurchaseOrderUpdate = ({ purchaseOrder, onFormSubmit }) => {
           unit: item.unit.unitName,
           quantity: 0,
           unitPrice: 0.0,
+          discount: 0.0,
           totalPrice: 0.0,
           chargesAndDeductions: initializedCharges, // Add the generated array to itemDetails
         },
@@ -966,7 +985,7 @@ const usePurchaseOrderUpdate = ({ purchaseOrder, onFormSubmit }) => {
           <tr key={chargeIndex}>
             <td
               colSpan={
-                4 + formData.itemDetails[0].chargesAndDeductions.length - 1
+                5 + formData.itemDetails[0].chargesAndDeductions.length - 1
               }
             ></td>
             <th>
@@ -1009,6 +1028,8 @@ const usePurchaseOrderUpdate = ({ purchaseOrder, onFormSubmit }) => {
       return null;
     });
   };
+
+  console.log("formData", formData);
 
   return {
     formData,

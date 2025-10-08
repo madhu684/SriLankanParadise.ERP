@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  get_sales_orders_with_out_drafts_api,
   post_sales_invoice_api,
   post_sales_invoice_detail_api,
   get_company_api,
@@ -12,7 +11,6 @@ import {
   get_transaction_types_api,
   get_user_locations_by_user_id_api,
   get_locations_inventories_by_location_id_api,
-  get_item_batch_by_itemMasterId_batchId_api,
   get_sum_location_inventories_by_locationId_itemMasterId_api,
   get_item_batches_by_item_master_id_api,
 } from "../../services/purchaseApi";
@@ -25,6 +23,8 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     invoiceDate: "",
     dueDate: "",
     referenceNumber: "",
+    patientName: "",
+    patientNo: "",
     itemDetails: [],
     attachments: [],
     totalAmount: 0,
@@ -607,6 +607,8 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
           referenceNumber: formData.referenceNumber,
           permissionId: 29,
           locationId: formData.storeLocation,
+          inVoicedPersonName: formData.patientName,
+          inVoicedPersonMobileNo: formData.patientNo,
         };
 
         const response = await post_sales_invoice_api(salesInvoiceData);
