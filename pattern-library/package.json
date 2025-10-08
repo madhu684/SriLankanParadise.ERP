@@ -38,6 +38,7 @@
     "build:powerlineprod": "env-cmd -f .env.powerlineprod react-scripts build",
     "build:powerlinedev": "env-cmd -f .env.powerlinedev react-scripts build",
     "build:development": "env-cmd -f .env.development react-scripts build",
+    "build:ayulanka": "env-cmd -f .env.ayulanka react-scripts build",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
