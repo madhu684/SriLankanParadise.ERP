@@ -1334,6 +1334,23 @@ export const get_item_locations_inventories_by_location_id_api = async (
   }
 };
 
+export const get_sum_of_item_inventory_by_location_id_api = async (
+  locationId
+) => {
+  try {
+    const response = await api.get(
+      `/locationInventory/GetSumOfItemInventoryByLocationId/${locationId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const get_locations_inventories_by_location_id_item_master_id_api =
   async (locationId, itemMasterId) => {
     try {
@@ -1730,6 +1747,26 @@ export const get_batches_by_batchRef_api = async (batchRef) => {
     const response = await api.get(`/batch/GetBatchesByBatchRef/${batchRef}`, {
       withCredentials: true,
     });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const update_reorderlevel_maxorder_level_api = async (
+  locationId,
+  itemMasterId,
+  formData
+) => {
+  try {
+    const response = await api.patch(
+      `/locationInventory/updateReorderLevelMaxStockLevel/${locationId}/${itemMasterId}`,
+      formData,
+      {
+        withCredentials: true,
+      }
+    );
     return response.data;
   } catch (error) {
     console.log(error);

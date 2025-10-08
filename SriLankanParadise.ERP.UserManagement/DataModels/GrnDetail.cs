@@ -23,6 +23,10 @@ public partial class GrnDetail
 
     public string? ItemBarcode { get; set; }
 
+    public int? OrderedQuantity { get; set; }     // need to be decimal
+
+    public DateTime? ExpiryDate { get; set; }
+
     public virtual GrnMaster GrnMaster { get; set; } = null!;
 
     public virtual ItemMaster? Item { get; set; }

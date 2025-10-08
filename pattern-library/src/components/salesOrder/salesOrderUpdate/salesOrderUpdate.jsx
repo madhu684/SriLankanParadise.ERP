@@ -104,8 +104,6 @@ const SalesOrderUpdate = ({
     return <ErrorComponent error={"Error fetching data"} />;
   }
 
-  console.log("Available Items", availableItems);
-
   const handleBack = () => {
     setShowUpdateSOForm(false);
   };
@@ -581,7 +579,7 @@ const SalesOrderUpdate = ({
                             <span className="me-3">
                               <i className="bi bi-cart4"></i>
                             </span>
-                            {item.itemName}
+                            {item.itemCode} - {item.itemName}
                           </button>
                         </li>
                       ))

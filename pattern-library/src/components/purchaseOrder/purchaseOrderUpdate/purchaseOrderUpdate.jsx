@@ -376,7 +376,7 @@ const PurchaseOrderUpdate = ({ handleClose, purchaseOrder, handleUpdated }) => {
                               <span className="me-3">
                                 <i className="bi bi-cart4"></i>
                               </span>{" "}
-                              {item.itemName}
+                              {item.itemCode} - {item.itemName}
                             </button>
                           </li>
                         ))
@@ -408,6 +408,7 @@ const PurchaseOrderUpdate = ({ handleClose, purchaseOrder, handleUpdated }) => {
                   <th>Unit</th>
                   <th>Quantity</th>
                   <th>Unit Price</th>
+                  <th>Discount (%)</th>
                   {renderColumns()}
                   <th className="text-end">Total Price</th>
                   <th className="text-end">Action</th>
@@ -468,6 +469,34 @@ const PurchaseOrderUpdate = ({ handleClose, purchaseOrder, handleUpdated }) => {
                         </div>
                       )}
                     </td>
+                    <td>
+                      <input
+                        type="number"
+                        className={`form-control ${
+                          validFields[`discount_${index}`] ? "is-valid" : ""
+                        } ${
+                          validationErrors[`discount_${index}`]
+                            ? "is-invalid"
+                            : ""
+                        }`}
+                        value={item.discount}
+                        onChange={(e) =>
+                          handleItemDetailsChange(
+                            index,
+                            "discount",
+                            e.target.value
+                          )
+                        }
+                        max={100}
+                        min={0}
+                        step={0.01}
+                      />
+                      {validationErrors[`discount_${index}`] && (
+                        <div className="invalid-feedback">
+                          {validationErrors[`discount_${index}`]}
+                        </div>
+                      )}
+                    </td>
                     {item.chargesAndDeductions.map((charge, chargeIndex) => (
                       <td key={chargeIndex}>
                         <input
@@ -522,7 +551,7 @@ const PurchaseOrderUpdate = ({ handleClose, purchaseOrder, handleUpdated }) => {
                 <tr>
                   <td
                     colSpan={
-                      4 +
+                      5 +
                       formData.itemDetails[0].chargesAndDeductions?.length -
                       1
                     }
@@ -536,7 +565,7 @@ const PurchaseOrderUpdate = ({ handleClose, purchaseOrder, handleUpdated }) => {
                 <tr>
                   <td
                     colSpan={
-                      4 +
+                      5 +
                       formData.itemDetails[0].chargesAndDeductions?.length -
                       1
                     }

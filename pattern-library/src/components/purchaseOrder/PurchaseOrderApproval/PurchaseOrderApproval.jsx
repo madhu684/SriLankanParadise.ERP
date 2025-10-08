@@ -28,6 +28,7 @@ const PurchaseOrderApproval = ({
     isLoadingPurchaseRequisition,
     handleApprove,
     calculateSubTotal,
+    calculateLineItemDiscount,
   } = usePurchaseOrderApproval({
     onFormSubmit: () => {
       handleClose();
@@ -115,6 +116,7 @@ const PurchaseOrderApproval = ({
                     <th>Unit</th>
                     <th>Quantity</th>
                     <th>Unit Price</th>
+                    <th>Discount (%)</th>
                     {uniqueLineItemDisplayNames.map((displayName, index) => {
                       // Find the charge/deduction associated with the current display name
                       const charge = lineItemChargesAndDeductions.find(
@@ -142,6 +144,13 @@ const PurchaseOrderApproval = ({
                       <td>{item.itemMaster?.unit.unitName}</td>
                       <td>{item.quantity}</td>
                       <td>{item.unitPrice.toFixed(2)}</td>
+                      <td>
+                        {calculateLineItemDiscount(
+                          item.quantity,
+                          item.unitPrice,
+                          item.totalPrice
+                        )}
+                      </td>
                       {/* Render line item charges/deductions */}
                       {uniqueLineItemDisplayNames.map((displayName, idx) => {
                         const charge = lineItemChargesAndDeductions.find(
@@ -181,7 +190,7 @@ const PurchaseOrderApproval = ({
                 </tbody>
                 <tfoot>
                   <tr>
-                    <td colSpan={3 + uniqueLineItemDisplayNames.length}></td>
+                    <td colSpan={4 + uniqueLineItemDisplayNames.length}></td>
                     <th>Sub Total</th>
                     <td className="text-end">
                       {calculateSubTotal().toFixed(2)}
@@ -214,7 +223,7 @@ const PurchaseOrderApproval = ({
                       return (
                         <tr key={`${index}-${chargeIndex}`}>
                           <td
-                            colSpan={3 + uniqueLineItemDisplayNames.length}
+                            colSpan={4 + uniqueLineItemDisplayNames.length}
                           ></td>
                           <th>
                             {charge.chargesAndDeduction.sign}{" "}
@@ -226,7 +235,7 @@ const PurchaseOrderApproval = ({
                     });
                   })}
                   <tr>
-                    <td colSpan={3 + uniqueLineItemDisplayNames.length}></td>
+                    <td colSpan={4 + uniqueLineItemDisplayNames.length}></td>
                     <th>Total Amount</th>
                     <td className="text-end">
                       {purchaseOrder.totalAmount.toFixed(2)}

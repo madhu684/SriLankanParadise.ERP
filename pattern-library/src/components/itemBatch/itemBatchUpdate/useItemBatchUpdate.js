@@ -62,7 +62,7 @@ const useItemBatchUpdate = ({ onFormSubmit }) => {
   };
 
   const {
-    data: availableItems,
+    data: availableItems = [],
     isLoading: isItemsLoading,
     isError: isItemsError,
     error: itemsError,

@@ -40,6 +40,8 @@ public partial class SalesInvoice
     public string? ReferenceNumber { get; set; }
 
     public int? LocationId { get; set; }
+    public string? InVoicedPersonName { get; set; }
+    public string? InVoicedPersonMobileNo { get; set; }
 
     public virtual ICollection<SalesInvoiceDetail> SalesInvoiceDetails { get; set; } = new List<SalesInvoiceDetail>();
 

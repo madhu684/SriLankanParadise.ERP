@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import {
   get_company_locations_api,
-  get_item_locations_inventories_by_location_id_api,
+  get_sum_of_item_inventory_by_location_id_api,
   put_location_inventory_by_id_api,
+  update_reorderlevel_maxorder_level_api,
 } from "../../services/purchaseApi";
 import { useCallback, useState, useMemo } from "react";
 
@@ -34,7 +35,9 @@ const useStockLevel = () => {
   const filteredInventories = useMemo(() => {
     console.log("Filtering inventories with searchTerm:", searchTerm);
     return inventories.filter((item) =>
-      item.itemName?.toLowerCase().includes(searchTerm.toLowerCase())
+      item?.itemMaster?.itemName
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase())
     );
   }, [inventories, searchTerm]);
 
@@ -77,26 +80,16 @@ const useStockLevel = () => {
   };
 
   const handleSearch = useCallback(async () => {
-    console.log("handleSearch triggered, selectedLocation:", selectedLocation);
     if (!selectedLocation) return;
 
     setLoading(true);
     try {
       console.log("Fetching inventory for location:", selectedLocation);
-      const inventory = await get_item_locations_inventories_by_location_id_api(
+      const inventory = await get_sum_of_item_inventory_by_location_id_api(
         selectedLocation
       );
       console.log("Raw API response:", inventory);
       if (inventory.data && inventory.data.result) {
-        console.log("Inventory fetched:", inventory.data.result);
-        const fetchedIds = inventory.data.result.map(
-          (item) => item.locationInventoryId
-        );
-        console.warn(
-          "Fetched locationInventoryIds:",
-          fetchedIds,
-          "Expected: 1041, 1042, 1043, 1044, 1046"
-        );
         setInventories(inventory.data.result);
       } else {
         console.warn("No result in inventory data, setting empty array");
@@ -125,7 +118,7 @@ const useStockLevel = () => {
     console.log("Edit clicked for item:", item);
     setSelectedItem(item);
     setModalAdjustedVolumes({
-      reOrderLevel: item.reOrderLevel,
+      reOrderLevel: item.minReOrderLevel,
       maxStockLevel: item.maxStockLevel,
     });
     setModalErrors("");
@@ -193,11 +186,6 @@ const useStockLevel = () => {
     }
 
     const payload = {
-      locationInventoryId: selectedItem.locationInventoryId,
-      itemMasterId: existingItem.itemMasterId,
-      batchId: existingItem.batchId,
-      locationId: existingItem.locationId,
-      stockInHand: existingItem.stockInHand,
       reOrderLevel: modalAdjustedVolumes.reOrderLevel,
       maxStockLevel: modalAdjustedVolumes.maxStockLevel,
     };
@@ -208,8 +196,9 @@ const useStockLevel = () => {
     );
 
     try {
-      const response = await put_location_inventory_by_id_api(
-        selectedItem.locationInventoryId,
+      const response = await update_reorderlevel_maxorder_level_api(
+        selectedLocation,
+        selectedItem.itemMasterId,
         payload
       );
       console.log(
@@ -296,7 +285,6 @@ const useStockLevel = () => {
     submissionStatus,
     filteredInventories,
     searchTerm,
-
     showEditModal,
     selectedItem,
     modalAdjustedVolumes,

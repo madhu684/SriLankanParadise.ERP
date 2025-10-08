@@ -21,7 +21,7 @@ const useGrn = ({ onFormSubmit }) => {
     receivedBy: "",
     receivedDate: "",
     itemDetails: [],
-    status: "",
+    status: "4",
     purchaseOrderId: null,
     supplierId: null,
     purchaseRequisitionId: null,
@@ -109,7 +109,7 @@ const useGrn = ({ onFormSubmit }) => {
         sessionStorage?.getItem("companyId")
       );
       const filteredPurchaseOrders = response.data.result?.filter(
-        (po) => po.status === 2
+        (po) => po.status === 4 || po.status === 2
       );
       return filteredPurchaseOrders || [];
     } catch (error) {
@@ -134,7 +134,7 @@ const useGrn = ({ onFormSubmit }) => {
         sessionStorage?.getItem("companyId")
       );
       const filteredPurchaseRequisitions = response.data.result?.filter(
-        (pr) => pr.status === 2
+        (pr) => pr.status === 2 || pr.status === 4
       );
       return filteredPurchaseRequisitions || [];
     } catch (error) {
@@ -210,7 +210,8 @@ const useGrn = ({ onFormSubmit }) => {
   });
 
   const {
-    data: grns,
+    data: grns = [],
+    isFetched: isGrnsFetched,
     isLoading: isGrnsLoading,
     isError: isGrnsError,
     error: grnError,
@@ -219,68 +220,80 @@ const useGrn = ({ onFormSubmit }) => {
     queryKey: ["grns", selectedPurchaseOrder?.purchaseOrderId],
     queryFn: () =>
       fetchGrnsBypurchaseOrderId(selectedPurchaseOrder.purchaseOrderId),
+    enabled: !!selectedPurchaseOrder,
   });
 
   useEffect(() => {
-    if (grns && selectedPurchaseOrder) {
-      const updatedItemDetails = selectedPurchaseOrder.purchaseOrderDetails
-        .map((poItem) => {
-          const receivedQuantity = grns.reduce((total, grn) => {
-            const grnDetail = grn.grnDetails.find(
-              (detail) => detail.itemId === poItem.itemMaster?.itemMasterId
-            );
-            return total + (grnDetail ? grnDetail.receivedQuantity : 0);
-          }, 0);
+    if (isGrnsFetched) {
+      if (grns && selectedPurchaseOrder) {
+        console.log("Run useEffect for grns and selectedPurchaseOrder");
+        const updatedItemDetails = selectedPurchaseOrder.purchaseOrderDetails
+          .map((poItem) => {
+            const receivedQuantity = grns.reduce((total, grn) => {
+              const grnDetail = grn.grnDetails.find(
+                (detail) => detail.itemId === poItem?.itemMaster?.itemMasterId
+              );
+              return total + (grnDetail ? grnDetail.acceptedQuantity : 0);
+            }, 0);
 
-          const remainingQuantity = poItem.quantity - receivedQuantity;
+            console.log("receivedQuantity", receivedQuantity);
+            const remainingQuantity = poItem.quantity - receivedQuantity;
+            console.log("remainingQuantity", remainingQuantity);
 
-          return {
+            return {
+              id: poItem.itemMaster?.itemMasterId,
+              name: poItem.itemMaster?.itemName,
+              unit: poItem.itemMaster?.unit.unitName,
+              //quantity: poItem.quantity,
+              quantity: Math.max(0, remainingQuantity),
+              remainingQuantity: Math.max(0, remainingQuantity),
+              receivedQuantity: 0,
+              rejectedQuantity: 0,
+              freeQuantity: 0,
+              orderedQuantity: poItem.quantity,
+              expiryDate: "",
+              itemBarcode: "",
+              unitPrice: poItem.unitPrice,
+            };
+          })
+          .filter((item) => item.remainingQuantity > 0);
+
+        console.log("updatedItemDetails", updatedItemDetails);
+
+        // Update form data with filtered items
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          itemDetails: updatedItemDetails,
+        }));
+      } else if (selectedPurchaseOrder) {
+        console.log("Run useEffect for selectedPurchaseOrder");
+        // If there are no existing GRNs, show all items from the selected purchase order
+        const allItemDetails = selectedPurchaseOrder.purchaseOrderDetails.map(
+          (poItem) => ({
             id: poItem.itemMaster?.itemMasterId,
             name: poItem.itemMaster?.itemName,
             unit: poItem.itemMaster?.unit.unitName,
             quantity: poItem.quantity,
-            remainingQuantity: Math.max(0, remainingQuantity),
+            remainingQuantity: poItem.quantity, // Set remaining quantity same as ordered quantity
             receivedQuantity: 0,
             rejectedQuantity: 0,
             freeQuantity: 0,
-            //expiryDate: '',
+            orderedQuantity: poItem.quantity,
+            expiryDate: "",
             itemBarcode: "",
             unitPrice: poItem.unitPrice,
-          };
-        })
-        .filter((item) => item.remainingQuantity > 0);
+            // Other item properties...
+          })
+        );
 
-      // Update form data with filtered items
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        itemDetails: updatedItemDetails,
-      }));
-    } else if (selectedPurchaseOrder) {
-      // If there are no existing GRNs, show all items from the selected purchase order
-      const allItemDetails = selectedPurchaseOrder.purchaseOrderDetails.map(
-        (poItem) => ({
-          id: poItem.itemMaster?.itemMasterId,
-          name: poItem.itemMaster?.itemName,
-          unit: poItem.itemMaster?.unit.unitName,
-          quantity: poItem.quantity,
-          remainingQuantity: poItem.quantity, // Set remaining quantity same as ordered quantity
-          receivedQuantity: 0,
-          rejectedQuantity: 0,
-          freeQuantity: 0,
-          //expiryDate: '',
-          itemBarcode: "",
-          unitPrice: poItem.unitPrice,
-          // Other item properties...
-        })
-      );
-
-      // Update form data with all items
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        itemDetails: allItemDetails,
-      }));
+        // Update form data with all items
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          itemDetails: allItemDetails,
+        }));
+      }
     }
-  }, [grns, selectedPurchaseOrder]);
+  }, [grns, selectedPurchaseOrder, isGrnsFetched]);
 
   /*Begin of purchase requisition use effect */
   useEffect(() => {
@@ -615,20 +628,6 @@ const useGrn = ({ onFormSubmit }) => {
       formData.warehouseLocation
     );
 
-    console.log("isGrnDateValid", isGrnDateValid);
-    console.log("isReceivedByValid", isReceivedByValid);
-    console.log("isReceivedDateValid", isReceivedDateValid);
-    console.log("isStatusValid", isStatusValid);
-    console.log("isPurchaseOrderIdValid", isPurchaseOrderIdValid);
-    console.log("isPurchaseRequisitionIdValid", isPurchaseRequisitionIdValid);
-    console.log("isSupplierValid", isSupplierValid);
-    console.log("isItemQuantityValid", isItemQuantityValid);
-    console.log("isItemUnitPriceValid", isItemUnitPriceValid);
-    console.log("isItemQuantityValid", isItemQuantityValid);
-    console.log("isRejectedQuantityValid", isRejectedQuantityValid);
-    console.log("isGrnTypeValid", isGrnTypeValid);
-    console.log("isWarehouseLocationValid", isWarehouseLocationValid);
-
     return (
       isGrnDateValid &&
       isReceivedByValid &&
@@ -704,7 +703,8 @@ const useGrn = ({ onFormSubmit }) => {
             unitPrice: item.unitPrice,
             itemId: item.id,
             freeQuantity: item.freeQuantity,
-            //expiryDate: item.expiryDate,
+            orderedQuantity: item.quantity,
+            expiryDate: item.expiryDate,
             itemBarcode: item.itemBarcode,
             permissionId: 20,
           };

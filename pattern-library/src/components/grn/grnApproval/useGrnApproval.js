@@ -12,6 +12,7 @@ import {
   get_purchase_requisition_by_id_api,
   approve_purchase_requisition_api,
   approve_purchase_order_api,
+  get_locations_inventories_by_location_id_item_master_id_api,
 } from "../../../services/purchaseApi";
 import { useQuery } from "@tanstack/react-query";
 
@@ -27,6 +28,12 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
     directPurchase: "Direct Purchase",
     goodsReceivedNote: "Goods Received Note",
   };
+
+  console.log("grn: ", grn);
+  const isComplete = grn?.grnDetails.every(
+    (detail) => detail.acceptedQuantity === detail.orderedQuantity
+  );
+  console.log("isComplete: ", isComplete);
 
   // Fetch Purchase Order
   const {
@@ -197,7 +204,7 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
       await approve_purchase_requisition_api(
         purchaseRequisition.purchaseRequisitionId,
         {
-          status: 5,
+          status: isComplete ? 5 : 4,
           approvedBy: purchaseRequisition.approvedBy,
           approvedUserId: purchaseRequisition.approvedUserId,
           approvedDate: purchaseRequisition.approvedDate,
@@ -213,7 +220,7 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
   const updatePO = async () => {
     try {
       await approve_purchase_order_api(purchaseOrder.purchaseOrderId, {
-        status: 5,
+        status: isComplete ? 5 : 4,
         approvedBy: purchaseOrder.approvedBy,
         approvedUserId: purchaseOrder.approvedUserId,
         approvedDate: purchaseOrder.approvedDate,
@@ -264,6 +271,15 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
       };
       await post_itemBatchHasGrnDetail_api(itemBatchHasGrnDetailData);
 
+      const existingItemDetails =
+        await get_locations_inventories_by_location_id_item_master_id_api(
+          grn?.warehouseLocationId,
+          itemBatchResponse.data.result?.itemMasterId
+        );
+
+      const reOrderMaxOrderDetails =
+        existingItemDetails?.data?.result?.[0] || {};
+
       const locationInventoryData = {
         itemMasterId: itemBatchResponse.data.result?.itemMasterId,
         batchId,
@@ -271,6 +287,8 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
         stockInHand: grnDetail.acceptedQuantity + grnDetail.freeQuantity,
         permissionId: 1088,
         movementTypeId: 2,
+        reOrderLevel: reOrderMaxOrderDetails?.reOrderLevel || 0,
+        maxStockLevel: reOrderMaxOrderDetails?.maxStockLevel || 0,
       };
       await post_location_inventory_api(locationInventoryData);
 

@@ -34,5 +34,7 @@
 
         public int PermissionId { get; set; }
         public int? LocationId { get; set; }
+        public string? InVoicedPersonName { get; set; }
+        public string? InVoicedPersonMobileNo { get; set; }
     }
 }
