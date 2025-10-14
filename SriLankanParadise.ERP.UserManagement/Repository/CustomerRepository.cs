@@ -13,6 +13,24 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             _dbContext = dbContext;
         }
+
+        public async Task ActiveDeactiveUser(int customerId, Customer customer)
+        {
+            try
+            {
+                var existingCustomer = await _dbContext.Customers.FindAsync(customerId);
+                if (existingCustomer != null)
+                {
+                    existingCustomer.Status = customer.Status;
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task AddCustomer(Customer customer)
         {
             try
@@ -33,6 +51,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             try
             {
                 return await _dbContext.Customers
+                    .Include(c => c.CustomerDeliveryAddress)
                     .ToListAsync();
             }
             catch (Exception)
@@ -46,7 +65,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             try
             {
-                var customer = await _dbContext.Customers.FirstOrDefaultAsync(c => c.CustomerId == id);
+                var customer = await _dbContext.Customers
+                    .Include(c => c.CustomerDeliveryAddress)
+                    .FirstOrDefaultAsync(c => c.CustomerId == id);
                 return customer != null ? customer : null!;
             }
             catch (Exception)
@@ -61,6 +82,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var customers = await _dbContext.Customers
                     .Where(c => c.CompanyId == companyId)
+                    .Include(c => c.CustomerDeliveryAddress)
                     .ToListAsync();
 
                 return customers.Any() ? customers : null;
@@ -68,6 +90,23 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             catch (Exception)
             {
 
+                throw;
+            }
+        }
+
+        public async Task UpdateCustomer(int customerId, Customer customer)
+        {
+            try
+            {
+                var existingCustomer = await _dbContext.Customers.FindAsync(customerId);
+                if (existingCustomer != null)
+                {
+                    _dbContext.Entry(existingCustomer).CurrentValues.SetValues(customer);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
                 throw;
             }
         }

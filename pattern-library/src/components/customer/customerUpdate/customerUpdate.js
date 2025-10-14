@@ -1,12 +1,15 @@
 import { useState, useRef, useEffect } from "react";
-import {
-  post_customer_api,
-  post_customer_delivery_address_api,
-} from "../../services/salesApi";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  put_customer_api,
+  post_customer_delivery_address_api,
+  delete_customer_delivery_address_api,
+  update_customer_delivery_address_api,
+} from "../../../services/salesApi";
 
-const useCustomer = ({ onFormSubmit }) => {
+const useCustomerUpdate = ({ customer, onFormSubmit }) => {
   const [formData, setFormData] = useState({
+    customerId: "",
     customerName: "",
     customerCode: "",
     contactPerson: "",
@@ -15,18 +18,19 @@ const useCustomer = ({ onFormSubmit }) => {
     status: 1,
     billingAddress1: "",
     billingAddress2: "",
+    reigonId: 1,
     lisenNumber: "",
     lisenStartDate: "",
     lisenEndDate: "",
     creditLimit: 0.0,
     creditDuration: 0,
+    outstandingBalance: 0.0,
     businessRegNo: "",
     isVatRegistered: "0",
     vatRegistrationNo: null,
-    deliveryAddresses: [
-      { addressLine1: "", addressLine2: "" }, // Initialize with first delivery address
-    ],
+    deliveryAddresses: [{ addressLine1: "", addressLine2: "" }],
   });
+  const [addressIdsToDelete, setAddressIdsToDelete] = useState([]);
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
   const [submissionStatus, setSubmissionStatus] = useState(null);
@@ -35,21 +39,41 @@ const useCustomer = ({ onFormSubmit }) => {
 
   const queryClient = useQueryClient();
 
-  // Sync billing address with first delivery address
   useEffect(() => {
-    if (formData.deliveryAddresses.length > 0) {
-      const firstAddress = formData.deliveryAddresses[0];
-      setFormData((prevData) => ({
-        ...prevData,
-        billingAddress1: firstAddress.addressLine1,
-        billingAddress2: firstAddress.addressLine2,
-      }));
+    if (customer) {
+      setFormData({
+        customerId: parseInt(customer.customerId),
+        customerName: customer.customerName,
+        customerCode: customer.customerCode,
+        contactPerson: customer.contactPerson,
+        phone: customer.phone,
+        email: customer.email,
+        companyId: customer.companyId,
+        status: customer.status,
+        billingAddress1: customer.billingAddressLine1,
+        billingAddress2: customer.billingAddressLine2,
+        reigonId: customer.reigonId,
+        lisenNumber: customer.lisenNumber,
+        lisenStartDate: customer.lisenStartDate.split("T")[0],
+        lisenEndDate: customer.lisenEndDate.split("T")[0],
+        creditLimit: customer.creditLimit,
+        creditDuration: customer.creditDuration,
+        outstandingBalance: customer.outstandingAmount,
+        businessRegNo: customer.businessRegistrationNo,
+        isVatRegistered: customer.isVATRegistered === true ? "1" : "0",
+        vatRegistrationNo: customer.vatRegistrationNo || null,
+        deliveryAddresses: customer.customerDeliveryAddress.map((address) => ({
+          id: address.id,
+          addressLine1: address.addressLine1,
+          addressLine2: address.addressLine2,
+          isNew: false, // Mark existing addresses
+        })),
+      });
     }
-  }, [formData.deliveryAddresses]);
+  }, [customer]);
 
   useEffect(() => {
     if (submissionStatus != null) {
-      // Scroll to the success alert when it becomes visible
       alertRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [submissionStatus]);
@@ -179,7 +203,6 @@ const useCustomer = ({ onFormSubmit }) => {
       formData.isVatRegistered
     );
 
-    // Validate delivery addresses (billing address is auto-synced from first delivery address)
     let areDeliveryAddressesValid = true;
     formData.deliveryAddresses.forEach((address, index) => {
       const isLine1Valid = validateField(
@@ -223,26 +246,17 @@ const useCustomer = ({ onFormSubmit }) => {
     }));
   };
 
-  // Add a new delivery address
   const addDeliveryAddress = () => {
     setFormData((prevData) => ({
       ...prevData,
       deliveryAddresses: [
         ...prevData.deliveryAddresses,
-        { addressLine1: "", addressLine2: "" },
+        { addressLine1: "", addressLine2: "", isNew: true },
       ],
     }));
   };
 
-  // Remove a delivery address (prevent removing the first one)
-  const removeDeliveryAddress = (index) => {
-    if (index === 0) {
-      console.warn(
-        "Cannot remove the first delivery address as it serves as the billing address"
-      );
-      return;
-    }
-
+  const removeDeliveryAddress = (index, id) => {
     setFormData((prevData) => ({
       ...prevData,
       deliveryAddresses: prevData.deliveryAddresses.filter(
@@ -250,7 +264,11 @@ const useCustomer = ({ onFormSubmit }) => {
       ),
     }));
 
-    // Clear validation errors for this address
+    // Only add to delete list if it has an ID (existing address)
+    if (id) {
+      setAddressIdsToDelete((prevIds) => [...prevIds, id]);
+    }
+
     setValidationErrors((prev) => {
       const newErrors = { ...prev };
       delete newErrors[`deliveryAddress${index}Line1`];
@@ -259,7 +277,6 @@ const useCustomer = ({ onFormSubmit }) => {
     });
   };
 
-  // Handle delivery address field changes
   const handleDeliveryAddressChange = (index, field, value) => {
     setFormData((prevData) => {
       const updatedAddresses = [...prevData.deliveryAddresses];
@@ -267,18 +284,36 @@ const useCustomer = ({ onFormSubmit }) => {
         ...updatedAddresses[index],
         [field]: value,
       };
-      return {
+
+      const updatedData = {
         ...prevData,
         deliveryAddresses: updatedAddresses,
       };
+
+      // If editing the Primary Billing Address, sync to billing fields
+      if (index === 0) {
+        if (field === "addressLine1") {
+          updatedData.billingAddress1 = value;
+        } else if (field === "addressLine2") {
+          updatedData.billingAddress2 = value;
+        }
+      }
+
+      return updatedData;
     });
   };
 
-  // Post delivery addresses after customer creation
-  const postDeliveryAddresses = async (customerId) => {
-    const promises = formData.deliveryAddresses.map((address) => {
+  // Post NEW delivery addresses
+  const postDeliveryAddresses = async () => {
+    const newAddresses = formData.deliveryAddresses.filter(
+      (address) => address.isNew === true
+    );
+
+    if (newAddresses.length === 0) return true;
+
+    const promises = newAddresses.map((address) => {
       const deliveryAddressData = {
-        customerId: customerId,
+        customerId: formData.customerId,
         addressLine1: address.addressLine1,
         addressLine2: address.addressLine2,
       };
@@ -287,10 +322,58 @@ const useCustomer = ({ onFormSubmit }) => {
 
     try {
       await Promise.all(promises);
-      console.log("All delivery addresses posted successfully");
+      console.log("All new delivery addresses posted successfully");
       return true;
     } catch (error) {
       console.error("Error posting delivery addresses:", error);
+      return false;
+    }
+  };
+
+  // Update EXISTING delivery addresses
+  const updateDeliveryAddresses = async () => {
+    const existingAddresses = formData.deliveryAddresses.filter(
+      (address) => address.id && address.isNew !== true
+    );
+
+    if (existingAddresses.length === 0) return true;
+
+    const promises = existingAddresses.map((address) => {
+      const deliveryAddressData = {
+        customerId: formData.customerId,
+        addressLine1: address.addressLine1,
+        addressLine2: address.addressLine2,
+      };
+      return update_customer_delivery_address_api(
+        address.id,
+        deliveryAddressData
+      );
+    });
+
+    try {
+      await Promise.all(promises);
+      console.log("All delivery addresses updated successfully");
+      return true;
+    } catch (error) {
+      console.error("Error updating delivery addresses:", error);
+      return false;
+    }
+  };
+
+  // Delete delivery addresses
+  const deleteDeliveryAddresses = async (idArray) => {
+    if (!idArray || idArray.length === 0) return true;
+
+    const promises = idArray.map((addressId) => {
+      return delete_customer_delivery_address_api(parseInt(addressId));
+    });
+
+    try {
+      await Promise.all(promises);
+      console.log("Delivery addresses deleted successfully");
+      return true;
+    } catch (error) {
+      console.error("Error deleting delivery addresses:", error);
       return false;
     }
   };
@@ -307,44 +390,46 @@ const useCustomer = ({ onFormSubmit }) => {
           contactPerson: formData.contactPerson,
           phone: formData.phone,
           email: formData.email,
-          companyId: sessionStorage.getItem("companyId"),
+          companyId: formData.companyId,
           customerCode: formData.customerCode,
           status: formData.status,
           billingAddressLine1: formData.billingAddress1,
           billingAddressLine2: formData.billingAddress2,
           reigonId: 1,
           lisenNumber: formData.lisenNumber,
-          lisenStartDate: formData.lisenStartDate.split("T")[0],
-          lisenEndDate: formData.lisenEndDate.split("T")[0],
+          lisenStartDate: formData.lisenStartDate,
+          lisenEndDate: formData.lisenEndDate,
           creditLimit: parseFloat(formData.creditLimit),
           creditDuration: parseInt(formData.creditDuration),
-          outstandingBalance: 0,
+          outstandingBalance: formData.outstandingBalance,
           businessRegistrationNo: formData.businessRegNo,
           isVatRegistered: formData.isVatRegistered === "1" ? true : false,
           vatRegistrationNo: formData.vatRegistrationNo,
         };
 
-        const response = await post_customer_api(customerData);
+        const response = await put_customer_api(
+          formData.customerId,
+          customerData
+        );
 
-        if (response.status === 201) {
-          const customerId =
-            response.data.result.customerId || response.data.result.id;
+        if (response.status === 200) {
+          // Handle delivery addresses in parallel
+          const [postSuccess, updateSuccess, deleteSuccess] = await Promise.all(
+            [
+              postDeliveryAddresses(), // Post new addresses
+              updateDeliveryAddresses(), // Update existing addresses
+              deleteDeliveryAddresses(addressIdsToDelete), // Delete removed addresses
+            ]
+          );
 
-          // Post delivery addresses if any exist
-          if (formData.deliveryAddresses.length > 0) {
-            const deliveryAddressSuccess = await postDeliveryAddresses(
-              customerId
+          if (!postSuccess || !updateSuccess || !deleteSuccess) {
+            console.warn(
+              "Customer updated but some delivery address operations failed"
             );
-
-            if (!deliveryAddressSuccess) {
-              console.warn(
-                "Customer created but some delivery addresses failed to save"
-              );
-            }
           }
 
           setSubmissionStatus("success");
-          console.log("Customer added successfully", customerData);
+          console.log("Customer updated successfully", customerData);
 
           setTimeout(() => {
             setSubmissionStatus(null);
@@ -371,6 +456,7 @@ const useCustomer = ({ onFormSubmit }) => {
   };
 
   console.log("Form Data: ", formData);
+  console.log("Address Ids To Delete: ", addressIdsToDelete);
 
   return {
     formData,
@@ -388,4 +474,4 @@ const useCustomer = ({ onFormSubmit }) => {
   };
 };
 
-export default useCustomer;
+export default useCustomerUpdate;

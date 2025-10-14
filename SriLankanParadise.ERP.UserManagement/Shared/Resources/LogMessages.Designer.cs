@@ -511,6 +511,60 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Customer delivery address created successfully.
+        /// </summary>
+        public static string CustomerDeliveryAddressCreated {
+            get {
+                return ResourceManager.GetString("CustomerDeliveryAddressCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customer delivery address deleted successfully.
+        /// </summary>
+        public static string CustomerDeliveryAddressDeleted {
+            get {
+                return ResourceManager.GetString("CustomerDeliveryAddressDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customer delivery addresses for customer retrieved.
+        /// </summary>
+        public static string CustomerDeliveryAddressesRetrieved {
+            get {
+                return ResourceManager.GetString("CustomerDeliveryAddressesRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customer delivery address not found.
+        /// </summary>
+        public static string CustomerDeliveryAddressNotFound {
+            get {
+                return ResourceManager.GetString("CustomerDeliveryAddressNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customer delivery address retrieved.
+        /// </summary>
+        public static string CustomerDeliveryAddressRetrieved {
+            get {
+                return ResourceManager.GetString("CustomerDeliveryAddressRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customer delivery address updated successfully.
+        /// </summary>
+        public static string CustomerDeliveryAddressUpdated {
+            get {
+                return ResourceManager.GetString("CustomerDeliveryAddressUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Customers not found.
         /// </summary>
         public static string CustomersNotFound {
@@ -525,6 +579,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string CustomersRetrieved {
             get {
                 return ResourceManager.GetString("CustomersRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customer updated successfuly.
+        /// </summary>
+        public static string CustomerUpdated {
+            get {
+                return ResourceManager.GetString("CustomerUpdated", resourceCulture);
             }
         }
         

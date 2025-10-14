@@ -165,6 +165,8 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<SupplierItem> SupplierItems { get; set; }
 
+    public virtual DbSet<CustomerDeliveryAddress> CustomerDeliveryAddresses { get; set; }
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:LocalSqlServerConnection");
@@ -1552,6 +1554,15 @@ public partial class ErpSystemContext : DbContext
                   .HasForeignKey(e => e.ItemMasterId)
                   .HasConstraintName("FK_SupplierItems_ItemMaster")
                   .IsRequired();
+        });
+
+        modelBuilder.Entity<CustomerDeliveryAddress>(entity =>
+        {
+            entity.ToTable("CustomerDeliveryAddress");
+            entity.HasOne(d => d.Customer).WithMany(p => p.CustomerDeliveryAddress)
+                .HasForeignKey(d => d.CustomerId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_CustomerDeliveryAddress_Customer");
         });
 
 

@@ -128,8 +128,7 @@ const Category = ({
                 </div>
               )}
             </div>
-
-            <div className="mb-3">
+            {/*  <div className="mb-3">
               <label className="form-label">Is Treatment Category ?</label>
               <div className="form-check">
                 <input
@@ -172,7 +171,7 @@ const Category = ({
                   {validationErrors.isTreatment}
                 </div>
               )}
-            </div>
+            </div>*/}
           </div>
         </div>
 

@@ -113,7 +113,7 @@ const CategoryUpdate = ({ handleClose, category, handleUpdated }) => {
               )}
             </div>
 
-            <div className="mb-3">
+            {/* <div className="mb-3">
               <label className="form-label">Is Treatment Category ?</label>
               <div className="form-check">
                 <input
@@ -156,7 +156,7 @@ const CategoryUpdate = ({ handleClose, category, handleUpdated }) => {
                   {validationErrors.isTreatment}
                 </div>
               )}
-            </div>
+            </div> */}
           </div>
         </div>
 

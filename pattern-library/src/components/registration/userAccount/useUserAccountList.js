@@ -149,7 +149,7 @@ const useUserAccountList = () => {
       console.log(error);
     }
   };
-  
+
   const userActivate = async (id) => {
     try {
       await activate_user(id);

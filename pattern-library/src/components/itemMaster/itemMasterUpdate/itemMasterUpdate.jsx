@@ -43,10 +43,10 @@ const ItemMasterUpdate = ({
     isLoading,
     isError,
     supplierSearchTerm,
-    suppliersError,
-    isSuppliersError,
-    isSuppliersLoading,
-    availableSuppliers,
+    // suppliersError,
+    // isSuppliersError,
+    // isSuppliersLoading,
+    // availableSuppliers,
     setSupplierSearchTerm,
     setSearchTerm,
     setSearchChildTerm,
@@ -103,12 +103,11 @@ const ItemMasterUpdate = ({
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <button
+          <i
+            class="bi bi-arrow-left"
             onClick={handleBack}
-            className="btn btn-dark d-flex align-items-center"
-          >
-            Back
-          </button>
+            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+          ></i>
           <p>
             {" "}
             <CurrentDateTime />
@@ -476,34 +475,8 @@ const ItemMasterUpdate = ({
                   </div>
                 )}
 
-                {/* <div className="mb-3 mt-3">
-              <label htmlFor="reorderLevel" className="form-label">
-                Reorder level
-              </label>
-              <input
-                type="number"
-                className={`form-control ${
-                  validFields.reorderLevel ? "is-valid" : ""
-                } ${validationErrors.reorderLevel ? "is-invalid" : ""}`}
-                id="reorderLevel"
-                placeholder="Enter Reorder Level"
-                value={formData.reorderLevel}
-                onChange={(e) => {
-                  const value = parseFloat(e.target.value);
-                  const positiveValue = isNaN(value) ? 0 : Math.max(0, value);
-                  handleInputChange("reorderLevel", positiveValue);
-                }}
-                required
-              />
-              {validationErrors.reorderLevel && (
-                <div className="invalid-feedback">
-                  {validationErrors.reorderLevel}
-                </div>
-              )}
-            </div> */}
-
                 {/* Supplier tagging */}
-                <h4>Supplier Tagging</h4>
+                {/* <h4>Supplier Tagging</h4>
                 <div className="mb-3 mt-3">
                   <label htmlFor="itemHierarchy" className="form-label">
                     Supplier
@@ -539,7 +512,6 @@ const ItemMasterUpdate = ({
                       </div>
                     )}
 
-                    {/* Dropdown for filtered suppliers */}
                     {supplierSearchTerm && (
                       <div className="dropdown" style={{ width: "100%" }}>
                         <ul
@@ -570,20 +542,14 @@ const ItemMasterUpdate = ({
                     {supplierSearchTerm === null && (
                       <div className="mb-3">
                         <small className="form-text text-muted">
-                          {/* {validationErrors.trnId && (
-                        <div className="text-danger mb-1">
-                          {validationErrors.trnId}
-                        </div>
-                      )} */}
                           Please search for a supplier and select it
                         </small>
                       </div>
                     )}
                   </div>
-                </div>
+                </div> */}
 
-                {/* Additional Supplier Information */}
-                {formData.supplierId && (
+                {/* {formData.supplierId && (
                   <div className="card mb-3">
                     <div className="card-header">Selected Supplier</div>
                     <div className="card-body">
@@ -606,13 +572,13 @@ const ItemMasterUpdate = ({
                       </button>
                     </div>
                   </div>
-                )}
+                )} */}
               </div>
             )}
           </div>
 
           <div className="col-md-5">
-            {!isServiceItemType() && (
+            {/* {!isServiceItemType() && (
               <>
                 <h4>Item Prices</h4>
                 <div className="mb-3 mt-3 d-flex align-items-center">
@@ -843,7 +809,7 @@ const ItemMasterUpdate = ({
                   />
                 </div>
               </>
-            )}
+            )} */}
 
             {!isServiceItemType() && (
               <>

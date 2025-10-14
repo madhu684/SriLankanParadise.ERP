@@ -42,16 +42,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 var customer = _mapper.Map<Customer>(customerRequest);
                 await _customerService.AddCustomer(customer);
 
-                // Create action log
-                //var actionLog = new ActionLogModel()
-                //{
-                //    ActionId = customerRequest.PermissionId,
-                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                //    Timestamp = DateTime.UtcNow
-                //};
-                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
-
                 // send response
                 var CustomerDto = _mapper.Map<CustomerDto>(customer);
                 _logger.LogInformation(LogMessages.CustomerCreated);
@@ -125,6 +115,60 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     AddResponseMessage(Response, LogMessages.CustomersNotFound, null, true, HttpStatusCode.NotFound);
                 }
 
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ApiResponseModel> UpdateCustomer(int id, CustomerRequestModel customerRequest)
+        {
+            try
+            {
+                var existingCustomer = await _customerService.GetCustomerById(id);
+                if (existingCustomer == null)
+                {
+                    _logger.LogWarning(LogMessages.CustomersNotFound);
+                    AddResponseMessage(Response, LogMessages.CustomersNotFound, null, true, HttpStatusCode.NotFound);
+                    return Response;
+                }
+                var customerToUpdate = _mapper.Map<Customer>(customerRequest);
+
+                customerToUpdate.CustomerId = id;
+
+                await _customerService.UpdateCustomer(existingCustomer.CustomerId, customerToUpdate);
+                _logger.LogInformation(LogMessages.CustomerUpdated);
+                AddResponseMessage(Response, LogMessages.CustomerUpdated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpPatch("ActiveDeactiveUser/{id}")]
+        public async Task<ApiResponseModel> ActiveDeactiveUser(int id, CustomerUpdateRequestModel customerRequest)
+        {
+            try
+            {
+                var existingCustomer = await _customerService.GetCustomerById(id);
+                if (existingCustomer == null)
+                {
+                    _logger.LogWarning(LogMessages.CustomersNotFound);
+                    AddResponseMessage(Response, LogMessages.CustomersNotFound, null, true, HttpStatusCode.NotFound);
+                    return Response;
+                }
+                var customerToUpdate = _mapper.Map<Customer>(customerRequest);
+                customerToUpdate.CustomerId = id;
+                await _customerService.ActiveDeactiveUser(existingCustomer.CustomerId, customerToUpdate);
+                _logger.LogInformation(LogMessages.CustomerUpdated);
+                AddResponseMessage(Response, LogMessages.CustomerUpdated, null, true, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {

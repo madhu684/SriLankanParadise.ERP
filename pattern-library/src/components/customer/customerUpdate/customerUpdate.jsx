@@ -1,8 +1,9 @@
-import useCustomer from "./useCustomer";
-import CurrentDateTime from "../currentDateTime/currentDateTime";
-import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
+import React from "react";
+import useCustomerUpdate from "./customerUpdate";
+import CurrentDateTime from "../../currentDateTime/currentDateTime";
+import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 
-const Customer = ({ handleClose }) => {
+const CustomerUpdate = ({ handleClose, customer }) => {
   const {
     formData,
     validFields,
@@ -15,10 +16,9 @@ const Customer = ({ handleClose }) => {
     addDeliveryAddress,
     removeDeliveryAddress,
     handleDeliveryAddressChange,
-  } = useCustomer({
-    onFormSubmit: () => {
-      handleClose();
-    },
+  } = useCustomerUpdate({
+    customer,
+    onFormSubmit: () => handleClose(),
   });
 
   return (
@@ -38,7 +38,7 @@ const Customer = ({ handleClose }) => {
             </div>
           </div>
           <div className="text-center">
-            <h1 className="fw-bold mb-2">Customer Registration</h1>
+            <h1 className="fw-bold mb-2">Customer Update</h1>
           </div>
         </div>
 
@@ -50,7 +50,7 @@ const Customer = ({ handleClose }) => {
           >
             <i className="bi bi-check-circle-fill fs-4 me-3"></i>
             <div>
-              <strong>Success!</strong> Customer created successfully!
+              <strong>Success!</strong> Customer Updated successfully!
             </div>
           </div>
         )}
@@ -62,7 +62,7 @@ const Customer = ({ handleClose }) => {
           >
             <i className="bi bi-x-circle-fill fs-4 me-3"></i>
             <div>
-              <strong>Error!</strong> Error creating customer. Please try again.
+              <strong>Error!</strong> Error updating customer. Please try again.
             </div>
           </div>
         )}
@@ -479,9 +479,14 @@ const Customer = ({ handleClose }) => {
                       </h3>
                       <button
                         type="button"
-                        onClick={() => removeDeliveryAddress(index)}
+                        onClick={() => removeDeliveryAddress(index, address.id)}
                         className="btn btn-danger btn-sm d-flex align-items-center gap-2"
                         disabled={index === 0}
+                        title={
+                          index === 0
+                            ? "Primary billing address cannot be removed"
+                            : "Remove address"
+                        }
                       >
                         <i className="bi bi-trash-fill"></i>
                         <span>Remove</span>
@@ -560,9 +565,9 @@ const Customer = ({ handleClose }) => {
               className="btn btn-primary px-5"
             >
               {loading && submissionStatus === null ? (
-                <ButtonLoadingSpinner text="Creating..." />
+                <ButtonLoadingSpinner text="Updating..." />
               ) : (
-                "Create Customer"
+                "Update Customer"
               )}
             </button>
             <button
@@ -580,4 +585,4 @@ const Customer = ({ handleClose }) => {
   );
 };
 
-export default Customer;
+export default CustomerUpdate;

@@ -12,6 +12,11 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             _customerRepository = customerRepository;
         }
 
+        public async Task ActiveDeactiveUser(int customerId, Customer customer)
+        {
+            await _customerRepository.ActiveDeactiveUser(customerId, customer);
+        }
+
         public async Task AddCustomer(Customer customer)
         {
             await _customerRepository.AddCustomer(customer);
@@ -30,6 +35,11 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         public async Task<IEnumerable<Customer>> GetCustomersByCompanyId(int companyId)
         {
             return await _customerRepository.GetCustomersByCompanyId(companyId);
+        }
+
+        public async Task UpdateCustomer(int customerId, Customer customer)
+        {
+            await _customerRepository.UpdateCustomer(customerId, customer);
         }
     }
 }

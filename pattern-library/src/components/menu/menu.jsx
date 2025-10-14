@@ -2,7 +2,6 @@ import "./menu.css";
 import React from "react";
 import { Navigate } from "react-router-dom";
 import userImage from "../../assets/images/person-circle.svg";
-//import CompanyImage from "../../assets/images/powerline_lanka_logo.jpeg";
 import CompanyImage from "../../assets/images/logo_small.png";
 
 function template() {

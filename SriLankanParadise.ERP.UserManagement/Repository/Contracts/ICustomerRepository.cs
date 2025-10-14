@@ -11,5 +11,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task<Customer> GetCustomerById(int id);
 
         Task<IEnumerable<Customer>> GetCustomersByCompanyId(int companyId);
+
+        Task UpdateCustomer(int customerId, Customer customer);
+
+        Task ActiveDeactiveUser(int customerId, Customer customer);
     }
 }

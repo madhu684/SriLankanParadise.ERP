@@ -98,29 +98,29 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       fetchItems(sessionStorage.getItem("companyId"), searchChildTerm),
   });
 
-  const fetchSuppliers = async (companyId, searchQuery) => {
-    try {
-      const response = await get_supplier_by_company_id_with_query_api(
-        companyId,
-        searchQuery
-      );
-      return response.data.result;
-    } catch (error) {
-      console.error("Error fetching suppliers:", error);
-    }
-  };
+  // const fetchSuppliers = async (companyId, searchQuery) => {
+  //   try {
+  //     const response = await get_supplier_by_company_id_with_query_api(
+  //       companyId,
+  //       searchQuery
+  //     );
+  //     return response.data.result;
+  //   } catch (error) {
+  //     console.error("Error fetching suppliers:", error);
+  //   }
+  // };
 
-  const {
-    data: availableSuppliers,
-    isLoading: isSuppliersLoading,
-    isError: isSuppliersError,
-    error: suppliersError,
-  } = useQuery({
-    queryKey: ["suppliers", supplierSearchTerm],
-    queryFn: () =>
-      fetchSuppliers(sessionStorage.getItem("companyId"), supplierSearchTerm),
-    enabled: !!supplierSearchTerm,
-  });
+  // const {
+  //   data: availableSuppliers,
+  //   isLoading: isSuppliersLoading,
+  //   isError: isSuppliersError,
+  //   error: suppliersError,
+  // } = useQuery({
+  //   queryKey: ["suppliers", supplierSearchTerm],
+  //   queryFn: () =>
+  //     fetchSuppliers(sessionStorage.getItem("companyId"), supplierSearchTerm),
+  //   enabled: !!supplierSearchTerm,
+  // });
 
   const fetchUnits = async () => {
     try {
@@ -339,103 +339,6 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     return isFieldValid;
   };
 
-  // const validateForm = () => {
-  //   setValidFields({});
-  //   setValidationErrors({});
-
-  //   const isUnitValid = validateField("unitId", "Unit", formData.unitId);
-  //   const isCategoryValid = validateField(
-  //     "categoryId",
-  //     "Category",
-  //     formData.categoryId
-  //   );
-  //   const isItemNameValid = validateField(
-  //     "itemName",
-  //     "Item name",
-  //     formData.itemName
-  //   );
-  //   const isItemTypeValid = validateField(
-  //     "itemTypeId",
-  //     "Item type",
-  //     formData.itemTypeId
-  //   );
-  //   const isItemHierarchyValid = validateField(
-  //     "itemHierarchy",
-  //     "Item hierarchy",
-  //     formData.itemHierarchy
-  //   );
-
-  //   let isparentItemValid = true;
-  //   if (formData.itemHierarchy === "sub") {
-  //     isparentItemValid = validateField(
-  //       "selectedParentItem",
-  //       "Parent item",
-  //       selectedParentItem
-  //     );
-  //   }
-
-  //   const isInventoryUnitValid = validateField(
-  //     "inventoryUnitId",
-  //     "Inventory unit",
-  //     formData.inventoryUnitId
-  //   );
-
-  //   const isConversionValueValid = validateField(
-  //     "conversionValue",
-  //     "Conversion rate",
-  //     formData.conversionValue,
-  //     {
-  //       validationFunction: (value) => parseFloat(value) > 0,
-  //       errorMessage: `Conversion rate must be greater than 0`,
-  //     }
-  //   );
-
-  //   const isItemCodeValid = validateField(
-  //     "itemCode",
-  //     "Item code",
-  //     formData.itemCode
-  //   );
-
-  //   // const isReorderLevelValid = validateField(
-  //   //   "reorderLevel",
-  //   //   "Reorder level",
-  //   //   formData.reorderLevel
-  //   // );
-
-  //   const isUnitPriceValid = validateField(
-  //     "unitPrice",
-  //     "Unit price",
-  //     formData.unitPrice
-  //   );
-
-  //   const isCostRatioValid = validateField(
-  //     "costRatio",
-  //     "Cost Ratio",
-  //     formData.costRatio
-  //   );
-
-  //   const isFOBInUSDValid = validateField(
-  //     "fobInUSD",
-  //     "FOB In USD",
-  //     formData.fobInUSD
-  //   );
-
-  //   return (
-  //     isUnitValid &&
-  //     isCategoryValid &&
-  //     isItemNameValid &&
-  //     isItemTypeValid &&
-  //     isItemHierarchyValid &&
-  //     isparentItemValid &&
-  //     isInventoryUnitValid &&
-  //     isConversionValueValid &&
-  //     isItemCodeValid &&
-  //     // isReorderLevelValid &&
-  //     isUnitPriceValid &&
-  //     isCostRatioValid &&
-  //     isFOBInUSDValid
-  //   );
-  // };
   const validateForm = () => {
     setValidFields({});
     setValidationErrors({});
@@ -548,7 +451,6 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       isItemCodeValid
     );
   };
-  // const handleSubmit = async (isSaveAsDraft) => {
   //   try {
   //     console.log("handleSubmit triggered!", isSaveAsDraft);
   //     const status = isSaveAsDraft ? false : true;
@@ -736,35 +638,6 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
         itemMaster.itemMasterId,
         ItemMasterData
       );
-
-      // Handle supplier updates
-      if (formData.previousSupplierId !== formData.supplierId) {
-        if (
-          formData.supplierId === null &&
-          formData.previousSupplierId !== null
-        ) {
-          // Case: Remove supplier
-          await delete_supplier_item_api(itemMaster.itemMasterId);
-        } else if (
-          formData.supplierId !== null &&
-          formData.previousSupplierId === null
-        ) {
-          // Case: Add new supplier
-          await post_supplier_item_api({
-            supplierId: formData.supplierId,
-            itemMasterId: itemMaster.itemMasterId,
-          });
-        } else if (
-          formData.supplierId !== null &&
-          formData.previousSupplierId !== null
-        ) {
-          // Case: Update existing supplier
-          await update_supplier_item_api(itemMaster.itemMasterId, {
-            supplierId: formData.supplierId,
-            itemMasterId: itemMaster.itemMasterId,
-          });
-        }
-      }
 
       if (putResponse.status === 200) {
         if (isSaveAsDraft) {
@@ -958,10 +831,10 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     isLoading,
     isError,
     supplierSearchTerm,
-    suppliersError,
-    isSuppliersError,
-    isSuppliersLoading,
-    availableSuppliers,
+    // suppliersError,
+    // isSuppliersError,
+    // isSuppliersLoading,
+    // availableSuppliers,
     setSupplierSearchTerm,
     setSearchTerm,
     setSearchChildTerm,

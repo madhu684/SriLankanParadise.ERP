@@ -24,6 +24,18 @@ export const post_customer_api = async (formData) => {
   }
 };
 
+export const put_customer_api = async (customerId, formData) => {
+  try {
+    const response = await api.put(`/customer/${customerId}`, formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const get_customers_by_company_id_api = async (companyId) => {
   try {
     const response = await api.get(
@@ -32,6 +44,61 @@ export const get_customers_by_company_id_api = async (companyId) => {
         withCredentials: true,
       }
     );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const activate_deactivate_customer_api = async (
+  customerId,
+  formData
+) => {
+  try {
+    const response = await api.patch(
+      `/customer/ActiveDeactiveUser/${customerId}`,
+      formData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const post_customer_delivery_address_api = async (formData) => {
+  try {
+    const response = await api.post("/customerDeliveryAddress", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const delete_customer_delivery_address_api = async (id) => {
+  try {
+    const response = await api.delete(`/customerDeliveryAddress/${id}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const update_customer_delivery_address_api = async (id, formData) => {
+  try {
+    const response = await api.put(`/customerDeliveryAddress/${id}`, formData, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);

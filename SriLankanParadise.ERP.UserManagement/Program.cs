@@ -209,6 +209,8 @@ builder.Services.AddScoped<IEmptyReturnService, EmptyReturnService>();
 builder.Services.AddScoped<IEmptyReturnRepository, EmptyReturnRepository>();
 builder.Services.AddScoped<ISupplierItemService, SupplierItemService>();
 builder.Services.AddScoped<ISupplierItemRepository, SupplierItemRepository>();
+builder.Services.AddScoped<ICustomerDeliveryAddressService, CustomerDeliveryAddressService>();
+builder.Services.AddScoped<ICustomerDeliveryAddressRepository, CustomerDeliveryAddressRepository>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

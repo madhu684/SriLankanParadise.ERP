@@ -1065,4 +1065,25 @@
   <data name="SalesInvoiceDeleted" xml:space="preserve">
     <value>Sales Invoice deleted successfully</value>
   </data>
+  <data name="CustomerDeliveryAddressCreated" xml:space="preserve">
+    <value>Customer delivery address created successfully</value>
+  </data>
+  <data name="CustomerDeliveryAddressNotFound" xml:space="preserve">
+    <value>Customer delivery address not found</value>
+  </data>
+  <data name="CustomerDeliveryAddressRetrieved" xml:space="preserve">
+    <value>Customer delivery address retrieved</value>
+  </data>
+  <data name="CustomerDeliveryAddressesRetrieved" xml:space="preserve">
+    <value>Customer delivery addresses for customer retrieved</value>
+  </data>
+  <data name="CustomerDeliveryAddressUpdated" xml:space="preserve">
+    <value>Customer delivery address updated successfully</value>
+  </data>
+  <data name="CustomerDeliveryAddressDeleted" xml:space="preserve">
+    <value>Customer delivery address deleted successfully</value>
+  </data>
+  <data name="CustomerUpdated" xml:space="preserve">
+    <value>Customer updated successfuly</value>
+  </data>
 </root>
