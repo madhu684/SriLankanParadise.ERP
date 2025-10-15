@@ -233,8 +233,8 @@ const Customer = ({ handleClose }) => {
               <div className="row g-3 mb-3">
                 <div className="col-6">
                   <label className="form-label ">
-                    <i className="bi bi-calendar-fill me-2"></i>Lisen Start Date{" "}
-                    <span className="text-danger">*</span>
+                    <i className="bi bi-calendar-fill me-2"></i>License Start
+                    Date <span className="text-danger">*</span>
                   </label>
                   <input
                     type="date"
@@ -255,7 +255,7 @@ const Customer = ({ handleClose }) => {
 
                 <div className="col-6">
                   <label className="form-label ">
-                    <i className="bi bi-calendar-fill me-2"></i>Lisen End Date{" "}
+                    <i className="bi bi-calendar-fill me-2"></i>License End Date{" "}
                     <span className="text-danger">*</span>
                   </label>
                   <input

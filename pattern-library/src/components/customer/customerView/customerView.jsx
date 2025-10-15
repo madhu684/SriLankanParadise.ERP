@@ -148,9 +148,12 @@ const CustomerView = ({ show, handleClose, customer }) => {
                 variant="success"
               >
                 <div>
-                  <InfoRow label="Lisen Number" value={customer?.lisenNumber} />
                   <InfoRow
-                    label="Lisen Period"
+                    label="License Number"
+                    value={customer?.lisenNumber}
+                  />
+                  <InfoRow
+                    label="License Period"
                     value={
                       customer?.lisenStartDate.split("T")[0] +
                       " - " +
@@ -251,7 +254,7 @@ const CustomerView = ({ show, handleClose, customer }) => {
             <Col sm={6} lg={3}>
               <StatCard
                 icon={FaLayerGroup}
-                label="Lisen Number"
+                label="License Number"
                 value={customer?.lisenNumber}
                 variant="secondary"
               />
