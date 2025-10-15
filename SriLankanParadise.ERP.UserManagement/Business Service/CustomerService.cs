@@ -37,6 +37,11 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             return await _customerRepository.GetCustomersByCompanyId(companyId);
         }
 
+        public Task<IEnumerable<Customer>> SearchCustomersByName(string searchQuery)
+        {
+            return _customerRepository.SearchCustomersByName(searchQuery);
+        }
+
         public async Task UpdateCustomer(int customerId, Customer customer)
         {
             await _customerRepository.UpdateCustomer(customerId, customer);

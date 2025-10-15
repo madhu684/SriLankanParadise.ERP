@@ -2,6 +2,7 @@
 using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
+using System.ComponentModel.Design;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
 {
@@ -90,6 +91,32 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             catch (Exception)
             {
 
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<Customer>> SearchCustomersByName(string searchQuery)
+        {
+            try
+            {
+                // Check if searchQuery is provided
+                if (string.IsNullOrEmpty(searchQuery))
+                {
+                    return null;
+                }
+
+                var query = _dbContext.Customers.Where(cu => cu.Status == 1);
+
+                // Apply search query
+                query = query.Where(cu => cu.CustomerName.Contains(searchQuery) || cu.CustomerCode.Contains(searchQuery));
+
+                query = query.Include(cu => cu.CustomerDeliveryAddress);
+
+                var customers = await query.ToListAsync();
+                return customers.Any() ? customers : null!;
+            }
+            catch (Exception)
+            {
                 throw;
             }
         }

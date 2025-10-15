@@ -40,12 +40,23 @@ public partial class SalesInvoice
     public string? ReferenceNumber { get; set; }
 
     public int? LocationId { get; set; }
-    public string? InVoicedPersonName { get; set; }
-    public string? InVoicedPersonMobileNo { get; set; }
 
-    public virtual ICollection<SalesInvoiceDetail> SalesInvoiceDetails { get; set; } = new List<SalesInvoiceDetail>();
+    public int? CustomerId { get; set; }
+
+    public int? CustomerDeliveryAddressId { get; set; }
+
+    public string? DriverName { get; set; }
+
+    public string? VehicleNumber { get; set; }
+
+    public decimal? TotalLitres { get; set; }
 
     public virtual SalesOrder? SalesOrder { get; set; }
+
+    public virtual Customer? Customer { get; set; }
+    public virtual CustomerDeliveryAddress? CustomerDeliveryAddress { get; set; }
+
+    public virtual ICollection<SalesInvoiceDetail> SalesInvoiceDetails { get; set; } = new List<SalesInvoiceDetail>();
 
     public virtual ICollection<SalesReceiptSalesInvoice> SalesReceiptSalesInvoices { get; set; } = new List<SalesReceiptSalesInvoice>();
 

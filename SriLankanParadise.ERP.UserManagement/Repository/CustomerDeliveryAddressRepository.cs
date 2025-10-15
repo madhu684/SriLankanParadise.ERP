@@ -68,6 +68,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Where(cda => cda.CustomerId == customerId)
                     .ToListAsync();
 
+
                 return addresses.Any() ? addresses : Enumerable.Empty<CustomerDeliveryAddress>();
             }
             catch (Exception)

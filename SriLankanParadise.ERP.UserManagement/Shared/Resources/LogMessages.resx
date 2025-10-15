@@ -1086,4 +1086,7 @@
   <data name="CustomerUpdated" xml:space="preserve">
     <value>Customer updated successfuly</value>
   </data>
+  <data name="CustomerDeliveryAddressesNotFound" xml:space="preserve">
+    <value>Customer delivery addresses not found</value>
+  </data>
 </root>

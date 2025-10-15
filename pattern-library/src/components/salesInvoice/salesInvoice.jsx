@@ -31,6 +31,17 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
     isCompanyError,
     company,
     locationInventories,
+    customerSearchTerm,
+    isLocationInventoryLoading,
+    isWarehouseLocationLoading,
+    userLocations,
+    customers,
+    isCustomersLoading,
+    isCustomersError,
+    handleCustomerSelect,
+    handleResetCustomer,
+    refetchCustomers,
+    setCustomerSearchTerm,
     handleInputChange,
     handleItemDetailsChange,
     handleAttachmentChange,
@@ -40,12 +51,9 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
     calculateTotalAmount,
     setSearchTerm,
     handleSelectItem,
+    calculateSubTotal,
     renderColumns,
     renderSubColumns,
-    calculateSubTotal,
-    userLocations,
-    isLocationInventoryLoading,
-    isWarehouseLocationLoading,
   } = useSalesInvoice({
     onFormSubmit: () => {
       handleClose();
@@ -64,566 +72,852 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
   }
 
   return (
-    <div className="container mt-4">
+    <div className="container-fluid px-4 py-3">
       {/* Header */}
       <div className="mb-4">
         <div ref={alertRef}></div>
-        <div className="d-flex justify-content-between">
-          <i
-            class="bi bi-arrow-left"
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <button
             onClick={handleClose}
-            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
-          ></i>
-          <p>
+            className="btn btn-dark d-flex align-items-center gap-2"
+            // style={{ minWidth: "100px" }}
+          >
+            <i className="bi bi-arrow-left"></i>
+            {/* <span>Back</span> */}
+          </button>
+          <div className="text-muted small">
             <CurrentDateTime />
-          </p>
+          </div>
         </div>
-        <h1 className="mt-2 text-center">Sales Invoice</h1>
-        <hr />
+        <h2 className="text-center mb-3 fw-bold">Sales Invoice</h2>
+        <hr className="mb-4" />
       </div>
 
       {/* Display success or error messages */}
       {submissionStatus === "successSubmitted" && (
-        <div className="alert alert-success mb-3" role="alert">
-          Sales invoice submitted successfully! Reference Number: {referenceNo}
+        <div
+          className="alert alert-success alert-dismissible fade show mb-4"
+          role="alert"
+        >
+          <i className="bi bi-check-circle-fill me-2"></i>
+          <strong>Success!</strong> Sales invoice submitted successfully!
+          <br />
+          Reference Number: <strong>{referenceNo}</strong>
         </div>
       )}
       {submissionStatus === "successSavedAsDraft" && (
-        <div className="alert alert-success mb-3" role="alert">
-          Sales invoice saved as draft, you can edit and submit it later!
-          Reference Number: {referenceNo}
+        <div
+          className="alert alert-info alert-dismissible fade show mb-4"
+          role="alert"
+        >
+          <i className="bi bi-info-circle-fill me-2"></i>
+          <strong>Saved as Draft!</strong> You can edit and submit it later.
+          <br />
+          Reference Number: <strong>{referenceNo}</strong>
         </div>
       )}
       {submissionStatus === "error" && (
-        <div className="alert alert-danger mb-3" role="alert">
-          Error submitting sales invoice. Please try again.
+        <div
+          className="alert alert-danger alert-dismissible fade show mb-4"
+          role="alert"
+        >
+          <i className="bi bi-exclamation-triangle-fill me-2"></i>
+          <strong>Error!</strong> Unable to submit sales invoice. Please try
+          again.
         </div>
       )}
 
       <form>
-        <div className="row mb-3 d-flex justify-content-between">
-          <div className="col-md-5">
-            {/* Order Information */}
-            <h4>1. Invoice Information</h4>
-            <div className="mb-3 mt-3">
-              <label htmlFor="invoiceDate" className="form-label">
-                Invoice Date
-              </label>
-              <input
-                type="date"
-                className={`form-control ${
-                  validFields.invoiceDate ? "is-valid" : ""
-                } ${validationErrors.invoiceDate ? "is-invalid" : ""}`}
-                id="invoiceDate"
-                placeholder="Enter order date"
-                value={formData.invoiceDate}
-                onChange={(e) =>
-                  handleInputChange("invoiceDate", e.target.value)
-                }
-                required
-              />
-              {validationErrors.invoiceDate && (
-                <div className="invalid-feedback">
-                  {validationErrors.invoiceDate}
-                </div>
-              )}
-            </div>
-            <div className="mb-3">
-              <label htmlFor="dueDate" className="form-label">
-                Due Date
-              </label>
-              <input
-                type="date"
-                className={`form-control ${
-                  validFields.dueDate ? "is-valid" : ""
-                } ${validationErrors.dueDate ? "is-invalid" : ""}`}
-                id="dueDate"
-                placeholder="Enter delivery date"
-                value={formData.dueDate}
-                onChange={(e) => handleInputChange("dueDate", e.target.value)}
-                required
-              />
-              {validationErrors.dueDate && (
-                <div className="invalid-feedback">
-                  {validationErrors.dueDate}
-                </div>
-              )}
-              <div className="mt-3">
-                <label htmlFor="referenceNumber" className="form-label">
-                  Reference Number
-                </label>
-                <input
-                  type="text"
-                  className={`form-control ${
-                    validFields.referenceNumber ? "is-valid" : ""
-                  } ${validationErrors.referenceNumber ? "is-invalid" : ""}`}
-                  id="referenceNumber"
-                  placeholder="Enter reference number"
-                  value={formData.referenceNumber}
-                  onChange={(e) =>
-                    handleInputChange("referenceNumber", e.target.value)
-                  }
-                  //required
-                />
-                {validationErrors.referenceNumber && (
-                  <div className="invalid-feedback">
-                    {validationErrors.referenceNumber}
-                  </div>
-                )}
+        <div className="row g-4 mb-4">
+          {/* Left Column - Invoice Information and Sales Order details */}
+          <div className="col-lg-6 d-flex flex-column">
+            {/* Invoice Information */}
+            <div className="card shadow-sm mb-3 flex-fill">
+              <div className="card-header bg-primary text-white">
+                <h5 className="mb-0">
+                  <i className="bi bi-file-text me-2"></i>1. Invoice Information
+                </h5>
               </div>
-            </div>
-            <div className="mb-3">
-              <label htmlFor="storeLocation" className="form-label">
-                Store Location
-              </label>
-              <select
-                className={`form-select ${
-                  validFields.storeLocation ? "is-valid" : ""
-                } ${validationErrors.storeLocation ? "is-invalid" : ""}`}
-                id="storeLocation"
-                value={formData?.storeLocation ?? ""}
-                onChange={(e) =>
-                  handleInputChange("storeLocation", e.target.value)
-                }
-              >
-                <option value="">Select Location</option>
-                {userLocations && userLocations != null
-                  ? userLocations.map((location) => (
-                      <option
-                        key={location.location.locationId}
-                        value={location.location.locationId}
-                      >
-                        {location.location.locationName}
-                      </option>
-                    ))
-                  : ""}
-              </select>
-              {validationErrors.storeLocation && (
-                <div className="invalid-feedback">
-                  {validationErrors.storeLocation}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="col-md-5">
-            <h4>2. Sales Order Details</h4>
-            <div className="mt-3">
-              <label htmlFor="purchaseOrder" className="form-label">
-                Sales Order
-              </label>
-            </div>
-            {/* Additional Sales Order Information */}
-            {salesOrder ? (
-              <div className="card mb-3">
-                <div className="card-header">Selected Sales Order</div>
-                <div className="card-body">
-                  <p>Sales Order Reference No: {salesOrder.referenceNo}</p>
-                  <p>Order Date: {salesOrder.orderDate?.split("T")[0] ?? ""}</p>
-                  <p>
-                    Delivery Date:{" "}
-                    {salesOrder.deliveryDate?.split("T")[0] ?? ""}
-                  </p>
-                  <p>
-                    Order Type:{" "}
-                    {salesOrder.customerId !== null
-                      ? "Customer Order"
-                      : "Direct Order"}
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="alert alert-warning" role="alert">
-                This is a direct sales invoice, no sales order.
-              </div>
-            )}
-
-            <div className="mt-3">
-              <h4>4. Patient Details</h4>
-              <div className="mb-3 mt-3">
-                <label htmlFor="patientName" className="form-label">
-                  Patient Name
-                </label>
-                <input
-                  type="text"
-                  className={`form-control ${
-                    validFields.patientName ? "is-valid" : ""
-                  } ${validationErrors.patientName ? "is-invalid" : ""}`}
-                  id="patientName"
-                  placeholder="Enter Patient Name"
-                  value={formData.patientName}
-                  onChange={(e) =>
-                    handleInputChange("patientName", e.target.value)
-                  }
-                  required
-                />
-                {validationErrors.patientName && (
-                  <div className="invalid-feedback">
-                    {validationErrors.patientName}
-                  </div>
-                )}
-              </div>
-              <div className="mb-3 mt-3">
-                <label htmlFor="patientNo" className="form-label">
-                  Patient Contact No
-                </label>
-                <input
-                  type="text"
-                  className={`form-control ${
-                    validFields.patientNo ? "is-valid" : ""
-                  } ${validationErrors.patientNo ? "is-invalid" : ""}`}
-                  id="patientNo"
-                  placeholder="Enter Patient Contact No"
-                  value={formData.patientNo}
-                  onChange={(e) =>
-                    handleInputChange("patientNo", e.target.value)
-                  }
-                  required
-                />
-                {validationErrors.patientNo && (
-                  <div className="invalid-feedback">
-                    {validationErrors.patientNo}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Item Details */}
-        <h4>3. Item Details</h4>
-        <div className="col-md-5">
-          {/* Item Search */}
-          <div className="mb-3 mt-3">
-            <div className="input-group">
-              <span className="input-group-text bg-transparent">
-                <i className="bi bi-search"></i>
-              </span>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Search for an item..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              {searchTerm && (
-                <span
-                  className="input-group-text bg-transparent"
-                  style={{
-                    cursor: "pointer",
-                  }}
-                  onClick={() => setSearchTerm("")}
-                >
-                  <i className="bi bi-x"></i>
-                </span>
-              )}
-            </div>
-            {/* Dropdown for filtered items */}
-            {searchTerm && (
-              <div className="dropdown" style={{ width: "100%" }}>
-                <ul
-                  className="dropdown-menu"
-                  style={{
-                    display: "block",
-                    width: "100%",
-                    maxHeight: "200px",
-                    overflowY: "auto",
-                  }}
-                >
-                  {isItemsLoading ? (
-                    <li className="dropdown-item">
-                      <ButtonLoadingSpinner text="Searching..." />
-                    </li>
-                  ) : isItemsError ? (
-                    <li className="dropdown-item">
-                      Error: {itemsError.message}
-                    </li>
-                  ) : availableItems === null ||
-                    availableItems.length === 0 ||
-                    availableItems.filter((item) => {
-                      // If batchStockType is FIFO, filter out items already present in formData.itemDetails
-                      if (company.batchStockType === "FIFO") {
-                        return !formData.itemDetails.some(
-                          (detail) => detail.itemMasterId === item.itemMasterId
-                        );
-                      }
-                      // Otherwise, include all items
-                      return true;
-                    }).length === 0 ? (
-                    <li className="dropdown-item">
-                      <span className="me-3">
-                        <i className="bi bi-emoji-frown"></i>
-                      </span>
-                      No items found
-                    </li>
-                  ) : (
-                    availableItems
-                      .filter((item) => {
-                        // If batchStockType is FIFO, filter out items already present in formData.itemDetails
-                        if (company.batchStockType === "FIFO") {
-                          return !formData.itemDetails.some(
-                            (detail) =>
-                              detail.itemMasterId === item.itemMasterId
-                          );
-                        }
-                        // Otherwise, include all items
-                        return true;
-                      })
-                      .map((item) => (
-                        <li key={item.itemMasterId}>
-                          <button
-                            type="button"
-                            className="dropdown-item"
-                            onClick={() => handleSelectItem(item)}
-                          >
-                            <span className="me-3">
-                              <i className="bi bi-cart4"></i>
-                            </span>
-                            {item?.itemCode} - {item?.itemName}
-                          </button>
-                        </li>
-                      ))
+              <div className="card-body">
+                <div className="mb-3">
+                  <label
+                    htmlFor="invoiceDate"
+                    className="form-label fw-semibold"
+                  >
+                    Invoice Date <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    className={`form-control ${
+                      validFields.invoiceDate ? "is-valid" : ""
+                    } ${validationErrors.invoiceDate ? "is-invalid" : ""}`}
+                    id="invoiceDate"
+                    value={formData.invoiceDate}
+                    onChange={(e) =>
+                      handleInputChange("invoiceDate", e.target.value)
+                    }
+                    required
+                  />
+                  {validationErrors.invoiceDate && (
+                    <div className="invalid-feedback">
+                      {validationErrors.invoiceDate}
+                    </div>
                   )}
-                </ul>
+                </div>
+
+                <div className="mb-3">
+                  <label htmlFor="dueDate" className="form-label fw-semibold">
+                    Due Date <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    className={`form-control ${
+                      validFields.dueDate ? "is-valid" : ""
+                    } ${validationErrors.dueDate ? "is-invalid" : ""}`}
+                    id="dueDate"
+                    value={formData.dueDate}
+                    onChange={(e) =>
+                      handleInputChange("dueDate", e.target.value)
+                    }
+                    required
+                  />
+                  {validationErrors.dueDate && (
+                    <div className="invalid-feedback">
+                      {validationErrors.dueDate}
+                    </div>
+                  )}
+                </div>
+
+                <div className="mb-3">
+                  <label
+                    htmlFor="referenceNumber"
+                    className="form-label fw-semibold"
+                  >
+                    Reference Number
+                  </label>
+                  <input
+                    type="text"
+                    className={`form-control ${
+                      validFields.referenceNumber ? "is-valid" : ""
+                    } ${validationErrors.referenceNumber ? "is-invalid" : ""}`}
+                    id="referenceNumber"
+                    placeholder="Enter reference number"
+                    value={formData.referenceNumber}
+                    onChange={(e) =>
+                      handleInputChange("referenceNumber", e.target.value)
+                    }
+                  />
+                  {validationErrors.referenceNumber && (
+                    <div className="invalid-feedback">
+                      {validationErrors.referenceNumber}
+                    </div>
+                  )}
+                </div>
+
+                <div className="mb-0">
+                  <label
+                    htmlFor="storeLocation"
+                    className="form-label fw-semibold"
+                  >
+                    Store Location <span className="text-danger">*</span>
+                  </label>
+                  <select
+                    className={`form-select ${
+                      validFields.storeLocation ? "is-valid" : ""
+                    } ${validationErrors.storeLocation ? "is-invalid" : ""}`}
+                    id="storeLocation"
+                    value={formData?.storeLocation ?? ""}
+                    onChange={(e) =>
+                      handleInputChange("storeLocation", e.target.value)
+                    }
+                  >
+                    <option value="">Select Location</option>
+                    {userLocations && userLocations != null
+                      ? userLocations.map((location) => (
+                          <option
+                            key={location.location.locationId}
+                            value={location.location.locationId}
+                          >
+                            {location.location.locationName}
+                          </option>
+                        ))
+                      : ""}
+                  </select>
+                  {validationErrors.storeLocation && (
+                    <div className="invalid-feedback">
+                      {validationErrors.storeLocation}
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
+            </div>
+            {/* Sales Order Details */}
+            <div className="card shadow-sm flex-fill">
+              <div className="card-header bg-success text-white">
+                <h5 className="mb-0">
+                  <i className="bi bi-cart-check me-2"></i>2. Sales Order
+                  Details
+                </h5>
+              </div>
+              <div className="card-body">
+                {salesOrder ? (
+                  <div className="bg-light p-3 rounded">
+                    <div className="row g-2">
+                      <div className="col-12">
+                        <small className="text-muted">Reference No:</small>
+                        <p className="mb-2 fw-semibold">
+                          {salesOrder.referenceNo}
+                        </p>
+                      </div>
+                      <div className="col-6">
+                        <small className="text-muted">Order Date:</small>
+                        <p className="mb-2">
+                          {salesOrder.orderDate?.split("T")[0] ?? ""}
+                        </p>
+                      </div>
+                      <div className="col-6">
+                        <small className="text-muted">Delivery Date:</small>
+                        <p className="mb-2">
+                          {salesOrder.deliveryDate?.split("T")[0] ?? ""}
+                        </p>
+                      </div>
+                      <div className="col-12">
+                        <small className="text-muted">Order Type:</small>
+                        <p className="mb-0">
+                          <span className="badge bg-info">
+                            {salesOrder.customerId !== null
+                              ? "Customer Order"
+                              : "Direct Order"}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="alert alert-warning mb-0" role="alert">
+                    <i className="bi bi-info-circle me-2"></i>
+                    This is a direct sales invoice, no sales order.
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
 
-        {formData.itemDetails.length > 0 && (
-          <div className="table-responsive mb-2">
-            <table
-              className="table"
-              style={{ minWidth: "1000px", overflowX: "auto" }}
-            >
-              <thead>
-                <tr>
-                  <th>Item Name</th>
-                  <th>Unit</th>
-                  <th>Stock In Hand</th>
-                  <th>Quantity</th>
-                  <th>Unit Price</th>
-                  {renderColumns()}
-                  <th className="text-end">Total Price</th>
-                  <th className="text-end">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {formData.itemDetails.map((item, index) => (
-                  <tr key={index}>
-                    <td>{item.name}</td>
-                    <td>{item.unit}</td>
-                    {/* <td>
-                      <select
-                        className="form-select"
-                        value={item.batchId}
-                        onChange={(e) =>
-                          handleItemDetailsChange(
-                            index,
-                            "batchId",
-                            e.target.value
-                          )
-                        }
-                        disabled={item.isInventoryItem === false}
-                      >
-                        <option value="">Select batch</option>
-                        {locationInventories
-                          ?.filter((i) => i.itemMasterId === item.id)
-                          ?.map((i, batchIndex) => (
-                            <option
-                              key={batchIndex}
-                              value={i.batchId}
-                              disabled={i.stockInHand === 0}
-                            >
-                              {i.itemBatch.batch.batchRef}
-                            </option>
-                          ))}
-                      </select>
-                    </td> */}
-                    <td>
-                      {item.isInventoryItem === false ? "-" : item.stockInHand}
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        className={`form-control ${
-                          validFields[`quantity_${index}`] ? "is-valid" : ""
-                        } ${
-                          validationErrors[`quantity_${index}`]
-                            ? "is-invalid"
-                            : ""
-                        }`}
-                        value={item.quantity}
-                        onChange={(e) =>
-                          handleItemDetailsChange(
-                            index,
-                            "quantity",
-                            e.target.value
-                          )
-                        }
-                        disabled={item.isInventoryItem === false}
-                      />
-                      {validationErrors[`quantity_${index}`] && (
-                        <div className="invalid-feedback">
-                          {validationErrors[`quantity_${index}`]}
-                        </div>
-                      )}
-                    </td>
-                    <td>
-                      {item.unitPrice ? item.unitPrice.toFixed(2) : "0.00"}
-                    </td>
-                    {item.chargesAndDeductions.map((charge, chargeIndex) => (
-                      <td key={chargeIndex}>
-                        <input
-                          className="form-control"
-                          type="number"
-                          value={charge.value}
-                          onChange={(e) => {
-                            let newValue = parseFloat(e.target.value);
-
-                            // If the entered value is not a valid number, set it to 0
-                            if (isNaN(newValue)) {
-                              newValue = 0;
-                            } else {
-                              // If the charge is a percentage, ensure the value is between 0 and 100
-                              if (charge.isPercentage) {
-                                newValue = Math.min(100, Math.max(0, newValue)); // Clamp the value between 0 and 100
-                              } else {
-                                // For non-percentage charges, ensure the value is positive
-                                newValue = Math.max(0, newValue);
-                              }
-                            }
-
-                            handleItemDetailsChange(
-                              index,
-                              `chargesAndDeductions_${chargeIndex}_value`,
-                              newValue
-                            );
-                          }}
-                        />
-                      </td>
-                    ))}
-                    <td className="text-end">{item.totalPrice.toFixed(2)}</td>
-                    <td className="text-end">
+          {/* Right Column - Sales Order, Customer & Driver Details */}
+          <div className="col-lg-6 d-flex flex-column">
+            {/* Customer Details */}
+            <div className="card shadow-sm mb-3 flex-fill">
+              <div className="card-header bg-danger text-white">
+                <h5 className="mb-0">
+                  <i className="bi bi-person-circle me-2"></i>3. Customer
+                  Details
+                </h5>
+              </div>
+              <div className="card-body">
+                <label htmlFor="customer" className="form-label fw-semibold">
+                  Customer <span className="text-danger">*</span>
+                </label>
+                <div className="mb-3">
+                  <div className="input-group">
+                    <span className="input-group-text bg-white">
+                      <i className="bi bi-search"></i>
+                    </span>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        validFields.customerId ? "is-valid" : ""
+                      } ${validationErrors.customerId ? "is-invalid" : ""}`}
+                      placeholder="Search for a customer..."
+                      value={customerSearchTerm}
+                      onChange={(e) => setCustomerSearchTerm(e.target.value)}
+                      autoFocus={false}
+                    />
+                    {customerSearchTerm && (
                       <button
                         type="button"
-                        className="btn btn-outline-danger"
-                        onClick={() => handleRemoveItem(index)}
+                        className="btn btn-outline-secondary"
+                        onClick={() => setCustomerSearchTerm("")}
                       >
-                        Delete
+                        <i className="bi bi-x"></i>
                       </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td
-                    colSpan={
-                      5 +
-                      formData.itemDetails[0].chargesAndDeductions.length -
-                      (company.batchStockType === "FIFO" ? 1 : 0)
-                    }
-                  ></td>
-                  <th>Sub Total</th>
-                  <td className="text-end">{calculateSubTotal().toFixed(2)}</td>
-                  <td></td>
-                </tr>
-                {renderSubColumns()}
-                <tr>
-                  <td
-                    colSpan={
-                      5 +
-                      formData.itemDetails[0].chargesAndDeductions.length -
-                      (company.batchStockType === "FIFO" ? 1 : 0)
-                    }
-                  ></td>
-                  <th>Total Amount</th>
-                  <td className="text-end">
-                    {calculateTotalAmount().toFixed(2)}
-                  </td>
-                  <td></td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        )}
+                    )}
+                  </div>
 
-        {/* Attachments */}
-        <h4>4. Attachments</h4>
-        <div className="col-md-6 mb-3">
-          <label htmlFor="attachment" className="form-label">
-            Attachments (if any)
-          </label>
-          <input
-            type="file"
-            className={`form-control ${
-              validFields.attachments ? "is-valid" : ""
-            } ${validationErrors.attachments ? "is-invalid" : ""}`}
-            id="attachment"
-            onChange={(e) => handleAttachmentChange(e.target.files)}
-            multiple
-          />
-          <small className="form-text text-muted">File size limit: 10MB</small>
-          {validationErrors.attachments && (
-            <div className="invalid-feedback">
-              {validationErrors.attachments}
+                  {/* Dropdown for filtered customers */}
+                  {customerSearchTerm && (
+                    <div className="dropdown position-relative">
+                      <ul
+                        className="dropdown-menu show shadow"
+                        style={{
+                          width: "100%",
+                          maxHeight: "200px",
+                          overflowY: "auto",
+                        }}
+                      >
+                        {isCustomersLoading && (
+                          <li className="dropdown-item text-center">
+                            <i className="bi bi-hourglass-split me-2"></i>
+                            Loading...
+                          </li>
+                        )}
+                        {isCustomersError && (
+                          <li className="dropdown-item text-center text-danger">
+                            <i className="bi bi-exclamation-triangle me-2"></i>
+                            Error loading customers.{" "}
+                            <button
+                              onClick={refetchCustomers}
+                              className="btn btn-link p-0"
+                            >
+                              Retry
+                            </button>
+                          </li>
+                        )}
+                        {!isCustomersLoading &&
+                          !isCustomersError &&
+                          customers.map((cs) => (
+                            <li key={cs.customerId}>
+                              <button
+                                type="button"
+                                className="dropdown-item"
+                                onClick={() => handleCustomerSelect(cs)}
+                              >
+                                <i className="bi bi-person me-2"></i>
+                                {cs?.customerCode} - {cs?.customerName}
+                              </button>
+                            </li>
+                          ))}
+                        {!isCustomersLoading &&
+                          !isCustomersError &&
+                          customers.length === 0 && (
+                            <li className="dropdown-item text-center text-muted">
+                              <i className="bi bi-emoji-frown me-2"></i>
+                              No customers found
+                            </li>
+                          )}
+                      </ul>
+                    </div>
+                  )}
+
+                  {formData.selectedCustomer === null && (
+                    <div className="mt-2">
+                      <small className="form-text text-muted">
+                        {validationErrors.customerId && (
+                          <div className="text-danger mb-1">
+                            <i className="bi bi-exclamation-circle me-1"></i>
+                            {validationErrors.customerId}
+                          </div>
+                        )}
+                        Please search for a customer and select it
+                      </small>
+                    </div>
+                  )}
+                </div>
+
+                {/* Selected Customer Information */}
+                {formData.selectedCustomer && (
+                  <div className="bg-light p-3 rounded mb-3">
+                    <div className="d-flex justify-content-between align-items-start mb-2">
+                      <h6 className="mb-0 text-primary">Selected Customer</h6>
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-danger"
+                        onClick={handleResetCustomer}
+                      >
+                        <i className="bi bi-x-circle me-1"></i>
+                        Reset
+                      </button>
+                    </div>
+                    <hr className="my-2" />
+                    <div className="row g-2 small">
+                      <div className="col-12">
+                        <strong>Name:</strong>{" "}
+                        {formData.selectedCustomer?.customerName}
+                      </div>
+                      <div className="col-12">
+                        <strong>Contact:</strong>{" "}
+                        {formData.selectedCustomer?.contactPerson}
+                      </div>
+                      <div className="col-6">
+                        <strong>Phone:</strong>{" "}
+                        {formData.selectedCustomer?.phone}
+                      </div>
+                      <div className="col-6">
+                        <strong>Email:</strong>{" "}
+                        {formData.selectedCustomer?.email}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {formData.selectedCustomer && (
+                  <div className="mb-0 p-3">
+                    <label
+                      htmlFor="deliveryAddress"
+                      className="form-label fw-semibold"
+                    >
+                      Delivery Address <span className="text-danger">*</span>
+                    </label>
+                    <select
+                      className={`form-select ${
+                        validFields.deliveryAddress ? "is-valid" : ""
+                      } ${
+                        validationErrors.deliveryAddress ? "is-invalid" : ""
+                      }`}
+                      id="deliveryAddress"
+                      //value={formData?.deliveryAddress ?? ""}
+                      onChange={(e) =>
+                        handleInputChange(
+                          "customerDeliveryAddressId",
+                          e.target.value
+                        )
+                      }
+                    >
+                      <option value="">Select Address</option>
+                      {formData.selectedCustomer
+                        ? formData.selectedCustomer.customerDeliveryAddress.map(
+                            (address) => (
+                              <option key={address.id} value={address.id}>
+                                {address.addressLine1} {address.addressLine2}
+                              </option>
+                            )
+                          )
+                        : ""}
+                    </select>
+                    {validationErrors.deliveryAddress && (
+                      <div className="invalid-feedback">
+                        {validationErrors.deliveryAddress}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
-          )}
+
+            {/* Driver Details */}
+            <div className="card shadow-sm flex-fill">
+              <div className="card-header bg-warning">
+                <h5 className="mb-0">
+                  <i className="bi bi-truck me-2"></i>4. Driver Details
+                </h5>
+              </div>
+              <div className="card-body">
+                <div className="mb-3">
+                  <label
+                    htmlFor="driverName"
+                    className="form-label fw-semibold"
+                  >
+                    Driver Name
+                  </label>
+                  <input
+                    type="text"
+                    className={`form-control ${
+                      validFields.driverName ? "is-valid" : ""
+                    } ${validationErrors.driverName ? "is-invalid" : ""}`}
+                    id="driverName"
+                    value={formData.driverName ?? ""}
+                    onChange={(e) =>
+                      handleInputChange("driverName", e.target.value)
+                    }
+                    placeholder="Enter Driver Name"
+                  />
+                  {validationErrors.driverName && (
+                    <div className="invalid-feedback">
+                      {validationErrors.driverName}
+                    </div>
+                  )}
+                </div>
+
+                <div className="mb-0">
+                  <label htmlFor="vehicleNo" className="form-label fw-semibold">
+                    Vehicle Number
+                  </label>
+                  <input
+                    type="text"
+                    className={`form-control ${
+                      validFields.vehicleNo ? "is-valid" : ""
+                    } ${validationErrors.vehicleNo ? "is-invalid" : ""}`}
+                    id="vehicleNo"
+                    value={formData.vehicleNo ?? ""}
+                    onChange={(e) =>
+                      handleInputChange("vehicleNo", e.target.value)
+                    }
+                    placeholder="Enter Vehicle Number"
+                  />
+                  {validationErrors.vehicleNo && (
+                    <div className="invalid-feedback">
+                      {validationErrors.vehicleNo}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Actions */}
-        <div className="mb-3">
-          <button
-            type="button"
-            className="btn btn-primary me-2"
-            onClick={() => handleSubmit(false)}
-            disabled={
-              !formData.itemDetails.length > 0 ||
-              loading ||
-              loadingDraft ||
-              submissionStatus !== null
-            }
-          >
-            {loading && submissionStatus === null ? (
-              <ButtonLoadingSpinner text="Submitting..." />
+        {/* Item Details Section */}
+        <div className="card shadow-sm mb-4">
+          <div className="card-header bg-secondary text-white">
+            <h5 className="mb-0">
+              <i className="bi bi-box-seam me-2"></i>5. Item Details
+            </h5>
+          </div>
+          <div className="card-body">
+            <div className="row">
+              <div className="col-lg-6 mb-3">
+                <label className="form-label fw-semibold">Search Items</label>
+                <div className="input-group">
+                  <span className="input-group-text bg-white">
+                    <i className="bi bi-search"></i>
+                  </span>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search for an item..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                  {searchTerm && (
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary"
+                      onClick={() => setSearchTerm("")}
+                    >
+                      <i className="bi bi-x"></i>
+                    </button>
+                  )}
+                </div>
+
+                {/* Dropdown for filtered items */}
+                {searchTerm && (
+                  <div className="dropdown position-relative">
+                    <ul
+                      className="dropdown-menu show shadow"
+                      style={{
+                        width: "100%",
+                        maxHeight: "200px",
+                        overflowY: "auto",
+                      }}
+                    >
+                      {isItemsLoading ? (
+                        <li className="dropdown-item text-center">
+                          <ButtonLoadingSpinner text="Searching..." />
+                        </li>
+                      ) : isItemsError ? (
+                        <li className="dropdown-item text-danger">
+                          <i className="bi bi-exclamation-triangle me-2"></i>
+                          Error: {itemsError.message}
+                        </li>
+                      ) : availableItems === null ||
+                        availableItems.length === 0 ||
+                        availableItems.filter((item) => {
+                          if (company.batchStockType === "FIFO") {
+                            return !formData.itemDetails.some(
+                              (detail) =>
+                                detail.itemMasterId === item.itemMasterId
+                            );
+                          }
+                          return true;
+                        }).length === 0 ? (
+                        <li className="dropdown-item text-center text-muted">
+                          <i className="bi bi-emoji-frown me-2"></i>
+                          No items found
+                        </li>
+                      ) : (
+                        availableItems
+                          .filter((item) => {
+                            if (company.batchStockType === "FIFO") {
+                              return !formData.itemDetails.some(
+                                (detail) =>
+                                  detail.itemMasterId === item.itemMasterId
+                              );
+                            }
+                            return true;
+                          })
+                          .map((item) => (
+                            <li key={item.itemMasterId}>
+                              <button
+                                type="button"
+                                className="dropdown-item"
+                                onClick={() => handleSelectItem(item)}
+                              >
+                                <i className="bi bi-cart4 me-2"></i>
+                                {item?.itemCode} - {item?.itemName}
+                              </button>
+                            </li>
+                          ))
+                      )}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {formData.itemDetails.length > 0 ? (
+              <div className="table-responsive">
+                <table className="table table-hover align-middle">
+                  <thead className="table-light">
+                    <tr>
+                      <th>Item Name</th>
+                      <th>Unit</th>
+                      <th className="text-center">Stock In Hand</th>
+                      <th className="text-center">Quantity</th>
+                      <th className="text-end">Unit Price</th>
+                      {renderColumns()}
+                      <th className="text-end">Total Price</th>
+                      <th className="text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {formData.itemDetails.map((item, index) => (
+                      <tr key={index}>
+                        <td>{item.name}</td>
+                        <td>
+                          <span className="badge bg-light text-dark">
+                            {item.unit}
+                          </span>
+                        </td>
+                        <td className="text-center">
+                          {item.isInventoryItem === false ? (
+                            <span className="text-muted">-</span>
+                          ) : (
+                            <span className="fw-semibold">
+                              {item.stockInHand}
+                            </span>
+                          )}
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            className={`form-control text-center ${
+                              validFields[`quantity_${index}`] ? "is-valid" : ""
+                            } ${
+                              validationErrors[`quantity_${index}`]
+                                ? "is-invalid"
+                                : ""
+                            }`}
+                            value={item.quantity}
+                            onChange={(e) =>
+                              handleItemDetailsChange(
+                                index,
+                                "quantity",
+                                e.target.value
+                              )
+                            }
+                            disabled={item.isInventoryItem === false}
+                            style={{ minWidth: "100px" }}
+                          />
+                          {validationErrors[`quantity_${index}`] && (
+                            <div className="invalid-feedback">
+                              {validationErrors[`quantity_${index}`]}
+                            </div>
+                          )}
+                        </td>
+                        <td className="text-end">
+                          {item.unitPrice ? item.unitPrice.toFixed(2) : "0.00"}
+                        </td>
+                        {item.chargesAndDeductions.map(
+                          (charge, chargeIndex) => (
+                            <td key={chargeIndex}>
+                              <input
+                                className="form-control text-end"
+                                type="number"
+                                value={charge.value}
+                                onChange={(e) => {
+                                  let newValue = parseFloat(e.target.value);
+                                  if (isNaN(newValue)) {
+                                    newValue = 0;
+                                  } else {
+                                    if (charge.isPercentage) {
+                                      newValue = Math.min(
+                                        100,
+                                        Math.max(0, newValue)
+                                      );
+                                    } else {
+                                      newValue = Math.max(0, newValue);
+                                    }
+                                  }
+                                  handleItemDetailsChange(
+                                    index,
+                                    `chargesAndDeductions_${chargeIndex}_value`,
+                                    newValue
+                                  );
+                                }}
+                                style={{ minWidth: "100px" }}
+                              />
+                            </td>
+                          )
+                        )}
+                        <td className="text-end fw-bold">
+                          {item.totalPrice.toFixed(2)}
+                        </td>
+                        <td className="text-center">
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-outline-danger"
+                            onClick={() => handleRemoveItem(index)}
+                          >
+                            <i className="bi bi-trash me-1"></i>
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot className="table-light">
+                    <tr>
+                      <td
+                        colSpan={
+                          5 +
+                          formData.itemDetails[0].chargesAndDeductions.length -
+                          (company.batchStockType === "FIFO" ? 1 : 0)
+                        }
+                      ></td>
+                      <th className="text-end">Sub Total</th>
+                      <td className="text-end fw-bold">
+                        {calculateSubTotal().toFixed(2)}
+                      </td>
+                      <td></td>
+                    </tr>
+                    {renderSubColumns()}
+                    <tr className="table-primary">
+                      <td
+                        colSpan={
+                          5 +
+                          formData.itemDetails[0].chargesAndDeductions.length -
+                          (company.batchStockType === "FIFO" ? 1 : 0)
+                        }
+                      ></td>
+                      <th className="text-end fs-6">Total Amount</th>
+                      <td className="text-end fw-bold fs-6">
+                        {calculateTotalAmount().toFixed(2)}
+                      </td>
+                      <td></td>
+                    </tr>
+                    <tr className="table-primary">
+                      <td
+                        colSpan={
+                          5 +
+                          formData.itemDetails[0].chargesAndDeductions.length -
+                          (company.batchStockType === "FIFO" ? 1 : 0)
+                        }
+                      ></td>
+                      <th className="text-end fs-6">Total Litres</th>
+                      <td className="text-end fw-bold fs-6">0.00</td>
+                      <td></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
             ) : (
-              "Submit"
+              <div className="alert alert-info text-center" role="alert">
+                <i className="bi bi-info-circle me-2"></i>
+                No items added yet. Search and select items to add to the
+                invoice.
+              </div>
             )}
-          </button>
-          <button
-            type="button"
-            className="btn btn-secondary me-2"
-            onClick={() => handleSubmit(true)}
-            disabled={
-              !formData.itemDetails.length > 0 ||
-              loading ||
-              loadingDraft ||
-              submissionStatus !== null
-            }
-          >
-            {loadingDraft && submissionStatus === null ? (
-              <ButtonLoadingSpinner text="Saving as Draft..." />
-            ) : (
-              "Save as Draft"
-            )}
-          </button>
-          <button
-            type="button"
-            className="btn btn-success me-2"
-            onClick={handlePrint}
-            disabled={loading || loadingDraft || submissionStatus !== null}
-          >
-            Print
-          </button>
-          <button
-            type="button"
-            className="btn btn-danger"
-            onClick={handleClose}
-            disabled={loading || loadingDraft || submissionStatus !== null}
-          >
-            Cancel
-          </button>
+          </div>
+        </div>
+
+        {/* Attachments Section */}
+        <div className="card shadow-sm mb-4">
+          <div className="card-header bg-light">
+            <h5 className="mb-0">
+              <i className="bi bi-paperclip me-2"></i>6. Attachments
+            </h5>
+          </div>
+          <div className="card-body">
+            <div className="row">
+              <div className="col-lg-6">
+                <label htmlFor="attachment" className="form-label fw-semibold">
+                  Upload Files (Optional)
+                </label>
+                <input
+                  type="file"
+                  className={`form-control ${
+                    validFields.attachments ? "is-valid" : ""
+                  } ${validationErrors.attachments ? "is-invalid" : ""}`}
+                  id="attachment"
+                  onChange={(e) => handleAttachmentChange(e.target.files)}
+                  multiple
+                />
+                <small className="form-text text-muted">
+                  <i className="bi bi-info-circle me-1"></i>
+                  File size limit: 10MB
+                </small>
+                {validationErrors.attachments && (
+                  <div className="invalid-feedback">
+                    {validationErrors.attachments}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="card shadow-sm">
+          <div className="card-body">
+            <div className="d-flex flex-wrap gap-2 justify-content-start">
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => handleSubmit(false)}
+                disabled={
+                  !formData.itemDetails.length > 0 ||
+                  loading ||
+                  loadingDraft ||
+                  submissionStatus !== null
+                }
+              >
+                {loading && submissionStatus === null ? (
+                  <ButtonLoadingSpinner text="Submitting..." />
+                ) : (
+                  <>
+                    <i className="bi bi-check-circle me-2"></i>
+                    Submit Invoice
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => handleSubmit(true)}
+                disabled={
+                  !formData.itemDetails.length > 0 ||
+                  loading ||
+                  loadingDraft ||
+                  submissionStatus !== null
+                }
+              >
+                {loadingDraft && submissionStatus === null ? (
+                  <ButtonLoadingSpinner text="Saving..." />
+                ) : (
+                  <>
+                    <i className="bi bi-floppy me-2"></i>
+                    Save as Draft
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                className="btn btn-success"
+                onClick={handlePrint}
+                disabled={loading || loadingDraft || submissionStatus !== null}
+              >
+                <i className="bi bi-printer me-2"></i>
+                Print
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={handleClose}
+                disabled={loading || loadingDraft || submissionStatus !== null}
+              >
+                <i className="bi bi-x-circle me-2"></i>
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       </form>
     </div>

@@ -3,6 +3,7 @@ import {
   post_sales_invoice_api,
   post_sales_invoice_detail_api,
   get_company_api,
+  search_customer_api,
 } from "../../services/salesApi";
 import {
   get_charges_and_deductions_by_company_id_api,
@@ -15,16 +16,19 @@ import {
   get_item_batches_by_item_master_id_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   const [formData, setFormData] = useState({
+    selectedCustomer: null,
+    customerDeliveryAddressId: null,
+    driverName: null,
+    vehicleNo: null,
+    totalLitres: 0,
     storeLocation: null,
     invoiceDate: "",
     dueDate: "",
     referenceNumber: "",
-    patientName: "",
-    patientNo: "",
     itemDetails: [],
     attachments: [],
     totalAmount: 0,
@@ -37,12 +41,14 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   const [validationErrors, setValidationErrors] = useState({});
   const alertRef = useRef(null);
   const [referenceNo, setReferenceNo] = useState(null);
-  const [salesOrderSearchTerm, setSalesOrderSearchTerm] = useState("");
+  const [customerSearchTerm, setCustomerSearchTerm] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBatch, setSelectedBatch] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [initialized, setInitialized] = useState(false);
+
+  const queryClient = useQueryClient();
 
   const fetchUserLocations = async () => {
     try {
@@ -118,6 +124,26 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     queryKey: ["locationInventories", formData.storeLocation],
     queryFn: () => fetchLocationInventories(formData.storeLocation),
     enabled: !!formData.storeLocation,
+  });
+
+  const fetchCustomers = async (searchQuery) => {
+    try {
+      const response = await search_customer_api(searchQuery);
+      return response.data.result || [];
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+    }
+  };
+
+  const {
+    data: customers = [],
+    isLoading: isCustomersLoading,
+    isError: isCustomersError,
+    refetch: refetchCustomers,
+  } = useQuery({
+    queryKey: ["customers", customerSearchTerm],
+    queryFn: () => fetchCustomers(customerSearchTerm),
+    enabled: !!customerSearchTerm,
   });
 
   useEffect(() => {
@@ -607,8 +633,13 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
           referenceNumber: formData.referenceNumber,
           permissionId: 29,
           locationId: formData.storeLocation,
-          inVoicedPersonName: formData.patientName,
-          inVoicedPersonMobileNo: formData.patientNo,
+          customerId: formData.selectedCustomer.customerId,
+          customerDeliveryAddressId: parseInt(
+            formData.customerDeliveryAddressId
+          ),
+          driverName: formData.driverName,
+          vehicleNumber: formData.vehicleNo,
+          totalLitres: formData.totalLitres,
         };
 
         const response = await post_sales_invoice_api(salesInvoiceData);
@@ -918,6 +949,27 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     // refetchLocationInventory();
   };
 
+  const handleCustomerSelect = (customer) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      selectedCustomer: customer,
+    }));
+    setCustomerSearchTerm("");
+  };
+
+  const handleResetCustomer = () => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      selectedCustomer: null,
+      customerDeliveryAddressId: null,
+    }));
+    setCustomerSearchTerm("");
+    setValidFields({});
+    setValidationErrors({});
+    // Explicitly reset selectedTrn to null to disable dependent queries
+    //queryClient.resetQueries(["customers", customerSearchTerm]);
+  };
+
   const renderColumns = () => {
     return chargesAndDeductions.map((charge) => {
       if (charge.isApplicableForLineItem) {
@@ -1047,6 +1099,13 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     company,
     userLocations,
     locationInventories,
+    customers,
+    customerSearchTerm,
+    isCustomersLoading,
+    isCustomersError,
+    handleCustomerSelect,
+    handleResetCustomer,
+    refetchCustomers,
     handleInputChange,
     handleItemDetailsChange,
     handleAttachmentChange,
@@ -1055,7 +1114,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     handleRemoveItem,
     handlePrint,
     calculateTotalAmount,
-    setSalesOrderSearchTerm,
+    setCustomerSearchTerm,
     setSearchTerm,
     handleSelectItem,
     calculateSubTotal,

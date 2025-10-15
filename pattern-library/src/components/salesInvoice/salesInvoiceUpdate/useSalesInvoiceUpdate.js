@@ -5,6 +5,8 @@ import {
   post_sales_invoice_detail_api,
   delete_sales_invoice_detail_api,
   get_company_api,
+  search_customer_api,
+  get_delivery_address_by_customer_id,
 } from "../../../services/salesApi";
 import {
   get_item_batches_by_item_master_id_api,
@@ -17,19 +19,22 @@ import {
   get_locations_inventories_by_location_id_api,
   get_item_batch_by_itemMasterId_batchId_api,
   get_sum_location_inventories_by_locationId_itemMasterId_api,
+  get_user_locations_by_user_id_api,
 } from "../../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../../services/inventoryApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { batch } from "react-redux";
 
 const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   const [formData, setFormData] = useState({
     storeLocation: null,
+    selectedCustomer: null,
+    customerDeliveryAddressId: null,
+    driverName: null,
+    vehicleNo: null,
+    totalLitres: 0,
     invoiceDate: "",
     dueDate: "",
     referenceNumber: "",
-    patientName: "",
-    patientNo: "",
     itemDetails: [],
     attachments: [],
     totalAmount: 0,
@@ -44,6 +49,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   const [itemIdsToBeDeleted, setItemIdsToBeDeleted] = useState([]);
   const alertRef = useRef(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [customerSearchTerm, setCustomerSearchTerm] = useState("");
   const [selectedBatch, setSelectedBatch] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
@@ -202,60 +208,47 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     queryFn: fetchCompany,
   });
 
-  // useEffect(() => {
-  //   if (groupedSalesInvoiceDetails) {
-  //     const promises = Object.values(groupedSalesInvoiceDetails).map(
-  //       async (item) => {
-  //         try {
-  //           // Fetch batches for the current itemMasterId
-  //           const response = await get_item_batches_by_item_master_id_api(
-  //             item.itemBatchItemMasterId,
-  //             sessionStorage.getItem("companyId")
-  //           );
-  //           console.log("Item batches 230:", response.data.result);
+  const fetchCustomers = async (searchQuery) => {
+    try {
+      const response = await search_customer_api(searchQuery);
+      return response.data.result || [];
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+    }
+  };
 
-  //           // Calculate total temporary quantity from batches
-  //           const tempQuantity = response.data.result.reduce(
-  //             (total, batch) => total + (batch.tempQuantity || 0),
-  //             0
-  //           );
+  const {
+    data: customers = [],
+    isLoading: isCustomersLoading,
+    isError: isCustomersError,
+    refetch: refetchCustomers,
+  } = useQuery({
+    queryKey: ["customers", customerSearchTerm],
+    queryFn: () => fetchCustomers(customerSearchTerm),
+    enabled: !!customerSearchTerm,
+  });
 
-  //           // Update quantity and totalPrice
-  //           item.itemBatch.tempQuantity = tempQuantity;
-
-  //           // Update tempQuantity of fetched batches based on salesOrderDetails
-  //           const updatedBatches = response.data.result.map((batch) => {
-  //             const correspondingDetail = salesInvoice.salesInvoiceDetails.find(
-  //               (detail) => detail.itemBatchBatchId === batch.batchId
-  //             );
-  //             if (correspondingDetail) {
-  //               batch.tempQuantity += correspondingDetail.quantity;
-  //             }
-  //             return batch;
-  //           });
-
-  //           // Update item.batches with the updated batches
-  //           item.batches = updatedBatches;
-
-  //           return item;
-  //         } catch (error) {
-  //           console.error("Error processing item:", error);
-  //           throw error; // Propagate the error
-  //         }
-  //       }
-  //     );
-
-  //     Promise.all(promises)
-  //       .then((processedItems) => {
-  //         // Handle processed items here
-  //         setProcessedItems(processedItems);
-  //       })
-  //       .catch((error) => {
-  //         // Handle error if any
-  //         console.error("Error processing items:", error);
-  //       });
-  //   }
-  // }, []);
+  const fetchUserLocations = async () => {
+    try {
+      const response = await get_user_locations_by_user_id_api(
+        sessionStorage.getItem("userId")
+      );
+      return response.data.result.filter(
+        (location) => location.location.locationTypeId === 2
+      );
+    } catch (error) {
+      console.error("Error fetching user locations:", error);
+    }
+  };
+  const {
+    data: userLocations,
+    isLoading: isUserLocationsLoading,
+    isError: isUserLocationsError,
+    error: userLocationsError,
+  } = useQuery({
+    queryKey: ["userLocations", sessionStorage.getItem("userId")],
+    queryFn: fetchUserLocations,
+  });
 
   useEffect(() => {
     if (
@@ -283,42 +276,6 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
         // Initialize line item charges and deductions
         const initializedLineItemCharges = salesInvoiceDetails.map(
           (item, index) => {
-            // const initializedCharges = chargesAndDeductionsApplied
-            //   ?.filter(
-            //     (charge) => charge.lineItemId === item?.itemMaster?.itemMasterId
-            //   )
-            //   .map((charge) => {
-            //     let value;
-            //     if (charge.chargesAndDeduction.percentage) {
-            //       // Calculate percentage value
-            //       value =
-            //         (Math.abs(charge.appliedValue) /
-            //           (item.unitPrice * item.quantity)) *
-            //         100;
-            //     } else {
-            //       value = Math.abs(charge.appliedValue);
-            //     }
-            //     return {
-            //       id: charge.chargesAndDeduction.chargesAndDeductionId,
-            //       name: charge.chargesAndDeduction.displayName,
-            //       value: value.toFixed(2),
-            //       sign: charge.chargesAndDeduction.sign,
-            //       isPercentage: charge.chargesAndDeduction.percentage !== null,
-            //       chargesAndDeductionAppliedId:
-            //         charge.chargesAndDeductionAppliedId,
-            //     };
-            //   });
-
-            // // Sort the charges and deductions according to the order of display names
-            // const sortedLineItemCharges = chargesAndDeductions
-            //   .filter((charge) => charge.isApplicableForLineItem)
-            //   .map((charge) => {
-            //     const displayName = charge.displayName; // Extract display name from charge
-            //     const matchedCharge = initializedCharges.find(
-            //       (c) => c.name === displayName
-            //     );
-            //     return matchedCharge || null; // Return null if no matching charge is found
-            //   });
             const inventory = inventoryResults[index];
             const availableStock =
               inventory?.data?.result?.totalStockInHand || 0;
@@ -399,12 +356,16 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           });
 
         setFormData({
+          selectedCustomer: deepCopySalesInvoice?.customer ?? null,
+          customerDeliveryAddressId:
+            deepCopySalesInvoice?.customerDeliveryAddressId ?? null,
+          driverName: deepCopySalesInvoice?.driverName ?? null,
+          vehicleNo: deepCopySalesInvoice?.vehicleNumber ?? null,
+          totalLitres: deepCopySalesInvoice?.totalLitres ?? 0,
           salesInvoiceId: deepCopySalesInvoice?.salesInvoiceId ?? "",
           invoiceDate: deepCopySalesInvoice?.invoiceDate?.split("T")[0] ?? "",
           dueDate: deepCopySalesInvoice?.dueDate?.split("T")[0] ?? "",
           referenceNumber: deepCopySalesInvoice?.referenceNo ?? "",
-          patientName: deepCopySalesInvoice?.inVoicedPersonName ?? "",
-          patientNo: deepCopySalesInvoice?.inVoicedPersonMobileNo ?? "",
           itemDetails: initializedLineItemCharges,
           attachments: deepCopySalesInvoice?.attachments ?? [],
           totalAmount: deepCopySalesInvoice?.totalAmount ?? "",
@@ -427,6 +388,28 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     company,
     locationInventories,
   ]);
+
+  const fetchCustomerDeliveryAddresses = async () => {
+    try {
+      const response = await get_delivery_address_by_customer_id(
+        formData?.selectedCustomer?.customerId
+      );
+      return response.data.result || [];
+    } catch (error) {
+      console.error("Error fetching customer delivery addresses:", error);
+    }
+  };
+
+  const {
+    data: customerDeliveryAddresses = [],
+    isLoading: isCustomerDeliveryAddressesLoading,
+    isError: isCustomerDeliveryAddressesError,
+    refetch: refetchCustomerDeliveryAddresses,
+  } = useQuery({
+    queryKey: ["customerDeliveryAddresses", salesInvoice.customerId],
+    queryFn: () => fetchCustomerDeliveryAddresses(),
+    enabled: !!formData?.selectedCustomer?.customerId,
+  });
 
   const getTransactionTypeIdByName = (name) => {
     const transactionType = transactionTypes.find((type) => type.name === name);
@@ -701,8 +684,13 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           referenceNumber: salesInvoice.referenceNumber,
           permissionId: 31,
           locationId: salesInvoice.locationId,
-          inVoicedPersonName: formData.patientName,
-          inVoicedPersonMobileNo: formData.patientNo,
+          customerId: formData.selectedCustomer.customerId,
+          customerDeliveryAddressId: parseInt(
+            formData.customerDeliveryAddressId
+          ),
+          driverName: formData.driverName,
+          vehicleNumber: formData.vehicleNo,
+          totalLitres: formData.totalLitres,
         };
 
         const response = await put_sales_invoice_api(
@@ -1083,6 +1071,27 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     }
   };
 
+  const handleCustomerSelect = (customer) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      selectedCustomer: customer,
+    }));
+    setCustomerSearchTerm("");
+  };
+
+  const handleResetCustomer = () => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      selectedCustomer: null,
+      customerDeliveryAddressId: null,
+    }));
+    setCustomerSearchTerm("");
+    setValidFields({});
+    setValidationErrors({});
+    // Explicitly reset selectedTrn to null to disable dependent queries
+    //queryClient.resetQueries(["customers", customerSearchTerm]);
+  };
+
   const renderColumns = () => {
     return chargesAndDeductions.map((charge) => {
       if (charge.isApplicableForLineItem) {
@@ -1184,6 +1193,14 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     company,
     itemIdsToBeDeleted,
     locationInventories,
+    customers,
+    customerSearchTerm,
+    isCustomersLoading,
+    isCustomersError,
+    userLocations,
+    customerDeliveryAddresses,
+    setCustomerSearchTerm,
+    refetchCustomers,
     handleInputChange,
     handleItemDetailsChange,
     handleSubmit,
@@ -1197,6 +1214,8 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     renderColumns,
     calculateSubTotal,
     renderSubColumns,
+    handleCustomerSelect,
+    handleResetCustomer,
   };
 };
 

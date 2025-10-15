@@ -106,6 +106,36 @@ export const update_customer_delivery_address_api = async (id, formData) => {
   }
 };
 
+export const search_customer_api = async (searchTerm) => {
+  try {
+    const response = await api.get(
+      `/customer/SearchCustomersByName?searchQuery=${searchTerm}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_delivery_address_by_customer_id = async (customerId) => {
+  try {
+    const response = await api.get(
+      `/customerDeliveryAddress/GetCustomerDeliveryAddressesByCustomerId/${customerId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 //sales person apis
 export const get_sales_persons_by_company_id_api = async (companyId) => {
   try {

@@ -245,7 +245,7 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
               )}
             </div>
 
-            {/* Additional Purchase Order Information */}
+            {/* Additional TRN Information */}
             {selectedTrn && (
               <div className="card mb-3">
                 <div className="card-header">Selected Transfer Requisition</div>

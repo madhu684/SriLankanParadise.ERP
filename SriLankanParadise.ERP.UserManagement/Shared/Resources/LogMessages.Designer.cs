@@ -529,6 +529,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Customer delivery addresses not found.
+        /// </summary>
+        public static string CustomerDeliveryAddressesNotFound {
+            get {
+                return ResourceManager.GetString("CustomerDeliveryAddressesNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Customer delivery addresses for customer retrieved.
         /// </summary>
         public static string CustomerDeliveryAddressesRetrieved {

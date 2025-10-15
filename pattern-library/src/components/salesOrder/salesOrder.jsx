@@ -567,22 +567,6 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                 </ul>
               </div>
             )}
-
-            {/* {!locationInventory && formData.itemMasterId !== 0 && (
-              <div className="mb-3">
-                <small className="form-text text-danger">
-                  Selected item does not have sufficient stock. Please select
-                  another item
-                </small>
-              </div>
-            )} */}
-            {formData.itemMasterId !== 0 && (
-              <div className="mb-3">
-                {/* <p className="form-text text-muted">
-                  Selected item: {formData.itemMaster.itemName}
-                </p> */}
-              </div>
-            )}
           </div>
         </div>
 
@@ -619,14 +603,6 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
           </div>
         </div> */}
 
-        {/* {!itemBatches && formData.itemMasterId !== 0 && (
-          <div className="mb-3">
-            <small className="form-text  text-danger">
-              Selected item does not have any associated item batches. Please
-              select another item
-            </small>
-          </div>
-        )} */}
         {formData.itemDetails.length > 0 && (
           <div className="table-responsive mb-2">
             <table

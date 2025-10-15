@@ -33,6 +33,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             try
             {
                 return await _dbContext.SalesInvoices
+                    .Include(si => si.Customer)
+                    .Include(si => si.CustomerDeliveryAddress)
                     .Include(si => si.SalesInvoiceDetails)
                     .ToListAsync();
             }
@@ -49,13 +51,15 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var salesInvoices = await _dbContext.SalesInvoices
                     .Where(si => si.Status != 0 && si.CompanyId == companyId)
+                    .Include(si => si.Customer)
+                    .Include(si => si.CustomerDeliveryAddress)
                     .Include(si => si.SalesInvoiceDetails)
-                    .ThenInclude(ib => ib.Batch)
+                        .ThenInclude(ib => ib.Batch)
                     .Include(si => si.SalesInvoiceDetails)
-                    .ThenInclude(ib => ib.ItemMaster)
-                    .ThenInclude(im => im.Unit)
+                        .ThenInclude(ib => ib.ItemMaster)
+                        .ThenInclude(im => im.Unit)
                     .Include(si => si.SalesOrder)
-                    .ThenInclude(so => so.SalesOrderDetails)
+                        .ThenInclude(so => so.SalesOrderDetails)
                     //.OrderByDescending(si => si.CreatedDate)
                     .ToListAsync();
 
@@ -73,6 +77,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var salesInvoices = await _dbContext.SalesInvoices
                     .Where(si => si.CreatedUserId == userId)
+                    .Include(si => si.Customer)
+                    .Include(si => si.CustomerDeliveryAddress)
                     .Include(si => si.SalesInvoiceDetails)
                         .ThenInclude(ib => ib.Batch)
                     .Include(si => si.SalesInvoiceDetails)
@@ -118,11 +124,13 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var salesInvoice = await _dbContext.SalesInvoices
                     .Where(si => si.SalesInvoiceId == salesInvoiceId)
+                    .Include(si => si.Customer)
+                    .Include(si => si.CustomerDeliveryAddress)
                     .Include(si => si.SalesInvoiceDetails)
-                    .ThenInclude(ib => ib.Batch)
+                        .ThenInclude(ib => ib.Batch)
                     .Include(si => si.SalesInvoiceDetails)
-                    .ThenInclude(ib => ib.ItemMaster)
-                    .ThenInclude(im => im.Unit)
+                        .ThenInclude(ib => ib.ItemMaster)
+                        .ThenInclude(im => im.Unit)
                     .Include(si => si.SalesOrder)
                     .FirstOrDefaultAsync();
 
@@ -204,6 +212,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             try
             {
                 var salesInvoice = await _dbContext.SalesInvoices
+                    .Include(si => si.Customer)
+                    .Include(si => si.CustomerDeliveryAddress)
                     .Include(si => si.SalesInvoiceDetails)
                     .FirstOrDefaultAsync(si => si.SalesInvoiceId == salesInvoiceId);
                 return salesInvoice;

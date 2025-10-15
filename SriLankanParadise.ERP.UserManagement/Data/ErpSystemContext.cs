@@ -1054,6 +1054,10 @@ public partial class ErpSystemContext : DbContext
             entity.HasOne(d => d.SalesOrder).WithMany(p => p.SalesInvoices)
                 .HasForeignKey(d => d.SalesOrderId)
                 .HasConstraintName("FK_SalesInvoice_SalesOrder");
+
+            entity.HasOne(d => d.Customer).WithMany(p => p.SalesInvoices)
+                .HasForeignKey(d => d.CustomerId)
+                .HasConstraintName("FK_SalesInvoice_Customer");
         });
 
         modelBuilder.Entity<SalesInvoiceDetail>(entity =>

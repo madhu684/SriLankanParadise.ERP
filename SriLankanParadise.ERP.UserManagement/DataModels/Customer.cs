@@ -31,4 +31,5 @@ public partial class Customer
     public virtual ICollection<PackingSlip> PackingSlips { get; set; } = new List<PackingSlip>();
     public virtual ICollection<Lead> Leads { get; set; } = new List<Lead>();
     public virtual ICollection<CustomerDeliveryAddress> CustomerDeliveryAddress { get; set; } = new List<CustomerDeliveryAddress>();
+    public virtual ICollection<SalesInvoice>? SalesInvoices { get; set; }
 }

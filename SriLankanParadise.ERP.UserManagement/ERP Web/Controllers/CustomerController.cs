@@ -177,5 +177,31 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpGet("SearchCustomersByName")]
+        public async Task<ApiResponseModel> SearchCustomersByName([FromQuery] string searchQuery)
+        {
+            try
+            {
+                var customers = await _customerService.SearchCustomersByName(searchQuery);
+                if (customers != null && customers.Any())
+                {
+                    var customerDtos = _mapper.Map<IEnumerable<CustomerDto>>(customers);
+                    _logger.LogInformation(LogMessages.CustomersRetrieved);
+                    AddResponseMessage(Response, LogMessages.CustomersRetrieved, customerDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.CustomersNotFound);
+                    AddResponseMessage(Response, LogMessages.CustomersNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

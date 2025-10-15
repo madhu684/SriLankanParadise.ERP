@@ -77,6 +77,12 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             try
             {
                 var customerDeliveryAddresses = await _customerDeliveryAddressService.GetCustomerDeliveryAddressesByCustomerId(customerId);
+                if (!customerDeliveryAddresses.Any())
+                {
+                    _logger.LogWarning(LogMessages.CustomerDeliveryAddressesNotFound);
+                    AddResponseMessage(Response, LogMessages.CustomerDeliveryAddressesNotFound, null, false, HttpStatusCode.NotFound);
+                    return Response;
+                }
                 var customerDeliveryAddressDto = _mapper.Map<IEnumerable<CustomerDeliveryAddressDto>>(customerDeliveryAddresses);
                 _logger.LogInformation(LogMessages.CustomerDeliveryAddressesRetrieved);
                 AddResponseMessage(Response, LogMessages.CustomerDeliveryAddressesRetrieved, customerDeliveryAddressDto, true, HttpStatusCode.OK);
