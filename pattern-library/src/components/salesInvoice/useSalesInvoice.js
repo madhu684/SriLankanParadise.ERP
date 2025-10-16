@@ -279,6 +279,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
       !isLoadingchargesAndDeductions &&
       chargesAndDeductions
     ) {
+      console.log("Trigger effect");
       const deepCopySalesOrder = JSON.parse(JSON.stringify(salesOrder));
 
       // Initialize line item charges and deductions
@@ -312,7 +313,10 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
 
           // Sort the charges and deductions according to the order of display names
           const sortedLineItemCharges = chargesAndDeductions
-            .filter((charge) => charge.isApplicableForLineItem)
+            .filter(
+              (charge) =>
+                charge.isDisableFromSubTotal === false && charge.status === true
+            )
             .map((charge) => {
               const displayName = charge.displayName; // Extract display name from charge
               const matchedCharge = initializedCharges.find(
@@ -341,6 +345,10 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
       );
 
       // Initialize common charges and deductions
+      console.log(
+        "chargesAndDeductionsApplied 347: ",
+        chargesAndDeductionsApplied
+      );
       const initializedCommonCharges = chargesAndDeductionsApplied
         ?.filter((charge) => !charge.lineItemId)
         .map((charge) => {
@@ -360,6 +368,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
             chargesAndDeductionAppliedId: charge.chargesAndDeductionAppliedId,
           };
         });
+      console.log("initializedCommonCharges 370: ", initializedCommonCharges);
 
       setFormData((prevFormData) => ({
         ...prevFormData,
@@ -509,7 +518,16 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
             item.chargesAndDeductions.map(async (charge) => {
               let appliedValue = 0;
 
-              if (charge.isPercentage) {
+              if (charge.name === "SSL") {
+                // Calculate the amount based on percentage and sign
+                const amount =
+                  item.isInventoryItem === true
+                    ? ((item.quantity * item.unitPrice) /
+                        (100 - charge.value)) *
+                      charge.value
+                    : (item.unitPrice / (100 - charge.value)) * charge.value;
+                appliedValue = charge.sign === "+" ? amount : -amount;
+              } else if (charge.isPercentage) {
                 // Calculate the amount based on percentage and sign
                 const amount =
                   item.isInventoryItem === true
@@ -526,7 +544,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
                 chargesAndDeductionId: charge.id,
                 transactionId: transactionId,
                 transactionTypeId,
-                lineItemId: item.itemMasterId,
+                lineItemId: item.id,
                 appliedValue,
                 dateApplied: new Date().toISOString(),
                 createdBy: sessionStorage?.getItem("userId"),
@@ -772,7 +790,11 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         updatedItemDetails[index].unitPrice;
 
       updatedItemDetails[index].chargesAndDeductions.forEach((charge) => {
-        if (charge.isPercentage) {
+        if (charge.name === "SSL") {
+          const amount =
+            (grandTotalPrice / (100 - charge.value)) * charge.value;
+          totalPrice += charge.sign === "+" ? amount : -amount;
+        } else if (charge.isPercentage) {
           const amount = (grandTotalPrice * charge.value) / 100;
           totalPrice += charge.sign === "+" ? amount : -amount;
         } else {
@@ -788,6 +810,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         itemDetails: updatedItemDetails,
         subTotal: calculateSubTotal(),
         totalAmount: calculateTotalAmount(),
+        totalLitres: calculateTotalLites(),
       };
     });
   };
@@ -870,6 +893,18 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     return totalAmount;
   };
 
+  const calculateTotalLites = () => {
+    let totalLitres = 0;
+    if (Array.isArray(formData?.itemDetails)) {
+      formData.itemDetails.forEach((item) => {
+        const quantity = Number(item.quantity) || 0;
+        const packSize = Number(item.packSize) || 0;
+        totalLitres += quantity * packSize;
+      });
+    }
+    return totalLitres / 1000;
+  };
+
   // Handler to add the selected item to itemDetails
   const handleSelectItem = async (item) => {
     // Initialize charges and deductions (this remains unchanged)
@@ -933,6 +968,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
                 : item.unitPrice,
             totalPrice: item.isInventoryItem === false ? item.unitPrice : 0.0,
             isInventoryItem: item?.isInventoryItem,
+            packSize: item?.conversionRate || 1,
             chargesAndDeductions: initializedCharges,
           },
         ],
@@ -988,7 +1024,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
 
   const handleAddCommonChargesAndDeductions = () => {
     const initializedCharges = chargesAndDeductions.reduce((acc, charge) => {
-      if (!charge.isApplicableForLineItem) {
+      if (charge.isDisableFromSubTotal === false) {
         // Initialize additional properties for the common on charges and deductions
         acc[charge.displayName] = charge.amount || charge.percentage;
       }
@@ -997,7 +1033,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
 
     // Generate chargesAndDeductions array for the newly added item
     const initializedChargesArray = chargesAndDeductions
-      .filter((charge) => !charge.isApplicableForLineItem)
+      .filter((charge) => charge.isDisableFromSubTotal === false)
       .map((charge) => ({
         id: charge.chargesAndDeductionId,
         name: charge.displayName,
@@ -1019,12 +1055,12 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
 
   const renderSubColumns = () => {
     return formData.commonChargesAndDeductions.map((charge, chargeIndex) => {
-      if (!charge.isApplicableForLineItem) {
+      if (charge.name !== "SSL") {
         return (
           <tr key={chargeIndex}>
             <td
               colSpan={
-                5 +
+                6 +
                 formData.itemDetails[0].chargesAndDeductions.length -
                 (company.batchStockType === "FIFO" ? 1 : 0)
               }
@@ -1062,7 +1098,6 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
                 }}
               />
             </td>
-            <td></td>
           </tr>
         );
       }
@@ -1118,6 +1153,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     setSearchTerm,
     handleSelectItem,
     calculateSubTotal,
+    calculateTotalLites,
     renderColumns,
     renderSubColumns,
   };

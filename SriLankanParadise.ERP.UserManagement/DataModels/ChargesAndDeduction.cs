@@ -33,5 +33,6 @@ public partial class ChargesAndDeduction
 
     public int? CompanyId { get; set; }
 
+    public bool IsDisableFromSubTotal { get; set; }
     public virtual ICollection<ChargesAndDeductionApplied> ChargesAndDeductionApplieds { get; set; } = new List<ChargesAndDeductionApplied>();
 }

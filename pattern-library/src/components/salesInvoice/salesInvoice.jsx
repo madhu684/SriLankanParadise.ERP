@@ -52,6 +52,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
     setSearchTerm,
     handleSelectItem,
     calculateSubTotal,
+    calculateTotalLites,
     renderColumns,
     renderSubColumns,
   } = useSalesInvoice({
@@ -612,8 +613,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                         availableItems.filter((item) => {
                           if (company.batchStockType === "FIFO") {
                             return !formData.itemDetails.some(
-                              (detail) =>
-                                detail.itemMasterId === item.itemMasterId
+                              (detail) => detail.id === item.itemMasterId
                             );
                           }
                           return true;
@@ -660,8 +660,8 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                       <th>Item Name</th>
                       <th>Unit</th>
                       <th className="text-center">Stock In Hand</th>
-                      <th className="text-center">Quantity</th>
                       <th className="text-end">Unit Price</th>
+                      <th className="text-center">Quantity</th>
                       {renderColumns()}
                       <th className="text-end">Total Price</th>
                       <th className="text-center">Action</th>
@@ -684,6 +684,9 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                               {item.stockInHand}
                             </span>
                           )}
+                        </td>
+                        <td className="text-end">
+                          {item.unitPrice ? item.unitPrice.toFixed(2) : "0.00"}
                         </td>
                         <td>
                           <input
@@ -711,9 +714,6 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                               {validationErrors[`quantity_${index}`]}
                             </div>
                           )}
-                        </td>
-                        <td className="text-end">
-                          {item.unitPrice ? item.unitPrice.toFixed(2) : "0.00"}
                         </td>
                         {item.chargesAndDeductions.map(
                           (charge, chargeIndex) => (
@@ -767,7 +767,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                     <tr>
                       <td
                         colSpan={
-                          5 +
+                          6 +
                           formData.itemDetails[0].chargesAndDeductions.length -
                           (company.batchStockType === "FIFO" ? 1 : 0)
                         }
@@ -776,13 +776,12 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                       <td className="text-end fw-bold">
                         {calculateSubTotal().toFixed(2)}
                       </td>
-                      <td></td>
                     </tr>
                     {renderSubColumns()}
                     <tr className="table-primary">
                       <td
                         colSpan={
-                          5 +
+                          6 +
                           formData.itemDetails[0].chargesAndDeductions.length -
                           (company.batchStockType === "FIFO" ? 1 : 0)
                         }
@@ -791,19 +790,19 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                       <td className="text-end fw-bold fs-6">
                         {calculateTotalAmount().toFixed(2)}
                       </td>
-                      <td></td>
                     </tr>
                     <tr className="table-primary">
                       <td
                         colSpan={
-                          5 +
+                          6 +
                           formData.itemDetails[0].chargesAndDeductions.length -
                           (company.batchStockType === "FIFO" ? 1 : 0)
                         }
                       ></td>
                       <th className="text-end fs-6">Total Litres</th>
-                      <td className="text-end fw-bold fs-6">0.00</td>
-                      <td></td>
+                      <td className="text-end fw-bold fs-6">
+                        {calculateTotalLites().toFixed(2)}
+                      </td>
                     </tr>
                   </tfoot>
                 </table>
