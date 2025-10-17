@@ -53,6 +53,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
     renderSubColumns,
     handleCustomerSelect,
     handleResetCustomer,
+    calculateTotalLites,
   } = useSalesInvoiceUpdate({
     salesInvoice,
     onFormSubmit: () => {
@@ -87,7 +88,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
             <CurrentDateTime />
           </div>
         </div>
-        <h2 className="text-center mb-3 fw-bold">Sales Invoice</h2>
+        <h2 className="text-center mb-3 fw-bold">Sales Invoice Update</h2>
         <hr className="mb-4" />
       </div>
 
@@ -658,8 +659,8 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                       <th>Item Name</th>
                       <th>Unit</th>
                       <th className="text-center">Stock In Hand</th>
-                      <th className="text-center">Quantity</th>
                       <th className="text-end">Unit Price</th>
+                      <th className="text-center">Quantity</th>
                       {renderColumns()}
                       <th className="text-end">Total Price</th>
                       <th className="text-center">Action</th>
@@ -682,6 +683,9 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                               {item.stockInHand}
                             </span>
                           )}
+                        </td>
+                        <td className="text-end">
+                          {item.unitPrice ? item.unitPrice.toFixed(2) : "0.00"}
                         </td>
                         <td>
                           <input
@@ -709,9 +713,6 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                               {validationErrors[`quantity_${index}`]}
                             </div>
                           )}
-                        </td>
-                        <td className="text-end">
-                          {item.unitPrice ? item.unitPrice.toFixed(2) : "0.00"}
                         </td>
                         {item.chargesAndDeductions.map(
                           (charge, chargeIndex) => (
@@ -752,7 +753,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                           <button
                             type="button"
                             className="btn btn-sm btn-outline-danger"
-                            onClick={() => handleRemoveItem(index)}
+                            onClick={() => handleRemoveItem(index, item)}
                           >
                             <i className="bi bi-trash me-1"></i>
                             Delete
@@ -765,7 +766,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                     <tr>
                       <td
                         colSpan={
-                          5 +
+                          6 +
                           formData.itemDetails[0].chargesAndDeductions.length -
                           (company.batchStockType === "FIFO" ? 1 : 0)
                         }
@@ -780,7 +781,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                     <tr className="table-primary">
                       <td
                         colSpan={
-                          5 +
+                          6 +
                           formData.itemDetails[0].chargesAndDeductions.length -
                           (company.batchStockType === "FIFO" ? 1 : 0)
                         }
@@ -794,13 +795,15 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                     <tr className="table-primary">
                       <td
                         colSpan={
-                          5 +
+                          6 +
                           formData.itemDetails[0].chargesAndDeductions.length -
                           (company.batchStockType === "FIFO" ? 1 : 0)
                         }
                       ></td>
                       <th className="text-end fs-6">Total Litres</th>
-                      <td className="text-end fw-bold fs-6">0.00</td>
+                      <td className="text-end fw-bold fs-6">
+                        {calculateTotalLites().toFixed(2)}
+                      </td>
                       <td></td>
                     </tr>
                   </tfoot>

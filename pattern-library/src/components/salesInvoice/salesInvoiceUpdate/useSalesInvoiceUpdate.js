@@ -279,12 +279,18 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
             const inventory = inventoryResults[index];
             const availableStock =
               inventory?.data?.result?.totalStockInHand || 0;
-
             const initializedCharges = chargesAndDeductionsApplied
-              ?.filter((charge) => charge.lineItemId === item.itemMasterId)
+              ?.filter(
+                (charge) => charge.lineItemId === item.itemBatchItemMasterId
+              )
               .map((charge) => {
                 let value;
-                if (charge.chargesAndDeduction.percentage) {
+                if (charge?.chargesAndDeduction?.displayName === "SSL") {
+                  value =
+                    (charge.appliedValue /
+                      (item.unitPrice * item.quantity + charge.appliedValue)) *
+                    100;
+                } else if (charge.chargesAndDeduction.percentage) {
                   value =
                     (Math.abs(charge.appliedValue) /
                       (item.unitPrice * item.quantity)) *
@@ -304,7 +310,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
               });
 
             const sortedLineItemCharges = chargesAndDeductions
-              .filter((charge) => charge.isApplicableForLineItem)
+              .filter((charge) => charge.isApplicableForLineItem === true)
               .map((charge) => {
                 const displayName = charge.displayName;
                 const matchedCharge = initializedCharges.find(
@@ -312,6 +318,8 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
                 );
                 return matchedCharge || null;
               });
+
+            console.log("sortedLineItemCharges 325: ", sortedLineItemCharges);
 
             return {
               salesInvoiceDetailId: item?.salesInvoiceDetailId,
@@ -324,6 +332,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
               quantity: item.quantity,
               unitPrice: item.unitPrice,
               totalPrice: item.totalPrice,
+              packSize: item?.itemMaster?.conversionRate || 1,
               chargesAndDeductions: sortedLineItemCharges,
             };
           }
@@ -426,7 +435,16 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
             item.chargesAndDeductions.map(async (charge) => {
               let appliedValue = 0;
 
-              if (charge.isPercentage) {
+              if (charge.name === "SSL") {
+                // Calculate the amount based on percentage and sign
+                const amount =
+                  item.IsInventoryItem === true
+                    ? ((item.quantity * item.unitPrice) /
+                        (100 - charge.value)) *
+                      charge.value
+                    : (item.unitPrice / (100 - charge.value)) * charge.value;
+                appliedValue = charge.sign === "+" ? amount : -amount;
+              } else if (charge.isPercentage) {
                 // Calculate the amount based on percentage and sign
                 const amount =
                   item.IsInventoryItem === true
@@ -530,6 +548,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
       ...prevFormData,
       subTotal: calculateSubTotal(),
       totalAmount: calculateTotalAmount(),
+      totalLitres: calculateTotalLites(),
     }));
   }, [formData.itemDetails, formData.commonChargesAndDeductions]);
 
@@ -871,7 +890,11 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
         if (charge.isPercentage) {
           // If charge is a percentage, calculate the amount and add/subtract it
           const amount = (grandTotalPrice * charge.value) / 100;
-          if (charge.sign === "+") {
+          if (charge.name === "SSL") {
+            const sslAmount =
+              (grandTotalPrice / (100 - charge.value)) * charge.value;
+            totalPrice += charge.sign === "+" ? sslAmount : -sslAmount;
+          } else if (charge.sign === "+") {
             totalPrice += amount;
           } else if (charge.sign === "-") {
             totalPrice -= amount;
@@ -916,7 +939,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     }));
   };
 
-  const handleRemoveItem = (index, item, chargesAndDeductions) => {
+  const handleRemoveItem = (index, item) => {
     setFormData((prevFormData) => {
       const updatedItemDetails = [...prevFormData.itemDetails];
       updatedItemDetails.splice(index, 1);
@@ -995,6 +1018,18 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     return totalAmount;
   };
 
+  const calculateTotalLites = () => {
+    let totalLitres = 0;
+    if (Array.isArray(formData?.itemDetails)) {
+      formData.itemDetails.forEach((item) => {
+        const quantity = Number(item.quantity) || 0;
+        const packSize = Number(item.packSize) || 0;
+        totalLitres += quantity * packSize;
+      });
+    }
+    return totalLitres / 1000;
+  };
+
   // Handler to add the selected item to itemDetails
   const handleSelectItem = async (item) => {
     const initializedCharges =
@@ -1058,6 +1093,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
                 : highestSellingPrice,
             totalPrice:
               item.isInventoryItem === false ? item.unitPrice : item.unitPrice,
+            packageSize: item.conversionRate || 1,
             chargesAndDeductions: initializedCharges,
           },
         ],
@@ -1110,12 +1146,12 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
 
   const renderSubColumns = () => {
     return formData.commonChargesAndDeductions.map((charge, chargeIndex) => {
-      if (!charge.isApplicableForLineItem) {
+      if (charge.name !== "SSL") {
         return (
           <tr key={chargeIndex}>
             <td
               colSpan={
-                5 +
+                6 +
                 formData.itemDetails[0].chargesAndDeductions.length -
                 (company.batchStockType === "FIFO" ? 1 : 0)
               }
@@ -1162,11 +1198,10 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   };
 
   console.log("formData", formData);
-  console.log(
-    "chargesAndDeductionsAppliedIdsToBeDeleted: ",
-    chargesAndDeductionsAppliedIdsToBeDeleted
-  );
-  console.log("itemIdsToBeDeleted: ", itemIdsToBeDeleted);
+  // console.log(
+  //   "chargesAndDeductionsAppliedIdsToBeDeleted: ",
+  //   chargesAndDeductionsAppliedIdsToBeDeleted
+  // );
 
   return {
     formData,
@@ -1216,6 +1251,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     renderSubColumns,
     handleCustomerSelect,
     handleResetCustomer,
+    calculateTotalLites,
   };
 };
 

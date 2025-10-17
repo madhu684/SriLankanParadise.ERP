@@ -872,7 +872,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     const subtotal = calculateSubTotal();
 
     // Calculate total amount based on subtotal and common charges and deductions
-    let totalAmount = subtotal;
+    let totalAmount = subtotal.toFixed(2);
     formData.commonChargesAndDeductions.forEach((charge) => {
       if (charge.isPercentage) {
         const amount = (subtotal * charge.value) / 100;
