@@ -211,6 +211,11 @@ builder.Services.AddScoped<ISupplierItemService, SupplierItemService>();
 builder.Services.AddScoped<ISupplierItemRepository, SupplierItemRepository>();
 builder.Services.AddScoped<ICustomerDeliveryAddressService, CustomerDeliveryAddressService>();
 builder.Services.AddScoped<ICustomerDeliveryAddressRepository, CustomerDeliveryAddressRepository>();
+builder.Services.AddScoped<IItemPriceMasterService, ItemPriceMasterService>();
+builder.Services.AddScoped<IItemPriceMasterRepository, ItemPriceMasterRepository>();
+builder.Services.AddScoped<IItemPriceDetailService, ItemPriceDetailService>();
+builder.Services.AddScoped<IItemPriceDetailRepository, ItemPriceDetailRepository>();
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

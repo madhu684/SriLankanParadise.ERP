@@ -12,6 +12,8 @@
 
         public int? ParentId { get; set; }
 
+        public int? PriceMasterId { get; set; }
+
         public int PermissionId { get; set; }
     }
 }

@@ -1089,4 +1089,22 @@
   <data name="CustomerDeliveryAddressesNotFound" xml:space="preserve">
     <value>Customer delivery addresses not found</value>
   </data>
+  <data name="ItemPriceMasterCreated" xml:space="preserve">
+    <value>Item price master created successfully</value>
+  </data>
+  <data name="ItemPriceMasterNotFound" xml:space="preserve">
+    <value>Item price master not found</value>
+  </data>
+  <data name="ItemPriceMasterRetrived" xml:space="preserve">
+    <value>Item price master retrived</value>
+  </data>
+  <data name="ItemPriceDetailCreated" xml:space="preserve">
+    <value>Item price detail created successfully</value>
+  </data>
+  <data name="ItemPriceDetailNotFound" xml:space="preserve">
+    <value>Item price detail not found</value>
+  </data>
+  <data name="ItemPriceDetailRetrived" xml:space="preserve">
+    <value>Item price detail retrived</value>
+  </data>
 </root>

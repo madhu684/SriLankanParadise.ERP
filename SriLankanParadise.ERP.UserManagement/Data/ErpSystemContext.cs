@@ -167,6 +167,10 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<CustomerDeliveryAddress> CustomerDeliveryAddresses { get; set; }
 
+    public virtual DbSet<ItemPriceMaster> ItemPriceMasters { get; set; }
+
+    public virtual DbSet<ItemPriceDetail> ItemPriceDetails { get; set; }
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:LocalSqlServerConnection");
@@ -685,6 +689,10 @@ public partial class ErpSystemContext : DbContext
             entity.HasOne(d => d.Parent).WithMany(p => p.InverseParent)
                 .HasForeignKey(d => d.ParentId)
                 .HasConstraintName("FK_Parent_Location");
+
+            entity.HasOne(d => d.ItemPriceMaster).WithMany(p => p.Locations)
+                .HasForeignKey(d => d.PriceMasterId)
+                .HasConstraintName("FK_Location_ItemPriceMaster");
         });
 
         modelBuilder.Entity<LocationInventory>(entity =>
@@ -1567,6 +1575,26 @@ public partial class ErpSystemContext : DbContext
                 .HasForeignKey(d => d.CustomerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_CustomerDeliveryAddress_Customer");
+        });
+
+        modelBuilder.Entity<ItemPriceMaster>(entity =>
+        {
+            entity.ToTable("ItemPriceMaster");
+        });
+
+        modelBuilder.Entity<ItemPriceDetail>(entity =>
+        {
+            entity.ToTable("ItemPriceDetail");
+
+            entity.HasOne(d => d.ItemPriceMaster).WithMany(p => p.ItemPriceDetails)
+                .HasForeignKey(d => d.ItemPriceMasterId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ItemPriceDetail_ItemPriceMaster");
+
+            entity.HasOne(d => d.ItemMaster).WithMany(p => p.ItemPriceDetails)
+                .HasForeignKey(d => d.ItemMasterId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ItemPriceDetail_ItemMaster");
         });
 
 

@@ -12,8 +12,10 @@
 
         public int? LocationTypeId { get; set; }
 
+        public int? ParentId { get; set; }
+
+        public int? PriceMasterId { get; set; }
         public virtual LocationTypeDto? LocationType { get; set; }
 
-        public int? ParentId { get; set; }
     }
 }

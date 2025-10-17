@@ -1015,6 +1015,60 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Item price detail created successfully.
+        /// </summary>
+        public static string ItemPriceDetailCreated {
+            get {
+                return ResourceManager.GetString("ItemPriceDetailCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item price detail not found.
+        /// </summary>
+        public static string ItemPriceDetailNotFound {
+            get {
+                return ResourceManager.GetString("ItemPriceDetailNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item price detail retrived.
+        /// </summary>
+        public static string ItemPriceDetailRetrived {
+            get {
+                return ResourceManager.GetString("ItemPriceDetailRetrived", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item price master created successfully.
+        /// </summary>
+        public static string ItemPriceMasterCreated {
+            get {
+                return ResourceManager.GetString("ItemPriceMasterCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item price master not found.
+        /// </summary>
+        public static string ItemPriceMasterNotFound {
+            get {
+                return ResourceManager.GetString("ItemPriceMasterNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item price master retrived.
+        /// </summary>
+        public static string ItemPriceMasterRetrived {
+            get {
+                return ResourceManager.GetString("ItemPriceMasterRetrived", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Item types not found.
         /// </summary>
         public static string ItemTypesNotFound {

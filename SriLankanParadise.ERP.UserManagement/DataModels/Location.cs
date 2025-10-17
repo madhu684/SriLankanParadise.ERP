@@ -17,7 +17,15 @@ public partial class Location
 
     public int? ParentId { get; set; }
 
+    public int? PriceMasterId { get; set; }
+
     public virtual Company Company { get; set; } = null!;
+
+    public virtual LocationType? LocationType { get; set; }
+
+    public virtual Location? Parent { get; set; }
+
+    public virtual ItemPriceMaster? ItemPriceMaster { get; set; }
 
     public virtual ICollection<DailyStockBalance> DailyStockBalances { get; set; } = new List<DailyStockBalance>();
 
@@ -34,10 +42,6 @@ public partial class Location
     public virtual ICollection<LocationInventoryGoodsInTransit> LocationInventoryGoodsInTransitToLocations { get; set; } = new List<LocationInventoryGoodsInTransit>();
 
     public virtual ICollection<LocationInventoryMovement> LocationInventoryMovements { get; set; } = new List<LocationInventoryMovement>();
-
-    public virtual LocationType? LocationType { get; set; }
-
-    public virtual Location? Parent { get; set; }
 
     public virtual ICollection<PurchaseRequisition> PurchaseRequisitionDepartmentNavigations { get; set; } = new List<PurchaseRequisition>();
 
