@@ -3,6 +3,7 @@ import CurrentDateTime from "../currentDateTime/currentDateTime";
 import LoadingSpinner from "../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../errorComponent/errorComponent";
 import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
+import CustomerStatusMessage from "./helperMethods/CustomerStatusMessage";
 
 const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
   const {
@@ -55,6 +56,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
     calculateTotalLites,
     renderColumns,
     renderSubColumns,
+    formatCurrency,
   } = useSalesInvoice({
     onFormSubmit: () => {
       handleClose();
@@ -62,6 +64,8 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
     },
     salesOrder,
   });
+
+  const { message, disableSubmit } = CustomerStatusMessage({ formData });
 
   if (
     isError ||
@@ -430,11 +434,11 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                     </div>
                     <hr className="my-2" />
                     <div className="row g-2 small">
-                      <div className="col-12">
+                      <div className="col-6">
                         <strong>Name:</strong>{" "}
                         {formData.selectedCustomer?.customerName}
                       </div>
-                      <div className="col-12">
+                      <div className="col-6">
                         <strong>Contact:</strong>{" "}
                         {formData.selectedCustomer?.contactPerson}
                       </div>
@@ -446,7 +450,32 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                         <strong>Email:</strong>{" "}
                         {formData.selectedCustomer?.email}
                       </div>
+                      <div className="col-6">
+                        <strong>Credit Limit:</strong>{" "}
+                        <span className="fw-semibold text-success">
+                          {formatCurrency(
+                            formData.selectedCustomer?.creditLimit
+                          )}
+                        </span>
+                      </div>
+                      <div className="col-6">
+                        <strong>Credit Duration:</strong>{" "}
+                        {formData.selectedCustomer?.creditDuration + " days"}
+                      </div>
+                      <div className="col-6">
+                        <strong>Outstanding Amount:</strong>{" "}
+                        <span className="fw-semibold text-danger">
+                          {formatCurrency(
+                            formData.selectedCustomer?.outstandingAmount
+                          )}
+                        </span>
+                      </div>
                     </div>
+
+                    {/* Customer ability message */}
+                    {formData.selectedCustomer && (
+                      <div className="mt-2">{message}</div>
+                    )}
                   </div>
                 )}
 
@@ -865,7 +894,8 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                   !formData.itemDetails.length > 0 ||
                   loading ||
                   loadingDraft ||
-                  submissionStatus !== null
+                  submissionStatus !== null ||
+                  disableSubmit
                 }
               >
                 {loading && submissionStatus === null ? (
@@ -885,7 +915,8 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                   !formData.itemDetails.length > 0 ||
                   loading ||
                   loadingDraft ||
-                  submissionStatus !== null
+                  submissionStatus !== null ||
+                  disableSubmit
                 }
               >
                 {loadingDraft && submissionStatus === null ? (

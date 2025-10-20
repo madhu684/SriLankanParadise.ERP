@@ -137,5 +137,29 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task UpdateOutstandingBalance(int customerId, int m, Customer customer)
+        {
+            try
+            {
+                var existingCustomer = await _dbContext.Customers.FindAsync(customerId);
+                if (existingCustomer != null)
+                {
+                    if(m == 1)
+                    {
+                        existingCustomer.OutstandingAmount += customer.OutstandingAmount;
+                    }
+                    else if (m == 2)
+                    {
+                        existingCustomer.OutstandingAmount -= customer.OutstandingAmount;
+                    }
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { approve_sales_invoice_api } from "../../../services/salesApi";
+import {
+  approve_sales_invoice_api,
+  update_outstanding_balance_api,
+} from "../../../services/salesApi";
 import {
   get_charges_and_deductions_applied_api,
   post_reduce_inventory_fifo_api,
@@ -23,6 +26,19 @@ const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
   }, [approvalStatus, onFormSubmit]);
 
   console.log(salesInvoice);
+
+  const updateCustomer = async (customerId, movementTypeId, formData) => {
+    try {
+      const response = await update_outstanding_balance_api(
+        customerId,
+        movementTypeId,
+        formData
+      );
+      return response;
+    } catch (error) {
+      console.error("Error fetching charges and deductions:", error);
+    }
+  };
 
   const handleApprove = async (salesInvoiceId) => {
     try {
@@ -54,7 +70,17 @@ const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
 
       if (approvalResponse.status === 200) {
         if (detailFifo.every((item) => item.status === 200)) {
-          setApprovalStatus("approved");
+          const customerResponse = await updateCustomer(
+            salesInvoice.customerId,
+            1,
+            { outstandingAmount: salesInvoice.totalAmount }
+          );
+
+          if (customerResponse.status === 200) {
+            setApprovalStatus("approved");
+          } else {
+            setApprovalStatus("error");
+          }
         } else {
           setApprovalStatus("error");
         }

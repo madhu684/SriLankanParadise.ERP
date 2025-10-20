@@ -46,5 +46,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             await _customerRepository.UpdateCustomer(customerId, customer);
         }
+
+        public async Task UpdateOutstandingBalance(int customerId, int m, Customer customer)
+        {
+            await _customerRepository.UpdateOutstandingBalance(customerId, m, customer);
+        }
     }
 }

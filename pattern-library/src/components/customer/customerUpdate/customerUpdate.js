@@ -401,7 +401,7 @@ const useCustomerUpdate = ({ customer, onFormSubmit }) => {
           lisenEndDate: formData.lisenEndDate,
           creditLimit: parseFloat(formData.creditLimit),
           creditDuration: parseInt(formData.creditDuration),
-          outstandingBalance: formData.outstandingBalance,
+          outstandingAmount: formData.outstandingBalance,
           businessRegistrationNo: formData.businessRegNo,
           isVatRegistered: formData.isVatRegistered === "1" ? true : false,
           vatRegistrationNo: formData.vatRegistrationNo,

@@ -136,6 +136,26 @@ export const get_delivery_address_by_customer_id = async (customerId) => {
   }
 };
 
+export const update_outstanding_balance_api = async (
+  customerId,
+  movementTypeId,
+  formData
+) => {
+  try {
+    const response = await api.patch(
+      `/customer/UpdateOutstandingBalance/${customerId}/${movementTypeId}`,
+      formData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 //sales person apis
 export const get_sales_persons_by_company_id_api = async (companyId) => {
   try {
@@ -463,6 +483,23 @@ export const delete_sales_invoice_api = async (salesInvoiceId) => {
     const response = await api.delete(`/salesInvoice/${salesInvoiceId}`, {
       withCredentials: true,
     });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const get_sales_invoices_by_status_customerId = async (
+  customerId,
+  status
+) => {
+  try {
+    const response = await api.get(
+      `/salesInvoice/GetSalesInvoicesByCustomerIdStatus/${customerId}/${status}`,
+      {
+        withCredentials: true,
+      }
+    );
     return response.data;
   } catch (error) {
     throw error;

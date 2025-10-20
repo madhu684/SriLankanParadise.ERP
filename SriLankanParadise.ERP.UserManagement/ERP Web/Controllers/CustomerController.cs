@@ -78,8 +78,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             try
             {
                 var customer = await _customerService.GetCustomerById(id);
-                
-                if(customer != null)
+
+                if (customer != null)
                 {
                     var customerDto = _mapper.Map<CustomerDto>(customer);
                     AddResponseMessage(Response, LogMessages.CustomersRetrieved, customerDto, true, HttpStatusCode.OK);
@@ -195,6 +195,33 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     _logger.LogWarning(LogMessages.CustomersNotFound);
                     AddResponseMessage(Response, LogMessages.CustomersNotFound, null, true, HttpStatusCode.NotFound);
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpPatch("UpdateOutstandingBalance/{id}/{movementTypeId}")]
+        public async Task<ApiResponseModel> UpdateOutstandingBalance(int id, int movementTypeId, CustomerOutstandingBalanceUpdateRequestModel requestModel)
+        {
+            try
+            {
+                var existingCustomer = await _customerService.GetCustomerById(id);
+                if (existingCustomer == null)
+                {
+                    _logger.LogWarning(LogMessages.CustomersNotFound);
+                    AddResponseMessage(Response, LogMessages.CustomersNotFound, null, true, HttpStatusCode.NotFound);
+                    return Response;
+                }
+                var customerToUpdate = _mapper.Map<Customer>(requestModel);
+                customerToUpdate.CustomerId = id;
+
+                await _customerService.UpdateOutstandingBalance(existingCustomer.CustomerId, movementTypeId, customerToUpdate);
+                _logger.LogInformation(LogMessages.CustomerOutstandingBalanceUpdated);
+                AddResponseMessage(Response, LogMessages.CustomerOutstandingBalanceUpdated, null, true, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {

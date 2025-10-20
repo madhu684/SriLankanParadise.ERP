@@ -170,6 +170,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<CustomerDeliveryAddressRequestModel, CustomerDeliveryAddress>();
             CreateMap<CustomerDeliveryAddress, CustomerDeliveryAddressDto>();
             CreateMap<CustomerUpdateRequestModel, Customer>();
+            CreateMap<CustomerOutstandingBalanceUpdateRequestModel, Customer>();
             CreateMap<ItemPriceMasterRequestModel, ItemPriceMaster>();
             CreateMap<ItemPriceMaster, ItemPriceMasterDto>();
             CreateMap<ItemPriceDetailRequestModel, ItemPriceDetail>();

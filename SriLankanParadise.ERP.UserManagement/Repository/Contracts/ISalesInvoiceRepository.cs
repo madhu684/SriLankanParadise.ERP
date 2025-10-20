@@ -12,6 +12,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
 
         Task<IEnumerable<SalesInvoice>> GetSalesInvoicesByUserId(int userId);
 
+        Task<IEnumerable<SalesInvoice>> GetSalesInvoicesByCustomerIdStatus(int customerId, int status);
+
         Task ApproveSalesInvoice(int salesInvoiceId, SalesInvoice salesInvoice);
 
         Task<SalesInvoice> GetSalesInvoiceBySalesInvoiceId(int salesInvoiceId);

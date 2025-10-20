@@ -80,10 +80,11 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                         <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
                           <span className="text-muted">Created Date:</span>
                           <span className="fw-semibold text-end">
-                            {moment
+                            {/* {moment
                               .utc(salesInvoice?.createdDate)
                               .tz("Asia/Colombo")
-                              .format("YYYY-MM-DD hh:mm:ss A")}
+                              .format("YYYY-MM-DD hh:mm:ss A")} */}
+                            {salesInvoice?.createdDate.split("T")[0]}
                           </span>
                         </div>
                       </div>
@@ -91,10 +92,11 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                         <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
                           <span className="text-muted">Last Updated:</span>
                           <span className="fw-semibold text-end">
-                            {moment
+                            {/* {moment
                               .utc(salesInvoice?.lastUpdatedDate)
                               .tz("Asia/Colombo")
-                              .format("YYYY-MM-DD hh:mm:ss A")}
+                              .format("YYYY-MM-DD hh:mm:ss A")} */}
+                            {salesInvoice?.lastUpdatedDate.split("T")[0]}
                           </span>
                         </div>
                       </div>
@@ -152,10 +154,11 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                             <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
                               <span className="text-muted">Approved Date:</span>
                               <span className="fw-semibold text-end">
-                                {moment
+                                {/* {moment
                                   .utc(salesInvoice?.approvedDate)
                                   .tz("Asia/Colombo")
-                                  .format("YYYY-MM-DD hh:mm:ss A")}
+                                  .format("YYYY-MM-DD hh:mm:ss A")} */}
+                                {salesInvoice?.approvedDate.split("T")[0]}
                               </span>
                             </div>
                           </div>

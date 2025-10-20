@@ -258,5 +258,30 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
         }
+
+        [HttpGet("GetSalesInvoicesByCustomerIdStatus/{customerId}/{status}")]
+        public async Task<ApiResponseModel> GetSalesInvoicesByCustomerIdStatus(int customerId, int status)
+        {
+            try
+            {
+                var salesInvoices = await _salesInvoiceService.GetSalesInvoicesByCustomerIdStatus(customerId, status);
+                if (salesInvoices != null)
+                {
+                    var salesInvoiceDtos = _mapper.Map<IEnumerable<SalesInvoiceDto>>(salesInvoices);
+                    AddResponseMessage(Response, LogMessages.SalesInvoicesRetrieved, salesInvoiceDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.SalesInvoicesNotFound);
+                    AddResponseMessage(Response, LogMessages.SalesInvoicesNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

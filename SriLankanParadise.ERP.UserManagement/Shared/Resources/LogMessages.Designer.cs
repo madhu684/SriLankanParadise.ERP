@@ -574,6 +574,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Customer outstanding balance updated successfully.
+        /// </summary>
+        public static string CustomerOutstandingBalanceUpdated {
+            get {
+                return ResourceManager.GetString("CustomerOutstandingBalanceUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Customers not found.
         /// </summary>
         public static string CustomersNotFound {

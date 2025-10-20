@@ -57,5 +57,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             return await _salesInvoiceRepository.GetSalesInvoiceById(salesInvoiceId);
         }
+
+        public Task<IEnumerable<SalesInvoice>> GetSalesInvoicesByCustomerIdStatus(int customerId, int status)
+        {
+            return _salesInvoiceRepository.GetSalesInvoicesByCustomerIdStatus(customerId, status);
+        }
     }
 }

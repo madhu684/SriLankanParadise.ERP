@@ -1107,4 +1107,7 @@
   <data name="ItemPriceDetailRetrived" xml:space="preserve">
     <value>Item price detail retrived</value>
   </data>
+  <data name="CustomerOutstandingBalanceUpdated" xml:space="preserve">
+    <value>Customer outstanding balance updated successfully</value>
+  </data>
 </root>

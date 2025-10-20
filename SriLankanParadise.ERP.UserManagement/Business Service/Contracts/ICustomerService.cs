@@ -16,6 +16,8 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
 
         Task ActiveDeactiveUser(int customerId, Customer customer);
 
+        Task UpdateOutstandingBalance(int customerId, int m, Customer customer);
+
         Task<IEnumerable<Customer>> SearchCustomersByName(string searchQuery);
     }
 }

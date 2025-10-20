@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   put_sales_invoice_api,
   put_sales_invoice_detail_api,
@@ -21,7 +21,10 @@ import {
   get_sum_location_inventories_by_locationId_itemMasterId_api,
   get_user_locations_by_user_id_api,
 } from "../../../services/purchaseApi";
-import { get_item_masters_by_company_id_with_query_api } from "../../../services/inventoryApi";
+import {
+  get_item_masters_by_company_id_with_query_api,
+  get_item_price_list_by_locationId,
+} from "../../../services/inventoryApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
@@ -248,6 +251,28 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   } = useQuery({
     queryKey: ["userLocations", sessionStorage.getItem("userId")],
     queryFn: fetchUserLocations,
+  });
+
+  const fetchItemPriceListByLocation = async () => {
+    try {
+      const response = await get_item_price_list_by_locationId(
+        formData.storeLocation
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching item price list by location:", error);
+    }
+  };
+
+  const {
+    data: itemPriceListByLocation,
+    isLoading: isItemPriceListByLocationLoading,
+    isError: isItemPriceListByLocationError,
+    error: itemPriceListByLocationError,
+  } = useQuery({
+    queryKey: ["itemPriceListByLocation", formData.storeLocation],
+    queryFn: fetchItemPriceListByLocation,
+    enabled: !!formData.storeLocation,
   });
 
   useEffect(() => {
@@ -551,6 +576,55 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
       totalLitres: calculateTotalLites(),
     }));
   }, [formData.itemDetails, formData.commonChargesAndDeductions]);
+
+  const priceListMap = useMemo(() => {
+    if (!itemPriceListByLocation?.itemPriceDetails) {
+      return new Map();
+    }
+
+    return new Map(
+      itemPriceListByLocation.itemPriceDetails.map((detail) => [
+        detail.itemMasterId,
+        detail.price,
+      ])
+    );
+  }, [itemPriceListByLocation]);
+
+  /**
+   * Helper function to get price from item price list using memoized map
+   * @param {number} itemMasterId - The item master ID
+   * @returns {number} The price from the price list, or 0 if not found
+   */
+  const getPriceFromPriceList = useCallback(
+    (itemMasterId) => {
+      return priceListMap.get(itemMasterId) || 0;
+    },
+    [priceListMap]
+  );
+
+  // Memoized charges initialization
+  const getInitializedCharges = useMemo(() => {
+    return (
+      chargesAndDeductions
+        ?.filter((charge) => charge.isApplicableForLineItem)
+        ?.map((charge) => ({
+          id: charge.chargesAndDeductionId,
+          name: charge.displayName,
+          value: charge.amount || charge.percentage,
+          sign: charge.sign,
+          isPercentage: charge.percentage !== null,
+        })) || []
+    );
+  }, [chargesAndDeductions]);
+
+  const formatCurrency = (value) => {
+    // if (!value) return "N/A";
+    return new Intl.NumberFormat("en-LK", {
+      style: "currency",
+      currency: "LKR",
+      minimumFractionDigits: 2,
+    }).format(value);
+  };
 
   const validateField = (
     fieldName,
@@ -1031,81 +1105,148 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   };
 
   // Handler to add the selected item to itemDetails
-  const handleSelectItem = async (item) => {
-    const initializedCharges =
-      chargesAndDeductions
-        ?.filter((charge) => charge.isApplicableForLineItem)
-        ?.map((charge) => ({
-          id: charge.chargesAndDeductionId,
-          name: charge.displayName,
-          value: charge.amount || charge.percentage,
-          sign: charge.sign,
-          isPercentage: charge.percentage !== null,
-        })) || [];
+  // const handleSelectItem = async (item) => {
+  //   const initializedCharges =
+  //     chargesAndDeductions
+  //       ?.filter((charge) => charge.isApplicableForLineItem)
+  //       ?.map((charge) => ({
+  //         id: charge.chargesAndDeductionId,
+  //         name: charge.displayName,
+  //         value: charge.amount || charge.percentage,
+  //         sign: charge.sign,
+  //         isPercentage: charge.percentage !== null,
+  //       })) || [];
 
-    let availableStock = 0;
-    let highestSellingPrice = 0;
+  //   let availableStock = 0;
+  //   let highestSellingPrice = 0;
 
-    try {
-      if (item.isInventoryItem === true) {
-        const inventory =
-          await get_sum_location_inventories_by_locationId_itemMasterId_api(
-            item.itemMasterId,
-            formData.storeLocation
-          );
-        availableStock = inventory?.data?.result?.totalStockInHand || 0;
+  //   try {
+  //     if (item.isInventoryItem === true) {
+  //       const inventory =
+  //         await get_sum_location_inventories_by_locationId_itemMasterId_api(
+  //           item.itemMasterId,
+  //           formData.storeLocation
+  //         );
+  //       availableStock = inventory?.data?.result?.totalStockInHand || 0;
 
-        if (availableStock <= 0) {
-          console.warn("No stock available for this item");
-          alert("No stock available for this item");
-          return;
+  //       if (availableStock <= 0) {
+  //         console.warn("No stock available for this item");
+  //         alert("No stock available for this item");
+  //         return;
+  //       }
+
+  //       // Get highest selling price from available batches
+  //       const batchesResponse = await get_item_batches_by_item_master_id_api(
+  //         item.itemMasterId,
+  //         sessionStorage.getItem("companyId")
+  //       );
+  //       highestSellingPrice =
+  //         batchesResponse?.data?.result?.reduce(
+  //           (maxPrice, batch) =>
+  //             batch.sellingPrice > maxPrice ? batch.sellingPrice : maxPrice,
+  //           0
+  //         ) || 0;
+  //     }
+
+  //     setFormData((prevFormData) => ({
+  //       ...prevFormData,
+  //       itemDetails: [
+  //         ...prevFormData.itemDetails,
+  //         {
+  //           salesInvoiceDetailId: null,
+  //           salesInvoiceId: salesInvoice.salesInvoiceId,
+  //           itemMasterId: item?.itemMasterId,
+  //           isInventoryItem: item?.isInventoryItem,
+  //           name: item?.itemName,
+  //           unit: item?.unit?.unitName,
+  //           stockInHand: item.isInventoryItem === true ? availableStock : 0,
+  //           quantity: 0,
+  //           unitPrice:
+  //             item.isInventoryItem === false
+  //               ? item.unitPrice
+  //               : highestSellingPrice,
+  //           totalPrice:
+  //             item.isInventoryItem === false ? item.unitPrice : item.unitPrice,
+  //           packageSize: item.conversionRate || 1,
+  //           chargesAndDeductions: initializedCharges,
+  //         },
+  //       ],
+  //     }));
+
+  //     setSearchTerm("");
+  //     setSelectedBatch(null);
+  //   } catch (error) {
+  //     console.error("Error processing item:", error);
+  //     alert("Error processing item. Please try again.");
+  //   }
+  // };
+
+  const handleSelectItem = useCallback(
+    async (item) => {
+      let availableStock = 0;
+      let unitPrice = item.unitPrice || 0;
+
+      try {
+        if (item.isInventoryItem === true) {
+          // Fetch inventory stock
+          const inventory =
+            await get_sum_location_inventories_by_locationId_itemMasterId_api(
+              item.itemMasterId,
+              userLocations[0]?.locationId
+            );
+          availableStock = inventory?.data?.result?.totalStockInHand || 0;
+
+          if (availableStock <= 0) {
+            console.warn("No stock available for this item");
+            alert("No stock available for this item");
+            return;
+          }
+
+          // Get price from memoized price list map - O(1) lookup
+          unitPrice = getPriceFromPriceList(item.itemMasterId);
+        } else {
+          // For non-inventory items, use the item's unit price
+          unitPrice = item.unitPrice || 0;
         }
 
-        // Get highest selling price from available batches
-        const batchesResponse = await get_item_batches_by_item_master_id_api(
-          item.itemMasterId,
-          sessionStorage.getItem("companyId")
-        );
-        highestSellingPrice =
-          batchesResponse?.data?.result?.reduce(
-            (maxPrice, batch) =>
-              batch.sellingPrice > maxPrice ? batch.sellingPrice : maxPrice,
-            0
-          ) || 0;
+        // Update form data
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          itemDetails: [
+            ...prevFormData.itemDetails,
+            {
+              name: item?.itemName,
+              id: item?.itemMasterId,
+              unit: item?.unit?.unitName,
+              batchId: null,
+              stockInHand: availableStock,
+              quantity: 0,
+              unitPrice: unitPrice,
+              totalPrice: item.isInventoryItem === false ? unitPrice : 0.0,
+              isInventoryItem: item?.isInventoryItem,
+              packSize: item?.conversionRate || 1,
+              chargesAndDeductions: getInitializedCharges,
+            },
+          ],
+        }));
+      } catch (error) {
+        console.error("Error processing item:", error);
+        alert("Error processing item. Please try again.");
       }
 
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        itemDetails: [
-          ...prevFormData.itemDetails,
-          {
-            salesInvoiceDetailId: null,
-            salesInvoiceId: salesInvoice.salesInvoiceId,
-            itemMasterId: item?.itemMasterId,
-            isInventoryItem: item?.isInventoryItem,
-            name: item?.itemName,
-            unit: item?.unit?.unitName,
-            stockInHand: item.isInventoryItem === true ? availableStock : 0,
-            quantity: 0,
-            unitPrice:
-              item.isInventoryItem === false
-                ? item.unitPrice
-                : highestSellingPrice,
-            totalPrice:
-              item.isInventoryItem === false ? item.unitPrice : item.unitPrice,
-            packageSize: item.conversionRate || 1,
-            chargesAndDeductions: initializedCharges,
-          },
-        ],
-      }));
-
+      // Reset search and batch selection
       setSearchTerm("");
       setSelectedBatch(null);
-    } catch (error) {
-      console.error("Error processing item:", error);
-      alert("Error processing item. Please try again.");
-    }
-  };
+    },
+    [
+      getPriceFromPriceList,
+      getInitializedCharges,
+      userLocations,
+      setFormData,
+      setSearchTerm,
+      setSelectedBatch,
+    ]
+  );
 
   const handleCustomerSelect = (customer) => {
     setFormData((prevFormData) => ({
@@ -1252,6 +1393,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     handleCustomerSelect,
     handleResetCustomer,
     calculateTotalLites,
+    formatCurrency,
   };
 };
 

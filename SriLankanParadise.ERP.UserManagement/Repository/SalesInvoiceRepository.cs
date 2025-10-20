@@ -223,5 +223,25 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task<IEnumerable<SalesInvoice>> GetSalesInvoicesByCustomerIdStatus(int customerId, int status)
+        {
+            try
+            {
+                var salesInvoice = await _dbContext.SalesInvoices
+                    .Where(si => si.CustomerId == customerId && si.Status == status)
+                    .Include(si => si.Customer)
+                    .Include(si => si.CustomerDeliveryAddress)
+                    .Include(si => si.SalesInvoiceDetails)
+                    .OrderBy(si => si.ApprovedDate)
+                    .ToListAsync();
+
+                return salesInvoice;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
