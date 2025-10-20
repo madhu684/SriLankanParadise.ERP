@@ -899,7 +899,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                   </>
                 )}
               </button>
-              <button
+              {/* <button
                 type="button"
                 className="btn btn-success"
                 onClick={handlePrint}
@@ -907,7 +907,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
               >
                 <i className="bi bi-printer me-2"></i>
                 Print
-              </button>
+              </button> */}
               <button
                 type="button"
                 className="btn btn-danger"

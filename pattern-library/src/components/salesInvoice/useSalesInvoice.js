@@ -15,7 +15,10 @@ import {
   get_sum_location_inventories_by_locationId_itemMasterId_api,
   get_item_batches_by_item_master_id_api,
 } from "../../services/purchaseApi";
-import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
+import {
+  get_item_masters_by_company_id_with_query_api,
+  get_item_price_list_by_locationId,
+} from "../../services/inventoryApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
@@ -237,6 +240,28 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   } = useQuery({
     queryKey: ["company"],
     queryFn: fetchCompany,
+  });
+
+  const fetchItemPriceListByLocation = async () => {
+    try {
+      const response = await get_item_price_list_by_locationId(
+        formData.storeLocation
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching item price list by location:", error);
+    }
+  };
+
+  const {
+    data: itemPriceListByLocation,
+    isLoading: isItemPriceListByLocationLoading,
+    isError: isItemPriceListByLocationError,
+    error: itemPriceListByLocationError,
+  } = useQuery({
+    queryKey: ["itemPriceListByLocation", formData.storeLocation],
+    queryFn: fetchItemPriceListByLocation,
+    enabled: !!formData.storeLocation,
   });
 
   useEffect(() => {

@@ -7,10 +7,12 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
     public class ItemPriceMasterService : IItemPriceMasterService
     {
         private readonly IItemPriceMasterRepository _repository;
+        private readonly ILocationRepository _locationRepository;
 
-        public ItemPriceMasterService(IItemPriceMasterRepository repository)
+        public ItemPriceMasterService(IItemPriceMasterRepository repository, ILocationRepository locationRepository)
         {
             _repository = repository;
+            _locationRepository = locationRepository;
         }
 
         public async Task AddItemPriceMaster(ItemPriceMaster itemPriceMaster)
@@ -26,6 +28,23 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         public Task<ItemPriceMaster> GetItemPriceMasterById(int id)
         {
             return _repository.GetItemPriceMasterById(id);
+        }
+
+        public async Task<ItemPriceMaster> GetItemPriceMasterByLocationId(int locationId)
+        {
+            var location = await _locationRepository.GetLocationByLocationId(locationId);
+            if (location == null)
+            {
+                return null;
+            }
+
+            if (location.PriceMasterId == null)
+            {
+                return null;
+            }
+
+            var itemPriceMaster = await _repository.GetItemPriceMasterById(location.PriceMasterId.Value);
+            return itemPriceMaster;
         }
     }
 }
