@@ -5,6 +5,7 @@ import {
   post_sales_receipt_api,
   post_sales_receipt_sales_invoice_api,
   put_sales_invoice_api,
+  update_outstanding_balance_api,
 } from "../../services/salesApi";
 import { useQuery } from "@tanstack/react-query";
 
@@ -312,8 +313,17 @@ const useSalesReceipt = ({ onFormSubmit }) => {
               approvedDate: item.approvedDate,
               companyId: item.companyId,
               salesOrderId: item.salesOrderId,
-              amountDue: newAmountDue, // Update with the remaining amount
+              amountDue: newAmountDue,
+              createdDate: item.createdDate,
+              lastUpdatedDate: item.lastUpdatedDate,
+              referenceNumber: item.referenceNumber,
               permissionId: 31,
+              locationId: item.locationId,
+              customerId: item.customerId,
+              customerDeliveryAddressId: item.customerDeliveryAddressId,
+              driverName: item.driverName,
+              vehicleNumber: item.vehicleNumber,
+              totalLitres: item.totalLitres,
             };
 
             const putResponse = await put_sales_invoice_api(
@@ -321,7 +331,20 @@ const useSalesReceipt = ({ onFormSubmit }) => {
               salesInvoiceData
             );
 
-            return { postResponse: postResponse, putResponse };
+            let customerResponse = null;
+            if (postResponse.status === 201 || putResponse.status === 200) {
+              customerResponse = await update_outstanding_balance_api(
+                item.customerId,
+                2,
+                { outstandingAmount: item.payment }
+              );
+            }
+
+            return {
+              postResponse: postResponse,
+              putResponse,
+              customerResponse,
+            };
           }
         );
 
@@ -330,8 +353,12 @@ const useSalesReceipt = ({ onFormSubmit }) => {
 
         // Check if all updates were successful
         const allUpdatesSuccessful = allResponses.every(
-          ({ postResponse, putResponse }) => {
-            return postResponse.status === 201 && putResponse.status === 200;
+          ({ postResponse, putResponse, customerResponse }) => {
+            return (
+              postResponse.status === 201 &&
+              putResponse.status === 200 &&
+              customerResponse.status === 200
+            );
           }
         );
 
@@ -578,6 +605,8 @@ const useSalesReceipt = ({ onFormSubmit }) => {
       ),
     }));
   };
+
+  console.log("formData: ", formData);
 
   return {
     formData,
