@@ -18,7 +18,7 @@ const InvoicePrintPreview = ({
     documentTitle: `Invoice_${salesInvoice?.referenceNumber || "TEMP"}`,
     pageStyle: `
       @page {
-        size: auto;
+        size: A4 portrait;
         margin: 0mm;
       }
       @media print {
@@ -39,6 +39,8 @@ const InvoicePrintPreview = ({
           top: 0;
           left: 0;
           border: none !important;
+          page-break-after: avoid !important;
+          page-break-inside: avoid !important;
         }
         * {
           font-family: 'Courier New', monospace !important;

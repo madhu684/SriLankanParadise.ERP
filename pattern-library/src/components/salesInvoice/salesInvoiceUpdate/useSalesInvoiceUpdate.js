@@ -1047,7 +1047,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
       setItemIdsToBeDeleted((prevIds) => [...prevIds, item]);
     }
 
-    chargesAndDeductions.map((charge) => {
+    item?.chargesAndDeductions.map((charge) => {
       if (
         charge.chargesAndDeductionAppliedId !== null &&
         charge.chargesAndDeductionAppliedId !== undefined
@@ -1356,10 +1356,10 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   };
 
   console.log("formData", formData);
-  // console.log(
-  //   "chargesAndDeductionsAppliedIdsToBeDeleted: ",
-  //   chargesAndDeductionsAppliedIdsToBeDeleted
-  // );
+  console.log(
+    "chargesAndDeductionsAppliedIdsToBeDeleted: ",
+    chargesAndDeductionsAppliedIdsToBeDeleted
+  );
 
   return {
     formData,

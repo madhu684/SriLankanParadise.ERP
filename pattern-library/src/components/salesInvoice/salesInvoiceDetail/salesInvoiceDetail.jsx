@@ -540,7 +540,7 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
               className="px-4 me-2"
             >
               <i className="bi bi-printer me-2"></i>
-              Print Invoice
+              Print Preview
             </Button>
           )}
           <Button variant="secondary" onClick={handleClose} className="px-4">
