@@ -38,6 +38,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     invoiceDate: "",
     dueDate: "",
     referenceNumber: "",
+    refNo: "",
     itemDetails: [],
     attachments: [],
     totalAmount: 0,
@@ -400,6 +401,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           invoiceDate: deepCopySalesInvoice?.invoiceDate?.split("T")[0] ?? "",
           dueDate: deepCopySalesInvoice?.dueDate?.split("T")[0] ?? "",
           referenceNumber: deepCopySalesInvoice?.referenceNo ?? "",
+          refNo: deepCopySalesInvoice?.referenceNumber ?? "",
           itemDetails: initializedLineItemCharges,
           attachments: deepCopySalesInvoice?.attachments ?? [],
           totalAmount: deepCopySalesInvoice?.totalAmount ?? "",
@@ -463,7 +465,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
               if (charge.name === "SSL") {
                 // Calculate the amount based on percentage and sign
                 const amount =
-                  item.IsInventoryItem === true
+                  item.isInventoryItem === true
                     ? ((item.quantity * item.unitPrice) /
                         (100 - charge.value)) *
                       charge.value
@@ -472,7 +474,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
               } else if (charge.isPercentage) {
                 // Calculate the amount based on percentage and sign
                 const amount =
-                  item.IsInventoryItem === true
+                  item.isInventoryItem === true
                     ? (item.quantity * item.unitPrice * charge.value) / 100
                     : (item.unitPrice * charge.value) / 100;
                 appliedValue = charge.sign === "+" ? amount : -amount;
@@ -613,6 +615,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           value: charge.amount || charge.percentage,
           sign: charge.sign,
           isPercentage: charge.percentage !== null,
+          chargesAndDeductionAppliedId: null,
         })) || []
     );
   }, [chargesAndDeductions]);
@@ -712,6 +715,18 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
       formData.referenceNumber
     );
 
+    const isCustomerValid = validateField(
+      "customer",
+      "Customer",
+      formData.selectedCustomer
+    );
+
+    const isCustomerDeliveryAddressValid = validateField(
+      "customerDeliveryAddress",
+      "Customer Delivery Address",
+      formData.customerDeliveryAddressId
+    );
+
     let isItemQuantityValid = true;
     // Validate item details
     formData.itemDetails.forEach((item, index) => {
@@ -739,6 +754,8 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     return (
       isInvoiceDateValid &&
       isDueDateValid &&
+      isCustomerValid &&
+      isCustomerDeliveryAddressValid &&
       isItemQuantityValid &&
       isAttachmentsValid &&
       isReferenceNumberValid
@@ -1215,10 +1232,10 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           itemDetails: [
             ...prevFormData.itemDetails,
             {
+              salesInvoiceDetailId: null,
               name: item?.itemName,
-              id: item?.itemMasterId,
+              itemMasterId: item?.itemMasterId,
               unit: item?.unit?.unitName,
-              batchId: null,
               stockInHand: availableStock,
               quantity: 0,
               unitPrice: unitPrice,

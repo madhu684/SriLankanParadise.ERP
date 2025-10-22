@@ -330,13 +330,18 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                     <input
                       type="text"
                       className={`form-control ${
-                        validFields.customerId ? "is-valid" : ""
-                      } ${validationErrors.customerId ? "is-invalid" : ""}`}
+                        validFields.customer ? "is-valid" : ""
+                      } ${validationErrors.customer ? "is-invalid" : ""}`}
                       placeholder="Search for a customer..."
                       value={customerSearchTerm}
                       onChange={(e) => setCustomerSearchTerm(e.target.value)}
                       autoFocus={false}
                     />
+                    {validationErrors.customer && (
+                      <div className="invalid-feedback">
+                        {validationErrors.customer}
+                      </div>
+                    )}
                     {customerSearchTerm && (
                       <button
                         type="button"
@@ -489,9 +494,11 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                     </label>
                     <select
                       className={`form-select ${
-                        validFields.deliveryAddress ? "is-valid" : ""
+                        validFields.customerDeliveryAddress ? "is-valid" : ""
                       } ${
-                        validationErrors.deliveryAddress ? "is-invalid" : ""
+                        validationErrors.customerDeliveryAddress
+                          ? "is-invalid"
+                          : ""
                       }`}
                       id="deliveryAddress"
                       //value={formData?.deliveryAddress ?? ""}
@@ -513,9 +520,9 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                           )
                         : ""}
                     </select>
-                    {validationErrors.deliveryAddress && (
+                    {validationErrors.customerDeliveryAddress && (
                       <div className="invalid-feedback">
-                        {validationErrors.deliveryAddress}
+                        {validationErrors.customerDeliveryAddress}
                       </div>
                     )}
                   </div>
@@ -656,8 +663,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                           .filter((item) => {
                             if (company.batchStockType === "FIFO") {
                               return !formData.itemDetails.some(
-                                (detail) =>
-                                  detail.itemMasterId === item.itemMasterId
+                                (detail) => detail.id === item.itemMasterId
                               );
                             }
                             return true;
@@ -751,6 +757,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                                 className="form-control text-end"
                                 type="number"
                                 value={charge.value}
+                                step={0.01}
                                 onChange={(e) => {
                                   let newValue = parseFloat(e.target.value);
                                   if (isNaN(newValue)) {

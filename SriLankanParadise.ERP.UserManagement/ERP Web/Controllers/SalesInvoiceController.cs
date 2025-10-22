@@ -1,13 +1,14 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using SriLankanParadise.ERP.UserManagement.Business_Service;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
-using System.Net;
 using SriLankanParadise.ERP.UserManagement.Shared.Resources;
-using SriLankanParadise.ERP.UserManagement.Business_Service;
+using System.ComponentModel.Design;
+using System.Net;
 
 
 namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
@@ -17,6 +18,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
     public class SalesInvoiceController : BaseApiController
     {
         private readonly ISalesInvoiceService _salesInvoiceService;
+        private readonly IChargesAndDeductionAppliedService _chargesAndDeductionAppliedService;
         private readonly IActionLogService _actionLogService;
         private readonly IMapper _mapper;
         private readonly ILogger<SalesInvoiceController> _logger;
@@ -24,12 +26,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
         public SalesInvoiceController(
             ISalesInvoiceService salesInvoiceService,
+            IChargesAndDeductionAppliedService chargesAndDeductionAppliedService,
             IActionLogService actionLogService,
             IMapper mapper,
             ILogger<SalesInvoiceController> logger,
             IHttpContextAccessor httpContextAccessor)
         {
             _salesInvoiceService = salesInvoiceService;
+            _chargesAndDeductionAppliedService = chargesAndDeductionAppliedService;
             _actionLogService = actionLogService;
             _mapper = mapper;
             _logger = logger;
@@ -283,5 +287,30 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        //[HttpGet("GetSalesInvoiceFullDataById/{salesInvoiceId}/{companyId}")]
+        //public async Task<ApiResponseModel> GetSalesInvoiceFullDataById(int salesInvoiceId, int companyId)
+        //{
+        //    try
+        //    {
+        //        var salesInvoice = await _salesInvoiceService.GetSalesInvoiceBySalesInvoiceId(salesInvoiceId);
+        //        if (salesInvoice == null)
+        //        {
+        //            _logger.LogWarning(LogMessages.SalesInvoiceNotFound);
+        //            AddResponseMessage(Response, LogMessages.SalesInvoiceNotFound, null, true, HttpStatusCode.NotFound);
+        //        }
+        //        else
+        //        {
+        //            var chargesAndDeductions = await _chargesAndDeductionAppliedService.GetChargesAndDeductionsApplied(3, salesInvoiceId, companyId);
+
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, ErrorMessages.InternalServerError);
+        //        AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+        //    }
+        //    return Response;
+        //}
     }
 }

@@ -543,6 +543,18 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
       formData.referenceNumber
     );
 
+    const isCustomerValid = validateField(
+      "customer",
+      "Customer",
+      formData.selectedCustomer
+    );
+
+    const isCustomerDeliveryAddressValid = validateField(
+      "customerDeliveryAddress",
+      "Customer Delivery Address",
+      formData.customerDeliveryAddressId
+    );
+
     const isAttachmentsValid = validateAttachments(formData.attachments);
 
     let isItemQuantityValid = true;
@@ -572,6 +584,8 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     return (
       isInvoiceDateValid &&
       isDueDateValid &&
+      isCustomerValid &&
+      isCustomerDeliveryAddressValid &&
       isAttachmentsValid &&
       isItemQuantityValid
     );

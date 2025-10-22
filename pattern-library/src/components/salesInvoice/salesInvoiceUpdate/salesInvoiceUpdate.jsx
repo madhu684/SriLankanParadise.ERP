@@ -205,7 +205,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                     } ${validationErrors.referenceNumber ? "is-invalid" : ""}`}
                     id="referenceNumber"
                     placeholder="Enter reference number"
-                    value={formData.referenceNumber}
+                    value={formData.refNo}
                     onChange={(e) =>
                       handleInputChange("referenceNumber", e.target.value)
                     }
@@ -330,13 +330,18 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                     <input
                       type="text"
                       className={`form-control ${
-                        validFields.customerId ? "is-valid" : ""
-                      } ${validationErrors.customerId ? "is-invalid" : ""}`}
+                        validFields.customer ? "is-valid" : ""
+                      } ${validationErrors.customer ? "is-invalid" : ""}`}
                       placeholder="Search for a customer..."
                       value={customerSearchTerm}
                       onChange={(e) => setCustomerSearchTerm(e.target.value)}
                       autoFocus={false}
                     />
+                    {validationErrors.customer && (
+                      <div className="invalid-feedback">
+                        {validationErrors.customer}
+                      </div>
+                    )}
                     {customerSearchTerm && (
                       <button
                         type="button"
@@ -489,9 +494,11 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                     </label>
                     <select
                       className={`form-select ${
-                        validFields.deliveryAddress ? "is-valid" : ""
+                        validFields.customerDeliveryAddress ? "is-valid" : ""
                       } ${
-                        validationErrors.deliveryAddress ? "is-invalid" : ""
+                        validationErrors.customerDeliveryAddress
+                          ? "is-invalid"
+                          : ""
                       }`}
                       id="deliveryAddress"
                       value={formData?.customerDeliveryAddressId ?? ""}
@@ -511,9 +518,9 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                           ))
                         : ""}
                     </select>
-                    {validationErrors.deliveryAddress && (
+                    {validationErrors.customerDeliveryAddress && (
                       <div className="invalid-feedback">
-                        {validationErrors.deliveryAddress}
+                        {validationErrors.customerDeliveryAddress}
                       </div>
                     )}
                   </div>
@@ -750,6 +757,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                                 className="form-control text-end"
                                 type="number"
                                 value={charge.value}
+                                step={0.01}
                                 onChange={(e) => {
                                   let newValue = parseFloat(e.target.value);
                                   if (isNaN(newValue)) {
