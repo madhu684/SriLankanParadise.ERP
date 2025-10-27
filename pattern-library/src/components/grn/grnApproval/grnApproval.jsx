@@ -57,11 +57,15 @@ const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
             <div className="mb-4 p-3 bg-light rounded-3 border">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  <h5 className="mb-1 text-dark fw-bold">
+                  {/* <h5 className="mb-1 text-dark fw-bold">
                     GRN #{grn.grnMasterId}
                   </h5>
                   <small className="text-dark">
                     Reference: {grn?.referenceNo || "N/A"}
+                  </small> */}
+                  <h5 className="mb-1 text-dark fw-bold">Reference No: </h5>
+                  <small className="text-dark fw-semibold">
+                    {grn?.referenceNo || "N/A"}
                   </small>
                 </div>
                 <div className="text-end">
@@ -202,7 +206,7 @@ const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
                     <i className="bi bi-box-seam me-2"></i>Item Details - Set
                     Pricing
                   </h6>
-                  <small className="text-muted">
+                  <small className="text-muted fw-semibold">
                     <i className="bi bi-exclamation-circle me-1"></i>
                     Update cost and selling prices before approval if needed
                   </small>
@@ -261,14 +265,14 @@ const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
                               {item.expiryDate.split("T")[0]}
                             </td>
                             <td className="text-end fw-semibold">
-                              ${item.unitPrice.toFixed(2)}
+                              {item.unitPrice.toFixed(2)}
                             </td>
                             <td
                               className="bg-warning bg-opacity-5"
                               style={{ width: "140px" }}
                             >
                               <div className="input-group input-group-sm">
-                                <span className="input-group-text">$</span>
+                                {/* <span className="input-group-text">$</span> */}
                                 <input
                                   type="number"
                                   className="form-control form-control-sm text-end"
@@ -287,7 +291,7 @@ const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
                               style={{ width: "140px" }}
                             >
                               <div className="input-group input-group-sm">
-                                <span className="input-group-text">$</span>
+                                {/* <span className="input-group-text">$</span> */}
                                 <input
                                   type="number"
                                   className="form-control form-control-sm text-end"

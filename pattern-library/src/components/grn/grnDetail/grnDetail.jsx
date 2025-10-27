@@ -21,9 +21,10 @@ const GrnDetail = ({ show, handleClose, grn }) => {
         <div className="mb-4 p-3 bg-light rounded-3 border">
           <div className="d-flex justify-content-between align-items-center">
             <div>
-              <h5 className="mb-1 text-dark fw-bold">GRN #{grn.grnMasterId}</h5>
-              <small className="text-dark">
-                Reference: {grn?.referenceNo || "N/A"}
+              {/* <h5 className="mb-1 text-dark fw-bold">GRN #{grn.grnMasterId}</h5> */}
+              <h5 className="mb-1 text-dark fw-bold">Reference No: </h5>
+              <small className="text-dark fw-semibold">
+                {grn?.referenceNo || "N/A"}
               </small>
             </div>
             <div className="text-end">

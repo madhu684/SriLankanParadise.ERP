@@ -1,7 +1,7 @@
 import React from "react";
 import useGrnUpdate from "./useGrnUpdate";
 import CurrentDateTime from "../../currentDateTime/currentDateTime";
-import useCompanyLogoUrl from "../../companyLogo/useCompanyLogoUrl";
+//import useCompanyLogoUrl from "../../companyLogo/useCompanyLogoUrl";
 import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
 import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
@@ -50,6 +50,7 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
     setSelectedPurchaseRequisition,
     setSearchTerm,
     handleSelectItem,
+    handleRemoveItem,
   } = useGrnUpdate({
     grn,
     onFormSubmit: () => {
@@ -58,7 +59,7 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
     },
   });
 
-  const companyLogoUrl = useCompanyLogoUrl();
+  //const companyLogoUrl = useCompanyLogoUrl();
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -74,7 +75,12 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
       <div ref={alertRef}></div>
       <div className="mb-4">
         <div className="d-flex justify-content-between">
-          <img src={companyLogoUrl} alt="Company Logo" height={30} />
+          {/* <img src={companyLogoUrl} alt="Company Logo" height={30} /> */}
+          <i
+            class="bi bi-arrow-left"
+            onClick={handleClose}
+            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+          ></i>
           <p>
             <CurrentDateTime />
           </p>
@@ -513,6 +519,7 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                   {/* <th>Item Barcode</th> */}
                   <th>Expiry Date</th>
                   <th>Unit Price</th>
+                  {/* <th>Action</th> */}
                 </tr>
               </thead>
               <tbody>
@@ -654,6 +661,15 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                         </div>
                       )}
                     </td>
+                    {/* <td>
+                      <button
+                        type="button"
+                        className="btn btn-outline-danger"
+                        onClick={() => handleRemoveItem(index, item)}
+                      >
+                        Delete
+                      </button>
+                    </td> */}
                   </tr>
                 ))}
               </tbody>

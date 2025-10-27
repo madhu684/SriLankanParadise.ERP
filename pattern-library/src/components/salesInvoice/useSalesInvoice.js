@@ -844,54 +844,123 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     });
   };
 
+  // const handleItemDetailsChange = async (index, field, value) => {
+  //   setFormData((prevFormData) => {
+  //     const updatedItemDetails = [...prevFormData.itemDetails];
+
+  //     if (field.startsWith("chargesAndDeductions")) {
+  //       // Handle charges and deductions
+  //       const chargeIndex = parseInt(field.split("_")[1]);
+  //       updatedItemDetails[index].chargesAndDeductions[chargeIndex].value =
+  //         value;
+  //     } else {
+  //       // Handle other fields
+  //       updatedItemDetails[index][field] = value;
+  //     }
+
+  //     // Ensure positive values for Quantities and Unit Prices
+  //     updatedItemDetails[index].quantity = Math.max(
+  //       0,
+  //       updatedItemDetails[index].quantity
+  //     );
+  //     updatedItemDetails[index].unitPrice = !isNaN(
+  //       parseFloat(updatedItemDetails[index].unitPrice)
+  //     )
+  //       ? Math.max(0, parseFloat(updatedItemDetails[index].unitPrice))
+  //       : 0;
+
+  //     // Calculate total price based on charges and deductions
+  //     const grandTotalPrice =
+  //       updatedItemDetails[index].quantity *
+  //       updatedItemDetails[index].unitPrice;
+  //     let totalPrice =
+  //       updatedItemDetails[index].quantity *
+  //       updatedItemDetails[index].unitPrice;
+
+  //     updatedItemDetails[index].chargesAndDeductions.forEach((charge) => {
+  //       if (charge.name === "SSL") {
+  //         const amount =
+  //           (grandTotalPrice / (100 - charge.value)) * charge.value;
+  //         totalPrice += charge.sign === "+" ? amount : -amount;
+  //       } else if (charge.isPercentage) {
+  //         const amount = (grandTotalPrice * charge.value) / 100;
+  //         totalPrice += charge.sign === "+" ? amount : -amount;
+  //       } else {
+  //         totalPrice += charge.sign === "+" ? charge.value : -charge.value;
+  //       }
+  //     });
+
+  //     totalPrice = isNaN(totalPrice) ? 0 : totalPrice;
+  //     updatedItemDetails[index].totalPrice = totalPrice;
+
+  //     return {
+  //       ...prevFormData,
+  //       itemDetails: updatedItemDetails,
+  //       subTotal: calculateSubTotal(),
+  //       totalAmount: calculateTotalAmount(),
+  //       totalLitres: calculateTotalLites(),
+  //     };
+  //   });
+  // };
+
   const handleItemDetailsChange = async (index, field, value) => {
     setFormData((prevFormData) => {
-      const updatedItemDetails = [...prevFormData.itemDetails];
+      // Create a deep copy of itemDetails
+      const updatedItemDetails = prevFormData.itemDetails.map((item, idx) => {
+        if (idx === index) {
+          // Deep copy the item and its chargesAndDeductions
+          const updatedItem = {
+            ...item,
+            chargesAndDeductions: item.chargesAndDeductions.map((charge) => ({
+              ...charge,
+            })),
+          };
 
-      if (field.startsWith("chargesAndDeductions")) {
-        // Handle charges and deductions
-        const chargeIndex = parseInt(field.split("_")[1]);
-        updatedItemDetails[index].chargesAndDeductions[chargeIndex].value =
-          value;
-      } else {
-        // Handle other fields
-        updatedItemDetails[index][field] = value;
-      }
+          if (field.startsWith("chargesAndDeductions")) {
+            // Handle charges and deductions
+            const chargeIndex = parseInt(field.split("_")[1]);
+            updatedItem.chargesAndDeductions[chargeIndex].value = value;
+          } else {
+            // Handle other fields
+            updatedItem[field] = value;
+          }
 
-      // Ensure positive values for Quantities and Unit Prices
-      updatedItemDetails[index].quantity = Math.max(
-        0,
-        updatedItemDetails[index].quantity
-      );
-      updatedItemDetails[index].unitPrice = !isNaN(
-        parseFloat(updatedItemDetails[index].unitPrice)
-      )
-        ? Math.max(0, parseFloat(updatedItemDetails[index].unitPrice))
-        : 0;
+          // Ensure positive values for Quantities and Unit Prices
+          updatedItem.quantity = Math.max(0, updatedItem.quantity);
+          updatedItem.unitPrice = !isNaN(parseFloat(updatedItem.unitPrice))
+            ? Math.max(0, parseFloat(updatedItem.unitPrice))
+            : 0;
 
-      // Calculate total price based on charges and deductions
-      const grandTotalPrice =
-        updatedItemDetails[index].quantity *
-        updatedItemDetails[index].unitPrice;
-      let totalPrice =
-        updatedItemDetails[index].quantity *
-        updatedItemDetails[index].unitPrice;
+          // Calculate total price based on charges and deductions
+          const grandTotalPrice = updatedItem.quantity * updatedItem.unitPrice;
+          let totalPrice = grandTotalPrice;
 
-      updatedItemDetails[index].chargesAndDeductions.forEach((charge) => {
-        if (charge.name === "SSL") {
-          const amount =
-            (grandTotalPrice / (100 - charge.value)) * charge.value;
-          totalPrice += charge.sign === "+" ? amount : -amount;
-        } else if (charge.isPercentage) {
-          const amount = (grandTotalPrice * charge.value) / 100;
-          totalPrice += charge.sign === "+" ? amount : -amount;
-        } else {
-          totalPrice += charge.sign === "+" ? charge.value : -charge.value;
+          updatedItem.chargesAndDeductions.forEach((charge) => {
+            if (charge.name === "SSL") {
+              const amount =
+                (grandTotalPrice / (100 - charge.value)) * charge.value;
+              totalPrice += charge.sign === "+" ? amount : -amount;
+            } else if (charge.isPercentage) {
+              const amount = (grandTotalPrice * charge.value) / 100;
+              totalPrice += charge.sign === "+" ? amount : -amount;
+            } else {
+              totalPrice += charge.sign === "+" ? charge.value : -charge.value;
+            }
+          });
+
+          totalPrice = isNaN(totalPrice) ? 0 : totalPrice;
+          updatedItem.totalPrice = totalPrice;
+
+          return updatedItem;
         }
+        // Return a deep copy of other items to ensure no shared references
+        return {
+          ...item,
+          chargesAndDeductions: item.chargesAndDeductions.map((charge) => ({
+            ...charge,
+          })),
+        };
       });
-
-      totalPrice = isNaN(totalPrice) ? 0 : totalPrice;
-      updatedItemDetails[index].totalPrice = totalPrice;
 
       return {
         ...prevFormData,
