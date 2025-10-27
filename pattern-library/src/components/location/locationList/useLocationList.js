@@ -10,6 +10,7 @@ const useLocationList = () => {
   const [error, setError] = useState(null);
   const [showCreateLocationForm, setShowCreateLocationForm] = useState(false);
   const [showUpdateLocationForm, setShowUpdateLocationForm] = useState(false);
+  const [showLocationView, setShowLocationView] = useState(false);
   const [locationDetail, setLocationDetail] = useState(null);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState(null);
@@ -35,6 +36,7 @@ const useLocationList = () => {
   }, []);
 
   const handleUpdate = (location) => {
+    console.log("Location: ", location);
     setLocationDetail(location);
     setShowUpdateLocationForm(true);
   };
@@ -80,6 +82,16 @@ const useLocationList = () => {
 
   const handleCloseDeleteConfirmation = () => {
     setShowDeleteConfirmation(false);
+  };
+
+  const handleView = (location) => {
+    setLocationDetail(location);
+    setShowLocationView(true);
+  };
+
+  const handleCloseView = () => {
+    setLocationDetail(null);
+    setShowLocationView(false);
   };
 
   const handleConfirmDeleteLocation = async () => {
@@ -132,6 +144,7 @@ const useLocationList = () => {
     submissionStatus,
     submissionMessage,
     loading,
+    showLocationView,
     setLocationDetail,
     setShowCreateLocationForm,
     setShowUpdateLocationForm,
@@ -144,6 +157,8 @@ const useLocationList = () => {
     getStatusBadgeClass,
     getStatusLabel,
     handleDelete,
+    handleView,
+    handleCloseView,
   };
 };
 

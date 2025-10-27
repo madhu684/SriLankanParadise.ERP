@@ -1628,6 +1628,17 @@ export const get_approved_supply_return_masters_by_companyId = async (
   }
 };
 
+export const get_location_by_locationId_api = async (locationId) => {
+  try {
+    const response = await api.get(`/location/${locationId}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const create_supply_return_master_api = async (formData) => {
   try {
     const response = await api.post("/supplyReturnMaster", formData, {

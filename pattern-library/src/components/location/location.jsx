@@ -228,7 +228,7 @@ const Location = ({ handleClose, handleUpdated }) => {
                   id="itemPriceList"
                   value={formData.itemPriceListId || ""}
                   onChange={(e) => handleItemPriceListChange(e.target.value)}
-                  required
+                  disabled={formData.selectedPriceList !== null}
                 >
                   <option value="">Choose price list...</option>
                   {itemPriceList?.map((item) => (
