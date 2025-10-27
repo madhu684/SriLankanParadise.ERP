@@ -27,8 +27,9 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     supplierId: "",
     purchaseRequisitionId: "",
     supplyReturnMasterId: "",
-    grnType: "goodsReceivedNote",
+    grnType: "directPurchase",
     warehouseLocation: null,
+    referenceNo: null,
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -241,6 +242,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       attachments: deepCopyGrn?.attachments ?? [],
       grnType: deepCopyGrn?.grnType,
       warehouseLocation: deepCopyGrn?.warehouseLocationId,
+      referenceNo: deepCopyGrn?.referenceNo,
     });
 
     if (!isLoading && purchaseOrders) {
@@ -739,6 +741,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
           lastUpdatedDate: currentDate,
           grnType: formData.grnType,
           warehouseLocationId: formData.warehouseLocation,
+          referenceNo: grn.referenceNo,
           permissionId: 22,
         };
 

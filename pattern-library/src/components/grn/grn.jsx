@@ -309,6 +309,7 @@ const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
                   setSearchByPR(false);
                   setSearchBySR(false);
                 }}
+                disabled={formData.grnType === "directPurchase"}
               />
               <label className="form-check-label" htmlFor="searchByPOCheckbox">
                 Search By Purchase Order
@@ -326,6 +327,7 @@ const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
                   setSearchByPR(true);
                   setSearchBySR(false);
                 }}
+                disabled={formData.grnType === "directPurchase"}
               />
               <label className="form-check-label" htmlFor="searchByPRCheckbox">
                 Search By Purchase Requisition
@@ -343,6 +345,7 @@ const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
                   setSearchByPR(false);
                   setSearchBySR(true);
                 }}
+                disabled={formData.grnType === "directPurchase"}
               />
               <label className="form-check-label" htmlFor="searchBySRCheckbox">
                 Search By Supply Return

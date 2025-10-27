@@ -26,7 +26,7 @@ const useGrn = ({ onFormSubmit }) => {
     supplierId: null,
     purchaseRequisitionId: null,
     supplyReturnMasterId: null,
-    grnType: "goodsReceivedNote",
+    grnType: "directPurchase",
     warehouseLocation: null,
     selectedSupplier: null,
   });
@@ -432,6 +432,16 @@ const useGrn = ({ onFormSubmit }) => {
     }
   }, [submissionStatus]);
 
+  const generateRef = () => {
+    const currentDate = new Date();
+    const formattedDate = currentDate
+      .toISOString()
+      .split("T")[0]
+      .replace(/-/g, "");
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+    return `GR-${formattedDate}-${randomNum}`;
+  };
+
   const validateField = (
     fieldName,
     fieldDisplayName,
@@ -646,6 +656,8 @@ const useGrn = ({ onFormSubmit }) => {
 
   const handleSubmit = async (isSaveAsDraft) => {
     try {
+      const grnRef = generateRef();
+
       const status = isSaveAsDraft ? 0 : 1;
 
       const combinedStatus = parseInt(`${formData.status}${status}`, 10);
@@ -685,6 +697,7 @@ const useGrn = ({ onFormSubmit }) => {
           lastUpdatedDate: currentDate,
           grnType: formData.grnType,
           warehouseLocationId: formData.warehouseLocation,
+          referenceNo: grnRef,
           permissionId: 20,
         };
 

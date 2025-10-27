@@ -29,11 +29,9 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
     goodsReceivedNote: "Goods Received Note",
   };
 
-  console.log("grn: ", grn);
   const isComplete = grn?.grnDetails.every(
     (detail) => detail.acceptedQuantity === detail.orderedQuantity
   );
-  console.log("isComplete: ", isComplete);
 
   // Fetch Purchase Order
   const {
@@ -319,6 +317,7 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
     locationId: grn?.warehouseLocationId,
     itemBarcode: grnDetail.itemBarcode,
     qty: grnDetail.acceptedQuantity + grnDetail.freeQuantity,
+    referenceNo: grn.referenceNo,
     permissionId: 1048,
   });
 

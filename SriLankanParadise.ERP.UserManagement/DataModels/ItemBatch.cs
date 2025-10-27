@@ -29,15 +29,17 @@ public partial class ItemBatch
 
     public int? Qty { get; set; }
 
+    public string? ReferenceNo { get; set; }
+
     public virtual Batch Batch { get; set; } = null!;
-
-    public virtual ICollection<DailyStockBalance> DailyStockBalances { get; set; } = new List<DailyStockBalance>();
-
-    public virtual ICollection<ItemBatchHasGrnDetail> ItemBatchHasGrnDetails { get; set; } = new List<ItemBatchHasGrnDetail>();
 
     public virtual ItemMaster ItemMaster { get; set; } = null!;
 
     public virtual Location? Location { get; set; }
+
+    public virtual ICollection<DailyStockBalance> DailyStockBalances { get; set; } = new List<DailyStockBalance>();
+
+    public virtual ICollection<ItemBatchHasGrnDetail> ItemBatchHasGrnDetails { get; set; } = new List<ItemBatchHasGrnDetail>();
 
     public virtual ICollection<LocationInventory> LocationInventories { get; set; } = new List<LocationInventory>();
 
