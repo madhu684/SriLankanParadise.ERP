@@ -584,6 +584,12 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.ItemCode).HasMaxLength(50);
             entity.Property(e => e.ItemName).HasMaxLength(50);
 
+            //entity.HasIndex(im => im.ItemCode)
+            //      .IsUnique();
+
+            //entity.HasIndex(im => im.ItemName)
+            //      .IsUnique();
+
             entity.HasOne(d => d.Category).WithMany(p => p.ItemMasters)
                 .HasForeignKey(d => d.CategoryId)
                 .OnDelete(DeleteBehavior.ClientSetNull)

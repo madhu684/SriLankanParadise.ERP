@@ -13,41 +13,96 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             _dbContext = dbContext;
         }
+
+        //public async Task AddItemMaster(ItemMaster itemMaster)
+        //{
+        //    try
+        //    {
+        //        if (itemMaster == null)
+        //        {
+        //            throw new ArgumentNullException(nameof(itemMaster), "ItemMaster cannot be null.");
+        //        }
+
+        //        // Trim whitespace from inputs
+        //        itemMaster.ItemName = itemMaster.ItemName?.Trim();
+        //        itemMaster.ItemCode = itemMaster.ItemCode?.Trim();
+
+        //        // Normalize the item name once (remove spaces, lowercase)
+        //        var normalizedItemName = itemMaster.ItemName?.Replace(" ", "").ToLower();
+
+        //        // Check for duplicate name (null-safe)
+        //        if (!string.IsNullOrWhiteSpace(normalizedItemName))
+        //        {
+        //            var nameExists = await _dbContext.ItemMasters
+        //                .AnyAsync(im => im.ItemName != null &&
+        //                               im.ItemName.Replace(" ", "").ToLower() == normalizedItemName);
+
+        //            if (nameExists)
+        //            {
+        //                throw new InvalidOperationException("An item with the same name already exists.");
+        //            }
+        //        }
+
+        //        // Normalize the item code once (trimmed, lowercase)
+        //        var normalizedCode = itemMaster.ItemCode?.Trim().ToLower();
+
+        //        // Check for duplicate code (null-safe, trimmed, case-insensitive)
+        //        if (!string.IsNullOrWhiteSpace(normalizedCode))
+        //        {
+        //            var codeExists = await _dbContext.ItemMasters
+        //                .AnyAsync(im => im.ItemCode != null &&
+        //                               im.ItemCode.Trim().ToLower() == normalizedCode);
+
+        //            if (codeExists)
+        //            {
+        //                throw new InvalidOperationException("An item with the same code already exists.");
+        //            }
+        //        }
+
+        //        _dbContext.ItemMasters.Add(itemMaster);
+        //        await _dbContext.SaveChangesAsync();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw;
+        //    }
+        //}
         public async Task AddItemMaster(ItemMaster itemMaster)
         {
             try
             {
                 if (itemMaster == null)
-                {
                     throw new ArgumentNullException(nameof(itemMaster), "ItemMaster cannot be null.");
+
+                itemMaster.ItemName = itemMaster.ItemName?.Trim();
+                itemMaster.ItemCode = itemMaster.ItemCode?.Trim();
+
+                var normalizedItemName = itemMaster.ItemName?.Replace(" ", "").ToLower();
+                var normalizedItemCode = itemMaster.ItemCode?.Replace(" ", "").ToLower();
+
+                if (!string.IsNullOrWhiteSpace(normalizedItemName))
+                {
+                    bool nameExists = await _dbContext.ItemMasters
+                        .AnyAsync(im => im.ItemName != null &&
+                                        im.ItemName.Replace(" ", "").ToLower() == normalizedItemName);
+                    if (nameExists)
+                        throw new InvalidOperationException($"An item with the name '{itemMaster.ItemName}' already exists.");
                 }
 
-                var existingItem = await _dbContext.ItemMasters
-                    .FirstOrDefaultAsync(im =>
-                        (im.ItemName != null && itemMaster.ItemName != null &&
-                         im.ItemName.Replace(" ", "").ToLower() == itemMaster.ItemName.Replace(" ", "").ToLower()) ||
-                        (im.ItemCode == itemMaster.ItemCode));
-
-                if (existingItem != null)
+                if (!string.IsNullOrWhiteSpace(normalizedItemCode))
                 {
-                    if (existingItem.ItemName != null && itemMaster.ItemName != null &&
-                        existingItem.ItemName.Replace(" ", "").ToLower() == itemMaster.ItemName.Replace(" ", "").ToLower())
-                    {
-                        throw new InvalidOperationException("An item with the same name already exists.");
-                    }
-                    if (existingItem.ItemCode == itemMaster.ItemCode)
-                    {
-                        throw new InvalidOperationException("An item with the same code already exists.");
-                    }
+                    bool codeExists = await _dbContext.ItemMasters
+                        .AnyAsync(im => im.ItemCode != null &&
+                                        im.ItemCode.Replace(" ", "").ToLower() == normalizedItemCode);
+                    if (codeExists)
+                        throw new InvalidOperationException($"An item with the code '{itemMaster.ItemCode}' already exists.");
                 }
 
                 _dbContext.ItemMasters.Add(itemMaster);
                 await _dbContext.SaveChangesAsync();
-
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -334,6 +389,19 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 throw;
             }
+        }
+
+
+        // Helper Function
+        private static string NormalizeString(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return null;
+
+            return new string(input
+                .Where(c => !char.IsWhiteSpace(c))
+                .ToArray())
+                .ToLowerInvariant();
         }
     }
 }
