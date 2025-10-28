@@ -62,5 +62,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             return _itemBatchRepository.GetItemBatchByItemMasterIdBatchId(itemMasterId, batchId);
         }
+
+        public async Task<IEnumerable<ItemBatch>> GetUniqueItembatchRef(int locationId, int companyId)
+        {
+            return await _itemBatchRepository.GetUniqueItembatchRef(locationId, companyId);
+        }
     }
 }

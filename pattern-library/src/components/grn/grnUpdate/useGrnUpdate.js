@@ -39,6 +39,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     useState(null);
   const [selectedSupplyReturn, setSelectedSupplyReturn] = useState(null);
   const [selectedSupplier, setSelectedSupplier] = useState(null);
+  const [hasManualEdits, setHasManualEdits] = useState(false);
   const [grnDetailIdsToDelete, setGrnDetailIdsToDelete] = useState([]);
 
   const statusOptions = useMemo(
@@ -359,6 +360,10 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       return;
     }
 
+    if (hasManualEdits) {
+      return;
+    }
+
     if (grns && selectedPurchaseOrder) {
       const updatedItemDetails = selectedPurchaseOrder.purchaseOrderDetails
         .map((poItem) => {
@@ -455,6 +460,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     isGrnsFetched,
     grn.grnMasterId,
     grn.grnDetails,
+    hasManualEdits,
   ]);
 
   /* Purchase requisition selected */
@@ -462,6 +468,10 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
   useEffect(() => {
     // Skip if initial setup is not complete
     if (!isInitialSetupComplete.current) {
+      return;
+    }
+
+    if (hasManualEdits) {
       return;
     }
 
@@ -564,6 +574,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     selectedPurchaseOrder,
     grn.grnMasterId,
     grn.grnDetails,
+    hasManualEdits,
   ]);
 
   /* Supply Return selection */
@@ -571,6 +582,10 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
   useEffect(() => {
     // Skip if initial setup is not complete
     if (!isInitialSetupComplete.current) {
+      return;
+    }
+
+    if (hasManualEdits) {
       return;
     }
 
@@ -642,7 +657,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
         };
       });
     }
-  }, [selectedSupplyReturn, grns]);
+  }, [selectedSupplyReturn, grns, hasManualEdits]);
 
   useEffect(() => {
     if (submissionStatus != null) {
@@ -956,32 +971,79 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     }));
   };
 
+  // const handleItemDetailsChange = (index, field, value) => {
+  //   setFormData((prevFormData) => {
+  //     const updatedItemDetails = [...prevFormData.itemDetails];
+  //     updatedItemDetails[index][field] = value;
+
+  //     // Ensure positive values for Quantities
+  //     updatedItemDetails[index].receivedQuantity = Math.max(
+  //       0,
+  //       updatedItemDetails[index].receivedQuantity
+  //     );
+
+  //     updatedItemDetails[index].rejectedQuantity = Math.max(
+  //       0,
+  //       updatedItemDetails[index].rejectedQuantity
+  //     );
+
+  //     updatedItemDetails[index].freeQuantity = Math.max(
+  //       0,
+  //       updatedItemDetails[index].freeQuantity
+  //     );
+
+  //     updatedItemDetails[index].unitPrice = !isNaN(
+  //       parseFloat(updatedItemDetails[index].unitPrice)
+  //     )
+  //       ? Math.max(0, parseFloat(updatedItemDetails[index].unitPrice))
+  //       : 0;
+
+  //     return {
+  //       ...prevFormData,
+  //       itemDetails: updatedItemDetails,
+  //     };
+  //   });
+  // };
+
   const handleItemDetailsChange = (index, field, value) => {
+    // FIXED: Set flag to prevent useEffect from overwriting manual changes
+    setHasManualEdits(true);
+
     setFormData((prevFormData) => {
       const updatedItemDetails = [...prevFormData.itemDetails];
-      updatedItemDetails[index][field] = value;
 
-      // Ensure positive values for Quantities
-      updatedItemDetails[index].receivedQuantity = Math.max(
-        0,
-        updatedItemDetails[index].receivedQuantity
-      );
+      if (
+        field === "receivedQuantity" ||
+        field === "rejectedQuantity" ||
+        field === "freeQuantity" ||
+        field === "unitPrice"
+      ) {
+        // Keep as string if user is typing, convert on blur
+        updatedItemDetails[index][field] = value === "" ? "" : value;
+      } else {
+        updatedItemDetails[index][field] = value;
+      }
 
-      updatedItemDetails[index].rejectedQuantity = Math.max(
-        0,
-        updatedItemDetails[index].rejectedQuantity
-      );
+      // Apply constraints only to ensure non-negative values
+      if (field === "receivedQuantity") {
+        updatedItemDetails[index].receivedQuantity =
+          value === "" ? "" : Math.max(0, parseFloat(value) || 0);
+      }
 
-      updatedItemDetails[index].freeQuantity = Math.max(
-        0,
-        updatedItemDetails[index].freeQuantity
-      );
+      if (field === "rejectedQuantity") {
+        updatedItemDetails[index].rejectedQuantity =
+          value === "" ? "" : Math.max(0, parseFloat(value) || 0);
+      }
 
-      updatedItemDetails[index].unitPrice = !isNaN(
-        parseFloat(updatedItemDetails[index].unitPrice)
-      )
-        ? Math.max(0, parseFloat(updatedItemDetails[index].unitPrice))
-        : 0;
+      if (field === "freeQuantity") {
+        updatedItemDetails[index].freeQuantity =
+          value === "" ? "" : Math.max(0, parseFloat(value) || 0);
+      }
+
+      if (field === "unitPrice") {
+        updatedItemDetails[index].unitPrice =
+          value === "" ? "" : Math.max(0, parseFloat(value) || 0);
+      }
 
       return {
         ...prevFormData,

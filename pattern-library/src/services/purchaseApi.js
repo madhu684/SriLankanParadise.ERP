@@ -806,6 +806,21 @@ export const get_item_batches_by_locationId_CompanyId = async (
   }
 };
 
+export const get_unique_item_batch_ref = async (locationId, companyId) => {
+  try {
+    const response = await api.get(
+      `/itemBatch/GetUniqueItembatchRef/${locationId}/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 //issue master apis
 export const post_issue_master_api = async (formData) => {
   try {

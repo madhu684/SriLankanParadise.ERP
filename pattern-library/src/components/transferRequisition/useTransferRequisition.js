@@ -6,6 +6,7 @@ import {
   get_user_locations_by_user_id_api,
   get_sum_location_inventories_by_locationId_itemMasterId_api,
   get_Low_Stock_Items_for_location_api,
+  get_unique_item_batch_ref,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
@@ -123,6 +124,29 @@ const useTransferRequisition = ({ onFormSubmit }) => {
   } = useQuery({
     queryKey: ["items", searchTerm],
     queryFn: () => fetchItems(sessionStorage.getItem("companyId"), searchTerm),
+  });
+
+  const fetchUniqueItembatchRefs = async () => {
+    try {
+      const response = await get_unique_item_batch_ref(
+        formData.toWarehouseLocation,
+        sessionStorage.getItem("companyId")
+      );
+      return response.data.result || [];
+    } catch (error) {
+      console.error("Error fetching unique item batch refs:", error);
+    }
+  };
+
+  const {
+    data: uniqueItemBatchRefs = [],
+    isLoading: isUniqueItemBatchRefsLoading,
+    isError: isUniqueItemBatchRefsError,
+    error: uniqueItemBatchRefsError,
+  } = useQuery({
+    queryKey: ["uniqueItemBatchRefs", formData.toWarehouseLocation],
+    queryFn: fetchUniqueItembatchRefs,
+    enabled: !!formData.toWarehouseLocation,
   });
 
   const fetchStockDetails = async (locationId, itemMasterId) => {
@@ -633,6 +657,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     showToast,
     isTRGenerated,
     trGenerating,
+    uniqueItemBatchRefs,
     setShowToast,
     handleInputChange,
     handleDepartmentChange,
