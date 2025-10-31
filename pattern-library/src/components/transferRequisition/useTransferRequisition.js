@@ -5,8 +5,8 @@ import {
   post_requisition_detail_api,
   get_user_locations_by_user_id_api,
   get_sum_location_inventories_by_locationId_itemMasterId_api,
-  get_Low_Stock_Items_for_location_api,
   get_unique_item_batch_ref,
+  get_sum_location_inventories_by_ref_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
@@ -19,6 +19,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     fromWarehouseLocation: null,
     itemDetails: [],
     attachments: [],
+    reference: null,
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -149,12 +150,13 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     enabled: !!formData.toWarehouseLocation,
   });
 
-  const fetchStockDetails = async (locationId, itemMasterId) => {
+  const fetchStockDetails = async (locationId, batchId, itemMasterId) => {
     try {
       const response =
         await get_sum_location_inventories_by_locationId_itemMasterId_api(
           itemMasterId,
-          locationId
+          locationId,
+          batchId
         );
       return response.data.result;
     } catch (error) {
@@ -162,59 +164,6 @@ const useTransferRequisition = ({ onFormSubmit }) => {
       return null;
     }
   };
-
-  // Fixed useEffect to prevent unnecessary re-renders
-  useEffect(() => {
-    const updateStockDetails = async () => {
-      if (
-        formData.fromWarehouseLocation &&
-        formData.toWarehouseLocation &&
-        formData.itemDetails.length > 0 &&
-        !isUpdatingStock
-      ) {
-        setIsUpdatingStock(true);
-        setLoading(true);
-
-        try {
-          const updatedItemDetails = await Promise.all(
-            formData.itemDetails.map(async (item) => {
-              const fromStockDetails = await fetchStockDetails(
-                formData.fromWarehouseLocation,
-                item.id
-              );
-              const toStockDetails = await fetchStockDetails(
-                formData.toWarehouseLocation,
-                item.id
-              );
-              return {
-                ...item,
-                totalStockInHand: fromStockDetails?.totalStockInHand || 0,
-                totalStockInHandTo: toStockDetails?.totalStockInHand || 0,
-                reOrderLevel: fromStockDetails?.minReOrderLevel || 0,
-                maxStockLevel: fromStockDetails?.maxStockLevel || 0,
-              };
-            })
-          );
-
-          setFormData((prevFormData) => ({
-            ...prevFormData,
-            itemDetails: updatedItemDetails,
-          }));
-        } catch (error) {
-          console.error("Error updating stock details:", error);
-        } finally {
-          setLoading(false);
-          setIsUpdatingStock(false);
-        }
-      }
-    };
-
-    updateStockDetails();
-  }, [
-    formData.fromWarehouseLocation,
-    formData.toWarehouseLocation,
-    formData.itemDetails.length,
-  ]);
 
   useEffect(() => {
     if (submissionStatus != null) {
@@ -394,6 +343,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
           requestedFromLocationId: formData.fromWarehouseLocation,
           requestedToLocationId: formData.toWarehouseLocation,
           referenceNumber: generateReferenceNumber(),
+          grnDekReference: formData?.reference?.referenceNo,
           permissionId: 1052,
         };
 
@@ -541,6 +491,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     if (formData.fromWarehouseLocation) {
       currentStockDetails = await fetchStockDetails(
         formData.fromWarehouseLocation,
+        null,
         item.itemMasterId
       );
     }
@@ -548,6 +499,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     if (formData.toWarehouseLocation) {
       toStockDetails = await fetchStockDetails(
         formData.toWarehouseLocation,
+        null,
         item.itemMasterId
       );
     }
@@ -571,14 +523,15 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     setSearchTerm("");
   };
 
-  const handleGenerateTRN = async () => {
+  const handleGenerateTRN = async (ref) => {
     try {
       setTRGenerating(true);
       setIsTRGenerated(true);
-      const response = await get_Low_Stock_Items_for_location_api(
-        formData.toWarehouseLocation
+      const response = await get_sum_location_inventories_by_ref_api(
+        ref.referenceNo || formData.reference
       );
       const lowStockItems = response.data.result || [];
+      console.log("lowStockItems 648: ", lowStockItems);
       if (lowStockItems.length === 0) {
         setShowToast(true);
         setTimeout(() => {
@@ -593,29 +546,21 @@ const useTransferRequisition = ({ onFormSubmit }) => {
       if (lowStockItems.length > 0) {
         const newItemDetails = await Promise.all(
           lowStockItems.map(async (item) => {
-            const fromStockDetails = await fetchStockDetails(
-              formData.fromWarehouseLocation,
+            const toStockDetails = await fetchStockDetails(
+              parseInt(formData.fromWarehouseLocation),
+              null,
               item.itemMasterId
             );
+
+            console.log("toStockDetails 668: ", toStockDetails);
 
             return {
               id: item.itemMasterId,
               name: item.itemMaster.itemName,
-              //quantity: 0,
-              quantity:
-                fromStockDetails?.maxStockLevel -
-                  fromStockDetails?.totalStockInHand >
-                0
-                  ? fromStockDetails?.maxStockLevel -
-                      fromStockDetails?.totalStockInHand >
-                    item.totalStockInHand
-                    ? item.totalStockInHand
-                    : fromStockDetails?.maxStockLevel -
-                      fromStockDetails?.totalStockInHand
-                  : 0,
+              quantity: 0,
               maxStockLevel: item.maxStockLevel || 0,
               minReOrderLevel: item.minReOrderLevel || 0,
-              totalStockInHand: fromStockDetails?.totalStockInHand || 0,
+              totalStockInHand: toStockDetails?.totalStockInHand || 0,
               totalStockInHandTo: item.totalStockInHand || 0,
               unit: item.itemMaster.unit?.unitName || "",
             };

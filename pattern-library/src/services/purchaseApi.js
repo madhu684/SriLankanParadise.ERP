@@ -1490,12 +1490,12 @@ export const get_location_inventory_by_locationInvemtoryId_api = async (
 
 //=============
 export const get_sum_location_inventories_by_locationId_itemMasterId_api =
-  async (itemMasterId, locationId = null) => {
+  async (itemMasterId, locationId = null, batchId = null) => {
     try {
       const response = await api.get(
         `/locationInventory/GetSumLocationInventoriesByLocationIdItemMasterId/${itemMasterId}`,
         {
-          params: { locationId },
+          params: { locationId, batchId },
           withCredentials: true,
         }
       );
@@ -1587,6 +1587,21 @@ export const get_Location_Inventory_Summary_By_Item_Name_api = async (
       "Error fetching location inventory summary by item name:",
       error
     );
+    throw error;
+  }
+};
+
+export const get_sum_location_inventories_by_ref_api = async (referenceNo) => {
+  try {
+    const response = await api.get(
+      `/locationInventory/GetSumLocationInventoriesByRef/${referenceNo}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching sum location inventories:", error);
     throw error;
   }
 };

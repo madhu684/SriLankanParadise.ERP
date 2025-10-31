@@ -73,9 +73,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             return await _locationInventoryRepository.GetLocationInventoryByBatchId(batchId);
         }
-        public async Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemMasterId(int? locationId, int itemMasterId)
+        public async Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemMasterId(int? locationId, int? batchId, int itemMasterId)
         {
-            return await _locationInventoryRepository.GetSumLocationInventoriesByLocationIdItemMasterId(locationId, itemMasterId);
+            return await _locationInventoryRepository.GetSumLocationInventoriesByLocationIdItemMasterId(locationId, batchId, itemMasterId);
         }
 
         public async Task<IEnumerable<LocationInventorySummary>> GetLowStockItems(int? supplierId = null, int? locationId = null)
@@ -106,6 +106,11 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         public async Task UpdateReorderLevelMaxStockLevel(int locationId, int itemMasterId, LocationInventory locationInventory)
         {
             await _locationInventoryRepository.UpdateReorderLevelMaxStockLevel(locationId, itemMasterId, locationInventory);
+        }
+
+        public Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByRef(string reference)
+        {
+            return _locationInventoryRepository.GetSumLocationInventoriesByRef(reference);
         }
     }
 }

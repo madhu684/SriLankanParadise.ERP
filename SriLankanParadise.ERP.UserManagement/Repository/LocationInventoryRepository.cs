@@ -4,6 +4,7 @@ using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
+using System.Linq;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
@@ -317,7 +318,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemMasterId(int? locationId, int itemMasterId)
+        public async Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemMasterId(int? locationId, int? batchId, int itemMasterId)
         {
             try
             {
@@ -330,6 +331,11 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 if (locationId.HasValue)
                 {
                     query = query.Where(li => li.LocationId == locationId.Value);
+                }
+
+                if (batchId.HasValue)
+                {
+                    query = query.Where(li => li.BatchId.HasValue && li.BatchId.Value == batchId.Value);
                 }
 
                 var summaryData = await query
@@ -759,6 +765,61 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             catch (Exception)
             {
                 throw;
+            }
+        }
+
+        public async Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByRef(string reference)
+        {
+            try
+            {
+                // First, get all ItemMasterIds and BatchIds that match the reference number
+                var itemBatchData = await _dbContext.ItemBatches
+                    .Where(ib => ib.ReferenceNo == reference)
+                    .Select(ib => new
+                    {
+                        ib.ItemMasterId,
+                        ib.BatchId
+                    })
+                    .ToListAsync();
+
+                if (!itemBatchData.Any())
+                {
+                    return new List<LocationInventorySummary>();
+                }
+
+                // Extract the ItemMasterIds and BatchIds
+                var itemMasterIds = itemBatchData.Select(x => x.ItemMasterId).Distinct().ToList();
+                var batchIds = itemBatchData.Select(x => x.BatchId).Distinct().ToList();
+
+                // Get location inventory data for those items and batches
+                var summaryData = await _dbContext.LocationInventories
+                    .Include(li => li.ItemMaster)
+                    .ThenInclude(im => im.Unit)
+                    .Include(li => li.ItemMaster)
+                    .ThenInclude(im => im.Category)
+                    .Include(li => li.ItemMaster)
+                    .ThenInclude(im => im.ItemType)
+                    .Where(li => itemMasterIds.Contains(li.ItemMasterId) &&
+                                 li.BatchId.HasValue &&
+                                 batchIds.Contains(li.BatchId.Value))
+                    .GroupBy(li => new { li.LocationId, li.ItemMasterId })
+                    .Select(g => new LocationInventorySummary
+                    {
+                        LocationInventoryId = g.First().LocationInventoryId,
+                        LocationId = g.Key.LocationId,
+                        ItemMasterId = g.Key.ItemMasterId,
+                        TotalStockInHand = g.Sum(li => li.StockInHand ?? 0),
+                        MinReOrderLevel = g.Min(li => li.ReOrderLevel ?? 0),
+                        MaxStockLevel = g.Max(li => li.MaxStockLevel ?? 0),
+                        ItemMaster = g.First().ItemMaster
+                    })
+                    .ToListAsync();
+
+                return summaryData.Any() ? summaryData : new List<LocationInventorySummary>();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error retrieving low stock items by location", ex);
             }
         }
     }

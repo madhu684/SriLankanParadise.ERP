@@ -104,8 +104,8 @@ const TransferRequisition = ({
 
       <div className="row g-4 mb-4">
         {/* Left Column - Request Information */}
-        <div className="col-md-6">
-          <div className="card border-light shadow mb-4">
+        <div className="col-lg-6">
+          <div className="card border-0 shadow-sm h-100">
             <div className="card-header bg-primary text-white d-flex align-items-center gap-2">
               <i className="bi bi-info-circle"></i>
               <span className="fw-medium">1. Request Information</span>
@@ -170,7 +170,7 @@ const TransferRequisition = ({
                 )}
               </div>
 
-              <div>
+              <div className="mb-0">
                 <label className="form-label fw-medium">
                   Requested To Warehouse <span className="text-danger">*</span>
                 </label>
@@ -212,26 +212,34 @@ const TransferRequisition = ({
           </div>
         </div>
 
-        {/* Right Column */}
-        <div className="col-md-6">
-          {/* Reference Selection */}
-          <div className="card border-light shadow mb-4">
+        {/* Right Column - Reference Selection */}
+        <div className="col-lg-6">
+          <div className="card border-0 shadow-sm h-100">
             <div className="card-header bg-danger text-white d-flex align-items-center gap-2">
               <i className="bi bi-bookmarks"></i>
               <span className="fw-medium">2. Reference Selection</span>
             </div>
             <div className="card-body">
-              <div className="mb-3 position-relative">
+              <div className="mb-3">
                 <label className="form-label fw-medium">
                   Reference <span className="text-danger">*</span>
                 </label>
                 <select
                   className="form-select"
-                  disabled={formData.toWarehouseLocation === null}
+                  disabled={
+                    formData.toWarehouseLocation === null ||
+                    formData.fromWarehouseLocation === null
+                  }
+                  //value={formData.referenceNo ?? ""}
+                  onChange={(e) => {
+                    const selectedRef = JSON.parse(e.target.value);
+                    handleInputChange("reference", selectedRef);
+                    handleGenerateTRN(selectedRef);
+                  }}
                 >
                   <option value="">Select Reference</option>
                   {uniqueItemBatchRefs.map((ref, index) => (
-                    <option key={index} value={ref.referenceNo}>
+                    <option key={index} value={JSON.stringify(ref)}>
                       {ref.referenceNo}
                     </option>
                   ))}
@@ -240,13 +248,48 @@ const TransferRequisition = ({
                   Please search for a reference and select it.
                 </small> */}
               </div>
+
+              {formData.reference && (
+                <div className="alert alert-info d-flex align-items-center justify-content-between mt-5 mb-0">
+                  <div className="d-flex align-items-center gap-2">
+                    <i className="bi bi-info-circle-fill"></i>
+                    <span className="fw-medium">Selected Reference:</span>
+                  </div>
+                  <div className="d-flex flex-column align-items-end">
+                    <span className="badge bg-primary fs-6 mb-1">
+                      {formData.reference.referenceNo}
+                    </span>
+                    {trGenerating ? (
+                      <small className="text-muted">
+                        <ButtonLoadingSpinner text="Loading items..." />
+                      </small>
+                    ) : (
+                      formData.itemDetails.length > 0 && (
+                        <small className="text-muted">
+                          <i className="bi bi-box-seam me-1"></i>
+                          {formData.itemDetails.length} item(s) available
+                        </small>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {!formData.reference && (
+                <div className="alert alert-light border d-flex align-items-center gap-2 mb-0">
+                  <i className="bi bi-arrow-up-circle text-muted"></i>
+                  <small className="text-muted mb-0">
+                    Please select a reference to view available items
+                  </small>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
 
       {/* Item Details Section */}
-      <div className="card border-light shadow mb-4">
+      <div className="card border-0 shadow-sm mb-4">
         <div className="card-header bg-secondary text-white d-flex align-items-center gap-2">
           <i className="bi bi-box"></i>
           <span className="fw-medium">3. Item Details</span>
@@ -254,7 +297,7 @@ const TransferRequisition = ({
         <div className="card-body">
           <div className="row">
             <div className="col-lg-6 mb-3">
-              <label className="form-label fw-medium">Search Items</label>
+              {/* <label className="form-label fw-medium">Search Items</label>
               <div className="input-group">
                 <span className="input-group-text">
                   <i className="bi bi-search"></i>
@@ -275,12 +318,12 @@ const TransferRequisition = ({
                     <i className="bi bi-x"></i>
                   </button>
                 )}
-              </div>
+              </div> */}
 
               {searchTerm && (
                 <div className="dropdown w-100 mt-2">
                   <ul
-                    className="dropdown-menu show w-100"
+                    className="dropdown-menu show w-100 position-absolute"
                     style={{ maxHeight: "200px", overflowY: "auto" }}
                   >
                     {isItemsLoading ? (
@@ -335,7 +378,7 @@ const TransferRequisition = ({
 
           {formData.itemDetails.length > 0 ? (
             <div className="table-responsive">
-              <table className="table table-hover align-middle">
+              <table className="table table-hover align-middle mb-0">
                 <thead className="table-light">
                   <tr>
                     <th>Item Name</th>
@@ -343,8 +386,8 @@ const TransferRequisition = ({
                     <th>Quantity</th>
                     <th>Available Stock</th>
                     <th>Requested Location Stock</th>
-                    <th>Reorder Level</th>
-                    <th>Max Stock Level</th>
+                    {/* <th>Reorder Level</th>
+                    <th>Max Stock Level</th> */}
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -384,12 +427,12 @@ const TransferRequisition = ({
                       </td>
                       <td>{item.totalStockInHand}</td>
                       <td>{item.totalStockInHandTo}</td>
-                      <td>{item.reOrderLevel}</td>
-                      <td>{item.maxStockLevel}</td>
+                      {/* <td>{item.reOrderLevel}</td>
+                      <td>{item.maxStockLevel}</td> */}
                       <td>
                         <button
                           type="button"
-                          className="btn btn-outline-danger"
+                          className="btn btn-outline-danger btn-sm"
                           onClick={() => handleRemoveItem(index)}
                         >
                           Delete
@@ -401,7 +444,7 @@ const TransferRequisition = ({
               </table>
             </div>
           ) : (
-            <div className="alert alert-info d-flex align-items-center gap-2">
+            <div className="alert alert-info d-flex align-items-center gap-2 mb-0">
               <i className="bi bi-info-circle"></i>
               <span>
                 No items added yet. Search and select items to add to the
@@ -445,39 +488,41 @@ const TransferRequisition = ({
       </div>
 
       {/* Attachments Section */}
-      <div className="card border-light shadow-sm mb-4">
+      <div className="card border-0 shadow-sm mb-4">
         <div className="card-header bg-secondary text-white d-flex align-items-center gap-2">
           <i className="bi bi-paperclip"></i>
           <span className="fw-medium">4. Attachments</span>
         </div>
         <div className="card-body">
-          <label className="form-label fw-medium">
-            Upload Files (Optional)
-          </label>
-          <input
-            type="file"
-            className={`form-control ${
-              validFields.attachments ? "is-valid" : ""
-            } ${validationErrors.attachments ? "is-invalid" : ""}`}
-            onChange={(e) => handleAttachmentChange(e.target.files)}
-            multiple
-          />
-          <small className="text-muted form-text">
-            <i className="bi bi-info-circle"></i> File size limit: 10MB
-          </small>
-          {validationErrors.attachments && (
-            <div className="invalid-feedback">
-              {validationErrors.attachments}
-            </div>
-          )}
+          <div className="mb-0">
+            <label className="form-label fw-medium">
+              Upload Files (Optional)
+            </label>
+            <input
+              type="file"
+              className={`form-control ${
+                validFields.attachments ? "is-valid" : ""
+              } ${validationErrors.attachments ? "is-invalid" : ""}`}
+              onChange={(e) => handleAttachmentChange(e.target.files)}
+              multiple
+            />
+            <small className="text-muted form-text d-block mt-2">
+              <i className="bi bi-info-circle me-1"></i> File size limit: 10MB
+            </small>
+            {validationErrors.attachments && (
+              <div className="invalid-feedback">
+                {validationErrors.attachments}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="d-flex gap-3">
+      <div className="d-flex flex-wrap gap-3 mb-3">
         <button
           type="button"
-          className="btn btn-primary"
+          className="btn btn-primary px-4"
           onClick={() => handleSubmit(false)}
           disabled={
             !formData.itemDetails.length > 0 ||
@@ -496,7 +541,7 @@ const TransferRequisition = ({
         </button>
         <button
           type="button"
-          className="btn btn-secondary"
+          className="btn btn-secondary px-4"
           disabled={loading || submissionStatus !== null}
         >
           <i className="bi bi-save me-2"></i>
@@ -504,7 +549,7 @@ const TransferRequisition = ({
         </button>
         <button
           type="button"
-          className="btn btn-danger"
+          className="btn btn-danger px-4"
           onClick={handleClose}
           disabled={loading || submissionStatus !== null}
         >
