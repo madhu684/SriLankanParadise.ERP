@@ -450,15 +450,6 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     );
   }, [chargesAndDeductions]);
 
-  const formatCurrency = (value) => {
-    // if (!value) return "N/A";
-    return new Intl.NumberFormat("en-LK", {
-      style: "currency",
-      currency: "LKR",
-      minimumFractionDigits: 2,
-    }).format(value);
-  };
-
   const validateField = (
     fieldName,
     fieldDisplayName,
@@ -1024,15 +1015,41 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     );
   };
 
+  // const calculateTotalAmount = () => {
+  //   // Calculate total price based on item details
+  //   const subtotal = calculateSubTotal();
+
+  //   // Calculate total amount based on subtotal and common charges and deductions
+  //   let totalAmount = subtotal.toFixed(2);
+  //   formData.commonChargesAndDeductions.forEach((charge) => {
+  //     if (charge.isPercentage) {
+  //       const amount = (subtotal * charge.value) / 100;
+  //       if (charge.sign === "+") {
+  //         totalAmount += amount;
+  //       } else if (charge.sign === "-") {
+  //         totalAmount -= amount;
+  //       }
+  //     } else {
+  //       if (charge.sign === "+") {
+  //         totalAmount += charge.value;
+  //       } else if (charge.sign === "-") {
+  //         totalAmount -= charge.value;
+  //       }
+  //     }
+  //   });
+
+  //   return totalAmount;
+  // };
+
   const calculateTotalAmount = () => {
     // Calculate total price based on item details
     const subtotal = calculateSubTotal();
 
     // Calculate total amount based on subtotal and common charges and deductions
-    let totalAmount = subtotal.toFixed(2);
+    let totalAmount = subtotal;
     formData.commonChargesAndDeductions.forEach((charge) => {
       if (charge.isPercentage) {
-        const amount = (subtotal * charge.value) / 100;
+        const amount = (subtotal * parseFloat(charge.value)) / 100;
         if (charge.sign === "+") {
           totalAmount += amount;
         } else if (charge.sign === "-") {
@@ -1040,9 +1057,9 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         }
       } else {
         if (charge.sign === "+") {
-          totalAmount += charge.value;
+          totalAmount += parseFloat(charge.value);
         } else if (charge.sign === "-") {
-          totalAmount -= charge.value;
+          totalAmount -= parseFloat(charge.value);
         }
       }
     });
@@ -1378,7 +1395,6 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     calculateTotalLites,
     renderColumns,
     renderSubColumns,
-    formatCurrency,
   };
 };
 

@@ -4,6 +4,7 @@ import LoadingSpinner from "../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../errorComponent/errorComponent";
 import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 import CustomerStatusMessage from "./helperMethods/CustomerStatusMessage";
+import useFormatCurrency from "./helperMethods/useFormatCurrency";
 
 const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
   const {
@@ -56,7 +57,6 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
     calculateTotalLites,
     renderColumns,
     renderSubColumns,
-    formatCurrency,
   } = useSalesInvoice({
     onFormSubmit: () => {
       handleClose();
@@ -65,6 +65,8 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
     salesOrder,
   });
 
+  const formatCurrency = useFormatCurrency();
+  const formatTotals = useFormatCurrency({ showCurrency: false });
   const { message, disableSubmit } = CustomerStatusMessage({ formData });
 
   if (
@@ -708,7 +710,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                         <td>{item.name}</td>
                         <td>
                           <span className="badge bg-light text-dark">
-                            {item.unit}
+                            {item.packSize} ml
                           </span>
                         </td>
                         <td className="text-center">
@@ -721,7 +723,9 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                           )}
                         </td>
                         <td className="text-end">
-                          {item.unitPrice ? item.unitPrice.toFixed(2) : "0.00"}
+                          {item.unitPrice
+                            ? formatTotals(item.unitPrice.toFixed(2))
+                            : "0.00"}
                         </td>
                         <td>
                           <input
@@ -784,7 +788,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                           )
                         )}
                         <td className="text-end fw-bold">
-                          {item.totalPrice.toFixed(2)}
+                          {formatTotals(item.totalPrice.toFixed(2))}
                         </td>
                         <td className="text-center">
                           <button
@@ -810,7 +814,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                       ></td>
                       <th className="text-end">Sub Total</th>
                       <td className="text-end fw-bold">
-                        {calculateSubTotal().toFixed(2)}
+                        {formatTotals(calculateSubTotal().toFixed(2))}
                       </td>
                     </tr>
                     {renderSubColumns()}
@@ -824,7 +828,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                       ></td>
                       <th className="text-end fs-6">Total Amount</th>
                       <td className="text-end fw-bold fs-6">
-                        {calculateTotalAmount().toFixed(2)}
+                        {formatTotals(calculateTotalAmount().toFixed(2))}
                       </td>
                     </tr>
                     <tr className="table-primary">
@@ -837,7 +841,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                       ></td>
                       <th className="text-end fs-6">Total Litres</th>
                       <td className="text-end fw-bold fs-6">
-                        {calculateTotalLites().toFixed(2)}
+                        {formatTotals(calculateTotalLites().toFixed(2))}
                       </td>
                     </tr>
                   </tfoot>

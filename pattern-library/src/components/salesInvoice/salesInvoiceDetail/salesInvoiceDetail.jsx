@@ -7,6 +7,7 @@ import ErrorComponent from "../../errorComponent/errorComponent";
 import moment from "moment";
 import "moment-timezone";
 import InvoicePrintPreview from "../helperMethods/InvoiceePreview";
+import useFormatCurrency from "../helperMethods/useFormatCurrency";
 
 const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
   const { getStatusLabel, getStatusBadgeClass } = useSalesInvoiceList();
@@ -24,6 +25,8 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
     company,
     renderSalesInvoiceDetails,
   } = useSalesInvoiceDetial(salesInvoice);
+
+  const formatTotals = useFormatCurrency({ showCurrency: false });
 
   // State for print preview modal
   const [showPrintPreview, setShowPrintPreview] = useState(false);
@@ -374,13 +377,18 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                         {renderSalesInvoiceDetails().map((item, index) => (
                           <tr key={index}>
                             <td>{item.itemMaster?.itemName}</td>
-                            <td>{item.itemMaster?.unit.unitName}</td>
+                            {/* <td>{item.itemMaster?.unit.unitName}</td> */}
+                            <td>
+                              <span className="badge bg-light text-dark">
+                                {item.itemMaster?.conversionRate} ml
+                              </span>
+                            </td>
                             {company.batchStockType !== "FIFO" && (
                               <td>{item.itemBatch?.batch?.batchRef}</td>
                             )}
                             <td className="text-end">{item.quantity}</td>
                             <td className="text-end">
-                              {item.unitPrice.toFixed(2)}
+                              {formatTotals(item.unitPrice.toFixed(2))}
                             </td>
                             {uniqueLineItemDisplayNames.map(
                               (displayName, idx) => {
@@ -434,7 +442,7 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                               }
                             )}
                             <td className="text-end fw-semibold">
-                              {item.totalPrice.toFixed(2)}
+                              {formatTotals(item.totalPrice.toFixed(2))}
                             </td>
                           </tr>
                         ))}
@@ -451,7 +459,7 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                           ></td>
                           <th className="text-end">Sub Total</th>
                           <td className="text-end fw-bold">
-                            {calculateSubTotal().toFixed(2)}
+                            {formatTotals(calculateSubTotal().toFixed(2))}
                           </td>
                         </tr>
                         {uniqueCommonDisplayNames.map((displayName, index) => {
@@ -507,7 +515,7 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                           ></td>
                           <th className="text-end fs-6">Total Amount</th>
                           <td className="text-end fw-bold fs-6">
-                            {salesInvoice.totalAmount.toFixed(2)}
+                            {formatTotals(salesInvoice.totalAmount.toFixed(2))}
                           </td>
                         </tr>
                         <tr className="table-info">
@@ -521,7 +529,7 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                           ></td>
                           <th className="text-end">Total Litres</th>
                           <td className="text-end fw-bold">
-                            {salesInvoice.totalLitres.toFixed(2)}
+                            {formatTotals(salesInvoice.totalLitres.toFixed(2))}
                           </td>
                         </tr>
                       </tfoot>
@@ -533,16 +541,19 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
           )}
         </Modal.Body>
         <Modal.Footer className="bg-light">
-          {!isLoading && !isError && !isCompanyLoading && (
-            <Button
-              variant="primary"
-              onClick={handleOpenPrintPreview}
-              className="px-4 me-2"
-            >
-              <i className="bi bi-printer me-2"></i>
-              Print Preview
-            </Button>
-          )}
+          {!isLoading &&
+            !isError &&
+            !isCompanyLoading &&
+            salesInvoice.status === 2 && (
+              <Button
+                variant="primary"
+                onClick={handleOpenPrintPreview}
+                className="px-4 me-2"
+              >
+                <i className="bi bi-printer me-2"></i>
+                Print Preview
+              </Button>
+            )}
           <Button variant="secondary" onClick={handleClose} className="px-4">
             Close
           </Button>

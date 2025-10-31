@@ -4,6 +4,7 @@ import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/butt
 import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
 import CustomerStatusMessage from "../helperMethods/CustomerStatusMessage";
+import useFormatCurrency from "../helperMethods/useFormatCurrency";
 
 const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
   const {
@@ -55,7 +56,6 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
     handleCustomerSelect,
     handleResetCustomer,
     calculateTotalLites,
-    formatCurrency,
   } = useSalesInvoiceUpdate({
     salesInvoice,
     onFormSubmit: () => {
@@ -64,6 +64,8 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
     },
   });
 
+  const formatCurrency = useFormatCurrency();
+  const formatTotals = useFormatCurrency({ showCurrency: false });
   const { message, disableSubmit } = CustomerStatusMessage({ formData });
 
   if (isLoadingchargesAndDeductions || isLoadingTransactionTypes) {
@@ -707,8 +709,11 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                       <tr key={index}>
                         <td>{item.name}</td>
                         <td>
-                          <span className="badge bg-light text-dark">
+                          {/* <span className="badge bg-light text-dark">
                             {item.unit}
+                          </span> */}
+                          <span className="badge bg-light text-dark">
+                            {item.packSize} ml
                           </span>
                         </td>
                         <td className="text-center">
@@ -721,7 +726,9 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                           )}
                         </td>
                         <td className="text-end">
-                          {item.unitPrice ? item.unitPrice.toFixed(2) : "0.00"}
+                          {item.unitPrice
+                            ? formatTotals(item.unitPrice.toFixed(2))
+                            : "0.00"}
                         </td>
                         <td>
                           <input
@@ -784,7 +791,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                           )
                         )}
                         <td className="text-end fw-bold">
-                          {item.totalPrice.toFixed(2)}
+                          {formatTotals(item.totalPrice.toFixed(2))}
                         </td>
                         <td className="text-center">
                           <button
@@ -810,7 +817,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                       ></td>
                       <th className="text-end">Sub Total</th>
                       <td className="text-end fw-bold">
-                        {calculateSubTotal().toFixed(2)}
+                        {formatTotals(calculateSubTotal().toFixed(2))}
                       </td>
                       <td></td>
                     </tr>
@@ -825,7 +832,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                       ></td>
                       <th className="text-end fs-6">Total Amount</th>
                       <td className="text-end fw-bold fs-6">
-                        {calculateTotalAmount().toFixed(2)}
+                        {formatTotals(calculateTotalAmount().toFixed(2))}
                       </td>
                       <td></td>
                     </tr>
@@ -839,7 +846,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                       ></td>
                       <th className="text-end fs-6">Total Litres</th>
                       <td className="text-end fw-bold fs-6">
-                        {calculateTotalLites().toFixed(2)}
+                        {formatTotals(calculateTotalLites().toFixed(2))}
                       </td>
                       <td></td>
                     </tr>

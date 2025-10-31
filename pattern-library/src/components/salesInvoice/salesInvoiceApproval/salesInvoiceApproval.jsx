@@ -7,6 +7,7 @@ import ErrorComponent from "../../errorComponent/errorComponent";
 import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 import moment from "moment";
 import "moment-timezone";
+import useFormatCurrency from "../helperMethods/useFormatCurrency";
 
 const SalesInvoiceApproval = ({
   show,
@@ -39,6 +40,7 @@ const SalesInvoiceApproval = ({
     salesInvoice,
   });
   const { getStatusLabel, getStatusBadgeClass } = useSalesInvoiceList();
+  const formatTotals = useFormatCurrency({ showCurrency: false });
 
   return (
     <Modal
@@ -387,13 +389,18 @@ const SalesInvoiceApproval = ({
                       {renderSalesInvoiceDetails().map((item, index) => (
                         <tr key={index}>
                           <td>{item.itemMaster?.itemName}</td>
-                          <td>{item.itemMaster?.unit.unitName}</td>
+                          {/* <td>{item.itemMaster?.unit.unitName}</td> */}
+                          <td>
+                            <span className="badge bg-light text-dark">
+                              {item.itemMaster?.conversionRate} ml
+                            </span>
+                          </td>
                           {company.batchStockType !== "FIFO" && (
                             <td>{item.itemBatch?.batch?.batchRef}</td>
                           )}
                           <td className="text-end">{item.quantity}</td>
                           <td className="text-end">
-                            {item.unitPrice.toFixed(2)}
+                            {formatTotals(item.unitPrice.toFixed(2))}
                           </td>
                           {uniqueLineItemDisplayNames.map(
                             (displayName, idx) => {
@@ -445,7 +452,7 @@ const SalesInvoiceApproval = ({
                             }
                           )}
                           <td className="text-end fw-semibold">
-                            {item.totalPrice.toFixed(2)}
+                            {formatTotals(item.totalPrice.toFixed(2))}
                           </td>
                         </tr>
                       ))}
@@ -462,7 +469,7 @@ const SalesInvoiceApproval = ({
                         ></td>
                         <th className="text-end">Sub Total</th>
                         <td className="text-end fw-bold">
-                          {calculateSubTotal().toFixed(2)}
+                          {formatTotals(calculateSubTotal().toFixed(2))}
                         </td>
                       </tr>
                       {uniqueCommonDisplayNames.map((displayName, index) => {
@@ -517,7 +524,7 @@ const SalesInvoiceApproval = ({
                         ></td>
                         <th className="text-end fs-6">Total Amount</th>
                         <td className="text-end fw-bold fs-6">
-                          {salesInvoice.totalAmount.toFixed(2)}
+                          {formatTotals(salesInvoice.totalAmount.toFixed(2))}
                         </td>
                       </tr>
                       <tr className="table-info">
@@ -531,7 +538,7 @@ const SalesInvoiceApproval = ({
                         ></td>
                         <th className="text-end">Total Litres</th>
                         <td className="text-end fw-bold">
-                          {salesInvoice.totalLitres.toFixed(2)}
+                          {formatTotals(salesInvoice.totalLitres.toFixed(2))}
                         </td>
                       </tr>
                     </tfoot>

@@ -2,6 +2,7 @@ import { useReactToPrint } from "react-to-print";
 import { useRef } from "react";
 import { FaPrint, FaEye, FaWindowClose } from "react-icons/fa";
 import useNumberToWords from "./useNumberToWords";
+import useFormatCurrency from "./useFormatCurrency";
 
 const InvoicePrintPreview = ({
   salesInvoice,
@@ -12,6 +13,8 @@ const InvoicePrintPreview = ({
 }) => {
   const componentRef = useRef(null);
   const numberToWords = useNumberToWords();
+
+  const formatTotals = useFormatCurrency({ showCurrency: false });
 
   const handlePrint = useReactToPrint({
     contentRef: componentRef,
@@ -584,7 +587,7 @@ const InvoicePrintPreview = ({
                         textAlign: "center",
                       }}
                     >
-                      {item.itemMaster?.conversionRate}
+                      {formatTotals(item.itemMaster?.conversionRate)}
                     </td>
                     <td
                       style={{
@@ -602,7 +605,9 @@ const InvoicePrintPreview = ({
                         textAlign: "right",
                       }}
                     >
-                      {item.itemMaster?.conversionRate * item.quantity}
+                      {formatTotals(
+                        item.itemMaster?.conversionRate * item.quantity
+                      )}
                     </td>
                     <td
                       style={{
@@ -611,7 +616,7 @@ const InvoicePrintPreview = ({
                         textAlign: "right",
                       }}
                     >
-                      {item.unitPrice.toFixed(2)}
+                      {formatTotals(item.unitPrice.toFixed(2))}
                     </td>
                     <td
                       style={{
@@ -621,7 +626,7 @@ const InvoicePrintPreview = ({
                         fontWeight: "bold",
                       }}
                     >
-                      {item.totalPrice.toFixed(2)}
+                      {formatTotals(item.totalPrice.toFixed(2))}
                     </td>
                   </tr>
                 ))}
@@ -719,7 +724,7 @@ const InvoicePrintPreview = ({
                           textAlign: "right",
                         }}
                       >
-                        {subTotal.toFixed(2)}
+                        {formatTotals(subTotal.toFixed(2))}
                       </td>
                     </tr>
                     {charges.map((charge, index) => {
@@ -774,7 +779,7 @@ const InvoicePrintPreview = ({
                           fontSize: "11px",
                         }}
                       >
-                        {salesInvoice.totalAmount.toFixed(2)}
+                        {formatTotals(salesInvoice.totalAmount.toFixed(2))}
                       </td>
                     </tr>
                     {/* <tr style={{ backgroundColor: "#FFF4CC" }}>
