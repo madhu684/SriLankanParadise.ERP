@@ -258,13 +258,27 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             try
             {
+                var inventory = await _dbContext.LocationInventories
+                    .Where(li => li.LocationId == locationId)
+                    .ToListAsync();
+
+                var batchIds = inventory.Select(li => li.BatchId).Distinct().ToList();
+
                 var itemBatches = await _dbContext.ItemBatches
-                    .Where(ib => ib.LocationId == locationId && ib.CompanyId == companyId)
+                    .Where(ib => batchIds.Contains(ib.BatchId) && ib.CompanyId == companyId)
                     .GroupBy(ib => ib.ReferenceNo)
                     .Select(g => g.First())
                     .ToListAsync();
 
                 return itemBatches;
+
+                //var itemBatches = await _dbContext.ItemBatches
+                //    .Where(ib => ib.LocationId == locationId && ib.CompanyId == companyId)
+                //    .GroupBy(ib => ib.ReferenceNo)
+                //    .Select(g => g.First())
+                //    .ToListAsync();
+
+                //return itemBatches;
             }
             catch (Exception)
             {

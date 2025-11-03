@@ -6,6 +6,7 @@ import {
   get_locations_inventories_by_location_id_item_master_id_api,
   patch_issue_detail_api,
   patch_location_inventory_api,
+  post_itemBatch_api,
   post_location_inventory_api,
   post_location_inventory_movement_api,
   update_min_state_in_mrn_api,
@@ -44,14 +45,13 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
   useEffect(() => {
     if (issuedetails?.length > 0) {
       const updatedReceivedQuantities = issuedetails.reduce((acc, item) => {
-        acc[item.issueDetailId] =
-          item.receivedQuantity !== undefined ? item.quantity : "";
+        acc[item.issueDetailId] = item.quantity !== null ? item.quantity : 0;
         return acc;
       }, {});
 
       const updatedReturnedQuantities = issuedetails.reduce((acc, item) => {
         acc[item.issueDetailId] =
-          item.returnedQuantity !== undefined ? item.returnedQuantity : "";
+          item.returnedQuantity !== null ? item.returnedQuantity : 0;
         return acc;
       }, {});
 
@@ -259,6 +259,33 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
     }
   };
 
+  // const createItemBatchData = async (tin) => {
+  //   for (const item of tin?.issueDetails) {
+  //     const formData = {
+  //       batchId: item.batchId,
+  //       itemMasterId: item.itemMasterId,
+  //       costPrice: item.itemMaster.unitPrice || 0,
+  //       sellingPrice: item.itemMaster.unitPrice || 0,
+  //       status: true,
+  //       companyId: sessionStorage.getItem("companyId"),
+  //       createdBy: sessionStorage.getItem("username"),
+  //       createdUserId: sessionStorage.getItem("userId"),
+  //       tempQuantity: item.receivedQuantity,
+  //       locationId: item?.requisitionMaster?.requestedFromLocationId,
+  //       qty: item.receivedQuantity,
+  //       referenceNo: item?.requisitionMaster?.grnDekReference,
+  //       permissionId: 1048,
+  //     };
+
+  //     try {
+  //       const response = await post_itemBatch_api(formData);
+  //       console.log("Item batch created successfully", response);
+  //     } catch (error) {
+  //       console.error("Error creating item batch:", error);
+  //     }
+  //   }
+  // };
+
   const validateQuantities = () => {
     const errors = [];
 
@@ -361,6 +388,8 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
       setLoading(false);
     }
   };
+
+  console.log(receivedQuantities, returnedQuantities);
 
   return {
     approvalStatus,

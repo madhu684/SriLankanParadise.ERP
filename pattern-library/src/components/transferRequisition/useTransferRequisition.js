@@ -528,7 +528,8 @@ const useTransferRequisition = ({ onFormSubmit }) => {
       setTRGenerating(true);
       setIsTRGenerated(true);
       const response = await get_sum_location_inventories_by_ref_api(
-        ref.referenceNo || formData.reference
+        ref.referenceNo || formData.reference,
+        formData.toWarehouseLocation
       );
       const lowStockItems = response.data.result || [];
       console.log("lowStockItems 648: ", lowStockItems);

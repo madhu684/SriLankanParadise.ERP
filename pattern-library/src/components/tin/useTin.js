@@ -1,242 +1,237 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   get_requisition_masters_with_out_drafts_api,
   post_issue_master_api,
   post_issue_detail_api,
   get_issue_masters_by_requisition_master_id_api,
   get_item_batches_api,
-  get_locations_inventories_by_location_id_api,
+  get_sum_location_inventories_by_ref_api,
 } from "../../services/purchaseApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
+// Constants
+const STATUS_OPTIONS = [
+  { id: "4", label: "In Progress" },
+  { id: "5", label: "Completed" },
+];
+
+const INITIAL_FORM_STATE = {
+  itemDetails: [],
+  status: STATUS_OPTIONS[0].id,
+  trnId: "",
+};
+
+const SUBMISSION_STATUS = {
+  SUCCESS_SUBMITTED: "successSubmitted",
+  SUCCESS_DRAFT: "successSavedAsDraft",
+  ERROR: "error",
+};
+
+const ALERT_TIMEOUT = 3000;
+
+// Helper Functions
+const getSessionValue = (key) => sessionStorage?.getItem(key) ?? null;
+
+const generateReferenceNumber = () => {
+  const timestamp = new Date().toISOString().replace(/\D/g, "").slice(0, 14);
+  const random = Math.floor(1000 + Math.random() * 9000);
+  return `TIN_${timestamp}_${random}`;
+};
+
+const calculateIssuedQuantity = (tins, itemMasterId) => {
+  return tins.reduce((total, tin) => {
+    const tinDetail = tin.issueDetails.find(
+      (detail) => detail.itemMasterId === itemMasterId
+    );
+    return total + (tinDetail?.quantity || 0);
+  }, 0);
+};
+
+const createItemDetail = (
+  requestItem,
+  issuedQuantity = 0,
+  stockInHand = 0
+) => ({
+  id: requestItem.itemMaster?.itemMasterId,
+  name: requestItem.itemMaster?.itemName,
+  unit: requestItem.itemMaster?.unit?.unitName || "Unit",
+  quantity: requestItem.quantity,
+  remainingQuantity: Math.max(0, requestItem.quantity - issuedQuantity),
+  stockInHand: stockInHand,
+  issuedQuantity: "",
+  batchId: "",
+});
+
+// Custom Hook
 const useTin = ({ onFormSubmit }) => {
-  const [formData, setFormData] = useState({
-    itemDetails: [],
-    status: "",
-    trnId: "",
-  });
+  // State Management
+  const [formData, setFormData] = useState(INITIAL_FORM_STATE);
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
   const [selectedTrn, setSelectedTrn] = useState(null);
-  const statusOptions = [
-    { id: "4", label: "In Progress" },
-    { id: "5", label: "Completed" },
-  ];
-  const alertRef = useRef(null);
   const [trnSearchTerm, setTrnSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
+
+  const alertRef = useRef(null);
   const queryClient = useQueryClient();
 
-  // Fetch TRNs
-  const fetchTrns = async () => {
+  // Memoized values
+  const companyId = useMemo(() => getSessionValue("companyId"), []);
+  const username = useMemo(() => getSessionValue("username"), []);
+  const userId = useMemo(() => getSessionValue("userId"), []);
+
+  // Query Functions
+  const fetchTrns = useCallback(async () => {
     try {
       const response = await get_requisition_masters_with_out_drafts_api(
-        sessionStorage?.getItem("companyId")
+        companyId
       );
-      const filteredTrns = response.data.result?.filter(
-        (rm) => rm.requisitionType === "TRN" && rm.status === 2
+      return (
+        response.data.result?.filter(
+          (rm) => rm.requisitionType === "TRN" && rm.status === 2
+        ) || []
       );
-      return filteredTrns || [];
     } catch (error) {
       console.error("Error fetching TRNs:", error);
+      throw error;
+    }
+  }, [companyId]);
+
+  const fetchTinsByRequisitionMasterId = useCallback(
+    async (requisitionMasterId) => {
+      try {
+        const response = await get_issue_masters_by_requisition_master_id_api(
+          requisitionMasterId
+        );
+        return (
+          response.data.result?.filter((rm) => rm.issueType === "TIN") || []
+        );
+      } catch (error) {
+        console.error("Error fetching TINs:", error);
+        throw error;
+      }
+    },
+    []
+  );
+
+  const fetchItemBatches = useCallback(async () => {
+    try {
+      const response = await get_item_batches_api(companyId);
+      return response.data.result || [];
+    } catch (error) {
+      console.error("Error fetching item batches:", error);
+      throw error;
+    }
+  }, [companyId]);
+
+  const fetchLocationInventoriesByRef = useCallback(async () => {
+    if (!selectedTrn?.grnDekReference || !selectedTrn?.requestedToLocationId) {
       return [];
     }
-  };
 
+    try {
+      const response = await get_sum_location_inventories_by_ref_api(
+        selectedTrn.grnDekReference,
+        selectedTrn.requestedToLocationId
+      );
+      console.log(
+        `Fetched location inventories for GRN reference ${selectedTrn.grnDekReference}:`,
+        response.data.result
+      );
+      return response.data.result || [];
+    } catch (error) {
+      console.error(
+        `Error fetching location inventories for GRN reference ${selectedTrn?.grnDekReference}:`,
+        error
+      );
+      throw error;
+    }
+  }, [selectedTrn?.grnDekReference, selectedTrn?.requestedToLocationId]);
+
+  // React Query Hooks
   const {
-    data: trns,
-    isLoading,
-    isError,
+    data: trns = [],
+    isLoading: isTrnsLoading,
+    isError: isTrnsError,
     refetch: refetchTrns,
   } = useQuery({
-    queryKey: ["trns"],
+    queryKey: ["trns", companyId],
     queryFn: fetchTrns,
+    staleTime: 5 * 60 * 1000,
   });
 
-  // Fetch TINs by requisitionMasterId
-  const fetchTinsByRequisitionMasterId = async (requisitionMasterId) => {
-    try {
-      const response = await get_issue_masters_by_requisition_master_id_api(
-        requisitionMasterId
-      );
-      const filteredTins = response.data.result?.filter(
-        (rm) => rm.issueType === "TIN"
-      );
-      return filteredTins || null;
-    } catch (error) {
-      console.error("Error fetching TINs:", error);
-      return null;
-    }
-  };
-
   const {
-    data: tins,
+    data: tins = [],
     isLoading: isTinsLoading,
     isError: isTinsError,
     refetch: refetchTins,
   } = useQuery({
     queryKey: ["tins", selectedTrn?.requisitionMasterId],
     queryFn: () =>
-      fetchTinsByRequisitionMasterId(parseInt(selectedTrn.requisitionMasterId)),
+      fetchTinsByRequisitionMasterId(selectedTrn.requisitionMasterId),
     enabled: !!selectedTrn?.requisitionMasterId,
+    staleTime: 5 * 60 * 1000,
   });
 
-  // Fetch item batches
-  const fetchItemBatches = async () => {
-    try {
-      const response = await get_item_batches_api(
-        sessionStorage?.getItem("companyId")
-      );
-      return response.data.result || [];
-    } catch (error) {
-      console.error("Error fetching item batches:", error);
-      return [];
-    }
-  };
-
   const {
-    data: itemBatches,
+    data: itemBatches = [],
     isLoading: isItemBatchesLoading,
     isError: isItemBatchesError,
-    refetch: refetchItemBatches,
   } = useQuery({
-    queryKey: ["itemBatches"],
+    queryKey: ["itemBatches", companyId],
     queryFn: fetchItemBatches,
+    staleTime: 10 * 60 * 1000,
   });
 
-  // Fetch location inventories
-  const fetchLocationInventories = async () => {
-    try {
-      const response = await get_locations_inventories_by_location_id_api(
-        selectedTrn?.requestedToLocationId
-      );
-      console.log(
-        "Fetched location inventories for location",
-        selectedTrn?.requestedToLocationId,
-        ":",
-        response.data.result
-      );
-      return response.data.result || [];
-    } catch (error) {
-      console.error(
-        "Error fetching location inventories for location",
-        selectedTrn?.requestedToLocationId,
-        ":",
-        error
-      );
-      return [];
-    }
-  };
-
   const {
-    data: locationInventories,
+    data: locationInventories = [],
     isLoading: isLocationInventoriesLoading,
     isError: isLocationInventoriesError,
     refetch: refetchLocationInventories,
   } = useQuery({
-    queryKey: ["locationInventories", selectedTrn?.requestedToLocationId],
-    queryFn: fetchLocationInventories,
-    enabled: !!selectedTrn?.requestedToLocationId,
+    queryKey: [
+      "locationInventoriesByRef",
+      selectedTrn?.grnDekReference,
+      selectedTrn?.requestedToLocationId,
+    ],
+    queryFn: fetchLocationInventoriesByRef,
+    enabled:
+      !!selectedTrn?.grnDekReference && !!selectedTrn?.requestedToLocationId,
+    staleTime: 2 * 60 * 1000,
   });
 
-  // Update itemDetails when selectedTrn or tins change
-  useEffect(() => {
-    if (selectedTrn) {
-      refetchLocationInventories();
-      if (tins) {
-        const updatedItemDetails = selectedTrn.requisitionDetails
-          .map((requestItem) => {
-            const issuedQuantity = tins.reduce((total, tin) => {
-              const tinDetail = tin.issueDetails.find(
-                (detail) =>
-                  detail.itemMasterId === requestItem.itemMaster?.itemMasterId
-              );
-              return total + (tinDetail ? tinDetail.quantity : 0);
-            }, 0);
+  // Validation Functions
+  const validateField = useCallback(
+    (fieldName, fieldDisplayName, value, additionalRules = {}) => {
+      let isFieldValid = true;
+      let errorMessage = "";
 
-            const remainingQuantity = requestItem.quantity - issuedQuantity;
-
-            return {
-              id: requestItem.itemMaster?.itemMasterId,
-              name: requestItem.itemMaster?.itemName,
-              unit: requestItem.itemMaster?.unit.unitName || "Unit",
-              quantity: requestItem.quantity,
-              remainingQuantity: Math.max(0, remainingQuantity),
-              issuedQuantity: "",
-              batchId: "",
-            };
-          })
-          .filter((item) => item.remainingQuantity > 0);
-
-        setFormData((prevFormData) => ({
-          ...prevFormData,
-          itemDetails: updatedItemDetails,
-          trnId: selectedTrn?.requisitionMasterId ?? "",
-        }));
-      } else {
-        const allItemDetails = selectedTrn.requisitionDetails.map(
-          (requestItem) => ({
-            id: requestItem.itemMaster?.itemMasterId,
-            name: requestItem.itemMaster?.itemName,
-            unit: requestItem.itemMaster?.unit.unitName || "Unit",
-            quantity: requestItem.quantity,
-            //remainingQuantity: requestItem.quantity,
-            remainingQuantity: 0,
-            issuedQuantity: "",
-            batchId: "",
-          })
-        );
-
-        setFormData((prevFormData) => ({
-          ...prevFormData,
-          itemDetails: allItemDetails,
-          trnId: selectedTrn?.requisitionMasterId ?? "",
-        }));
+      const stringValue = `${value ?? ""}`.trim();
+      if (stringValue === "") {
+        isFieldValid = false;
+        errorMessage = `${fieldDisplayName} is required`;
       }
-    }
-  }, [selectedTrn, tins, refetchLocationInventories]);
 
-  // Scroll to alert on submission status change
-  useEffect(() => {
-    if (submissionStatus != null) {
-      alertRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [submissionStatus]);
+      if (
+        isFieldValid &&
+        additionalRules.validationFunction &&
+        !additionalRules.validationFunction(value)
+      ) {
+        isFieldValid = false;
+        errorMessage = additionalRules.errorMessage;
+      }
 
-  // Validate individual fields
-  const validateField = (
-    fieldName,
-    fieldDisplayName,
-    value,
-    additionalRules = {}
-  ) => {
-    let isFieldValid = true;
-    let errorMessage = "";
+      setValidFields((prev) => ({ ...prev, [fieldName]: isFieldValid }));
+      setValidationErrors((prev) => ({ ...prev, [fieldName]: errorMessage }));
 
-    if (value === null || value === undefined || `${value}`.trim() === "") {
-      isFieldValid = false;
-      errorMessage = `${fieldDisplayName} is required`;
-    }
+      return isFieldValid;
+    },
+    []
+  );
 
-    if (
-      isFieldValid &&
-      additionalRules.validationFunction &&
-      !additionalRules.validationFunction(value)
-    ) {
-      isFieldValid = false;
-      errorMessage = additionalRules.errorMessage;
-    }
-
-    setValidFields((prev) => ({ ...prev, [fieldName]: isFieldValid }));
-    setValidationErrors((prev) => ({ ...prev, [fieldName]: errorMessage }));
-
-    return isFieldValid;
-  };
-
-  // Validate the entire form
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     setValidFields({});
     setValidationErrors({});
 
@@ -248,35 +243,27 @@ const useTin = ({ onFormSubmit }) => {
     );
 
     let isItemQuantityValid = true;
-    let isBatchValid = true;
 
     formData.itemDetails.forEach((item, index) => {
       // Validate issued quantity
       const quantityFieldName = `issuedQuantity_${index}`;
       const quantityFieldDisplayName = `Dispatched Quantity for ${item.name}`;
-      const quantityRules = {
-        validationFunction: (value) =>
-          parseFloat(value) > 0 && parseFloat(value) <= item.remainingQuantity,
-        errorMessage: `${quantityFieldDisplayName} must be greater than 0 and less than or equal to remaining quantity ${item.remainingQuantity}`,
-      };
       const isValidQuantity = validateField(
         quantityFieldName,
         quantityFieldDisplayName,
         item.issuedQuantity,
-        quantityRules
-      );
-
-      // Validate batch selection
-      const batchFieldName = `batchId_${index}`;
-      const batchFieldDisplayName = `Batch for ${item.name}`;
-      const isValidBatch = validateField(
-        batchFieldName,
-        batchFieldDisplayName,
-        item.batchId
+        {
+          validationFunction: (value) => {
+            const numValue = parseFloat(value);
+            return (
+              !isNaN(numValue) && numValue > 0 && numValue <= item.stockInHand
+            );
+          },
+          errorMessage: `${quantityFieldDisplayName} must be between 1 and ${item.stockInHand}`,
+        }
       );
 
       isItemQuantityValid = isItemQuantityValid && isValidQuantity;
-      isBatchValid = isBatchValid && isValidBatch;
     });
 
     const isItemsPresent = formData.itemDetails.length > 0;
@@ -288,251 +275,301 @@ const useTin = ({ onFormSubmit }) => {
     }
 
     return (
-      isStatusValid &&
-      isTrnIdValid &&
-      isItemQuantityValid &&
-      isBatchValid &&
-      isItemsPresent
+      isStatusValid && isTrnIdValid && isItemQuantityValid && isItemsPresent
     );
-  };
+  }, [formData, validateField]);
 
-  // Generate unique reference number
-  const generateReferenceNumber = () => {
-    const currentDate = new Date();
-    const formattedDate = currentDate
-      .toISOString()
-      .replace(/\D/g, "")
-      .slice(0, 14);
-    const randomNumber = Math.floor(1000 + Math.random() * 9000);
-    return `TIN_${formattedDate}_${randomNumber}`;
-  };
+  // Event Handlers
+  const handleSubmit = useCallback(
+    async (isSaveAsDraft = false) => {
+      try {
+        if (!validateForm()) {
+          setSubmissionStatus(SUBMISSION_STATUS.ERROR);
+          setTimeout(() => setSubmissionStatus(null), ALERT_TIMEOUT);
+          return;
+        }
 
-  // Handle form submission
-  const handleSubmit = async (isSaveAsDraft) => {
-    try {
-      const status = isSaveAsDraft ? 0 : 1;
-      const combinedStatus = parseInt(`${formData.status}${status}`, 10);
-      const currentDate = new Date().toISOString();
+        const loadingSetter = isSaveAsDraft ? setLoadingDraft : setLoading;
+        loadingSetter(true);
 
-      const isFormValid = validateForm();
-      if (!isFormValid) {
-        setSubmissionStatus("error");
-        setTimeout(() => setSubmissionStatus(null), 3000);
-        return;
-      }
+        const status = isSaveAsDraft ? 0 : 1;
+        const combinedStatus = parseInt(`${formData.status}${status}`, 10);
 
-      if (isSaveAsDraft) setLoadingDraft(true);
-      else setLoading(true);
-
-      const TinData = {
-        requisitionMasterId: parseInt(formData.trnId),
-        issueDate: currentDate,
-        createdBy: sessionStorage?.getItem("username") ?? null,
-        createdUserId: sessionStorage?.getItem("userId") ?? null,
-        status: combinedStatus,
-        approvedBy: null,
-        approvedDate: null,
-        companyId: sessionStorage?.getItem("companyId") ?? null,
-        issueType: "TIN",
-        referenceNumber: generateReferenceNumber(),
-        approvedUserId: null,
-        issuedLocationId: parseInt(selectedTrn?.requestedToLocationId) || null,
-        permissionId: 1061,
-        //toLocationId: parseInt(selectedTrn?.requestedToLocationId) || null,
-      };
-
-      const response = await post_issue_master_api(TinData);
-      const issueMasterId = response.data.result.issueMasterId;
-
-      const itemDetailsData = formData.itemDetails.map(async (item) => {
-        const detailsData = {
-          issueMasterId,
-          itemMasterId: item.id,
-          batchId: parseInt(item.batchId),
-          quantity: parseFloat(item.issuedQuantity),
-          permissionId: 1063,
+        const tinData = {
+          requisitionMasterId: parseInt(formData.trnId),
+          issueDate: new Date().toISOString(),
+          createdBy: username,
+          createdUserId: userId,
+          status: combinedStatus,
+          approvedBy: null,
+          approvedDate: null,
+          companyId,
+          issueType: "TIN",
+          referenceNumber: generateReferenceNumber(),
+          approvedUserId: null,
+          issuedLocationId:
+            parseInt(selectedTrn?.requestedToLocationId) || null,
+          permissionId: 1061,
         };
-        return await post_issue_detail_api(detailsData);
-      });
 
-      const detailsResponses = await Promise.all(itemDetailsData);
-      const allDetailsSuccessful = detailsResponses.every(
-        (detailsResponse) => detailsResponse.status === 201
-      );
+        const response = await post_issue_master_api(tinData);
+        const issueMasterId = response.data.result.issueMasterId;
 
-      if (allDetailsSuccessful) {
-        setSubmissionStatus(
-          isSaveAsDraft ? "successSavedAsDraft" : "successSubmitted"
+        const itemDetailsPromises = formData.itemDetails.map((item) =>
+          post_issue_detail_api({
+            issueMasterId,
+            itemMasterId: item.id,
+            batchId: parseInt(item.batchId),
+            quantity: parseFloat(item.issuedQuantity),
+            permissionId: 1063,
+          })
         );
-        console.log(
-          isSaveAsDraft
-            ? "Transfer issue note saved as draft!"
-            : "Transfer issue note submitted successfully!",
-          formData
+
+        const detailsResponses = await Promise.all(itemDetailsPromises);
+        const allSuccessful = detailsResponses.every(
+          (res) => res.status === 201
         );
+
+        if (allSuccessful) {
+          const successStatus = isSaveAsDraft
+            ? SUBMISSION_STATUS.SUCCESS_DRAFT
+            : SUBMISSION_STATUS.SUCCESS_SUBMITTED;
+          setSubmissionStatus(successStatus);
+
+          console.log(
+            isSaveAsDraft
+              ? "Transfer issue note saved as draft!"
+              : "Transfer issue note submitted successfully!",
+            formData
+          );
+
+          setTimeout(() => {
+            setSubmissionStatus(null);
+            loadingSetter(false);
+            onFormSubmit();
+          }, ALERT_TIMEOUT);
+        } else {
+          throw new Error("Some item details failed to submit");
+        }
+      } catch (error) {
+        console.error("Error submitting form:", error);
+        setSubmissionStatus(SUBMISSION_STATUS.ERROR);
         setTimeout(() => {
           setSubmissionStatus(null);
           setLoading(false);
           setLoadingDraft(false);
-          onFormSubmit();
-        }, 3000);
-      } else {
-        setSubmissionStatus("error");
+        }, ALERT_TIMEOUT);
       }
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      setSubmissionStatus("error");
-      setTimeout(() => {
-        setSubmissionStatus(null);
-        setLoading(false);
-        setLoadingDraft(false);
-      }, 3000);
-    }
-  };
+    },
+    [
+      formData,
+      selectedTrn,
+      username,
+      userId,
+      companyId,
+      validateForm,
+      onFormSubmit,
+    ]
+  );
 
-  // Handle input changes
-  const handleInputChange = (field, value) => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [field]: value,
-    }));
-  };
+  const handleInputChange = useCallback((field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  }, []);
 
-  // Handle item details changes
-  const handleItemDetailsChange = (index, field, value) => {
-    setFormData((prev) => {
-      const updatedItemDetails = [...prev.itemDetails];
-      if (field === "batchId") {
-        const selectedBatch = locationInventories.find(
-          (batch) =>
-            batch.batchId === parseInt(value) &&
-            batch.itemMasterId === updatedItemDetails[index].id
-        );
-        updatedItemDetails[index].batchId = value;
-        updatedItemDetails[index].remainingQuantity =
-          selectedBatch?.stockInHand ?? 0;
-        updatedItemDetails[index].issuedQuantity = "";
-      } else {
+  const handleItemDetailsChange = useCallback(
+    (index, field, value) => {
+      setFormData((prev) => {
+        const updatedItemDetails = [...prev.itemDetails];
         updatedItemDetails[index][field] = value;
+        return { ...prev, itemDetails: updatedItemDetails };
+      });
+
+      if (field === "issuedQuantity") {
+        const item = formData.itemDetails[index];
+        validateField(
+          `issuedQuantity_${index}`,
+          `Dispatched Quantity for ${item.name}`,
+          value,
+          {
+            validationFunction: (val) => {
+              const numValue = parseFloat(val);
+              return (
+                !isNaN(numValue) && numValue > 0 && numValue <= item.stockInHand
+              );
+            },
+            errorMessage: `Dispatched Quantity must be between 1 and ${item.stockInHand}`,
+          }
+        );
       }
-      return { ...prev, itemDetails: updatedItemDetails };
-    });
+    },
+    [formData.itemDetails, validateField]
+  );
 
-    if (field === "issuedQuantity") {
-      const item = formData.itemDetails[index];
-      const fieldName = `issuedQuantity_${index}`;
-      const fieldDisplayName = `Dispatched Quantity for ${item.name}`;
-      const additionalRules = {
-        validationFunction: (val) => {
-          const parsedValue = parseFloat(val);
-          return (
-            !isNaN(parsedValue) &&
-            parsedValue > 0 &&
-            parsedValue <= item.remainingQuantity
-          );
-        },
-        errorMessage: `${fieldDisplayName} must be greater than 0 and less than or equal to ${item.remainingQuantity}`,
-      };
-      validateField(fieldName, fieldDisplayName, value, additionalRules);
-    }
-  };
-  // Remove an item from itemDetails
-  const handleRemoveItem = (index) => {
-    setFormData((prev) => {
-      const updatedItemDetails = [...prev.itemDetails];
-      updatedItemDetails.splice(index, 1);
-      return { ...prev, itemDetails: updatedItemDetails };
-    });
+  const handleRemoveItem = useCallback((index) => {
+    setFormData((prev) => ({
+      ...prev,
+      itemDetails: prev.itemDetails.filter((_, i) => i !== index),
+    }));
+
     setValidFields((prev) => {
-      const copy = { ...prev };
-      delete copy[`issuedQuantity_${index}`];
-      delete copy[`batchId_${index}`];
-      return copy;
+      const updated = { ...prev };
+      delete updated[`issuedQuantity_${index}`];
+      return updated;
     });
+
     setValidationErrors((prev) => {
-      const copy = { ...prev };
-      delete copy[`issuedQuantity_${index}`];
-      delete copy[`batchId_${index}`];
-      return copy;
+      const updated = { ...prev };
+      delete updated[`issuedQuantity_${index}`];
+      return updated;
     });
-  };
+  }, []);
 
-  // Handle print
-  const handlePrint = () => {
-    window.print();
-  };
+  const handleTrnChange = useCallback(
+    (referenceId) => {
+      const selected = trns.find((trn) => trn.referenceNumber === referenceId);
+      console.log("selectedTrn", selected);
 
-  // Handle TRN selection
-  const handleTrnChange = (referenceId) => {
-    const selectedTrn = trns.find((trn) => trn.referenceNumber === referenceId);
-    console.log("selectedTrn", selectedTrn);
-    setSelectedTrn(selectedTrn);
+      setSelectedTrn(selected);
+      setFormData((prev) => ({
+        ...prev,
+        trnId: selected?.requisitionMasterId ?? "",
+      }));
+      setTrnSearchTerm("");
+
+      if (selected) {
+        refetchTins();
+      }
+    },
+    [trns, refetchTins]
+  );
+
+  const handleStatusChange = useCallback((selectedOption) => {
     setFormData((prev) => ({
       ...prev,
-      trnId: selectedTrn?.requisitionMasterId ?? "",
+      status: selectedOption?.id ?? "",
     }));
-    refetchTins();
-    setTrnSearchTerm("");
-  };
+  }, []);
 
-  // Handle status change
-  const handleStatusChange = (selectedOption) => {
-    setFormData((prev) => ({
-      ...prev,
-      status: selectedOption?.id,
-    }));
-  };
-
-  // Reset TRN
-  const handleResetTrn = () => {
-    setFormData((prev) => ({
-      ...prev,
-      trnId: "",
-      itemDetails: [],
-    }));
+  const handleResetTrn = useCallback(() => {
+    setFormData(INITIAL_FORM_STATE);
     setSelectedTrn(null);
     setValidFields({});
     setValidationErrors({});
-    // Reset query states to clear errors
-    refetchTrns();
-    refetchTins();
-    refetchItemBatches();
-    refetchLocationInventories();
-    // Explicitly reset selectedTrn to null to disable dependent queries
-    queryClient.resetQueries(["tins", null]);
-    queryClient.resetQueries(["locationInventories", null]);
-  };
 
-  console.log("formData", formData);
+    queryClient.removeQueries(["tins"]);
+    queryClient.removeQueries(["locationInventoriesByRef"]);
+  }, [queryClient]);
 
+  const handlePrint = useCallback(() => {
+    window.print();
+  }, []);
+
+  // Effects
+  useEffect(() => {
+    if (!selectedTrn || locationInventories.length === 0) return;
+
+    const updateItemDetails = () => {
+      const itemDetails = selectedTrn.requisitionDetails
+        .map((requestItem) => {
+          const issuedQty =
+            tins.length > 0
+              ? calculateIssuedQuantity(
+                  tins,
+                  requestItem.itemMaster?.itemMasterId
+                )
+              : 0;
+
+          // Find matching inventory for this item
+          const inventory = locationInventories.find(
+            (inv) => inv.itemMasterId === requestItem.itemMaster?.itemMasterId
+          );
+
+          const stockInHand = inventory?.totalStockInHand || 0;
+
+          // Create item detail with stock info
+          const itemDetail = createItemDetail(
+            requestItem,
+            issuedQty,
+            stockInHand
+          );
+
+          if (itemBatches.length > 0 && inventory) {
+            const batch = itemBatches.find(
+              (ib) =>
+                ib.itemMasterId === requestItem.itemMaster?.itemMasterId &&
+                ib.referenceNo === selectedTrn.grnDekReference
+            );
+            itemDetail.batchId = batch?.batchId ?? null;
+          }
+
+          return itemDetail;
+        })
+        .filter((item) => item.remainingQuantity > 0);
+
+      setFormData((prev) => ({
+        ...prev,
+        itemDetails,
+        trnId: selectedTrn.requisitionMasterId ?? "",
+      }));
+    };
+
+    updateItemDetails();
+  }, [selectedTrn, tins, locationInventories]);
+
+  useEffect(() => {
+    if (submissionStatus && alertRef.current) {
+      alertRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [submissionStatus]);
+
+  // Computed values
+  const isLoading = useMemo(
+    () =>
+      isTrnsLoading ||
+      isTinsLoading ||
+      isItemBatchesLoading ||
+      isLocationInventoriesLoading,
+    [
+      isTrnsLoading,
+      isTinsLoading,
+      isItemBatchesLoading,
+      isLocationInventoriesLoading,
+    ]
+  );
+
+  const isError = useMemo(
+    () =>
+      isTrnsError ||
+      isTinsError ||
+      isItemBatchesError ||
+      isLocationInventoriesError,
+    [isTrnsError, isTinsError, isItemBatchesError, isLocationInventoriesError]
+  );
+
+  console.log("FormData: ", formData);
+  console.log("Location Inventories: ", locationInventories);
+
+  // Return values
   return {
     formData,
     validFields,
     validationErrors,
     selectedTrn,
-    trns: trns || [],
-    statusOptions,
+    trns,
+    statusOptions: STATUS_OPTIONS,
     submissionStatus,
     alertRef,
-    isLoading:
-      isLoading ||
-      isTinsLoading ||
-      isItemBatchesLoading ||
-      isLocationInventoriesLoading,
-    isError:
-      isError ||
-      isTinsError ||
-      isItemBatchesError ||
-      isLocationInventoriesError,
+    isLoading,
+    isError,
     trnSearchTerm,
     loading,
     loadingDraft,
-    itemBatches: itemBatches || [],
+    itemBatches,
     isItemBatchesLoading,
     isItemBatchesError,
     isLocationInventoriesLoading,
     isLocationInventoriesError,
-    locationInventories: locationInventories || [],
+    locationInventories,
     handleInputChange,
     handleItemDetailsChange,
     handleRemoveItem,

@@ -45,361 +45,438 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
       handleUpdated();
     },
   });
-  //const companyLogoUrl = useCompanyLogoUrl();
 
   if (isLoading || isItemBatchesLoading) {
     return <LoadingSpinner />;
   }
 
-  if (isError || isItemBatchesError) {
+  if (isError) {
     return <ErrorComponent error={"Error fetching data"} />;
   }
-  const handleBack = () => {
-    setShowCreateTinForm(false);
-  };
 
   return (
-    <div className="container mt-4">
+    <div className="container-fluid py-4 px-md-5">
       {/* Header */}
       <div className="mb-4">
         <div ref={alertRef}></div>
-        <div className="d-flex justify-content-between">
-          {/* <img src={companyLogoUrl} alt="Company Logo" height={30} /> */}
-          {/* <button
-            onClick={handleBack}
-            className="btn btn-dark d-flex align-items-center"
-          >
-            Back
-          </button> */}
-          <i
-            class="bi bi-arrow-left"
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <button
             onClick={handleClose}
-            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
-          ></i>
-          <p>
+            className="btn btn-dark btn-sm d-flex align-items-center gap-2"
+          >
+            <i className="bi bi-arrow-left"></i>
+          </button>
+          <div className="text-muted small">
             <CurrentDateTime />
-          </p>
+          </div>
         </div>
-        <h1 className="mt-2 text-center">Transfer Issue Note</h1>
-        <hr />
+        <h1 className="text-center fw-bold mb-3">Transfer Issue Note</h1>
+        <hr className="border-2 opacity-75" />
       </div>
 
-      {/* Display success or error message */}
+      {/* Alert Messages */}
       {submissionStatus === "successSubmitted" && (
-        <div className="alert alert-success mb-3" role="alert">
+        <div
+          className="alert alert-success alert-dismissible fade show mb-4"
+          role="alert"
+        >
+          <i className="bi bi-check-circle-fill me-2"></i>
           Transfer issue note submitted successfully!
         </div>
       )}
       {submissionStatus === "successSavedAsDraft" && (
-        <div className="alert alert-success mb-3" role="alert">
+        <div
+          className="alert alert-info alert-dismissible fade show mb-4"
+          role="alert"
+        >
+          <i className="bi bi-save-fill me-2"></i>
           Transfer issue note saved as draft, you can edit and submit it later!
         </div>
       )}
       {submissionStatus === "error" && (
-        <div className="alert alert-danger mb-3" role="alert">
+        <div
+          className="alert alert-danger alert-dismissible fade show mb-4"
+          role="alert"
+        >
+          <i className="bi bi-exclamation-triangle-fill me-2"></i>
           Error submitting transfer issue note. Please try again.
         </div>
       )}
 
       <form>
-        {/* Tin Information */}
-        <div className="row mb-3 d-flex justify-content-between">
-          <div className="col-md-5">
-            <h4>1. TIN Information</h4>
-            {/* Status Dropdown */}
-            <div className="mb-3 mt-3">
-              <label htmlFor="status" className="form-label">
-                Status
-              </label>
-              <select
-                id="status"
-                className={`form-select ${
-                  validFields.status ? "is-valid" : ""
-                } ${validationErrors.status ? "is-invalid" : ""}`}
-                value={formData.status}
-                onChange={(e) =>
-                  handleStatusChange(
-                    statusOptions.find((option) => option.id === e.target.value)
-                  )
-                }
-                required
-              >
-                <option value="">Select Status</option>
-                {statusOptions.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              {validationErrors.status && (
-                <div className="invalid-feedback">
-                  {validationErrors.status}
+        {/* Main Content Grid */}
+        <div className="row g-4 mb-4">
+          {/* TIN Information */}
+          <div className="col-lg-6">
+            <div className="card shadow-sm h-100">
+              <div className="card-header bg-primary text-white">
+                <h5 className="mb-0">
+                  <i className="bi bi-info-circle me-2"></i>
+                  1. TIN Information
+                </h5>
+              </div>
+              <div className="card-body">
+                <div className="mb-3">
+                  <label htmlFor="status" className="form-label fw-semibold">
+                    Status <span className="text-danger">*</span>
+                  </label>
+                  <select
+                    id="status"
+                    className={`form-select ${
+                      validFields.status ? "is-valid" : ""
+                    } ${validationErrors.status ? "is-invalid" : ""}`}
+                    value={formData.status}
+                    onChange={(e) =>
+                      handleStatusChange(
+                        statusOptions.find(
+                          (option) => option.id === e.target.value
+                        )
+                      )
+                    }
+                    required
+                  >
+                    <option value="">Select Status</option>
+                    {statusOptions.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  {validationErrors.status && (
+                    <div className="invalid-feedback">
+                      {validationErrors.status}
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           </div>
 
-          {/* Material Requisition Selection */}
-          <div className="col-md-5">
-            <h4>2. Transfer Requisition Details</h4>
-            <div className="mt-3">
-              <label htmlFor="transferRequisition" className="form-label">
-                Transfer Requisition
-              </label>
-              {selectedTrn === null && (
-                <div className="mb-3">
-                  <div className="input-group">
-                    <span className="input-group-text bg-transparent ">
-                      <i className="bi bi-search"></i>
-                    </span>
-                    <input
-                      type="text"
-                      className={`form-control ${
-                        validFields.trnId ? "is-valid" : ""
-                      } ${validationErrors.trnId ? "is-invalid" : ""}`}
-                      placeholder="Search for a transfer requisition..."
-                      value={trnSearchTerm}
-                      onChange={(e) => setTrnSearchTerm(e.target.value)}
-                      autoFocus={false}
-                    />
-                    {trnSearchTerm && (
-                      <span
-                        className="input-group-text bg-transparent"
-                        style={{
-                          cursor: "pointer",
-                        }}
-                        onClick={() => setTrnSearchTerm("")}
-                      >
-                        <i className="bi bi-x"></i>
-                      </span>
-                    )}
-                  </div>
+          {/* Transfer Requisition Details */}
+          <div className="col-lg-6">
+            <div className="card shadow-sm h-100">
+              <div className="card-header bg-success text-white">
+                <h5 className="mb-0">
+                  <i className="bi bi-file-earmark-text me-2"></i>
+                  2. Transfer Requisition Details
+                </h5>
+              </div>
+              <div className="card-body">
+                <label
+                  htmlFor="transferRequisition"
+                  className="form-label fw-semibold"
+                >
+                  Transfer Requisition <span className="text-danger">*</span>
+                </label>
 
-                  {/* Dropdown for filtered suppliers */}
-                  {trnSearchTerm && (
-                    <div className="dropdown" style={{ width: "100%" }}>
-                      <ul
-                        className="dropdown-menu"
-                        style={{
-                          display: "block",
-                          width: "100%",
-                          maxHeight: "200px",
-                          overflowY: "auto",
-                        }}
-                      >
-                        {trns
-                          .filter((trn) =>
+                {selectedTrn === null && (
+                  <div className="mb-3">
+                    <div className="input-group">
+                      <span className="input-group-text bg-light">
+                        <i className="bi bi-search"></i>
+                      </span>
+                      <input
+                        type="text"
+                        className={`form-control ${
+                          validFields.trnId ? "is-valid" : ""
+                        } ${validationErrors.trnId ? "is-invalid" : ""}`}
+                        placeholder="Search for a transfer requisition..."
+                        value={trnSearchTerm}
+                        onChange={(e) => setTrnSearchTerm(e.target.value)}
+                        autoFocus={false}
+                      />
+                      {trnSearchTerm && (
+                        <button
+                          className="btn btn-outline-secondary"
+                          type="button"
+                          onClick={() => setTrnSearchTerm("")}
+                        >
+                          <i className="bi bi-x-lg"></i>
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Dropdown for filtered requisitions */}
+                    {trnSearchTerm && (
+                      <div className="position-relative">
+                        <ul
+                          className="list-group position-absolute w-100 mt-1 shadow-lg"
+                          style={{
+                            maxHeight: "250px",
+                            overflowY: "auto",
+                            zIndex: 1000,
+                          }}
+                        >
+                          {trns
+                            .filter((trn) =>
+                              trn.referenceNumber
+                                ?.replace(/\s/g, "")
+                                ?.toLowerCase()
+                                .includes(
+                                  trnSearchTerm.toLowerCase().replace(/\s/g, "")
+                                )
+                            )
+                            .map((trn) => (
+                              <li
+                                key={trn.requisitionMasterId}
+                                className="list-group-item list-group-item-action p-0"
+                              >
+                                <button
+                                  className="btn btn-link text-decoration-none text-start w-100 p-3"
+                                  type="button"
+                                  onClick={() =>
+                                    handleTrnChange(trn.referenceNumber)
+                                  }
+                                >
+                                  <i className="bi bi-file-earmark-text me-2"></i>
+                                  {trn?.referenceNumber}
+                                </button>
+                              </li>
+                            ))}
+                          {trns.filter((trn) =>
                             trn.referenceNumber
                               ?.replace(/\s/g, "")
                               ?.toLowerCase()
                               .includes(
                                 trnSearchTerm.toLowerCase().replace(/\s/g, "")
                               )
-                          )
-                          .map((trn) => (
-                            <li key={trn.requisitionMasterId}>
-                              <button
-                                className="dropdown-item"
-                                onClick={() =>
-                                  handleTrnChange(trn.referenceNumber)
-                                }
-                              >
-                                <span className="me-3">
-                                  <i className="bi bi-file-earmark-text"></i>
-                                </span>{" "}
-                                {trn?.referenceNumber}
-                              </button>
+                          ).length === 0 && (
+                            <li className="list-group-item text-center text-muted py-3">
+                              <i className="bi bi-emoji-frown me-2"></i>
+                              No transfer requisitions found
                             </li>
-                          ))}
-                        {trns.filter((trn) =>
-                          trn.referenceNumber
-                            ?.replace(/\s/g, "")
-                            ?.toLowerCase()
-                            .includes(
-                              trnSearchTerm.toLowerCase().replace(/\s/g, "")
-                            )
-                        ).length === 0 && (
-                          <li className="dropdown-item text-center">
-                            <span className="me-3">
-                              <i className="bi bi-emoji-frown"></i>
-                            </span>
-                            No transfer requisitions found
-                          </li>
-                        )}
-                      </ul>
-                    </div>
-                  )}
-                  {selectedTrn === null && (
-                    <div className="mb-3">
-                      <small className="form-text text-muted">
-                        {validationErrors.trnId && (
-                          <div className="text-danger mb-1">
-                            {validationErrors.trnId}
-                          </div>
-                        )}
-                        Please search for a transfer requisition and select it
-                      </small>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+                          )}
+                        </ul>
+                      </div>
+                    )}
 
-            {/* Additional TRN Information */}
-            {selectedTrn && (
-              <div className="card mb-3">
-                <div className="card-header">Selected Transfer Requisition</div>
-                <div className="card-body">
-                  <p>
-                    Transfer Requisition Reference No:{" "}
-                    {selectedTrn?.referenceNumber}
-                  </p>
-                  <p>Requested By: {selectedTrn?.requestedBy}</p>
-                  <p>
-                    Trn Date:{" "}
-                    {moment
-                      .utc(selectedTrn?.requisitionDate)
-                      .tz("Asia/Colombo")
-                      .format("YYYY-MM-DD hh:mm:ss A")}
-                  </p>
-                  <p>
-                    To Warehouse Location:{" "}
-                    {selectedTrn?.requestedToLocation.locationName}
-                  </p>
-                  <p>
-                    From Warehouse Location:{" "}
-                    {selectedTrn?.requestedFromLocation.locationName}
-                  </p>
-                  <button
-                    type="button"
-                    className="btn btn-outline-danger float-end"
-                    onClick={handleResetTrn}
-                  >
-                    Reset Transfer Requisition
-                  </button>
-                </div>
+                    <div className="form-text mt-2">
+                      {validationErrors.trnId && (
+                        <div className="text-danger mb-1">
+                          <i className="bi bi-exclamation-circle me-1"></i>
+                          {validationErrors.trnId}
+                        </div>
+                      )}
+                      <i className="bi bi-info-circle me-1"></i>
+                      Please search for a transfer requisition and select it
+                    </div>
+                  </div>
+                )}
+
+                {/* Selected TRN Information */}
+                {selectedTrn && (
+                  <div className="card border-success">
+                    <div className="card-header bg-light">
+                      <strong>Selected Transfer Requisition</strong>
+                    </div>
+                    <div className="card-body">
+                      <div className="row g-3">
+                        <div className="col-12">
+                          <div className="d-flex">
+                            <strong className="text-muted me-2">
+                              Reference No:
+                            </strong>
+                            <span>{selectedTrn?.referenceNumber}</span>
+                          </div>
+                        </div>
+                        <div className="col-12">
+                          <div className="d-flex">
+                            <strong className="text-muted me-2">
+                              GRN Reference:
+                            </strong>
+                            <span className="badge bg-info">
+                              {selectedTrn?.grnDekReference || "N/A"}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="col-12">
+                          <div className="d-flex">
+                            <strong className="text-muted me-2">
+                              Requested By:
+                            </strong>
+                            <span>{selectedTrn?.requestedBy}</span>
+                          </div>
+                        </div>
+                        <div className="col-12">
+                          <div className="d-flex">
+                            <strong className="text-muted me-2">
+                              TRN Date:
+                            </strong>
+                            <span>
+                              {moment
+                                .utc(selectedTrn?.requisitionDate)
+                                .tz("Asia/Colombo")
+                                .format("YYYY-MM-DD hh:mm:ss A")}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="col-12">
+                          <div className="d-flex">
+                            <strong className="text-muted me-2">
+                              To Location:
+                            </strong>
+                            <span>
+                              {selectedTrn?.requestedToLocation.locationName}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="col-12">
+                          <div className="d-flex">
+                            <strong className="text-muted me-2">
+                              From Location:
+                            </strong>
+                            <span>
+                              {selectedTrn?.requestedFromLocation.locationName}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="col-12">
+                          <button
+                            type="button"
+                            className="btn btn-outline-danger btn-sm w-100"
+                            onClick={handleResetTrn}
+                          >
+                            <i className="bi bi-arrow-counterclockwise me-2"></i>
+                            Reset Transfer Requisition
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Item Details Section */}
+        <div className="card shadow-sm mb-4">
+          <div className="card-header bg-info text-white">
+            <h5 className="mb-0">
+              <i className="bi bi-box-seam me-2"></i>
+              3. Item Details
+            </h5>
+          </div>
+          <div className="card-body">
+            {formData.itemDetails.length > 0 && (
+              <div className="table-responsive">
+                <table className="table table-hover table-bordered align-middle">
+                  <thead className="table-light">
+                    <tr>
+                      <th className="text-nowrap">Item Name</th>
+                      <th className="text-nowrap">Unit</th>
+                      <th className="text-nowrap">Requested Qty</th>
+                      <th className="text-nowrap">Available Stock</th>
+                      <th className="text-nowrap">Dispatched Qty</th>
+                      <th className="text-nowrap text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {formData.itemDetails.map((item, index) => (
+                      <tr key={index}>
+                        <td className="fw-semibold">{item.name}</td>
+                        <td>{item.unit}</td>
+                        <td>
+                          <span className="badge bg-primary rounded-pill">
+                            {item.quantity}
+                          </span>
+                        </td>
+                        <td>
+                          <span
+                            className={`badge rounded-pill ${
+                              item.stockInHand > 0 ? "bg-success" : "bg-danger"
+                            }`}
+                          >
+                            {item.stockInHand}
+                          </span>
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            min="0"
+                            max={item.stockInHand}
+                            className={`form-control form-control-sm ${
+                              validFields[`issuedQuantity_${index}`]
+                                ? "is-valid"
+                                : ""
+                            } ${
+                              validationErrors[`issuedQuantity_${index}`]
+                                ? "is-invalid"
+                                : ""
+                            }`}
+                            value={item.issuedQuantity}
+                            onChange={(e) =>
+                              handleItemDetailsChange(
+                                index,
+                                "issuedQuantity",
+                                e.target.value
+                              )
+                            }
+                            placeholder={`Max: ${item.stockInHand}`}
+                            disabled={item.stockInHand === 0}
+                          />
+                          {validationErrors[`issuedQuantity_${index}`] && (
+                            <div className="invalid-feedback">
+                              {validationErrors[`issuedQuantity_${index}`]}
+                            </div>
+                          )}
+                        </td>
+                        <td className="text-center">
+                          <button
+                            type="button"
+                            className="btn btn-outline-danger btn-sm"
+                            onClick={() => handleRemoveItem(index)}
+                          >
+                            <i className="bi bi-trash me-1"></i>
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {selectedTrn === null && (
+              <div className="alert alert-warning mb-0" role="alert">
+                <i className="bi bi-info-circle me-2"></i>
+                Please select a transfer requisition to add item details.
+              </div>
+            )}
+
+            {selectedTrn !== null && formData.itemDetails.length === 0 && (
+              <div className="alert alert-danger mb-0" role="alert">
+                <i className="bi bi-exclamation-triangle me-2"></i>
+                Selected transfer requisition has no remaining items to issue.
               </div>
             )}
           </div>
         </div>
 
-        {/* Item Details */}
-        <h4>3. Item Details</h4>
-        {/* {console.log('formdata: ', formData)} */}
-        {formData.itemDetails.length > 0 && (
-          <div className="table-responsive mb-2">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Item Name</th>
-                  <th>Unit</th>
-                  <th>Requested Quantity</th>
-                  <th>Stock In Hand</th>
-                  <th>Item Batch</th>
-                  <th>Dispatched Quantity</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {formData.itemDetails.map((item, index) => (
-                  <tr key={index}>
-                    <td>{item.name}</td>
-                    <td>{item.unit}</td>
-                    <td>{item.quantity}</td>
-                    <td>{item.remainingQuantity}</td>
-                    <td>
-                      <select
-                        className="form-select"
-                        value={item.batchId}
-                        onChange={(e) =>
-                          handleItemDetailsChange(
-                            index,
-                            "batchId",
-                            e.target.value
-                          )
-                        }
-                      >
-                        <option value="">Select item batch</option>
-                        {locationInventories
-                          ?.filter((batch) => batch.itemMasterId === item.id)
-                          ?.map((batch, batchIndex) => (
-                            <option
-                              key={batchIndex}
-                              value={batch.batchId}
-                              disabled={batch.stockInHand === 0}
-                            >
-                              {batch.itemBatch.batch.batchRef}
-                            </option>
-                          ))}
-                      </select>
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        min="1"
-                        max={item.remainingQuantity}
-                        className={`form-control ${
-                          validFields[`issuedQuantity_${index}`]
-                            ? "is-valid"
-                            : ""
-                        } ${
-                          validationErrors[`issuedQuantity_${index}`]
-                            ? "is-invalid"
-                            : ""
-                        }`}
-                        value={item.issuedQuantity}
-                        onChange={(e) =>
-                          handleItemDetailsChange(
-                            index,
-                            "issuedQuantity",
-                            e.target.value
-                          )
-                        }
-                        placeholder={`1 - ${item.remainingQuantity}`}
-                      />
-                      {validationErrors[`issuedQuantity_${index}`] && (
-                        <div className="invalid-feedback">
-                          {validationErrors[`issuedQuantity_${index}`]}
-                        </div>
-                      )}
-                    </td>
-                    <td>
-                      <button
-                        type="button"
-                        className="btn btn-outline-danger"
-                        onClick={() => handleRemoveItem(index)}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {selectedTrn === null && (
-          <div className="mb-3">
-            <small className="form-text text-muted">
-              Please select a transfer requisition to add item details.
-            </small>
-          </div>
-        )}
-
-        {selectedTrn !== null && formData.itemDetails.length === 0 && (
-          <div className="mb-3">
-            <small className="form-text  text-danger">
-              Selected transfer requisition has no remaining items to issue.
-            </small>
-          </div>
-        )}
-
-        {/* Actions */}
-        <div className="mb-3">
+        {/* Action Buttons */}
+        <div className="d-flex flex-wrap gap-2 justify-content-end">
           <button
             type="button"
-            className="btn btn-primary me-2"
+            className="btn btn-danger"
+            onClick={handleClose}
+            disabled={loading || loadingDraft || submissionStatus !== null}
+          >
+            <i className="bi bi-x-circle me-2"></i>
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="btn btn-success"
+            onClick={handlePrint}
+            disabled={loading || loadingDraft || submissionStatus !== null}
+          >
+            <i className="bi bi-printer me-2"></i>
+            Print
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary"
             onClick={() => handleSubmit(false)}
             disabled={
               !formData.itemDetails.length > 0 ||
@@ -411,24 +488,11 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Submitting..." />
             ) : (
-              "Submit"
+              <>
+                <i className="bi bi-check-circle me-2"></i>
+                Submit
+              </>
             )}
-          </button>
-          <button
-            type="button"
-            className="btn btn-success me-2"
-            onClick={handlePrint}
-            disabled={loading || loadingDraft || submissionStatus !== null}
-          >
-            Print
-          </button>
-          <button
-            type="button"
-            className="btn btn-danger"
-            onClick={handleClose}
-            disabled={loading || loadingDraft || submissionStatus !== null}
-          >
-            Cancel
           </button>
         </div>
       </form>

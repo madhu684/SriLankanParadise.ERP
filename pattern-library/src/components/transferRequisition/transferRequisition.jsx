@@ -425,8 +425,8 @@ const TransferRequisition = ({
                           </div>
                         )}
                       </td>
-                      <td>{item.totalStockInHand}</td>
-                      <td>{item.totalStockInHandTo}</td>
+                      <td><span className="badge bg-primary fs-6 px-3 py-2">{item.totalStockInHand}</span></td>
+                      <td><span className="badge bg-success fs-6 px-3 py-2">{item.totalStockInHandTo}</span></td>
                       {/* <td>{item.reOrderLevel}</td>
                       <td>{item.maxStockLevel}</td> */}
                       <td>

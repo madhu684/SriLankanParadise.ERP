@@ -108,9 +108,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             await _locationInventoryRepository.UpdateReorderLevelMaxStockLevel(locationId, itemMasterId, locationInventory);
         }
 
-        public Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByRef(string reference)
+        public Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByRef(string reference, int locationId)
         {
-            return _locationInventoryRepository.GetSumLocationInventoriesByRef(reference);
+            return _locationInventoryRepository.GetSumLocationInventoriesByRef(reference, locationId);
         }
     }
 }

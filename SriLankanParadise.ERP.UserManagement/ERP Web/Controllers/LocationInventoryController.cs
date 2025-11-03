@@ -532,12 +532,12 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
         }
 
-        [HttpGet("GetSumLocationInventoriesByRef/{reference}")]
-        public async Task<ApiResponseModel> GetSumLocationInventoriesByRef(string reference)
+        [HttpGet("GetSumLocationInventoriesByRef/{reference}/{locationId}")]
+        public async Task<ApiResponseModel> GetSumLocationInventoriesByRef(string reference, int locationId)
         {
             try
             {
-                var lowStockItems = await _locationInventoryService.GetSumLocationInventoriesByRef(reference);
+                var lowStockItems = await _locationInventoryService.GetSumLocationInventoriesByRef(reference, locationId);
                 if (lowStockItems != null && lowStockItems.Any())
                 {
                     var lowStockItemsDtos = _mapper.Map<IEnumerable<LocationInventorySummaryDto>>(lowStockItems);

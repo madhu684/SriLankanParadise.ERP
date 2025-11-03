@@ -237,6 +237,48 @@ const GrnDetail = ({ show, handleClose, grn }) => {
               </table>
             </div>
           </div>
+
+          {/* Footer Section - Item Summary */}
+          <div className="card-footer bg-light">
+            <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+              <small className="text-muted">
+                <i className="bi bi-info-circle me-1"></i>
+                Total Items: {grn.grnDetails.length}
+              </small>
+              <div className="d-flex gap-3 flex-wrap">
+                <small className="text-muted">
+                  <i className="bi bi-box-arrow-in-down me-1"></i>
+                  Total Received:{" "}
+                  <span className="fw-bold text-primary">
+                    {grn.grnDetails.reduce(
+                      (sum, item) => sum + (item.receivedQuantity || 0),
+                      0
+                    )}
+                  </span>
+                </small>
+                <small className="text-muted">
+                  <i className="bi bi-x-circle me-1"></i>
+                  Total Rejected:{" "}
+                  <span className="fw-bold text-danger">
+                    {grn.grnDetails.reduce(
+                      (sum, item) => sum + (item.rejectedQuantity || 0),
+                      0
+                    )}
+                  </span>
+                </small>
+                <small className="text-muted">
+                  <i className="bi bi-gift me-1"></i>
+                  Total Free:{" "}
+                  <span className="fw-bold text-success">
+                    {grn.grnDetails.reduce(
+                      (sum, item) => sum + (item.freeQuantity || 0),
+                      0
+                    )}
+                  </span>
+                </small>
+              </div>
+            </div>
+          </div>
         </div>
       </Modal.Body>
       <Modal.Footer className="border-top bg-light">

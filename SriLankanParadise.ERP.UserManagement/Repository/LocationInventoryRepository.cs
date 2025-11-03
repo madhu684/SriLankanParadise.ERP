@@ -768,7 +768,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByRef(string reference)
+        public async Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByRef(string reference, int locationId)
         {
             try
             {
@@ -801,7 +801,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(im => im.ItemType)
                     .Where(li => itemMasterIds.Contains(li.ItemMasterId) &&
                                  li.BatchId.HasValue &&
-                                 batchIds.Contains(li.BatchId.Value))
+                                 batchIds.Contains(li.BatchId.Value) &&
+                                 li.LocationId == locationId)
                     .GroupBy(li => new { li.LocationId, li.ItemMasterId })
                     .Select(g => new LocationInventorySummary
                     {

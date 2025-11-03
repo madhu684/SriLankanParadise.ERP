@@ -11,7 +11,6 @@ const TransferRequisitionDetail = ({
   transferRequisition,
 }) => {
   const { getStatusLabel, getStatusBadgeClass } = useTransferRequisitionList();
-  console.log(transferRequisition);
 
   return (
     <Modal show={show} onHide={handleClose} centered scrollable size="lg">
@@ -23,7 +22,7 @@ const TransferRequisitionDetail = ({
       </Modal.Header>
       <Modal.Body className="p-4">
         {/* Header Section */}
-        <div className="card border-0 shadow-sm mb-4">
+        <div className="card border-0 shadow mb-4 bg-light">
           <div className="card-body">
             <div className="d-flex justify-content-between align-items-start mb-3">
               <div>
@@ -62,7 +61,7 @@ const TransferRequisitionDetail = ({
         </div>
 
         {/* Request Information */}
-        <div className="card border-0 shadow-sm mb-4">
+        <div className="card border-0 shadow mb-4 bg-light">
           <div className="card-header bg-primary text-white">
             <i className="bi bi-info-circle me-2"></i>
             Request Information
@@ -160,7 +159,7 @@ const TransferRequisitionDetail = ({
         </div>
 
         {/* Item Details */}
-        <div className="card border-0 shadow-sm">
+        <div className="card border-0 shadow bg-light">
           <div className="card-header bg-secondary text-white d-flex align-items-center justify-content-between">
             <div>
               <i className="bi bi-box-seam me-2"></i>
@@ -175,9 +174,10 @@ const TransferRequisitionDetail = ({
               <table className="table table-hover align-middle mb-0">
                 <thead className="table-light">
                   <tr>
-                    <th className="ps-3">#</th>
+                    <th className="ps-3"></th>
                     <th>Item Name</th>
                     <th className="text-center">Unit</th>
+                    <th className="text-center">Pack Size</th>
                     <th className="text-end pe-3">Requested Quantity</th>
                   </tr>
                 </thead>
@@ -187,7 +187,7 @@ const TransferRequisitionDetail = ({
                       <td className="ps-3 text-muted">{index + 1}</td>
                       <td>
                         <div className="d-flex align-items-center gap-2">
-                          <i className="bi bi-box text-primary"></i>
+                          {/* <i className="bi bi-box text-primary"></i> */}
                           <span className="fw-medium">
                             {item.itemMaster.itemName}
                           </span>
@@ -196,6 +196,11 @@ const TransferRequisitionDetail = ({
                       <td className="text-center">
                         <span className="badge bg-light text-dark">
                           {item.itemMaster.unit.unitName}
+                        </span>
+                      </td>
+                      <td className="text-center">
+                        <span className="badge bg-light text-dark">
+                          {item.itemMaster.conversionRate} ml
                         </span>
                       </td>
                       <td className="text-end pe-3">
@@ -221,7 +226,7 @@ const TransferRequisitionDetail = ({
                   <div className="col-6">
                     <div className="alert alert-success d-flex align-items-center mb-0">
                       <i className="bi bi-check-circle-fill me-2"></i>
-                      <small>MIN Accepted</small>
+                      <small>TIN Accepted</small>
                     </div>
                   </div>
                 )}
@@ -229,7 +234,7 @@ const TransferRequisitionDetail = ({
                   <div className="col-6">
                     <div className="alert alert-success d-flex align-items-center mb-0">
                       <i className="bi bi-check-circle-fill me-2"></i>
-                      <small>MIN Approved</small>
+                      <small>TIN Approved</small>
                     </div>
                   </div>
                 )}

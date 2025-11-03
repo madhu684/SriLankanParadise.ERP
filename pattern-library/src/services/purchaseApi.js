@@ -1591,10 +1591,13 @@ export const get_Location_Inventory_Summary_By_Item_Name_api = async (
   }
 };
 
-export const get_sum_location_inventories_by_ref_api = async (referenceNo) => {
+export const get_sum_location_inventories_by_ref_api = async (
+  referenceNo,
+  locationId
+) => {
   try {
     const response = await api.get(
-      `/locationInventory/GetSumLocationInventoriesByRef/${referenceNo}`,
+      `/locationInventory/GetSumLocationInventoriesByRef/${referenceNo}/${locationId}`,
       {
         withCredentials: true,
       }

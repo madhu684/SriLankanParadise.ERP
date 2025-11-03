@@ -29,6 +29,8 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
     goodsReceivedNote: "Goods Received Note",
   };
 
+  console.log("grn: ", grn);
+
   const isComplete = grn?.grnDetails.every(
     (detail) => detail.acceptedQuantity === detail.orderedQuantity
   );
@@ -315,7 +317,7 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
     createdUserId: sessionStorage.getItem("userId"),
     tempQuantity: grnDetail.acceptedQuantity + grnDetail.freeQuantity,
     locationId: grn?.warehouseLocationId,
-    itemBarcode: grnDetail.itemBarcode,
+    expiryDate: grnDetail.expiryDate,
     qty: grnDetail.acceptedQuantity + grnDetail.freeQuantity,
     referenceNo: grn.referenceNo,
     permissionId: 1048,
