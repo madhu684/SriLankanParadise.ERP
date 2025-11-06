@@ -243,5 +243,35 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task<IEnumerable<SalesInvoice>> GetSalesInvoiceByReference(string reference, int status)
+        {
+            try
+            {
+                // Check if reference is provided
+                if (string.IsNullOrEmpty(reference))
+                {
+                    return null;
+                }
+
+                var query = _dbContext.SalesInvoices.Where(si => si.ReferenceNo.Contains(reference) && si.Status == status);
+
+                query = query.Include(si => si.Customer)
+                    .Include(si => si.CustomerDeliveryAddress)
+                    .Include(si => si.SalesInvoiceDetails)
+                        .ThenInclude(ib => ib.ItemMaster)
+                        .ThenInclude(im => im.Unit)
+                    .OrderBy(si => si.ApprovedDate);
+
+
+                var salesInvoices = await query.ToListAsync();
+
+                return salesInvoices.Any() ? salesInvoices : null!;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

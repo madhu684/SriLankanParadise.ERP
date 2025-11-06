@@ -312,5 +312,30 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         //    }
         //    return Response;
         //}
+
+        [HttpGet("GetSalesInvoiceByReference")]
+        public async Task<ApiResponseModel> GetSalesInvoiceByReference([FromQuery] string reference, int status)
+        {
+            try
+            {
+                var salesInvoices = await _salesInvoiceService.GetSalesInvoiceByReference(reference, status);
+                if (salesInvoices != null)
+                {
+                    var salesInvoiceDtos = _mapper.Map<IEnumerable<SalesInvoiceDto>>(salesInvoices);
+                    AddResponseMessage(Response, LogMessages.SalesInvoicesRetrieved, salesInvoiceDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.SalesInvoicesNotFound);
+                    AddResponseMessage(Response, LogMessages.SalesInvoicesNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

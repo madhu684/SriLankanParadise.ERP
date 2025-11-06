@@ -4,7 +4,7 @@ import {
   get_sales_receipts_by_user_id_api,
   get_cashier_expense_outs_by_user_id_api,
 } from "../../../services/salesApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import moment from "moment";
 
 const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
@@ -27,6 +27,8 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
   const [selectedMode, setSelectedMode] = useState(null);
   const [showExpenseOutDetailModal, setShowExpenseOutDetailModal] =
     useState(false);
+
+  const queryClient = useQueryClient();
 
   const fetchUserSalesReceipts = async () => {
     try {
@@ -246,6 +248,7 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
           actualChequesInHand: actualChequesInHand,
           reasonCashInHandDifference: reasonCashInHand,
           reasonChequesInHandDifference: reasonChequesInHand,
+          isActiveSession: false,
           permissionId: 1068,
         };
 
@@ -257,6 +260,12 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
         if (response.status === 200) {
           setSubmissionStatus("success");
           console.log("Cashier session close successfully", cashierSessionData);
+          queryClient.invalidateQueries({
+            queryKey: [
+              "activeCashierSession",
+              sessionStorage.getItem("userId"),
+            ],
+          });
           setTimeout(() => {
             setSubmissionStatus(null);
             setLoading(false);

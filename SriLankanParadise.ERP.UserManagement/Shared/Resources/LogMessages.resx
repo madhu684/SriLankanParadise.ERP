@@ -1110,4 +1110,7 @@
   <data name="CustomerOutstandingBalanceUpdated" xml:space="preserve">
     <value>Customer outstanding balance updated successfully</value>
   </data>
+  <data name="CashierSessionRetrieved" xml:space="preserve">
+    <value>Cashier session retrieved</value>
+  </data>
 </root>

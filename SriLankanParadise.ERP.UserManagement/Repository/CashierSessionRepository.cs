@@ -28,6 +28,23 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
+        public async Task<CashierSession> GetActiveSessionByUserId(int userId)
+        {
+            try
+            {
+                var cashierSession = await _dbContext.CashierSessions
+                    .Where(cs => cs.UserId == userId && cs.IsActiveSession)
+                    .FirstOrDefaultAsync();
+
+                return cashierSession;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
         public async Task<IEnumerable<CashierSession>> GetAll()
         {
             try

@@ -23,5 +23,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task DeleteSalesInvoice(int salesInvoiceId);
 
         Task<SalesInvoice> GetSalesInvoiceById(int salesInvoiceId);
+
+        Task<IEnumerable<SalesInvoice>> GetSalesInvoiceByReference(string reference, int status);
     }
 }

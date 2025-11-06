@@ -2,50 +2,44 @@ import React from "react";
 import "./topNav.css";
 import CashierSession from "../cashierSession/cashierSession";
 import CashierSessionUpdate from "../cashierSession/cashierSessionUpdate/cashierSessionUpdate";
-import { useState, useEffect } from "react";
+import { useState, useContext, useEffect } from "react";
+import { UserContext } from "../../context/userContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 const TopNav = ({ onToggleSidebar }) => {
   const [showCashierSessionModal, setShowCashierSessionModal] = useState(false);
   const [showCashierSessionModalInParent, setshowCashierSessionModalInParent] =
     useState(false);
-  const [isCashierSessionOpen, setIsCashierSessionOpen] = useState(false);
-  const [currentCashierSession, setCurrentCashierSession] = useState(null);
+  const [modalType, setModalType] = useState(null); // 'create' or 'update'
 
-  // Load cashier session state from sessionStorage on component mount
-  useEffect(() => {
-    const savedCashierSession = JSON.parse(
-      sessionStorage.getItem("cashierSession")
-    );
-    if (savedCashierSession) {
-      setCurrentCashierSession(savedCashierSession);
-      setIsCashierSessionOpen(true);
-    }
-  }, []);
+  const { activeCashierSession, activeCashierSessionLoading } =
+    useContext(UserContext);
+  const queryClient = useQueryClient();
 
-  // Save cashier session state to sessionStorage whenever it changes
-  useEffect(() => {
-    sessionStorage.setItem(
-      "cashierSession",
-      JSON.stringify(currentCashierSession)
-    );
-  }, [currentCashierSession]);
+  const isCashierSessionOpen = !!activeCashierSession;
 
   const handleShowCashierSessionModal = () => {
+    // Determine which modal to show based on current session state
+    setModalType(isCashierSessionOpen ? "update" : "create");
     setShowCashierSessionModal(true);
     setshowCashierSessionModalInParent(true);
   };
 
   const handleAddCashierSession = (response) => {
     if (response.status === 201) {
-      setIsCashierSessionOpen(true);
-      setCurrentCashierSession(response.data.result);
+      // Invalidate the query to refetch the active cashier session
+      queryClient.invalidateQueries({
+        queryKey: ["activeCashierSession", sessionStorage.getItem("userId")],
+      });
     }
   };
 
   const handleUpdateCashierSession = (response) => {
     if (response.status === 200) {
-      setIsCashierSessionOpen(false);
-      setCurrentCashierSession(null);
+      // Invalidate the query to refetch (should return null after closing)
+      queryClient.invalidateQueries({
+        queryKey: ["activeCashierSession", sessionStorage.getItem("userId")],
+      });
     }
   };
 
@@ -58,6 +52,7 @@ const TopNav = ({ onToggleSidebar }) => {
     const delay = 300;
     setTimeout(() => {
       setshowCashierSessionModalInParent(false);
+      setModalType(null); // Reset modal type after animation
     }, delay);
   };
 
@@ -85,6 +80,7 @@ const TopNav = ({ onToggleSidebar }) => {
             }`}
             onClick={handleShowCashierSessionModal}
             style={{ marginLeft: "25px" }}
+            disabled={activeCashierSessionLoading}
           >
             {isCashierSessionOpen
               ? "Close Cashier Session"
@@ -94,19 +90,19 @@ const TopNav = ({ onToggleSidebar }) => {
         <span className="navbar-text">Enterprise Resource App</span>
       </div>
       {/* Render CashierSession modal */}
-      {isCashierSessionOpen === false && showCashierSessionModalInParent && (
+      {modalType === "create" && showCashierSessionModalInParent && (
         <CashierSession
           show={showCashierSessionModal}
           handleClose={handleCloseCashierSessionModal}
           handleAddCashierSession={handleAddCashierSession}
         />
       )}
-      {isCashierSessionOpen && showCashierSessionModalInParent && (
+      {modalType === "update" && showCashierSessionModalInParent && (
         <CashierSessionUpdate
           show={showCashierSessionModal}
           handleClose={handleCloseCashierSessionModal}
           handleAddCashierSession={handleUpdateCashierSession}
-          cashierSession={currentCashierSession}
+          cashierSession={activeCashierSession}
         />
       )}
     </nav>

@@ -178,6 +178,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cashier session retrieved.
+        /// </summary>
+        public static string CashierSessionRetrieved {
+            get {
+                return ResourceManager.GetString("CashierSessionRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cashier sessions retrieved.
         /// </summary>
         public static string CashierSessionsRetrieved {
