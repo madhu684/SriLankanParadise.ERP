@@ -167,6 +167,14 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<EmptyReturnMaster, EmptyReturnMasterDto>();
             CreateMap<SupplierItemRequestModel, SupplierItem>();
             CreateMap<SupplierItem, SupplierItemDto>();
+            CreateMap<CustomerDeliveryAddressRequestModel, CustomerDeliveryAddress>();
+            CreateMap<CustomerDeliveryAddress, CustomerDeliveryAddressDto>();
+            CreateMap<CustomerUpdateRequestModel, Customer>();
+            CreateMap<CustomerOutstandingBalanceUpdateRequestModel, Customer>();
+            CreateMap<ItemPriceMasterRequestModel, ItemPriceMaster>();
+            CreateMap<ItemPriceMaster, ItemPriceMasterDto>();
+            CreateMap<ItemPriceDetailRequestModel, ItemPriceDetail>();
+            CreateMap<ItemPriceDetail, ItemPriceDetailDto>();
             // Add more mapping configurations if needed
 
         }

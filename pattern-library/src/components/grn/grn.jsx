@@ -86,1153 +86,1239 @@ const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
   };
 
   return (
-    <div className="container mt-4">
+    <div className="container mt-4 pb-5">
       {/* Header */}
       <div className="mb-4">
         <div ref={alertRef}></div>
-        <div className="d-flex justify-content-between">
-          {/*<img src={companyLogoUrl} alt="Company Logo" height={30} />*/}
-
-          <i
-            class="bi bi-arrow-left"
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <button
             onClick={handleBack}
-            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
-          ></i>
+            className="btn btn-dark d-flex align-items-center gap-2"
+            type="button"
+          >
+            <i className="bi bi-arrow-left"></i>
+            {/* <span className="d-none d-sm-inline">Back</span> */}
+          </button>
 
-          <p>
+          <div className="text-muted small">
             <CurrentDateTime />
-          </p>
+          </div>
         </div>
-        <h1 className="mt-2 text-center">Goods Received Note</h1>
-        <hr />
+        <h1 className="text-center fw-bold mb-3">Goods Received Note</h1>
+        <hr className="border-2 opacity-50" />
       </div>
 
       {/* Display success or error message */}
       {submissionStatus === "successSubmitted" && (
-        <div className="alert alert-success mb-3" role="alert">
+        <div
+          className="alert alert-success alert-dismissible fade show mb-4"
+          role="alert"
+        >
+          <i className="bi bi-check-circle-fill me-2"></i>
           GRN submitted successfully!
         </div>
       )}
       {submissionStatus === "successSavedAsDraft" && (
-        <div className="alert alert-success mb-3" role="alert">
+        <div
+          className="alert alert-info alert-dismissible fade show mb-4"
+          role="alert"
+        >
+          <i className="bi bi-info-circle-fill me-2"></i>
           GRN saved as draft, you can edit and submit it later!
         </div>
       )}
       {submissionStatus === "error" && (
-        <div className="alert alert-danger mb-3" role="alert">
+        <div
+          className="alert alert-danger alert-dismissible fade show mb-4"
+          role="alert"
+        >
+          <i className="bi bi-exclamation-triangle-fill me-2"></i>
           Error submitting GRN. Please try again.
         </div>
       )}
 
       <form>
-        {/* GRN Information */}
-        <div className="row mb-3 d-flex justify-content-between">
-          <div className="col-md-5">
-            <h4>1. GRN Information</h4>
-            <div className="mb-3 mt-3">
-              <label htmlFor="grnDate" className="form-label">
-                GRN Date
-              </label>
-              <input
-                type="date"
-                className={`form-control ${
-                  validFields.grnDate ? "is-valid" : ""
-                } ${validationErrors.grnDate ? "is-invalid" : ""}`}
-                id="grnDate"
-                placeholder="Enter GRN date"
-                value={formData.grnDate}
-                onChange={(e) => handleInputChange("grnDate", e.target.value)}
-                required
-              />
-              {validationErrors.grnDate && (
-                <div className="invalid-feedback">
-                  {validationErrors.grnDate}
+        {/* GRN Information & Purchase Details */}
+        <div className="row g-4 mb-4">
+          {/* GRN Information */}
+          <div className="col-lg-6">
+            <div className="card shadow-sm h-100">
+              <div className="card-header bg-primary text-white">
+                <h5 className="mb-0">
+                  <i className="bi bi-file-text me-2"></i>1. GRN Information
+                </h5>
+              </div>
+              <div className="card-body">
+                <div className="mb-3">
+                  <label htmlFor="grnDate" className="form-label fw-semibold">
+                    GRN Date <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    className={`form-control ${
+                      validFields.grnDate ? "is-valid" : ""
+                    } ${validationErrors.grnDate ? "is-invalid" : ""}`}
+                    id="grnDate"
+                    value={formData.grnDate}
+                    onChange={(e) =>
+                      handleInputChange("grnDate", e.target.value)
+                    }
+                    required
+                  />
+                  {validationErrors.grnDate && (
+                    <div className="invalid-feedback">
+                      {validationErrors.grnDate}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            <div className="mb-3">
-              <label htmlFor="receivedBy" className="form-label">
-                Received By
-              </label>
-              <input
-                type="text"
-                className={`form-control ${
-                  validFields.receivedBy ? "is-valid" : ""
-                } ${validationErrors.receivedBy ? "is-invalid" : ""}`}
-                id="receivedBy"
-                placeholder="Enter name"
-                value={formData.receivedBy}
-                onChange={(e) =>
-                  handleInputChange("receivedBy", e.target.value)
-                }
-                required
-              />
-              {validationErrors.receivedBy && (
-                <div className="invalid-feedback">
-                  {validationErrors.receivedBy}
-                </div>
-              )}
-            </div>
-            <div className="mb-3">
-              <label htmlFor="receivedDate" className="form-label">
-                Received Date
-              </label>
-              <input
-                type="date"
-                className={`form-control ${
-                  validFields.receivedDate ? "is-valid" : ""
-                } ${validationErrors.receivedDate ? "is-invalid" : ""}`}
-                id="receivedDate"
-                placeholder="Enter received date"
-                value={formData.receivedDate}
-                onChange={(e) =>
-                  handleInputChange("receivedDate", e.target.value)
-                }
-                required
-              />
-              {validationErrors.receivedDate && (
-                <div className="invalid-feedback">
-                  {validationErrors.receivedDate}
-                </div>
-              )}
-            </div>
 
-            {/* GRN Type Dropdown */}
-            <div className="mb-3">
-              <label htmlFor="grnType" className="form-label">
-                GRN Type
-              </label>
-              <select
-                id="grnType"
-                className={`form-select ${
-                  validFields.grnType ? "is-valid" : ""
-                } ${validationErrors.grnType ? "is-invalid" : ""}`}
-                value={formData.grnType}
-                onChange={(e) => handleInputChange("grnType", e.target.value)}
-                required
-              >
-                <option value="">Select GRN Type</option>
-                {grnTypeOptions.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              {validationErrors.grnType && (
-                <div className="invalid-feedback">
-                  {validationErrors.grnType}
+                <div className="mb-3">
+                  <label
+                    htmlFor="receivedBy"
+                    className="form-label fw-semibold"
+                  >
+                    Received By <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    className={`form-control ${
+                      validFields.receivedBy ? "is-valid" : ""
+                    } ${validationErrors.receivedBy ? "is-invalid" : ""}`}
+                    id="receivedBy"
+                    placeholder="Enter name"
+                    value={formData.receivedBy}
+                    onChange={(e) =>
+                      handleInputChange("receivedBy", e.target.value)
+                    }
+                    required
+                  />
+                  {validationErrors.receivedBy && (
+                    <div className="invalid-feedback">
+                      {validationErrors.receivedBy}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            {/* Status Dropdown */}
-            <div className="mb-3">
-              <label htmlFor="status" className="form-label">
-                Status
-              </label>
-              <select
-                id="status"
-                className={`form-select ${
-                  validFields.status ? "is-valid" : ""
-                } ${validationErrors.status ? "is-invalid" : ""}`}
-                value={formData.status}
-                onChange={(e) =>
-                  handleStatusChange(
-                    statusOptions.find((option) => option.id === e.target.value)
-                  )
-                }
-                required
-              >
-                <option value="">Select Status</option>
-                {statusOptions.map((option) => (
-                  <option key={option.id} value={option.id}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              {validationErrors.status && (
-                <div className="invalid-feedback">
-                  {validationErrors.status}
+                <div className="mb-3">
+                  <label
+                    htmlFor="receivedDate"
+                    className="form-label fw-semibold"
+                  >
+                    Received Date <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    className={`form-control ${
+                      validFields.receivedDate ? "is-valid" : ""
+                    } ${validationErrors.receivedDate ? "is-invalid" : ""}`}
+                    id="receivedDate"
+                    value={formData.receivedDate}
+                    onChange={(e) =>
+                      handleInputChange("receivedDate", e.target.value)
+                    }
+                    required
+                  />
+                  {validationErrors.receivedDate && (
+                    <div className="invalid-feedback">
+                      {validationErrors.receivedDate}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            <div className="mb-3 mt-3">
-              <label htmlFor="warehouseLocation" className="form-label">
-                Warehouse Location
-              </label>
-              <select
-                className={`form-select ${
-                  validFields.warehouseLocation ? "is-valid" : ""
-                } ${validationErrors.warehouseLocation ? "is-invalid" : ""}`}
-                id="warehouseLocation"
-                value={formData?.warehouseLocation ?? ""}
-                onChange={(e) =>
-                  handleInputChange("warehouseLocation", e.target.value)
-                }
-              >
-                <option value="">Select Warehouse</option>
-                {/* Filter out warehouse locations based on the locationType being "Warehouse" */}
-                {locations
-                  ?.filter(
-                    (location) => location.locationType.name === "Warehouse"
-                  )
-                  ?.map((location) => (
-                    <option
-                      key={location.locationId}
-                      value={location.locationId}
-                    >
-                      {location.locationName}
-                    </option>
-                  ))}
-              </select>
-              {validationErrors.warehouseLocation && (
-                <div className="invalid-feedback">
-                  {validationErrors.warehouseLocation}
+                <div className="mb-3">
+                  <label htmlFor="grnType" className="form-label fw-semibold">
+                    GRN Type <span className="text-danger">*</span>
+                  </label>
+                  <select
+                    id="grnType"
+                    className={`form-select ${
+                      validFields.grnType ? "is-valid" : ""
+                    } ${validationErrors.grnType ? "is-invalid" : ""}`}
+                    value={formData.grnType}
+                    onChange={(e) =>
+                      handleInputChange("grnType", e.target.value)
+                    }
+                    required
+                  >
+                    <option value="">Select GRN Type</option>
+                    {grnTypeOptions.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  {validationErrors.grnType && (
+                    <div className="invalid-feedback">
+                      {validationErrors.grnType}
+                    </div>
+                  )}
                 </div>
-              )}
+
+                <div className="mb-3">
+                  <label htmlFor="status" className="form-label fw-semibold">
+                    Status <span className="text-danger">*</span>
+                  </label>
+                  <select
+                    id="status"
+                    className={`form-select ${
+                      validFields.status ? "is-valid" : ""
+                    } ${validationErrors.status ? "is-invalid" : ""}`}
+                    value={formData.status}
+                    onChange={(e) =>
+                      handleStatusChange(
+                        statusOptions.find(
+                          (option) => option.id === e.target.value
+                        )
+                      )
+                    }
+                    required
+                  >
+                    <option value="">Select Status</option>
+                    {statusOptions.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  {validationErrors.status && (
+                    <div className="invalid-feedback">
+                      {validationErrors.status}
+                    </div>
+                  )}
+                </div>
+
+                <div className="mb-0">
+                  <label
+                    htmlFor="warehouseLocation"
+                    className="form-label fw-semibold"
+                  >
+                    Warehouse Location <span className="text-danger">*</span>
+                  </label>
+                  <select
+                    className={`form-select ${
+                      validFields.warehouseLocation ? "is-valid" : ""
+                    } ${
+                      validationErrors.warehouseLocation ? "is-invalid" : ""
+                    }`}
+                    id="warehouseLocation"
+                    value={formData?.warehouseLocation ?? ""}
+                    onChange={(e) =>
+                      handleInputChange("warehouseLocation", e.target.value)
+                    }
+                  >
+                    <option value="">Select Warehouse</option>
+                    {locations
+                      ?.filter(
+                        (location) => location.locationType.name === "Warehouse"
+                      )
+                      ?.map((location) => (
+                        <option
+                          key={location.locationId}
+                          value={location.locationId}
+                        >
+                          {location.locationName}
+                        </option>
+                      ))}
+                  </select>
+                  {validationErrors.warehouseLocation && (
+                    <div className="invalid-feedback">
+                      {validationErrors.warehouseLocation}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Purchase Order ID Selection */}
-          <div className="col-md-5">
-            <h4>2. Purchase Details</h4>
+          {/* Purchase Details */}
+          <div className="col-lg-6">
+            <div className="card shadow-sm h-100">
+              <div className="card-header bg-success text-white">
+                <h5 className="mb-0">
+                  <i className="bi bi-cart-check me-2"></i>2. Purchase Details
+                </h5>
+              </div>
+              <div className="card-body">
+                {/* Search Options */}
+                <div className="mb-3">
+                  <div className="form-check mb-2">
+                    <input
+                      type="checkbox"
+                      className="form-check-input"
+                      id="searchByPOCheckbox"
+                      checked={searchByPO}
+                      onChange={() => {
+                        setSearchByPO(true);
+                        setSearchByPR(false);
+                        setSearchBySR(false);
+                      }}
+                      disabled={formData.grnType === "directPurchase"}
+                    />
+                    <label
+                      className="form-check-label"
+                      htmlFor="searchByPOCheckbox"
+                    >
+                      <i className="bi bi-file-earmark-text me-1"></i>
+                      Search By Purchase Order
+                    </label>
+                  </div>
 
-            <div className="mb-3 mt-3 form-check">
-              <input
-                type="checkbox"
-                className="form-check-input"
-                id="searchByPOCheckbox"
-                checked={searchByPO}
-                onChange={() => {
-                  setSearchByPO(true);
-                  setSearchByPR(false);
-                  setSearchBySR(false);
-                }}
-              />
-              <label className="form-check-label" htmlFor="searchByPOCheckbox">
-                Search By Purchase Order
-              </label>
-            </div>
+                  <div className="form-check mb-2">
+                    <input
+                      type="checkbox"
+                      className="form-check-input"
+                      id="searchByPRCheckbox"
+                      checked={searchByPR}
+                      onChange={() => {
+                        setSearchByPO(false);
+                        setSearchByPR(true);
+                        setSearchBySR(false);
+                      }}
+                      disabled={formData.grnType === "directPurchase"}
+                    />
+                    <label
+                      className="form-check-label"
+                      htmlFor="searchByPRCheckbox"
+                    >
+                      <i className="bi bi-clipboard-check me-1"></i>
+                      Search By Purchase Requisition
+                    </label>
+                  </div>
 
-            <div className="mb-3 mt-3 form-check">
-              <input
-                type="checkbox"
-                className="form-check-input"
-                id="searchByPRCheckbox"
-                checked={searchByPR}
-                onChange={() => {
-                  setSearchByPO(false);
-                  setSearchByPR(true);
-                  setSearchBySR(false);
-                }}
-              />
-              <label className="form-check-label" htmlFor="searchByPRCheckbox">
-                Search By Purchase Requisition
-              </label>
-            </div>
+                  <div className="form-check">
+                    <input
+                      type="checkbox"
+                      className="form-check-input"
+                      id="searchBySRCheckbox"
+                      checked={searchBySR}
+                      onChange={() => {
+                        setSearchByPO(false);
+                        setSearchByPR(false);
+                        setSearchBySR(true);
+                      }}
+                      disabled={formData.grnType === "directPurchase"}
+                    />
+                    <label
+                      className="form-check-label"
+                      htmlFor="searchBySRCheckbox"
+                    >
+                      <i className="bi bi-arrow-return-left me-1"></i>
+                      Search By Supply Return
+                    </label>
+                  </div>
+                </div>
 
-            <div className="mb-3 mt-3 form-check">
-              <input
-                type="checkbox"
-                className="form-check-input"
-                id="searchBySRCheckbox"
-                checked={searchBySR}
-                onChange={() => {
-                  setSearchByPO(false);
-                  setSearchByPR(false);
-                  setSearchBySR(true);
-                }}
-              />
-              <label className="form-check-label" htmlFor="searchBySRCheckbox">
-                Search By Supply Return
-              </label>
-            </div>
-
-            {searchByPO && (
-              <div className="mt-3">
-                <label htmlFor="purchaseOrder" className="form-label">
-                  Purchase Order
-                </label>
-
-                {!["finishedGoodsIn", "directPurchase"].includes(
-                  formData?.grnType
-                ) &&
-                  selectedPurchaseOrder === null && (
-                    <div className="mb-3">
-                      <div className="input-group">
-                        <span className="input-group-text bg-transparent ">
-                          <i className="bi bi-search"></i>
-                        </span>
-                        <input
-                          type="text"
-                          className={`form-control ${
-                            validFields.purchaseOrderId ? "is-valid" : ""
-                          } ${
-                            validationErrors.purchaseOrderId ? "is-invalid" : ""
-                          }`}
-                          placeholder="Search for a purchase order..."
-                          value={purchaseOrderSearchTerm}
-                          onChange={(e) =>
-                            setPurchaseOrderSearchTerm(e.target.value)
-                          }
-                          autoFocus={false}
-                        />
-                        {purchaseOrderSearchTerm && (
-                          <span
-                            className="input-group-text bg-transparent"
-                            style={{
-                              cursor: "pointer",
-                            }}
-                            onClick={() => setPurchaseOrderSearchTerm("")}
-                          >
-                            <i className="bi bi-x"></i>
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Dropdown for filtered suppliers */}
-                      {purchaseOrderSearchTerm && (
-                        <div className="dropdown" style={{ width: "100%" }}>
-                          <ul
-                            className="dropdown-menu"
-                            style={{
-                              display: "block",
-                              width: "100%",
-                              maxHeight: "200px",
-                              overflowY: "auto",
-                            }}
-                          >
-                            {purchaseOrders
-                              .filter((purchaseOrder) =>
-                                purchaseOrder.referenceNo
-                                  ?.replace(/\s/g, "")
-                                  ?.toLowerCase()
-                                  .includes(
-                                    purchaseOrderSearchTerm
-                                      .toLowerCase()
-                                      .replace(/\s/g, "")
-                                  )
-                              )
-                              .map((purchaseOrder) => (
-                                <li key={purchaseOrder.purchaseOrderId}>
-                                  <button
-                                    className="dropdown-item"
-                                    onClick={() =>
-                                      handlePurchaseOrderChange(
-                                        purchaseOrder.referenceNo
-                                      )
-                                    }
-                                  >
-                                    <span className="me-3">
-                                      <i className="bi bi-file-earmark-text"></i>
-                                    </span>{" "}
-                                    {purchaseOrder?.referenceNo}
-                                  </button>
-                                </li>
-                              ))}
-                            {purchaseOrders.filter((purchaseOrder) =>
-                              purchaseOrder.referenceNo
-                                ?.replace(/\s/g, "")
-                                ?.toLowerCase()
-                                .includes(
-                                  purchaseOrderSearchTerm
-                                    .toLowerCase()
-                                    .replace(/\s/g, "")
-                                )
-                            ).length === 0 && (
-                              <li className="dropdown-item text-center">
-                                <span className="me-3">
-                                  <i className="bi bi-emoji-frown"></i>
-                                </span>
-                                No purchase orders found
-                              </li>
-                            )}
-                          </ul>
-                        </div>
-                      )}
-                      {selectedPurchaseOrder === null && (
+                {/* Purchase Order Search */}
+                {searchByPO && (
+                  <div className="mt-3">
+                    {!["finishedGoodsIn", "directPurchase"].includes(
+                      formData?.grnType
+                    ) &&
+                      selectedPurchaseOrder === null && (
                         <div className="mb-3">
-                          <small className="form-text text-muted">
-                            {validationErrors.purchaseOrderId && (
-                              <div className="text-danger mb-1">
-                                {validationErrors.purchaseOrderId}
+                          <label
+                            htmlFor="purchaseOrder"
+                            className="form-label fw-semibold"
+                          >
+                            Purchase Order
+                          </label>
+                          <div className="position-relative">
+                            <div className="input-group">
+                              <span className="input-group-text bg-light border-end-0">
+                                <i className="bi bi-search text-muted"></i>
+                              </span>
+                              <input
+                                type="text"
+                                className={`form-control border-start-0 ${
+                                  validFields.purchaseOrderId ? "is-valid" : ""
+                                } ${
+                                  validationErrors.purchaseOrderId
+                                    ? "is-invalid"
+                                    : ""
+                                }`}
+                                placeholder="Search for a purchase order..."
+                                value={purchaseOrderSearchTerm}
+                                onChange={(e) =>
+                                  setPurchaseOrderSearchTerm(e.target.value)
+                                }
+                              />
+                              {purchaseOrderSearchTerm && (
+                                <button
+                                  className="btn btn-outline-secondary"
+                                  type="button"
+                                  onClick={() => setPurchaseOrderSearchTerm("")}
+                                >
+                                  <i className="bi bi-x"></i>
+                                </button>
+                              )}
+                            </div>
+
+                            {purchaseOrderSearchTerm && (
+                              <div
+                                className="position-absolute w-100 mt-1 shadow-lg"
+                                style={{ zIndex: 1000 }}
+                              >
+                                <ul
+                                  className="list-group rounded-bottom overflow-auto"
+                                  style={{ maxHeight: "200px" }}
+                                >
+                                  {purchaseOrders
+                                    .filter((purchaseOrder) =>
+                                      purchaseOrder.referenceNo
+                                        ?.replace(/\s/g, "")
+                                        ?.toLowerCase()
+                                        .includes(
+                                          purchaseOrderSearchTerm
+                                            .toLowerCase()
+                                            .replace(/\s/g, "")
+                                        )
+                                    )
+                                    .map((purchaseOrder) => (
+                                      <li
+                                        key={purchaseOrder.purchaseOrderId}
+                                        className="list-group-item list-group-item-action"
+                                      >
+                                        <button
+                                          className="btn btn-link text-decoration-none text-start w-100 p-0"
+                                          type="button"
+                                          onClick={() =>
+                                            handlePurchaseOrderChange(
+                                              purchaseOrder.referenceNo
+                                            )
+                                          }
+                                        >
+                                          <i className="bi bi-file-earmark-text me-2 text-primary"></i>
+                                          {purchaseOrder?.referenceNo}
+                                        </button>
+                                      </li>
+                                    ))}
+                                  {purchaseOrders.filter((purchaseOrder) =>
+                                    purchaseOrder.referenceNo
+                                      ?.replace(/\s/g, "")
+                                      ?.toLowerCase()
+                                      .includes(
+                                        purchaseOrderSearchTerm
+                                          .toLowerCase()
+                                          .replace(/\s/g, "")
+                                      )
+                                  ).length === 0 && (
+                                    <li className="list-group-item text-center text-muted">
+                                      <i className="bi bi-emoji-frown me-2"></i>
+                                      No purchase orders found
+                                    </li>
+                                  )}
+                                </ul>
                               </div>
                             )}
-                            Please search for a purchase order and select it
-                          </small>
+                          </div>
+                          {selectedPurchaseOrder === null && (
+                            <small className="form-text text-muted d-block mt-1">
+                              {validationErrors.purchaseOrderId && (
+                                <span className="text-danger">
+                                  {validationErrors.purchaseOrderId}
+                                </span>
+                              )}
+                              {!validationErrors.purchaseOrderId &&
+                                "Please search for a purchase order and select it"}
+                            </small>
+                          )}
                         </div>
                       )}
-                    </div>
-                  )}
-                {formData.grnType === "finishedGoodsIn" && (
-                  <div className="alert alert-warning" role="alert">
-                    This is a "Finished Goods In", no need a purchase order.
-                  </div>
-                )}
-                {formData.grnType === "directPurchase" && (
-                  <div className="alert alert-warning" role="alert">
-                    This is a "Direct Purchase", no need a purchase order.
-                  </div>
-                )}
-              </div>
-            )}
 
-            {/* Additional Purchase Order Information */}
-            {selectedPurchaseOrder && (
-              <div className="card mb-3">
-                <div className="card-header">Selected Purchase Order</div>
-                <div className="card-body">
-                  <p>
-                    Purchase Order Reference No:{" "}
-                    {selectedPurchaseOrder?.referenceNo}
-                  </p>
-                  <p>
-                    Supplier: {selectedPurchaseOrder?.supplier?.supplierName}
-                  </p>
-                  <p>
-                    Order Date:{" "}
-                    {selectedPurchaseOrder?.orderDate?.split("T")[0] ?? ""}
-                  </p>
-                  <button
-                    type="button"
-                    className="btn btn-outline-danger float-end"
-                    onClick={handleResetPurchaseOrder}
-                  >
-                    Reset Purchase Order
-                  </button>
-                </div>
-              </div>
-            )}
+                    {formData.grnType === "finishedGoodsIn" && (
+                      <div
+                        className="alert alert-warning d-flex align-items-center"
+                        role="alert"
+                      >
+                        <i className="bi bi-info-circle-fill me-2"></i>
+                        <div>
+                          This is a "Finished Goods In", no need a purchase
+                          order.
+                        </div>
+                      </div>
+                    )}
 
-            {searchByPR && (
-              <div className="mt-3">
-                <div>
-                  <label htmlFor="purchaseRequisition" className="form-label">
-                    Search for Purchase Requisition
-                  </label>
+                    {formData.grnType === "directPurchase" && (
+                      <div
+                        className="alert alert-warning d-flex align-items-center"
+                        role="alert"
+                      >
+                        <i className="bi bi-info-circle-fill me-2"></i>
+                        <div>
+                          This is a "Direct Purchase", no need a purchase order.
+                        </div>
+                      </div>
+                    )}
 
-                  <div className="mb-3">
-                    <div className="input-group">
-                      {selectedPurchaseRequisition === null && (
-                        <>
-                          <span className="input-group-text bg-transparent ">
-                            <i className="bi bi-search"></i>
-                          </span>
-                          <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Search for a purchase requisition..."
-                            value={purchaseRequisitionSearchTerm}
-                            onChange={(e) =>
-                              setPurchaseRequisitionSearchTerm(e.target.value)
-                            }
-                            autoFocus={false}
-                          />
-                        </>
-                      )}
-                      {purchaseRequisitionSearchTerm && (
-                        <span
-                          className="input-group-text bg-transparent"
-                          style={{
-                            cursor: "pointer",
-                          }}
-                          onClick={() => setPurchaseRequisitionSearchTerm("")}
-                        >
-                          <i className="bi bi-x"></i>
-                        </span>
-                      )}
-
-                      {purchaseRequisitionSearchTerm && (
-                        <div className="dropdown" style={{ width: "100%" }}>
-                          <ul
-                            className="dropdown-menu"
-                            style={{
-                              display: "block",
-                              width: "100%",
-                              maxHeight: "200px",
-                              overflowY: "auto",
-                            }}
+                    {selectedPurchaseOrder && (
+                      <div className="card border-primary">
+                        <div className="card-header bg-primary text-white">
+                          <i className="bi bi-check-circle me-2"></i>Selected
+                          Purchase Order
+                        </div>
+                        <div className="card-body">
+                          <div className="mb-2">
+                            <strong>Reference No:</strong>{" "}
+                            {selectedPurchaseOrder?.referenceNo}
+                          </div>
+                          <div className="mb-2">
+                            <strong>Supplier:</strong>{" "}
+                            {selectedPurchaseOrder?.supplier?.supplierName}
+                          </div>
+                          <div className="mb-3">
+                            <strong>Order Date:</strong>{" "}
+                            {selectedPurchaseOrder?.orderDate?.split("T")[0] ??
+                              ""}
+                          </div>
+                          <button
+                            type="button"
+                            className="btn btn-outline-danger btn-sm"
+                            onClick={handleResetPurchaseOrder}
                           >
-                            {purchaseRequisitions
-                              .filter((purchaseRequisitions) =>
-                                purchaseRequisitions.referenceNo
-                                  ?.replace(/\s/g, "")
-                                  ?.toLowerCase()
-                                  .includes(
-                                    purchaseRequisitionSearchTerm
-                                      .toLowerCase()
-                                      .replace(/\s/g, "")
-                                  )
-                              )
-                              .map((purchaseRequisition) => (
-                                <li
-                                  key={
-                                    purchaseRequisition.purchaseRequisitionId
-                                  }
-                                >
-                                  <button
-                                    className="dropdown-item"
-                                    onClick={() =>
-                                      handlePurchaseRequisitionChange(
-                                        purchaseRequisition.referenceNo
-                                      )
-                                    }
-                                  >
-                                    <span className="me-3">
-                                      <i className="bi bi-file-earmark-text"></i>
-                                    </span>{" "}
-                                    {purchaseRequisition?.referenceNo}
-                                  </button>
-                                </li>
-                              ))}
-                            {purchaseRequisitions.filter(
-                              (purchaseRequisition) =>
-                                purchaseRequisition.referenceNo
-                                  ?.replace(/\s/g, "")
-                                  ?.toLowerCase()
-                                  .includes(
-                                    purchaseRequisitionSearchTerm
-                                      .toLowerCase()
-                                      .replace(/\s/g, "")
-                                  )
-                            ).length === 0 && (
-                              <li className="dropdown-item text-center">
-                                <span className="me-3">
-                                  <i className="bi bi-emoji-frown"></i>
-                                </span>
-                                No purchase requisition found
-                              </li>
-                            )}
-                          </ul>
+                            <i className="bi bi-x-circle me-1"></i>Reset
+                            Purchase Order
+                          </button>
                         </div>
-                      )}
-                    </div>
-                    {selectedPurchaseRequisition === null && (
-                      <div className="mb-3">
-                        <small className="form-text text-muted">
-                          {validationErrors.purchaseOrderId && (
-                            <div className="text-danger mb-1">
-                              {validationErrors.purchaseRequisitionId}
-                            </div>
-                          )}
-                          Please search for a purchase requisition and select it
-                        </small>
                       </div>
                     )}
-                  </div>
-                </div>
-
-                {/* Additional Purchase Requisition Information */}
-                {selectedPurchaseRequisition && (
-                  <div className="card mb-3">
-                    <div className="card-header">
-                      Selected Purchase Requisition
-                    </div>
-                    <div className="card-body">
-                      <p>
-                        Purchase Requisition Reference No:{" "}
-                        {selectedPurchaseRequisition?.referenceNo}
-                      </p>
-                      <p>
-                        Requested By: {selectedPurchaseRequisition?.requestedBy}
-                      </p>
-                      <p>
-                        Requisition Date:{" "}
-                        {selectedPurchaseRequisition?.requisitionDate?.split(
-                          "T"
-                        )[0] ?? ""}
-                      </p>
-                      <button
-                        type="button"
-                        className="btn btn-outline-danger float-end"
-                        onClick={handleResetPurchaseRequisition}
-                      >
-                        Reset Purchase Requisition
-                      </button>
-                    </div>
                   </div>
                 )}
 
-                <div>
-                  <label htmlFor="supplierDetailsn" className="form-label">
-                    Search for Supplier
-                  </label>
-                  <div className="mb-3 position-relative">
-                    <div className="input-group">
-                      {formData?.selectedSupplier === null && (
-                        <>
-                          <span className="input-group-text bg-transparent ">
-                            <i className="bi bi-search"></i>
-                          </span>
-                          <input
-                            type="text"
-                            className={`form-control ${
-                              validFields.supplierId ? "is-valid" : ""
-                            } ${
-                              validationErrors.supplierId ? "is-invalid" : ""
-                            }`}
-                            placeholder="Search for a supplier..."
-                            value={supplierSearchTerm}
-                            onChange={(e) =>
-                              setSupplierSearchTerm(e.target.value)
-                            }
-                            autoFocus={false}
-                          />
-                        </>
-                      )}
-                      {supplierSearchTerm && (
-                        <span
-                          className="input-group-text bg-transparent"
-                          style={{
-                            cursor: "pointer",
-                          }}
-                          onClick={() => setSupplierSearchTerm("")}
-                        >
-                          <i className="bi bi-x"></i>
-                        </span>
-                      )}
-                    </div>
-
-                    {supplierSearchTerm && (
-                      <div className="dropdown" style={{ width: "100%" }}>
-                        <ul
-                          className="dropdown-menu"
-                          style={{
-                            display: "block",
-                            width: "100%",
-                            maxHeight: "200px",
-                            overflowY: "auto",
-                          }}
-                        >
-                          {suppliers
-                            ?.filter(
-                              (supplier) =>
-                                supplier.supplierName
-                                  .toLowerCase()
-                                  .includes(supplierSearchTerm.toLowerCase()) ||
-                                supplier.phone
-                                  .replace(/\s/g, "")
-                                  .includes(
-                                    supplierSearchTerm.replace(/\s/g, "")
-                                  )
-                            )
-                            .map((supplier) => (
-                              <li key={supplier.supplierId}>
-                                <button
-                                  className="dropdown-item"
-                                  onClick={() => handleSelectSupplier(supplier)}
-                                >
-                                  <span className="me-3">
-                                    <i className="bi bi-shop"></i>
-                                  </span>{" "}
-                                  {supplier?.supplierName} - {supplier?.phone}
-                                </button>
-                              </li>
-                            ))}
-                          {suppliers?.filter(
-                            (supplier) =>
-                              supplier.supplierName
-                                .toLowerCase()
-                                .includes(supplierSearchTerm.toLowerCase()) ||
-                              supplier.phone
-                                .replace(/\s/g, "")
-                                .includes(supplierSearchTerm.replace(/\s/g, ""))
-                          ).length === 0 && (
-                            <>
-                              <li className="dropdown-item text-center">
-                                <span className="me-3">
-                                  <i className="bi bi-emoji-frown"></i>
-                                </span>
-                                No suppliers found
-                              </li>
-                            </>
-                          )}
-                        </ul>
-                      </div>
-                    )}
-                    {formData.selectedSupplier === "" && (
-                      <div className="mb-3">
-                        <small className="form-text text-muted">
-                          {validationErrors.supplierId && (
-                            <div className="text-danger mb-1">
-                              {validationErrors.supplierId}
-                            </div>
-                          )}
-                          Please search for a supplier and select it
-                        </small>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Additional Supplier Information */}
-                {formData.selectedSupplier && (
-                  <div className="card mb-3">
-                    <div className="card-header">Selected Supplier</div>
-                    <div className="card-body">
-                      <p>
-                        Supplier Name: {formData.selectedSupplier.supplierName}
-                      </p>
-                      <p>Phone: {formData.selectedSupplier.phone}</p>
-                      <button
-                        type="button"
-                        className="btn btn-outline-danger float-end"
-                        onClick={handleResetSupplier}
-                      >
-                        Reset Supplier
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {searchBySR && (
-              <div className="mt-3">
-                <label htmlFor="supplyRetuen" className="form-label">
-                  Search for Supply Return
-                </label>
-
-                <div className="mb-3">
-                  <div className="input-group">
-                    <span className="input-group-text bg-transparent ">
-                      <i className="bi bi-search"></i>
-                    </span>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Search for a supply return..."
-                      value={supplyReturnSearchTerm}
-                      onChange={(e) =>
-                        setSupplyReturnSearchTerm(e.target.value)
-                      }
-                      autoFocus={false}
-                    />
-                    {supplyReturnSearchTerm && (
-                      <span
-                        className="input-group-text bg-transparent"
-                        style={{
-                          cursor: "pointer",
-                        }}
-                        onClick={() => setSupplyReturnSearchTerm("")}
-                      >
-                        <i className="bi bi-x"></i>
-                      </span>
-                    )}
-
-                    {supplyReturnSearchTerm && (
-                      <div className="dropdown" style={{ width: "100%" }}>
-                        <ul
-                          className="dropdown-menu"
-                          style={{
-                            display: "block",
-                            width: "100%",
-                            maxHeight: "200px",
-                            overflowY: "auto",
-                          }}
-                        >
-                          {approvedSupplyReturnMasters
-                            .filter((supplyReturn) =>
-                              supplyReturn.referenceNo
-                                ?.replace(/\s/g, "")
-                                ?.toLowerCase()
-                                .includes(
-                                  supplyReturnSearchTerm
-                                    .toLowerCase()
-                                    .replace(/\s/g, "")
-                                )
-                            )
-                            .map((supplyReturn) => (
-                              <li key={supplyReturn.supplyReturnMasterId}>
-                                <button
-                                  className="dropdown-item"
-                                  onClick={() =>
-                                    handleSupplyReturnChange(
-                                      supplyReturn.referenceNo
-                                    )
-                                  }
-                                >
-                                  <span className="me-3">
-                                    <i className="bi bi-file-earmark-text"></i>
-                                  </span>{" "}
-                                  {supplyReturn?.referenceNo}
-                                </button>
-                              </li>
-                            ))}
-                          {approvedSupplyReturnMasters.filter((supplyReturn) =>
-                            supplyReturn.referenceNo
-                              ?.replace(/\s/g, "")
-                              ?.toLowerCase()
-                              .includes(
-                                supplyReturnSearchTerm
-                                  .toLowerCase()
-                                  .replace(/\s/g, "")
-                              )
-                          ).length === 0 && (
-                            <li className="dropdown-item text-center">
-                              <span className="me-3">
-                                <i className="bi bi-emoji-frown"></i>
-                              </span>
-                              No supply return found
-                            </li>
-                          )}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                  {selectedSupplyReturn === null && (
+                {/* Purchase Requisition Search */}
+                {searchByPR && (
+                  <div className="mt-3">
                     <div className="mb-3">
-                      <small className="form-text text-muted">
-                        {validationErrors.supplyReturnMasterId && (
-                          <div className="text-danger mb-1">
-                            {validationErrors.supplyReturnMasterId}
+                      <label
+                        htmlFor="purchaseRequisition"
+                        className="form-label fw-semibold"
+                      >
+                        Purchase Requisition
+                      </label>
+                      <div className="position-relative">
+                        {selectedPurchaseRequisition === null && (
+                          <div className="input-group">
+                            <span className="input-group-text bg-light border-end-0">
+                              <i className="bi bi-search text-muted"></i>
+                            </span>
+                            <input
+                              type="text"
+                              className="form-control border-start-0"
+                              placeholder="Search for a purchase requisition..."
+                              value={purchaseRequisitionSearchTerm}
+                              onChange={(e) =>
+                                setPurchaseRequisitionSearchTerm(e.target.value)
+                              }
+                            />
+                            {purchaseRequisitionSearchTerm && (
+                              <button
+                                className="btn btn-outline-secondary"
+                                type="button"
+                                onClick={() =>
+                                  setPurchaseRequisitionSearchTerm("")
+                                }
+                              >
+                                <i className="bi bi-x"></i>
+                              </button>
+                            )}
                           </div>
                         )}
-                        Please search for a supply return and select it
-                      </small>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
 
-            {/* Additional Supply Return Information */}
-            {selectedSupplyReturn && (
-              <div className="card mb-3">
-                <div className="card-header">Selected Supply Return</div>
-                <div className="card-body">
-                  <p>
-                    Supply Return Reference No:{" "}
-                    {selectedSupplyReturn?.referenceNo}
-                  </p>
-                  <p>
-                    Supplier: {selectedSupplyReturn?.supplier?.supplierName}
-                  </p>
-                  <p>
-                    Returned Date:{" "}
-                    {selectedSupplyReturn?.returnDate?.split("T")[0] ?? ""}
-                  </p>
-                  <button
-                    type="button"
-                    className="btn btn-outline-danger float-end"
-                    onClick={handleResetSupplyReturn}
-                  >
-                    Reset Supply Return
-                  </button>
-                </div>
+                        {purchaseRequisitionSearchTerm && (
+                          <div
+                            className="position-absolute w-100 mt-1 shadow-lg"
+                            style={{ zIndex: 1000 }}
+                          >
+                            <ul
+                              className="list-group rounded-bottom overflow-auto"
+                              style={{ maxHeight: "200px" }}
+                            >
+                              {purchaseRequisitions
+                                .filter((pr) =>
+                                  pr.referenceNo
+                                    ?.replace(/\s/g, "")
+                                    ?.toLowerCase()
+                                    .includes(
+                                      purchaseRequisitionSearchTerm
+                                        .toLowerCase()
+                                        .replace(/\s/g, "")
+                                    )
+                                )
+                                .map((purchaseRequisition) => (
+                                  <li
+                                    key={
+                                      purchaseRequisition.purchaseRequisitionId
+                                    }
+                                    className="list-group-item list-group-item-action"
+                                  >
+                                    <button
+                                      className="btn btn-link text-decoration-none text-start w-100 p-0"
+                                      type="button"
+                                      onClick={() =>
+                                        handlePurchaseRequisitionChange(
+                                          purchaseRequisition.referenceNo
+                                        )
+                                      }
+                                    >
+                                      <i className="bi bi-file-earmark-text me-2 text-success"></i>
+                                      {purchaseRequisition?.referenceNo}
+                                    </button>
+                                  </li>
+                                ))}
+                              {purchaseRequisitions.filter((pr) =>
+                                pr.referenceNo
+                                  ?.replace(/\s/g, "")
+                                  ?.toLowerCase()
+                                  .includes(
+                                    purchaseRequisitionSearchTerm
+                                      .toLowerCase()
+                                      .replace(/\s/g, "")
+                                  )
+                              ).length === 0 && (
+                                <li className="list-group-item text-center text-muted">
+                                  <i className="bi bi-emoji-frown me-2"></i>
+                                  No purchase requisition found
+                                </li>
+                              )}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                      {selectedPurchaseRequisition === null && (
+                        <small className="form-text text-muted d-block mt-1">
+                          {validationErrors.purchaseRequisitionId && (
+                            <span className="text-danger">
+                              {validationErrors.purchaseRequisitionId}
+                            </span>
+                          )}
+                          {!validationErrors.purchaseRequisitionId &&
+                            "Please search for a purchase requisition and select it"}
+                        </small>
+                      )}
+                    </div>
+
+                    {selectedPurchaseRequisition && (
+                      <div className="card border-success mb-3">
+                        <div className="card-header bg-success text-white">
+                          <i className="bi bi-check-circle me-2"></i>Selected
+                          Purchase Requisition
+                        </div>
+                        <div className="card-body">
+                          <div className="mb-2">
+                            <strong>Reference No:</strong>{" "}
+                            {selectedPurchaseRequisition?.referenceNo}
+                          </div>
+                          <div className="mb-2">
+                            <strong>Requested By:</strong>{" "}
+                            {selectedPurchaseRequisition?.requestedBy}
+                          </div>
+                          <div className="mb-3">
+                            <strong>Requisition Date:</strong>{" "}
+                            {selectedPurchaseRequisition?.requisitionDate?.split(
+                              "T"
+                            )[0] ?? ""}
+                          </div>
+                          <button
+                            type="button"
+                            className="btn btn-outline-danger btn-sm"
+                            onClick={handleResetPurchaseRequisition}
+                          >
+                            <i className="bi bi-x-circle me-1"></i>Reset
+                            Purchase Requisition
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Supplier Search */}
+                    <div className="mb-3">
+                      <label
+                        htmlFor="supplierDetails"
+                        className="form-label fw-semibold"
+                      >
+                        Supplier
+                      </label>
+                      <div className="position-relative">
+                        {formData?.selectedSupplier === null && (
+                          <div className="input-group">
+                            <span className="input-group-text bg-light border-end-0">
+                              <i className="bi bi-search text-muted"></i>
+                            </span>
+                            <input
+                              type="text"
+                              className={`form-control border-start-0 ${
+                                validFields.supplierId ? "is-valid" : ""
+                              } ${
+                                validationErrors.supplierId ? "is-invalid" : ""
+                              }`}
+                              placeholder="Search for a supplier..."
+                              value={supplierSearchTerm}
+                              onChange={(e) =>
+                                setSupplierSearchTerm(e.target.value)
+                              }
+                            />
+                            {supplierSearchTerm && (
+                              <button
+                                className="btn btn-outline-secondary"
+                                type="button"
+                                onClick={() => setSupplierSearchTerm("")}
+                              >
+                                <i className="bi bi-x"></i>
+                              </button>
+                            )}
+                          </div>
+                        )}
+
+                        {supplierSearchTerm && (
+                          <div
+                            className="position-absolute w-100 mt-1 shadow-lg"
+                            style={{ zIndex: 1000 }}
+                          >
+                            <ul
+                              className="list-group rounded-bottom overflow-auto"
+                              style={{ maxHeight: "200px" }}
+                            >
+                              {suppliers
+                                ?.filter(
+                                  (supplier) =>
+                                    supplier.supplierName
+                                      .toLowerCase()
+                                      .includes(
+                                        supplierSearchTerm.toLowerCase()
+                                      ) ||
+                                    supplier.phone
+                                      .replace(/\s/g, "")
+                                      .includes(
+                                        supplierSearchTerm.replace(/\s/g, "")
+                                      )
+                                )
+                                .map((supplier) => (
+                                  <li
+                                    key={supplier.supplierId}
+                                    className="list-group-item list-group-item-action"
+                                  >
+                                    <button
+                                      className="btn btn-link text-decoration-none text-start w-100 p-0"
+                                      type="button"
+                                      onClick={() =>
+                                        handleSelectSupplier(supplier)
+                                      }
+                                    >
+                                      <i className="bi bi-shop me-2 text-info"></i>
+                                      {supplier?.supplierName} -{" "}
+                                      {supplier?.phone}
+                                    </button>
+                                  </li>
+                                ))}
+                              {suppliers?.filter(
+                                (supplier) =>
+                                  supplier.supplierName
+                                    .toLowerCase()
+                                    .includes(
+                                      supplierSearchTerm.toLowerCase()
+                                    ) ||
+                                  supplier.phone
+                                    .replace(/\s/g, "")
+                                    .includes(
+                                      supplierSearchTerm.replace(/\s/g, "")
+                                    )
+                              ).length === 0 && (
+                                <li className="list-group-item text-center text-muted">
+                                  <i className="bi bi-emoji-frown me-2"></i>
+                                  No suppliers found
+                                </li>
+                              )}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                      {formData.selectedSupplier === "" && (
+                        <small className="form-text text-muted d-block mt-1">
+                          {validationErrors.supplierId && (
+                            <span className="text-danger">
+                              {validationErrors.supplierId}
+                            </span>
+                          )}
+                          {!validationErrors.supplierId &&
+                            "Please search for a supplier and select it"}
+                        </small>
+                      )}
+                    </div>
+
+                    {formData.selectedSupplier && (
+                      <div className="card border-info">
+                        <div className="card-header bg-info text-white">
+                          <i className="bi bi-check-circle me-2"></i>Selected
+                          Supplier
+                        </div>
+                        <div className="card-body">
+                          <div className="mb-2">
+                            <strong>Supplier Name:</strong>{" "}
+                            {formData.selectedSupplier.supplierName}
+                          </div>
+                          <div className="mb-3">
+                            <strong>Phone:</strong>{" "}
+                            {formData.selectedSupplier.phone}
+                          </div>
+                          <button
+                            type="button"
+                            className="btn btn-outline-danger btn-sm"
+                            onClick={handleResetSupplier}
+                          >
+                            <i className="bi bi-x-circle me-1"></i>Reset
+                            Supplier
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Supply Return Search */}
+                {searchBySR && (
+                  <div className="mt-3">
+                    <div className="mb-3">
+                      <label
+                        htmlFor="supplyReturn"
+                        className="form-label fw-semibold"
+                      >
+                        Supply Return
+                      </label>
+                      <div className="position-relative">
+                        <div className="input-group">
+                          <span className="input-group-text bg-light border-end-0">
+                            <i className="bi bi-search text-muted"></i>
+                          </span>
+                          <input
+                            type="text"
+                            className="form-control border-start-0"
+                            placeholder="Search for a supply return..."
+                            value={supplyReturnSearchTerm}
+                            onChange={(e) =>
+                              setSupplyReturnSearchTerm(e.target.value)
+                            }
+                          />
+                          {supplyReturnSearchTerm && (
+                            <button
+                              className="btn btn-outline-secondary"
+                              type="button"
+                              onClick={() => setSupplyReturnSearchTerm("")}
+                            >
+                              <i className="bi bi-x"></i>
+                            </button>
+                          )}
+                        </div>
+
+                        {supplyReturnSearchTerm && (
+                          <div
+                            className="position-absolute w-100 mt-1 shadow-lg"
+                            style={{ zIndex: 1000 }}
+                          >
+                            <ul
+                              className="list-group rounded-bottom overflow-auto"
+                              style={{ maxHeight: "200px" }}
+                            >
+                              {approvedSupplyReturnMasters
+                                .filter((supplyReturn) =>
+                                  supplyReturn.referenceNo
+                                    ?.replace(/\s/g, "")
+                                    ?.toLowerCase()
+                                    .includes(
+                                      supplyReturnSearchTerm
+                                        .toLowerCase()
+                                        .replace(/\s/g, "")
+                                    )
+                                )
+                                .map((supplyReturn) => (
+                                  <li
+                                    key={supplyReturn.supplyReturnMasterId}
+                                    className="list-group-item list-group-item-action"
+                                  >
+                                    <button
+                                      className="btn btn-link text-decoration-none text-start w-100 p-0"
+                                      type="button"
+                                      onClick={() =>
+                                        handleSupplyReturnChange(
+                                          supplyReturn.referenceNo
+                                        )
+                                      }
+                                    >
+                                      <i className="bi bi-file-earmark-text me-2 text-warning"></i>
+                                      {supplyReturn?.referenceNo}
+                                    </button>
+                                  </li>
+                                ))}
+                              {approvedSupplyReturnMasters.filter(
+                                (supplyReturn) =>
+                                  supplyReturn.referenceNo
+                                    ?.replace(/\s/g, "")
+                                    ?.toLowerCase()
+                                    .includes(
+                                      supplyReturnSearchTerm
+                                        .toLowerCase()
+                                        .replace(/\s/g, "")
+                                    )
+                              ).length === 0 && (
+                                <li className="list-group-item text-center text-muted">
+                                  <i className="bi bi-emoji-frown me-2"></i>
+                                  No supply return found
+                                </li>
+                              )}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                      {selectedSupplyReturn === null && (
+                        <small className="form-text text-muted d-block mt-1">
+                          {validationErrors.supplyReturnMasterId && (
+                            <span className="text-danger">
+                              {validationErrors.supplyReturnMasterId}
+                            </span>
+                          )}
+                          {!validationErrors.supplyReturnMasterId &&
+                            "Please search for a supply return and select it"}
+                        </small>
+                      )}
+                    </div>
+
+                    {selectedSupplyReturn && (
+                      <div className="card border-warning">
+                        <div className="card-header bg-warning text-dark">
+                          <i className="bi bi-check-circle me-2"></i>Selected
+                          Supply Return
+                        </div>
+                        <div className="card-body">
+                          <div className="mb-2">
+                            <strong>Reference No:</strong>{" "}
+                            {selectedSupplyReturn?.referenceNo}
+                          </div>
+                          <div className="mb-2">
+                            <strong>Supplier:</strong>{" "}
+                            {selectedSupplyReturn?.supplier?.supplierName}
+                          </div>
+                          <div className="mb-3">
+                            <strong>Returned Date:</strong>{" "}
+                            {selectedSupplyReturn?.returnDate?.split("T")[0] ??
+                              ""}
+                          </div>
+                          <button
+                            type="button"
+                            className="btn btn-outline-danger btn-sm"
+                            onClick={handleResetSupplyReturn}
+                          >
+                            <i className="bi bi-x-circle me-1"></i>Reset Supply
+                            Return
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </div>
 
-        <div className="row mb-3 d-flex justify-content-between">
-          <div className="col-md-5">
-            {/* Item Details */}
-            <h4>3. Item Details</h4>
-            {/* Item Search */}
+        {/* Item Details Section */}
+        <div className="card shadow-sm mb-4">
+          <div className="card-header bg-info text-white">
+            <h5 className="mb-0">
+              <i className="bi bi-box-seam me-2"></i>3. Item Details
+            </h5>
+          </div>
+          <div className="card-body">
             {["finishedGoodsIn", "directPurchase"].includes(
               formData?.grnType
             ) && (
-              <div className="mb-0 mt-3">
-                <div className="input-group">
-                  <span className="input-group-text bg-transparent">
-                    <i className="bi bi-search"></i>
-                  </span>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Search for an item..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                  {searchTerm && (
-                    <span
-                      className="input-group-text bg-transparent"
-                      style={{
-                        cursor: "pointer",
-                      }}
-                      onClick={() => setSearchTerm("")}
-                    >
-                      <i className="bi bi-x"></i>
+              <div className="mb-3">
+                <div className="position-relative">
+                  <div className="input-group">
+                    <span className="input-group-text bg-light border-end-0">
+                      <i className="bi bi-search text-muted"></i>
                     </span>
-                  )}
-                </div>
+                    <input
+                      type="text"
+                      className="form-control border-start-0"
+                      placeholder="Search for an item..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    {searchTerm && (
+                      <button
+                        className="btn btn-outline-secondary"
+                        type="button"
+                        onClick={() => setSearchTerm("")}
+                      >
+                        <i className="bi bi-x"></i>
+                      </button>
+                    )}
+                  </div>
 
-                {/* Dropdown for filtered items */}
-                {searchTerm && (
-                  <div className="dropdown" style={{ width: "100%" }}>
-                    <ul
-                      className="dropdown-menu"
-                      style={{
-                        display: "block",
-                        width: "100%",
-                        maxHeight: "200px",
-                        overflowY: "auto",
-                      }}
+                  {searchTerm && (
+                    <div
+                      className="position-absolute w-100 mt-1 shadow-lg"
+                      style={{ zIndex: 1000 }}
                     >
-                      {isItemsLoading ? (
-                        <li className="dropdown-item">
-                          <ButtonLoadingSpinner text="Searching..." />
-                        </li>
-                      ) : isItemsError ? (
-                        <li className="dropdown-item">
-                          Error: {itemsError.message}
-                        </li>
-                      ) : availableItems === null ||
-                        availableItems?.filter(
-                          (item) =>
-                            !formData.itemDetails.some(
-                              (detail) => detail.id === item.itemMasterId
-                            )
-                        ).length === 0 ? (
-                        <li className="dropdown-item">
-                          <span className="me-3">
-                            <i className="bi bi-emoji-frown"></i>
-                          </span>
-                          No items found
-                        </li>
-                      ) : (
-                        availableItems
-                          ?.filter(
+                      <ul
+                        className="list-group rounded-bottom overflow-auto"
+                        style={{ maxHeight: "200px" }}
+                      >
+                        {isItemsLoading ? (
+                          <li className="list-group-item">
+                            <ButtonLoadingSpinner text="Searching..." />
+                          </li>
+                        ) : isItemsError ? (
+                          <li className="list-group-item text-danger">
+                            <i className="bi bi-exclamation-triangle me-2"></i>
+                            Error: {itemsError.message}
+                          </li>
+                        ) : availableItems === null ||
+                          availableItems?.filter(
                             (item) =>
                               !formData.itemDetails.some(
                                 (detail) => detail.id === item.itemMasterId
                               )
-                          ) // Filter out items that are already in itemDetails
-                          .map((item) => (
-                            <li key={item.itemMasterId}>
-                              <button
-                                className="dropdown-item"
-                                onClick={() => handleSelectItem(item)}
+                          ).length === 0 ? (
+                          <li className="list-group-item text-center text-muted">
+                            <i className="bi bi-emoji-frown me-2"></i>
+                            No items found
+                          </li>
+                        ) : (
+                          availableItems
+                            ?.filter(
+                              (item) =>
+                                !formData.itemDetails.some(
+                                  (detail) => detail.id === item.itemMasterId
+                                )
+                            )
+                            .map((item) => (
+                              <li
+                                key={item.itemMasterId}
+                                className="list-group-item list-group-item-action"
                               >
-                                <span className="me-3">
-                                  <i className="bi bi-cart4"></i>
-                                </span>{" "}
-                                {item.itemCode} - {item.itemName}
-                              </button>
-                            </li>
-                          ))
-                      )}
-                    </ul>
-                  </div>
-                )}
+                                <button
+                                  className="btn btn-link text-decoration-none text-start w-100 p-0"
+                                  type="button"
+                                  onClick={() => handleSelectItem(item)}
+                                >
+                                  <i className="bi bi-cart4 me-2"></i>
+                                  <span className="text-dark">
+                                    {item.itemCode} - {item.itemName}
+                                  </span>
+                                </button>
+                              </li>
+                            ))
+                        )}
+                      </ul>
+                    </div>
+                  )}
+                </div>
 
                 {!formData.itemDetails.length > 0 && (
-                  <div className="mb-3">
-                    <small className="form-text text-muted">
-                      Please search for an item and add it
-                    </small>
-                  </div>
+                  <small className="form-text text-muted d-block mt-2">
+                    <i className="bi bi-info-circle me-1"></i>
+                    Please search for an item and add it
+                  </small>
                 )}
+              </div>
+            )}
+
+            {!["finishedGoodsIn", "directPurchase"].includes(
+              formData?.grnType
+            ) &&
+              selectedPurchaseOrder === null && (
+                <div
+                  className="alert alert-info d-flex align-items-center"
+                  role="alert"
+                >
+                  <i className="bi bi-info-circle-fill me-2"></i>
+                  <div>
+                    Please select a purchase order or purchase requisition to
+                    add item details.
+                  </div>
+                </div>
+              )}
+
+            {selectedPurchaseOrder !== null &&
+              formData.itemDetails.length === 0 && (
+                <div
+                  className="alert alert-danger d-flex align-items-center"
+                  role="alert"
+                >
+                  <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                  <div>
+                    Selected purchase order has no remaining items to receive.
+                  </div>
+                </div>
+              )}
+
+            {formData.itemDetails.length > 0 && (
+              <div className="table-responsive">
+                <table className="table table-hover align-middle mb-0">
+                  <thead className="table-light">
+                    <tr>
+                      <th className="fw-semibold">Item Name</th>
+                      <th className="fw-semibold">Unit</th>
+                      {!["finishedGoodsIn", "directPurchase"].includes(
+                        formData?.grnType
+                      ) && <th className="fw-semibold">Ordered Qty</th>}
+                      <th className="fw-semibold">Received Qty</th>
+                      <th className="fw-semibold">Rejected Qty</th>
+                      <th className="fw-semibold">Free Qty</th>
+                      <th className="fw-semibold">Expiry Date</th>
+                      <th className="fw-semibold">Unit Price</th>
+                      <th className="fw-semibold text-center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {formData.itemDetails.map((item, index) => (
+                      <tr key={index}>
+                        <td className="fw-medium">{item.name}</td>
+                        <td>
+                          <span className="badge bg-secondary">
+                            {item.unit}
+                          </span>
+                        </td>
+                        {!["finishedGoodsIn", "directPurchase"].includes(
+                          formData?.grnType
+                        ) && (
+                          <td>
+                            <span className="badge bg-info">
+                              {item.quantity}
+                            </span>
+                          </td>
+                        )}
+                        <td>
+                          <input
+                            type="number"
+                            className={`form-control form-control-sm ${
+                              validFields[`receivedQuantity_${index}`]
+                                ? "is-valid"
+                                : ""
+                            } ${
+                              validationErrors[`receivedQuantity_${index}`]
+                                ? "is-invalid"
+                                : ""
+                            }`}
+                            value={item.receivedQuantity}
+                            onChange={(e) =>
+                              handleItemDetailsChange(
+                                index,
+                                "receivedQuantity",
+                                e.target.value
+                              )
+                            }
+                          />
+                          {validationErrors[`receivedQuantity_${index}`] && (
+                            <div className="invalid-feedback">
+                              {validationErrors[`receivedQuantity_${index}`]}
+                            </div>
+                          )}
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            className={`form-control form-control-sm ${
+                              validFields[`rejectedQuantity_${index}`]
+                                ? "is-valid"
+                                : ""
+                            } ${
+                              validationErrors[`rejectedQuantity_${index}`]
+                                ? "is-invalid"
+                                : ""
+                            }`}
+                            value={item.rejectedQuantity}
+                            onChange={(e) =>
+                              handleItemDetailsChange(
+                                index,
+                                "rejectedQuantity",
+                                e.target.value
+                              )
+                            }
+                          />
+                          {validationErrors[`rejectedQuantity_${index}`] && (
+                            <div className="invalid-feedback">
+                              {validationErrors[`rejectedQuantity_${index}`]}
+                            </div>
+                          )}
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            className="form-control form-control-sm"
+                            value={item.freeQuantity}
+                            onChange={(e) =>
+                              handleItemDetailsChange(
+                                index,
+                                "freeQuantity",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="date"
+                            className="form-control form-control-sm"
+                            value={item.expiryDate}
+                            onChange={(e) =>
+                              handleItemDetailsChange(
+                                index,
+                                "expiryDate",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            className={`form-control form-control-sm ${
+                              validFields[`unitPrice_${index}`]
+                                ? "is-valid"
+                                : ""
+                            } ${
+                              validationErrors[`unitPrice_${index}`]
+                                ? "is-invalid"
+                                : ""
+                            }`}
+                            value={item.unitPrice}
+                            onChange={(e) =>
+                              handleItemDetailsChange(
+                                index,
+                                "unitPrice",
+                                e.target.value
+                              )
+                            }
+                          />
+                          {validationErrors[`unitPrice_${index}`] && (
+                            <div className="invalid-feedback">
+                              {validationErrors[`unitPrice_${index}`]}
+                            </div>
+                          )}
+                        </td>
+                        <td className="text-center">
+                          <button
+                            type="button"
+                            className="btn btn-outline-danger btn-sm"
+                            onClick={() => handleRemoveItem(index)}
+                          >
+                            <i className="bi bi-trash me-1"></i>Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>
         </div>
 
-        {formData.itemDetails.length > 0 && (
-          <div className="table-responsive mb-2">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Item Name</th>
-                  <th>Unit</th>
-                  {!["finishedGoodsIn", "directPurchase"].includes(
-                    formData?.grnType
-                  ) && (
-                    <>
-                      <th>Ordered Quantity</th>
-                      {/* <th>Remaining Quantity</th> */}
-                    </>
-                  )}
-                  <th>Received Quantity</th>
-                  <th>Rejected Quantity</th>
-                  <th>Free Quantity</th>
-                  {/* <th>Item Barcode</th> */}
-                  <th>Expiry Date</th>
-                  <th>Unit Price</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {formData.itemDetails.map((item, index) => (
-                  <tr key={index}>
-                    <td>{item.name}</td>
-                    <td>{item.unit}</td>
-                    {!["finishedGoodsIn", "directPurchase"].includes(
-                      formData?.grnType
-                    ) && (
-                      <>
-                        <td>{item.quantity}</td>
-                        {/* <td>{item.remainingQuantity}</td> */}
-                      </>
-                    )}
-                    <td>
-                      <input
-                        type="number"
-                        className={`form-control ${
-                          validFields[`receivedQuantity_${index}`]
-                            ? "is-valid"
-                            : ""
-                        } ${
-                          validationErrors[`receivedQuantity_${index}`]
-                            ? "is-invalid"
-                            : ""
-                        }`}
-                        value={item.receivedQuantity}
-                        onChange={(e) =>
-                          handleItemDetailsChange(
-                            index,
-                            "receivedQuantity",
-                            e.target.value
-                          )
-                        }
-                      />
-                      {validationErrors[`receivedQuantity_${index}`] && (
-                        <div className="invalid-feedback">
-                          {validationErrors[`receivedQuantity_${index}`]}
-                        </div>
-                      )}
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        className={`form-control ${
-                          validFields[`rejectedQuantity_${index}`]
-                            ? "is-valid"
-                            : ""
-                        } ${
-                          validationErrors[`rejectedQuantity_${index}`]
-                            ? "is-invalid"
-                            : ""
-                        }`}
-                        value={item.rejectedQuantity}
-                        onChange={(e) =>
-                          handleItemDetailsChange(
-                            index,
-                            "rejectedQuantity",
-                            e.target.value
-                          )
-                        }
-                      />
-                      {validationErrors[`rejectedQuantity_${index}`] && (
-                        <div className="invalid-feedback">
-                          {validationErrors[`rejectedQuantity_${index}`]}
-                        </div>
-                      )}
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        className="form-control"
-                        value={item.freeQuantity}
-                        onChange={(e) =>
-                          handleItemDetailsChange(
-                            index,
-                            "freeQuantity",
-                            e.target.value
-                          )
-                        }
-                      />
-                    </td>
-                    {/* <td>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="itemBarcode"
-                        placeholder="Enter Item Barcode"
-                        value={item.itemBarcode || ""}
-                        onChange={(e) =>
-                          handleItemDetailsChange(
-                            index,
-                            "itemBarcode",
-                            e.target.value
-                          )
-                        }
-                        required
-                      />
-                    </td> */}
-                    <td>
-                      <input
-                        type="date"
-                        className="form-control"
-                        id="expiryDate"
-                        // value={item.expiryDate || ""}
-                        onChange={(e) =>
-                          handleItemDetailsChange(
-                            index,
-                            "expiryDate",
-                            e.target.value
-                          )
-                        }
-                        required
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        className={`form-control ${
-                          validFields[`unitPrice_${index}`] ? "is-valid" : ""
-                        } ${
-                          validationErrors[`unitPrice_${index}`]
-                            ? "is-invalid"
-                            : ""
-                        }`}
-                        value={item.unitPrice}
-                        onChange={(e) =>
-                          handleItemDetailsChange(
-                            index,
-                            "unitPrice",
-                            e.target.value
-                          )
-                        }
-                      />
-                      {validationErrors[`unitPrice_${index}`] && (
-                        <div className="invalid-feedback">
-                          {validationErrors[`unitPrice_${index}`]}
-                        </div>
-                      )}
-                    </td>
-                    <td>
-                      <button
-                        type="button"
-                        className="btn btn-outline-danger"
-                        onClick={() => handleRemoveItem(index)}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {!["finishedGoodsIn", "directPurchase"].includes(formData?.grnType) &&
-          selectedPurchaseOrder === null && (
-            <div className="mb-3">
-              <small className="form-text text-muted">
-                Please select a purchase order or purchase requisition to add
-                item details.
-              </small>
-            </div>
-          )}
-
-        {selectedPurchaseOrder !== null &&
-          formData.itemDetails.length === 0 && (
-            <div className="mb-3">
-              <small className="form-text  text-danger">
-                Selected purchase order has no remaining items to receive.
-              </small>
-            </div>
-          )}
-
-        {/* Actions */}
-        <div className="mb-3">
+        {/* Action Buttons */}
+        <div className="d-flex flex-wrap gap-2 pb-4">
           <button
             type="button"
-            className="btn btn-primary me-2"
+            className="btn btn-primary px-4"
             onClick={() => handleSubmit(false)}
             disabled={
               !formData.itemDetails.length > 0 ||
@@ -1244,12 +1330,14 @@ const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
             {loading && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Submitting..." />
             ) : (
-              "Submit"
+              <>
+                <i className="bi bi-check-circle me-2"></i>Submit
+              </>
             )}
           </button>
           <button
             type="button"
-            className="btn btn-secondary me-2"
+            className="btn btn-secondary px-4"
             onClick={() => handleSubmit(true)}
             disabled={
               !formData.itemDetails.length > 0 ||
@@ -1261,24 +1349,26 @@ const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
             {loadingDraft && submissionStatus === null ? (
               <ButtonLoadingSpinner text="Saving as Draft..." />
             ) : (
-              "Save as Draft"
+              <>
+                <i className="bi bi-save me-2"></i>Save as Draft
+              </>
             )}
           </button>
           <button
             type="button"
-            className="btn btn-success me-2"
+            className="btn btn-success px-4"
             onClick={handlePrint}
             disabled={loading || loadingDraft || submissionStatus !== null}
           >
-            Print
+            <i className="bi bi-printer me-2"></i>Print
           </button>
           <button
             type="button"
-            className="btn btn-danger"
+            className="btn btn-danger px-4"
             onClick={handleClose}
             disabled={loading || loadingDraft || submissionStatus !== null}
           >
-            Cancel
+            <i className="bi bi-x-circle me-2"></i>Cancel
           </button>
         </div>
       </form>

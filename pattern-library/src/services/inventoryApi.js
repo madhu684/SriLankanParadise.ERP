@@ -417,3 +417,46 @@ export const get_supplier_items_by_type_category_api = async (
     throw error;
   }
 };
+
+//Item Price List APIs
+export const get_item_price_list_by_company_id_api = async (companyId) => {
+  try {
+    const response = await api.get(
+      `/itemPriceMaster/GetItemPriceMasterByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_item_price_list_by_id_api = async (id) => {
+  try {
+    const response = await api.get(`/itemPriceMaster/${id}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_item_price_list_by_locationId = async (locationId) => {
+  try {
+    const response = await api.get(
+      `/itemPriceMaster/GetItemPriceMasterByLocationId/${locationId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   get_company_suppliers_api,
   get_purchase_orders_with_out_drafts_api,
@@ -15,6 +15,7 @@ import {
 } from "../../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useGrnUpdate = ({ grn, onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -27,8 +28,9 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     supplierId: "",
     purchaseRequisitionId: "",
     supplyReturnMasterId: "",
-    grnType: "goodsReceivedNote",
+    grnType: "directPurchase",
     warehouseLocation: null,
+    referenceNo: null,
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -38,23 +40,42 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     useState(null);
   const [selectedSupplyReturn, setSelectedSupplyReturn] = useState(null);
   const [selectedSupplier, setSelectedSupplier] = useState(null);
-  const statusOptions = [
-    { id: "4", label: "In Progress" },
-    { id: "5", label: "Completed" },
-  ];
+  const [hasManualEdits, setHasManualEdits] = useState(false);
+  const [grnDetailIdsToDelete, setGrnDetailIdsToDelete] = useState([]);
+
+  const statusOptions = useMemo(
+    () => [
+      { id: "4", label: "In Progress" },
+      { id: "5", label: "Completed" },
+    ],
+    []
+  );
+
   const alertRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
-  const grnTypeOptions = [
-    { id: "goodsReceivedNote", label: "Goods Received Note" },
-    { id: "finishedGoodsIn", label: "Finished Goods In" },
-    { id: "directPurchase", label: "Direct Purchase" },
-  ];
+
+  const grnTypeOptions = useMemo(
+    () => [
+      { id: "goodsReceivedNote", label: "Goods Received Note" },
+      { id: "finishedGoodsIn", label: "Finished Goods In" },
+      { id: "directPurchase", label: "Direct Purchase" },
+    ],
+    []
+  );
+
   const [searchTerm, setSearchTerm] = useState("");
   const [searchByPO, setSearchByPO] = useState(false);
   const [searchByPR, setSearchByPR] = useState(true);
 
-  console.log("Grn: ", grn);
+  // FIXED: Use ref to track if we've logged to prevent infinite console logs
+  const hasLoggedGrn = useRef(false);
+  useEffect(() => {
+    if (!hasLoggedGrn.current) {
+      console.log("Grn: ", grn);
+      hasLoggedGrn.current = true;
+    }
+  }, [grn]);
 
   const fetchLocations = async () => {
     try {
@@ -172,6 +193,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     queryKey: ["grns", selectedPurchaseOrder?.purchaseOrderId],
     queryFn: () =>
       fetchGrnsBypurchaseOrderId(selectedPurchaseOrder.purchaseOrderId),
+    enabled: !!selectedPurchaseOrder?.purchaseOrderId,
   });
 
   const fetchSuppliers = async () => {
@@ -226,7 +248,78 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     enabled: !!grn.supplyReturnMasterId,
   });
 
+  const handlePurchaseOrderChange = useCallback(
+    (purchaseOrderId) => {
+      if (!purchaseOrders) return;
+
+      const selectedPurchaseOrder = purchaseOrders.find(
+        (purchaseOrder) => purchaseOrder.purchaseOrderId === purchaseOrderId
+      );
+
+      setSelectedPurchaseOrder(selectedPurchaseOrder);
+
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        purchaseOrderId: selectedPurchaseOrder?.purchaseOrderId ?? "",
+      }));
+    },
+    [purchaseOrders]
+  );
+
+  const handlePurchaseRequisitionChange = useCallback(
+    (purchaseRequisitionId) => {
+      if (!purchaseRequisitions) return;
+
+      const selectedPurchaseRequisition = purchaseRequisitions.find(
+        (purchaseRequisition) =>
+          purchaseRequisition.purchaseRequisitionId === purchaseRequisitionId
+      );
+
+      setSelectedPurchaseRequisition(selectedPurchaseRequisition);
+
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        purchaseRequisitionId:
+          selectedPurchaseRequisition?.purchaseRequisitionId ?? "",
+      }));
+    },
+    [purchaseRequisitions]
+  );
+
+  const handleSupplierChange = useCallback(
+    (supplierId) => {
+      if (!suppliers) return;
+
+      const selectedSupplier = suppliers.find(
+        (supplier) => supplier.supplierId === supplierId
+      );
+
+      setSelectedSupplier(selectedSupplier);
+
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        supplierId: selectedSupplier?.supplierId ?? "",
+      }));
+    },
+    [suppliers]
+  );
+
+  // Added useRef to track if initial setup is complete
+  const isInitialSetupComplete = useRef(false);
+
+  // Initial data setup - only runs once when grn and data are loaded
   useEffect(() => {
+    // Skip if already initialized or if data is still loading
+    if (
+      isInitialSetupComplete.current ||
+      isLoading ||
+      !purchaseOrders ||
+      !purchaseRequisitions ||
+      !suppliers
+    ) {
+      return;
+    }
+
     const deepCopyGrn = JSON.parse(JSON.stringify(grn));
     setFormData({
       grnDate: deepCopyGrn?.grnDate?.split("T")[0] ?? "",
@@ -241,117 +334,154 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       attachments: deepCopyGrn?.attachments ?? [],
       grnType: deepCopyGrn?.grnType,
       warehouseLocation: deepCopyGrn?.warehouseLocationId,
+      referenceNo: deepCopyGrn?.referenceNo,
     });
 
-    if (!isLoading && purchaseOrders) {
-      //handlePurchaseOrderChange(deepCopyGrn?.purchaseOrder?.referenceNo);
-      handlePurchaseOrderChange(deepCopyGrn?.purchaseOrderId);
-    }
-    if (!isLoading && purchaseRequisitions) {
-      //handlePurchaseRequisitionChange(deepCopyGrn?.purchaseRequisition?.referenceNo)
-      handlePurchaseRequisitionChange(deepCopyGrn?.purchaseRequisitionId);
-    }
+    handlePurchaseOrderChange(deepCopyGrn?.purchaseOrderId);
+    handlePurchaseRequisitionChange(deepCopyGrn?.purchaseRequisitionId);
+    handleSupplierChange(deepCopyGrn?.supplierId);
 
-    if (!isLoading && suppliers) {
-      handleSupplierChange(deepCopyGrn?.supplierId);
-    }
-  }, [grn, isLoading]);
+    // Mark initialization as complete
+    isInitialSetupComplete.current = true;
+  }, [
+    grn,
+    isLoading,
+    purchaseOrders,
+    purchaseRequisitions,
+    suppliers,
+    handlePurchaseOrderChange,
+    handlePurchaseRequisitionChange,
+    handleSupplierChange,
+  ]);
 
+  // Separate effect for updating item details when purchase order or grns change
   useEffect(() => {
-    if (isGrnsFetched) {
-      if (grns && selectedPurchaseOrder) {
-        const updatedItemDetails = selectedPurchaseOrder.purchaseOrderDetails
-          .map((poItem) => {
-            const receivedQuantity = grns.reduce((total, grn) => {
-              const grnDetail = grn.grnDetails.find(
-                (detail) => detail.itemId === poItem.itemMaster?.itemMasterId
-              );
-              return total + (grnDetail ? grnDetail.acceptedQuantity : 0);
-            }, 0);
+    // Skip if initial setup is not complete
+    if (!isInitialSetupComplete.current || !isGrnsFetched) {
+      return;
+    }
 
-            console.log("receivedQuantity", receivedQuantity);
-            const remainingQuantity = poItem.quantity - receivedQuantity;
-            console.log("remainingQuantity", remainingQuantity);
+    if (hasManualEdits) {
+      return;
+    }
 
-            const matchingGrnDetail = grn.grnDetails.find(
-              (detail) => detail.itemId === poItem.itemMaster.itemMasterId
+    if (grns && selectedPurchaseOrder) {
+      const updatedItemDetails = selectedPurchaseOrder.purchaseOrderDetails
+        .map((poItem) => {
+          const receivedQuantity = grns.reduce((total, grnItem) => {
+            const grnDetail = grnItem.grnDetails.find(
+              (detail) => detail.itemId === poItem.itemMaster?.itemMasterId
             );
+            return total + (grnDetail ? grnDetail.acceptedQuantity : 0);
+          }, 0);
 
-            console.log(matchingGrnDetail);
+          const remainingQuantity = poItem.quantity - receivedQuantity;
 
-            return {
-              id: poItem.itemMaster.itemMasterId,
-              name: poItem.itemMaster.itemName,
-              unit: poItem.itemMaster.unit.unitName,
-              quantity: Math.max(0, remainingQuantity),
-              // remainingQuantity:
-              //   Math.max(0, remainingQuantity) +
-              //   (matchingGrnDetail ? matchingGrnDetail.receivedQuantity : 0),
-              remainingQuantity: Math.max(0, remainingQuantity),
-              receivedQuantity: matchingGrnDetail
-                ? matchingGrnDetail.receivedQuantity
-                : 0,
-              rejectedQuantity: matchingGrnDetail
-                ? matchingGrnDetail.rejectedQuantity
-                : 0,
-              freeQuantity: matchingGrnDetail
-                ? matchingGrnDetail.freeQuantity
-                : 0,
-              orderedQuantity: poItem.quantity,
-              expiryDate: matchingGrnDetail
-                ? matchingGrnDetail.expiryDate.split("T")[0]
-                : "",
-              itemBarcode: poItem.itemBarcode,
-              unitPrice: poItem.unitPrice,
-              grnDetailId: matchingGrnDetail
-                ? matchingGrnDetail.grnDetailId
-                : null,
-              grnMasterId: matchingGrnDetail
-                ? matchingGrnDetail.grnMasterId
-                : null,
-            };
-          })
-          .filter((item) => item.grnMasterId === grn.grnMasterId);
+          const matchingGrnDetail = grn.grnDetails.find(
+            (detail) => detail.itemId === poItem.itemMaster.itemMasterId
+          );
 
-        // Update form data with filtered items
-        setFormData((prevFormData) => ({
+          return {
+            id: poItem.itemMaster.itemMasterId,
+            name: poItem.itemMaster.itemName,
+            unit: poItem.itemMaster.unit.unitName,
+            quantity: Math.max(0, remainingQuantity),
+            remainingQuantity: Math.max(0, remainingQuantity),
+            receivedQuantity: matchingGrnDetail
+              ? matchingGrnDetail.receivedQuantity
+              : 0,
+            rejectedQuantity: matchingGrnDetail
+              ? matchingGrnDetail.rejectedQuantity
+              : 0,
+            freeQuantity: matchingGrnDetail
+              ? matchingGrnDetail.freeQuantity
+              : 0,
+            orderedQuantity: poItem.quantity,
+            expiryDate: matchingGrnDetail
+              ? matchingGrnDetail.expiryDate.split("T")[0]
+              : "",
+            itemBarcode: poItem.itemBarcode,
+            unitPrice: poItem.unitPrice,
+            grnDetailId: matchingGrnDetail
+              ? matchingGrnDetail.grnDetailId
+              : null,
+            grnMasterId: matchingGrnDetail
+              ? matchingGrnDetail.grnMasterId
+              : null,
+          };
+        })
+        .filter((item) => item.grnMasterId === grn.grnMasterId);
+
+      // FIXED: Only update if itemDetails actually changed
+      setFormData((prevFormData) => {
+        const itemDetailsChanged =
+          JSON.stringify(prevFormData.itemDetails) !==
+          JSON.stringify(updatedItemDetails);
+        if (!itemDetailsChanged) return prevFormData;
+
+        return {
           ...prevFormData,
           itemDetails: updatedItemDetails,
-        }));
-      } else {
-        const formattedItemDetails = grn.grnDetails.map((detail) => ({
-          id: detail.item.itemMasterId,
-          name: detail.item.itemName,
-          unit: detail.item.unit.unitName,
-          quantity: detail.receivedQuantity,
-          remainingQuantity: detail.remainingQuantity,
-          receivedQuantity: detail.receivedQuantity,
-          rejectedQuantity: detail.rejectedQuantity,
-          freeQuantity: detail.freeQuantity,
-          orderedQuantity: detail.orderedQuantity,
-          expiryDate: detail.expiryDate,
-          itemBarcode: detail.itemBarcode,
-          unitPrice: detail.unitPrice,
-          grnDetailId: detail.grnDetailId,
-        }));
+        };
+      });
+    } else if (!selectedPurchaseOrder && isInitialSetupComplete.current) {
+      // Only set default item details if no purchase order is selected
+      const formattedItemDetails = grn.grnDetails.map((detail) => ({
+        id: detail.item.itemMasterId,
+        name: detail.item.itemName,
+        unit: detail.item.unit.unitName,
+        quantity: detail.receivedQuantity,
+        remainingQuantity: detail.remainingQuantity,
+        receivedQuantity: detail.receivedQuantity,
+        rejectedQuantity: detail.rejectedQuantity,
+        freeQuantity: detail.freeQuantity,
+        orderedQuantity: detail.orderedQuantity,
+        expiryDate: detail.expiryDate.split("T")[0],
+        itemBarcode: detail.itemBarcode,
+        unitPrice: detail.unitPrice,
+        grnDetailId: detail.grnDetailId,
+      }));
 
-        setFormData((prevFormData) => ({
+      // FIXED: Only update if itemDetails actually changed
+      setFormData((prevFormData) => {
+        const itemDetailsChanged =
+          JSON.stringify(prevFormData.itemDetails) !==
+          JSON.stringify(formattedItemDetails);
+        if (!itemDetailsChanged) return prevFormData;
+
+        return {
           ...prevFormData,
           itemDetails: formattedItemDetails,
-        }));
-      }
+        };
+      });
     }
-  }, [selectedPurchaseOrder, grns, isGrnsFetched]);
+  }, [
+    selectedPurchaseOrder,
+    grns,
+    isGrnsFetched,
+    grn.grnMasterId,
+    grn.grnDetails,
+    hasManualEdits,
+  ]);
 
   /* Purchase requisition selected */
-
+  // Added dependency check and skip condition
   useEffect(() => {
+    // Skip if initial setup is not complete
+    if (!isInitialSetupComplete.current) {
+      return;
+    }
+
+    if (hasManualEdits) {
+      return;
+    }
+
     if (grns && selectedPurchaseRequisition) {
       const updatedItemDetails =
         selectedPurchaseRequisition.purchaseRequisitionDetails
           .map((prItem) => {
-            const receivedQuantity = grns.reduce((total, grn) => {
-              const grnDetail = grn.grnDetails.find(
+            const receivedQuantity = grns.reduce((total, grnItem) => {
+              const grnDetail = grnItem.grnDetails.find(
                 (detail) => detail.itemId === prItem.itemMaster?.itemMasterId
               );
               return total + (grnDetail ? grnDetail.receivedQuantity : 0);
@@ -362,8 +492,6 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
             const matchingGrnDetail = grn.grnDetails.find(
               (detail) => detail.itemId === prItem.itemMaster.itemMasterId
             );
-
-            console.log(matchingGrnDetail);
 
             return {
               id: prItem.itemMaster.itemMasterId,
@@ -382,9 +510,6 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
               freeQuantity: matchingGrnDetail
                 ? matchingGrnDetail.freeQuantity
                 : 0,
-              // expiryDate: matchingGrnDetail
-              //   ? matchingGrnDetail.expiryDate?.split('T')[0]
-              //   : '',
               itemBarcode: prItem.itemBarcode,
               unitPrice: prItem.unitPrice,
               grnDetailId: matchingGrnDetail
@@ -397,12 +522,24 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
           })
           .filter((item) => item.grnMasterId === grn.grnMasterId);
 
-      // Update form data with filtered items
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        itemDetails: updatedItemDetails,
-      }));
-    } else {
+      // FIXED: Only update if itemDetails actually changed
+      setFormData((prevFormData) => {
+        const itemDetailsChanged =
+          JSON.stringify(prevFormData.itemDetails) !==
+          JSON.stringify(updatedItemDetails);
+        if (!itemDetailsChanged) return prevFormData;
+
+        return {
+          ...prevFormData,
+          itemDetails: updatedItemDetails,
+        };
+      });
+    } else if (
+      !selectedPurchaseRequisition &&
+      !selectedPurchaseOrder &&
+      isInitialSetupComplete.current
+    ) {
+      // Only set default if no PR or PO is selected
       const formattedItemDetails = grn.grnDetails.map((detail) => ({
         id: detail.item.itemMasterId,
         name: detail.item.itemName,
@@ -412,27 +549,52 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
         receivedQuantity: detail.receivedQuantity,
         rejectedQuantity: detail.rejectedQuantity,
         freeQuantity: detail.freeQuantity,
-        //expiryDate: detail.expiryDate ? detail.expiryDate.split('T')[0] : '',
+        orderedQuantity: detail.orderedQuantity,
+        expiryDate: detail.expiryDate.split("T")[0],
         itemBarcode: detail.itemBarcode,
         unitPrice: detail.unitPrice,
         grnDetailId: detail.grnDetailId,
       }));
 
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        itemDetails: formattedItemDetails,
-      }));
+      // FIXED: Only update if itemDetails actually changed
+      setFormData((prevFormData) => {
+        const itemDetailsChanged =
+          JSON.stringify(prevFormData.itemDetails) !==
+          JSON.stringify(formattedItemDetails);
+        if (!itemDetailsChanged) return prevFormData;
+
+        return {
+          ...prevFormData,
+          itemDetails: formattedItemDetails,
+        };
+      });
     }
-  }, [selectedPurchaseRequisition, grns]);
+  }, [
+    selectedPurchaseRequisition,
+    grns,
+    selectedPurchaseOrder,
+    grn.grnMasterId,
+    grn.grnDetails,
+    hasManualEdits,
+  ]);
 
   /* Supply Return selection */
-
+  // Added dependency check and skip condition
   useEffect(() => {
+    // Skip if initial setup is not complete
+    if (!isInitialSetupComplete.current) {
+      return;
+    }
+
+    if (hasManualEdits) {
+      return;
+    }
+
     if (grns && selectedSupplyReturn) {
       const formattedItemDetails = selectedSupplyReturn.supplyReturnDetails
         .map((srItem) => {
-          const receivedQuantity = grns.reduce((total, grn) => {
-            const grnDetail = grn.grnDetails.find(
+          const receivedQuantity = grns.reduce((total, grnItem) => {
+            const grnDetail = grnItem.grnDetails.find(
               (detail) => detail.itemId === srItem.itemMaster?.itemMasterId
             );
             return total + (grnDetail ? grnDetail.receivedQuantity : 0);
@@ -449,42 +611,54 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
             receivedQuantity: 0,
             rejectedQuantity: 0,
             freeQuantity: 0,
-            //expiryDate: '',
             itemBarcode: "",
             unitPrice: srItem.itemMaster.unitPrice,
           };
         })
         .filter((item) => item.remainingQuantity > 0);
 
-      // Update form data with filtered items
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        itemDetails: formattedItemDetails,
-      }));
-    } else if (selectedSupplyReturn) {
+      // FIXED: Only update if itemDetails actually changed
+      setFormData((prevFormData) => {
+        const itemDetailsChanged =
+          JSON.stringify(prevFormData.itemDetails) !==
+          JSON.stringify(formattedItemDetails);
+        if (!itemDetailsChanged) return prevFormData;
+
+        return {
+          ...prevFormData,
+          itemDetails: formattedItemDetails,
+        };
+      });
+    } else if (selectedSupplyReturn && !grns) {
       const formattedItemDetails = selectedSupplyReturn.supplyReturnDetails.map(
         (srItem) => ({
           id: srItem.itemMaster?.itemMasterId,
           name: srItem.itemMaster?.itemName,
           unit: srItem.itemMaster?.unit.unitName,
           quantity: srItem.returnedQuantity,
-          remainingQuantity: srItem.returnedQuantity, // Set remaining quantity same as ordered quantity
+          remainingQuantity: srItem.returnedQuantity,
           receivedQuantity: srItem.returnedQuantity,
           rejectedQuantity: 0,
           freeQuantity: 0,
-          //expiryDate: '',
           itemBarcode: "",
           unitPrice: srItem.itemMaster.unitPrice,
-          // Other item properties...
         })
       );
 
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        itemDetails: formattedItemDetails,
-      }));
+      // FIXED: Only update if itemDetails actually changed
+      setFormData((prevFormData) => {
+        const itemDetailsChanged =
+          JSON.stringify(prevFormData.itemDetails) !==
+          JSON.stringify(formattedItemDetails);
+        if (!itemDetailsChanged) return prevFormData;
+
+        return {
+          ...prevFormData,
+          itemDetails: formattedItemDetails,
+        };
+      });
     }
-  }, [selectedSupplyReturn, grns]);
+  }, [selectedSupplyReturn, grns, hasManualEdits]);
 
   useEffect(() => {
     if (submissionStatus != null) {
@@ -648,23 +822,6 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       isItemUnitPriceValid = isItemUnitPriceValid && isValidUnitPrice;
     });
 
-    // let isItemExpiryDateValid = true;
-
-    // // Validate item details
-    // formData.itemDetails.forEach((item, index) => {
-    //   // Validation for expiry date
-    //   const expiryDateFieldName = `expiryDate_${index}`;
-    //   const expiryDateFieldDisplayName = `Expiry Date for ${item.name}`;
-
-    //   const isValidExpiryDate = validateField(
-    //     expiryDateFieldName,
-    //     expiryDateFieldDisplayName,
-    //     item.expiryDate
-    //   );
-
-    //   isItemExpiryDateValid = isItemExpiryDateValid && isValidExpiryDate;
-    // });
-
     const isItemBarcodeValid = validateField(
       "itemBarcode",
       "Item Barcode",
@@ -690,7 +847,6 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       isStatusValid &&
       isItemQuantityValid &&
       isItemUnitPriceValid &&
-      //isItemExpiryDateValid &&
       isRejectedQuantityValid &&
       isGrnTypeValid &&
       isWarehouseLocationValid &&
@@ -739,6 +895,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
           lastUpdatedDate: currentDate,
           grnType: formData.grnType,
           warehouseLocationId: formData.warehouseLocation,
+          referenceNo: grn.referenceNo,
           permissionId: 22,
         };
 
@@ -793,8 +950,15 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
             setLoadingDraft(false);
             onFormSubmit();
           }, 3000);
+
+          toast.success(
+            isSaveAsDraft
+              ? "GRN updated as draft successfully!"
+              : "GRN updated successfully!"
+          );
         } else {
           setSubmissionStatus("error");
+          toast.error("Error updating GRN!");
         }
       }
     } catch (error) {
@@ -805,6 +969,8 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
         setLoading(false);
         setLoadingDraft(false);
       }, 3000);
+
+      toast.error("Error updating GRN!");
     }
   };
 
@@ -815,32 +981,79 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     }));
   };
 
+  // const handleItemDetailsChange = (index, field, value) => {
+  //   setFormData((prevFormData) => {
+  //     const updatedItemDetails = [...prevFormData.itemDetails];
+  //     updatedItemDetails[index][field] = value;
+
+  //     // Ensure positive values for Quantities
+  //     updatedItemDetails[index].receivedQuantity = Math.max(
+  //       0,
+  //       updatedItemDetails[index].receivedQuantity
+  //     );
+
+  //     updatedItemDetails[index].rejectedQuantity = Math.max(
+  //       0,
+  //       updatedItemDetails[index].rejectedQuantity
+  //     );
+
+  //     updatedItemDetails[index].freeQuantity = Math.max(
+  //       0,
+  //       updatedItemDetails[index].freeQuantity
+  //     );
+
+  //     updatedItemDetails[index].unitPrice = !isNaN(
+  //       parseFloat(updatedItemDetails[index].unitPrice)
+  //     )
+  //       ? Math.max(0, parseFloat(updatedItemDetails[index].unitPrice))
+  //       : 0;
+
+  //     return {
+  //       ...prevFormData,
+  //       itemDetails: updatedItemDetails,
+  //     };
+  //   });
+  // };
+
   const handleItemDetailsChange = (index, field, value) => {
+    // FIXED: Set flag to prevent useEffect from overwriting manual changes
+    setHasManualEdits(true);
+
     setFormData((prevFormData) => {
       const updatedItemDetails = [...prevFormData.itemDetails];
-      updatedItemDetails[index][field] = value;
 
-      // Ensure positive values for Quantities
-      updatedItemDetails[index].receivedQuantity = Math.max(
-        0,
-        updatedItemDetails[index].receivedQuantity
-      );
+      if (
+        field === "receivedQuantity" ||
+        field === "rejectedQuantity" ||
+        field === "freeQuantity" ||
+        field === "unitPrice"
+      ) {
+        // Keep as string if user is typing, convert on blur
+        updatedItemDetails[index][field] = value === "" ? "" : value;
+      } else {
+        updatedItemDetails[index][field] = value;
+      }
 
-      updatedItemDetails[index].rejectedQuantity = Math.max(
-        0,
-        updatedItemDetails[index].rejectedQuantity
-      );
+      // Apply constraints only to ensure non-negative values
+      if (field === "receivedQuantity") {
+        updatedItemDetails[index].receivedQuantity =
+          value === "" ? "" : Math.max(0, parseFloat(value) || 0);
+      }
 
-      updatedItemDetails[index].freeQuantity = Math.max(
-        0,
-        updatedItemDetails[index].freeQuantity
-      );
+      if (field === "rejectedQuantity") {
+        updatedItemDetails[index].rejectedQuantity =
+          value === "" ? "" : Math.max(0, parseFloat(value) || 0);
+      }
 
-      updatedItemDetails[index].unitPrice = !isNaN(
-        parseFloat(updatedItemDetails[index].unitPrice)
-      )
-        ? Math.max(0, parseFloat(updatedItemDetails[index].unitPrice))
-        : 0;
+      if (field === "freeQuantity") {
+        updatedItemDetails[index].freeQuantity =
+          value === "" ? "" : Math.max(0, parseFloat(value) || 0);
+      }
+
+      if (field === "unitPrice") {
+        updatedItemDetails[index].unitPrice =
+          value === "" ? "" : Math.max(0, parseFloat(value) || 0);
+      }
 
       return {
         ...prevFormData,
@@ -851,47 +1064,6 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
 
   const handlePrint = () => {
     window.print();
-  };
-
-  const handlePurchaseOrderChange = (purchaseOrderId) => {
-    const selectedPurchaseOrder = purchaseOrders?.find(
-      (purchaseOrder) => purchaseOrder.purchaseOrderId === purchaseOrderId
-    );
-
-    setSelectedPurchaseOrder(selectedPurchaseOrder);
-
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      purchaseOrderId: selectedPurchaseOrder?.purchaseOrderId ?? "",
-    }));
-  };
-
-  const handlePurchaseRequisitionChange = (purchaseRequisitionId) => {
-    const selectedPurchaseRequisition = purchaseRequisitions?.find(
-      (purchaseRequisition) =>
-        purchaseRequisition.purchaseRequisitionId === purchaseRequisitionId
-    );
-
-    setSelectedPurchaseRequisition(selectedPurchaseRequisition);
-
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      purchaseRequisitionId:
-        selectedPurchaseRequisition?.purchaseRequisitionId ?? "",
-    }));
-  };
-
-  const handleSupplierChange = (supplierId) => {
-    const selectedSupplier = suppliers?.find(
-      (supplier) => supplier.supplierId === supplierId
-    );
-
-    setSelectedSupplier(selectedSupplier);
-
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      supplierId: selectedSupplier?.supplierId ?? "",
-    }));
   };
 
   const handleStatusChange = (selectedOption) => {
@@ -915,7 +1087,6 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
           receivedQuantity: 0,
           rejectedQuantity: 0,
           freeQuantity: 0,
-          //expiryDate: "",
           itemBarcode: "",
           unitPrice: 0.0,
         },
@@ -924,7 +1095,36 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     setSearchTerm(""); // Clear the search term
   };
 
-  console.log("formData", formData);
+  const handleRemoveItem = (index, item) => {
+    setFormData((prevFormData) => {
+      const updatedItemDetails = [...prevFormData.itemDetails];
+      updatedItemDetails.splice(index, 1);
+      return {
+        ...prevFormData,
+        itemDetails: updatedItemDetails,
+      };
+    });
+
+    if (item?.grnDetailId !== null && item?.grnDetailId !== undefined) {
+      setGrnDetailIdsToDelete((prevIds) => [...prevIds, item]);
+    }
+
+    setValidFields({});
+    setValidationErrors({});
+  };
+
+  // Use ref to track if we've logged formData to prevent infinite console logs
+  const hasLoggedFormData = useRef(false);
+  const lastLoggedFormData = useRef(null);
+
+  useEffect(() => {
+    const formDataString = JSON.stringify(formData);
+    // Only log if formData actually changed
+    if (lastLoggedFormData.current !== formDataString) {
+      console.log("formData", formData);
+      lastLoggedFormData.current = formDataString;
+    }
+  }, [formData]);
 
   return {
     formData,
@@ -969,6 +1169,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     setSelectedPurchaseRequisition,
     setSearchTerm,
     handleSelectItem,
+    handleRemoveItem,
   };
 };
 

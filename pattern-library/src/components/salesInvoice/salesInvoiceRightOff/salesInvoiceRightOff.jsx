@@ -1,6 +1,7 @@
 import React from "react";
 import { Modal, Button } from "react-bootstrap";
 import { put_sales_invoice_api } from "../../../services/salesApi";
+import toast from "react-hot-toast";
 
 const SalesInvoiceRightOff = ({
   show,
@@ -31,8 +32,10 @@ const SalesInvoiceRightOff = ({
       });
       handleRightOff();
       handleClose();
+      toast.success("Sales invoice righted off successfully.");
     } catch (error) {
       console.error("Error righting off sales invoice:", error);
+      toast.error("Error righting off sales invoice.");
     }
   };
 

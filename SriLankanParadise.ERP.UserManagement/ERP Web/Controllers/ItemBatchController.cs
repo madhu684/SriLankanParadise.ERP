@@ -284,5 +284,29 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpGet("GetUniqueItembatchRef/{locationId}/{companyId}")]
+        public async Task<ApiResponseModel> GetUniqueItembatchRef(int locationId, int companyId)
+        {
+            try
+            {
+                var itemBatches = await _itemBatchService.GetUniqueItembatchRef(locationId, companyId);
+                if (itemBatches != null)
+                {
+                    AddResponseMessage(Response, LogMessages.ItemBatchesRetrieved, itemBatches, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.ItemBatchesNotFound);
+                    AddResponseMessage(Response, LogMessages.ItemBatchesNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

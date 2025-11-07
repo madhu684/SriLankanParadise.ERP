@@ -16,7 +16,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task UpdateLocationInventory(int locationInventoryId, LocationInventory locationInventory);
         Task<LocationInventory> GetLocationInventoryByDetails(int locationId, int itemMasterId, int batchId);
         Task<LocationInventory> GetEmptyLocationInventoryByDetails(int locationId, int itemMasterId);
-        Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemMasterId(int? locationId, int itemMasterId);
+        Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemMasterId(int? locationId, int? batchId, int itemMasterId);
         Task UpdateLocationInventoryStockInHand(int locationId, int itemMasterId, int batchId, LocationInventory locationInventory, string operation);
         Task UpdateEmptyLocationInventoryStockInHand(int locationId, int itemMasterId,LocationInventory locationInventory, string operation);
         Task<IEnumerable<LocationInventorySummary>> GetLowStockItems(int? supplierId = null, int? locationId = null);
@@ -25,6 +25,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task ReduceInventoryByFIFO(int locationId, int itemMasterId, int transactionTypeId, decimal quantity);
         Task<IEnumerable<LocationInventorySummary>> GetSumOfItemInventoryByLocationId(int locationId);
         Task UpdateReorderLevelMaxStockLevel(int locationId, int itemMasterId, LocationInventory locationInventory);
+        Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByRef(string reference, int locationId);
     }
 
 }

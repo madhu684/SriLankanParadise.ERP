@@ -1,12 +1,31 @@
 import { useState, useRef, useEffect } from "react";
-import { post_customer_api } from "../../services/salesApi";
+import {
+  post_customer_api,
+  post_customer_delivery_address_api,
+} from "../../services/salesApi";
+import { useQueryClient } from "@tanstack/react-query";
 
 const useCustomer = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
     customerName: "",
+    customerCode: "",
     contactPerson: "",
     phone: "",
     email: "",
+    status: 1,
+    billingAddress1: "",
+    billingAddress2: "",
+    lisenNumber: "",
+    lisenStartDate: "",
+    lisenEndDate: "",
+    creditLimit: 0.0,
+    creditDuration: 0,
+    businessRegNo: "",
+    isVatRegistered: "0",
+    vatRegistrationNo: null,
+    deliveryAddresses: [
+      { addressLine1: "", addressLine2: "" }, // Initialize with first delivery address
+    ],
   });
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
@@ -14,10 +33,24 @@ const useCustomer = ({ onFormSubmit }) => {
   const alertRef = useRef(null);
   const [loading, setLoading] = useState(false);
 
+  const queryClient = useQueryClient();
+
+  // Sync billing address with first delivery address
+  useEffect(() => {
+    if (formData.deliveryAddresses.length > 0) {
+      const firstAddress = formData.deliveryAddresses[0];
+      setFormData((prevData) => ({
+        ...prevData,
+        billingAddress1: firstAddress.addressLine1,
+        billingAddress2: firstAddress.addressLine2,
+      }));
+    }
+  }, [formData.deliveryAddresses]);
+
   useEffect(() => {
     if (submissionStatus != null) {
       // Scroll to the success alert when it becomes visible
-      alertRef.current.scrollIntoView({ behavior: "smooth" });
+      alertRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [submissionStatus]);
 
@@ -56,7 +89,7 @@ const useCustomer = ({ onFormSubmit }) => {
 
     const isCustomerNameValid = validateField(
       "customerName",
-      "Customer name",
+      "Customer Name",
       formData.customerName
     );
 
@@ -70,14 +103,117 @@ const useCustomer = ({ onFormSubmit }) => {
       }
     );
 
-    const isEmailValid = formData.email
-      ? validateField("email", "Email", formData.email, {
-          validationFunction: (value) => /\S+@\S+\.\S+/.test(value),
-          errorMessage: "Please enter a valid email address",
-        })
-      : true;
+    const isEmailValid = validateField("email", "Email", formData.email, {
+      validationFunction: (value) => /\S+@\S+\.\S+/.test(value),
+      errorMessage: "Please enter a valid email address",
+    });
 
-    return isCustomerNameValid && isPhoneValid && isEmailValid;
+    const isCustomerCodeValid = validateField(
+      "customerCode",
+      "Customer Code",
+      formData.customerCode
+    );
+
+    const isContactPersonValid = validateField(
+      "contactPerson",
+      "Contact Person",
+      formData.contactPerson
+    );
+
+    const isCreditLimitValid = validateField(
+      "creditLimit",
+      "Credit Limit",
+      formData.creditLimit,
+      {
+        validationFunction: (value) => /^\d+(\.\d+)?$/.test(value),
+        errorMessage: "Please enter a valid credit limit",
+      }
+    );
+
+    const isCreditDurationValid = validateField(
+      "creditDuration",
+      "Credit Duration",
+      formData.creditDuration,
+      {
+        validationFunction: (value) => /^\d+$/.test(value),
+        errorMessage: "Please enter a valid credit duration",
+      }
+    );
+
+    const isBusinessRegNoValid = validateField(
+      "businessRegNo",
+      "Business Registration Number",
+      formData.businessRegNo
+    );
+
+    const isVatRegistrationNoValid =
+      formData.isVatRegistered === "1"
+        ? validateField(
+            "vatRegistrationNo",
+            "VAT Registration Number",
+            formData.vatRegistrationNo
+          )
+        : true;
+
+    const isLisenStartDateValid = validateField(
+      "lisenStartDate",
+      "License Start Date",
+      formData.lisenStartDate
+    );
+
+    const isLisenEndDateValid = validateField(
+      "lisenEndDate",
+      "License End Date",
+      formData.lisenEndDate
+    );
+
+    const isLisenNumberValid = validateField(
+      "lisenNumber",
+      "License Number",
+      formData.lisenNumber
+    );
+
+    const isVatRegisteredValid = validateField(
+      "isVatRegistered",
+      "VAT Registered",
+      formData.isVatRegistered
+    );
+
+    // Validate delivery addresses (billing address is auto-synced from first delivery address)
+    let areDeliveryAddressesValid = true;
+    formData.deliveryAddresses.forEach((address, index) => {
+      const isLine1Valid = validateField(
+        `deliveryAddress${index}Line1`,
+        `Delivery Address ${index + 1} Line 1`,
+        address.addressLine1
+      );
+      const isLine2Valid = validateField(
+        `deliveryAddress${index}Line2`,
+        `Delivery Address ${index + 1} Line 2`,
+        address.addressLine2
+      );
+
+      if (!isLine1Valid || !isLine2Valid) {
+        areDeliveryAddressesValid = false;
+      }
+    });
+
+    return (
+      isCustomerNameValid &&
+      isPhoneValid &&
+      isEmailValid &&
+      isCustomerCodeValid &&
+      isContactPersonValid &&
+      isCreditLimitValid &&
+      isCreditDurationValid &&
+      isBusinessRegNoValid &&
+      isVatRegistrationNoValid &&
+      isLisenStartDateValid &&
+      isLisenEndDateValid &&
+      isLisenNumberValid &&
+      isVatRegisteredValid &&
+      areDeliveryAddressesValid
+    );
   };
 
   const handleInputChange = (field, value) => {
@@ -87,33 +223,141 @@ const useCustomer = ({ onFormSubmit }) => {
     }));
   };
 
-  const handleSubmit = async () => {
+  // Add a new delivery address
+  const addDeliveryAddress = () => {
+    setFormData((prevData) => ({
+      ...prevData,
+      deliveryAddresses: [
+        ...prevData.deliveryAddresses,
+        { addressLine1: "", addressLine2: "" },
+      ],
+    }));
+  };
+
+  // Remove a delivery address (prevent removing the first one)
+  const removeDeliveryAddress = (index) => {
+    if (index === 0) {
+      console.warn(
+        "Cannot remove the first delivery address as it serves as the billing address"
+      );
+      return;
+    }
+
+    setFormData((prevData) => ({
+      ...prevData,
+      deliveryAddresses: prevData.deliveryAddresses.filter(
+        (_, i) => i !== index
+      ),
+    }));
+
+    // Clear validation errors for this address
+    setValidationErrors((prev) => {
+      const newErrors = { ...prev };
+      delete newErrors[`deliveryAddress${index}Line1`];
+      delete newErrors[`deliveryAddress${index}Line2`];
+      return newErrors;
+    });
+  };
+
+  // Handle delivery address field changes
+  const handleDeliveryAddressChange = (index, field, value) => {
+    setFormData((prevData) => {
+      const updatedAddresses = [...prevData.deliveryAddresses];
+      updatedAddresses[index] = {
+        ...updatedAddresses[index],
+        [field]: value,
+      };
+      return {
+        ...prevData,
+        deliveryAddresses: updatedAddresses,
+      };
+    });
+  };
+
+  // Post delivery addresses after customer creation
+  const postDeliveryAddresses = async (customerId) => {
+    const promises = formData.deliveryAddresses.map((address) => {
+      const deliveryAddressData = {
+        customerId: customerId,
+        addressLine1: address.addressLine1,
+        addressLine2: address.addressLine2,
+      };
+      return post_customer_delivery_address_api(deliveryAddressData);
+    });
+
+    try {
+      await Promise.all(promises);
+      console.log("All delivery addresses posted successfully");
+      return true;
+    } catch (error) {
+      console.error("Error posting delivery addresses:", error);
+      return false;
+    }
+  };
+
+  const handleFormSubmit = async () => {
     try {
       const isFormValid = validateForm();
 
       if (isFormValid) {
         setLoading(true);
+
         const customerData = {
           customerName: formData.customerName,
           contactPerson: formData.contactPerson,
           phone: formData.phone,
           email: formData.email,
           companyId: sessionStorage.getItem("companyId"),
-          permissionId: 24,
+          customerCode: formData.customerCode,
+          status: formData.status,
+          billingAddressLine1: formData.billingAddress1,
+          billingAddressLine2: formData.billingAddress2,
+          reigonId: 1,
+          lisenNumber: formData.lisenNumber,
+          lisenStartDate: formData.lisenStartDate.split("T")[0],
+          lisenEndDate: formData.lisenEndDate.split("T")[0],
+          creditLimit: parseFloat(formData.creditLimit),
+          creditDuration: parseInt(formData.creditDuration),
+          outstandingBalance: 0,
+          businessRegistrationNo: formData.businessRegNo,
+          isVatRegistered: formData.isVatRegistered === "1" ? true : false,
+          vatRegistrationNo: formData.vatRegistrationNo,
         };
 
         const response = await post_customer_api(customerData);
 
         if (response.status === 201) {
+          const customerId =
+            response.data.result.customerId || response.data.result.id;
+
+          // Post delivery addresses if any exist
+          if (formData.deliveryAddresses.length > 0) {
+            const deliveryAddressSuccess = await postDeliveryAddresses(
+              customerId
+            );
+
+            if (!deliveryAddressSuccess) {
+              console.warn(
+                "Customer created but some delivery addresses failed to save"
+              );
+            }
+          }
+
           setSubmissionStatus("success");
-          console.log("Custermer added successfully", customerData);
+          console.log("Customer added successfully", customerData);
+
           setTimeout(() => {
             setSubmissionStatus(null);
             setLoading(false);
             onFormSubmit(response.data.result);
+            queryClient.invalidateQueries([
+              "customers",
+              sessionStorage.getItem("companyId"),
+            ]);
           }, 3000);
         } else {
           setSubmissionStatus("error");
+          setLoading(false);
         }
       }
     } catch (error) {
@@ -126,15 +370,21 @@ const useCustomer = ({ onFormSubmit }) => {
     }
   };
 
+  console.log("Form Data: ", formData);
+
   return {
     formData,
     validFields,
     validationErrors,
     submissionStatus,
-    loading,
     alertRef,
+    loading,
+    validateForm,
     handleInputChange,
-    handleSubmit,
+    handleFormSubmit,
+    addDeliveryAddress,
+    removeDeliveryAddress,
+    handleDeliveryAddressChange,
   };
 };
 

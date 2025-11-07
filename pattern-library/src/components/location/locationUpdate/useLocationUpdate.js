@@ -4,15 +4,17 @@ import {
   get_location_types_by_company_id_api,
   put_company_location_api,
 } from "../../../services/purchaseApi";
+import { get_item_price_list_by_company_id_api } from "../../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
 
 const useLocationUpdate = ({ location, onFormSubmit }) => {
   const [formData, setFormData] = useState({
-    
     locationName: "",
     status: "",
     locationType: "",
     locationHierarchy: "",
+    itemPriceListId: null,
+    selectedPriceList: null,
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -42,6 +44,27 @@ const useLocationUpdate = ({ location, onFormSubmit }) => {
   } = useQuery({
     queryKey: ["locations"],
     queryFn: fetchLocations,
+  });
+
+  const fetchItemPriceList = async () => {
+    try {
+      const response = await get_item_price_list_by_company_id_api(
+        parseInt(sessionStorage.getItem("companyId"))
+      );
+      return response.data.result || [];
+    } catch (error) {
+      console.error("Error fetching item price list:", error);
+    }
+  };
+
+  const {
+    data: itemPriceList = [],
+    isLoading: isItemPriceListLoading,
+    isError: isItemPriceListError,
+    error: itemPriceListError,
+  } = useQuery({
+    queryKey: ["itemPriceList", sessionStorage.getItem("companyId")],
+    queryFn: fetchItemPriceList,
   });
 
   useEffect(() => {
@@ -83,13 +106,23 @@ const useLocationUpdate = ({ location, onFormSubmit }) => {
         ? "sub"
         : "main";
 
+    // Find the selected price list if itemPriceListId exists
+    const selectedPriceList =
+      deepCopyLocation?.priceMasterId && itemPriceList?.length > 0
+        ? itemPriceList.find(
+            (item) => item.id === deepCopyLocation.priceMasterId
+          )
+        : null;
+
     setFormData({
       locationName: deepCopyLocation?.locationName,
       status: deepCopyLocation?.status == true ? "1" : "0",
       locationType: deepCopyLocation?.locationTypeId ?? "",
       locationHierarchy: locationHierarchy,
+      itemPriceListId: deepCopyLocation?.priceMasterId || null,
+      selectedPriceList: selectedPriceList,
     });
-   
+
     if (
       !isLocationsLoading &&
       availableFetchedLocations &&
@@ -101,11 +134,10 @@ const useLocationUpdate = ({ location, onFormSubmit }) => {
         )
       );
     }
-  }, [location, isLocationsLoading, availableFetchedLocations]);
+  }, [location, isLocationsLoading, availableFetchedLocations, itemPriceList]);
 
   useEffect(() => {
     if (submissionStatus != null) {
-      // Scroll to the success alert when it becomes visible
       alertRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [submissionStatus]);
@@ -119,13 +151,11 @@ const useLocationUpdate = ({ location, onFormSubmit }) => {
     let isFieldValid = true;
     let errorMessage = "";
 
-    // Required validation
     if (value === null || value === undefined || `${value}`.trim() === "") {
       isFieldValid = false;
       errorMessage = `${fieldDisplayName} is required`;
     }
 
-    // Additional validation
     if (
       isFieldValid &&
       additionalRules.validationFunction &&
@@ -179,15 +209,16 @@ const useLocationUpdate = ({ location, onFormSubmit }) => {
       isparentLocationValid
     );
   };
+
   const handleSubmit = async () => {
     console.log("LocationID: ", location.locationId);
     try {
       const status = formData.status === "1" ? true : false;
       const isFormValid = validateForm();
-  
+
       if (isFormValid) {
         setLoading(true);
-  
+
         const locationData = {
           companyId: sessionStorage.getItem("companyId"),
           locationName: formData.locationName,
@@ -197,11 +228,13 @@ const useLocationUpdate = ({ location, onFormSubmit }) => {
             formData.locationHierarchy === "sub"
               ? selectedParentLocation?.locationId
               : location.locationId,
+          itemPriceListId: formData.itemPriceListId,
+          priceMasterId: formData.itemPriceListId,
           permissionId: 1105,
         };
-  
+
         console.log("Payload data:", locationData);
-  
+
         const putResponse = await put_company_location_api(
           location?.locationId,
           locationData
@@ -211,14 +244,17 @@ const useLocationUpdate = ({ location, onFormSubmit }) => {
         if (putResponse.status === 200) {
           setSubmissionStatus("successSubmitted");
           console.log("Location updated successfully!", formData);
-  
+
           setTimeout(() => {
             setSubmissionStatus(null);
             onFormSubmit();
             setLoading(false);
           }, 2000);
         } else {
-          console.error("Unexpected response status:", putResponse.status || putResponse);
+          console.error(
+            "Unexpected response status:",
+            putResponse.status || putResponse
+          );
           setSubmissionStatus("error");
           setTimeout(() => {
             setSubmissionStatus(null);
@@ -235,9 +271,6 @@ const useLocationUpdate = ({ location, onFormSubmit }) => {
       }, 2000);
     }
   };
-  
-
-  
 
   const handleInputChange = (field, value) => {
     setFormData((prevFormData) => ({
@@ -255,6 +288,31 @@ const useLocationUpdate = ({ location, onFormSubmit }) => {
     setSelectedParentLocation("");
   };
 
+  const handleResetItemPriceList = () => {
+    setFormData((prevData) => ({
+      ...prevData,
+      selectedPriceList: null,
+      itemPriceListId: null,
+    }));
+  };
+
+  const handleItemPriceListChange = (itemId) => {
+    const selectedItem = itemPriceList.find(
+      (item) => item.id === parseInt(itemId)
+    );
+
+    if (selectedItem) {
+      setFormData((prevData) => ({
+        ...prevData,
+        selectedPriceList: selectedItem,
+        itemPriceListId: selectedItem.id,
+      }));
+    }
+  };
+
+  console.log("formData: ", formData);
+  console.log("itemPriceList: ", itemPriceList);
+
   return {
     formData,
     validFields,
@@ -271,11 +329,14 @@ const useLocationUpdate = ({ location, onFormSubmit }) => {
     isLocationsError,
     locationsError,
     availableLocations,
+    itemPriceList,
     setSearchTerm,
     handleInputChange,
     handleSubmit,
     handleSelectLocation,
     handleResetParentLocation,
+    handleResetItemPriceList,
+    handleItemPriceListChange,
   };
 };
 

@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import {
   post_sales_invoice_api,
   post_sales_invoice_detail_api,
   get_company_api,
+  search_customer_api,
 } from "../../services/salesApi";
 import {
   get_charges_and_deductions_by_company_id_api,
@@ -14,17 +15,24 @@ import {
   get_sum_location_inventories_by_locationId_itemMasterId_api,
   get_item_batches_by_item_master_id_api,
 } from "../../services/purchaseApi";
-import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
-import { useQuery } from "@tanstack/react-query";
+import {
+  get_item_masters_by_company_id_with_query_api,
+  get_item_price_list_by_locationId,
+} from "../../services/inventoryApi";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   const [formData, setFormData] = useState({
+    selectedCustomer: null,
+    customerDeliveryAddressId: null,
+    driverName: null,
+    vehicleNo: null,
+    totalLitres: 0,
     storeLocation: null,
     invoiceDate: "",
     dueDate: "",
     referenceNumber: "",
-    patientName: "",
-    patientNo: "",
     itemDetails: [],
     attachments: [],
     totalAmount: 0,
@@ -37,12 +45,14 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   const [validationErrors, setValidationErrors] = useState({});
   const alertRef = useRef(null);
   const [referenceNo, setReferenceNo] = useState(null);
-  const [salesOrderSearchTerm, setSalesOrderSearchTerm] = useState("");
+  const [customerSearchTerm, setCustomerSearchTerm] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBatch, setSelectedBatch] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [initialized, setInitialized] = useState(false);
+
+  const queryClient = useQueryClient();
 
   const fetchUserLocations = async () => {
     try {
@@ -118,6 +128,26 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     queryKey: ["locationInventories", formData.storeLocation],
     queryFn: () => fetchLocationInventories(formData.storeLocation),
     enabled: !!formData.storeLocation,
+  });
+
+  const fetchCustomers = async (searchQuery) => {
+    try {
+      const response = await search_customer_api(searchQuery);
+      return response.data.result || [];
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+    }
+  };
+
+  const {
+    data: customers = [],
+    isLoading: isCustomersLoading,
+    isError: isCustomersError,
+    refetch: refetchCustomers,
+  } = useQuery({
+    queryKey: ["customers", customerSearchTerm],
+    queryFn: () => fetchCustomers(customerSearchTerm),
+    enabled: !!customerSearchTerm,
   });
 
   useEffect(() => {
@@ -213,6 +243,28 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     queryFn: fetchCompany,
   });
 
+  const fetchItemPriceListByLocation = async () => {
+    try {
+      const response = await get_item_price_list_by_locationId(
+        formData.storeLocation
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching item price list by location:", error);
+    }
+  };
+
+  const {
+    data: itemPriceListByLocation,
+    isLoading: isItemPriceListByLocationLoading,
+    isError: isItemPriceListByLocationError,
+    error: itemPriceListByLocationError,
+  } = useQuery({
+    queryKey: ["itemPriceListByLocation", formData.storeLocation],
+    queryFn: fetchItemPriceListByLocation,
+    enabled: !!formData.storeLocation,
+  });
+
   useEffect(() => {
     setFormData((prevFormData) => ({
       ...prevFormData,
@@ -253,6 +305,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
       !isLoadingchargesAndDeductions &&
       chargesAndDeductions
     ) {
+      console.log("Trigger effect");
       const deepCopySalesOrder = JSON.parse(JSON.stringify(salesOrder));
 
       // Initialize line item charges and deductions
@@ -286,7 +339,10 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
 
           // Sort the charges and deductions according to the order of display names
           const sortedLineItemCharges = chargesAndDeductions
-            .filter((charge) => charge.isApplicableForLineItem)
+            .filter(
+              (charge) =>
+                charge.isDisableFromSubTotal === false && charge.status === true
+            )
             .map((charge) => {
               const displayName = charge.displayName; // Extract display name from charge
               const matchedCharge = initializedCharges.find(
@@ -315,6 +371,10 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
       );
 
       // Initialize common charges and deductions
+      console.log(
+        "chargesAndDeductionsApplied 347: ",
+        chargesAndDeductionsApplied
+      );
       const initializedCommonCharges = chargesAndDeductionsApplied
         ?.filter((charge) => !charge.lineItemId)
         .map((charge) => {
@@ -334,6 +394,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
             chargesAndDeductionAppliedId: charge.chargesAndDeductionAppliedId,
           };
         });
+      console.log("initializedCommonCharges 370: ", initializedCommonCharges);
 
       setFormData((prevFormData) => ({
         ...prevFormData,
@@ -349,6 +410,46 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     isLoadingchargesAndDeductions,
     chargesAndDeductions,
   ]);
+
+  const priceListMap = useMemo(() => {
+    if (!itemPriceListByLocation?.itemPriceDetails) {
+      return new Map();
+    }
+
+    return new Map(
+      itemPriceListByLocation.itemPriceDetails.map((detail) => [
+        detail.itemMasterId,
+        detail.price,
+      ])
+    );
+  }, [itemPriceListByLocation]);
+
+  /**
+   * Helper function to get price from item price list using memoized map
+   * @param {number} itemMasterId - The item master ID
+   * @returns {number} The price from the price list, or 0 if not found
+   */
+  const getPriceFromPriceList = useCallback(
+    (itemMasterId) => {
+      return priceListMap.get(itemMasterId) || 0;
+    },
+    [priceListMap]
+  );
+
+  // Memoized charges initialization
+  const getInitializedCharges = useMemo(() => {
+    return (
+      chargesAndDeductions
+        ?.filter((charge) => charge.isApplicableForLineItem)
+        ?.map((charge) => ({
+          id: charge.chargesAndDeductionId,
+          name: charge.displayName,
+          value: charge.amount || charge.percentage,
+          sign: charge.sign,
+          isPercentage: charge.percentage !== null,
+        })) || []
+    );
+  }, [chargesAndDeductions]);
 
   const validateField = (
     fieldName,
@@ -434,6 +535,18 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
       formData.referenceNumber
     );
 
+    const isCustomerValid = validateField(
+      "customer",
+      "Customer",
+      formData.selectedCustomer
+    );
+
+    const isCustomerDeliveryAddressValid = validateField(
+      "customerDeliveryAddress",
+      "Customer Delivery Address",
+      formData.customerDeliveryAddressId
+    );
+
     const isAttachmentsValid = validateAttachments(formData.attachments);
 
     let isItemQuantityValid = true;
@@ -463,6 +576,8 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     return (
       isInvoiceDateValid &&
       isDueDateValid &&
+      isCustomerValid &&
+      isCustomerDeliveryAddressValid &&
       isAttachmentsValid &&
       isItemQuantityValid
     );
@@ -483,7 +598,16 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
             item.chargesAndDeductions.map(async (charge) => {
               let appliedValue = 0;
 
-              if (charge.isPercentage) {
+              if (charge.name === "SSL") {
+                // Calculate the amount based on percentage and sign
+                const amount =
+                  item.isInventoryItem === true
+                    ? ((item.quantity * item.unitPrice) /
+                        (100 - charge.value)) *
+                      charge.value
+                    : (item.unitPrice / (100 - charge.value)) * charge.value;
+                appliedValue = charge.sign === "+" ? amount : -amount;
+              } else if (charge.isPercentage) {
                 // Calculate the amount based on percentage and sign
                 const amount =
                   item.isInventoryItem === true
@@ -500,7 +624,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
                 chargesAndDeductionId: charge.id,
                 transactionId: transactionId,
                 transactionTypeId,
-                lineItemId: item.itemMasterId,
+                lineItemId: item.id,
                 appliedValue,
                 dateApplied: new Date().toISOString(),
                 createdBy: sessionStorage?.getItem("userId"),
@@ -607,8 +731,13 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
           referenceNumber: formData.referenceNumber,
           permissionId: 29,
           locationId: formData.storeLocation,
-          inVoicedPersonName: formData.patientName,
-          inVoicedPersonMobileNo: formData.patientNo,
+          customerId: formData.selectedCustomer.customerId,
+          customerDeliveryAddressId: parseInt(
+            formData.customerDeliveryAddressId
+          ),
+          driverName: formData.driverName,
+          vehicleNumber: formData.vehicleNo,
+          totalLitres: formData.totalLitres,
         };
 
         const response = await post_sales_invoice_api(salesInvoiceData);
@@ -664,8 +793,11 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
             setLoadingDraft(false);
             onFormSubmit();
           }, 3000);
+
+          toast.success("Sales invoice submitted successfully!");
         } else {
           setSubmissionStatus("error");
+          toast.error("Failed to submit sales invoice.");
         }
       }
     } catch (error) {
@@ -676,6 +808,8 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         setLoading(false);
         setLoadingDraft(false);
       }, 3000);
+
+      toast.error("Failed to submit sales invoice.");
     }
   };
 
@@ -707,56 +841,130 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     });
   };
 
+  // const handleItemDetailsChange = async (index, field, value) => {
+  //   setFormData((prevFormData) => {
+  //     const updatedItemDetails = [...prevFormData.itemDetails];
+
+  //     if (field.startsWith("chargesAndDeductions")) {
+  //       // Handle charges and deductions
+  //       const chargeIndex = parseInt(field.split("_")[1]);
+  //       updatedItemDetails[index].chargesAndDeductions[chargeIndex].value =
+  //         value;
+  //     } else {
+  //       // Handle other fields
+  //       updatedItemDetails[index][field] = value;
+  //     }
+
+  //     // Ensure positive values for Quantities and Unit Prices
+  //     updatedItemDetails[index].quantity = Math.max(
+  //       0,
+  //       updatedItemDetails[index].quantity
+  //     );
+  //     updatedItemDetails[index].unitPrice = !isNaN(
+  //       parseFloat(updatedItemDetails[index].unitPrice)
+  //     )
+  //       ? Math.max(0, parseFloat(updatedItemDetails[index].unitPrice))
+  //       : 0;
+
+  //     // Calculate total price based on charges and deductions
+  //     const grandTotalPrice =
+  //       updatedItemDetails[index].quantity *
+  //       updatedItemDetails[index].unitPrice;
+  //     let totalPrice =
+  //       updatedItemDetails[index].quantity *
+  //       updatedItemDetails[index].unitPrice;
+
+  //     updatedItemDetails[index].chargesAndDeductions.forEach((charge) => {
+  //       if (charge.name === "SSL") {
+  //         const amount =
+  //           (grandTotalPrice / (100 - charge.value)) * charge.value;
+  //         totalPrice += charge.sign === "+" ? amount : -amount;
+  //       } else if (charge.isPercentage) {
+  //         const amount = (grandTotalPrice * charge.value) / 100;
+  //         totalPrice += charge.sign === "+" ? amount : -amount;
+  //       } else {
+  //         totalPrice += charge.sign === "+" ? charge.value : -charge.value;
+  //       }
+  //     });
+
+  //     totalPrice = isNaN(totalPrice) ? 0 : totalPrice;
+  //     updatedItemDetails[index].totalPrice = totalPrice;
+
+  //     return {
+  //       ...prevFormData,
+  //       itemDetails: updatedItemDetails,
+  //       subTotal: calculateSubTotal(),
+  //       totalAmount: calculateTotalAmount(),
+  //       totalLitres: calculateTotalLites(),
+  //     };
+  //   });
+  // };
+
   const handleItemDetailsChange = async (index, field, value) => {
     setFormData((prevFormData) => {
-      const updatedItemDetails = [...prevFormData.itemDetails];
+      // Create a deep copy of itemDetails
+      const updatedItemDetails = prevFormData.itemDetails.map((item, idx) => {
+        if (idx === index) {
+          // Deep copy the item and its chargesAndDeductions
+          const updatedItem = {
+            ...item,
+            chargesAndDeductions: item.chargesAndDeductions.map((charge) => ({
+              ...charge,
+            })),
+          };
 
-      if (field.startsWith("chargesAndDeductions")) {
-        // Handle charges and deductions
-        const chargeIndex = parseInt(field.split("_")[1]);
-        updatedItemDetails[index].chargesAndDeductions[chargeIndex].value =
-          value;
-      } else {
-        // Handle other fields
-        updatedItemDetails[index][field] = value;
-      }
+          if (field.startsWith("chargesAndDeductions")) {
+            // Handle charges and deductions
+            const chargeIndex = parseInt(field.split("_")[1]);
+            updatedItem.chargesAndDeductions[chargeIndex].value = value;
+          } else {
+            // Handle other fields
+            updatedItem[field] = value;
+          }
 
-      // Ensure positive values for Quantities and Unit Prices
-      updatedItemDetails[index].quantity = Math.max(
-        0,
-        updatedItemDetails[index].quantity
-      );
-      updatedItemDetails[index].unitPrice = !isNaN(
-        parseFloat(updatedItemDetails[index].unitPrice)
-      )
-        ? Math.max(0, parseFloat(updatedItemDetails[index].unitPrice))
-        : 0;
+          // Ensure positive values for Quantities and Unit Prices
+          updatedItem.quantity = Math.max(0, updatedItem.quantity);
+          updatedItem.unitPrice = !isNaN(parseFloat(updatedItem.unitPrice))
+            ? Math.max(0, parseFloat(updatedItem.unitPrice))
+            : 0;
 
-      // Calculate total price based on charges and deductions
-      const grandTotalPrice =
-        updatedItemDetails[index].quantity *
-        updatedItemDetails[index].unitPrice;
-      let totalPrice =
-        updatedItemDetails[index].quantity *
-        updatedItemDetails[index].unitPrice;
+          // Calculate total price based on charges and deductions
+          const grandTotalPrice = updatedItem.quantity * updatedItem.unitPrice;
+          let totalPrice = grandTotalPrice;
 
-      updatedItemDetails[index].chargesAndDeductions.forEach((charge) => {
-        if (charge.isPercentage) {
-          const amount = (grandTotalPrice * charge.value) / 100;
-          totalPrice += charge.sign === "+" ? amount : -amount;
-        } else {
-          totalPrice += charge.sign === "+" ? charge.value : -charge.value;
+          updatedItem.chargesAndDeductions.forEach((charge) => {
+            if (charge.name === "SSL") {
+              const amount =
+                (grandTotalPrice / (100 - charge.value)) * charge.value;
+              totalPrice += charge.sign === "+" ? amount : -amount;
+            } else if (charge.isPercentage) {
+              const amount = (grandTotalPrice * charge.value) / 100;
+              totalPrice += charge.sign === "+" ? amount : -amount;
+            } else {
+              totalPrice += charge.sign === "+" ? charge.value : -charge.value;
+            }
+          });
+
+          totalPrice = isNaN(totalPrice) ? 0 : totalPrice;
+          updatedItem.totalPrice = totalPrice;
+
+          return updatedItem;
         }
+        // Return a deep copy of other items to ensure no shared references
+        return {
+          ...item,
+          chargesAndDeductions: item.chargesAndDeductions.map((charge) => ({
+            ...charge,
+          })),
+        };
       });
-
-      totalPrice = isNaN(totalPrice) ? 0 : totalPrice;
-      updatedItemDetails[index].totalPrice = totalPrice;
 
       return {
         ...prevFormData,
         itemDetails: updatedItemDetails,
         subTotal: calculateSubTotal(),
         totalAmount: calculateTotalAmount(),
+        totalLitres: calculateTotalLites(),
       };
     });
   };
@@ -813,6 +1021,32 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     );
   };
 
+  // const calculateTotalAmount = () => {
+  //   // Calculate total price based on item details
+  //   const subtotal = calculateSubTotal();
+
+  //   // Calculate total amount based on subtotal and common charges and deductions
+  //   let totalAmount = subtotal.toFixed(2);
+  //   formData.commonChargesAndDeductions.forEach((charge) => {
+  //     if (charge.isPercentage) {
+  //       const amount = (subtotal * charge.value) / 100;
+  //       if (charge.sign === "+") {
+  //         totalAmount += amount;
+  //       } else if (charge.sign === "-") {
+  //         totalAmount -= amount;
+  //       }
+  //     } else {
+  //       if (charge.sign === "+") {
+  //         totalAmount += charge.value;
+  //       } else if (charge.sign === "-") {
+  //         totalAmount -= charge.value;
+  //       }
+  //     }
+  //   });
+
+  //   return totalAmount;
+  // };
+
   const calculateTotalAmount = () => {
     // Calculate total price based on item details
     const subtotal = calculateSubTotal();
@@ -821,7 +1055,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     let totalAmount = subtotal;
     formData.commonChargesAndDeductions.forEach((charge) => {
       if (charge.isPercentage) {
-        const amount = (subtotal * charge.value) / 100;
+        const amount = (subtotal * parseFloat(charge.value)) / 100;
         if (charge.sign === "+") {
           totalAmount += amount;
         } else if (charge.sign === "-") {
@@ -829,9 +1063,9 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         }
       } else {
         if (charge.sign === "+") {
-          totalAmount += charge.value;
+          totalAmount += parseFloat(charge.value);
         } else if (charge.sign === "-") {
-          totalAmount -= charge.value;
+          totalAmount -= parseFloat(charge.value);
         }
       }
     });
@@ -839,83 +1073,184 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     return totalAmount;
   };
 
+  const calculateTotalLites = () => {
+    let totalLitres = 0;
+    if (Array.isArray(formData?.itemDetails)) {
+      formData.itemDetails.forEach((item) => {
+        const quantity = Number(item.quantity) || 0;
+        const packSize = Number(item.packSize) || 0;
+        totalLitres += quantity * packSize;
+      });
+    }
+    return totalLitres / 1000;
+  };
+
   // Handler to add the selected item to itemDetails
-  const handleSelectItem = async (item) => {
-    // Initialize charges and deductions (this remains unchanged)
-    const initializedCharges =
-      chargesAndDeductions
-        ?.filter((charge) => charge.isApplicableForLineItem)
-        ?.map((charge) => ({
-          id: charge.chargesAndDeductionId,
-          name: charge.displayName,
-          value: charge.amount || charge.percentage,
-          sign: charge.sign,
-          isPercentage: charge.percentage !== null,
-        })) || [];
+  // const handleSelectItem = async (item) => {
+  //   // Initialize charges and deductions (this remains unchanged)
+  //   const initializedCharges =
+  //     chargesAndDeductions
+  //       ?.filter((charge) => charge.isApplicableForLineItem)
+  //       ?.map((charge) => ({
+  //         id: charge.chargesAndDeductionId,
+  //         name: charge.displayName,
+  //         value: charge.amount || charge.percentage,
+  //         sign: charge.sign,
+  //         isPercentage: charge.percentage !== null,
+  //       })) || [];
 
-    let availableStock = 0;
-    let highestSellingPrice = 0;
+  //   let availableStock = 0;
+  //   let highestSellingPrice = 0;
 
-    try {
-      if (item.isInventoryItem === true) {
-        const inventory =
-          await get_sum_location_inventories_by_locationId_itemMasterId_api(
-            item.itemMasterId,
-            userLocations[0]?.locationId
-          );
-        availableStock = inventory?.data?.result?.totalStockInHand || 0;
+  //   try {
+  //     if (item.isInventoryItem === true) {
+  //       const inventory =
+  //         await get_sum_location_inventories_by_locationId_itemMasterId_api(
+  //           item.itemMasterId,
+  //           userLocations[0]?.locationId
+  //         );
+  //       availableStock = inventory?.data?.result?.totalStockInHand || 0;
 
-        if (availableStock <= 0) {
-          console.warn("No stock available for this item");
-          alert("No stock available for this item");
-          return;
+  //       if (availableStock <= 0) {
+  //         console.warn("No stock available for this item");
+  //         alert("No stock available for this item");
+  //         return;
+  //       }
+
+  //       // Get highest selling price from available batches
+  //       const batchesResponse = await get_item_batches_by_item_master_id_api(
+  //         item.itemMasterId,
+  //         sessionStorage.getItem("companyId")
+  //       );
+  //       highestSellingPrice =
+  //         batchesResponse?.data?.result?.reduce(
+  //           (maxPrice, batch) =>
+  //             batch.sellingPrice > maxPrice ? batch.sellingPrice : maxPrice,
+  //           0
+  //         ) || 0;
+  //     }
+
+  //     // Update form data
+  //     setFormData((prevFormData) => ({
+  //       ...prevFormData,
+  //       itemDetails: [
+  //         ...prevFormData.itemDetails,
+  //         {
+  //           name: item?.itemName,
+  //           id: item?.itemMasterId,
+  //           unit: item?.unit?.unitName,
+  //           batchId: null,
+  //           stockInHand: availableStock,
+  //           quantity: 0,
+  //           unitPrice:
+  //             item.isInventoryItem === true
+  //               ? highestSellingPrice
+  //               : item.unitPrice,
+  //           totalPrice: item.isInventoryItem === false ? item.unitPrice : 0.0,
+  //           isInventoryItem: item?.isInventoryItem,
+  //           packSize: item?.conversionRate || 1,
+  //           chargesAndDeductions: initializedCharges,
+  //         },
+  //       ],
+  //     }));
+  //   } catch (error) {
+  //     console.error("Error processing item:", error);
+  //     alert("Error processing item. Please try again.");
+  //   }
+
+  //   // Reset search and batch selection
+  //   setSearchTerm("");
+  //   setSelectedBatch(null);
+  // };
+
+  const handleSelectItem = useCallback(
+    async (item) => {
+      let availableStock = 0;
+      let unitPrice = item.unitPrice || 0;
+
+      try {
+        if (item.isInventoryItem === true) {
+          // Fetch inventory stock
+          const inventory =
+            await get_sum_location_inventories_by_locationId_itemMasterId_api(
+              item.itemMasterId,
+              userLocations[0]?.locationId
+            );
+          availableStock = inventory?.data?.result?.totalStockInHand || 0;
+
+          if (availableStock <= 0) {
+            toast.error(
+              `No stock available for "${item.itemName}" in selected Location`
+            );
+            searchTerm("");
+            return;
+          }
+
+          // Get price from memoized price list map - O(1) lookup
+          unitPrice = getPriceFromPriceList(item.itemMasterId);
+        } else {
+          // For non-inventory items, use the item's unit price
+          unitPrice = item.unitPrice || 0;
         }
 
-        // Get highest selling price from available batches
-        const batchesResponse = await get_item_batches_by_item_master_id_api(
-          item.itemMasterId,
-          sessionStorage.getItem("companyId")
-        );
-        highestSellingPrice =
-          batchesResponse?.data?.result?.reduce(
-            (maxPrice, batch) =>
-              batch.sellingPrice > maxPrice ? batch.sellingPrice : maxPrice,
-            0
-          ) || 0;
+        // Update form data
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          itemDetails: [
+            ...prevFormData.itemDetails,
+            {
+              name: item?.itemName,
+              id: item?.itemMasterId,
+              unit: item?.unit?.unitName,
+              batchId: null,
+              stockInHand: availableStock,
+              quantity: 0,
+              unitPrice: unitPrice,
+              totalPrice: item.isInventoryItem === false ? unitPrice : 0.0,
+              isInventoryItem: item?.isInventoryItem,
+              packSize: item?.conversionRate || 1,
+              chargesAndDeductions: getInitializedCharges,
+            },
+          ],
+        }));
+      } catch (error) {
+        console.error("Error processing item:", error);
+        // toast.error("Error processing item. Please try again.");
       }
 
-      // Update form data
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        itemDetails: [
-          ...prevFormData.itemDetails,
-          {
-            name: item?.itemName,
-            id: item?.itemMasterId,
-            unit: item?.unit?.unitName,
-            batchId: null,
-            stockInHand: availableStock,
-            quantity: 0,
-            unitPrice:
-              item.isInventoryItem === true
-                ? highestSellingPrice
-                : item.unitPrice,
-            totalPrice: item.isInventoryItem === false ? item.unitPrice : 0.0,
-            isInventoryItem: item?.isInventoryItem,
-            chargesAndDeductions: initializedCharges,
-          },
-        ],
-      }));
-    } catch (error) {
-      console.error("Error processing item:", error);
-      alert("Error processing item. Please try again.");
-    }
+      // Reset search and batch selection
+      setSearchTerm("");
+      setSelectedBatch(null);
+    },
+    [
+      getPriceFromPriceList,
+      getInitializedCharges,
+      userLocations,
+      setFormData,
+      setSearchTerm,
+      setSelectedBatch,
+    ]
+  );
 
-    // Reset search and batch selection
-    setSearchTerm("");
-    setSelectedBatch(null);
-    // refetchItemBatches();
-    // refetchLocationInventory();
+  const handleCustomerSelect = (customer) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      selectedCustomer: customer,
+    }));
+    setCustomerSearchTerm("");
+  };
+
+  const handleResetCustomer = () => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      selectedCustomer: null,
+      customerDeliveryAddressId: null,
+    }));
+    setCustomerSearchTerm("");
+    setValidFields({});
+    setValidationErrors({});
+    // Explicitly reset selectedTrn to null to disable dependent queries
+    //queryClient.resetQueries(["customers", customerSearchTerm]);
   };
 
   const renderColumns = () => {
@@ -936,7 +1271,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
 
   const handleAddCommonChargesAndDeductions = () => {
     const initializedCharges = chargesAndDeductions.reduce((acc, charge) => {
-      if (!charge.isApplicableForLineItem) {
+      if (charge.isDisableFromSubTotal === false) {
         // Initialize additional properties for the common on charges and deductions
         acc[charge.displayName] = charge.amount || charge.percentage;
       }
@@ -945,7 +1280,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
 
     // Generate chargesAndDeductions array for the newly added item
     const initializedChargesArray = chargesAndDeductions
-      .filter((charge) => !charge.isApplicableForLineItem)
+      .filter((charge) => charge.isDisableFromSubTotal === false)
       .map((charge) => ({
         id: charge.chargesAndDeductionId,
         name: charge.displayName,
@@ -967,12 +1302,12 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
 
   const renderSubColumns = () => {
     return formData.commonChargesAndDeductions.map((charge, chargeIndex) => {
-      if (!charge.isApplicableForLineItem) {
+      if (charge.name !== "SSL") {
         return (
           <tr key={chargeIndex}>
             <td
               colSpan={
-                5 +
+                6 +
                 formData.itemDetails[0].chargesAndDeductions.length -
                 (company.batchStockType === "FIFO" ? 1 : 0)
               }
@@ -1010,7 +1345,6 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
                 }}
               />
             </td>
-            <td></td>
           </tr>
         );
       }
@@ -1047,6 +1381,13 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     company,
     userLocations,
     locationInventories,
+    customers,
+    customerSearchTerm,
+    isCustomersLoading,
+    isCustomersError,
+    handleCustomerSelect,
+    handleResetCustomer,
+    refetchCustomers,
     handleInputChange,
     handleItemDetailsChange,
     handleAttachmentChange,
@@ -1055,10 +1396,11 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     handleRemoveItem,
     handlePrint,
     calculateTotalAmount,
-    setSalesOrderSearchTerm,
+    setCustomerSearchTerm,
     setSearchTerm,
     handleSelectItem,
     calculateSubTotal,
+    calculateTotalLites,
     renderColumns,
     renderSubColumns,
   };

@@ -32,6 +32,7 @@ import SupplierReturnList from "../supplierReturn/supplierReturnList/supplierRet
 import EmptyReturnList from "../emptyReturn/emptyReturnList/emptyReturnList.jsx";
 import AddEmpties from "../emptyReturn/addEmpties/addEmpties.jsx";
 import RolePermissionMapping from "../rolePermissionMapping/RolePermissionMapping.jsx";
+import CustomerList from "../customer/customerList/customerList.jsx";
 
 const useMain = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -152,6 +153,8 @@ const useMain = () => {
         return <EmptyReturnList />;
       case "Role Permission Mapping":
         return <RolePermissionMapping />;
+      case "Customers":
+        return <CustomerList />;
       default:
         return null;
     }

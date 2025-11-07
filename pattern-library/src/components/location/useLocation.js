@@ -6,6 +6,7 @@ import {
   put_company_location_api,
 } from "../../services/purchaseApi";
 import { useQuery } from "@tanstack/react-query";
+import { get_item_price_list_by_company_id_api } from "../../services/inventoryApi";
 
 const useLocation = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -13,6 +14,8 @@ const useLocation = ({ onFormSubmit }) => {
     status: "",
     locationType: "",
     locationHierarchy: "main",
+    itemPriceListId: null,
+    selectedPriceList: null,
   });
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
@@ -42,6 +45,27 @@ const useLocation = ({ onFormSubmit }) => {
   } = useQuery({
     queryKey: ["locations"],
     queryFn: fetchLocations,
+  });
+
+  const fetchItemPriceList = async () => {
+    try {
+      const response = await get_item_price_list_by_company_id_api(
+        parseInt(sessionStorage.getItem("companyId"))
+      );
+      return response.data.result || [];
+    } catch (error) {
+      console.error("Error fetching item price list:", error);
+    }
+  };
+
+  const {
+    data: itemPriceList = [],
+    isLoading: isItemPriceListLoading,
+    isError: isItemPriceListError,
+    error: itemPriceListError,
+  } = useQuery({
+    queryKey: ["itemPriceList", sessionStorage.getItem("companyId")],
+    queryFn: fetchItemPriceList,
   });
 
   useEffect(() => {
@@ -163,27 +187,28 @@ const useLocation = ({ onFormSubmit }) => {
     try {
       const status = formData.status === "1" ? true : false;
       let putResponse = { status: 200 };
-  
+
       const isFormValid = validateForm();
       if (isFormValid) {
         setLoading(true);
-  
+
         const locationData = {
           companyId: sessionStorage.getItem("companyId"),
           locationName: formData.locationName,
           status: status,
           locationTypeId: formData.locationType,
           parentId: selectedParentLocation?.locationId || null,
+          priceMasterId: formData.itemPriceListId,
           permissionId: 1104,
         };
-  
+
         const response = await post_comapny_location_api(locationData);
         console.log("Response from post_comapny_location_api:", response);
-  
+
         if (response.status === 201 && response.data && response.data.result) {
           const locationId = response.data.result.locationId;
           console.log("Location ID from response:", locationId);
-  
+
           if (formData.locationHierarchy === "main") {
             const locationData = {
               companyId: sessionStorage.getItem("companyId"),
@@ -191,17 +216,21 @@ const useLocation = ({ onFormSubmit }) => {
               status: status,
               locationTypeId: formData.locationType,
               parentId: locationId,
+              priceMasterId: formData.itemPriceListId,
               permissionId: 1105,
             };
-  
-            putResponse = await put_company_location_api(locationId, locationData);
+
+            putResponse = await put_company_location_api(
+              locationId,
+              locationData
+            );
             console.log("Response from put_company_location_api:", putResponse);
           }
-  
+
           if (putResponse.status === 200) {
             setSubmissionStatus("successSubmitted");
             console.log("Location created successfully!", formData);
-  
+
             setTimeout(() => {
               setSubmissionStatus(null);
               onFormSubmit();
@@ -223,7 +252,6 @@ const useLocation = ({ onFormSubmit }) => {
       }, 3000);
     }
   };
-  
 
   const handleSelectLocation = (Location) => {
     setSelectedParentLocation(Location);
@@ -233,6 +261,31 @@ const useLocation = ({ onFormSubmit }) => {
   const handleResetParentLocation = () => {
     setSelectedParentLocation("");
   };
+
+  const handleResetItemPriceList = () => {
+    setFormData((prevData) => ({
+      ...prevData,
+      selectedPriceList: null,
+      itemPriceListId: null,
+    }));
+  };
+
+  const handleItemPriceListChange = (itemId) => {
+    const selectedItem = itemPriceList.find(
+      (item) => item.id === parseInt(itemId)
+    );
+
+    if (selectedItem) {
+      setFormData((prevData) => ({
+        ...prevData,
+        selectedPriceList: selectedItem,
+        itemPriceListId: selectedItem.id,
+      }));
+    }
+  };
+
+  console.log("formData: ", formData);
+  console.log("itemPriceList: ", itemPriceList);
 
   return {
     formData,
@@ -250,11 +303,14 @@ const useLocation = ({ onFormSubmit }) => {
     isLocationsError,
     locationsError,
     availableLocations,
+    itemPriceList,
     setSearchTerm,
     handleInputChange,
     handleSubmit,
     handleSelectLocation,
     handleResetParentLocation,
+    handleResetItemPriceList,
+    handleItemPriceListChange,
   };
 };
 

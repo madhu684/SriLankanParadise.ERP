@@ -1065,4 +1065,52 @@
   <data name="SalesInvoiceDeleted" xml:space="preserve">
     <value>Sales Invoice deleted successfully</value>
   </data>
+  <data name="CustomerDeliveryAddressCreated" xml:space="preserve">
+    <value>Customer delivery address created successfully</value>
+  </data>
+  <data name="CustomerDeliveryAddressNotFound" xml:space="preserve">
+    <value>Customer delivery address not found</value>
+  </data>
+  <data name="CustomerDeliveryAddressRetrieved" xml:space="preserve">
+    <value>Customer delivery address retrieved</value>
+  </data>
+  <data name="CustomerDeliveryAddressesRetrieved" xml:space="preserve">
+    <value>Customer delivery addresses for customer retrieved</value>
+  </data>
+  <data name="CustomerDeliveryAddressUpdated" xml:space="preserve">
+    <value>Customer delivery address updated successfully</value>
+  </data>
+  <data name="CustomerDeliveryAddressDeleted" xml:space="preserve">
+    <value>Customer delivery address deleted successfully</value>
+  </data>
+  <data name="CustomerUpdated" xml:space="preserve">
+    <value>Customer updated successfuly</value>
+  </data>
+  <data name="CustomerDeliveryAddressesNotFound" xml:space="preserve">
+    <value>Customer delivery addresses not found</value>
+  </data>
+  <data name="ItemPriceMasterCreated" xml:space="preserve">
+    <value>Item price master created successfully</value>
+  </data>
+  <data name="ItemPriceMasterNotFound" xml:space="preserve">
+    <value>Item price master not found</value>
+  </data>
+  <data name="ItemPriceMasterRetrived" xml:space="preserve">
+    <value>Item price master retrived</value>
+  </data>
+  <data name="ItemPriceDetailCreated" xml:space="preserve">
+    <value>Item price detail created successfully</value>
+  </data>
+  <data name="ItemPriceDetailNotFound" xml:space="preserve">
+    <value>Item price detail not found</value>
+  </data>
+  <data name="ItemPriceDetailRetrived" xml:space="preserve">
+    <value>Item price detail retrived</value>
+  </data>
+  <data name="CustomerOutstandingBalanceUpdated" xml:space="preserve">
+    <value>Customer outstanding balance updated successfully</value>
+  </data>
+  <data name="CashierSessionRetrieved" xml:space="preserve">
+    <value>Cashier session retrieved</value>
+  </data>
 </root>

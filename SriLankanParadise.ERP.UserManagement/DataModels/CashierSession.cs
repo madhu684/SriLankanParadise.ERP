@@ -25,5 +25,7 @@ public partial class CashierSession
 
     public string? ReasonChequesInHandDifference { get; set; }
 
+    public bool IsActiveSession { get; set; }
+
     public virtual User? User { get; set; }
 }

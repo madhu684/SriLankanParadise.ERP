@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { post_cashier_session_api } from "../../services/salesApi";
+import { useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useCashierSession = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -10,6 +12,8 @@ const useCashierSession = ({ onFormSubmit }) => {
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const alertRef = useRef(null);
   const [loading, setLoading] = useState(false);
+
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (submissionStatus != null) {
@@ -84,6 +88,7 @@ const useCashierSession = ({ onFormSubmit }) => {
           actualChequesInHand: null,
           reasonCashInHandDifference: null,
           reasonChequesInHandDifference: null,
+          isActiveSession: true,
           permissionId: 1067,
         };
 
@@ -92,13 +97,22 @@ const useCashierSession = ({ onFormSubmit }) => {
         if (response.status === 201) {
           setSubmissionStatus("success");
           console.log("Cashier session open successfully", cashierSessionData);
+          queryClient.invalidateQueries({
+            queryKey: [
+              "activeCashierSession",
+              sessionStorage.getItem("userId"),
+            ],
+          });
           setTimeout(() => {
             setSubmissionStatus(null);
             setLoading(false);
             onFormSubmit(response);
           }, 3000);
+
+          toast.success("Cashier session opened successfully!");
         } else {
           setSubmissionStatus("error");
+          toast.error("Error opening cashier session. Please try again.");
         }
       }
     } catch (error) {
@@ -108,6 +122,7 @@ const useCashierSession = ({ onFormSubmit }) => {
         setSubmissionStatus(null);
         setLoading(false);
       }, 3000);
+      toast.error("Error opening cashier session. Please try again.");
     }
   };
 

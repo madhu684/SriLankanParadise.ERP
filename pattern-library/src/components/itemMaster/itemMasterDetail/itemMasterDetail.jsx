@@ -160,13 +160,6 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
                     label="Unit Price"
                     value={formatCurrency(itemMaster?.unitPrice)}
                   />
-                  {/* {!isServiceItemType() && (
-                    <InfoRow
-                      label="Reorder Level"
-                      value={itemMaster?.reorderLevel}
-                    />
-                  )} */}
-
                   <InfoRow
                     label="Hierarchy Type"
                     value={
@@ -181,7 +174,7 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
           </Row>
 
           {/* Supplier Information */}
-          {itemMaster.supplier && (
+          {/* {itemMaster.supplier && (
             <Row className="mb-4">
               <Col xs={12}>
                 <InfoCard
@@ -238,10 +231,10 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
                 </InfoCard>
               </Col>
             </Row>
-          )}
+          )} */}
 
           {/* Pricing Information */}
-          {!isServiceItemType() && (
+          {/* {!isServiceItemType() && (
             <>
               <Row className="mb-4">
                 <Col xs={12}>
@@ -312,7 +305,7 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
                 </Col>
               </Row>
             </>
-          )}
+          )} */}
 
           {/* Quick Stats */}
           <Row className="g-3">
@@ -324,18 +317,14 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
                 variant="success"
               />
             </Col>
-            {!isServiceItemType() && (
-              <>
-                <Col sm={6} lg={colSize}>
-                  <StatCard
-                    icon={FaTag}
-                    label="Selling Price"
-                    value={formatCurrency(itemMaster.sellingPrice)}
-                    variant="info"
-                  />
-                </Col>
-              </>
-            )}
+            <Col sm={6} lg={colSize}>
+              <StatCard
+                icon={FaTag}
+                label="Conversion Rate"
+                value={itemMaster.conversionRate || "N/A"}
+                variant="info"
+              />
+            </Col>
             <Col sm={6} lg={colSize}>
               <StatCard
                 icon={FaChartLine}

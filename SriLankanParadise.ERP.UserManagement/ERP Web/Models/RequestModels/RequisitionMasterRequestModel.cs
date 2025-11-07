@@ -28,6 +28,8 @@
 
         public string? ReferenceNumber { get; set; }
 
+        public string? GrnDekReference { get; set; }
+
         public int PermissionId { get; set; }
     }
 }

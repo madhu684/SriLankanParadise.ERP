@@ -40,11 +40,18 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public int? LocationId { get; set; }
 
-        public string? InVoicedPersonName { get; set; }
+        public int? CustomerId { get; set; }
 
-        public string? InVoicedPersonMobileNo { get; set; }
+        public int? CustomerDeliveryAddressId { get; set; }
+
+        public string? DriverName { get; set; }
+
+        public string? VehicleNumber { get; set; }
+
+        public decimal? TotalLitres { get; set; }
 
         public virtual SalesOrderDto? SalesOrder { get; set; }
+        public virtual CustomerDto? Customer { get; set; }
 
         public virtual IEnumerable<SalesInvoiceDetailDto>? SalesInvoiceDetails { get; set; }
     }

@@ -28,9 +28,9 @@ const useItemMaster = ({ onFormSubmit }) => {
     conversionValue: "",
     itemCode: "",
     unitPrice: "",
-    costRatio: "",
-    fobInUSD: "",
-    landedCost: 0,
+    costRatio: 0.0,
+    fobInUSD: 0.0,
+    landedCost: 0.0,
     minNetSellingPrice: 0,
     sellingPrice: 0,
     mrp: 0,
@@ -97,29 +97,29 @@ const useItemMaster = ({ onFormSubmit }) => {
     enabled: !!searchChildTerm,
   });
 
-  const fetchSuppliers = async (companyId, searchQuery) => {
-    try {
-      const response = await get_supplier_by_company_id_with_query_api(
-        companyId,
-        searchQuery
-      );
-      return response.data.result;
-    } catch (error) {
-      console.error("Error fetching suppliers:", error);
-    }
-  };
+  // const fetchSuppliers = async (companyId, searchQuery) => {
+  //   try {
+  //     const response = await get_supplier_by_company_id_with_query_api(
+  //       companyId,
+  //       searchQuery
+  //     );
+  //     return response.data.result;
+  //   } catch (error) {
+  //     console.error("Error fetching suppliers:", error);
+  //   }
+  // };
 
-  const {
-    data: availableSuppliers,
-    isLoading: isSuppliersLoading,
-    isError: isSuppliersError,
-    error: suppliersError,
-  } = useQuery({
-    queryKey: ["suppliers", supplierSearchTerm],
-    queryFn: () =>
-      fetchSuppliers(sessionStorage.getItem("companyId"), supplierSearchTerm),
-    enabled: !!supplierSearchTerm,
-  });
+  // const {
+  //   data: availableSuppliers,
+  //   isLoading: isSuppliersLoading,
+  //   isError: isSuppliersError,
+  //   error: suppliersError,
+  // } = useQuery({
+  //   queryKey: ["suppliers", supplierSearchTerm],
+  //   queryFn: () =>
+  //     fetchSuppliers(sessionStorage.getItem("companyId"), supplierSearchTerm),
+  //   enabled: !!supplierSearchTerm,
+  // });
 
   const fetchItemTypes = async () => {
     try {
@@ -691,10 +691,10 @@ const useItemMaster = ({ onFormSubmit }) => {
     selectedParentItem,
     selectedChildItems,
     supplierSearchTerm,
-    availableSuppliers,
-    isSuppliersLoading,
-    isSuppliersError,
-    suppliersError,
+    // availableSuppliers,
+    // isSuppliersLoading,
+    // isSuppliersError,
+    // suppliersError,
     isSupplierSelected,
     handleSupplierChange,
     handleResetSupplier,

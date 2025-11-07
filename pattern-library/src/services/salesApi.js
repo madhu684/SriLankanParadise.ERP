@@ -24,10 +24,127 @@ export const post_customer_api = async (formData) => {
   }
 };
 
+export const put_customer_api = async (customerId, formData) => {
+  try {
+    const response = await api.put(`/customer/${customerId}`, formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const get_customers_by_company_id_api = async (companyId) => {
   try {
     const response = await api.get(
       `/customer/GetCustomersByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const activate_deactivate_customer_api = async (
+  customerId,
+  formData
+) => {
+  try {
+    const response = await api.patch(
+      `/customer/ActiveDeactiveUser/${customerId}`,
+      formData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const post_customer_delivery_address_api = async (formData) => {
+  try {
+    const response = await api.post("/customerDeliveryAddress", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const delete_customer_delivery_address_api = async (id) => {
+  try {
+    const response = await api.delete(`/customerDeliveryAddress/${id}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const update_customer_delivery_address_api = async (id, formData) => {
+  try {
+    const response = await api.put(`/customerDeliveryAddress/${id}`, formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const search_customer_api = async (searchTerm) => {
+  try {
+    const response = await api.get(
+      `/customer/SearchCustomersByName?searchQuery=${searchTerm}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_delivery_address_by_customer_id = async (customerId) => {
+  try {
+    const response = await api.get(
+      `/customerDeliveryAddress/GetCustomerDeliveryAddressesByCustomerId/${customerId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const update_outstanding_balance_api = async (
+  customerId,
+  movementTypeId,
+  formData
+) => {
+  try {
+    const response = await api.patch(
+      `/customer/UpdateOutstandingBalance/${customerId}/${movementTypeId}`,
+      formData,
       {
         withCredentials: true,
       }
@@ -372,6 +489,23 @@ export const delete_sales_invoice_api = async (salesInvoiceId) => {
   }
 };
 
+export const get_sales_invoices_by_status_customerId = async (
+  customerId,
+  status
+) => {
+  try {
+    const response = await api.get(
+      `/salesInvoice/GetSalesInvoicesByCustomerIdStatus/${customerId}/${status}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 //packing slips apis
 
 export const get_packing_slips_details_by_packing_slip_id = async (
@@ -687,6 +821,21 @@ export const post_cashier_expense_out_api = async (formData) => {
     const response = await api.post("/cashierExpenseOut", formData, {
       withCredentials: true,
     });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_cashier_session_by_user_id_api = async (userId) => {
+  try {
+    const response = await api.get(
+      `/cashierSession/GetActiveCashierSession/${userId}`,
+      {
+        withCredentials: true,
+      }
+    );
     return response.data;
   } catch (error) {
     console.log(error);

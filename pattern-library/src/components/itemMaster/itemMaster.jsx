@@ -37,10 +37,10 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
     selectedChildItems,
     itemCode,
     supplierSearchTerm,
-    availableSuppliers,
-    isSuppliersLoading,
-    isSuppliersError,
-    suppliersError,
+    // availableSuppliers,
+    // isSuppliersLoading,
+    // isSuppliersError,
+    // suppliersError,
     isSupplierSelected,
     handleSupplierChange,
     handleResetSupplier,
@@ -470,37 +470,9 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
                   </div>
                 )}
 
-                {/* <div className="mb-3 mt-3">
-                  <label htmlFor="reorderLevel" className="form-label">
-                    Reorder level
-                  </label>
-                  <input
-                    type="number"
-                    className={`form-control ${
-                      validFields.reorderLevel ? "is-valid" : ""
-                    } ${validationErrors.reorderLevel ? "is-invalid" : ""}`}
-                    id="reorderLevel"
-                    placeholder="Enter Reorder Level"
-                    value={formData.reorderLevel}
-                    onChange={(e) => {
-                      const value = parseFloat(e.target.value);
-                      const positiveValue = isNaN(value)
-                        ? 0
-                        : Math.max(0, value);
-                      handleInputChange("reorderLevel", positiveValue);
-                    }}
-                    required
-                  />
-                  {validationErrors.reorderLevel && (
-                    <div className="invalid-feedback">
-                      {validationErrors.reorderLevel}
-                    </div>
-                  )}
-                </div> */}
-
                 {/* Supplier tagging */}
-                <h4>Supplier Tagging</h4>
-                <div className="mb-3 mt-3">
+                {/* <h4>Supplier Tagging</h4> */}
+                {/* <div className="mb-3 mt-3">
                   <label htmlFor="itemHierarchy" className="form-label">
                     Supplier
                   </label>
@@ -535,7 +507,6 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
                       </div>
                     )}
 
-                    {/* Dropdown for filtered suppliers */}
                     {supplierSearchTerm && (
                       <div className="dropdown" style={{ width: "100%" }}>
                         <ul
@@ -566,20 +537,15 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
                     {supplierSearchTerm === null && (
                       <div className="mb-3">
                         <small className="form-text text-muted">
-                          {/* {validationErrors.trnId && (
-                        <div className="text-danger mb-1">
-                          {validationErrors.trnId}
-                        </div>
-                      )} */}
                           Please search for a supplier and select it
                         </small>
                       </div>
                     )}
                   </div>
-                </div>
+                </div> */}
 
                 {/* Additional Supplier Information */}
-                {isSupplierSelected && (
+                {/* {isSupplierSelected && (
                   <div className="card mb-3">
                     <div className="card-header">Selected Supplier</div>
                     <div className="card-body">
@@ -602,13 +568,13 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
                       </button>
                     </div>
                   </div>
-                )}
+                )} */}
               </div>
             )}
           </div>
 
           <div className="col-md-5">
-            {!isServiceItemType() && (
+            {/* {!isServiceItemType() && (
               <>
                 <h4>Item Prices</h4>
                 <div className="mb-3 mt-3 d-flex align-items-center">
@@ -839,7 +805,7 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
                   />
                 </div>
               </>
-            )}
+            )} */}
             {!isServiceItemType() && (
               <>
                 <h4>Item Hierarchy</h4>

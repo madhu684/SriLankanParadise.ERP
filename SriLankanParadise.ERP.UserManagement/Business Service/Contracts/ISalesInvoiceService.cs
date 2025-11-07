@@ -12,6 +12,8 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
 
         Task<IEnumerable<SalesInvoice>> GetSalesInvoicesByUserId(int userId);
 
+        Task<IEnumerable<SalesInvoice>> GetSalesInvoicesByCustomerIdStatus(int customerId, int status);
+
         Task ApproveSalesInvoice(int salesInvoiceId, SalesInvoice salesInvoice);
 
         Task<SalesInvoice> GetSalesInvoiceBySalesInvoiceId(int salesInvoiceId);
@@ -21,5 +23,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task DeleteSalesInvoice(int salesInvoiceId);
 
         Task<SalesInvoice> GetSalesInvoiceById(int salesInvoiceId);
+
+        Task<IEnumerable<SalesInvoice>> GetSalesInvoiceByReference(string reference, int status);
     }
 }

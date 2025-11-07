@@ -33,6 +33,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             try
             {
                 return await _dbContext.SalesInvoices
+                    .Include(si => si.Customer)
+                    .Include(si => si.CustomerDeliveryAddress)
                     .Include(si => si.SalesInvoiceDetails)
                     .ToListAsync();
             }
@@ -49,13 +51,15 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var salesInvoices = await _dbContext.SalesInvoices
                     .Where(si => si.Status != 0 && si.CompanyId == companyId)
+                    .Include(si => si.Customer)
+                    .Include(si => si.CustomerDeliveryAddress)
                     .Include(si => si.SalesInvoiceDetails)
-                    .ThenInclude(ib => ib.Batch)
+                        .ThenInclude(ib => ib.Batch)
                     .Include(si => si.SalesInvoiceDetails)
-                    .ThenInclude(ib => ib.ItemMaster)
-                    .ThenInclude(im => im.Unit)
+                        .ThenInclude(ib => ib.ItemMaster)
+                        .ThenInclude(im => im.Unit)
                     .Include(si => si.SalesOrder)
-                    .ThenInclude(so => so.SalesOrderDetails)
+                        .ThenInclude(so => so.SalesOrderDetails)
                     //.OrderByDescending(si => si.CreatedDate)
                     .ToListAsync();
 
@@ -73,6 +77,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var salesInvoices = await _dbContext.SalesInvoices
                     .Where(si => si.CreatedUserId == userId)
+                    .Include(si => si.Customer)
+                    .Include(si => si.CustomerDeliveryAddress)
                     .Include(si => si.SalesInvoiceDetails)
                         .ThenInclude(ib => ib.Batch)
                     .Include(si => si.SalesInvoiceDetails)
@@ -118,11 +124,13 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var salesInvoice = await _dbContext.SalesInvoices
                     .Where(si => si.SalesInvoiceId == salesInvoiceId)
+                    .Include(si => si.Customer)
+                    .Include(si => si.CustomerDeliveryAddress)
                     .Include(si => si.SalesInvoiceDetails)
-                    .ThenInclude(ib => ib.Batch)
+                        .ThenInclude(ib => ib.Batch)
                     .Include(si => si.SalesInvoiceDetails)
-                    .ThenInclude(ib => ib.ItemMaster)
-                    .ThenInclude(im => im.Unit)
+                        .ThenInclude(ib => ib.ItemMaster)
+                        .ThenInclude(im => im.Unit)
                     .Include(si => si.SalesOrder)
                     .FirstOrDefaultAsync();
 
@@ -204,11 +212,63 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             try
             {
                 var salesInvoice = await _dbContext.SalesInvoices
+                    .Include(si => si.Customer)
+                    .Include(si => si.CustomerDeliveryAddress)
                     .Include(si => si.SalesInvoiceDetails)
                     .FirstOrDefaultAsync(si => si.SalesInvoiceId == salesInvoiceId);
                 return salesInvoice;
             }
             catch(Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<SalesInvoice>> GetSalesInvoicesByCustomerIdStatus(int customerId, int status)
+        {
+            try
+            {
+                var salesInvoice = await _dbContext.SalesInvoices
+                    .Where(si => si.CustomerId == customerId && si.Status == status)
+                    .Include(si => si.Customer)
+                    .Include(si => si.CustomerDeliveryAddress)
+                    .Include(si => si.SalesInvoiceDetails)
+                    .OrderBy(si => si.ApprovedDate)
+                    .ToListAsync();
+
+                return salesInvoice;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<SalesInvoice>> GetSalesInvoiceByReference(string reference, int status)
+        {
+            try
+            {
+                // Check if reference is provided
+                if (string.IsNullOrEmpty(reference))
+                {
+                    return null;
+                }
+
+                var query = _dbContext.SalesInvoices.Where(si => si.ReferenceNo.Contains(reference) && si.Status == status);
+
+                query = query.Include(si => si.Customer)
+                    .Include(si => si.CustomerDeliveryAddress)
+                    .Include(si => si.SalesInvoiceDetails)
+                        .ThenInclude(ib => ib.ItemMaster)
+                        .ThenInclude(im => im.Unit)
+                    .OrderBy(si => si.ApprovedDate);
+
+
+                var salesInvoices = await query.ToListAsync();
+
+                return salesInvoices.Any() ? salesInvoices : null!;
+            }
+            catch (Exception)
             {
                 throw;
             }

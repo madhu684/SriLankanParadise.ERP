@@ -806,6 +806,21 @@ export const get_item_batches_by_locationId_CompanyId = async (
   }
 };
 
+export const get_unique_item_batch_ref = async (locationId, companyId) => {
+  try {
+    const response = await api.get(
+      `/itemBatch/GetUniqueItembatchRef/${locationId}/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 //issue master apis
 export const post_issue_master_api = async (formData) => {
   try {
@@ -1475,12 +1490,12 @@ export const get_location_inventory_by_locationInvemtoryId_api = async (
 
 //=============
 export const get_sum_location_inventories_by_locationId_itemMasterId_api =
-  async (itemMasterId, locationId = null) => {
+  async (itemMasterId, locationId = null, batchId = null) => {
     try {
       const response = await api.get(
         `/locationInventory/GetSumLocationInventoriesByLocationIdItemMasterId/${itemMasterId}`,
         {
-          params: { locationId },
+          params: { locationId, batchId },
           withCredentials: true,
         }
       );
@@ -1576,6 +1591,24 @@ export const get_Location_Inventory_Summary_By_Item_Name_api = async (
   }
 };
 
+export const get_sum_location_inventories_by_ref_api = async (
+  referenceNo,
+  locationId
+) => {
+  try {
+    const response = await api.get(
+      `/locationInventory/GetSumLocationInventoriesByRef/${referenceNo}/${locationId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching sum location inventories:", error);
+    throw error;
+  }
+};
+
 export const post_comapny_location_api = async (locationData) => {
   try {
     const response = await api.post("/location", locationData, {
@@ -1622,6 +1655,17 @@ export const get_approved_supply_return_masters_by_companyId = async (
         withCredentials: true,
       }
     );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const get_location_by_locationId_api = async (locationId) => {
+  try {
+    const response = await api.get(`/location/${locationId}`, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     throw error;

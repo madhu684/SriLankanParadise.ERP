@@ -1,28 +1,44 @@
-import "./menu.css";
+// src/components/menu/menu.jsx
 import React from "react";
-import { Navigate } from "react-router-dom";
+import "./menu.css";
 import userImage from "../../assets/images/person-circle.svg";
-//import CompanyImage from "../../assets/images/powerline_lanka_logo.jpeg";
 import CompanyImage from "../../assets/images/logo_small.png";
+import useMenu from "./useMenu";
 
-function template() {
+function Menu({
+  activeSubmodule,
+  isSidebarOpen: propSidebarOpen,
+  isSmallScreen,
+  onToggleSidebar,
+  onSubmoduleClick,
+}) {
   const {
-    activeModules,
     modules,
+    activeModules,
     isDropdownOpen,
     username,
     companyName,
     companyLogoUrl,
-  } = this.state;
-  const { activeSubmodule, isSidebarOpen, isSmallScreen, onToggleSidebar } =
-    this.props;
+    isSidebarOpen,
+    handleModuleClick,
+    handleSubmoduleClick,
+    toggleDropdown,
+    handleLogout,
+  } = useMenu({
+    activeSubmodule,
+    isSidebarOpen: propSidebarOpen,
+    isSmallScreen,
+    onToggleSidebar,
+    onSubmoduleClick,
+  });
+
   return (
     <>
       <nav
         className={`bg-light menu ${isSidebarOpen ? "" : "d-none"} transition`}
       >
         <div
-          className="d-flex flex-column flex-shrink-0 p-3 bg-light "
+          className="d-flex flex-column flex-shrink-0 p-3 bg-light"
           style={{ height: "100vh" }}
         >
           <div className="container-fluid">
@@ -39,18 +55,19 @@ function template() {
                 src={CompanyImage}
                 alt="Company Logo"
               />
-
               {isSmallScreen && (
                 <button
                   type="button"
                   className="btn-close"
                   aria-label="Close"
-                  onClick={() => onToggleSidebar()}
-                ></button>
+                  onClick={onToggleSidebar}
+                />
               )}
             </a>
           </div>
+
           <hr />
+
           <div className="mb-auto overflow-y-auto">
             <ul className="nav flex-column mb-auto">
               {modules.map((module) => (
@@ -62,16 +79,15 @@ function template() {
                         ? "nav-link-active text-light"
                         : "text-dark"
                     }`}
-                    onClick={() => this.handleModuleClick(module.id)}
+                    onClick={() => handleModuleClick(module.id)}
                     data-bs-toggle="collapse"
                     data-bs-target={`#submodulesCollapse${module.id}`}
-                    aria-expanded={
-                      activeModules.includes(module.id) ? "true" : "false"
-                    }
+                    aria-expanded={activeModules.includes(module.id)}
                   >
                     {module.name}
                   </a>
-                  {module.submodules && module.submodules.length > 0 && (
+
+                  {module.submodules.length > 0 && (
                     <div
                       className="collapse"
                       id={`submodulesCollapse${module.id}`}
@@ -80,20 +96,11 @@ function template() {
                         {module.submodules.map((submodule) => (
                           <li key={submodule.id}>
                             <a
-                              href={`#${
-                                activeSubmodule === submodule.name
-                                  ? activeSubmodule.toLowerCase()
-                                  : submodule.name.toLowerCase()
-                              }`}
+                              href={`#${submodule.name.toLowerCase()}`}
                               className="nav-link link-dark smaller-text"
                               onClick={() => {
-                                this.handleSubmoduleClick(
-                                  module.id,
-                                  submodule.name
-                                );
-                                if (isSmallScreen) {
-                                  onToggleSidebar();
-                                }
+                                handleSubmoduleClick(module.id, submodule.name);
+                                if (isSmallScreen) onToggleSidebar();
                               }}
                             >
                               <span
@@ -115,7 +122,9 @@ function template() {
               ))}
             </ul>
           </div>
+
           <hr />
+
           <div
             className={`nav-item dropdown ${isDropdownOpen ? "dropup" : ""}`}
           >
@@ -123,7 +132,7 @@ function template() {
               className="d-flex align-items-center nav-link dropdown-toggle link-dark text-decoration-none"
               role="button"
               aria-expanded={isDropdownOpen}
-              onClick={this.toggleDropdown}
+              onClick={toggleDropdown}
             >
               <img
                 src={userImage}
@@ -137,7 +146,7 @@ function template() {
             <ul
               className={`dropdown-menu ${
                 isDropdownOpen ? "dropup-position show" : ""
-              } `}
+              }`}
             >
               <li>
                 <a className="dropdown-item" href="#">
@@ -163,22 +172,23 @@ function template() {
                   role="button"
                   onClick={(e) => {
                     e.preventDefault();
-                    this.handleLogout();
+                    handleLogout();
                   }}
                 >
                   Sign out
                 </a>
-                {this.state.isLogout && <Navigate to="/login" replace={true} />}
               </li>
             </ul>
           </div>
         </div>
       </nav>
+
+      {/* Overlay for mobile */}
       {isSidebarOpen && isSmallScreen && (
-        <div className="overlay" onClick={() => onToggleSidebar()}></div>
+        <div className="overlay" onClick={onToggleSidebar}></div>
       )}
     </>
   );
 }
 
-export default template;
+export default Menu;

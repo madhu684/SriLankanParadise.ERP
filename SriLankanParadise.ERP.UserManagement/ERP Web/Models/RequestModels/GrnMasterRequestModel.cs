@@ -34,6 +34,7 @@
         public string? GrnType { get; set; }
 
         public int? WarehouseLocationId { get; set; }
+        public string? ReferenceNo { get; set; }
 
         public int PermissionId { get; set; }
     }

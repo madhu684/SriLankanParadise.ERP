@@ -7,6 +7,7 @@ import {
   post_location_inventory_goods_in_transit_api,
   update_min_state_in_mrn_api,
 } from "../../../services/purchaseApi";
+import toast from "react-hot-toast";
 
 const useTinApproval = ({ tin, onFormSubmit }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
@@ -176,13 +177,17 @@ const useTinApproval = ({ tin, onFormSubmit }) => {
         setApprovalStatus(null);
         setLoading(false);
       }, 2000);
+
+      toast.success("Transfer issue note approved successfully.");
     } catch (error) {
       setApprovalStatus("error");
-      console.error("Error approving material issue Note note:", error);
+      console.error("Error approving Transfer issue Note note:", error);
       setTimeout(() => {
         setApprovalStatus(null);
         setLoading(false);
       }, 2000);
+
+      toast.error("Error approving Transfer issue note.");
     }
   };
 
