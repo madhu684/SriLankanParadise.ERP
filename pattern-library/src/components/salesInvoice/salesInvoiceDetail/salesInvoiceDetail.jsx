@@ -420,7 +420,8 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                                       value.toFixed(2) +
                                       ` (${percentageValue.toFixed(2)}%)`;
                                   } else if (
-                                    charge.chargesAndDeduction.percentage
+                                    charge.chargesAndDeduction.percentage !==
+                                    null
                                   ) {
                                     const percentageValue =
                                       (value /

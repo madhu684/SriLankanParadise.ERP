@@ -15,6 +15,7 @@ import {
 } from "../../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useGrnUpdate = ({ grn, onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -949,8 +950,15 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
             setLoadingDraft(false);
             onFormSubmit();
           }, 3000);
+
+          toast.success(
+            isSaveAsDraft
+              ? "GRN updated as draft successfully!"
+              : "GRN updated successfully!"
+          );
         } else {
           setSubmissionStatus("error");
+          toast.error("Error updating GRN!");
         }
       }
     } catch (error) {
@@ -961,6 +969,8 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
         setLoading(false);
         setLoadingDraft(false);
       }, 3000);
+
+      toast.error("Error updating GRN!");
     }
   };
 

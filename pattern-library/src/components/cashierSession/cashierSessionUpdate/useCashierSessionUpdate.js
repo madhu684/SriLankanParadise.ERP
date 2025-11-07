@@ -6,6 +6,7 @@ import {
 } from "../../../services/salesApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import moment from "moment";
+import toast from "react-hot-toast";
 
 const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
   const [validFields, setValidFields] = useState({});
@@ -271,8 +272,11 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
             setLoading(false);
             onFormSubmit(response);
           }, 3000);
+
+          toast.success("Cashier session closed successfully!");
         } else {
           setSubmissionStatus("error");
+          toast.error("Failed to close cashier session.");
         }
       }
     } catch (error) {
@@ -282,6 +286,7 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
         setSubmissionStatus(null);
         setLoading(false);
       }, 3000);
+      toast.error("Failed to close cashier session.");
     }
   };
 

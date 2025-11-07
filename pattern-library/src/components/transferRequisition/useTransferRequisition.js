@@ -10,6 +10,7 @@ import {
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useTransferRequisition = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -147,7 +148,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
   } = useQuery({
     queryKey: ["uniqueItemBatchRefs", formData.toWarehouseLocation],
     queryFn: fetchUniqueItembatchRefs,
-    enabled: !!formData.toWarehouseLocation,
+    enabled: !!formData.toWarehouseLocation && !!formData.fromWarehouseLocation,
   });
 
   const fetchStockDetails = async (locationId, batchId, itemMasterId) => {
@@ -391,8 +392,15 @@ const useTransferRequisition = ({ onFormSubmit }) => {
             setLoading(false);
             onFormSubmit();
           }, 3000);
+
+          toast.success(
+            isSaveAsDraft
+              ? "Transfer requisition saved as draft successfully!"
+              : "Transfer requisition submitted successfully!"
+          );
         } else {
           setSubmissionStatus("error");
+          toast.error("Error submitting transfer requisition!");
         }
       }
     } catch (error) {
@@ -402,6 +410,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
         setSubmissionStatus(null);
         setLoading(false);
       }, 3000);
+      toast.error("Error submitting transfer requisition!");
     }
   };
 
@@ -532,7 +541,6 @@ const useTransferRequisition = ({ onFormSubmit }) => {
         formData.toWarehouseLocation
       );
       const lowStockItems = response.data.result || [];
-      console.log("lowStockItems 648: ", lowStockItems);
       if (lowStockItems.length === 0) {
         setShowToast(true);
         setTimeout(() => {
@@ -572,6 +580,8 @@ const useTransferRequisition = ({ onFormSubmit }) => {
           ...prevFormData,
           itemDetails: newItemDetails,
         }));
+      } else {
+        toast.error("No items found for selected reference.");
       }
     } catch (error) {
       console.error("Error generating purchase order:", error);

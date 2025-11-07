@@ -14,10 +14,11 @@ import {
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useGrn = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
-    grnDate: "",
+    grnDate: new Date().toISOString().split("T")[0],
     receivedBy: "",
     receivedDate: "",
     itemDetails: [],
@@ -758,8 +759,15 @@ const useGrn = ({ onFormSubmit }) => {
             setLoadingDraft(false);
             onFormSubmit();
           }, 3000);
+
+          toast.success(
+            isSaveAsDraft
+              ? "GRN saved as draft successfully!"
+              : "GRN submitted successfully!"
+          );
         } else {
           setSubmissionStatus("error");
+          toast.error("Error submitting GRN!");
         }
       }
     } catch (error) {
@@ -770,6 +778,7 @@ const useGrn = ({ onFormSubmit }) => {
         setLoading(false);
         setLoadingDraft(false);
       }, 3000);
+      toast.error("Error submitting GRN!");
     }
   };
 
@@ -973,7 +982,7 @@ const useGrn = ({ onFormSubmit }) => {
           receivedQuantity: 0,
           rejectedQuantity: 0,
           freeQuantity: 0,
-          //expiryDate: '',
+          expiryDate: new Date().toISOString().split("T")[0],
           itemBarcode: "",
           unitPrice: 0.0,
         },

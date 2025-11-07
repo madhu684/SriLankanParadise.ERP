@@ -701,7 +701,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                       <th className="text-center">Quantity</th>
                       {renderColumns()}
                       <th className="text-end">Total Price</th>
-                      <th className="text-center">Action</th>
+                      <th className="text-end">Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -793,7 +793,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                         <td className="text-end fw-bold">
                           {formatTotals(item.totalPrice.toFixed(2))}
                         </td>
-                        <td className="text-center">
+                        <td className="text-end">
                           <button
                             type="button"
                             className="btn btn-sm btn-outline-danger"

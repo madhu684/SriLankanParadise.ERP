@@ -431,7 +431,7 @@ const SalesInvoiceApproval = ({
                                     value.toFixed(2) +
                                     ` (${percentageValue.toFixed(2)}%)`;
                                 } else if (
-                                  charge.chargesAndDeduction.percentage
+                                  charge.chargesAndDeduction.percentage !== null
                                 ) {
                                   const percentageValue =
                                     (value / (item.unitPrice * item.quantity)) *

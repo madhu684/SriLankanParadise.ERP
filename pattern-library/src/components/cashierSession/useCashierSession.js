@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { post_cashier_session_api } from "../../services/salesApi";
 import { useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useCashierSession = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -107,8 +108,11 @@ const useCashierSession = ({ onFormSubmit }) => {
             setLoading(false);
             onFormSubmit(response);
           }, 3000);
+
+          toast.success("Cashier session opened successfully!");
         } else {
           setSubmissionStatus("error");
+          toast.error("Error opening cashier session. Please try again.");
         }
       }
     } catch (error) {
@@ -118,6 +122,7 @@ const useCashierSession = ({ onFormSubmit }) => {
         setSubmissionStatus(null);
         setLoading(false);
       }, 3000);
+      toast.error("Error opening cashier session. Please try again.");
     }
   };
 

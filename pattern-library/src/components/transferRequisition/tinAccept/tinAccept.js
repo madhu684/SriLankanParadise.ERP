@@ -11,6 +11,7 @@ import {
   post_location_inventory_movement_api,
   update_min_state_in_mrn_api,
 } from "../../../services/purchaseApi";
+import toast from "react-hot-toast";
 
 const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
@@ -377,6 +378,8 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
       queryClient.invalidateQueries(["locationInventories", fromLocationId]);
       setRefetch(!refetch);
       setApprovalStatus("approved");
+
+      toast.success("Transfer issue note accepted successfully");
     } catch (error) {
       setApprovalStatus("error");
       console.error("Error accepting transfer issue note:", error);
@@ -384,6 +387,7 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
         setApprovalStatus(null);
         setLoading(false);
       }, 2000);
+      toast.error("Error accepting transfer issue note");
     } finally {
       setLoading(false);
     }

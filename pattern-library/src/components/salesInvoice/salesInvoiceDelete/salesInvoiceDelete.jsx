@@ -6,6 +6,7 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Modal } from "react-bootstrap";
 import { delete_sales_invoice_api } from "../../../services/salesApi";
+import toast from "react-hot-toast";
 
 const SalesInvoiceDelete = ({ show, handleClose, salesInvoice }) => {
   const [isDeleting, setIsDeleting] = useState(false);
@@ -63,9 +64,12 @@ const SalesInvoiceDelete = ({ show, handleClose, salesInvoice }) => {
           sessionStorage.getItem("companyId"),
         ]);
       }, 2000);
+
+      toast.success("Sales Invoice deleted successfully!");
     } catch (error) {
       console.error("Error deleting purchase order:", error);
       setIsDeleting(false);
+      toast.error("Error deleting sales invoice. Please try again.");
     }
   };
 

@@ -8,6 +8,7 @@ import {
   update_outstanding_balance_api,
 } from "../../services/salesApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useSalesReceipt = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -300,14 +301,19 @@ const useSalesReceipt = ({ onFormSubmit }) => {
             const newAmountDue = Math.max(0, item.amountDue - item.payment);
 
             // Determine the new status
+            // let siStatus = item.status;
+            // if (newAmountDue <= 0) {
+            //   siStatus = 5;
+            // } else if (item.outstandingAmount <= 100) {
+            //   siStatus = 5;
+            // } else {
+            //   siStatus = 2;
+            // }
             let siStatus = item.status;
             if (newAmountDue <= 0) {
-              siStatus = 5; // Settled - fully paid
-            } else if (item.outstandingAmount <= 100) {
-              // NEW LOGIC: If outstanding amount (outstanding amount) <= 100, set to settled
-              siStatus = 5; // Settled - outstanding amount within tolerance
+              siStatus = 5;
             } else {
-              siStatus = 2; // Approved - partially paid
+              siStatus = 2;
             }
 
             const salesInvoiceData = {
@@ -393,8 +399,11 @@ const useSalesReceipt = ({ onFormSubmit }) => {
             setLoadingDraft(false);
             onFormSubmit();
           }, 3000);
+
+          toast.success("Sales receipt submitted successfully!");
         } else {
           setSubmissionStatus("error");
+          toast.error("Error submitting sales receipt.");
         }
       }
     } catch (error) {
@@ -405,6 +414,7 @@ const useSalesReceipt = ({ onFormSubmit }) => {
         setLoading(false);
         setLoadingDraft(false);
       }, 3000);
+      toast.error("Error submitting sales receipt.");
     }
   };
 

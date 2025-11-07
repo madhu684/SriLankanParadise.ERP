@@ -26,6 +26,7 @@ import {
   get_item_price_list_by_locationId,
 } from "../../../services/inventoryApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -316,7 +317,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
                     (charge.appliedValue /
                       (item.unitPrice * item.quantity + charge.appliedValue)) *
                     100;
-                } else if (charge.chargesAndDeduction.percentage) {
+                } else if (charge.chargesAndDeduction.percentage !== null) {
                   value =
                     (Math.abs(charge.appliedValue) /
                       (item.unitPrice * item.quantity)) *
@@ -374,7 +375,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           ?.filter((charge) => !charge.lineItemId)
           .map((charge) => {
             let value;
-            if (charge.chargesAndDeduction.percentage) {
+            if (charge.chargesAndDeduction.percentage !== null) {
               // Calculate percentage value based on subtotal
               value = (Math.abs(charge.appliedValue) / subTotal) * 100;
             } else {
@@ -882,8 +883,11 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
               sessionStorage.getItem("userId"),
             ]);
           }, 3000);
+
+          toast.success("Sales invoice updated successfully!");
         } else {
           setSubmissionStatus("error");
+          toast.error("Error updating sales invoice. Please try again.");
         }
       }
     } catch (error) {
@@ -894,6 +898,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
         setLoading(false);
         setLoadingDraft(false);
       }, 3000);
+      toast.error("Error updating sales invoice. Please try again.");
     }
   };
 

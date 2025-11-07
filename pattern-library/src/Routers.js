@@ -6,7 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 
-import Login from "./components/login";
+import Login from "./components/login/login";
 import Main from "./components/main";
 import Admin from "./components/admin";
 import PurchaseRequisition from "./components/purchaseRequisition/purchaseRequisition";

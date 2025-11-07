@@ -15,6 +15,7 @@ import {
   get_locations_inventories_by_location_id_item_master_id_api,
 } from "../../../services/purchaseApi";
 import { useQuery } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useGrnApproval = ({ grn, onFormSubmit }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
@@ -157,12 +158,16 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
         if (grn.purchaseOrderId && purchaseOrder?.purchaseOrderId) {
           await updatePO();
         }
+
+        toast.success("GRN approved successfully !");
       } else {
         setApprovalStatus("error");
+        toast.error("Error approving GRN !");
       }
     } catch (error) {
       setApprovalStatus("error");
       console.error("Error approving goods received note:", error);
+      toast.error("Error approving GRN !");
     } finally {
       setTimeout(() => {
         setApprovalStatus(null);

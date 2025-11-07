@@ -10,6 +10,7 @@ import {
 } from "../../../services/salesApi";
 import SalesReceipt from "../salesReceipt";
 import { useQuery } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -449,8 +450,11 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
             setLoadingDraft(false);
             onFormSubmit();
           }, 3000);
+
+          toast.success("Sales receipt updated successfully!");
         } else {
           setSubmissionStatus("error");
+          toast.error("Failed to update sales receipt.");
         }
       }
     } catch (error) {
@@ -461,6 +465,7 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
         setLoading(false);
         setLoadingDraft(false);
       }, 3000);
+      toast.error("Failed to update sales receipt.");
     }
   };
 

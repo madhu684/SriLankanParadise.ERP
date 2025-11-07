@@ -9,6 +9,7 @@ import {
 } from "../../../services/purchaseApi";
 import { get_company_api } from "../../../services/salesApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
@@ -78,14 +79,18 @@ const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
 
           if (customerResponse.status === 200) {
             setApprovalStatus("approved");
+            toast.success("Sales invoice approved successfully");
           } else {
             setApprovalStatus("error");
+            toast.error("Error approving sales invoice");
           }
         } else {
           setApprovalStatus("error");
+          toast.error("Error approving sales invoice");
         }
       } else {
         setApprovalStatus("error");
+        toast.error("Error approving sales invoice");
       }
 
       setTimeout(() => {
@@ -104,6 +109,7 @@ const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
         setApprovalStatus(null);
         setLoading(false);
       }, 2000);
+      toast.error("Error approving sales invoice");
     }
   };
 

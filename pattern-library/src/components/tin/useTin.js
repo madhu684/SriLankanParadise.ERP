@@ -8,6 +8,7 @@ import {
   get_sum_location_inventories_by_ref_api,
 } from "../../services/purchaseApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 // Constants
 const STATUS_OPTIONS = [
@@ -348,7 +349,14 @@ const useTin = ({ onFormSubmit }) => {
             loadingSetter(false);
             onFormSubmit();
           }, ALERT_TIMEOUT);
+
+          toast.success(
+            isSaveAsDraft
+              ? "Transfer issue note saved as draft successfully!"
+              : "Transfer issue note submitted successfully!"
+          );
         } else {
+          toast.error("Transfer issue note failed to submit");
           throw new Error("Some item details failed to submit");
         }
       } catch (error) {
@@ -359,6 +367,7 @@ const useTin = ({ onFormSubmit }) => {
           setLoading(false);
           setLoadingDraft(false);
         }, ALERT_TIMEOUT);
+        toast.error("Transfer issue note failed to submit");
       }
     },
     [

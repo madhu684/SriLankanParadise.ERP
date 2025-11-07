@@ -20,6 +20,7 @@ import {
   get_item_price_list_by_locationId,
 } from "../../services/inventoryApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   const [formData, setFormData] = useState({
@@ -792,8 +793,11 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
             setLoadingDraft(false);
             onFormSubmit();
           }, 3000);
+
+          toast.success("Sales invoice submitted successfully!");
         } else {
           setSubmissionStatus("error");
+          toast.error("Failed to submit sales invoice.");
         }
       }
     } catch (error) {
@@ -804,6 +808,8 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         setLoading(false);
         setLoadingDraft(false);
       }, 3000);
+
+      toast.error("Failed to submit sales invoice.");
     }
   };
 
@@ -1173,8 +1179,10 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
           availableStock = inventory?.data?.result?.totalStockInHand || 0;
 
           if (availableStock <= 0) {
-            console.warn("No stock available for this item");
-            alert("No stock available for this item");
+            toast.error(
+              `No stock available for "${item.itemName}" in selected Location`
+            );
+            searchTerm("");
             return;
           }
 
@@ -1207,7 +1215,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         }));
       } catch (error) {
         console.error("Error processing item:", error);
-        alert("Error processing item. Please try again.");
+        // toast.error("Error processing item. Please try again.");
       }
 
       // Reset search and batch selection

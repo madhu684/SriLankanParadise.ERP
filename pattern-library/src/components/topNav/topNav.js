@@ -1,8 +1,7 @@
-import React from "react";
 import "./topNav.css";
 import CashierSession from "../cashierSession/cashierSession";
 import CashierSessionUpdate from "../cashierSession/cashierSessionUpdate/cashierSessionUpdate";
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext } from "react";
 import { UserContext } from "../../context/userContext";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -10,7 +9,7 @@ const TopNav = ({ onToggleSidebar }) => {
   const [showCashierSessionModal, setShowCashierSessionModal] = useState(false);
   const [showCashierSessionModalInParent, setshowCashierSessionModalInParent] =
     useState(false);
-  const [modalType, setModalType] = useState(null); // 'create' or 'update'
+  const [modalType, setModalType] = useState(null);
 
   const { activeCashierSession, activeCashierSessionLoading } =
     useContext(UserContext);
@@ -19,7 +18,8 @@ const TopNav = ({ onToggleSidebar }) => {
   const isCashierSessionOpen = !!activeCashierSession;
 
   const handleShowCashierSessionModal = () => {
-    // Determine which modal to show based on current session state
+    if (activeCashierSessionLoading) return;
+
     setModalType(isCashierSessionOpen ? "update" : "create");
     setShowCashierSessionModal(true);
     setshowCashierSessionModalInParent(true);
@@ -52,8 +52,17 @@ const TopNav = ({ onToggleSidebar }) => {
     const delay = 300;
     setTimeout(() => {
       setshowCashierSessionModalInParent(false);
-      setModalType(null); // Reset modal type after animation
+      setModalType(null);
     }, delay);
+  };
+
+  const getButtonText = () => {
+    if (activeCashierSessionLoading) {
+      return "Loading...";
+    }
+    return isCashierSessionOpen
+      ? "Close Cashier Session"
+      : "Open Cashier Session";
   };
 
   return (
@@ -82,9 +91,7 @@ const TopNav = ({ onToggleSidebar }) => {
             style={{ marginLeft: "25px" }}
             disabled={activeCashierSessionLoading}
           >
-            {isCashierSessionOpen
-              ? "Close Cashier Session"
-              : "Open Cashier Session"}
+            {getButtonText()}
           </button>
         </div>
         <span className="navbar-text">Enterprise Resource App</span>

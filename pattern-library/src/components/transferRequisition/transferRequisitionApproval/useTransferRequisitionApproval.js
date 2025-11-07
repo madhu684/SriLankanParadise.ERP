@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { approve_requisition_master_api } from "../../../services/purchaseApi";
+import toast from "react-hot-toast";
 
 const useTransferRequisitionApproval = ({ onFormSubmit }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
@@ -52,6 +53,8 @@ const useTransferRequisitionApproval = ({ onFormSubmit }) => {
         setApprovalStatus(null);
         setLoading(false);
       }, 2000);
+
+      toast.success("Transfer requisition note approved successfully");
     } catch (error) {
       setApprovalStatus("error");
       console.error("Error approving transfer requisition note:", error);
@@ -59,6 +62,7 @@ const useTransferRequisitionApproval = ({ onFormSubmit }) => {
         setApprovalStatus(null);
         setLoading(false);
       }, 2000);
+      toast.error("Error approving transfer requisition note");
     }
   };
 

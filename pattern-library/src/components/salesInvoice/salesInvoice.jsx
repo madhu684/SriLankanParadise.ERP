@@ -701,7 +701,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                       <th className="text-center">Quantity</th>
                       {renderColumns()}
                       <th className="text-end">Total Price</th>
-                      <th className="text-center">Action</th>
+                      <th className="text-end">Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -756,9 +756,9 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                         </td>
                         {item.chargesAndDeductions.map(
                           (charge, chargeIndex) => (
-                            <td key={chargeIndex}>
+                            <td key={chargeIndex} className="text-end">
                               <input
-                                className="form-control text-end"
+                                className="form-control"
                                 type="number"
                                 value={charge.value}
                                 step={0.01}
@@ -790,7 +790,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                         <td className="text-end fw-bold">
                           {formatTotals(item.totalPrice.toFixed(2))}
                         </td>
-                        <td className="text-center">
+                        <td className="text-end">
                           <button
                             type="button"
                             className="btn btn-sm btn-outline-danger"
