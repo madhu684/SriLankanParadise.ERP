@@ -8,7 +8,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public int ItemBatchItemMasterId { get; set; }
 
-        public int ItemBatchBatchId { get; set; }
+        public int? ItemBatchBatchId { get; set; }
 
         public int SalesOrderId { get; set; }
 
@@ -18,6 +18,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public decimal? TotalPrice { get; set; }
 
-        public virtual ItemBatchDto? ItemBatch { get; set; }
+        public BatchDto? Batch { get; set; }
+
+        public ItemMasterDto? ItemMaster { get; set; }
     }
 }

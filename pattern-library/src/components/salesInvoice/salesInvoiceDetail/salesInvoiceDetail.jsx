@@ -42,7 +42,7 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
   return (
     <>
       <Modal show={show} onHide={handleClose} centered scrollable size="xl">
-        <Modal.Header closeButton className="bg-light border-bottom">
+        <Modal.Header className="bg-light border-bottom">
           <Modal.Title className="fw-bold">Sales Invoice Details</Modal.Title>
         </Modal.Header>
         <Modal.Body className="p-4">
@@ -417,7 +417,7 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                                           item.unitPrice * item.quantity)) *
                                       100;
                                     renderedValue =
-                                      value.toFixed(2) +
+                                      formatTotals(value.toFixed(2)) +
                                       ` (${percentageValue.toFixed(2)}%)`;
                                   } else if (
                                     charge.chargesAndDeduction.percentage !==
@@ -428,7 +428,7 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                                         (item.unitPrice * item.quantity)) *
                                       100;
                                     renderedValue =
-                                      value.toFixed(2) +
+                                      formatTotals(value.toFixed(2)) +
                                       ` (${percentageValue.toFixed(2)}%)`;
                                   } else {
                                     renderedValue = value.toFixed(2);
@@ -480,7 +480,7 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                               const percentageValue =
                                 (renderedValue / calculateSubTotal()) * 100;
                               renderedValue =
-                                renderedValue +
+                                formatTotals(renderedValue) +
                                 ` (${percentageValue.toFixed(2)}%)`;
                             }
 

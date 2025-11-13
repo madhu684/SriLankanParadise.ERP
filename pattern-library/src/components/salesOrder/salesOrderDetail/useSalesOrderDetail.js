@@ -94,7 +94,7 @@ const useSalesOrderDetail = (salesOrder) => {
   // Group sales order details by item master ID
   const groupedSalesOrderDetails = salesOrder.salesOrderDetails.reduce(
     (acc, item) => {
-      const itemMasterId = item.itemBatch?.itemMaster?.itemMasterId;
+      const itemMasterId = item?.itemMaster?.itemMasterId;
       if (!acc[itemMasterId]) {
         acc[itemMasterId] = { ...item, quantity: 0, totalPrice: 0 };
       }

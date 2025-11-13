@@ -1,5 +1,5 @@
 /* styles.css */
-@import '../src/assets/styles/variable.css';
+@import "../src/assets/styles/variable.css";
 
 body {
   background-color: var(--background-color); /* Use background color variable */
@@ -16,9 +16,41 @@ body {
 
 .btn-primary {
   background-color: var(--primary-color);
-}  
+}
 
-a{
+a {
   text-decoration: none;
   color: var(--primary-color);
+}
+
+/* Reusable Hover Text Effects */
+.hover-text-primary:hover {
+  color: var(--bs-primary) !important;
+}
+.hover-text-success:hover {
+  color: var(--bs-success) !important;
+}
+.hover-text-muted:hover {
+  color: var(--bs-body-color) !important;
+}
+.hover-underline:hover {
+  text-decoration: underline !important;
+}
+.hover-fw-bold:hover {
+  font-weight: 600 !important;
+}
+
+/* Reusable Hover Background Effects */
+.hover-bg-primary:hover {
+  background-color: var(--bs-primary) !important;
+  opacity: 0.5 !important;
+}
+.hover-bg-success:hover {
+  background-color: var(--bs-success) !important;
+  opacity: 0.5 !important;
+}
+
+/* Smooth transition */
+.hover-effect {
+  transition: color 0.2s ease, text-decoration 0.2s ease !important;
 }

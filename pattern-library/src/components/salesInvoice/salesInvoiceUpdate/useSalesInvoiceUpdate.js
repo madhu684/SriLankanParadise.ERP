@@ -1079,32 +1079,6 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     );
   };
 
-  // const calculateTotalAmount = () => {
-  //   // Calculate total price based on item details
-  //   const subtotal = calculateSubTotal();
-
-  //   // Calculate total amount based on subtotal and common charges and deductions
-  //   let totalAmount = subtotal;
-  //   formData.commonChargesAndDeductions.forEach((charge) => {
-  //     if (charge.isPercentage) {
-  //       const amount = (subtotal * charge.value) / 100;
-  //       if (charge.sign === "+") {
-  //         totalAmount += amount;
-  //       } else if (charge.sign === "-") {
-  //         totalAmount -= amount;
-  //       }
-  //     } else {
-  //       if (charge.sign === "+") {
-  //         totalAmount += charge.value;
-  //       } else if (charge.sign === "-") {
-  //         totalAmount -= charge.value;
-  //       }
-  //     }
-  //   });
-
-  //   return totalAmount;
-  // };
-
   const calculateTotalAmount = () => {
     // Calculate total price based on item details
     const subtotal = calculateSubTotal();
@@ -1144,82 +1118,6 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   };
 
   // Handler to add the selected item to itemDetails
-  // const handleSelectItem = async (item) => {
-  //   const initializedCharges =
-  //     chargesAndDeductions
-  //       ?.filter((charge) => charge.isApplicableForLineItem)
-  //       ?.map((charge) => ({
-  //         id: charge.chargesAndDeductionId,
-  //         name: charge.displayName,
-  //         value: charge.amount || charge.percentage,
-  //         sign: charge.sign,
-  //         isPercentage: charge.percentage !== null,
-  //       })) || [];
-
-  //   let availableStock = 0;
-  //   let highestSellingPrice = 0;
-
-  //   try {
-  //     if (item.isInventoryItem === true) {
-  //       const inventory =
-  //         await get_sum_location_inventories_by_locationId_itemMasterId_api(
-  //           item.itemMasterId,
-  //           formData.storeLocation
-  //         );
-  //       availableStock = inventory?.data?.result?.totalStockInHand || 0;
-
-  //       if (availableStock <= 0) {
-  //         console.warn("No stock available for this item");
-  //         alert("No stock available for this item");
-  //         return;
-  //       }
-
-  //       // Get highest selling price from available batches
-  //       const batchesResponse = await get_item_batches_by_item_master_id_api(
-  //         item.itemMasterId,
-  //         sessionStorage.getItem("companyId")
-  //       );
-  //       highestSellingPrice =
-  //         batchesResponse?.data?.result?.reduce(
-  //           (maxPrice, batch) =>
-  //             batch.sellingPrice > maxPrice ? batch.sellingPrice : maxPrice,
-  //           0
-  //         ) || 0;
-  //     }
-
-  //     setFormData((prevFormData) => ({
-  //       ...prevFormData,
-  //       itemDetails: [
-  //         ...prevFormData.itemDetails,
-  //         {
-  //           salesInvoiceDetailId: null,
-  //           salesInvoiceId: salesInvoice.salesInvoiceId,
-  //           itemMasterId: item?.itemMasterId,
-  //           isInventoryItem: item?.isInventoryItem,
-  //           name: item?.itemName,
-  //           unit: item?.unit?.unitName,
-  //           stockInHand: item.isInventoryItem === true ? availableStock : 0,
-  //           quantity: 0,
-  //           unitPrice:
-  //             item.isInventoryItem === false
-  //               ? item.unitPrice
-  //               : highestSellingPrice,
-  //           totalPrice:
-  //             item.isInventoryItem === false ? item.unitPrice : item.unitPrice,
-  //           packageSize: item.conversionRate || 1,
-  //           chargesAndDeductions: initializedCharges,
-  //         },
-  //       ],
-  //     }));
-
-  //     setSearchTerm("");
-  //     setSelectedBatch(null);
-  //   } catch (error) {
-  //     console.error("Error processing item:", error);
-  //     alert("Error processing item. Please try again.");
-  //   }
-  // };
-
   const handleSelectItem = useCallback(
     async (item) => {
       let availableStock = 0;
@@ -1236,8 +1134,10 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           availableStock = inventory?.data?.result?.totalStockInHand || 0;
 
           if (availableStock <= 0) {
-            console.warn("No stock available for this item");
-            alert("No stock available for this item");
+            toast.error(
+              `No stock available for "${item.itemName}" in user location`
+            );
+            setSearchTerm("");
             return;
           }
 
@@ -1378,10 +1278,6 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   };
 
   console.log("formData", formData);
-  console.log(
-    "chargesAndDeductionsAppliedIdsToBeDeleted: ",
-    chargesAndDeductionsAppliedIdsToBeDeleted
-  );
 
   return {
     formData,

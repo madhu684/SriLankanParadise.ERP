@@ -1135,15 +1135,15 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.TotalPrice).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
 
-            entity.HasOne(d => d.SalesOrder).WithMany(p => p.SalesOrderDetails)
-                .HasForeignKey(d => d.SalesOrderId)
+            entity.HasOne(d => d.ItemMaster).WithMany(p => p.SalesOrderDetails)
+                .HasForeignKey(d => d.ItemBatchItemMasterId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__SalesOrde__Sales__22401542");
+                .HasConstraintName("FK_SalesOrderDetail_ItemMaster");
 
-            entity.HasOne(d => d.ItemBatch).WithMany(p => p.SalesOrderDetails)
-                .HasForeignKey(d => new { d.ItemBatchBatchId, d.ItemBatchItemMasterId })
+            entity.HasOne(d => d.Batch).WithMany(p => p.SalesOrderDetails)
+                .HasForeignKey(d => d.ItemBatchBatchId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__SalesOrderDetail__2334397B");
+                .HasConstraintName("FK_SalesOrderDetail_Batch");
         });
 
         modelBuilder.Entity<SalesReceipt>(entity =>
