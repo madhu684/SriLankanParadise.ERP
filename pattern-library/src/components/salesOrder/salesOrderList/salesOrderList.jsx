@@ -112,7 +112,7 @@ const SalesOrderList = () => {
   if (salesOrders.length === 0) {
     return (
       <div className="container mt-4">
-        <h2>Sales Orders</h2>
+        <h2>Sales Requisitions</h2>
         <div
           className="d-flex flex-column justify-content-center align-items-center text-center vh-100"
           style={{ maxHeight: "80vh" }}

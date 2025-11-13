@@ -21,7 +21,6 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
     alertRef,
     showCreateCustomerModal,
     showCreateCustomerMoalInParent,
-    directOrder,
     isError,
     isLoading,
     error,
@@ -64,7 +63,6 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
     calculateTotalAmount,
     calculateSubTotal,
     handleAddCustomer,
-    setDirectOrder,
     setSearchTerm,
     handleSelectItem,
     handleBatchSelection,
@@ -84,6 +82,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
   });
 
   const formatTotals = useFormatCurrency({ showCurrency: false });
+  const formatCurrency = useFormatCurrency();
 
   if (
     isCustomersLoading ||
@@ -121,7 +120,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
             <CurrentDateTime />
           </div>
         </div>
-        <h2 className="text-center mb-3 fw-bold">Sales Order</h2>
+        <h2 className="text-center mb-3 fw-bold">Sales Requisition</h2>
         <hr className="mb-4" />
       </div>
 
@@ -181,107 +180,52 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                 </h5>
               </div>
               <div className="card-body">
-                {/* Order Type Checkbox */}
-                <div className="form-check mb-4 p-3 bg-light rounded">
-                  <input
-                    type="checkbox"
-                    className="form-check-input"
-                    id="directOrderCheckbox"
-                    checked={directOrder}
-                    onChange={() => setDirectOrder(!directOrder)}
-                  />
-                  <label
-                    className="form-check-label fw-semibold"
-                    htmlFor="directOrderCheckbox"
-                  >
-                    <i className="bi bi-lightning-fill text-warning me-2"></i>
-                    Direct Order (No Customer Selection)
-                  </label>
-                </div>
-
                 {/* Customer Information */}
-                {!directOrder && (
-                  <div className="mb-4">
-                    <label
-                      htmlFor="customerId"
-                      className="form-label fw-semibold"
-                    >
-                      <i className="bi bi-person-fill me-2"></i>Customer
-                    </label>
-                    {formData.selectedCustomer === "" && (
-                      <div className="position-relative">
-                        <div className="input-group mb-2">
-                          <span className="input-group-text bg-white border-end-0">
-                            <i className="bi bi-search text-muted"></i>
-                          </span>
-                          <input
-                            type="text"
-                            className={`form-control border-start-0 ps-0 ${
-                              validFields.supplierId ? "is-valid" : ""
-                            } ${
-                              validationErrors.supplierId ? "is-invalid" : ""
-                            }`}
-                            placeholder="Search by name or phone..."
-                            value={customerSearchTerm}
-                            onChange={(e) =>
-                              setCustomerSearchTerm(e.target.value)
-                            }
-                            autoFocus={false}
-                          />
-                          {customerSearchTerm && (
-                            <button
-                              type="button"
-                              className="btn btn-outline-secondary"
-                              onClick={() => setCustomerSearchTerm("")}
-                            >
-                              <i className="bi bi-x-lg"></i>
-                            </button>
-                          )}
-                        </div>
-
-                        {/* Dropdown for filtered customers */}
+                <div className="mb-4">
+                  <label
+                    htmlFor="customerId"
+                    className="form-label fw-semibold"
+                  >
+                    <i className="bi bi-person-fill me-2"></i>Customer
+                  </label>
+                  {formData.selectedCustomer === "" && (
+                    <div className="position-relative">
+                      <div className="input-group mb-2">
+                        <span className="input-group-text bg-white border-end-0">
+                          <i className="bi bi-search text-muted"></i>
+                        </span>
+                        <input
+                          type="text"
+                          className={`form-control border-start-0 ps-0 ${
+                            validFields.supplierId ? "is-valid" : ""
+                          } ${validationErrors.supplierId ? "is-invalid" : ""}`}
+                          placeholder="Search by name or phone..."
+                          value={customerSearchTerm}
+                          onChange={(e) =>
+                            setCustomerSearchTerm(e.target.value)
+                          }
+                          autoFocus={false}
+                        />
                         {customerSearchTerm && (
-                          <div className="dropdown w-100">
-                            <ul
-                              className="dropdown-menu show w-100 shadow-lg border-0"
-                              style={{ maxHeight: "300px", overflowY: "auto" }}
-                            >
-                              {customers
-                                .filter(
-                                  (customer) =>
-                                    customer.customerName
-                                      .toLowerCase()
-                                      .includes(
-                                        customerSearchTerm.toLowerCase()
-                                      ) ||
-                                    customer.phone
-                                      .replace(/\s/g, "")
-                                      .includes(
-                                        customerSearchTerm.replace(/\s/g, "")
-                                      )
-                                )
-                                .map((customer) => (
-                                  <li key={customer.customerId}>
-                                    <button
-                                      type="button"
-                                      className="dropdown-item py-2 d-flex align-items-center"
-                                      onClick={() =>
-                                        handleSelectCustomer(customer)
-                                      }
-                                    >
-                                      <i className="bi bi-person-lines-fill text-primary me-3 fs-5"></i>
-                                      <div>
-                                        <div className="fw-semibold">
-                                          {customer?.customerName}
-                                        </div>
-                                        <small className="text-muted">
-                                          {customer?.phone}
-                                        </small>
-                                      </div>
-                                    </button>
-                                  </li>
-                                ))}
-                              {customers.filter(
+                          <button
+                            type="button"
+                            className="btn btn-outline-secondary"
+                            onClick={() => setCustomerSearchTerm("")}
+                          >
+                            <i className="bi bi-x-lg"></i>
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Dropdown for filtered customers */}
+                      {customerSearchTerm && (
+                        <div className="dropdown w-100">
+                          <ul
+                            className="dropdown-menu show w-100 shadow-lg border-0"
+                            style={{ maxHeight: "300px", overflowY: "auto" }}
+                          >
+                            {customers
+                              .filter(
                                 (customer) =>
                                   customer.customerName
                                     .toLowerCase()
@@ -293,103 +237,142 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                                     .includes(
                                       customerSearchTerm.replace(/\s/g, "")
                                     )
-                              ).length === 0 && (
-                                <>
-                                  <li className="dropdown-item text-center text-muted">
-                                    <i className="bi bi-emoji-frown me-2"></i>
-                                    No customers found
-                                  </li>
-                                </>
-                              )}
-                            </ul>
-                          </div>
-                        )}
-                        {formData.selectedCustomer === "" && (
-                          <div>
-                            <small className="form-text text-muted">
-                              {validationErrors.customerId && (
-                                <div className="text-danger mb-1 fw-semibold">
-                                  <i className="bi bi-exclamation-circle me-1"></i>
-                                  {validationErrors.customerId}
-                                </div>
-                              )}
-                              Please search and select a customer
-                            </small>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Selected Customer Card */}
-                    {formData.selectedCustomer && (
-                      <div className="card border-success">
-                        <div className="card-header bg-success bg-opacity-10 d-flex justify-content-between align-items-center">
-                          <span className="fw-semibold text-success">
-                            <i className="bi bi-check-circle-fill me-2"></i>
-                            Selected Customer
-                          </span>
+                              )
+                              .map((customer) => (
+                                <li key={customer.customerId}>
+                                  <button
+                                    type="button"
+                                    className="dropdown-item py-2 d-flex align-items-center"
+                                    onClick={() =>
+                                      handleSelectCustomer(customer)
+                                    }
+                                  >
+                                    <i className="bi bi-person-lines-fill text-primary me-3 fs-5"></i>
+                                    <div>
+                                      <div className="fw-semibold">
+                                        {customer?.customerName}
+                                      </div>
+                                      <small className="text-muted">
+                                        {customer?.phone}
+                                      </small>
+                                    </div>
+                                  </button>
+                                </li>
+                              ))}
+                            {customers.filter(
+                              (customer) =>
+                                customer.customerName
+                                  .toLowerCase()
+                                  .includes(customerSearchTerm.toLowerCase()) ||
+                                customer.phone
+                                  .replace(/\s/g, "")
+                                  .includes(
+                                    customerSearchTerm.replace(/\s/g, "")
+                                  )
+                            ).length === 0 && (
+                              <>
+                                <li className="dropdown-item text-center text-muted">
+                                  <i className="bi bi-emoji-frown me-2"></i>
+                                  No customers found
+                                </li>
+                              </>
+                            )}
+                          </ul>
                         </div>
-                        <div className="card-body">
-                          <div className="row g-3">
-                            {/* Left Column: Customer Name & Contact Person */}
-                            <div className="col-12 col-md-6">
-                              <div className="mb-2">
-                                <small className="text-muted d-block">
-                                  Customer Name
-                                </small>
-                                <span className="fw-semibold">
-                                  {formData.selectedCustomer.customerName}
-                                </span>
+                      )}
+                      {formData.selectedCustomer === "" && (
+                        <div>
+                          <small className="form-text text-muted">
+                            {validationErrors.customerId && (
+                              <div className="text-danger mb-1 fw-semibold">
+                                <i className="bi bi-exclamation-circle me-1"></i>
+                                {validationErrors.customerId}
                               </div>
-                              <div className="mb-2">
-                                <small className="text-muted d-block">
-                                  Contact Person
-                                </small>
-                                <span>
-                                  {formData.selectedCustomer.contactPerson}
-                                </span>
-                              </div>
-                            </div>
+                            )}
+                            Please search and select a customer
+                          </small>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
-                            {/* Right Column: Phone & Email */}
-                            <div className="col-12 col-md-6">
-                              <div className="mb-2">
-                                <small className="text-muted d-block">
-                                  Phone
-                                </small>
-                                <span>
-                                  <i className="bi bi-telephone me-1"></i>
-                                  {formData.selectedCustomer.phone}
-                                </span>
-                              </div>
-                              <div className="mb-3">
-                                <small className="text-muted d-block">
-                                  Email
-                                </small>
-                                <span>
-                                  <i className="bi bi-envelope me-1"></i>
-                                  {formData.selectedCustomer.email}
-                                </span>
-                              </div>
+                  {/* Selected Customer Card */}
+                  {formData.selectedCustomer && (
+                    <div className="card border-success">
+                      <div className="card-header bg-success bg-opacity-10 d-flex justify-content-between align-items-center">
+                        <span className="fw-semibold text-success">
+                          <i className="bi bi-check-circle-fill me-2"></i>
+                          Selected Customer
+                        </span>
+                      </div>
+                      <div className="card-body">
+                        <div className="row g-3">
+                          {/* Left Column: Customer Name & Contact Person */}
+                          <div className="col-12 col-md-6">
+                            <div className="mb-2">
+                              <small className="text-muted d-block">
+                                Customer Name
+                              </small>
+                              <span className="fw-semibold">
+                                {formData.selectedCustomer.customerName}
+                              </span>
+                            </div>
+                            <div className="mb-2">
+                              <small className="text-muted d-block">
+                                Contact Person
+                              </small>
+                              <span>
+                                {formData.selectedCustomer.contactPerson}
+                              </span>
+                            </div>
+                            <div className="mb-2">
+                              <small className="text-muted d-block">
+                                Credit Limit
+                              </small>
+                              <span>
+                                {formData.selectedCustomer.creditLimit}
+                              </span>
                             </div>
                           </div>
 
-                          {/* Reset Button - Full width on small screens, centered */}
-                          <div className="mt-3">
-                            <button
-                              type="button"
-                              className="btn btn-outline-danger btn-sm w-100"
-                              onClick={handleResetCustomer}
-                            >
-                              <i className="bi bi-x-circle me-1"></i>Reset
-                              Customer
-                            </button>
+                          {/* Right Column: Phone & Email */}
+                          <div className="col-12 col-md-6">
+                            <div className="mb-2">
+                              <small className="text-muted d-block">
+                                Phone
+                              </small>
+                              <span>
+                                <i className="bi bi-telephone me-1"></i>
+                                {formData.selectedCustomer.phone}
+                              </span>
+                            </div>
+                            <div className="mb-3">
+                              <small className="text-muted d-block">
+                                Email
+                              </small>
+                              <span>
+                                <i className="bi bi-envelope me-1"></i>
+                                {formData.selectedCustomer.email}
+                              </span>
+                            </div>
                           </div>
                         </div>
+
+                        {/* Reset Button - Full width on small screens, centered */}
+                        <div className="mt-3">
+                          <button
+                            type="button"
+                            className="btn btn-outline-danger btn-sm w-100"
+                            onClick={handleResetCustomer}
+                          >
+                            <i className="bi bi-x-circle me-1"></i>Reset
+                            Customer
+                          </button>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                )}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

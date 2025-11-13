@@ -97,7 +97,7 @@ const useMain = () => {
         return <PurchaseOrderList />;
       case "Goods Received Notes":
         return <GrnList />;
-      case "Sales Orders":
+      case "Sales Requisitions":
         return <SalesOrderList />;
       case "Sales Invoices":
         return <SalesInvoiceList />;

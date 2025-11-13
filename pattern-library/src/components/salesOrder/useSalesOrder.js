@@ -40,7 +40,6 @@ const useSalesOrder = ({ onFormSubmit }) => {
   const [showCreateCustomerModal, setShowCreateCustomerModal] = useState(false);
   const [showCreateCustomerMoalInParent, setShowCreateCustomerModalInParent] =
     useState(false);
-  const [directOrder, setDirectOrder] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBatch, setSelectedBatch] = useState(null);
   const [customerSearchTerm, setCustomerSearchTerm] = useState("");
@@ -342,13 +341,11 @@ const useSalesOrder = ({ onFormSubmit }) => {
   const validateForm = useCallback(() => {
     let isCustomerValid = true;
 
-    if (!directOrder) {
-      isCustomerValid = validateField(
-        "customerId",
-        "Customer",
-        formData.customerId
-      );
-    }
+    isCustomerValid = validateField(
+      "customerId",
+      "Customer",
+      formData.customerId
+    );
 
     const isSalesPersonValid = validateField(
       "salesPersonId",
@@ -397,7 +394,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
       isAttachmentsValid &&
       isItemQuantityValid
     );
-  }, [directOrder, formData, validateField, validateAttachments]);
+  }, [formData, validateField, validateAttachments]);
 
   // ============================================================================
   // HELPER FUNCTIONS
@@ -512,7 +509,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
 
         const currentDate = new Date().toISOString();
         const salesOrderData = {
-          customerId: directOrder ? null : formData.customerId,
+          customerId: formData.customerId,
           orderDate: formData.orderDate,
           deliveryDate: formData.deliveryDate,
           totalAmount: formData.totalAmount,
@@ -592,7 +589,6 @@ const useSalesOrder = ({ onFormSubmit }) => {
     },
     [
       validateForm,
-      directOrder,
       formData,
       username,
       userId,
@@ -891,7 +887,6 @@ const useSalesOrder = ({ onFormSubmit }) => {
     referenceNo,
     showCreateCustomerModal,
     showCreateCustomerMoalInParent,
-    directOrder,
     searchTerm,
     selectedBatch,
     customerSearchTerm,
@@ -933,7 +928,6 @@ const useSalesOrder = ({ onFormSubmit }) => {
     chargesAndDeductionsError,
 
     // Setters
-    setDirectOrder,
     setSearchTerm,
     setCustomerSearchTerm,
     setSalesPersonSearchTerm,
