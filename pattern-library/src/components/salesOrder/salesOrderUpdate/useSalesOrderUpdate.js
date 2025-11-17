@@ -26,6 +26,7 @@ import { use } from "react";
 
 const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
   const [formData, setFormData] = useState({
+    customerPoNumber: "",
     customerId: "",
     orderDate: "",
     deliveryDate: "",
@@ -44,7 +45,6 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
   const [validationErrors, setValidationErrors] = useState({});
   const [itemIdsToBeDeleted, setItemIdsToBeDeleted] = useState([]);
   const alertRef = useRef(null);
-  const [directOrder, setDirectOrder] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
   const [customerSearchTerm, setCustomerSearchTerm] = useState("");
@@ -389,6 +389,7 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
 
         setFormData({
           salesOrderId: deepCopySalesOrder?.salesOrderId ?? "",
+          customerPoNumber: deepCopySalesOrder?.customerPoNumber ?? "",
           customerId: deepCopySalesOrder?.customerId ?? "",
           salesPersonId: deepCopySalesOrder?.salesPersonId ?? "",
           orderDate: deepCopySalesOrder?.orderDate?.split("T")[0] ?? "",
@@ -615,14 +616,11 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
   const validateForm = () => {
     let isCustomerValid = true;
 
-    // Check customer validation only if it's not a direct order
-    if (!directOrder) {
-      isCustomerValid = validateField(
-        "customerId",
-        "Customer",
-        formData.customerId
-      );
-    }
+    isCustomerValid = validateField(
+      "customerId",
+      "Customer",
+      formData.customerId
+    );
 
     const isSalesPersonValid = validateField(
       "salesPersonId",
@@ -640,6 +638,12 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
       "deliveryDate",
       "Delivery date",
       formData.deliveryDate
+    );
+
+    const isCustomerPoNovalid = validateField(
+      "customerPoNumber",
+      "Customer PO Number",
+      formData.customerPoNumber
     );
 
     const isAttachmentsValid = validateAttachments(formData.attachments);
@@ -671,6 +675,7 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
       isSalesPersonValid &&
       isOrderDateValid &&
       isDeliveryDateValid &&
+      isCustomerPoNovalid &&
       isAttachmentsValid &&
       isItemQuantityValid
     );
@@ -696,7 +701,7 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
 
   const handleSubmit = async (isSaveAsDraft) => {
     try {
-      const customerId = directOrder ? null : formData.customerId;
+      const customerId = formData.customerId;
       const status = isSaveAsDraft ? 0 : 1;
       const currentDate = new Date().toISOString();
       let putSalesOrderSuccessful;
@@ -726,6 +731,7 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
           permissionId: 27,
           salesPersonId: formData.salesPersonId,
           inventoryLocationId: salesOrder.inventoryLocationId,
+          customerPoNumber: formData.customerPoNumber,
         };
 
         const response = await put_sales_order_api(
@@ -1145,7 +1151,6 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
     formData,
     submissionStatus,
     validFields,
-    directOrder,
     searchTerm,
     customerSearchTerm,
     salesPersonSearchTerm,
@@ -1185,7 +1190,6 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
     isCompanyError,
 
     // Setters
-    setDirectOrder,
     setCustomerSearchTerm,
     setSalesPersonSearchTerm,
     setSearchTerm,

@@ -37,5 +37,7 @@
         public double? Longitude { get; set; }
 
         public int InventoryLocationId { get; set; }
+
+        public string CustomerPoNumber { get; set; }
     }
 }

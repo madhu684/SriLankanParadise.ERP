@@ -181,6 +181,24 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
               </div>
               <div className="card-body">
                 {/* Customer Information */}
+                <div className="mb-3">
+                  <label htmlFor="orderType" className="form-label fw-semibold">
+                    <i className="bi bi-card-list me-2"></i>Customer PO Number
+                  </label>
+                  <input
+                    type="text"
+                    className={`form-control ${
+                      validFields.customerPoNumber ? "is-valid" : ""
+                    } ${validationErrors.customerPoNumber ? "is-invalid" : ""}`}
+                    id="customerPoNumber"
+                    name="customerPoNumber"
+                    value={formData.customerPoNumber}
+                    onChange={(e) =>
+                      handleInputChange("customerPoNumber", e.target.value)
+                    }
+                    placeholder="Eg:- C-100"
+                  />
+                </div>
                 <div className="mb-4">
                   <label
                     htmlFor="customerId"
@@ -302,7 +320,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                       <div className="card-header bg-success bg-opacity-10 d-flex justify-content-between align-items-center">
                         <span className="fw-semibold text-success">
                           <i className="bi bi-check-circle-fill me-2"></i>
-                          Selected Customer
+                          {formData.selectedCustomer.customerName}
                         </span>
                       </div>
                       <div className="card-body">
@@ -311,26 +329,29 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                           <div className="col-12 col-md-6">
                             <div className="mb-2">
                               <small className="text-muted d-block">
-                                Customer Name
-                              </small>
-                              <span className="fw-semibold">
-                                {formData.selectedCustomer.customerName}
-                              </span>
-                            </div>
-                            <div className="mb-2">
-                              <small className="text-muted d-block">
                                 Contact Person
                               </small>
                               <span>
                                 {formData.selectedCustomer.contactPerson}
                               </span>
                             </div>
-                            <div className="mb-2">
+                            <div className="mb-3">
+                              <small className="text-muted d-block">
+                                Email
+                              </small>
+                              <span>
+                                <i className="bi bi-envelope me-1"></i>
+                                {formData.selectedCustomer.email}
+                              </span>
+                            </div>
+                            <div className="mb-2 text-success">
                               <small className="text-muted d-block">
                                 Credit Limit
                               </small>
                               <span>
-                                {formData.selectedCustomer.creditLimit}
+                                {formatCurrency(
+                                  formData.selectedCustomer.creditLimit
+                                )}
                               </span>
                             </div>
                           </div>
@@ -348,11 +369,21 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                             </div>
                             <div className="mb-3">
                               <small className="text-muted d-block">
-                                Email
+                                Credit Duration
                               </small>
                               <span>
-                                <i className="bi bi-envelope me-1"></i>
-                                {formData.selectedCustomer.email}
+                                <i className="bi bi-clock me-1"></i>
+                                {formData.selectedCustomer.creditDuration} days
+                              </span>
+                            </div>
+                            <div className="mb-2 text-danger">
+                              <small className="text-muted d-block">
+                                Outstanding Amount
+                              </small>
+                              <span>
+                                {formatCurrency(
+                                  formData.selectedCustomer.outstandingAmount
+                                )}
                               </span>
                             </div>
                           </div>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import useSalesOrderList from "./useSalesOrderList";
 import SalesOrderApproval from "../salesOrderApproval/salesOrderApproval";
 import SalesOrder from "../salesOrder";
@@ -9,6 +9,7 @@ import ErrorComponent from "../../errorComponent/errorComponent";
 import SalesInvoice from "../../salesInvoice/salesInvoice";
 import Pagination from "../../common/Pagination/Pagination";
 import { FaSearch } from "react-icons/fa";
+import { UserContext } from "../../../context/userContext";
 
 const SalesOrderList = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -18,9 +19,6 @@ const SalesOrderList = () => {
   const {
     salesOrders,
     isLoadingData,
-    isLoadingPermissions,
-    isPermissionsError,
-    permissionError,
     error,
     isAnyRowSelected,
     selectedRows,
@@ -45,7 +43,6 @@ const SalesOrderList = () => {
     handleViewDetails,
     setShowCreateSOForm,
     setShowUpdateSOForm,
-    hasPermission,
     handleUpdate,
     handleUpdated,
     handleClose,
@@ -53,6 +50,8 @@ const SalesOrderList = () => {
     handleConvert,
     setShowConvertSOForm,
   } = useSalesOrderList();
+
+  const { hasPermission } = useContext(UserContext);
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -67,15 +66,11 @@ const SalesOrderList = () => {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  if (error || isPermissionsError) {
+  if (error) {
     return <ErrorComponent error={error || "Error fetching data"} />;
   }
 
-  if (
-    isLoadingData ||
-    isLoadingPermissions ||
-    (salesOrders && !(salesOrders.length >= 0))
-  ) {
+  if (isLoadingData || (salesOrders && !(salesOrders.length >= 0))) {
     return <LoadingSpinner />;
   }
 

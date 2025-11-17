@@ -1,7 +1,5 @@
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { get_sales_invoices_with_out_drafts_api } from "../../../services/salesApi";
-import { get_sales_invoices_by_user_id_api } from "../../../services/salesApi";
-import { get_user_permissions_api } from "../../../services/userManagementApi";
 import { useQuery } from "@tanstack/react-query";
 
 const useSalesInvoiceList = () => {
@@ -21,105 +19,21 @@ const useSalesInvoiceList = () => {
   const [SIDetail, setSIDetail] = useState("");
   const [showDeleteSIForm, setShowDeleteSIForm] = useState(false);
 
-  // Fetch user permissions
-  const {
-    data: userPermissions,
-    isLoading: isLoadingPermissions,
-    isError: isPermissionsError,
-    error: permissionError,
-  } = useQuery({
-    queryKey: ["userPermissions", sessionStorage.getItem("userId")],
-    queryFn: async () => {
-      const response = await get_user_permissions_api(
-        sessionStorage.getItem("userId")
-      );
-      return response.data.result;
-    },
-    enabled: !!sessionStorage.getItem("userId"),
-  });
-
-  // Helper function to check permissions
-  const hasPermission = (permissionName) => {
-    return userPermissions?.some(
-      (permission) =>
-        permission.permission.permissionName === permissionName &&
-        permission.permission.permissionStatus
-    );
-  };
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
 
   // Fetch sales invoices without drafts
   const {
-    data: salesInvoicesWithoutDrafts,
-    isLoading: isLoadingSalesInvoicesWithoutDrafts,
-    error: salesInvoicesWithoutDraftsError,
+    data: salesInvoices = [],
+    isLoading: isLoadingSalesInvoices,
+    error,
   } = useQuery({
-    queryKey: [
-      "salesInvoicesWithoutDrafts",
-      sessionStorage.getItem("companyId"),
-    ],
+    queryKey: ["salesInvoices", companyId],
     queryFn: async () => {
-      const response = await get_sales_invoices_with_out_drafts_api(
-        sessionStorage.getItem("companyId")
-      );
+      const response = await get_sales_invoices_with_out_drafts_api(companyId);
       return response.data.result || [];
     },
-    enabled: !isLoadingPermissions && hasPermission("Approve Sales Invoice"),
+    enabled: !companyId,
   });
-
-  // Fetch sales invoices by user ID
-  const {
-    data: salesInvoicesByUserId,
-    isLoading: isLoadingSalesInvoicesByUserId,
-    error: salesInvoicesByUserIdError,
-    refetch: refetchSalesInvoices,
-  } = useQuery({
-    queryKey: ["salesInvoicesByUserId", sessionStorage.getItem("userId")],
-    queryFn: async () => {
-      const response = await get_sales_invoices_by_user_id_api(
-        sessionStorage.getItem("userId")
-      );
-      return response.data.result || [];
-    },
-    enabled: !isLoadingPermissions && !!userPermissions,
-  });
-
-  // Combine and process sales invoices data
-  const salesInvoices = (() => {
-    if (isLoadingPermissions || !userPermissions) {
-      return [];
-    }
-
-    if (hasPermission("Approve Sales Invoice")) {
-      const invoicesWithoutDrafts = salesInvoicesWithoutDrafts || [];
-      const invoicesByUserId = salesInvoicesByUserId || [];
-
-      // Filter out duplicates
-      const uniqueInvoicesByUserId = invoicesByUserId.filter(
-        (invoice) =>
-          !invoicesWithoutDrafts.some(
-            (existingInvoice) =>
-              existingInvoice.salesInvoiceId === invoice.salesInvoiceId
-          )
-      );
-
-      return [...invoicesWithoutDrafts, ...uniqueInvoicesByUserId];
-    } else {
-      return salesInvoicesByUserId || [];
-    }
-  })();
-
-  // Calculate loading state
-  const isLoadingData =
-    isLoadingPermissions ||
-    (hasPermission("Approve Sales Invoice")
-      ? isLoadingSalesInvoicesWithoutDrafts || isLoadingSalesInvoicesByUserId
-      : isLoadingSalesInvoicesByUserId);
-
-  // Calculate error state
-  const error =
-    permissionError ||
-    salesInvoicesWithoutDraftsError ||
-    salesInvoicesByUserIdError;
 
   const handleShowApproveSIModal = () => {
     setShowApproveSIModal(true);
@@ -156,8 +70,6 @@ const useSalesInvoiceList = () => {
   };
 
   const handleApproved = async () => {
-    // Refetch the data after approval
-    await refetchSalesInvoices();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -171,9 +83,6 @@ const useSalesInvoiceList = () => {
     setTimeout(() => {
       setSelectedRowData([]);
     }, delay);
-
-    // Refetch data after right off operation
-    await refetchSalesInvoices();
   };
 
   const handleShowDetailSIModal = () => {
@@ -199,7 +108,6 @@ const useSalesInvoiceList = () => {
 
   const handleUpdated = async () => {
     // Refetch data after update
-    await refetchSalesInvoices();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -213,25 +121,28 @@ const useSalesInvoiceList = () => {
     setSIDetail("");
   };
 
-  const handleRowSelect = (id) => {
-    const isSelected = selectedRows.includes(id);
-    const selectedRow = salesInvoices.find((si) => si.salesInvoiceId === id);
+  const handleRowSelect = useCallback(
+    (id) => {
+      const isSelected = selectedRows.includes(id);
+      const selectedRow = salesInvoices?.find((si) => si.salesInvoiceId === id);
 
-    if (isSelected) {
-      setSelectedRows((prevSelected) =>
-        prevSelected.filter((selectedId) => selectedId !== id)
-      );
-      setSelectedRowData((prevSelectedData) =>
-        prevSelectedData.filter((data) => data.salesInvoiceId !== id)
-      );
-    } else {
-      setSelectedRows((prevSelected) => [...prevSelected, id]);
-      setSelectedRowData((prevSelectedData) => [
-        ...prevSelectedData,
-        selectedRow,
-      ]);
-    }
-  };
+      if (isSelected) {
+        setSelectedRows((prevSelected) =>
+          prevSelected.filter((selectedId) => selectedId !== id)
+        );
+        setSelectedRowData((prevSelectedData) =>
+          prevSelectedData.filter((data) => data.salesInvoiceId !== id)
+        );
+      } else {
+        setSelectedRows((prevSelected) => [...prevSelected, id]);
+        setSelectedRowData((prevSelectedData) => [
+          ...prevSelectedData,
+          selectedRow,
+        ]);
+      }
+    },
+    [salesInvoices, selectedRows]
+  );
 
   const isAnyRowSelected = selectedRows.length === 1;
 
@@ -267,29 +178,28 @@ const useSalesInvoiceList = () => {
     return statusClasses[statusCode] || "bg-secondary";
   };
 
-  const areAnySelectedRowsPending = (selectedRows) => {
-    return selectedRows.some(
-      (id) => salesInvoices.find((si) => si.salesInvoiceId === id)?.status === 1
-    );
-  };
+  const areAnySelectedRowsPending = useCallback(
+    (selectedRows) => {
+      return selectedRows.some(
+        (id) =>
+          salesInvoices?.find((si) => si.salesInvoiceId === id)?.status === 1
+      );
+    },
+    [salesInvoices]
+  );
 
-  const areAnySelectedRowsApproved = (selectedRows) => {
-    return selectedRows.some(
-      (id) => salesInvoices.find((si) => si.salesInvoiceId === id)?.status === 2
-    );
-  };
-
-  // Expose refetch function for external use
-  const refetch = () => {
-    refetchSalesInvoices();
-  };
+  const areAnySelectedRowsApproved = useCallback(
+    (selectedRows) => {
+      return selectedRows.some(
+        (id) =>
+          salesInvoices?.find((si) => si.salesInvoiceId === id)?.status === 2
+      );
+    },
+    [salesInvoices]
+  );
 
   return {
     salesInvoices,
-    isLoadingData,
-    isLoadingPermissions,
-    isPermissionsError,
-    error,
     isAnyRowSelected,
     selectedRows,
     showApproveSIModal,
@@ -301,10 +211,10 @@ const useSalesInvoiceList = () => {
     selectedRowData,
     showCreateSIForm,
     showUpdateSIForm,
-    userPermissions,
     SIDetail,
     showDeleteSIForm,
-    refetch,
+    isLoadingSalesInvoices,
+    error,
     setShowDeleteSIForm,
     areAnySelectedRowsPending,
     areAnySelectedRowsApproved,
@@ -321,7 +231,6 @@ const useSalesInvoiceList = () => {
     handleRightOff,
     setShowCreateSIForm,
     setShowUpdateSIForm,
-    hasPermission,
     handleUpdate,
     handleUpdated,
     handleClose,

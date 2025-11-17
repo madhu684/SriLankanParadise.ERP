@@ -14,7 +14,7 @@ import {
   get_grn_masters_by_purchase_order_id_api,
 } from "../../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../../services/inventoryApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 const useGrnUpdate = ({ grn, onFormSubmit }) => {
@@ -68,6 +68,10 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
   const [searchByPO, setSearchByPO] = useState(false);
   const [searchByPR, setSearchByPR] = useState(true);
 
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
+
+  const queryClient = useQueryClient();
+
   // FIXED: Use ref to track if we've logged to prevent infinite console logs
   const hasLoggedGrn = useRef(false);
   useEffect(() => {
@@ -79,9 +83,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
 
   const fetchLocations = async () => {
     try {
-      const response = await get_company_locations_api(
-        sessionStorage.getItem("companyId")
-      );
+      const response = await get_company_locations_api(companyId);
       return response.data.result;
     } catch (error) {
       console.error("Error fetching locations:", error);
@@ -118,7 +120,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
     error: itemsError,
   } = useQuery({
     queryKey: ["items", searchTerm],
-    queryFn: () => fetchItems(sessionStorage.getItem("companyId"), searchTerm),
+    queryFn: () => fetchItems(companyId, searchTerm),
   });
 
   const fetchPurchaseOrders = async () => {
@@ -198,9 +200,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
 
   const fetchSuppliers = async () => {
     try {
-      const response = await get_company_suppliers_api(
-        sessionStorage.getItem("companyId")
-      );
+      const response = await get_company_suppliers_api(companyId);
 
       const filteredSuppliers = response.data.result?.filter(
         (supplier) => supplier.status === 1
@@ -944,6 +944,8 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
             console.log("GRN submitted successfully!", formData);
           }
 
+          queryClient.invalidateQueries(["grns", companyId]);
+
           setTimeout(() => {
             setSubmissionStatus(null);
             setLoading(false);
@@ -980,40 +982,6 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       [field]: value,
     }));
   };
-
-  // const handleItemDetailsChange = (index, field, value) => {
-  //   setFormData((prevFormData) => {
-  //     const updatedItemDetails = [...prevFormData.itemDetails];
-  //     updatedItemDetails[index][field] = value;
-
-  //     // Ensure positive values for Quantities
-  //     updatedItemDetails[index].receivedQuantity = Math.max(
-  //       0,
-  //       updatedItemDetails[index].receivedQuantity
-  //     );
-
-  //     updatedItemDetails[index].rejectedQuantity = Math.max(
-  //       0,
-  //       updatedItemDetails[index].rejectedQuantity
-  //     );
-
-  //     updatedItemDetails[index].freeQuantity = Math.max(
-  //       0,
-  //       updatedItemDetails[index].freeQuantity
-  //     );
-
-  //     updatedItemDetails[index].unitPrice = !isNaN(
-  //       parseFloat(updatedItemDetails[index].unitPrice)
-  //     )
-  //       ? Math.max(0, parseFloat(updatedItemDetails[index].unitPrice))
-  //       : 0;
-
-  //     return {
-  //       ...prevFormData,
-  //       itemDetails: updatedItemDetails,
-  //     };
-  //   });
-  // };
 
   const handleItemDetailsChange = (index, field, value) => {
     // FIXED: Set flag to prevent useEffect from overwriting manual changes

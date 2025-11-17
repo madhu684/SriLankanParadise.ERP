@@ -19,6 +19,7 @@ import toast from "react-hot-toast";
 
 const useSalesOrder = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
+    customerPoNumber: "",
     customerId: "",
     orderDate: new Date().toISOString().split("T")[0],
     deliveryDate: "",
@@ -358,11 +359,19 @@ const useSalesOrder = ({ onFormSubmit }) => {
       "Order date",
       formData.orderDate
     );
+
     const isDeliveryDateValid = validateField(
       "deliveryDate",
       "Delivery date",
       formData.deliveryDate
     );
+
+    const isCustomerPoNovalid = validateField(
+      "customerPoNumber",
+      "Customer PO Number",
+      formData.customerPoNumber
+    );
+
     const isAttachmentsValid = validateAttachments(formData.attachments);
 
     let isItemQuantityValid = true;
@@ -391,6 +400,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
       isSalesPersonValid &&
       isOrderDateValid &&
       isDeliveryDateValid &&
+      isCustomerPoNovalid &&
       isAttachmentsValid &&
       isItemQuantityValid
     );
@@ -525,6 +535,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
           permissionId: 25,
           salesPersonId: formData.salesPersonId,
           inventoryLocationId: warehouseLocationId,
+          customerPoNumber: formData.customerPoNumber,
         };
 
         const response = await post_sales_order_api(salesOrderData);

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   approve_sales_invoice_api,
   update_outstanding_balance_api,
@@ -15,6 +15,8 @@ const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const alertRef = useRef(null);
+
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
 
   const queryClient = useQueryClient();
 
@@ -93,14 +95,11 @@ const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
         toast.error("Error approving sales invoice");
       }
 
+      queryClient.invalidateQueries(["salesInvoices", companyId]);
+
       setTimeout(() => {
         setApprovalStatus(null);
         setLoading(false);
-
-        queryClient.invalidateQueries([
-          "salesInvoicesByUserId",
-          sessionStorage.getItem("userId"),
-        ]);
       }, 2000);
     } catch (error) {
       setApprovalStatus("error");

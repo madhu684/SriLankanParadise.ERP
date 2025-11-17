@@ -1,15 +1,17 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   put_unit_api,
   get_measurement_types_by_company_id_api,
 } from "../../../services/inventoryApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useUnitUpdate = ({ unit, onFormSubmit }) => {
   const [formData, setFormData] = useState({
     unitName: "",
     status: "",
     measurementType: "",
+    companyId: "",
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -17,11 +19,13 @@ const useUnitUpdate = ({ unit, onFormSubmit }) => {
   const alertRef = useRef(null);
   const [loading, setLoading] = useState(false);
 
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
+
+  const queryClient = useQueryClient();
+
   const fetchMeasurementTypes = async () => {
     try {
-      const response = await get_measurement_types_by_company_id_api(
-        sessionStorage.getItem("companyId")
-      );
+      const response = await get_measurement_types_by_company_id_api(companyId);
       return response.data.result || [];
     } catch (error) {
       console.error("Error fetching measurement types:", error);
@@ -42,8 +46,9 @@ const useUnitUpdate = ({ unit, onFormSubmit }) => {
     const deepCopyUnit = JSON.parse(JSON.stringify(unit));
     setFormData({
       unitName: deepCopyUnit?.unitName,
-      status: deepCopyUnit?.status == true ? "1" : "0",
+      status: deepCopyUnit?.status === true ? "1" : "0",
       measurementType: deepCopyUnit?.measurementTypeId ?? "",
+      companyId: deepCopyUnit?.companyId,
     });
   }, [unit]);
 
@@ -114,7 +119,7 @@ const useUnitUpdate = ({ unit, onFormSubmit }) => {
         const UnitData = {
           unitName: formData.unitName,
           status: status,
-          companyId: sessionStorage.getItem("companyId"),
+          companyId: formData.companyId,
           measurementTypeId: formData.measurementType,
           permissionId: 1045,
         };
@@ -130,13 +135,18 @@ const useUnitUpdate = ({ unit, onFormSubmit }) => {
             console.log("Unit updated successfully!", formData);
           }
 
+          queryClient.invalidateQueries(["units", companyId]);
+
           setTimeout(() => {
             setSubmissionStatus(null);
             onFormSubmit();
             setLoading(false);
           }, 3000);
+
+          toast.success("Unit updated successfully!");
         } else {
           setSubmissionStatus("error");
+          toast.error("Error updating Unit. Please try again.");
         }
       }
     } catch (error) {
@@ -146,6 +156,7 @@ const useUnitUpdate = ({ unit, onFormSubmit }) => {
         setSubmissionStatus(null);
         setLoading(false);
       }, 3000);
+      toast.error("Error updating Unit. Please try again.");
     }
   };
 

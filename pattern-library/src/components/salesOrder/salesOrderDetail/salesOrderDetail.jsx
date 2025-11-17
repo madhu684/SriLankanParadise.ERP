@@ -160,53 +160,50 @@ const SalesOrderDetail = ({ show, handleClose, salesOrder }) => {
                     </h6>
                   </div>
                   <div className="card-body">
-                    {salesOrder.customerId !== null ? (
-                      <div className="row g-3">
-                        <div className="col-12">
-                          <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
-                            <span className="text-muted">Customer Name:</span>
-                            <span className="fw-semibold text-end">
-                              {salesOrder.customer.customerName}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="col-12">
-                          <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
-                            <span className="text-muted">Contact Person:</span>
-                            <span className="fw-semibold text-end">
-                              {salesOrder.customer.contactPerson}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="col-12">
-                          <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
-                            <span className="text-muted">Phone:</span>
-                            <span className="fw-semibold text-end">
-                              {salesOrder.customer.phone}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="col-12">
-                          <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
-                            <span className="text-muted">Email:</span>
-                            <span className="fw-semibold text-end text-break">
-                              {salesOrder.customer.email}
-                            </span>
-                          </div>
+                    <div className="row g-3">
+                      <div className="col-12">
+                        <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
+                          <span className="text-muted">Customer Name:</span>
+                          <span className="fw-semibold text-end">
+                            {salesOrder.customer.customerName}
+                          </span>
                         </div>
                       </div>
-                    ) : (
-                      <div
-                        className="alert alert-warning d-flex align-items-center mb-0"
-                        role="alert"
-                      >
-                        <i className="bi bi-exclamation-triangle-fill me-2"></i>
-                        <div>
-                          This is a direct sales order with no associated
-                          customer.
+                      <div className="col-12">
+                        <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
+                          <span className="text-muted">Contact Person:</span>
+                          <span className="fw-semibold text-end">
+                            {salesOrder.customer.contactPerson}
+                          </span>
                         </div>
                       </div>
-                    )}
+                      <div className="col-12">
+                        <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
+                          <span className="text-muted">Phone:</span>
+                          <span className="fw-semibold text-end">
+                            {salesOrder.customer.phone}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="col-12">
+                        <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
+                          <span className="text-muted">Email:</span>
+                          <span className="fw-semibold text-end text-break">
+                            {salesOrder.customer.email}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="col-12">
+                        <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
+                          <span className="text-muted">
+                            Customer Po Number:
+                          </span>
+                          <span className="fw-semibold text-end text-break">
+                            {salesOrder.customerPoNumber}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

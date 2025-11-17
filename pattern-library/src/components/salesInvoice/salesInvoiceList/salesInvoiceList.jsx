@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import useSalesInvoiceList from "./useSalesInvoiceList";
 import SalesInvoiceApproval from "../salesInvoiceApproval/salesInvoiceApproval";
 import SalesInvoice from "../salesInvoice";
@@ -9,6 +9,7 @@ import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
 import Pagination from "../../common/Pagination/Pagination";
 import { FaSearch } from "react-icons/fa";
+import { UserContext } from "../../../context/userContext";
 import SalesInvoiceDelete from "../salesInvoiceDelete/salesInvoiceDelete";
 
 const SalesInvoiceList = () => {
@@ -18,66 +19,65 @@ const SalesInvoiceList = () => {
 
   const {
     salesInvoices,
-    isLoadingData,
-    isLoadingPermissions,
-    isPermissionsError,
-    error,
     isAnyRowSelected,
     selectedRows,
-    selectedRowData,
     showApproveSIModal,
     showApproveSIModalInParent,
     showDetailSIModal,
     showDetailSIModalInParent,
-    showCreateSIForm,
-    showUpdateSIForm,
     showRightOffSIModal,
     showRightOffSIModalInParent,
+    selectedRowData,
+    showCreateSIForm,
+    showUpdateSIForm,
     SIDetail,
     showDeleteSIForm,
+    error,
+    isLoadingSalesInvoices,
     setShowDeleteSIForm,
     areAnySelectedRowsPending,
     areAnySelectedRowsApproved,
-    setSelectedRows,
-    handleRowSelect,
+    handleViewDetails,
     getStatusLabel,
     getStatusBadgeClass,
+    handleRowSelect,
     handleShowApproveSIModal,
     handleCloseApproveSIModal,
     handleShowRightOffSIModal,
     handleCloseRightOffSIModal,
-    handleCloseDetailSIModal,
     handleApproved,
     handleRightOff,
-    handleViewDetails,
     setShowCreateSIForm,
     setShowUpdateSIForm,
-    hasPermission,
     handleUpdate,
     handleUpdated,
     handleClose,
+    handleCloseDetailSIModal,
   } = useSalesInvoiceList();
+
+  const { hasPermission } = useContext(UserContext);
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
     setCurrentPage(1);
   };
 
-  const filteredSalesInvoices = salesInvoices.filter(
-    (si) =>
-      si.referenceNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      si.createdBy.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredSalesInvoices = salesInvoices
+    ? salesInvoices.filter(
+        (si) =>
+          si.referenceNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          si.createdBy.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  if (error || isPermissionsError) {
+  if (error) {
     return <ErrorComponent error={error || "Error fetching data"} />;
   }
 
   if (
-    isLoadingData ||
-    isLoadingPermissions ||
+    isLoadingSalesInvoices ||
     (salesInvoices && !(salesInvoices.length >= 0))
   ) {
     return <LoadingSpinner />;

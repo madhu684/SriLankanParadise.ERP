@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   get_sales_invoices_with_out_drafts_api,
   get_payment_modes_api,
@@ -35,13 +35,13 @@ const useSalesReceipt = ({ onFormSubmit }) => {
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
 
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
+
   const queryClient = useQueryClient();
 
   const fetchsalesInvoices = async () => {
     try {
-      const response = await get_sales_invoices_with_out_drafts_api(
-        sessionStorage?.getItem("companyId")
-      );
+      const response = await get_sales_invoices_with_out_drafts_api(companyId);
 
       const filteredsalesInvoices = response.data.result?.filter(
         (sr) => sr.status === 2
@@ -64,9 +64,7 @@ const useSalesReceipt = ({ onFormSubmit }) => {
 
   const fetchPaymentModes = async () => {
     try {
-      const response = await get_payment_modes_api(
-        sessionStorage?.getItem("companyId")
-      );
+      const response = await get_payment_modes_api(companyId);
       return response.data.result || [];
     } catch (error) {
       console.error("Error fetching payment modes:", error);
@@ -260,7 +258,7 @@ const useSalesReceipt = ({ onFormSubmit }) => {
           receiptDate: formData.receiptDate,
           amountReceived: formData.totalAmount,
           paymentReferenceNo: formData.referenceNo,
-          companyId: sessionStorage?.getItem("companyId") ?? null,
+          companyId: companyId ?? null,
           paymentModeId: formData.paymentModeId,
           createdBy: sessionStorage?.getItem("username") ?? null,
           createdUserId: sessionStorage?.getItem("userId") ?? null,
@@ -384,14 +382,7 @@ const useSalesReceipt = ({ onFormSubmit }) => {
             setSubmissionStatus("successSubmitted");
           }
 
-          queryClient.invalidateQueries([
-            "salesReceiptsWithoutDrafts",
-            sessionStorage.getItem("companyId"),
-          ]);
-          queryClient.invalidateQueries([
-            "salesReceiptsByUserId",
-            sessionStorage.getItem("userId"),
-          ]);
+          queryClient.invalidateQueries(["salesReceipts", companyId]);
 
           setTimeout(() => {
             setSubmissionStatus(null);

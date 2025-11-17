@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import useExpenseOutRequisitionList from "./useExpenseOutRequisitionList";
 import ExpenseOutRequisitionApproval from "../expenseOutRequisitionApproval/expenseOutRequisitionApproval";
 import ExpenseOutRequisition from "../expenseOutRequisition";
@@ -8,13 +8,12 @@ import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
 import moment from "moment";
 import "moment-timezone";
+import { UserContext } from "../../../context/userContext";
 
 const ExpenseOutRequisitionList = () => {
   const {
     expenseOutRequisitions,
     isLoadingData,
-    isLoadingPermissions,
-    isPermissionsError,
     error,
     isAnyRowSelected,
     selectedRows,
@@ -40,20 +39,20 @@ const ExpenseOutRequisitionList = () => {
     handleViewDetails,
     setShowCreateEORForm,
     setShowUpdateEORForm,
-    hasPermission,
     handleUpdate,
     handleUpdated,
     handleClose,
     handleExpensedOut,
   } = useExpenseOutRequisitionList();
 
-  if (error || isPermissionsError) {
+  const { hasPermission } = useContext(UserContext);
+
+  if (error) {
     return <ErrorComponent error={error || "Error fetching data"} />;
   }
 
   if (
     isLoadingData ||
-    isLoadingPermissions ||
     (expenseOutRequisitions && !(expenseOutRequisitions.length >= 0))
   ) {
     return <LoadingSpinner />;

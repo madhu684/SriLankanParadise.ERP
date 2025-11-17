@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   approve_issue_master_api,
   patch_item_batch_api,
@@ -6,11 +6,17 @@ import {
   post_location_inventory_movement_api,
   update_min_state_in_mrn_api,
 } from "../../../services/purchaseApi";
+import { useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useMinApproval = ({ min, onFormSubmit }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const alertRef = useRef(null);
+
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
+
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (approvalStatus === "approved") {
@@ -120,15 +126,14 @@ const useMinApproval = ({ min, onFormSubmit }) => {
         if (min.requisitionMasterId !== null) {
           await updateMrnState();
         }
-
-        console.log(
-          "Material issue note approved and inventory updated successfully:",
-          approvalResponse
-        );
         setApprovalStatus("approved");
+        toast.success("Material Issue Note approved successfully!");
       } else {
         setApprovalStatus("error");
+        toast.error("Error approving Material Issue Note");
       }
+
+      queryClient.invalidateQueries(["mins", companyId]);
 
       setTimeout(() => {
         setApprovalStatus(null);
@@ -141,6 +146,7 @@ const useMinApproval = ({ min, onFormSubmit }) => {
         setApprovalStatus(null);
         setLoading(false);
       }, 2000);
+      toast.error("Error approving material issue Note note");
     }
   };
 

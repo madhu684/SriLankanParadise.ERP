@@ -3,7 +3,6 @@ import {
   get_item_masters_by_company_id_api,
   delete_item_master_api,
 } from "../../../services/inventoryApi";
-import { get_user_permissions_api } from "../../../services/userManagementApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const useItemMasterList = () => {
@@ -21,27 +20,6 @@ const useItemMasterList = () => {
   const [loading, setLoading] = useState(false);
 
   const queryClient = useQueryClient();
-
-  const fetchUserPermissions = async () => {
-    try {
-      const response = await get_user_permissions_api(
-        sessionStorage.getItem("userId")
-      );
-      return response.data.result;
-    } catch (error) {
-      console.error("Error fetching user permissions:", error);
-    }
-  };
-
-  const {
-    data: userPermissions,
-    isLoading: isLoadingPermissions,
-    isError: isPermissionsError,
-    error: permissionError,
-  } = useQuery({
-    queryKey: ["userPermissions"],
-    queryFn: fetchUserPermissions,
-  });
 
   const fetchItems = async () => {
     try {
@@ -201,20 +179,11 @@ const useItemMasterList = () => {
     );
   };
 
-  const hasPermission = (permissionName) => {
-    return userPermissions?.some(
-      (permission) =>
-        permission.permission.permissionName === permissionName &&
-        permission.permission.permissionStatus
-    );
-  };
-
   if (itemMasters.length > 0) console.log("itemMasters: ", itemMasters);
 
   return {
     itemMasters,
     isLoadingItemMasters,
-    isLoadingPermissions,
     itemMastersError,
     isAnyRowSelected,
     selectedRows,
@@ -223,7 +192,6 @@ const useItemMasterList = () => {
     selectedRowData,
     showCreateIMForm,
     showUpdateIMForm,
-    userPermissions,
     IMDetail,
     showDeleteConfirmation,
     submissionStatus,
@@ -239,7 +207,6 @@ const useItemMasterList = () => {
     handleCloseDetailIMModal,
     setShowCreateIMForm,
     setShowUpdateIMForm,
-    hasPermission,
     handleUpdate,
     handleUpdated,
     handleClose,

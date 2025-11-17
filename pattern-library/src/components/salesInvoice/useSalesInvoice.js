@@ -778,11 +778,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
             isSaveAsDraft ? "successSavedAsDraft" : "successSubmitted"
           );
 
-          toast.success(
-            isSaveAsDraft
-              ? "Sales invoice saved as draft!"
-              : "Sales invoice submitted successfully!"
-          );
+          queryClient.invalidateQueries(["salesInvoices", companyId]);
 
           setTimeout(() => {
             setSubmissionStatus(null);
@@ -790,6 +786,12 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
             setLoadingDraft(false);
             onFormSubmit();
           }, 3000);
+
+          toast.success(
+            isSaveAsDraft
+              ? "Sales invoice saved as draft!"
+              : "Sales invoice submitted successfully!"
+          );
         } else {
           setSubmissionStatus("error");
           toast.error("Failed to submit sales invoice.");

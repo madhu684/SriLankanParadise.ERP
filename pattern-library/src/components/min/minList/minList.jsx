@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import useMinList from "./useMinList.js";
 import MinApproval from "../minApproval/minApproval.jsx";
 import Min from "../min.jsx";
@@ -8,6 +8,7 @@ import ErrorComponent from "../../errorComponent/errorComponent.jsx";
 import moment from "moment";
 import "moment-timezone";
 import { FaSearch } from "react-icons/fa";
+import { UserContext } from "../../../context/userContext";
 import Pagination from "../../common/Pagination/Pagination.jsx";
 
 const MinList = () => {
@@ -18,36 +19,30 @@ const MinList = () => {
   const {
     mins,
     isLoadingData,
-    isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
-    selectedRowData,
     showApproveMinModal,
     showApproveMinModalInParent,
     showDetailMinModal,
     showDetailMinModalInParent,
+    selectedRowData,
     showCreateMinForm,
-    showUpdateMinForm,
     MinDetail,
-    isPermissionsError,
-    permissionError,
     areAnySelectedRowsPending,
-    setSelectedRows,
-    handleRowSelect,
+    handleViewDetails,
     getStatusLabel,
     getStatusBadgeClass,
+    handleRowSelect,
     handleShowApproveMinModal,
     handleCloseApproveMinModal,
     handleCloseDetailMinModal,
     handleApproved,
-    handleViewDetails,
     setShowCreateMinForm,
-    setShowUpdateMinForm,
-    hasPermission,
     handleUpdated,
-    handleClose,
   } = useMinList();
+
+  const { hasPermission } = useContext(UserContext);
 
   //Handler for search input
   const handleSearch = (e) => {
@@ -56,18 +51,20 @@ const MinList = () => {
   };
 
   //Filter MINS based on search query
-  const filteredMaterialIssueNotes = mins?.filter((min) =>
-    min.referenceNumber.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredMaterialIssueNotes = mins
+    ? mins?.filter((min) =>
+        min.referenceNumber.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
 
   //Pagination Handler
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  if (error || isPermissionsError) {
+  if (error) {
     return <ErrorComponent error={error || "Error fetching data"} />;
   }
 
-  if (isLoadingData || isLoadingPermissions || (mins && !(mins?.length >= 0))) {
+  if (isLoadingData || (mins && !(mins?.length >= 0))) {
     return <LoadingSpinner />;
   }
 

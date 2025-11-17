@@ -66,6 +66,8 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
 
   const queryClient = useQueryClient();
 
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
+
   const fetchItems = async (companyId, searchQuery) => {
     try {
       const response = await get_item_masters_by_company_id_with_query_api(
@@ -86,7 +88,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     error: itemsError,
   } = useQuery({
     queryKey: ["items", searchTerm],
-    queryFn: () => fetchItems(sessionStorage.getItem("companyId"), searchTerm),
+    queryFn: () => fetchItems(companyId, searchTerm),
   });
 
   const fetchLocationInventories = async (locationId) => {
@@ -129,7 +131,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   const fetchchargesAndDeductions = async () => {
     try {
       const response = await get_charges_and_deductions_by_company_id_api(
-        sessionStorage.getItem("companyId")
+        companyId
       );
       return response.data.result;
     } catch (error) {
@@ -150,9 +152,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
 
   const fetchTransactionTypes = async () => {
     try {
-      const response = await get_transaction_types_api(
-        sessionStorage.getItem("companyId")
-      );
+      const response = await get_transaction_types_api(companyId);
       return response.data.result;
     } catch (error) {
       console.error("Error fetching transaction types:", error);
@@ -174,7 +174,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
       const response = await get_charges_and_deductions_applied_api(
         3,
         salesInvoice.salesInvoiceId,
-        sessionStorage.getItem("companyId")
+        companyId
       );
       return response.data.result;
     } catch (error) {
@@ -872,16 +872,13 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
             console.log("Sales invoice submitted successfully!", formData);
           }
 
+          queryClient.invalidateQueries(["salesInvoices", companyId]);
+
           setTimeout(() => {
             setSubmissionStatus(null);
             setLoading(false);
             setLoadingDraft(false);
             onFormSubmit();
-
-            queryClient.invalidateQueries([
-              "salesInvoicesByUserId",
-              sessionStorage.getItem("userId"),
-            ]);
           }, 3000);
 
           toast.success("Sales invoice updated successfully!");

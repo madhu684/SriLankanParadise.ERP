@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   get_purchase_orders_with_out_drafts_api,
   get_purchase_requisitions_with_out_drafts_api,
@@ -13,7 +13,7 @@ import {
   get_company_locations_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 const useGrn = ({ onFormSubmit }) => {
@@ -60,11 +60,13 @@ const useGrn = ({ onFormSubmit }) => {
   const [searchBySR, setSearchBySR] = useState(false);
   const [supplierSearchTerm, setSupplierSearchTerm] = useState("");
 
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
+
+  const queryClient = useQueryClient();
+
   const fetchLocations = async () => {
     try {
-      const response = await get_company_locations_api(
-        sessionStorage.getItem("companyId")
-      );
+      const response = await get_company_locations_api(companyId);
       return response.data.result;
     } catch (error) {
       console.error("Error fetching locations:", error);
@@ -101,7 +103,7 @@ const useGrn = ({ onFormSubmit }) => {
     error: itemsError,
   } = useQuery({
     queryKey: ["items", searchTerm],
-    queryFn: () => fetchItems(sessionStorage.getItem("companyId"), searchTerm),
+    queryFn: () => fetchItems(companyId, searchTerm),
   });
 
   const fetchPurchaseOrders = async () => {
@@ -157,7 +159,7 @@ const useGrn = ({ onFormSubmit }) => {
   const fetchApprovedSupplyReturnMasters = async () => {
     try {
       const response = await get_approved_supply_return_masters_by_companyId(
-        sessionStorage.getItem("companyId")
+        companyId
       );
       return response.data.result || [];
     } catch (error) {
@@ -166,10 +168,7 @@ const useGrn = ({ onFormSubmit }) => {
   };
 
   const { data: approvedSupplyReturnMasters } = useQuery({
-    queryKey: [
-      "approvedSupplyReturnMasters",
-      sessionStorage.getItem("companyId"),
-    ],
+    queryKey: ["approvedSupplyReturnMasters", companyId],
     queryFn: fetchApprovedSupplyReturnMasters,
   });
 
@@ -186,9 +185,7 @@ const useGrn = ({ onFormSubmit }) => {
 
   const fetchSuppliers = async () => {
     try {
-      const response = await get_company_suppliers_api(
-        sessionStorage.getItem("companyId")
-      );
+      const response = await get_company_suppliers_api(companyId);
 
       const filteredSuppliers = response.data.result?.filter(
         (supplier) => supplier.status === 1
@@ -725,8 +722,6 @@ const useGrn = ({ onFormSubmit }) => {
 
           // Call post_purchase_requisition_detail_api for each item
           const detailsApiResponse = await post_grn_detail_api(detailsData);
-          console.log("GRN Details Response", detailsApiResponse);
-
           return detailsApiResponse;
         });
 
@@ -752,6 +747,8 @@ const useGrn = ({ onFormSubmit }) => {
             setSubmissionStatus("successSubmitted");
             console.log("GRN submitted successfully!", formData);
           }
+
+          queryClient.invalidateQueries(["grns", companyId]);
 
           setTimeout(() => {
             setSubmissionStatus(null);

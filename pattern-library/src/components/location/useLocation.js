@@ -7,6 +7,7 @@ import {
 } from "../../services/purchaseApi";
 import { useQuery } from "@tanstack/react-query";
 import { get_item_price_list_by_company_id_api } from "../../services/inventoryApi";
+import toast from "react-hot-toast";
 
 const useLocation = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -229,18 +230,20 @@ const useLocation = ({ onFormSubmit }) => {
 
           if (putResponse.status === 200) {
             setSubmissionStatus("successSubmitted");
-            console.log("Location created successfully!", formData);
-
             setTimeout(() => {
               setSubmissionStatus(null);
               onFormSubmit();
               setLoading(false);
             }, 3000);
+
+            toast.success("Location created successfully!");
           } else {
             setSubmissionStatus("error");
+            toast.error("Failed to create location.");
           }
         } else {
           setSubmissionStatus("error");
+          toast.error("Failed to create location.");
         }
       }
     } catch (error) {
@@ -250,6 +253,7 @@ const useLocation = ({ onFormSubmit }) => {
         setSubmissionStatus(null);
         setLoading(false);
       }, 3000);
+      toast.error("Failed to create location.");
     }
   };
 

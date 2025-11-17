@@ -10,7 +10,7 @@ import {
 } from "../../../services/purchaseApi";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-const useMinAccept = ({ min, refetch, setRefetch, onFormSubmit }) => {
+const useMinAccept = ({ min, onFormSubmit }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
   const [receivedQuantities, setReceivedQuantities] = useState({});
   const [returnedQuantities, setReturnedQuantities] = useState({});
@@ -270,7 +270,6 @@ const useMinAccept = ({ min, refetch, setRefetch, onFormSubmit }) => {
 
       // Refresh queries and set success state
       queryClient.invalidateQueries(["min", minId]);
-      setRefetch(!refetch);
       setApprovalStatus("approved");
     } catch (error) {
       setApprovalStatus("error");

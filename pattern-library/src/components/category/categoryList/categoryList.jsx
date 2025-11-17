@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import useCategoryList from "./useCategoryList";
 import Category from "../category";
 import CategoryUpdate from "../categoryUpdate/categoryUpdate";
@@ -7,6 +7,7 @@ import ErrorComponent from "../../errorComponent/errorComponent";
 import DeleteConfirmationModal from "../../confirmationModals/deleteConfirmationModal/deleteConfirmationModal";
 import { FaSearch } from "react-icons/fa";
 import Pagination from "../../common/Pagination/Pagination";
+import { UserContext } from "../../../context/userContext";
 
 const CategoryList = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -16,7 +17,6 @@ const CategoryList = () => {
   const {
     categories,
     isLoadingData,
-    isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
@@ -36,13 +36,14 @@ const CategoryList = () => {
     setShowCreateCategoryForm,
     setShowUpdateCategoryForm,
     setShowDeleteConfirmation,
-    hasPermission,
     handleUpdate,
     handleUpdated,
     handleClose,
     handleConfirmDeleteCategory,
     handleCloseDeleteConfirmation,
   } = useCategoryList();
+
+  const { hasPermission } = useContext(UserContext);
 
   //Handler for search input
   const handleSearch = (e) => {
@@ -51,9 +52,11 @@ const CategoryList = () => {
   };
 
   //Filter MRNs based on search query
-  const filteredCategories = categories.filter((catagory) =>
-    catagory.categoryName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredCategories = categories
+    ? categories?.filter((catagory) =>
+        catagory.categoryName.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
 
   //Pagination Handler
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
@@ -62,11 +65,7 @@ const CategoryList = () => {
     return <ErrorComponent error={error} />;
   }
 
-  if (
-    isLoadingData ||
-    isLoadingPermissions ||
-    (categories && !(categories.length >= 0))
-  ) {
+  if (isLoadingData || (categories && !(categories.length >= 0))) {
     return <LoadingSpinner />;
   }
 

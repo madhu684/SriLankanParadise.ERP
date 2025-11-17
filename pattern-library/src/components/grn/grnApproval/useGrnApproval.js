@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   approve_grn_master_api,
   post_batch_api,
@@ -14,7 +14,7 @@ import {
   approve_purchase_order_api,
   get_locations_inventories_by_location_id_item_master_id_api,
 } from "../../../services/purchaseApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 const useGrnApproval = ({ grn, onFormSubmit }) => {
@@ -30,7 +30,9 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
     goodsReceivedNote: "Goods Received Note",
   };
 
-  console.log("grn: ", grn);
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
+
+  const queryClient = useQueryClient();
 
   const isComplete = grn?.grnDetails.every(
     (detail) => detail.acceptedQuantity === detail.orderedQuantity
@@ -159,6 +161,7 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
           await updatePO();
         }
 
+        queryClient.invalidateQueries(["grns", companyId]);
         toast.success("GRN approved successfully !");
       } else {
         setApprovalStatus("error");
@@ -246,7 +249,7 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
     const batchData = {
       batchRef,
       date: formattedDate,
-      companyId: sessionStorage.getItem("companyId"),
+      companyId: companyId,
       permissionId: 1047,
     };
 
@@ -317,7 +320,7 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
     costPrice: grnDetail.costPrice,
     sellingPrice: grnDetail.sellingPrice,
     status: true,
-    companyId: sessionStorage.getItem("companyId"),
+    companyId: companyId,
     createdBy: sessionStorage.getItem("username"),
     createdUserId: sessionStorage.getItem("userId"),
     tempQuantity: grnDetail.acceptedQuantity + grnDetail.freeQuantity,

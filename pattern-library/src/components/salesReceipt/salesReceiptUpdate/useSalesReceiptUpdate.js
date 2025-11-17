@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   get_sales_invoices_with_out_drafts_api,
   get_payment_modes_api,
@@ -9,7 +9,7 @@ import {
   delete_sales_receipt_sales_invoice_api,
 } from "../../../services/salesApi";
 import SalesReceipt from "../salesReceipt";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
@@ -44,11 +44,13 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
 
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
+
+  const queryClient = useQueryClient();
+
   const fetchsalesInvoices = async () => {
     try {
-      const response = await get_sales_invoices_with_out_drafts_api(
-        sessionStorage?.getItem("companyId")
-      );
+      const response = await get_sales_invoices_with_out_drafts_api(companyId);
 
       const filteredsalesInvoices = response.data.result.filter(
         (sr) => sr.status === 2 || sr.status === 5
@@ -71,9 +73,7 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
 
   const fetchPaymentModes = async () => {
     try {
-      const response = await get_payment_modes_api(
-        sessionStorage?.getItem("companyId")
-      );
+      const response = await get_payment_modes_api(companyId);
       return response.data.result || [];
     } catch (error) {
       console.error("Error fetching payment modes:", error);
@@ -443,6 +443,8 @@ const useSalesReceiptUpdate = ({ salesReceipt, onFormSubmit }) => {
             setSubmissionStatus("successSubmitted");
             console.log("Sales receipt updated successfully!", formData);
           }
+
+          queryClient.invalidateQueries(["salesReceipts", companyId]);
 
           setTimeout(() => {
             setSubmissionStatus(null);

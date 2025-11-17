@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import useSalesReceiptList from "./useSalesReceiptList";
 import SalesReceipt from "../salesReceipt";
 import SalesReceiptDetail from "../salesReceiptDetail/salesReceiptDetail";
@@ -7,6 +7,7 @@ import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
 import Pagination from "../../common/Pagination/Pagination";
 import { FaSearch, FaPlus, FaFilter } from "react-icons/fa";
+import { UserContext } from "../../../context/userContext";
 
 const SalesReceiptList = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -16,36 +17,29 @@ const SalesReceiptList = () => {
   const {
     salesReceipts,
     isLoadingData,
-    isLoadingPermissions,
     error,
-    isAnyRowSelected,
-    selectedRows,
-    selectedRowData,
     showDetailSRModal,
     showDetailSRModalInParent,
+    selectedRowData,
     showCreateSRForm,
     showUpdateSRForm,
     SRDetail,
-    isPermissionsError,
     isCashierSessionOpen,
-    areAnySelectedRowsPending,
-    setSelectedRows,
-    handleRowSelect,
+    filter,
+    filteredSalesReceipts,
+    handleViewDetails,
     getStatusLabel,
     getStatusBadgeClass,
     handleCloseDetailSRModal,
-    handleViewDetails,
     setShowCreateSRForm,
-    setShowUpdateSRForm,
-    hasPermission,
     handleUpdate,
     handleUpdated,
     handleClose,
     closeAlertAfterDelay,
-    filter,
     setFilter,
-    filteredSalesReceipts,
   } = useSalesReceiptList();
+
+  const { hasPermission } = useContext(UserContext);
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -60,15 +54,11 @@ const SalesReceiptList = () => {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  if (error || isPermissionsError) {
+  if (error) {
     return <ErrorComponent error={error || "Error fetching data"} />;
   }
 
-  if (
-    isLoadingData ||
-    isLoadingPermissions ||
-    (salesReceipts && !(salesReceipts.length >= 0))
-  ) {
+  if (isLoadingData || (salesReceipts && !(salesReceipts.length >= 0))) {
     return <LoadingSpinner />;
   }
 

@@ -1,13 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { get_sales_orders_with_out_drafts_api } from "../../../services/salesApi";
-import { get_sales_orders_by_user_id_api } from "../../../services/salesApi";
-import { get_user_permissions_api } from "../../../services/userManagementApi";
 import { useQuery } from "@tanstack/react-query";
 
 const useSalesOrderList = () => {
-  const [salesOrders, setSalesOrders] = useState([]);
-  const [isLoadingData, setIsLoadingData] = useState(true);
-  const [error, setError] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedRowData, setSelectedRowData] = useState([]);
   const [showApproveSOModal, setShowApproveSOModal] = useState(false);
@@ -21,90 +16,19 @@ const useSalesOrderList = () => {
   const [SODetail, setSODetail] = useState("");
   const [showConvertSOForm, setShowConvertSOForm] = useState(false);
 
-  const fetchUserPermissions = async () => {
-    try {
-      const response = await get_user_permissions_api(
-        sessionStorage.getItem("userId")
-      );
-      return response.data.result;
-    } catch (error) {
-      console.error("Error fetching user permissions:", error);
-    }
-  };
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
 
   const {
-    data: userPermissions,
-    isLoading: isLoadingPermissions,
-    isError: isPermissionsError,
-    error: permissionError,
+    data: salesOrders = [],
+    isLoading: isLoadingData,
+    error,
   } = useQuery({
-    queryKey: ["userPermissions"],
-    queryFn: fetchUserPermissions,
+    queryKey: ["salesOrders", companyId],
+    queryFn: async () => {
+      const response = await get_sales_orders_with_out_drafts_api(companyId);
+      return response.data.result || [];
+    },
   });
-
-  const fetchData = async () => {
-    try {
-      if (!isLoadingPermissions && userPermissions) {
-        if (hasPermission("Approve Sales Order")) {
-          const SalesOrderWithoutDraftsResponse =
-            await get_sales_orders_with_out_drafts_api(
-              sessionStorage.getItem("companyId")
-            );
-
-          const SalesOrderByUserIdResponse =
-            await get_sales_orders_by_user_id_api(
-              sessionStorage.getItem("userId")
-            );
-
-          let newSalesOrders = [];
-          if (
-            SalesOrderWithoutDraftsResponse &&
-            SalesOrderWithoutDraftsResponse.data.result
-          ) {
-            newSalesOrders = SalesOrderWithoutDraftsResponse.data.result;
-          }
-
-          let additionalOrders = [];
-          if (
-            SalesOrderByUserIdResponse &&
-            SalesOrderByUserIdResponse.data.result
-          ) {
-            additionalOrders = SalesOrderByUserIdResponse.data.result;
-          }
-          //let newSalesOrders = SalesOrderWithoutDraftsResponse.data.result;
-          //const additionalOrders = SalesOrderByUserIdResponse.data.result;
-
-          const uniqueNewOrders = additionalOrders.filter(
-            (order) =>
-              !newSalesOrders.some(
-                (existingOrder) =>
-                  existingOrder.salesOrderId === order.salesOrderId
-              )
-          );
-
-          newSalesOrders = [...newSalesOrders, ...uniqueNewOrders];
-          setSalesOrders(newSalesOrders);
-        } else {
-          const SalesOrderResponse = await get_sales_orders_by_user_id_api(
-            sessionStorage.getItem("userId")
-          );
-          setSalesOrders(SalesOrderResponse.data.result || []);
-        }
-      }
-    } catch (error) {
-      setError("Error fetching data");
-    } finally {
-      setIsLoadingData(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchUserPermissions();
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [isLoadingPermissions, userPermissions]);
 
   const handleShowApproveSOModal = () => {
     setShowApproveSOModal(true);
@@ -124,7 +48,6 @@ const useSalesOrderList = () => {
   };
 
   const handleApproved = async () => {
-    fetchData();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -161,7 +84,6 @@ const useSalesOrderList = () => {
   };
 
   const handleUpdated = async () => {
-    fetchData();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -239,14 +161,6 @@ const useSalesOrderList = () => {
     );
   };
 
-  const hasPermission = (permissionName) => {
-    return userPermissions?.some(
-      (permission) =>
-        permission.permission.permissionName === permissionName &&
-        permission.permission.permissionStatus
-    );
-  };
-
   const areAnySelectedRowsApproved = (selectedRows) => {
     return selectedRows.some(
       (id) => salesOrders.find((so) => so.salesOrderId === id)?.status === 2
@@ -256,9 +170,6 @@ const useSalesOrderList = () => {
   return {
     salesOrders,
     isLoadingData,
-    isLoadingPermissions,
-    isPermissionsError,
-    permissionError,
     error,
     isAnyRowSelected,
     selectedRows,
@@ -269,7 +180,6 @@ const useSalesOrderList = () => {
     selectedRowData,
     showCreateSOForm,
     showUpdateSOForm,
-    userPermissions,
     SODetail,
     showConvertSOForm,
     areAnySelectedRowsPending,
@@ -285,7 +195,6 @@ const useSalesOrderList = () => {
     handleApproved,
     setShowCreateSOForm,
     setShowUpdateSOForm,
-    hasPermission,
     handleUpdate,
     handleUpdated,
     handleClose,
