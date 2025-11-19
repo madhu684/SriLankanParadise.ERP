@@ -62,7 +62,6 @@ const CustomerStatusMessage = ({ formData }) => {
       // NEW: Prevent submission while loading or if query fails
       // This ensures validation isn't bypassed when unSettledInvoices is temporarily empty
       if (formData?.selectedCustomer && (isLoading || isQueryError)) {
-        console.log("Query loading or error:", { isLoading, isQueryError });
         return {
           message: (
             <div

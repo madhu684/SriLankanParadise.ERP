@@ -12,7 +12,6 @@ import useFormatCurrency from "../helperMethods/useFormatCurrency";
 const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
   const { getStatusLabel, getStatusBadgeClass } = useSalesInvoiceList();
   const {
-    calculateSubTotal,
     isLoading,
     isError,
     error,
@@ -23,7 +22,10 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
     isCompanyLoading,
     isCompanyError,
     company,
+    showFullRemarks,
     renderSalesInvoiceDetails,
+    calculateSubTotal,
+    setShowFullRemarks,
   } = useSalesInvoiceDetial(salesInvoice);
 
   const formatTotals = useFormatCurrency({ showCurrency: false });
@@ -75,7 +77,7 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
               <div className="row g-4 mb-4">
                 {/* Left Column - Invoice Information */}
                 <div className="col-lg-6">
-                  <div className="card shadow-sm flex-fill">
+                  <div className="card shadow-sm h-100">
                     <div className="card-header bg-primary text-white">
                       <h6 className="mb-0 fw-semibold">
                         <i className="bi bi-file-text me-2"></i>Invoice
@@ -86,66 +88,121 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                       <div className="row g-3">
                         <div className="col-12">
                           <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
-                            <span className="text-muted">Created By:</span>
-                            <span className="fw-semibold text-end">
+                            <span
+                              className="text-muted"
+                              style={{ minWidth: "120px" }}
+                            >
+                              Created By:
+                            </span>
+                            <span className="fw-semibold text-end flex-grow-1 ms-2">
                               {salesInvoice.createdBy}
                             </span>
                           </div>
                         </div>
                         <div className="col-12">
                           <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
-                            <span className="text-muted">Created Date:</span>
-                            <span className="fw-semibold text-end">
+                            <span
+                              className="text-muted"
+                              style={{ minWidth: "120px" }}
+                            >
+                              Created Date:
+                            </span>
+                            <span className="fw-semibold text-end flex-grow-1 ms-2">
                               {salesInvoice?.createdDate.split("T")[0]}
                             </span>
                           </div>
                         </div>
                         <div className="col-12">
                           <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
-                            <span className="text-muted">Last Updated:</span>
-                            <span className="fw-semibold text-end">
+                            <span
+                              className="text-muted"
+                              style={{ minWidth: "120px" }}
+                            >
+                              Last Updated:
+                            </span>
+                            <span className="fw-semibold text-end flex-grow-1 ms-2">
                               {salesInvoice?.lastUpdatedDate.split("T")[0]}
                             </span>
                           </div>
                         </div>
                         <div className="col-12">
                           <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
-                            <span className="text-muted">
-                              Reference Number:
+                            <span
+                              className="text-muted"
+                              style={{ minWidth: "120px" }}
+                            >
+                              Remarks:
                             </span>
-                            <span className="fw-semibold text-end">
-                              {salesInvoice?.referenceNumber}
+                            <span
+                              className="fw-semibold text-end flex-grow-1 ms-2"
+                              style={{ wordBreak: "break-word" }}
+                            >
+                              {showFullRemarks
+                                ? salesInvoice?.remarks || "-"
+                                : salesInvoice?.remarks?.length > 50
+                                ? salesInvoice?.remarks.substring(0, 50) + "..."
+                                : salesInvoice?.remarks || "-"}
+                              {salesInvoice?.remarks?.length > 50 && (
+                                <button
+                                  className="btn btn-link btn-sm p-0 ms-2"
+                                  onClick={() =>
+                                    setShowFullRemarks(!showFullRemarks)
+                                  }
+                                >
+                                  {showFullRemarks ? "Show less" : "Show more"}
+                                </button>
+                              )}
                             </span>
                           </div>
                         </div>
                         <div className="col-12">
                           <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
-                            <span className="text-muted">Invoice Date:</span>
-                            <span className="fw-semibold text-end">
+                            <span
+                              className="text-muted"
+                              style={{ minWidth: "120px" }}
+                            >
+                              Invoice Date:
+                            </span>
+                            <span className="fw-semibold text-end flex-grow-1 ms-2">
                               {salesInvoice?.invoiceDate?.split("T")[0]}
                             </span>
                           </div>
                         </div>
                         <div className="col-12">
                           <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
-                            <span className="text-muted">Due Date:</span>
-                            <span className="fw-semibold text-end">
+                            <span
+                              className="text-muted"
+                              style={{ minWidth: "120px" }}
+                            >
+                              Due Date:
+                            </span>
+                            <span className="fw-semibold text-end flex-grow-1 ms-2">
                               {salesInvoice?.dueDate?.split("T")[0]}
                             </span>
                           </div>
                         </div>
                         <div className="col-12">
                           <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
-                            <span className="text-muted">Driver Name:</span>
-                            <span className="fw-semibold text-end">
+                            <span
+                              className="text-muted"
+                              style={{ minWidth: "120px" }}
+                            >
+                              Driver Name:
+                            </span>
+                            <span className="fw-semibold text-end flex-grow-1 ms-2">
                               {salesInvoice?.driverName || "-"}
                             </span>
                           </div>
                         </div>
                         <div className="col-12">
                           <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
-                            <span className="text-muted">Vehicle No:</span>
-                            <span className="fw-semibold text-end">
+                            <span
+                              className="text-muted"
+                              style={{ minWidth: "120px" }}
+                            >
+                              Vehicle No:
+                            </span>
+                            <span className="fw-semibold text-end flex-grow-1 ms-2">
                               {salesInvoice?.vehicleNumber || "-"}
                             </span>
                           </div>
@@ -154,19 +211,29 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                           <>
                             <div className="col-12">
                               <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
-                                <span className="text-muted">Approved By:</span>
-                                <span className="fw-semibold text-end">
-                                  {salesInvoice.approvedBy}
+                                <span
+                                  className="text-muted"
+                                  style={{ minWidth: "120px" }}
+                                >
+                                  Approved By:
+                                </span>
+                                <span className="fw-semibold text-end flex-grow-1 ms-2">
+                                  {salesInvoice.approvedBy || "-"}
                                 </span>
                               </div>
                             </div>
                             <div className="col-12">
                               <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
-                                <span className="text-muted">
+                                <span
+                                  className="text-muted"
+                                  style={{ minWidth: "120px" }}
+                                >
                                   Approved Date:
                                 </span>
-                                <span className="fw-semibold text-end">
-                                  {salesInvoice?.approvedDate.split("T")[0]}
+                                <span className="fw-semibold text-end flex-grow-1 ms-2">
+                                  {salesInvoice?.approvedDate
+                                    ? salesInvoice?.approvedDate.split("T")[0]
+                                    : "-"}
                                 </span>
                               </div>
                             </div>
@@ -181,7 +248,7 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                 <div className="col-lg-6">
                   <div className="d-flex flex-column gap-3 h-100">
                     {/* Customer Card */}
-                    <div className="card shadow-sm flex-fill">
+                    <div className="card shadow-sm">
                       <div className="card-header bg-success text-white">
                         <h6 className="mb-0 fw-semibold">
                           <i className="bi bi-person-circle me-2"></i>Customer
@@ -192,47 +259,65 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                         <div className="row g-3">
                           <div className="col-12">
                             <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
-                              <span className="text-muted">Customer Name:</span>
-                              <span className="fw-semibold text-end">
+                              <span
+                                className="text-muted"
+                                style={{ minWidth: "130px" }}
+                              >
+                                Customer Name:
+                              </span>
+                              <span className="fw-semibold text-end flex-grow-1 ms-2">
                                 {salesInvoice.customer.customerName}
                               </span>
                             </div>
                           </div>
                           <div className="col-12">
                             <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
-                              <span className="text-muted">
+                              <span
+                                className="text-muted"
+                                style={{ minWidth: "130px" }}
+                              >
                                 Contact Person:
                               </span>
-                              <span className="fw-semibold text-end">
+                              <span className="fw-semibold text-end flex-grow-1 ms-2">
                                 {salesInvoice.customer.contactPerson}
                               </span>
                             </div>
                           </div>
                           <div className="col-12">
                             <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
-                              <span className="text-muted">Phone:</span>
-                              <span className="fw-semibold text-end">
+                              <span
+                                className="text-muted"
+                                style={{ minWidth: "130px" }}
+                              >
+                                Phone:
+                              </span>
+                              <span className="fw-semibold text-end flex-grow-1 ms-2">
                                 {salesInvoice.customer.phone}
                               </span>
                             </div>
                           </div>
                           <div className="col-12">
                             <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
-                              <span className="text-muted">Email:</span>
-                              <span className="fw-semibold text-end text-break">
+                              <span
+                                className="text-muted"
+                                style={{ minWidth: "130px" }}
+                              >
+                                Email:
+                              </span>
+                              <span className="fw-semibold text-end flex-grow-1 ms-2 text-break">
                                 {salesInvoice.customer.email}
                               </span>
                             </div>
                           </div>
                           <div className="col-12">
                             <div className="d-flex justify-content-between align-items-start">
-                              <span className="text-muted">
+                              <span
+                                className="text-muted"
+                                style={{ minWidth: "130px" }}
+                              >
                                 Delivery Address:
                               </span>
-                              <span
-                                className="fw-semibold text-end"
-                                style={{ maxWidth: "60%" }}
-                              >
+                              <span className="fw-semibold text-end flex-grow-1 ms-2">
                                 {(() => {
                                   const deliveryAddress =
                                     salesInvoice.customer.customerDeliveryAddress.find(
@@ -258,7 +343,7 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
 
                     {/* Sales Order Card */}
                     {salesInvoice.salesOrder ? (
-                      <div className="card shadow-sm flex-fill">
+                      <div className="card shadow-sm">
                         <div className="card-header bg-info text-white">
                           <h6 className="mb-0 fw-semibold">
                             <i className="bi bi-cart-check me-2"></i>Associated
@@ -269,18 +354,26 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                           <div className="row g-3">
                             <div className="col-12">
                               <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
-                                <span className="text-muted">
+                                <span
+                                  className="text-muted"
+                                  style={{ minWidth: "120px" }}
+                                >
                                   Reference No:
                                 </span>
-                                <span className="fw-semibold text-end">
+                                <span className="fw-semibold text-end flex-grow-1 ms-2">
                                   {salesInvoice.salesOrder.referenceNo}
                                 </span>
                               </div>
                             </div>
                             <div className="col-12">
                               <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
-                                <span className="text-muted">Order Date:</span>
-                                <span className="fw-semibold text-end">
+                                <span
+                                  className="text-muted"
+                                  style={{ minWidth: "120px" }}
+                                >
+                                  Order Date:
+                                </span>
+                                <span className="fw-semibold text-end flex-grow-1 ms-2">
                                   {salesInvoice.salesOrder.orderDate?.split(
                                     "T"
                                   )[0] ?? ""}
@@ -289,10 +382,13 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                             </div>
                             <div className="col-12">
                               <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
-                                <span className="text-muted">
+                                <span
+                                  className="text-muted"
+                                  style={{ minWidth: "120px" }}
+                                >
                                   Delivery Date:
                                 </span>
-                                <span className="fw-semibold text-end">
+                                <span className="fw-semibold text-end flex-grow-1 ms-2">
                                   {salesInvoice.salesOrder.deliveryDate?.split(
                                     "T"
                                   )[0] ?? ""}
@@ -301,12 +397,16 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                             </div>
                             <div className="col-12">
                               <div className="d-flex justify-content-between align-items-start">
-                                <span className="text-muted">Order Type:</span>
-                                <span className="fw-semibold text-end">
+                                <span
+                                  className="text-muted"
+                                  style={{ minWidth: "120px" }}
+                                >
+                                  Customer PO Number:
+                                </span>
+                                <span className="fw-semibold text-end flex-grow-1 ms-2">
                                   <span className="badge bg-secondary">
-                                    {salesInvoice.salesOrder.customerId !== null
-                                      ? "Customer Order"
-                                      : "Direct Order"}
+                                    {salesInvoice.salesOrder.customerPoNumber ??
+                                      ""}
                                   </span>
                                 </span>
                               </div>
@@ -343,11 +443,13 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                       <thead className="table-light">
                         <tr>
                           <th className="fw-semibold">Item Name</th>
-                          <th className="fw-semibold">Unit</th>
+                          <th className="fw-semibold text-center">Unit</th>
                           {company.batchStockType !== "FIFO" && (
-                            <th className="fw-semibold">Batch Ref</th>
+                            <th className="fw-semibold text-center">
+                              Batch Ref
+                            </th>
                           )}
-                          <th className="fw-semibold text-end">Quantity</th>
+                          <th className="fw-semibold text-center">Quantity</th>
                           <th className="fw-semibold text-end">Unit Price</th>
                           {uniqueLineItemDisplayNames.map(
                             (displayName, index) => {
@@ -377,16 +479,17 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                         {renderSalesInvoiceDetails().map((item, index) => (
                           <tr key={index}>
                             <td>{item.itemMaster?.itemName}</td>
-                            {/* <td>{item.itemMaster?.unit.unitName}</td> */}
-                            <td>
+                            <td className="text-center">
                               <span className="badge bg-light text-dark">
                                 {item.itemMaster?.conversionRate} ml
                               </span>
                             </td>
                             {company.batchStockType !== "FIFO" && (
-                              <td>{item.itemBatch?.batch?.batchRef}</td>
+                              <td className="text-center">
+                                {item.itemBatch?.batch?.batchRef}
+                              </td>
                             )}
-                            <td className="text-end">{item.quantity}</td>
+                            <td className="text-center">{item.quantity}</td>
                             <td className="text-end">
                               {formatTotals(item.unitPrice.toFixed(2))}
                             </td>
@@ -495,7 +598,6 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                                   className="text-end"
                                 ></td>
                                 <th className="text-end">
-                                  {charge.chargesAndDeduction.sign}{" "}
                                   {charge.chargesAndDeduction.displayName}
                                 </th>
                                 <td className="text-end fw-semibold">

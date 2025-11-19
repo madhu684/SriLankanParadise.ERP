@@ -10,9 +10,9 @@ const useSalesOrderApproval = ({ onFormSubmit, salesOrder }) => {
   const [loading, setLoading] = useState(false);
   const alertRef = useRef(null);
 
-  const companyId = sessionStorage.getItem("companyId");
-  const username = sessionStorage.getItem("username");
-  const userId = sessionStorage.getItem("userId");
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
+  const username = useMemo(() => sessionStorage.getItem("username"), []);
+  const userId = useMemo(() => sessionStorage.getItem("userId"), []);
 
   const queryClient = useQueryClient();
 
@@ -187,14 +187,12 @@ const useSalesOrderApproval = ({ onFormSubmit, salesOrder }) => {
         if (approvalResponse.status === 200) {
           setApprovalStatus("approved");
           toast.success("Sales Order Approved Successfully");
-          queryClient.invalidateQueries([
-            "salesOrdersByUserId",
-            sessionStorage.getItem("userId"),
-          ]);
         } else {
           setApprovalStatus("error");
           toast.error("Error Approving Sales Order");
         }
+
+        queryClient.invalidateQueries(["salesOrders", companyId]);
 
         setTimeout(() => {
           setApprovalStatus(null);

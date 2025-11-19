@@ -14,6 +14,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
     formData,
     customers,
     salesPersons,
+    userLocations,
     submissionStatus,
     validFields,
     validationErrors,
@@ -198,6 +199,11 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                     }
                     placeholder="Eg:- C-100"
                   />
+                  {validationErrors.customerPoNumber && (
+                    <div className="invalid-feedback">
+                      {validationErrors.customerPoNumber}
+                    </div>
+                  )}
                 </div>
                 <div className="mb-4">
                   <label
@@ -320,7 +326,8 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                       <div className="card-header bg-success bg-opacity-10 d-flex justify-content-between align-items-center">
                         <span className="fw-semibold text-success">
                           <i className="bi bi-check-circle-fill me-2"></i>
-                          {formData.selectedCustomer.customerName}
+                          {/* {formData.selectedCustomer.customerName} */}
+                          Selected Customer
                         </span>
                       </div>
                       <div className="card-body">
@@ -417,6 +424,44 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                 </h5>
               </div>
               <div className="card-body">
+                <div className="mb-3">
+                  <label
+                    htmlFor="storeLocation"
+                    className="form-label fw-semibold"
+                  >
+                    Store Location <span className="text-danger">*</span>
+                  </label>
+                  <select
+                    className={`form-select ${
+                      validFields.storeLocation ? "is-valid" : ""
+                    } ${validationErrors.storeLocation ? "is-invalid" : ""}`}
+                    id="storeLocation"
+                    value={formData?.storeLocation ?? ""}
+                    onChange={(e) =>
+                      handleInputChange(
+                        "storeLocation",
+                        parseInt(e.target.value)
+                      )
+                    }
+                  >
+                    <option value="">Select Location</option>
+                    {userLocations && userLocations != null
+                      ? userLocations.map((location) => (
+                          <option
+                            key={location.location.locationId}
+                            value={location.location.locationId}
+                          >
+                            {location.location.locationName}
+                          </option>
+                        ))
+                      : ""}
+                  </select>
+                  {validationErrors.storeLocation && (
+                    <div className="invalid-feedback">
+                      {validationErrors.storeLocation}
+                    </div>
+                  )}
+                </div>
                 <div className="row g-3">
                   <div className="col-12 col-md-6 mb-3">
                     <label
@@ -669,7 +714,10 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                       placeholder="Search for an item..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      disabled={formData.selectedSalesPerson === null}
+                      disabled={
+                        formData.selectedSalesPerson === null ||
+                        formData.storeLocation === null
+                      }
                     />
                     {searchTerm && (
                       <button

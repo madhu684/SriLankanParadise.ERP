@@ -129,7 +129,7 @@ const SalesOrderList = () => {
 
   return (
     <div className="container mt-4">
-      <h2>Sales Orders</h2>
+      <h2>Sales Requisitions</h2>
       <div className="mt-3 d-flex justify-content-start align-items-center">
         <div className="btn-group" role="group">
           {hasPermission("Create Sales Order") && (
@@ -163,14 +163,16 @@ const SalesOrderList = () => {
                 Convert
               </button>
             )}
-          {hasPermission("Update Sales Order") && isAnyRowSelected && (
-            <button
-              className="btn btn-warning"
-              onClick={() => setShowUpdateSOForm(true)}
-            >
-              Edit
-            </button>
-          )}
+          {hasPermission("Update Sales Order") &&
+            isAnyRowSelected &&
+            selectedRowData[0]?.status === 1 && (
+              <button
+                className="btn btn-warning"
+                onClick={() => setShowUpdateSOForm(true)}
+              >
+                Edit
+              </button>
+            )}
         </div>
       </div>
       <div className="d-flex justify-content-end mb-3">

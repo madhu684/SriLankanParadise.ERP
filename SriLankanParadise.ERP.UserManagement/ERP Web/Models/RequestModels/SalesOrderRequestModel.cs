@@ -39,5 +39,9 @@
         public int InventoryLocationId { get; set; }
 
         public string CustomerPoNumber { get; set; }
+
+        public decimal? CustomerCreditLimitAtOrder { get; set; }
+
+        public int? CustomerCreditDurationAtOrder { get; set; }
     }
 }

@@ -44,6 +44,10 @@ public partial class SalesOrder
 
     public string CustomerPoNumber { get; set; }
 
+    public decimal? CustomerCreditLimitAtOrder { get; set; }
+
+    public int? CustomerCreditDurationAtOrder { get; set; }
+
     public virtual Customer? Customer { get; set; }
 
     public virtual User SalesPerson { get; set; }

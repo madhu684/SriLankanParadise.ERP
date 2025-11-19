@@ -18,11 +18,14 @@ import {
   put_charges_and_deductions_applied_api,
   delete_charges_and_deductions_applied_api,
   get_sum_location_inventories_by_locationId_itemMasterId_api,
+  get_user_locations_by_user_id_api,
 } from "../../../services/purchaseApi";
-import { get_item_masters_by_company_id_with_query_api } from "../../../services/inventoryApi";
-import { useQuery } from "@tanstack/react-query";
+import {
+  get_item_masters_by_company_id_with_query_api,
+  get_item_price_list_by_locationId,
+} from "../../../services/inventoryApi";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { use } from "react";
 
 const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -38,6 +41,7 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
     selectedCustomer: "",
     salesPersonId: null,
     selectedSalesPerson: null,
+    storeLocation: null,
     commonChargesAndDeductions: [],
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
@@ -57,6 +61,8 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
   ] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
+  const queryClient = useQueryClient();
+
   // ============================================================================
   // MEMOIZED VALUES
   // ============================================================================
@@ -66,6 +72,23 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
   // ============================================================================
   // DATA FETCHING - REACT QUERY
   // ============================================================================
+
+  const {
+    data: userLocations = [],
+    isLoading: isUserLocationsLoading,
+    isError: isUserLocationsError,
+    error: userLocationsError,
+  } = useQuery({
+    queryKey: ["userLocations", userId],
+    queryFn: async () => {
+      const response = await get_user_locations_by_user_id_api(userId);
+      const filteredLocations = response?.data?.result.filter(
+        (loc) => loc?.location?.locationTypeId === 2
+      );
+      return filteredLocations || [];
+    },
+    enabled: !!userId,
+  });
 
   const fetchItems = async (companyId, searchQuery) => {
     try {
@@ -237,9 +260,45 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
     queryFn: fetchCompany,
   });
 
+  const {
+    data: itemPriceListByLocation,
+    isLoading: isItemPriceListByLocationLoading,
+    isError: isItemPriceListByLocationError,
+    error: itemPriceListByLocationError,
+  } = useQuery({
+    queryKey: ["itemPriceListByLocation", formData.storeLocation],
+    queryFn: async () => {
+      const response = await get_item_price_list_by_locationId(
+        formData.storeLocation
+      );
+      return response.data.result;
+    },
+    enabled: !!formData.storeLocation,
+  });
+
   // ============================================================================
   // MEMOIZED CALCULATIONS
   // ============================================================================
+
+  const priceListMap = useMemo(() => {
+    if (!itemPriceListByLocation?.itemPriceDetails) {
+      return new Map();
+    }
+
+    return new Map(
+      itemPriceListByLocation.itemPriceDetails.map((detail) => [
+        detail.itemMasterId,
+        detail.price,
+      ])
+    );
+  }, [itemPriceListByLocation]);
+
+  const getPriceFromPriceList = useCallback(
+    (itemMasterId) => {
+      return priceListMap.get(itemMasterId) || 0;
+    },
+    [priceListMap]
+  );
 
   // Memoized charges initialization
   const getInitializedCharges = useMemo(() => {
@@ -400,6 +459,7 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
           selectedCustomer: deepCopySalesOrder?.customer ?? "",
           selectedSalesPerson: salesPersonDetails,
           subTotal: deepCopySalesOrder?.totalAmount ?? "",
+          storeLocation: deepCopySalesOrder?.inventoryLocationId ?? null,
           commonChargesAndDeductions: initializedCommonCharges,
         });
       };
@@ -646,6 +706,12 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
       formData.customerPoNumber
     );
 
+    const isStoreLocationValid = validateField(
+      "storeLocation",
+      "Store Location",
+      formData.storeLocation
+    );
+
     const isAttachmentsValid = validateAttachments(formData.attachments);
 
     let isItemQuantityValid = true;
@@ -699,6 +765,26 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
   // EVENT HANDLERS
   // ============================================================================
 
+  const clearForm = () => {
+    setFormData((prev) => ({
+      ...prev,
+      customerPoNumber: "",
+      customerId: "",
+      orderDate: "",
+      deliveryDate: "",
+      itemDetails: [],
+      status: 0,
+      attachments: [],
+      totalAmount: 0,
+      subTotal: 0,
+      selectedCustomer: "",
+      salesPersonId: null,
+      selectedSalesPerson: null,
+      storeLocation: null,
+      commonChargesAndDeductions: [],
+    }));
+  };
+
   const handleSubmit = async (isSaveAsDraft) => {
     try {
       const customerId = formData.customerId;
@@ -730,8 +816,11 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
           lastUpdatedDate: currentDate,
           permissionId: 27,
           salesPersonId: formData.salesPersonId,
-          inventoryLocationId: salesOrder.inventoryLocationId,
+          inventoryLocationId: formData.storeLocation,
           customerPoNumber: formData.customerPoNumber,
+          customerCreditLimitAtOrder: formData?.selectedCustomer?.creditLimit,
+          customerCreditDurationAtOrder:
+            formData?.selectedCustomer?.creditDuration,
         };
 
         const response = await put_sales_order_api(
@@ -813,10 +902,13 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
             console.log("Sales order submitted successfully!", formData);
           }
 
+          queryClient.invalidateQueries(["salesOrders", companyId]);
+
           setTimeout(() => {
             setSubmissionStatus(null);
             setLoading(false);
             setLoadingDraft(false);
+            clearForm();
             onFormSubmit();
           }, 3000);
 
@@ -1017,13 +1109,16 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
   // Handler to add the selected item to itemDetails
   const handleSelectItem = useCallback(
     async (item) => {
+      let availableStock = 0;
+      let unitPrice = item.unitPrice || 0;
+
       try {
         const inventory =
           await get_sum_location_inventories_by_locationId_itemMasterId_api(
             item.itemMasterId,
-            salesOrder.inventoryLocationId
+            formData.storeLocation
           );
-        const availableStock = inventory?.data?.result?.totalStockInHand || 0;
+        availableStock = inventory?.data?.result?.totalStockInHand || 0;
 
         if (availableStock <= 0) {
           toast.error(
@@ -1032,6 +1127,8 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
           setSearchTerm("");
           return;
         }
+
+        unitPrice = getPriceFromPriceList(item.itemMasterId);
 
         setFormData((prev) => ({
           ...prev,
@@ -1043,7 +1140,7 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
               name: item.itemName || "",
               unit: item.unit?.unitName || "",
               quantity: 0,
-              unitPrice: item.unitPrice || 0,
+              unitPrice: unitPrice,
               totalPrice: 0,
               batchId: null,
               tempQuantity: availableStock,
@@ -1061,7 +1158,7 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
         setSearchTerm("");
       }
     },
-    [getInitializedCharges]
+    [getInitializedCharges, getPriceFromPriceList, formData.storeLocation]
   );
 
   const renderColumns = useCallback(() => {
@@ -1081,6 +1178,7 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
   }, [chargesAndDeductions]);
 
   const renderSubColumns = useCallback(() => {
+    if (formData.itemDetails.length === 0) return null;
     return formData.commonChargesAndDeductions.map((charge, chargeIndex) => {
       if (!charge.isApplicableForLineItem) {
         return (
@@ -1125,7 +1223,6 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
                 }}
               />
             </td>
-            <td></td>
           </tr>
         );
       }
@@ -1165,6 +1262,7 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
     salesPersons,
     availableItems,
     company,
+    userLocations,
 
     // Loading States
     isItemsLoading,

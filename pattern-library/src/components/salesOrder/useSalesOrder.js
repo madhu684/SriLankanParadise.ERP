@@ -13,8 +13,11 @@ import {
   get_sum_location_inventories_by_locationId_itemMasterId_api,
   get_user_locations_by_user_id_api,
 } from "../../services/purchaseApi";
-import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
-import { useQuery } from "@tanstack/react-query";
+import {
+  get_item_masters_by_company_id_with_query_api,
+  get_item_price_list_by_locationId,
+} from "../../services/inventoryApi";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 const useSalesOrder = ({ onFormSubmit }) => {
@@ -31,6 +34,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
     selectedCustomer: "",
     salesPersonId: null,
     selectedSalesPerson: null,
+    storeLocation: null,
     commonChargesAndDeductions: [],
   });
 
@@ -48,9 +52,10 @@ const useSalesOrder = ({ onFormSubmit }) => {
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [warehouseLocationId, setWarehouseLocationId] = useState(null);
 
   const alertRef = useRef(null);
+
+  const queryClient = useQueryClient();
 
   // ============================================================================
   // MEMOIZED VALUES
@@ -70,23 +75,15 @@ const useSalesOrder = ({ onFormSubmit }) => {
     isError: isUserLocationsError,
     error: userLocationsError,
   } = useQuery({
-    queryKey: ["userLocations", formData.salesPersonId],
+    queryKey: ["userLocations", userId],
     queryFn: async () => {
-      const response = await get_user_locations_by_user_id_api(
-        parseInt(formData.salesPersonId)
+      const response = await get_user_locations_by_user_id_api(userId);
+      const filteredLocations = response?.data?.result.filter(
+        (loc) => loc?.location?.locationTypeId === 2
       );
-      const locations = response.data.result.filter(
-        (location) => location.location.locationTypeId === 2
-      );
-
-      // Set warehouse location from first result
-      if (locations.length > 0) {
-        setWarehouseLocationId(locations[0].locationId);
-      }
-
-      return locations;
+      return filteredLocations || [];
     },
-    enabled: !!formData.salesPersonId,
+    enabled: !!userId,
     staleTime: 5 * 60 * 1000,
   });
 
@@ -189,9 +186,38 @@ const useSalesOrder = ({ onFormSubmit }) => {
     staleTime: 10 * 60 * 1000,
   });
 
+  // Fetch item price list
+  const {
+    data: itemPriceListByLocation,
+    isLoading: isItemPriceListByLocationLoading,
+    isError: isItemPriceListByLocationError,
+    error: itemPriceListByLocationError,
+  } = useQuery({
+    queryKey: ["itemPriceListByLocation", formData.storeLocation],
+    queryFn: async () => {
+      const response = await get_item_price_list_by_locationId(
+        formData.storeLocation
+      );
+      return response.data.result;
+    },
+    enabled: !!formData.storeLocation,
+  });
+
   // ============================================================================
   // MEMOIZED CALCULATIONS
   // ============================================================================
+
+  const priceListMap = useMemo(() => {
+    if (!itemPriceListByLocation?.itemPriceDetails) {
+      return new Map();
+    }
+    return new Map(
+      itemPriceListByLocation.itemPriceDetails.map((detail) => [
+        detail.itemMasterId,
+        detail.price,
+      ])
+    );
+  }, [itemPriceListByLocation]);
 
   // Memoized charges initialization
   const getInitializedCharges = useMemo(() => {
@@ -372,6 +398,12 @@ const useSalesOrder = ({ onFormSubmit }) => {
       formData.customerPoNumber
     );
 
+    const isStoreLocationValid = validateField(
+      "storeLocation",
+      "Store Location",
+      formData.storeLocation
+    );
+
     const isAttachmentsValid = validateAttachments(formData.attachments);
 
     let isItemQuantityValid = true;
@@ -409,6 +441,13 @@ const useSalesOrder = ({ onFormSubmit }) => {
   // ============================================================================
   // HELPER FUNCTIONS
   // ============================================================================
+
+  const getPriceFromPriceList = useCallback(
+    (itemMasterId) => {
+      return priceListMap.get(itemMasterId) || 0;
+    },
+    [priceListMap]
+  );
 
   const getTransactionTypeIdByName = useCallback(
     (name) => {
@@ -534,8 +573,11 @@ const useSalesOrder = ({ onFormSubmit }) => {
           lastUpdatedDate: currentDate,
           permissionId: 25,
           salesPersonId: formData.salesPersonId,
-          inventoryLocationId: warehouseLocationId,
+          inventoryLocationId: formData.storeLocation,
           customerPoNumber: formData.customerPoNumber,
+          customerCreditLimitAtOrder: formData?.selectedCustomer?.creditLimit,
+          customerCreditDurationAtOrder:
+            formData?.selectedCustomer?.creditDuration,
         };
 
         const response = await post_sales_order_api(salesOrderData);
@@ -573,6 +615,9 @@ const useSalesOrder = ({ onFormSubmit }) => {
           setSubmissionStatus(
             isSaveAsDraft ? "successSavedAsDraft" : "successSubmitted"
           );
+
+          queryClient.invalidateQueries(["salesOrders", companyId]);
+
           setTimeout(() => {
             setSubmissionStatus(null);
             setLoading(false);
@@ -604,7 +649,6 @@ const useSalesOrder = ({ onFormSubmit }) => {
       username,
       userId,
       companyId,
-      warehouseLocationId,
       postChargesAndDeductionsApplied,
       onFormSubmit,
     ]
@@ -697,18 +741,17 @@ const useSalesOrder = ({ onFormSubmit }) => {
 
   const handleSelectItem = useCallback(
     async (item) => {
-      if (!userLocations?.[0]?.locationId) {
-        toast.error("No user location available");
-        return;
-      }
+      let availableStock = 0;
+      let unitPrice = item.unitPrice || 0;
 
       try {
         const inventory =
           await get_sum_location_inventories_by_locationId_itemMasterId_api(
             item.itemMasterId,
-            userLocations[0].locationId
+            formData.storeLocation,
+            null
           );
-        const availableStock = inventory?.data?.result?.totalStockInHand || 0;
+        availableStock = inventory?.data?.result?.totalStockInHand || 0;
 
         if (availableStock <= 0) {
           toast.error(
@@ -717,6 +760,8 @@ const useSalesOrder = ({ onFormSubmit }) => {
           setSearchTerm("");
           return;
         }
+
+        unitPrice = getPriceFromPriceList(item.itemMasterId);
 
         setFormData((prev) => ({
           ...prev,
@@ -727,7 +772,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
               name: item.itemName || "",
               unit: item.unit?.unitName || "",
               quantity: 0,
-              unitPrice: item.unitPrice || 0,
+              unitPrice: unitPrice,
               totalPrice: 0,
               batchId: null,
               tempQuantity: availableStock,
@@ -745,7 +790,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
         setSearchTerm("");
       }
     },
-    [userLocations, getInitializedCharges]
+    [getPriceFromPriceList, getInitializedCharges, formData.storeLocation]
   );
 
   const handleSelectCustomer = useCallback((selectedCustomer) => {
@@ -858,8 +903,8 @@ const useSalesOrder = ({ onFormSubmit }) => {
       return (
         <tr key={chargeIndex}>
           <td colSpan={colSpan}></td>
-          <th>
-            {charge.sign + " "}
+          <th className="text-end">
+            {/* {charge.sign + " "} */}
             {charge.name}
             {charge.isPercentage && " (%)"}
           </th>
@@ -905,7 +950,6 @@ const useSalesOrder = ({ onFormSubmit }) => {
     loading,
     loadingDraft,
     showModal,
-    warehouseLocationId,
 
     // Refs
     alertRef,

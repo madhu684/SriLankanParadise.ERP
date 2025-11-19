@@ -43,6 +43,10 @@
 
         public string CustomerPoNumber { get; set; }
 
+        public decimal? CustomerCreditLimitAtOrder { get; set; }
+
+        public int? CustomerCreditDurationAtOrder { get; set; }
+
         public virtual IEnumerable<SalesOrderDetailDto>? SalesOrderDetails { get; set; }
     }
 }

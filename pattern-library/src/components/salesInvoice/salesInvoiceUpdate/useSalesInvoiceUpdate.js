@@ -38,7 +38,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     totalLitres: 0,
     invoiceDate: "",
     dueDate: "",
-    referenceNumber: "",
+    remarks: "",
     refNo: "",
     itemDetails: [],
     attachments: [],
@@ -402,7 +402,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           invoiceDate: deepCopySalesInvoice?.invoiceDate?.split("T")[0] ?? "",
           dueDate: deepCopySalesInvoice?.dueDate?.split("T")[0] ?? "",
           referenceNumber: deepCopySalesInvoice?.referenceNo ?? "",
-          refNo: deepCopySalesInvoice?.referenceNumber ?? "",
+          remarks: deepCopySalesInvoice?.remarks ?? "",
           itemDetails: initializedLineItemCharges,
           attachments: deepCopySalesInvoice?.attachments ?? [],
           totalAmount: deepCopySalesInvoice?.totalAmount ?? "",
@@ -701,11 +701,11 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
       formData.dueDate
     );
 
-    const isReferenceNumberValid = validateField(
-      "referenceNumber",
-      "Reference Number",
-      formData.referenceNumber
-    );
+    // const isRemarksValid = validateField(
+    //   "remarks",
+    //   "Remarks",
+    //   formData.remarks
+    // );
 
     const isCustomerValid = validateField(
       "customer",
@@ -748,9 +748,9 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
       isDueDateValid &&
       isCustomerValid &&
       isCustomerDeliveryAddressValid &&
+      // isRemarksValid &&
       isItemQuantityValid &&
-      isAttachmentsValid &&
-      isReferenceNumberValid
+      isAttachmentsValid
     );
   };
 
@@ -783,7 +783,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           amountDue: formData.totalAmount,
           createdDate: salesInvoice.createdDate,
           lastUpdatedDate: currentDate,
-          referenceNumber: salesInvoice.referenceNumber,
+          remarks: formData.remarks,
           permissionId: 31,
           locationId: salesInvoice.locationId,
           customerId: formData.selectedCustomer.customerId,
@@ -1233,8 +1233,8 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
                 (company.batchStockType === "FIFO" ? 1 : 0)
               }
             ></td>
-            <th>
-              {charge.sign + " "}
+            <th className="text-end">
+              {/* {charge.sign + " "} */}
               {charge.name}
               {charge.isPercentage === true && " (%)"}
             </th>
@@ -1274,7 +1274,8 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     });
   };
 
-  console.log("formData", formData);
+  // console.log("formData", formData);
+  console.log("Invoice: ", salesInvoice);
 
   return {
     formData,

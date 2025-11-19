@@ -4,6 +4,8 @@ import {
   post_sales_invoice_detail_api,
   get_company_api,
   search_customer_api,
+  update_outstanding_balance_api,
+  approve_sales_order_api,
 } from "../../services/salesApi";
 import {
   get_charges_and_deductions_by_company_id_api,
@@ -13,6 +15,7 @@ import {
   get_user_locations_by_user_id_api,
   get_locations_inventories_by_location_id_api,
   get_sum_location_inventories_by_locationId_itemMasterId_api,
+  post_reduce_inventory_fifo_api,
 } from "../../services/purchaseApi";
 import {
   get_item_masters_by_company_id_with_query_api,
@@ -31,7 +34,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     storeLocation: null,
     invoiceDate: "",
     dueDate: "",
-    referenceNumber: "",
+    remarks: "",
     itemDetails: [],
     attachments: [],
     totalAmount: 0,
@@ -50,7 +53,25 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
 
+  const [hasLineItemChargesChanged, setHasLineItemChargesChanged] =
+    useState(false);
+
+  const [originalLineItemCharges, setOriginalLineItemCharges] = useState(
+    new Map()
+  );
+
+  const [creditMismatchDetails, setCreditMismatchDetails] = useState({
+    hasLimitMismatch: false,
+    hasDurationMismatch: false,
+    originalLimit: null,
+    currentLimit: null,
+    originalDuration: null,
+    currentDuration: null,
+  });
+
   const queryClient = useQueryClient();
+
+  // ==================== Memorized Values ====================
   const userId = sessionStorage.getItem("userId");
   const companyId = sessionStorage.getItem("companyId");
   const username = sessionStorage.getItem("username");
@@ -280,6 +301,16 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     [transactionTypes]
   );
 
+  const compareCharges = useCallback((original, current) => {
+    if (!original || !current) return false;
+    if (original.length !== current.length) return true;
+
+    return original.some((origCharge, index) => {
+      const currCharge = current[index];
+      return parseFloat(origCharge.value) !== parseFloat(currCharge.value);
+    });
+  }, []);
+
   // ==================== VALIDATION ====================
   const validateField = useCallback(
     (fieldName, fieldDisplayName, value, additionalRules = {}) => {
@@ -357,11 +388,11 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
       formData.dueDate
     );
 
-    const isReferenceNumberValid = validateField(
-      "referenceNumber",
-      "Reference Number",
-      formData.referenceNumber
-    );
+    // const isRemarksValid = validateField(
+    //   "remarks",
+    //   "Remarks",
+    //   formData.remarks
+    // );
 
     const isCustomerValid = validateField(
       "customer",
@@ -402,7 +433,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     return (
       isInvoiceDateValid &&
       isDueDateValid &&
-      isReferenceNumberValid &&
+      // isRemarksValid &&
       isCustomerValid &&
       isCustomerDeliveryAddressValid &&
       isAttachmentsValid &&
@@ -703,122 +734,340 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     [formData, getTransactionTypeIdByName, userId, companyId]
   );
 
+  const updateCustomer = useCallback(
+    async (customerId, movementTypeId, formData) => {
+      try {
+        const response = await update_outstanding_balance_api(
+          customerId,
+          movementTypeId,
+          formData
+        );
+        return response;
+      } catch (error) {
+        console.error("Error fetching charges and deductions:", error);
+      }
+    },
+    []
+  );
+
+  const updateSalesOrder = useCallback(async () => {
+    const approvalData = {
+      status: 5,
+      approvedBy: salesOrder.approvedBy,
+      approvedUserId: salesOrder.approvedUserId,
+      approvedDate: salesOrder.approvedDate,
+      permissionId: 26,
+    };
+
+    try {
+      const approvalResponse = await approve_sales_order_api(
+        salesOrder.salesOrderId,
+        approvalData
+      );
+      queryClient.invalidateQueries(["salesOrders", companyId]);
+      return approvalResponse;
+    } catch (error) {
+      console.error("Error fetching charges and deductions:", error);
+    }
+  }, [salesOrder]);
+
   const handleSubmit = useCallback(
     async (isSaveAsDraft) => {
       try {
-        const status = isSaveAsDraft ? 0 : 1;
-        const isFormValid = validateForm();
-        const currentDate = new Date().toISOString();
-
-        if (!isFormValid) return;
+        if (!validateForm()) {
+          return;
+        }
 
         isSaveAsDraft ? setLoadingDraft(true) : setLoading(true);
 
-        const salesInvoiceData = {
-          invoiceDate: formData.invoiceDate,
-          dueDate: formData.dueDate,
-          totalAmount: formData.totalAmount,
-          status: status,
-          createdBy: username,
-          createdUserId: userId,
-          approvedBy: null,
-          approvedUserId: null,
-          approvedDate: null,
-          companyId: companyId,
-          salesOrderId: salesOrder?.salesOrderId ?? null,
-          amountDue: formData.totalAmount,
-          createdDate: currentDate,
-          lastUpdatedDate: currentDate,
-          referenceNumber: formData.referenceNumber,
-          permissionId: 29,
-          locationId: formData.storeLocation,
-          customerId: formData.selectedCustomer.customerId,
-          customerDeliveryAddressId: parseInt(
-            formData.customerDeliveryAddressId
-          ),
-          driverName: formData.driverName,
-          vehicleNumber: formData.vehicleNo,
-          totalLitres: formData.totalLitres,
-        };
-
-        const response = await post_sales_invoice_api(salesInvoiceData);
-        setReferenceNo(response.data.result.referenceNo);
-
-        const salesInvoiceId = response.data.result.salesInvoiceId;
-
-        const itemDetailsData = formData.itemDetails.map(async (item) => {
-          const detailsData = {
-            salesInvoiceId,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            totalPrice: item.totalPrice,
-            itemBatchItemMasterId: item.id,
-            itemBatchBatchId: item.batchId,
-            permissionId: 25,
-          };
-
-          return await post_sales_invoice_detail_api(detailsData);
-        });
-
-        const detailsResponses = await Promise.all(itemDetailsData);
-        const allDetailsSuccessful = detailsResponses.every(
-          (detailsResponse) => detailsResponse.status === 201
+        const status = determineInvoiceStatus(
+          isSaveAsDraft,
+          salesOrder,
+          hasLineItemChargesChanged
         );
 
-        const postChargesAndDeductionsAppliedResponse =
-          await postChargesAndDeductionsApplied(salesInvoiceId);
+        const salesInvoiceId = await createSalesInvoice(status);
 
-        const allAppliedSuccessful =
-          postChargesAndDeductionsAppliedResponse.every(
-            (detailsResponse) => detailsResponse.status === 201
-          );
+        await Promise.all([
+          processSalesInvoiceDetails(salesInvoiceId),
+          processChargesAndDeductions(salesInvoiceId),
+        ]);
 
-        if (allDetailsSuccessful && allAppliedSuccessful) {
-          setSubmissionStatus(
-            isSaveAsDraft ? "successSavedAsDraft" : "successSubmitted"
-          );
+        await handlePostSubmissionOperations(status, salesInvoiceId);
 
-          queryClient.invalidateQueries(["salesInvoices", companyId]);
+        showSuccessNotification(
+          isSaveAsDraft,
+          salesOrder,
+          hasLineItemChargesChanged
+        );
 
-          setTimeout(() => {
-            setSubmissionStatus(null);
-            setLoading(false);
-            setLoadingDraft(false);
-            onFormSubmit();
-          }, 3000);
-
-          toast.success(
-            isSaveAsDraft
-              ? "Sales invoice saved as draft!"
-              : "Sales invoice submitted successfully!"
-          );
-        } else {
-          setSubmissionStatus("error");
-          toast.error("Failed to submit sales invoice.");
-        }
+        await finalizeSubmission(isSaveAsDraft);
       } catch (error) {
-        console.error("Error submitting form:", error);
-        setSubmissionStatus("error");
-        setTimeout(() => {
-          setSubmissionStatus(null);
-          setLoading(false);
-          setLoadingDraft(false);
-        }, 3000);
-
-        toast.error("Failed to submit sales invoice.");
+        handleSubmissionError(error);
       }
     },
     [
       formData,
-      validateForm,
       salesOrder,
       username,
       userId,
       companyId,
-      postChargesAndDeductionsApplied,
+      hasLineItemChargesChanged,
       onFormSubmit,
+      postChargesAndDeductionsApplied,
+      validateForm,
     ]
   );
+
+  const determineInvoiceStatus = (
+    isSaveAsDraft,
+    salesOrder,
+    hasLineItemChargesChanged
+  ) => {
+    if (isSaveAsDraft) return 0;
+
+    if (salesOrder) {
+      const currentCreditLimit = formData.selectedCustomer?.creditLimit;
+      const currentCreditDuration = formData.selectedCustomer?.creditDuration;
+      const orderCreditLimit = salesOrder.customerCreditLimitAtOrder;
+      const orderCreditDuration = salesOrder.customerCreditDurationAtOrder;
+
+      const isCreditLimitMismatch = currentCreditLimit !== orderCreditLimit;
+      const isCreditDurationMismatch =
+        currentCreditDuration !== orderCreditDuration;
+
+      if (
+        isCreditLimitMismatch ||
+        isCreditDurationMismatch ||
+        hasLineItemChargesChanged
+      ) {
+        return 1;
+      }
+    }
+
+    return 2;
+  };
+
+  /**
+   * Creates a new sales invoice
+   * @param {number} status - Invoice status
+   * @returns {Promise<number>} Sales invoice ID
+   */
+  const createSalesInvoice = async (status) => {
+    const currentDate = new Date().toISOString();
+
+    const salesInvoiceData = {
+      invoiceDate: formData.invoiceDate,
+      dueDate: formData.dueDate,
+      totalAmount: formData.totalAmount,
+      status,
+      createdBy: username,
+      createdUserId: userId,
+      approvedBy: status === 2 ? username : null,
+      approvedUserId: status === 2 ? userId : null,
+      approvedDate: status === 2 ? currentDate : null,
+      companyId,
+      salesOrderId: salesOrder?.salesOrderId ?? null,
+      amountDue: formData.totalAmount,
+      createdDate: currentDate,
+      lastUpdatedDate: currentDate,
+      remarks: formData.remarks,
+      permissionId: 29,
+      locationId: formData.storeLocation,
+      customerId: formData.selectedCustomer.customerId,
+      customerDeliveryAddressId: parseInt(formData.customerDeliveryAddressId),
+      driverName: formData.driverName,
+      vehicleNumber: formData.vehicleNo,
+      totalLitres: formData.totalLitres,
+    };
+
+    const response = await post_sales_invoice_api(salesInvoiceData);
+    const { salesInvoiceId, referenceNo } = response.data.result;
+
+    setReferenceNo(referenceNo);
+    return salesInvoiceId;
+  };
+
+  /**
+   * Processes all sales invoice details
+   * @param {number} salesInvoiceId - Sales invoice ID
+   * @returns {Promise<void>}
+   */
+  const processSalesInvoiceDetails = async (salesInvoiceId) => {
+    const itemDetailsPromises = formData.itemDetails.map((item) => {
+      const detailsData = {
+        salesInvoiceId,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        totalPrice: item.totalPrice,
+        itemBatchItemMasterId: item.id,
+        itemBatchBatchId: item.batchId,
+        permissionId: 25,
+      };
+
+      return post_sales_invoice_detail_api(detailsData);
+    });
+
+    const detailsResponses = await Promise.all(itemDetailsPromises);
+
+    const allSuccessful = detailsResponses.every(
+      (response) => response.status === 201
+    );
+
+    if (!allSuccessful) {
+      throw new Error("Failed to create some invoice details");
+    }
+  };
+
+  /**
+   * Processes charges and deductions for the invoice
+   * @param {number} salesInvoiceId - Sales invoice ID
+   * @returns {Promise<void>}
+   */
+  const processChargesAndDeductions = async (salesInvoiceId) => {
+    const responses = await postChargesAndDeductionsApplied(salesInvoiceId);
+
+    const allSuccessful = responses.every(
+      (response) => response.status === 201
+    );
+
+    if (!allSuccessful) {
+      throw new Error("Failed to apply some charges or deductions");
+    }
+  };
+
+  /**
+   * Reduces inventory using FIFO method
+   * @param {number} salesInvoiceId - Sales invoice ID
+   * @returns {Promise<Array>}
+   */
+  const reduceInventoryFifo = async (salesInvoiceId) => {
+    const fifoPromises = formData.itemDetails.map((invoiceDetail) =>
+      post_reduce_inventory_fifo_api({
+        locationId: formData.storeLocation,
+        itemMasterId: invoiceDetail.id,
+        transactionTypeId: 3,
+        quantity: invoiceDetail.quantity,
+      })
+    );
+
+    const fifoResponses = await Promise.all(fifoPromises);
+    return fifoResponses.map((response) => response.data);
+  };
+
+  /**
+   * Handles operations that need to occur after submission based on status
+   * @param {number} status - Invoice status
+   * @param {number} salesInvoiceId - Sales invoice ID
+   * @returns {Promise<void>}
+   */
+  const handlePostSubmissionOperations = async (status, salesInvoiceId) => {
+    if (status === 2) {
+      // Execute in parallel for better performance
+      await Promise.all([
+        updateCustomer(formData.selectedCustomer.customerId, 1, {
+          outstandingAmount: formData.totalAmount,
+        }),
+        reduceInventoryFifo(salesInvoiceId),
+        updateSalesOrder(),
+      ]);
+    }
+  };
+
+  /**
+   * Shows appropriate success notification
+   * @param {boolean} isSaveAsDraft - Whether saved as draft
+   * @param {Object} salesOrder - Sales order object
+   * @param {boolean} hasLineItemChargesChanged - Whether charges changed
+   */
+  const showSuccessNotification = (
+    isSaveAsDraft,
+    salesOrder,
+    hasLineItemChargesChanged
+  ) => {
+    if (isSaveAsDraft) {
+      toast.success("Sales invoice saved as draft!");
+      return;
+    }
+
+    if (!salesOrder) {
+      toast.success("Sales invoice submitted successfully!");
+      return;
+    }
+
+    const reasons = [];
+
+    if (hasLineItemChargesChanged) {
+      reasons.push("modified line item charges");
+    }
+
+    const currentCreditLimit = formData.selectedCustomer?.creditLimit;
+    const currentCreditDuration = formData.selectedCustomer?.creditDuration;
+    const orderCreditLimit = salesOrder.customerCreditLimitAtOrder;
+    const orderCreditDuration = salesOrder.customerCreditDurationAtOrder;
+
+    if (currentCreditLimit !== orderCreditLimit) {
+      reasons.push(
+        `credit limit changed (LKR${orderCreditLimit?.toLocaleString()} → LKR${currentCreditLimit?.toLocaleString()})`
+      );
+    }
+
+    if (currentCreditDuration !== orderCreditDuration) {
+      reasons.push(
+        `credit duration changed (${orderCreditDuration} days → ${currentCreditDuration} days)`
+      );
+    }
+
+    if (reasons.length > 0) {
+      toast.success(
+        `Sales invoice submitted with ${reasons.join(
+          ", "
+        )} and requires approval!`,
+        { duration: 5000 }
+      );
+    } else {
+      toast.success("Sales invoice submitted successfully!");
+    }
+  };
+
+  /**
+   * Finalizes the submission process
+   * @param {boolean} isSaveAsDraft - Whether saved as draft
+   * @returns {Promise<void>}
+   */
+  const finalizeSubmission = async (isSaveAsDraft) => {
+    setSubmissionStatus(
+      isSaveAsDraft ? "successSavedAsDraft" : "successSubmitted"
+    );
+    queryClient.invalidateQueries(["salesInvoices", companyId]);
+
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        setSubmissionStatus(null);
+        setLoading(false);
+        setLoadingDraft(false);
+        onFormSubmit();
+        resolve();
+      }, 3000);
+    });
+  };
+
+  /**
+   * Handles submission errors
+   * @param {Error} error - Error object
+   */
+  const handleSubmissionError = (error) => {
+    console.error("Error submitting sales invoice:", error);
+
+    setSubmissionStatus("error");
+    toast.error("Failed to submit sales invoice.");
+
+    setTimeout(() => {
+      setSubmissionStatus(null);
+      setLoading(false);
+      setLoadingDraft(false);
+    }, 3000);
+  };
 
   // ==================== RENDER HELPERS ====================
   const renderColumns = useCallback(() => {
@@ -848,8 +1097,8 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
       return (
         <tr key={chargeIndex}>
           <td colSpan={colSpan}></td>
-          <th>
-            {charge.sign + " "}
+          <th className="text-end">
+            {/* {charge.sign + " "} */}
             {charge.name}
             {charge.isPercentage === true && " (%)"}
           </th>
@@ -947,7 +1196,153 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     }));
   }, [chargesAndDeductions]);
 
-  // OPTIMIZED: Initialize sales order data
+  // Initialize sales order data
+  // useEffect(() => {
+  //   if (
+  //     !salesOrder ||
+  //     isChargesAndDeductionsAppliedLoading ||
+  //     !chargesAndDeductionsApplied ||
+  //     isLoadingchargesAndDeductions ||
+  //     !chargesAndDeductions
+  //   ) {
+  //     return;
+  //   }
+
+  //   const initializeData = async () => {
+  //     // Calculate subtotal first (synchronous)
+  //     const subTotal = salesOrder.salesOrderDetails.reduce(
+  //       (total, item) => total + item.totalPrice,
+  //       0
+  //     );
+
+  //     // Fetch inventory for ALL items in parallel
+  //     const inventoryPromises = salesOrder.salesOrderDetails.map((item) => {
+  //       const itemId = item.itemMaster.itemMasterId;
+  //       const locationId =
+  //         salesOrder.inventoryLocationId || formData.storeLocation;
+
+  //       return get_sum_location_inventories_by_locationId_itemMasterId_api(
+  //         itemId,
+  //         locationId,
+  //         null
+  //       )
+  //         .then((response) => ({
+  //           itemId,
+  //           availableStock: response?.data?.result?.totalStockInHand || 0,
+  //         }))
+  //         .catch((error) => {
+  //           console.error(`Failed to fetch stock for item ${itemId}:`, error);
+  //           return { itemId, availableStock: 0 };
+  //         });
+  //     });
+
+  //     const inventoryResults = await Promise.all(inventoryPromises);
+
+  //     const stockMap = new Map(
+  //       inventoryResults.map((res) => [res.itemId, res.availableStock])
+  //     );
+
+  //     // Process line items
+  //     const initializedLineItemCharges = salesOrder.salesOrderDetails.map(
+  //       (item) => {
+  //         const itemId = item.itemMaster.itemMasterId;
+  //         const itemTotal = item.unitPrice * item.quantity;
+  //         const availableStock = stockMap.get(itemId) || 0;
+
+  //         // Get applied charges for this line item
+  //         const appliedCharges = chargesAndDeductionsApplied.filter(
+  //           (charge) => charge.lineItemId === itemId
+  //         );
+
+  //         const appliedChargesMap = new Map(
+  //           appliedCharges.map((charge) => {
+  //             let value;
+  //             const appliedVal = charge.appliedValue;
+  //             const chargeDef = charge.chargesAndDeduction;
+
+  //             if (chargeDef.displayName === "SSL") {
+  //               value = (appliedVal / (itemTotal + appliedVal)) * 100;
+  //             } else if (chargeDef.percentage !== null) {
+  //               value = (Math.abs(appliedVal) / itemTotal) * 100;
+  //             } else {
+  //               value = Math.abs(appliedVal);
+  //             }
+
+  //             return [
+  //               chargeDef.displayName,
+  //               {
+  //                 id: chargeDef.chargesAndDeductionId,
+  //                 name: chargeDef.displayName,
+  //                 value: value.toFixed(2),
+  //                 sign: chargeDef.sign,
+  //                 isPercentage: chargeDef.percentage !== null,
+  //                 chargesAndDeductionAppliedId:
+  //                   charge.chargesAndDeductionAppliedId,
+  //               },
+  //             ];
+  //           })
+  //         );
+
+  //         const sortedLineItemCharges = lineItemChargesLookup.map(
+  //           (charge) => appliedChargesMap.get(charge.displayName) || null
+  //         );
+
+  //         return {
+  //           id: itemId,
+  //           name: item.itemMaster.itemName,
+  //           unit: item.itemMaster.unit.unitName,
+  //           batchId: null,
+  //           stockInHand: availableStock,
+  //           quantity: item.quantity,
+  //           unitPrice: item.unitPrice,
+  //           totalPrice: item.totalPrice,
+  //           isInventoryItem: item?.itemMaster?.isInventoryItem,
+  //           packSize: item?.itemMaster?.conversionRate || 1,
+  //           chargesAndDeductions: sortedLineItemCharges,
+  //         };
+  //       }
+  //     );
+
+  //     // Process common charges
+  //     const initializedCommonCharges = chargesAndDeductionsApplied
+  //       .filter((charge) => !charge.lineItemId)
+  //       .map((charge) => {
+  //         const chargeDef = charge.chargesAndDeduction;
+  //         const value =
+  //           chargeDef.percentage !== null
+  //             ? (Math.abs(charge.appliedValue) / subTotal) * 100
+  //             : Math.abs(charge.appliedValue);
+
+  //         return {
+  //           id: chargeDef.chargesAndDeductionId,
+  //           name: chargeDef.displayName,
+  //           value: value.toFixed(2),
+  //           sign: chargeDef.sign,
+  //           isPercentage: chargeDef.percentage !== null,
+  //           chargesAndDeductionAppliedId: charge.chargesAndDeductionAppliedId,
+  //         };
+  //       });
+
+  //     setFormData((prev) => ({
+  //       ...prev,
+  //       selectedCustomer: salesOrder.customer,
+  //       itemDetails: initializedLineItemCharges,
+  //       salesOrderId: salesOrder.salesOrderId,
+  //       commonChargesAndDeductions: initializedCommonCharges,
+  //     }));
+  //   };
+
+  //   initializeData();
+  // }, [
+  //   salesOrder,
+  //   isChargesAndDeductionsAppliedLoading,
+  //   chargesAndDeductionsApplied,
+  //   isLoadingchargesAndDeductions,
+  //   chargesAndDeductions,
+  //   lineItemChargesLookup,
+  //   formData.storeLocation,
+  // ]);
+
   useEffect(() => {
     if (
       !salesOrder ||
@@ -959,110 +1354,137 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
       return;
     }
 
-    // Process line items
-    const initializedLineItemCharges = salesOrder.salesOrderDetails.map(
-      (item) => {
+    const initializeData = async () => {
+      const subTotal = salesOrder.salesOrderDetails.reduce(
+        (total, item) => total + item.totalPrice,
+        0
+      );
+
+      const inventoryPromises = salesOrder.salesOrderDetails.map((item) => {
         const itemId = item.itemMaster.itemMasterId;
-        const itemTotal = item.unitPrice * item.quantity;
+        const locationId =
+          salesOrder.inventoryLocationId || formData.storeLocation;
 
-        // Get charges for this specific line item
-        const appliedCharges = chargesAndDeductionsApplied.filter(
-          (charge) => charge.lineItemId === itemId
-        );
-
-        // Build charges lookup map for O(1) access
-        const appliedChargesMap = new Map(
-          appliedCharges.map((charge) => {
-            let value;
-            const appliedVal = charge.appliedValue;
-            const chargeDef = charge.chargesAndDeduction;
-
-            if (chargeDef.displayName === "SSL") {
-              value = (appliedVal / (itemTotal + appliedVal)) * 100;
-            } else if (chargeDef.percentage !== null) {
-              value = (Math.abs(appliedVal) / itemTotal) * 100;
-            } else {
-              value = Math.abs(appliedVal);
-            }
-
-            return [
-              chargeDef.displayName,
-              {
-                id: chargeDef.chargesAndDeductionId,
-                name: chargeDef.displayName,
-                value: value.toFixed(2),
-                sign: chargeDef.sign,
-                isPercentage: chargeDef.percentage !== null,
-                chargesAndDeductionAppliedId:
-                  charge.chargesAndDeductionAppliedId,
-              },
-            ];
-          })
-        );
-
-        // Map applicable charges, using applied values where they exist
-        const sortedLineItemCharges = lineItemChargesLookup.map(
-          (charge) => appliedChargesMap.get(charge.displayName) || null
-        );
-
-        // Fetch inventory
-        const inventory =
-          get_sum_location_inventories_by_locationId_itemMasterId_api(
+        return get_sum_location_inventories_by_locationId_itemMasterId_api(
+          itemId,
+          locationId,
+          null
+        )
+          .then((response) => ({
             itemId,
-            salesOrder.inventoryLocationId
-          );
-        const availableStock = inventory?.data?.result?.totalStockInHand || 0;
-
-        return {
-          id: itemId,
-          name: item.itemMaster.itemName,
-          unit: item.itemMaster.unit.unitName,
-          batchId: null,
-          stockInHand: availableStock,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
-          totalPrice: item.totalPrice,
-          isInventoryItem: item?.itemMaster?.isInventoryItem,
-          packSize: item?.itemMaster?.conversionRate || 1,
-          chargesAndDeductions: sortedLineItemCharges,
-        };
-      }
-    );
-
-    // Calculate subtotal once
-    const subTotal = salesOrder.salesOrderDetails.reduce(
-      (total, item) => total + item.totalPrice,
-      0
-    );
-
-    // Process common charges (those without line item association)
-    const initializedCommonCharges = chargesAndDeductionsApplied
-      .filter((charge) => !charge.lineItemId)
-      .map((charge) => {
-        const chargeDef = charge.chargesAndDeduction;
-        const value =
-          chargeDef.percentage !== null
-            ? (Math.abs(charge.appliedValue) / subTotal) * 100
-            : Math.abs(charge.appliedValue);
-
-        return {
-          id: chargeDef.chargesAndDeductionId,
-          name: chargeDef.displayName,
-          value: value.toFixed(2),
-          sign: chargeDef.sign,
-          isPercentage: chargeDef.percentage !== null,
-          chargesAndDeductionAppliedId: charge.chargesAndDeductionAppliedId,
-        };
+            availableStock: response?.data?.result?.totalStockInHand || 0,
+          }))
+          .catch((error) => {
+            console.error(`Failed to fetch stock for item ${itemId}:`, error);
+            return { itemId, availableStock: 0 };
+          });
       });
 
-    // Single state update at the end
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      selectedCustomer: salesOrder.customer,
-      itemDetails: initializedLineItemCharges,
-      salesOrderId: salesOrder.salesOrderId,
-      commonChargesAndDeductions: initializedCommonCharges,
-    }));
+      const inventoryResults = await Promise.all(inventoryPromises);
+      const stockMap = new Map(
+        inventoryResults.map((res) => [res.itemId, res.availableStock])
+      );
+
+      // NEW: Create a map to store original charges for comparison
+      const originalChargesMap = new Map();
+
+      const initializedLineItemCharges = salesOrder.salesOrderDetails.map(
+        (item) => {
+          const itemId = item.itemMaster.itemMasterId;
+          const itemTotal = item.unitPrice * item.quantity;
+          const availableStock = stockMap.get(itemId) || 0;
+
+          const appliedCharges = chargesAndDeductionsApplied.filter(
+            (charge) => charge.lineItemId === itemId
+          );
+
+          const appliedChargesMap = new Map(
+            appliedCharges.map((charge) => {
+              let value;
+              const appliedVal = charge.appliedValue;
+              const chargeDef = charge.chargesAndDeduction;
+
+              if (chargeDef.displayName === "SSL") {
+                value = (appliedVal / (itemTotal + appliedVal)) * 100;
+              } else if (chargeDef.percentage !== null) {
+                value = (Math.abs(appliedVal) / itemTotal) * 100;
+              } else {
+                value = Math.abs(appliedVal);
+              }
+
+              return [
+                chargeDef.displayName,
+                {
+                  id: chargeDef.chargesAndDeductionId,
+                  name: chargeDef.displayName,
+                  value: value.toFixed(2),
+                  sign: chargeDef.sign,
+                  isPercentage: chargeDef.percentage !== null,
+                  chargesAndDeductionAppliedId:
+                    charge.chargesAndDeductionAppliedId,
+                },
+              ];
+            })
+          );
+
+          const sortedLineItemCharges = lineItemChargesLookup.map(
+            (charge) => appliedChargesMap.get(charge.displayName) || null
+          );
+
+          // NEW: Store original charges for this item
+          originalChargesMap.set(
+            itemId,
+            JSON.parse(JSON.stringify(sortedLineItemCharges))
+          );
+
+          return {
+            id: itemId,
+            name: item.itemMaster.itemName,
+            unit: item.itemMaster.unit.unitName,
+            batchId: null,
+            stockInHand: availableStock,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            totalPrice: item.totalPrice,
+            isInventoryItem: item?.itemMaster?.isInventoryItem,
+            packSize: item?.itemMaster?.conversionRate || 1,
+            chargesAndDeductions: sortedLineItemCharges,
+          };
+        }
+      );
+
+      const initializedCommonCharges = chargesAndDeductionsApplied
+        .filter((charge) => !charge.lineItemId)
+        .map((charge) => {
+          const chargeDef = charge.chargesAndDeduction;
+          const value =
+            chargeDef.percentage !== null
+              ? (Math.abs(charge.appliedValue) / subTotal) * 100
+              : Math.abs(charge.appliedValue);
+
+          return {
+            id: chargeDef.chargesAndDeductionId,
+            name: chargeDef.displayName,
+            value: value.toFixed(2),
+            sign: chargeDef.sign,
+            isPercentage: chargeDef.percentage !== null,
+            chargesAndDeductionAppliedId: charge.chargesAndDeductionAppliedId,
+          };
+        });
+
+      // NEW: Store original charges in state
+      setOriginalLineItemCharges(originalChargesMap);
+
+      setFormData((prev) => ({
+        ...prev,
+        selectedCustomer: salesOrder.customer,
+        itemDetails: initializedLineItemCharges,
+        salesOrderId: salesOrder.salesOrderId,
+        commonChargesAndDeductions: initializedCommonCharges,
+      }));
+    };
+
+    initializeData();
   }, [
     salesOrder,
     isChargesAndDeductionsAppliedLoading,
@@ -1070,9 +1492,69 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     isLoadingchargesAndDeductions,
     chargesAndDeductions,
     lineItemChargesLookup,
+    formData.storeLocation,
   ]);
 
-  console.log("Form data: ", formData);
+  // NEW: Effect to detect if line item charges have changed
+  useEffect(() => {
+    if (!salesOrder || originalLineItemCharges.size === 0) {
+      setHasLineItemChargesChanged(false);
+      return;
+    }
+
+    let hasChanged = false;
+
+    for (const item of formData.itemDetails) {
+      const originalCharges = originalLineItemCharges.get(item.id);
+      if (!originalCharges) continue;
+
+      if (compareCharges(originalCharges, item.chargesAndDeductions)) {
+        hasChanged = true;
+        break;
+      }
+    }
+
+    setHasLineItemChargesChanged(hasChanged);
+  }, [
+    formData.itemDetails,
+    originalLineItemCharges,
+    salesOrder,
+    compareCharges,
+  ]);
+
+  useEffect(() => {
+    if (!salesOrder || !formData.selectedCustomer) {
+      setCreditMismatchDetails({
+        hasLimitMismatch: false,
+        hasDurationMismatch: false,
+        originalLimit: null,
+        currentLimit: null,
+        originalDuration: null,
+        currentDuration: null,
+      });
+      return;
+    }
+
+    const currentCreditLimit = formData.selectedCustomer.creditLimit;
+    const currentCreditDuration = formData.selectedCustomer.creditDuration;
+    const orderCreditLimit = salesOrder.customerCreditLimitAtOrder;
+    const orderCreditDuration = salesOrder.customerCreditDurationAtOrder;
+
+    const hasLimitMismatch = currentCreditLimit !== orderCreditLimit;
+    const hasDurationMismatch = currentCreditDuration !== orderCreditDuration;
+
+    setCreditMismatchDetails({
+      hasLimitMismatch,
+      hasDurationMismatch,
+      originalLimit: orderCreditLimit,
+      currentLimit: currentCreditLimit,
+      originalDuration: orderCreditDuration,
+      currentDuration: currentCreditDuration,
+    });
+  }, [salesOrder, formData.selectedCustomer]);
+
+  // console.log("Form data: ", formData);
+  // console.log("hasLineItemChargesChanged:", hasLineItemChargesChanged);
 
   return {
     formData,
@@ -1105,6 +1587,8 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     customerSearchTerm,
     isCustomersLoading,
     isCustomersError,
+    hasLineItemChargesChanged,
+    creditMismatchDetails,
     handleCustomerSelect,
     handleResetCustomer,
     refetchCustomers,

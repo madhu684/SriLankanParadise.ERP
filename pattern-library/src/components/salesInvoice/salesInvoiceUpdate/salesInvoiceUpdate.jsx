@@ -8,7 +8,6 @@ import useFormatCurrency from "../helperMethods/useFormatCurrency";
 
 const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
   const {
-    salesOrder,
     formData,
     submissionStatus,
     validFields,
@@ -63,6 +62,8 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
       handleUpdated();
     },
   });
+
+  const { salesOrder } = salesInvoice;
 
   const formatCurrency = useFormatCurrency();
   const formatTotals = useFormatCurrency({ showCurrency: false });
@@ -195,33 +196,6 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
 
                 <div className="mb-3">
                   <label
-                    htmlFor="referenceNumber"
-                    className="form-label fw-semibold"
-                  >
-                    Reference Number
-                  </label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      validFields.referenceNumber ? "is-valid" : ""
-                    } ${validationErrors.referenceNumber ? "is-invalid" : ""}`}
-                    id="referenceNumber"
-                    placeholder="Enter reference number"
-                    value={formData.refNo}
-                    onChange={(e) =>
-                      handleInputChange("referenceNumber", e.target.value)
-                    }
-                    disabled
-                  />
-                  {validationErrors.referenceNumber && (
-                    <div className="invalid-feedback">
-                      {validationErrors.referenceNumber}
-                    </div>
-                  )}
-                </div>
-
-                <div className="mb-0">
-                  <label
                     htmlFor="storeLocation"
                     className="form-label fw-semibold"
                   >
@@ -255,6 +229,26 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                     </div>
                   )}
                 </div>
+
+                <div className="mb-0">
+                  <label htmlFor="remarks" className="form-label fw-semibold">
+                    Remarks
+                  </label>
+                  <textarea
+                    type="text"
+                    // className={`form-control ${
+                    //   validFields.remarks ? "is-valid" : ""
+                    // } ${validationErrors.remarks ? "is-invalid" : ""}`}
+                    className="form-control"
+                    id="remarks"
+                    placeholder="Enter remarks (Min. 150 words)"
+                    value={formData.remarks}
+                    onChange={(e) =>
+                      handleInputChange("remarks", e.target.value)
+                    }
+                    maxLength={150}
+                  />
+                </div>
               </div>
             </div>
 
@@ -268,35 +262,58 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
               </div>
               <div className="card-body">
                 {salesOrder ? (
-                  <div className="bg-light p-3 rounded">
-                    <div className="row g-2">
-                      <div className="col-12">
-                        <small className="text-muted">Reference No:</small>
-                        <p className="mb-2 fw-semibold">
-                          {salesOrder.referenceNo}
-                        </p>
-                      </div>
+                  <div>
+                    {/* Reference Number - Prominent Display */}
+                    <div className="mb-3 pb-3 border-bottom">
+                      <small className="text-muted d-block mb-1 fw-semibold">
+                        Reference No:
+                      </small>
+                      <h4 className="mb-0 fw-bold text-dark">
+                        {salesOrder.referenceNo}
+                      </h4>
+                    </div>
+
+                    {/* Dates Section - Two Columns */}
+                    <div className="row g-3 mb-3">
                       <div className="col-6">
-                        <small className="text-muted">Order Date:</small>
-                        <p className="mb-2">
+                        <small className="text-muted d-block mb-2 fw-semibold">
+                          <i className="bi bi-calendar3 me-1"></i>Order Date
+                        </small>
+                        <p className="mb-0 fs-6 fw-semibold text-dark">
                           {salesOrder.orderDate?.split("T")[0] ?? ""}
                         </p>
                       </div>
                       <div className="col-6">
-                        <small className="text-muted">Delivery Date:</small>
-                        <p className="mb-2">
+                        <small className="text-muted d-block mb-2 fw-semibold">
+                          <i className="bi bi-calendar-check me-1"></i>Delivery
+                          Date
+                        </small>
+                        <p className="mb-0 fs-6 fw-semibold text-dark">
                           {salesOrder.deliveryDate?.split("T")[0] ?? ""}
                         </p>
                       </div>
-                      <div className="col-12">
-                        <small className="text-muted">Order Type:</small>
-                        <p className="mb-0">
-                          <span className="badge bg-info">
-                            {salesOrder.customerId !== null
-                              ? "Customer Order"
-                              : "Direct Order"}
-                          </span>
-                        </p>
+                    </div>
+                    <div className="row g-3 mb-3">
+                      <div className="col-6">
+                        <small className="text-muted d-block mb-2 fw-semibold">
+                          Order Type
+                        </small>
+                        <span className="badge rounded-pill bg-info text-dark px-3 py-2 fs-6">
+                          <i className="bi bi-tag-fill me-1"></i>
+                          {salesOrder.customerId !== null
+                            ? "Customer Order"
+                            : "Direct Order"}
+                        </span>
+                      </div>
+                      <div className="col-6">
+                        <small className="text-muted d-block mb-2 fw-semibold">
+                          <i className="bi bi-bookmark-plus me-1"></i>Customer
+                          Po Number
+                        </small>
+                        <span className="badge rounded-pill bg-secondary text-dark px-3 py-2 fs-6">
+                          <i className="bi bi-tag-fill me-1"></i>
+                          {salesOrder.customerPoNumber ?? "N/A"}
+                        </span>
                       </div>
                     </div>
                   </div>

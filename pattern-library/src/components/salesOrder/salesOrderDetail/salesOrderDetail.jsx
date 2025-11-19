@@ -366,7 +366,7 @@ const SalesOrderDetail = ({ show, handleClose, salesOrder }) => {
                                 className="text-end"
                               ></td>
                               <th className="text-end">
-                                {charge.chargesAndDeduction.sign}{" "}
+                                {/* {charge.chargesAndDeduction.sign}{" "} */}
                                 {charge.chargesAndDeduction.displayName}
                               </th>
                               <td className="text-end fw-semibold">

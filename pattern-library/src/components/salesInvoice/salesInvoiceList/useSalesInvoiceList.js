@@ -32,7 +32,7 @@ const useSalesInvoiceList = () => {
       const response = await get_sales_invoices_with_out_drafts_api(companyId);
       return response.data.result || [];
     },
-    enabled: !companyId,
+    enabled: !!companyId,
   });
 
   const handleShowApproveSIModal = () => {

@@ -19,6 +19,7 @@ const SalesOrderUpdate = ({
     formData,
     customers,
     salesPersons,
+    userLocations,
     submissionStatus,
     validFields,
     validationErrors,
@@ -119,7 +120,6 @@ const SalesOrderUpdate = ({
         </div>
         <h1 className="text-center mb-3 fw-bold">Sales Order Update</h1>
         <hr className="mb-4" />
-        <hr />
       </div>
 
       {/* Display success or error messages */}
@@ -388,6 +388,44 @@ const SalesOrderUpdate = ({
                 </h5>
               </div>
               <div className="card-body">
+                <div className="mb-3">
+                  <label
+                    htmlFor="storeLocation"
+                    className="form-label fw-semibold"
+                  >
+                    Store Location <span className="text-danger">*</span>
+                  </label>
+                  <select
+                    className={`form-select ${
+                      validFields.storeLocation ? "is-valid" : ""
+                    } ${validationErrors.storeLocation ? "is-invalid" : ""}`}
+                    id="storeLocation"
+                    value={formData?.storeLocation ?? ""}
+                    onChange={(e) =>
+                      handleInputChange(
+                        "storeLocation",
+                        parseInt(e.target.value)
+                      )
+                    }
+                  >
+                    <option value="">Select Location</option>
+                    {userLocations && userLocations != null
+                      ? userLocations.map((location) => (
+                          <option
+                            key={location.location.locationId}
+                            value={location.location.locationId}
+                          >
+                            {location.location.locationName}
+                          </option>
+                        ))
+                      : ""}
+                  </select>
+                  {validationErrors.storeLocation && (
+                    <div className="invalid-feedback">
+                      {validationErrors.storeLocation}
+                    </div>
+                  )}
+                </div>
                 <div className="row g-3">
                   <div className="col-12 col-md-6 mb-3">
                     <label
@@ -794,8 +832,9 @@ const SalesOrderUpdate = ({
                         <td className="text-end">
                           {formatTotals(item.unitPrice.toFixed(2))}
                         </td>
-                        {item.chargesAndDeductions.map(
-                          (charge, chargeIndex) => (
+                        {item.chargesAndDeductions
+                          ?.filter((charge) => charge != null)
+                          .map((charge, chargeIndex) => (
                             <td key={chargeIndex}>
                               <input
                                 className="form-control"
@@ -825,8 +864,7 @@ const SalesOrderUpdate = ({
                                 }}
                               />
                             </td>
-                          )
-                        )}
+                          ))}
                         <td className="text-end fw-semibold">
                           {formatTotals(item.totalPrice.toFixed(2))}
                         </td>
@@ -844,33 +882,39 @@ const SalesOrderUpdate = ({
                     ))}
                   </tbody>
                   <tfoot className="table-light">
-                    <tr>
-                      <td
-                        colSpan={
-                          6 +
-                          formData.itemDetails[0].chargesAndDeductions.length -
-                          (company.batchStockType === "FIFO" ? 1 : 0)
-                        }
-                      ></td>
-                      <th className="text-end">Sub Total</th>
-                      <td className="text-end fw-bold">
-                        {formatTotals(calculateSubTotal().toFixed(2))}
-                      </td>
-                    </tr>
-                    {renderSubColumns()}
-                    <tr className="table-primary">
-                      <td
-                        colSpan={
-                          6 +
-                          formData.itemDetails[0].chargesAndDeductions.length -
-                          (company.batchStockType === "FIFO" ? 1 : 0)
-                        }
-                      ></td>
-                      <th className="text-end fs-6">Total Amount</th>
-                      <td className="text-end fw-bold fs-6">
-                        {formatTotals(calculateTotalAmount().toFixed(2))}
-                      </td>
-                    </tr>
+                    {formData.itemDetails.length > 0 && (
+                      <>
+                        <tr>
+                          <td
+                            colSpan={
+                              6 +
+                              formData.itemDetails[0].chargesAndDeductions
+                                .length -
+                              (company.batchStockType === "FIFO" ? 1 : 0)
+                            }
+                          ></td>
+                          <th className="text-end">Sub Total</th>
+                          <td className="text-end fw-bold">
+                            {formatTotals(calculateSubTotal().toFixed(2))}
+                          </td>
+                        </tr>
+                        {renderSubColumns()}
+                        <tr className="table-primary">
+                          <td
+                            colSpan={
+                              6 +
+                              formData.itemDetails[0].chargesAndDeductions
+                                .length -
+                              (company.batchStockType === "FIFO" ? 1 : 0)
+                            }
+                          ></td>
+                          <th className="text-end fs-6">Total Amount</th>
+                          <td className="text-end fw-bold fs-6">
+                            {formatTotals(calculateTotalAmount().toFixed(2))}
+                          </td>
+                        </tr>
+                      </>
+                    )}
                   </tfoot>
                 </table>
               </div>

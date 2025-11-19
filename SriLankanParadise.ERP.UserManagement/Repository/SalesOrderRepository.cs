@@ -63,6 +63,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         .ThenInclude(im => im.ItemMaster)
                         .ThenInclude(im => im.Unit)
                     .Include(so => so.Customer)
+                        .ThenInclude(cu => cu.CustomerDeliveryAddress)
                     .ToListAsync();
 
                 return salesOrders.Any() ? salesOrders : null;

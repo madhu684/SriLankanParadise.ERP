@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import {
   approve_sales_invoice_api,
+  approve_sales_order_api,
   update_outstanding_balance_api,
 } from "../../../services/salesApi";
 import {
@@ -13,12 +14,15 @@ import toast from "react-hot-toast";
 
 const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
+  const [showFullRemarks, setShowFullRemarks] = useState(false);
   const [loading, setLoading] = useState(false);
   const alertRef = useRef(null);
 
   const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
 
   const queryClient = useQueryClient();
+
+  const { salesOrder } = salesInvoice;
 
   useEffect(() => {
     if (approvalStatus === "approved") {
@@ -28,20 +32,44 @@ const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
     }
   }, [approvalStatus, onFormSubmit]);
 
-  console.log(salesInvoice);
+  console.log(salesOrder);
 
-  const updateCustomer = async (customerId, movementTypeId, formData) => {
+  const updateCustomer = useCallback(
+    async (customerId, movementTypeId, formData) => {
+      try {
+        const response = await update_outstanding_balance_api(
+          customerId,
+          movementTypeId,
+          formData
+        );
+        return response;
+      } catch (error) {
+        console.error("Error fetching charges and deductions:", error);
+      }
+    },
+    []
+  );
+
+  const updateSalesOrder = useCallback(async () => {
+    const approvalData = {
+      status: 5,
+      approvedBy: salesOrder.approvedBy,
+      approvedUserId: salesOrder.approvedUserId,
+      approvedDate: salesOrder.approvedDate,
+      permissionId: 26,
+    };
+
     try {
-      const response = await update_outstanding_balance_api(
-        customerId,
-        movementTypeId,
-        formData
+      const approvalResponse = await approve_sales_order_api(
+        salesOrder.salesOrderId,
+        approvalData
       );
-      return response;
+      queryClient.invalidateQueries(["salesOrders", companyId]);
+      return approvalResponse;
     } catch (error) {
       console.error("Error fetching charges and deductions:", error);
     }
-  };
+  }, [salesOrder]);
 
   const handleApprove = async (salesInvoiceId) => {
     try {
@@ -79,7 +107,12 @@ const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
             { outstandingAmount: salesInvoice.totalAmount }
           );
 
-          if (customerResponse.status === 200) {
+          const salesOrderResponse = await updateSalesOrder();
+
+          if (
+            customerResponse.status === 200 &&
+            salesOrderResponse.status === 200
+          ) {
             setApprovalStatus("approved");
             toast.success("Sales invoice approved successfully");
           } else {
@@ -243,6 +276,8 @@ const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
     isCompanyLoading,
     isCompanyError,
     company,
+    showFullRemarks,
+    setShowFullRemarks,
     renderSalesInvoiceDetails,
     calculateSubTotal,
     handleApprove,
