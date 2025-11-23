@@ -27,6 +27,23 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
+        public async Task ChangeStatus(int id, ItemPriceMaster itemPriceMaster)
+        {
+            try
+            {
+                var existingItemPriceMaster = await _dbContext.ItemPriceMasters.FindAsync(id);
+                if (existingItemPriceMaster != null)
+                {
+                    existingItemPriceMaster.Status = itemPriceMaster.Status;
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<IEnumerable<ItemPriceMaster>> GetItemPriceMasterByCompanyId(int companyId)
         {
             try
@@ -34,6 +51,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var itemPriceMasters = await _dbContext.ItemPriceMasters
                     .Where(ipm => ipm.CompanyId == companyId)
                     .Include(ipm => ipm.ItemPriceDetails)
+                        .ThenInclude(ipd => ipd.ItemMaster)
                     .ToListAsync();
 
                 return itemPriceMasters.Any() ? itemPriceMasters : null!;
@@ -53,6 +71,23 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .FirstOrDefaultAsync(ipm => ipm.Id == id);
 
                 return itemPriceMaster!;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task UpdateItemPriceMaster(int id, ItemPriceMaster itemPriceMaster)
+        {
+            try
+            {
+                var existingItemPriceMaster = await _dbContext.ItemPriceMasters.FindAsync(id);
+                if (existingItemPriceMaster != null)
+                {
+                    _dbContext.Entry(existingItemPriceMaster).CurrentValues.SetValues(itemPriceMaster);
+                    await _dbContext.SaveChangesAsync();
+                }
             }
             catch (Exception)
             {

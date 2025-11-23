@@ -268,7 +268,6 @@ const useLocationUpdate = ({ location, onFormSubmit }) => {
         setLoading(false);
       }, 2000);
     }
-    toast.error("Failed to update location.");
   };
 
   const handleInputChange = (field, value) => {

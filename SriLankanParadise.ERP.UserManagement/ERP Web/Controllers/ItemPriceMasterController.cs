@@ -124,5 +124,60 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpPut("{id}")]
+        public async Task<ApiResponseModel> UpdateItemPriceMaster(int id, ItemPriceMasterRequestModel requestModel)
+        {
+            try
+            {
+                var existingItemPriceMaster = await _itemPriceMasterService.GetItemPriceMasterById(id);
+                if (existingItemPriceMaster == null)
+                {
+                    _logger.LogWarning(LogMessages.ItemPriceMasterNotFound);
+                    AddResponseMessage(Response, LogMessages.ItemPriceMasterNotFound, null, false, HttpStatusCode.NotFound);
+                    return Response;
+                }
+
+                var updatedItemPriceMaster = _mapper.Map<ItemPriceMaster>(requestModel);
+                updatedItemPriceMaster.Id = id;
+
+                await _itemPriceMasterService.UpdateItemPriceMaster(existingItemPriceMaster.Id, updatedItemPriceMaster);
+
+                _logger.LogInformation(LogMessages.ItemPriceMasterUpdated);
+                AddResponseMessage(Response, LogMessages.ItemPriceMasterUpdated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpPatch("ChangeStatus/{id}")]
+        public async Task<ApiResponseModel> ChangeStatus(int id, ItemPriceMasterStatusChangeRequestModel requestModel)
+        {
+            try
+            {
+                var existingItemPriceMaster = await _itemPriceMasterService.GetItemPriceMasterById(id);
+                if (existingItemPriceMaster == null)
+                {
+                    _logger.LogWarning(LogMessages.ItemPriceMasterNotFound);
+                    AddResponseMessage(Response, LogMessages.ItemPriceMasterNotFound, null, false, HttpStatusCode.NotFound);
+                    return Response;
+                }
+                var itemPriceMasterToUpdate = _mapper.Map<ItemPriceMaster>(requestModel);
+
+                await _itemPriceMasterService.ChangeStatus(existingItemPriceMaster.Id, itemPriceMasterToUpdate);
+                _logger.LogInformation(LogMessages.ItemPriceMasterStatusChanged);
+                AddResponseMessage(Response, LogMessages.ItemPriceMasterStatusChanged, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

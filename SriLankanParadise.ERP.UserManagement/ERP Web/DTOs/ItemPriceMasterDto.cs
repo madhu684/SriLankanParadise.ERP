@@ -10,6 +10,7 @@
         public string CreatedBy { get; set; }
         public int CreatedUserId { get; set; }
         public DateTime CreatedDate { get; set; }
+        public string? Remark { get; set; }
         public List<ItemPriceDetailDto>? ItemPriceDetails { get; set; }
     }
 }

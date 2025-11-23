@@ -27,6 +27,23 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
+        public async Task DeleteItemPriceDetail(int id)
+        {
+            try
+            {
+                var itemPriceDetail = await _dbContext.ItemPriceDetails.FindAsync(id);
+                if (itemPriceDetail != null)
+                {
+                    _dbContext.ItemPriceDetails.Remove(itemPriceDetail);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<ItemPriceDetail> GetById(int id)
         {
             try
@@ -51,6 +68,22 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ToListAsync();
 
                 return itemPriceDetails.Any() ? itemPriceDetails : null!;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task UpdateItemPriceDetail(int id, ItemPriceDetail itemPriceDetail)
+        {
+            try
+            {
+                var existItemPriceDetail = await _dbContext.ItemPriceDetails.FindAsync(id);
+                if (existItemPriceDetail != null) {
+                    _dbContext.Entry(existItemPriceDetail).CurrentValues.SetValues(itemPriceDetail);
+                    await _dbContext.SaveChangesAsync();
+                }
             }
             catch (Exception)
             {

@@ -97,5 +97,59 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpPut("{id}")]
+        public async Task<ApiResponseModel> UpdateItemPriceDetail(int id, ItemPriceDetailRequestModel requestModel)
+        {
+            try
+            {
+                var existingItemPriceDetail = await _itemPriceDetailService.GetById(id);
+                if (existingItemPriceDetail == null)
+                {
+                    _logger.LogWarning(LogMessages.ItemPriceDetailNotFound);
+                    AddResponseMessage(Response, LogMessages.ItemPriceDetailNotFound, null, false, HttpStatusCode.NotFound);
+                    return Response;
+                }
+
+                var updatedItemPriceDetail = _mapper.Map<ItemPriceDetail>(requestModel);
+                updatedItemPriceDetail.Id = id;
+
+                await _itemPriceDetailService.UpdateItemPriceDetail(existingItemPriceDetail.Id, updatedItemPriceDetail);
+
+                _logger.LogInformation(LogMessages.ItemPriceDetailUpdated);
+                AddResponseMessage(Response, LogMessages.ItemPriceDetailUpdated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ApiResponseModel> DeleteItemPriceDetail(int id)
+        {
+            try
+            {
+                var existingItemPriceDetail = await _itemPriceDetailService.GetById(id);
+                if (existingItemPriceDetail == null)
+                {
+                    _logger.LogWarning(LogMessages.ItemPriceDetailNotFound);
+                    AddResponseMessage(Response, LogMessages.ItemPriceDetailNotFound, null, false, HttpStatusCode.NotFound);
+                    return Response;
+                }
+
+                await _itemPriceDetailService.DeleteItemPriceDetail(id);
+                _logger.LogInformation(LogMessages.ItemPriceDetailDeleted);
+                AddResponseMessage(Response, LogMessages.ItemPriceDetailDeleted, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

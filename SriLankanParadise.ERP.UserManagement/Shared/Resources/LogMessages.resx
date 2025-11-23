@@ -1113,4 +1113,16 @@
   <data name="CashierSessionRetrieved" xml:space="preserve">
     <value>Cashier session retrieved</value>
   </data>
+  <data name="ItemPriceMasterUpdated" xml:space="preserve">
+    <value>Item price master updated successfully</value>
+  </data>
+  <data name="ItemPriceMasterStatusChanged" xml:space="preserve">
+    <value>Item price master status changed successfully</value>
+  </data>
+  <data name="ItemPriceDetailUpdated" xml:space="preserve">
+    <value>Item price detail updated successfully</value>
+  </data>
+  <data name="ItemPriceDetailDeleted" xml:space="preserve">
+    <value>Item price detail deleted successfully</value>
+  </data>
 </root>
