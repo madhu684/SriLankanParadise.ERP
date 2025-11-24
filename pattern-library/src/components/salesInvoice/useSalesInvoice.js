@@ -23,6 +23,7 @@ import {
 } from "../../services/inventoryApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   const [formData, setFormData] = useState({
@@ -70,6 +71,8 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   });
 
   const queryClient = useQueryClient();
+
+  const navigate = useNavigate();
 
   // ==================== Memorized Values ====================
   const userId = sessionStorage.getItem("userId");
@@ -1047,6 +1050,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         setLoading(false);
         setLoadingDraft(false);
         onFormSubmit();
+        navigate("/main/sales/invoices");
         resolve();
       }, 3000);
     });

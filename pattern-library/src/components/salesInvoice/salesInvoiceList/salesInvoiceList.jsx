@@ -110,8 +110,11 @@ const SalesInvoiceList = () => {
           className="d-flex flex-column justify-content-center align-items-center text-center vh-100"
           style={{ maxHeight: "80vh" }}
         >
-          <p>You haven't created any sales invoice. Create a new one.</p>
-          {hasPermission("Create Sales Invoice") && (
+          <p>
+            You haven't created any sales invoice. Create a new one through a
+            Sales Requisition.
+          </p>
+          {/* {hasPermission("Create Sales Invoice") && (
             <button
               type="button"
               className="btn btn-primary"
@@ -119,7 +122,7 @@ const SalesInvoiceList = () => {
             >
               Create
             </button>
-          )}
+          )} */}
         </div>
       </div>
     );
@@ -130,7 +133,7 @@ const SalesInvoiceList = () => {
       <h2>Sales Invoices</h2>
       <div className="mt-3 d-flex justify-content-start align-items-center">
         <div className="btn-group" role="group">
-          {hasPermission("Create Sales Invoice") && (
+          {/* {hasPermission("Create Sales Invoice") && (
             <button
               type="button"
               className="btn btn-primary"
@@ -138,7 +141,7 @@ const SalesInvoiceList = () => {
             >
               Create
             </button>
-          )}
+          )} */}
           {hasPermission("Approve Sales Invoice") &&
             selectedRowData[0]?.createdUserId !==
               parseInt(sessionStorage.getItem("userId")) &&

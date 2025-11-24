@@ -1,4 +1,3 @@
-// src/components/menu/menu.jsx
 import React from "react";
 import "./menu.css";
 import userImage from "../../assets/images/person-circle.svg";
@@ -6,15 +5,14 @@ import CompanyImage from "../../assets/images/logo_small.png";
 import useMenu from "./useMenu";
 
 function Menu({
-  activeSubmodule,
   isSidebarOpen: propSidebarOpen,
   isSmallScreen,
   onToggleSidebar,
-  onSubmoduleClick,
 }) {
   const {
     modules,
     activeModules,
+    activeSubmodule,
     isDropdownOpen,
     username,
     companyName,
@@ -25,11 +23,9 @@ function Menu({
     toggleDropdown,
     handleLogout,
   } = useMenu({
-    activeSubmodule,
     isSidebarOpen: propSidebarOpen,
     isSmallScreen,
     onToggleSidebar,
-    onSubmoduleClick,
   });
 
   return (
@@ -79,7 +75,10 @@ function Menu({
                         ? "nav-link-active text-light"
                         : "text-dark"
                     }`}
-                    onClick={() => handleModuleClick(module.id)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleModuleClick(module.id);
+                    }}
                     data-bs-toggle="collapse"
                     data-bs-target={`#submodulesCollapse${module.id}`}
                     aria-expanded={activeModules.includes(module.id)}
@@ -89,18 +88,20 @@ function Menu({
 
                   {module.submodules.length > 0 && (
                     <div
-                      className="collapse"
+                      className={`collapse ${
+                        activeModules.includes(module.id) ? "show" : ""
+                      }`}
                       id={`submodulesCollapse${module.id}`}
                     >
                       <ul className="list-unstyled ps-2 submodule-list">
                         {module.submodules.map((submodule) => (
                           <li key={submodule.id}>
                             <a
-                              href={`#${submodule.name.toLowerCase()}`}
+                              href="#"
                               className="nav-link link-dark smaller-text"
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.preventDefault();
                                 handleSubmoduleClick(module.id, submodule.name);
-                                if (isSmallScreen) onToggleSidebar();
                               }}
                             >
                               <span
