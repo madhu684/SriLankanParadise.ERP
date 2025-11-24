@@ -1,13 +1,15 @@
 ﻿using AutoMapper;
-using System.Net;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using SriLankanParadise.ERP.UserManagement.Business_Service;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Shared.Resources;
-using SriLankanParadise.ERP.UserManagement.Business_Service;
+using System.Net;
 
 namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 {
@@ -43,20 +45,16 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 var grnMaster = _mapper.Map<GrnMaster>(grnMasterRequest);
                 await _grnMasterService.AddGrnMaster(grnMaster);
 
-                // Create action log
-                //var actionLog = new ActionLogModel()
-                //{
-                //    ActionId = grnMasterRequest.PermissionId,
-                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                //    Timestamp = DateTime.UtcNow
-                //};
-                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
-
                 // send response
                 var grnMasterDto = _mapper.Map<GrnMasterDto>(grnMaster);
                 _logger.LogInformation(LogMessages.GrnMasterCreated);
                 AddResponseMessage(Response, LogMessages.GrnMasterCreated, grnMasterDto, true, HttpStatusCode.Created);
+            }
+            catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex, "UK_GrnMaster_CustDekNo") ||
+                                       IsUniqueConstraintViolation(ex, "IX_GrnMaster_CustDekNo_Unique"))
+            {
+                _logger.LogWarning(ex, "Attempt to create duplicate CustDekNo: {CustDekNo}", grnMasterRequest.CustDekNo);
+                AddResponseMessage(Response, "CustDekNo already exists. Please use a unique value.", null, false, HttpStatusCode.Conflict);
             }
             catch (Exception ex)
             {
@@ -214,16 +212,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                 await _grnMasterService.UpdateGrnMaster(existingGrnMaster.GrnMasterId, updatedGrnMaster);
 
-                // Create action log
-                //var actionLog = new ActionLogModel()
-                //{
-                //    ActionId = grnMasterRequest.PermissionId,
-                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                //    Timestamp = DateTime.UtcNow
-                //};
-                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
-
                 _logger.LogInformation(LogMessages.GrnMasterUpdated);
                 return AddResponseMessage(Response, LogMessages.GrnMasterUpdated, null, true, HttpStatusCode.OK);
             }
@@ -257,6 +245,16 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
             return Response;
+        }
+
+
+
+        private bool IsUniqueConstraintViolation(DbUpdateException ex, string constraintName)
+        {
+            // SQL Server error number for unique violation is 2601 or 2627
+            return ex.InnerException is SqlException sqlEx &&
+                   (sqlEx.Number == 2601 || sqlEx.Number == 2627) &&
+                   sqlEx.Message.Contains(constraintName);
         }
 
     }

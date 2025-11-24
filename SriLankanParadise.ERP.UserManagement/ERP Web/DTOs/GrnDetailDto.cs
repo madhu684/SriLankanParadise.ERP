@@ -28,5 +28,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public DateTime? ExpiryDate { get; set; }
 
+        public string? RejectedReason { get; set; }
+
     }
 }

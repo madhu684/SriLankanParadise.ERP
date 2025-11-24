@@ -63,9 +63,9 @@ const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
                   <small className="text-dark">
                     Reference: {grn?.referenceNo || "N/A"}
                   </small> */}
-                  <h5 className="mb-1 text-dark fw-bold">Reference No: </h5>
+                  <h5 className="mb-1 text-dark fw-bold">Cust Deck No: </h5>
                   <small className="text-dark fw-semibold">
-                    {grn?.referenceNo || "N/A"}
+                    {grn?.custDekNo || "N/A"}
                   </small>
                 </div>
                 <div className="text-end">
@@ -231,84 +231,111 @@ const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
                     <tbody>
                       {modGrn &&
                         modGrn.grnDetails.map((item, index) => (
-                          <tr key={index}>
-                            <td className="fw-semibold">
-                              {item.item?.itemName}
-                            </td>
-                            <td>
-                              <span className="badge bg-secondary bg-opacity-25 text-dark">
-                                {item.item?.unit.unitName}
-                              </span>
-                            </td>
-                            <td className="text-end">
-                              {item.receivedQuantity}
-                            </td>
-                            <td className="text-end">
-                              {item.rejectedQuantity > 0 ? (
-                                <span className="text-danger fw-semibold">
-                                  {item.rejectedQuantity}
+                          <React.Fragment key={index}>
+                            <tr>
+                              <td className="fw-semibold">
+                                {item.item?.itemName}
+                              </td>
+                              <td>
+                                <span className="badge bg-secondary bg-opacity-25 text-dark">
+                                  {item.item?.unit.unitName}
                                 </span>
-                              ) : (
-                                item.rejectedQuantity
-                              )}
-                            </td>
-                            <td className="text-end">
-                              {item.freeQuantity > 0 ? (
-                                <span className="text-success fw-semibold">
-                                  {item.freeQuantity}
-                                </span>
-                              ) : (
-                                item.freeQuantity
-                              )}
-                            </td>
-                            <td className="text-nowrap">
-                              {item.expiryDate.split("T")[0]}
-                            </td>
-                            <td className="text-end fw-semibold">
-                              {item.unitPrice.toFixed(2)}
-                            </td>
-                            <td
-                              className="bg-warning bg-opacity-5"
-                              style={{ width: "140px" }}
-                            >
-                              <div className="input-group input-group-sm">
-                                {/* <span className="input-group-text">$</span> */}
-                                <input
-                                  type="number"
-                                  className="form-control form-control-sm text-end"
-                                  value={item.costPrice}
-                                  onChange={(e) =>
-                                    handleCostPriceChange(e.target.value, index)
-                                  }
-                                  step="0.01"
-                                  min="0"
-                                  disabled={loading || approvalStatus !== null}
-                                />
-                              </div>
-                            </td>
-                            <td
-                              className="bg-success bg-opacity-5"
-                              style={{ width: "140px" }}
-                            >
-                              <div className="input-group input-group-sm">
-                                {/* <span className="input-group-text">$</span> */}
-                                <input
-                                  type="number"
-                                  className="form-control form-control-sm text-end"
-                                  value={item.sellingPrice}
-                                  onChange={(e) =>
-                                    handleSellingPriceChange(
-                                      e.target.value,
-                                      index
-                                    )
-                                  }
-                                  step="0.01"
-                                  min="0"
-                                  disabled={loading || approvalStatus !== null}
-                                />
-                              </div>
-                            </td>
-                          </tr>
+                              </td>
+                              <td className="text-end">
+                                {item.receivedQuantity}
+                              </td>
+                              <td className="text-end">
+                                {item.rejectedQuantity > 0 ? (
+                                  <span className="text-danger fw-semibold">
+                                    {item.rejectedQuantity}
+                                  </span>
+                                ) : (
+                                  item.rejectedQuantity
+                                )}
+                              </td>
+                              <td className="text-end">
+                                {item.freeQuantity > 0 ? (
+                                  <span className="text-success fw-semibold">
+                                    {item.freeQuantity}
+                                  </span>
+                                ) : (
+                                  item.freeQuantity
+                                )}
+                              </td>
+                              <td className="text-nowrap">
+                                {item.expiryDate.split("T")[0]}
+                              </td>
+                              <td className="text-end fw-semibold">
+                                {item.unitPrice.toFixed(2)}
+                              </td>
+                              <td
+                                className="bg-warning bg-opacity-5"
+                                style={{ width: "140px" }}
+                              >
+                                <div className="input-group input-group-sm">
+                                  {/* <span className="input-group-text">$</span> */}
+                                  <input
+                                    type="number"
+                                    className="form-control form-control-sm text-end"
+                                    value={item.costPrice}
+                                    onChange={(e) =>
+                                      handleCostPriceChange(
+                                        e.target.value,
+                                        index
+                                      )
+                                    }
+                                    step="0.01"
+                                    min="0"
+                                    disabled={
+                                      loading || approvalStatus !== null
+                                    }
+                                  />
+                                </div>
+                              </td>
+                              <td
+                                className="bg-success bg-opacity-5"
+                                style={{ width: "140px" }}
+                              >
+                                <div className="input-group input-group-sm">
+                                  {/* <span className="input-group-text">$</span> */}
+                                  <input
+                                    type="number"
+                                    className="form-control form-control-sm text-end"
+                                    value={item.sellingPrice}
+                                    onChange={(e) =>
+                                      handleSellingPriceChange(
+                                        e.target.value,
+                                        index
+                                      )
+                                    }
+                                    step="0.01"
+                                    min="0"
+                                    disabled={
+                                      loading || approvalStatus !== null
+                                    }
+                                  />
+                                </div>
+                              </td>
+                            </tr>
+                            {parseFloat(item.rejectedQuantity) > 0 && (
+                              <tr>
+                                <td className="bg-light" colSpan="9">
+                                  <div className="px-2 py-2">
+                                    <label className="form-label fw-semibold mb-1 small">
+                                      <i className="bi bi-chat-left-text me-1"></i>
+                                      Rejection Reason
+                                    </label>
+                                    <input
+                                      type="text"
+                                      className="form-control form-control-sm"
+                                      value={item.rejectedReason || ""}
+                                      readOnly
+                                    />
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
                         ))}
                     </tbody>
                   </table>

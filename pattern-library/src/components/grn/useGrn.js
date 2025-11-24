@@ -20,6 +20,7 @@ const useGrn = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
     grnDate: new Date().toISOString().split("T")[0],
     receivedBy: "",
+    custdeckNo: "",
     receivedDate: "",
     itemDetails: [],
     status: "4",
@@ -430,16 +431,6 @@ const useGrn = ({ onFormSubmit }) => {
     }
   }, [submissionStatus]);
 
-  const generateRef = () => {
-    const currentDate = new Date();
-    const formattedDate = currentDate
-      .toISOString()
-      .split("T")[0]
-      .replace(/-/g, "");
-    const randomNum = Math.floor(1000 + Math.random() * 9000);
-    return `GR-${formattedDate}-${randomNum}`;
-  };
-
   const validateField = (
     fieldName,
     fieldDisplayName,
@@ -511,6 +502,12 @@ const useGrn = ({ onFormSubmit }) => {
       formData.supplierId
     );
 
+    const isCustdeckNoValid = validateField(
+      "custdeckNo",
+      "Cust Deck No",
+      formData.custdeckNo
+    );
+
     const isStatusValid = validateField("status", "Status", formData.status);
 
     let isPurchaseOrderIdValid = true;
@@ -576,6 +573,23 @@ const useGrn = ({ onFormSubmit }) => {
 
       isRejectedQuantityValid =
         isRejectedQuantityValid && isValidRejectedQuantity;
+    });
+
+    let isRejectionReasonValid = true;
+    // Validate rejection reason if rejected quantity > 0
+    formData.itemDetails.forEach((item, index) => {
+      if (parseFloat(item.rejectedQuantity) > 0) {
+        const reasonFieldName = `rejectionReason_${index}`;
+        const reasonFieldDisplayName = `Rejection Reason for ${item.name}`;
+
+        const isValidReason = validateField(
+          reasonFieldName,
+          reasonFieldDisplayName,
+          item.rejectionReason
+        );
+
+        isRejectionReasonValid = isRejectionReasonValid && isValidReason;
+      }
     });
 
     let isItemUnitPriceValid = true;
@@ -644,7 +658,9 @@ const useGrn = ({ onFormSubmit }) => {
       isItemQuantityValid &&
       isItemUnitPriceValid &&
       isRejectedQuantityValid &&
+      isRejectionReasonValid &&
       isGrnTypeValid &&
+      isCustdeckNoValid &&
       isWarehouseLocationValid &&
       (isPurchaseOrderIdValid ||
         (isPurchaseRequisitionIdValid && isSupplierValid) ||
@@ -654,8 +670,6 @@ const useGrn = ({ onFormSubmit }) => {
 
   const handleSubmit = async (isSaveAsDraft) => {
     try {
-      const grnRef = generateRef();
-
       const status = isSaveAsDraft ? 0 : 1;
 
       const combinedStatus = parseInt(`${formData.status}${status}`, 10);
@@ -695,12 +709,19 @@ const useGrn = ({ onFormSubmit }) => {
           lastUpdatedDate: currentDate,
           grnType: formData.grnType,
           warehouseLocationId: formData.warehouseLocation,
-          referenceNo: grnRef,
+          custDekNo: formData.custdeckNo,
           permissionId: 20,
         };
 
         const response = await post_grn_master_api(grnData);
         console.log("GRN Response", response);
+
+        if (response.status === 409) {
+          toast.error(response.message);
+          setLoading(false);
+          setLoadingDraft(false);
+          return;
+        }
 
         const grnMasterId = response.data.result.grnMasterId;
 
@@ -717,6 +738,7 @@ const useGrn = ({ onFormSubmit }) => {
             orderedQuantity: item.quantity,
             expiryDate: item.expiryDate,
             itemBarcode: item.itemBarcode,
+            rejectedReason: item.rejectionReason || null,
             permissionId: 20,
           };
 

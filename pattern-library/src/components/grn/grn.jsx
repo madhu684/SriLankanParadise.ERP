@@ -149,80 +149,110 @@ const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
                 </h5>
               </div>
               <div className="card-body">
-                <div className="mb-3">
-                  <label htmlFor="grnDate" className="form-label fw-semibold">
-                    GRN Date <span className="text-danger">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    className={`form-control ${
-                      validFields.grnDate ? "is-valid" : ""
-                    } ${validationErrors.grnDate ? "is-invalid" : ""}`}
-                    id="grnDate"
-                    value={formData.grnDate}
-                    onChange={(e) =>
-                      handleInputChange("grnDate", e.target.value)
-                    }
-                    required
-                  />
-                  {validationErrors.grnDate && (
-                    <div className="invalid-feedback">
-                      {validationErrors.grnDate}
-                    </div>
-                  )}
+                <div className="row g-3">
+                  <div className="col-12 col-md-6 mb-3">
+                    <label htmlFor="grnDate" className="form-label fw-semibold">
+                      GRN Date <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      className={`form-control ${
+                        validFields.grnDate ? "is-valid" : ""
+                      } ${validationErrors.grnDate ? "is-invalid" : ""}`}
+                      id="grnDate"
+                      value={formData.grnDate}
+                      onChange={(e) =>
+                        handleInputChange("grnDate", e.target.value)
+                      }
+                      required
+                    />
+                    {validationErrors.grnDate && (
+                      <div className="invalid-feedback">
+                        {validationErrors.grnDate}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="col-12 col-md-6 mb-3">
+                    <label
+                      htmlFor="receivedDate"
+                      className="form-label fw-semibold"
+                    >
+                      Received Date <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      className={`form-control ${
+                        validFields.receivedDate ? "is-valid" : ""
+                      } ${validationErrors.receivedDate ? "is-invalid" : ""}`}
+                      id="receivedDate"
+                      value={formData.receivedDate}
+                      onChange={(e) =>
+                        handleInputChange("receivedDate", e.target.value)
+                      }
+                      required
+                    />
+                    {validationErrors.receivedDate && (
+                      <div className="invalid-feedback">
+                        {validationErrors.receivedDate}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <div className="mb-3">
-                  <label
-                    htmlFor="receivedBy"
-                    className="form-label fw-semibold"
-                  >
-                    Received By <span className="text-danger">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      validFields.receivedBy ? "is-valid" : ""
-                    } ${validationErrors.receivedBy ? "is-invalid" : ""}`}
-                    id="receivedBy"
-                    placeholder="Enter name"
-                    value={formData.receivedBy}
-                    onChange={(e) =>
-                      handleInputChange("receivedBy", e.target.value)
-                    }
-                    required
-                  />
-                  {validationErrors.receivedBy && (
-                    <div className="invalid-feedback">
-                      {validationErrors.receivedBy}
-                    </div>
-                  )}
-                </div>
-
-                <div className="mb-3">
-                  <label
-                    htmlFor="receivedDate"
-                    className="form-label fw-semibold"
-                  >
-                    Received Date <span className="text-danger">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    className={`form-control ${
-                      validFields.receivedDate ? "is-valid" : ""
-                    } ${validationErrors.receivedDate ? "is-invalid" : ""}`}
-                    id="receivedDate"
-                    value={formData.receivedDate}
-                    onChange={(e) =>
-                      handleInputChange("receivedDate", e.target.value)
-                    }
-                    required
-                  />
-                  {validationErrors.receivedDate && (
-                    <div className="invalid-feedback">
-                      {validationErrors.receivedDate}
-                    </div>
-                  )}
+                <div className="row g-3">
+                  <div className="col-12 col-md-6 mb-3">
+                    <label
+                      htmlFor="custdeckNo"
+                      className="form-label fw-semibold"
+                    >
+                      Cust Deck No <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        validFields.custdeckNo ? "is-valid" : ""
+                      } ${validationErrors.custdeckNo ? "is-invalid" : ""}`}
+                      id="custdeckNo"
+                      placeholder="Eg:- S-00009"
+                      value={formData.custdeckNo}
+                      onChange={(e) =>
+                        handleInputChange("custdeckNo", e.target.value)
+                      }
+                      required
+                    />
+                    {validationErrors.custdeckNo && (
+                      <div className="invalid-feedback">
+                        {validationErrors.custdeckNo}
+                      </div>
+                    )}
+                  </div>
+                  <div className="col-12 col-md-6 mb-3">
+                    <label
+                      htmlFor="receivedBy"
+                      className="form-label fw-semibold"
+                    >
+                      Received By <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        validFields.receivedBy ? "is-valid" : ""
+                      } ${validationErrors.receivedBy ? "is-invalid" : ""}`}
+                      id="receivedBy"
+                      placeholder="Enter name"
+                      value={formData.receivedBy}
+                      onChange={(e) =>
+                        handleInputChange("receivedBy", e.target.value)
+                      }
+                      required
+                    />
+                    {validationErrors.receivedBy && (
+                      <div className="invalid-feedback">
+                        {validationErrors.receivedBy}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="mb-3">
@@ -1165,147 +1195,202 @@ const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
                       <th className="fw-semibold">Rejected Qty</th>
                       <th className="fw-semibold">Free Qty</th>
                       <th className="fw-semibold">Expiry Date</th>
-                      <th className="fw-semibold">Unit Price</th>
+                      <th className="fw-semibold">Unit Cost Price</th>
                       <th className="fw-semibold text-center">Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {formData.itemDetails.map((item, index) => (
-                      <tr key={index}>
-                        <td className="fw-medium">{item.name}</td>
-                        <td>
-                          <span className="badge bg-secondary">
-                            {item.unit}
-                          </span>
-                        </td>
-                        {!["finishedGoodsIn", "directPurchase"].includes(
-                          formData?.grnType
-                        ) && (
+                      <React.Fragment key={index}>
+                        <tr>
+                          <td className="fw-medium">{item.name}</td>
                           <td>
-                            <span className="badge bg-info">
-                              {item.quantity}
+                            <span className="badge bg-secondary">
+                              {item.unit}
                             </span>
                           </td>
+                          {!["finishedGoodsIn", "directPurchase"].includes(
+                            formData?.grnType
+                          ) && (
+                            <td>
+                              <span className="badge bg-info">
+                                {item.quantity}
+                              </span>
+                            </td>
+                          )}
+                          <td>
+                            <input
+                              type="number"
+                              className={`form-control form-control-sm ${
+                                validFields[`receivedQuantity_${index}`]
+                                  ? "is-valid"
+                                  : ""
+                              } ${
+                                validationErrors[`receivedQuantity_${index}`]
+                                  ? "is-invalid"
+                                  : ""
+                              }`}
+                              value={item.receivedQuantity}
+                              onChange={(e) =>
+                                handleItemDetailsChange(
+                                  index,
+                                  "receivedQuantity",
+                                  e.target.value
+                                )
+                              }
+                            />
+                            {validationErrors[`receivedQuantity_${index}`] && (
+                              <div className="invalid-feedback">
+                                {validationErrors[`receivedQuantity_${index}`]}
+                              </div>
+                            )}
+                          </td>
+                          <td>
+                            <input
+                              type="number"
+                              className={`form-control form-control-sm ${
+                                validFields[`rejectedQuantity_${index}`]
+                                  ? "is-valid"
+                                  : ""
+                              } ${
+                                validationErrors[`rejectedQuantity_${index}`]
+                                  ? "is-invalid"
+                                  : ""
+                              }`}
+                              value={item.rejectedQuantity}
+                              onChange={(e) =>
+                                handleItemDetailsChange(
+                                  index,
+                                  "rejectedQuantity",
+                                  e.target.value
+                                )
+                              }
+                            />
+                            {validationErrors[`rejectedQuantity_${index}`] && (
+                              <div className="invalid-feedback">
+                                {validationErrors[`rejectedQuantity_${index}`]}
+                              </div>
+                            )}
+                          </td>
+                          <td>
+                            <input
+                              type="number"
+                              className="form-control form-control-sm"
+                              value={item.freeQuantity}
+                              onChange={(e) =>
+                                handleItemDetailsChange(
+                                  index,
+                                  "freeQuantity",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="date"
+                              className="form-control form-control-sm"
+                              value={item.expiryDate}
+                              onChange={(e) =>
+                                handleItemDetailsChange(
+                                  index,
+                                  "expiryDate",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="number"
+                              className={`form-control form-control-sm ${
+                                validFields[`unitPrice_${index}`]
+                                  ? "is-valid"
+                                  : ""
+                              } ${
+                                validationErrors[`unitPrice_${index}`]
+                                  ? "is-invalid"
+                                  : ""
+                              }`}
+                              value={item.unitPrice}
+                              onChange={(e) =>
+                                handleItemDetailsChange(
+                                  index,
+                                  "unitPrice",
+                                  e.target.value
+                                )
+                              }
+                            />
+                            {validationErrors[`unitPrice_${index}`] && (
+                              <div className="invalid-feedback">
+                                {validationErrors[`unitPrice_${index}`]}
+                              </div>
+                            )}
+                          </td>
+                          <td className="text-center">
+                            <button
+                              type="button"
+                              className="btn btn-outline-danger btn-sm"
+                              onClick={() => handleRemoveItem(index)}
+                            >
+                              <i className="bi bi-trash me-1"></i>
+                            </button>
+                          </td>
+                        </tr>
+                        {parseFloat(item.rejectedQuantity) > 0 && (
+                          <tr>
+                            <td
+                              colSpan={
+                                !["finishedGoodsIn", "directPurchase"].includes(
+                                  formData?.grnType
+                                )
+                                  ? "9"
+                                  : "8"
+                              }
+                              className="bg-light"
+                            >
+                              <div className="px-2 py-2">
+                                <label className="form-label fw-semibold mb-1 small">
+                                  <i className="bi bi-chat-left-text me-1"></i>
+                                  Rejection Reason
+                                </label>
+                                <input
+                                  type="text"
+                                  className={`form-control form-control-sm ${
+                                    validFields[`rejectionReason_${index}`]
+                                      ? "is-valid"
+                                      : ""
+                                  } ${
+                                    validationErrors[`rejectionReason_${index}`]
+                                      ? "is-invalid"
+                                      : ""
+                                  }`}
+                                  placeholder="Enter reason for rejection..."
+                                  value={item.rejectionReason || ""}
+                                  onChange={(e) =>
+                                    handleItemDetailsChange(
+                                      index,
+                                      "rejectionReason",
+                                      e.target.value
+                                    )
+                                  }
+                                />
+                                {validationErrors[
+                                  `rejectionReason_${index}`
+                                ] && (
+                                  <div className="invalid-feedback">
+                                    {
+                                      validationErrors[
+                                        `rejectionReason_${index}`
+                                      ]
+                                    }
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
                         )}
-                        <td>
-                          <input
-                            type="number"
-                            className={`form-control form-control-sm ${
-                              validFields[`receivedQuantity_${index}`]
-                                ? "is-valid"
-                                : ""
-                            } ${
-                              validationErrors[`receivedQuantity_${index}`]
-                                ? "is-invalid"
-                                : ""
-                            }`}
-                            value={item.receivedQuantity}
-                            onChange={(e) =>
-                              handleItemDetailsChange(
-                                index,
-                                "receivedQuantity",
-                                e.target.value
-                              )
-                            }
-                          />
-                          {validationErrors[`receivedQuantity_${index}`] && (
-                            <div className="invalid-feedback">
-                              {validationErrors[`receivedQuantity_${index}`]}
-                            </div>
-                          )}
-                        </td>
-                        <td>
-                          <input
-                            type="number"
-                            className={`form-control form-control-sm ${
-                              validFields[`rejectedQuantity_${index}`]
-                                ? "is-valid"
-                                : ""
-                            } ${
-                              validationErrors[`rejectedQuantity_${index}`]
-                                ? "is-invalid"
-                                : ""
-                            }`}
-                            value={item.rejectedQuantity}
-                            onChange={(e) =>
-                              handleItemDetailsChange(
-                                index,
-                                "rejectedQuantity",
-                                e.target.value
-                              )
-                            }
-                          />
-                          {validationErrors[`rejectedQuantity_${index}`] && (
-                            <div className="invalid-feedback">
-                              {validationErrors[`rejectedQuantity_${index}`]}
-                            </div>
-                          )}
-                        </td>
-                        <td>
-                          <input
-                            type="number"
-                            className="form-control form-control-sm"
-                            value={item.freeQuantity}
-                            onChange={(e) =>
-                              handleItemDetailsChange(
-                                index,
-                                "freeQuantity",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="date"
-                            className="form-control form-control-sm"
-                            value={item.expiryDate}
-                            onChange={(e) =>
-                              handleItemDetailsChange(
-                                index,
-                                "expiryDate",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="number"
-                            className={`form-control form-control-sm ${
-                              validFields[`unitPrice_${index}`]
-                                ? "is-valid"
-                                : ""
-                            } ${
-                              validationErrors[`unitPrice_${index}`]
-                                ? "is-invalid"
-                                : ""
-                            }`}
-                            value={item.unitPrice}
-                            onChange={(e) =>
-                              handleItemDetailsChange(
-                                index,
-                                "unitPrice",
-                                e.target.value
-                              )
-                            }
-                          />
-                          {validationErrors[`unitPrice_${index}`] && (
-                            <div className="invalid-feedback">
-                              {validationErrors[`unitPrice_${index}`]}
-                            </div>
-                          )}
-                        </td>
-                        <td className="text-center">
-                          <button
-                            type="button"
-                            className="btn btn-outline-danger btn-sm"
-                            onClick={() => handleRemoveItem(index)}
-                          >
-                            <i className="bi bi-trash me-1"></i>Delete
-                          </button>
-                        </td>
-                      </tr>
+                      </React.Fragment>
                     ))}
                   </tbody>
                 </table>

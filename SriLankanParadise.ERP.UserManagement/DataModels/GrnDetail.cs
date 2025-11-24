@@ -27,6 +27,8 @@ public partial class GrnDetail
 
     public DateTime? ExpiryDate { get; set; }
 
+    public string? RejectedReason { get; set; }
+
     public virtual GrnMaster GrnMaster { get; set; } = null!;
 
     public virtual ItemMaster? Item { get; set; }

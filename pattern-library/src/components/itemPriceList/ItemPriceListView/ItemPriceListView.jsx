@@ -19,14 +19,11 @@ const ItemPriceListViewModal = memo(({ itemPriceList, show, handleClose }) => {
       size="lg"
       centered
       backdrop="static"
-      keyboard={false}
+      scrollable
     >
       {/* Modal Header */}
-      <Modal.Header closeButton className="bg-primary text-white">
-        <Modal.Title>
-          <i className="bi bi-eye me-2"></i>
-          Price List Details
-        </Modal.Title>
+      <Modal.Header className="border-bottom">
+        <Modal.Title className="mb-1 text-dark">Price List Details</Modal.Title>
       </Modal.Header>
 
       {/* Modal Body */}
@@ -126,7 +123,7 @@ const ItemPriceListViewModal = memo(({ itemPriceList, show, handleClose }) => {
         </div>
 
         {/* Summary Statistics */}
-        <div className="row g-3 mb-4">
+        {/* <div className="row g-3 mb-4">
           <div className="col-md-6">
             <div className="card border-0 shadow-sm bg-primary bg-opacity-10">
               <div className="card-body text-center">
@@ -151,11 +148,11 @@ const ItemPriceListViewModal = memo(({ itemPriceList, show, handleClose }) => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Items Table */}
         <div className="card border-0 shadow-sm">
-          <div className="card-header bg-light">
+          <div className="card-header bg-dark text-white">
             <h6 className="mb-0 fw-bold">
               <i className="bi bi-list-ul me-2"></i>
               Item Details ({totalItems} items)
@@ -181,8 +178,7 @@ const ItemPriceListViewModal = memo(({ itemPriceList, show, handleClose }) => {
                         <td className="ps-4 text-muted">{index + 1}</td>
                         <td>
                           <div className="d-flex align-items-center">
-                            <i className="bi bi-box text-primary me-2"></i>
-                            <span className="fw-medium">
+                            <span className="fw-semibold">
                               {item.itemMaster.itemName || "N/A"}
                             </span>
                           </div>
@@ -202,20 +198,6 @@ const ItemPriceListViewModal = memo(({ itemPriceList, show, handleClose }) => {
                       </tr>
                     ))}
                   </tbody>
-                  <tfoot className="table-light">
-                    <tr>
-                      <td colSpan="2" className="ps-4 fw-bold">
-                        Total
-                      </td>
-                      <td className="text-end pe-4 fw-bold text-success">
-                        LKR{" "}
-                        {totalValue.toLocaleString("en-US", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
-                      </td>
-                    </tr>
-                  </tfoot>
                 </table>
               </div>
             ) : (
@@ -233,10 +215,6 @@ const ItemPriceListViewModal = memo(({ itemPriceList, show, handleClose }) => {
         <Button variant="secondary" onClick={handleClose}>
           <i className="bi bi-x-circle me-2"></i>
           Close
-        </Button>
-        <Button variant="primary">
-          <i className="bi bi-printer me-2"></i>
-          Print
         </Button>
       </Modal.Footer>
     </Modal>

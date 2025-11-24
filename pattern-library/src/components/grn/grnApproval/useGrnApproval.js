@@ -327,7 +327,7 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
     locationId: grn?.warehouseLocationId,
     expiryDate: grnDetail.expiryDate,
     qty: grnDetail.acceptedQuantity + grnDetail.freeQuantity,
-    referenceNo: grn.referenceNo,
+    custDekNo: grn.custDekNo,
     permissionId: 1048,
   });
 

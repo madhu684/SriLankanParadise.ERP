@@ -226,11 +226,13 @@ const LocationUpdate = ({ handleClose, location, handleUpdated }) => {
                   disabled={formData.selectedPriceList !== null}
                 >
                   <option value="">Choose price list...</option>
-                  {itemPriceList?.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.listName}
-                    </option>
-                  ))}
+                  {itemPriceList
+                    ?.filter((ipl) => ipl.status === 1)
+                    .map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.listName}
+                      </option>
+                    ))}
                 </select>
               </div>
 

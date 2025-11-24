@@ -502,6 +502,10 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.ReceivedBy).HasMaxLength(50);
             entity.Property(e => e.ReceivedDate).HasColumnType("date");
 
+            entity.HasIndex(e => e.CustDekNo)
+                 .IsUnique()
+                 .HasDatabaseName("IX_GrnMaster_CustDekNo_Unique");
+
             entity.HasOne(d => d.PurchaseOrder).WithMany(p => p.GrnMasters)
                 .HasForeignKey(d => d.PurchaseOrderId)
                 .HasConstraintName("FK_GrnMaster_PurchaseOrder");

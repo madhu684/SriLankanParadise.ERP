@@ -21,6 +21,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
   const [formData, setFormData] = useState({
     grnDate: "",
     receivedBy: "",
+    custdeckNo: "",
     receivedDate: "",
     itemDetails: [],
     status: "",
@@ -334,7 +335,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       attachments: deepCopyGrn?.attachments ?? [],
       grnType: deepCopyGrn?.grnType,
       warehouseLocation: deepCopyGrn?.warehouseLocationId,
-      referenceNo: deepCopyGrn?.referenceNo,
+      custdeckNo: deepCopyGrn?.custDekNo,
     });
 
     handlePurchaseOrderChange(deepCopyGrn?.purchaseOrderId);
@@ -440,6 +441,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
         itemBarcode: detail.itemBarcode,
         unitPrice: detail.unitPrice,
         grnDetailId: detail.grnDetailId,
+        rejectionReason: detail.rejectedReason ?? null,
       }));
 
       // FIXED: Only update if itemDetails actually changed
@@ -554,6 +556,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
         itemBarcode: detail.itemBarcode,
         unitPrice: detail.unitPrice,
         grnDetailId: detail.grnDetailId,
+        rejectionReason: detail.rejectedReason ?? null,
       }));
 
       // FIXED: Only update if itemDetails actually changed
@@ -642,6 +645,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
           freeQuantity: 0,
           itemBarcode: "",
           unitPrice: srItem.itemMaster.unitPrice,
+          rejectionReason: srItem.rejectedReason ?? null,
         })
       );
 
@@ -732,6 +736,12 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       formData.supplierId
     );
 
+    const isCustdeckNoValid = validateField(
+      "custdeckNo",
+      "Cust Deck No",
+      formData.custdeckNo
+    );
+
     const isStatusValid = validateField("status", "Status", formData.status);
 
     let isPurchaseOrderIdValid = true;
@@ -799,6 +809,23 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
         isRejectedQuantityValid && isValidRejectedQuantity;
     });
 
+    let isRejectionReasonValid = true;
+    // Validate rejection reason if rejected quantity > 0
+    formData.itemDetails.forEach((item, index) => {
+      if (parseFloat(item.rejectedQuantity) > 0) {
+        const reasonFieldName = `rejectionReason_${index}`;
+        const reasonFieldDisplayName = `Rejection Reason for ${item.name}`;
+
+        const isValidReason = validateField(
+          reasonFieldName,
+          reasonFieldDisplayName,
+          item.rejectionReason
+        );
+
+        isRejectionReasonValid = isRejectionReasonValid && isValidReason;
+      }
+    });
+
     let isItemUnitPriceValid = true;
 
     // Validate item details
@@ -845,9 +872,11 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
       isReceivedByValid &&
       isReceivedDateValid &&
       isStatusValid &&
+      isCustdeckNoValid &&
       isItemQuantityValid &&
       isItemUnitPriceValid &&
       isRejectedQuantityValid &&
+      isRejectionReasonValid &&
       isGrnTypeValid &&
       isWarehouseLocationValid &&
       (isPurchaseOrderIdValid ||
@@ -895,7 +924,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
           lastUpdatedDate: currentDate,
           grnType: formData.grnType,
           warehouseLocationId: formData.warehouseLocation,
-          referenceNo: grn.referenceNo,
+          custDekNo: formData.custdeckNo,
           permissionId: 22,
         };
 
@@ -916,6 +945,7 @@ const useGrnUpdate = ({ grn, onFormSubmit }) => {
             orderedQuantity: item.orderedQuantity,
             expiryDate: item.expiryDate,
             itemBarcode: item.itemBarcode,
+            rejectedReason: item.rejectionReason || null,
             permissionId: 22,
           };
 
