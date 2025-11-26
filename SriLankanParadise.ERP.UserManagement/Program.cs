@@ -1,15 +1,16 @@
+using AutoMapper;
+using Consul;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using SriLankanParadise.ERP.UserManagement.Business_Service;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
+using SriLankanParadise.ERP.UserManagement.Data;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Middlewares;
+using SriLankanParadise.ERP.UserManagement.Hubs;
 using SriLankanParadise.ERP.UserManagement.Repository;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
-using AutoMapper;
 using SriLankanParadise.ERP.UserManagement.Shared.AutoMappers;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.EntityFrameworkCore.Query;
-using SriLankanParadise.ERP.UserManagement.ERP_Web.Middlewares;
-using Consul;
-using SriLankanParadise.ERP.UserManagement.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,9 @@ builder.Services.AddControllers();
 
 // Register HttpContextAccessor
 builder.Services.AddHttpContextAccessor();
+
+// Register SignalR
+builder.Services.AddSignalR();
 
 // Allowed origins
 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
@@ -216,6 +220,10 @@ builder.Services.AddScoped<IItemPriceMasterRepository, ItemPriceMasterRepository
 builder.Services.AddScoped<IItemPriceDetailService, ItemPriceDetailService>();
 builder.Services.AddScoped<IItemPriceDetailRepository, ItemPriceDetailRepository>();
 
+// Register custom services
+builder.Services.AddSingleton<IUserConnectionService, UserConnectionService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -245,6 +253,9 @@ app.UseMiddleware<AuditMiddleware>();
 
 
 app.MapControllers();
+
+// Map SignalR hub
+app.MapHub<NotificationHub>("/notificationHub");
 
 //app.Lifetime.ApplicationStarted.Register(() =>
 //{

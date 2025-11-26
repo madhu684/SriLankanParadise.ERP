@@ -17,12 +17,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
     {
         private readonly IItemPriceMasterService _itemPriceMasterService;
         private readonly ILogger<ItemPriceMasterController> _logger;
+        private readonly INotificationService _notificationService;
         private readonly IMapper _mapper;
 
-        public ItemPriceMasterController(IItemPriceMasterService itemPriceMasterService, ILogger<ItemPriceMasterController> logger, IMapper mapper)
+        public ItemPriceMasterController(IItemPriceMasterService itemPriceMasterService, ILogger<ItemPriceMasterController> logger, INotificationService notificationService, IMapper mapper)
         {
             _itemPriceMasterService = itemPriceMasterService;
             _logger = logger;
+            _notificationService = notificationService;
             _mapper = mapper;
         }
 
@@ -169,6 +171,23 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 var itemPriceMasterToUpdate = _mapper.Map<ItemPriceMaster>(requestModel);
 
                 await _itemPriceMasterService.ChangeStatus(existingItemPriceMaster.Id, itemPriceMasterToUpdate);
+
+                // Send notification to all logged-in users
+                await _notificationService.SendNotificationToAllLoggedUsers(new NotificationDto
+                {
+                    Title = itemPriceMasterToUpdate.Status == 0
+                        ? "Item Price Master Deactivated"
+                        : "Item Price Master Activated",
+                    Type = "ItemPriceMaster",
+                    Action = "Updated",
+                    Data = new
+                    {
+                        ItemPriceMasterId = existingItemPriceMaster.Id,
+                        Name = existingItemPriceMaster.ListName,
+                        NewStatus = itemPriceMasterToUpdate.Status
+                    },
+                });
+
                 _logger.LogInformation(LogMessages.ItemPriceMasterStatusChanged);
                 AddResponseMessage(Response, LogMessages.ItemPriceMasterStatusChanged, null, true, HttpStatusCode.OK);
             }
