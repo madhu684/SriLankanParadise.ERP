@@ -34,7 +34,27 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             _httpContextAccessor = httpContextAccessor;
         }
 
-        
+
+        [HttpPost]
+        public async Task<ApiResponseModel> AddItemType(ItemTypeRequestModel itemTypeRequestModel)
+        {
+            try
+            {
+                var itemType = _mapper.Map<ItemType>(itemTypeRequestModel);
+                await _itemTypeService.AddItemType(itemType);
+
+                var itemTypeDto = _mapper.Map<ItemTypeDto>(itemType);
+                _logger.LogInformation(LogMessages.ItemTypeAdded);
+                AddResponseMessage(Response, LogMessages.ItemTypeAdded, itemTypeDto, true, HttpStatusCode.Created);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
         [HttpGet("GetItemTypesByCompanyId/{companyId}")]
         public async Task<ApiResponseModel> GetItemTypesByCompanyId(int companyId)
         {
@@ -51,6 +71,62 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     _logger.LogWarning(LogMessages.ItemTypesNotFound);
                     AddResponseMessage(Response, LogMessages.ItemTypesNotFound, null, true, HttpStatusCode.NotFound);
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ApiResponseModel> GetItemTypeById(int id)
+        {
+            try
+            {
+                var itemType = await _itemTypeService.GetItemTypeById(id);
+                if (itemType != null)
+                {
+                    var itemTypeDto = _mapper.Map<ItemTypeDto>(itemType);
+                    _logger.LogInformation(LogMessages.ItemTypeRetrieved);
+                    AddResponseMessage(Response, LogMessages.ItemTypeRetrieved, itemTypeDto, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.ItemTypeNotFound);
+                    AddResponseMessage(Response, LogMessages.ItemTypeNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ApiResponseModel> UpdateItemType(int id, ItemTypeRequestModel itemTypeRequestModel)
+        {
+            try
+            {
+                var existingItemType = await _itemTypeService.GetItemTypeById(id);
+                if (existingItemType == null)
+                {
+                    _logger.LogWarning(LogMessages.ItemTypeNotFound);
+                    AddResponseMessage(Response, LogMessages.ItemTypeNotFound, null, true, HttpStatusCode.NotFound);
+                    return Response;
+                }
+
+                var updatedItemType = _mapper.Map<ItemType>(itemTypeRequestModel);
+                updatedItemType.ItemTypeId = id;
+
+                await _itemTypeService.UpdateItemType(existingItemType.ItemTypeId, updatedItemType);
+
+                _logger.LogInformation(LogMessages.ItemTypeUpdated);
+                AddResponseMessage(Response, LogMessages.ItemTypeUpdated, null, true, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {

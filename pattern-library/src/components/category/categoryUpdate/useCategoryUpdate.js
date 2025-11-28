@@ -1,5 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { put_category_api } from "../../../services/inventoryApi";
+import { useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useCategoryUpdate = ({ category, onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -13,12 +15,17 @@ const useCategoryUpdate = ({ category, onFormSubmit }) => {
   const alertRef = useRef(null);
   const [loading, setLoading] = useState(false);
 
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
+
+  const queryClient = useQueryClient();
+
   useEffect(() => {
     const deepCopyCategory = JSON.parse(JSON.stringify(category));
     setFormData({
       categoryName: deepCopyCategory?.categoryName,
       status: deepCopyCategory?.status === true ? "1" : "0",
       isTreatment: deepCopyCategory?.isTreatment === true ? "1" : "0",
+      companyId: deepCopyCategory?.companyId,
     });
   }, [category]);
 
@@ -90,7 +97,7 @@ const useCategoryUpdate = ({ category, onFormSubmit }) => {
           categoryName: formData.categoryName,
           status: status,
           isTreatment: formData.isTreatment === "1" ? true : false,
-          companyId: sessionStorage.getItem("companyId"),
+          companyId: formData.companyId,
           permissionId: 1043,
         };
 
@@ -102,11 +109,13 @@ const useCategoryUpdate = ({ category, onFormSubmit }) => {
         if (putResponse.status === 200) {
           if (status === false) {
             setSubmissionStatus("successSavedAsDraft");
-            console.log("Category updated and saved as draft!", formData);
+            toast.success("Category updated and saved as draft!");
           } else {
             setSubmissionStatus("successSubmitted");
-            console.log("Category updated successfully!", formData);
+            toast.success("Category updated successfully!");
           }
+
+          queryClient.invalidateQueries(["categories", companyId]);
 
           setTimeout(() => {
             setSubmissionStatus(null);
@@ -115,6 +124,7 @@ const useCategoryUpdate = ({ category, onFormSubmit }) => {
           }, 3000);
         } else {
           setSubmissionStatus("error");
+          toast.error("Category update failed!");
         }
       }
     } catch (error) {
@@ -124,6 +134,7 @@ const useCategoryUpdate = ({ category, onFormSubmit }) => {
         setSubmissionStatus(null);
         setLoading(false);
       }, 3000);
+      toast.error("Category update failed!");
     }
   };
 

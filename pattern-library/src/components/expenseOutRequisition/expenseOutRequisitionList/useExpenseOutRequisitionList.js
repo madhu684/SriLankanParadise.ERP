@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { get_expense_out_requisitions_api } from "../../../services/salesApi";
 import { get_expense_out_requisitions_by_user_id_api } from "../../../services/salesApi";
-import { get_user_permissions_api } from "../../../services/userManagementApi";
 import { useQuery } from "@tanstack/react-query";
 
 const useExpenseOutRequisitionList = () => {
@@ -22,85 +21,51 @@ const useExpenseOutRequisitionList = () => {
   const [showConvertEORForm, setShowConvertEORForm] = useState(false);
   const [approvalType, setApprovalType] = useState("");
 
-  const fetchUserPermissions = async () => {
-    try {
-      const response = await get_user_permissions_api(
-        sessionStorage.getItem("userId")
-      );
-      return response.data.result;
-    } catch (error) {
-      console.error("Error fetching user permissions:", error);
-    }
-  };
-
-  const {
-    data: userPermissions,
-    isLoading: isLoadingPermissions,
-    isError: isPermissionsError,
-    error: permissionError,
-  } = useQuery({
-    queryKey: ["userPermissions"],
-    queryFn: fetchUserPermissions,
-  });
-
   const fetchData = async () => {
     try {
-      if (!isLoadingPermissions && userPermissions) {
-        if (hasPermission("View All Expense Out Requisitions")) {
-          const ExpenseOutRequisitionWithoutDraftsResponse =
-            await get_expense_out_requisitions_api(
-              sessionStorage.getItem("companyId")
-            );
+      const ExpenseOutRequisitionWithoutDraftsResponse =
+        await get_expense_out_requisitions_api(
+          sessionStorage.getItem("companyId")
+        );
 
-          const ExpenseOutRequisitionByUserIdResponse =
-            await get_expense_out_requisitions_by_user_id_api(
-              sessionStorage.getItem("userId")
-            );
+      const ExpenseOutRequisitionByUserIdResponse =
+        await get_expense_out_requisitions_by_user_id_api(
+          sessionStorage.getItem("userId")
+        );
 
-          let newExpenseOutRequisitions = [];
-          if (
-            ExpenseOutRequisitionWithoutDraftsResponse &&
-            ExpenseOutRequisitionWithoutDraftsResponse.data.result
-          ) {
-            newExpenseOutRequisitions =
-              ExpenseOutRequisitionWithoutDraftsResponse.data.result;
-          }
-
-          let additionalOrders = [];
-          if (
-            ExpenseOutRequisitionByUserIdResponse &&
-            ExpenseOutRequisitionByUserIdResponse.data.result
-          ) {
-            additionalOrders =
-              ExpenseOutRequisitionByUserIdResponse.data.result;
-          }
-          //let newExpenseOutRequisitions = ExpenseOutRequisitionWithoutDraftsResponse.data.result;
-          //const additionalOrders = ExpenseOutRequisitionByUserIdResponse.data.result;
-
-          const uniqueNewOrders = additionalOrders.filter(
-            (order) =>
-              !newExpenseOutRequisitions.some(
-                (existingOrder) =>
-                  existingOrder.ExpenseOutRequisitionId ===
-                  order.ExpenseOutRequisitionId
-              )
-          );
-
-          newExpenseOutRequisitions = [
-            ...newExpenseOutRequisitions,
-            ...uniqueNewOrders,
-          ];
-          setExpenseOutRequisitions(newExpenseOutRequisitions);
-        } else {
-          const ExpenseOutRequisitionResponse =
-            await get_expense_out_requisitions_by_user_id_api(
-              sessionStorage.getItem("userId")
-            );
-          setExpenseOutRequisitions(
-            ExpenseOutRequisitionResponse.data.result || []
-          );
-        }
+      let newExpenseOutRequisitions = [];
+      if (
+        ExpenseOutRequisitionWithoutDraftsResponse &&
+        ExpenseOutRequisitionWithoutDraftsResponse.data.result
+      ) {
+        newExpenseOutRequisitions =
+          ExpenseOutRequisitionWithoutDraftsResponse.data.result;
       }
+
+      let additionalOrders = [];
+      if (
+        ExpenseOutRequisitionByUserIdResponse &&
+        ExpenseOutRequisitionByUserIdResponse.data.result
+      ) {
+        additionalOrders = ExpenseOutRequisitionByUserIdResponse.data.result;
+      }
+      //let newExpenseOutRequisitions = ExpenseOutRequisitionWithoutDraftsResponse.data.result;
+      //const additionalOrders = ExpenseOutRequisitionByUserIdResponse.data.result;
+
+      const uniqueNewOrders = additionalOrders.filter(
+        (order) =>
+          !newExpenseOutRequisitions.some(
+            (existingOrder) =>
+              existingOrder.ExpenseOutRequisitionId ===
+              order.ExpenseOutRequisitionId
+          )
+      );
+
+      newExpenseOutRequisitions = [
+        ...newExpenseOutRequisitions,
+        ...uniqueNewOrders,
+      ];
+      setExpenseOutRequisitions(newExpenseOutRequisitions);
     } catch (error) {
       setError("Error fetching data");
     } finally {
@@ -109,12 +74,8 @@ const useExpenseOutRequisitionList = () => {
   };
 
   useEffect(() => {
-    fetchUserPermissions();
-  }, []);
-
-  useEffect(() => {
     fetchData();
-  }, [isLoadingPermissions, userPermissions]);
+  }, []);
 
   const handleShowApproveEORModal = (approvalType) => {
     setApprovalType(approvalType);
@@ -252,14 +213,6 @@ const useExpenseOutRequisitionList = () => {
     );
   };
 
-  const hasPermission = (permissionName) => {
-    return userPermissions?.some(
-      (permission) =>
-        permission.permission.permissionName === permissionName &&
-        permission.permission.permissionStatus
-    );
-  };
-
   const areAnySelectedRowsPendingApproval = (selectedRows) => {
     return selectedRows.some(
       (id) =>
@@ -271,9 +224,6 @@ const useExpenseOutRequisitionList = () => {
   return {
     expenseOutRequisitions,
     isLoadingData,
-    isLoadingPermissions,
-    isPermissionsError,
-    permissionError,
     error,
     isAnyRowSelected,
     selectedRows,
@@ -284,7 +234,6 @@ const useExpenseOutRequisitionList = () => {
     selectedRowData,
     showCreateEORForm,
     showUpdateEORForm,
-    userPermissions,
     EORDetail,
     showConvertEORForm,
     approvalType,
@@ -302,7 +251,6 @@ const useExpenseOutRequisitionList = () => {
     handleApproved,
     setShowCreateEORForm,
     setShowUpdateEORForm,
-    hasPermission,
     handleUpdate,
     handleUpdated,
     handleClose,

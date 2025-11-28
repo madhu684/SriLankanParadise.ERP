@@ -7,7 +7,7 @@ import CurrentDateTime from "../../currentDateTime/currentDateTime";
 import MinDetails from "../minAccept/minAccept.jsx";
 import { useQuery } from "@tanstack/react-query";
 
-const MinsListDetail = ({ refetch, setRefetch, mrnId, handleBack }) => {
+const MinsListDetail = ({ mrnId, handleBack }) => {
   const { getStatusBadgeClass, getStatusLabel } = useMinList();
 
   const [minDetail, setMinDetail] = useState("");
@@ -116,8 +116,6 @@ const MinsListDetail = ({ refetch, setRefetch, mrnId, handleBack }) => {
         </table>
         {showMinAcceptModal && (
           <MinDetails
-            refetch={refetch}
-            setRefetch={setRefetch}
             show={showMinAcceptModal}
             handleClose={handleCloseDetailMinModal}
             min={minDetail}

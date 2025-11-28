@@ -22,6 +22,8 @@
 
         public DateTime? ExpiryDate { get; set; }
 
+        public string? RejectedReason { get; set; }
+
         public int PermissionId { get; set; }
     }
 }

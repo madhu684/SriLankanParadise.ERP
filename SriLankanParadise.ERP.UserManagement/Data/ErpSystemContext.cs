@@ -502,6 +502,10 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.ReceivedBy).HasMaxLength(50);
             entity.Property(e => e.ReceivedDate).HasColumnType("date");
 
+            entity.HasIndex(e => e.CustDekNo)
+                 .IsUnique()
+                 .HasDatabaseName("IX_GrnMaster_CustDekNo_Unique");
+
             entity.HasOne(d => d.PurchaseOrder).WithMany(p => p.GrnMasters)
                 .HasForeignKey(d => d.PurchaseOrderId)
                 .HasConstraintName("FK_GrnMaster_PurchaseOrder");
@@ -1056,7 +1060,6 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.ReferenceNo)
                 .HasMaxLength(20)
                 .HasDefaultValueSql("('SI'+CONVERT([nvarchar](20),NEXT VALUE FOR [dbo].[SalesInvoiceReferenceNoSeq]))");
-            entity.Property(e => e.ReferenceNumber).HasMaxLength(255);
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.SalesOrder).WithMany(p => p.SalesInvoices)
@@ -1135,15 +1138,15 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.TotalPrice).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
 
-            entity.HasOne(d => d.SalesOrder).WithMany(p => p.SalesOrderDetails)
-                .HasForeignKey(d => d.SalesOrderId)
+            entity.HasOne(d => d.ItemMaster).WithMany(p => p.SalesOrderDetails)
+                .HasForeignKey(d => d.ItemBatchItemMasterId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__SalesOrde__Sales__22401542");
+                .HasConstraintName("FK_SalesOrderDetail_ItemMaster");
 
-            entity.HasOne(d => d.ItemBatch).WithMany(p => p.SalesOrderDetails)
-                .HasForeignKey(d => new { d.ItemBatchBatchId, d.ItemBatchItemMasterId })
+            entity.HasOne(d => d.Batch).WithMany(p => p.SalesOrderDetails)
+                .HasForeignKey(d => d.ItemBatchBatchId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__SalesOrderDetail__2334397B");
+                .HasConstraintName("FK_SalesOrderDetail_Batch");
         });
 
         modelBuilder.Entity<SalesReceipt>(entity =>

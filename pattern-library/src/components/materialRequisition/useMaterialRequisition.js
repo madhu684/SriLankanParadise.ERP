@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   get_company_locations_api,
   post_requisition_master_api,
@@ -7,7 +7,7 @@ import {
   get_issue_masters_by_requisition_master_id_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const useMaterialRequisition = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -24,11 +24,13 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
+
+  const queryClient = useQueryClient();
+
   const fetchLocations = async () => {
     try {
-      const response = await get_company_locations_api(
-        sessionStorage.getItem("companyId")
-      );
+      const response = await get_company_locations_api(companyId);
       return response.data.result;
     } catch (error) {
       console.error("Error fetching locations:", error);
@@ -118,7 +120,7 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
     error: itemsError,
   } = useQuery({
     queryKey: ["items", searchTerm],
-    queryFn: () => fetchItems(sessionStorage.getItem("companyId"), searchTerm),
+    queryFn: () => fetchItems(companyId, searchTerm),
   });
 
   useEffect(() => {
@@ -307,8 +309,6 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
   const handleSubmit = async (isSaveAsDraft) => {
     try {
       const status = isSaveAsDraft ? 0 : 1;
-      console.log("_______Handle submit trigger________");
-      // Get the current date and time in UTC timezone in the specified format
       const requisitionDate = new Date().toISOString();
 
       const isFormValid = validateForm(isSaveAsDraft);
@@ -325,7 +325,7 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
           approvedBy: null,
           approvedUserId: null,
           approvedDate: null,
-          companyId: sessionStorage.getItem("companyId"),
+          companyId: companyId,
           requisitionType: "MRN",
           requestedFromLocationId: formData.departmentLocation,
           requestedToLocationId: formData.warehouseLocation,
@@ -373,6 +373,8 @@ const useMaterialRequisition = ({ onFormSubmit }) => {
               formData
             );
           }
+
+          queryClient.invalidateQueries(["materialRequisitions", companyId]);
 
           setTimeout(() => {
             setSubmissionStatus(null);

@@ -1042,6 +1042,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Item price detail deleted successfully.
+        /// </summary>
+        public static string ItemPriceDetailDeleted {
+            get {
+                return ResourceManager.GetString("ItemPriceDetailDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Item price detail not found.
         /// </summary>
         public static string ItemPriceDetailNotFound {
@@ -1056,6 +1065,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string ItemPriceDetailRetrived {
             get {
                 return ResourceManager.GetString("ItemPriceDetailRetrived", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item price detail updated successfully.
+        /// </summary>
+        public static string ItemPriceDetailUpdated {
+            get {
+                return ResourceManager.GetString("ItemPriceDetailUpdated", resourceCulture);
             }
         }
         
@@ -1087,6 +1105,51 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Item price master status changed successfully.
+        /// </summary>
+        public static string ItemPriceMasterStatusChanged {
+            get {
+                return ResourceManager.GetString("ItemPriceMasterStatusChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item price master updated successfully.
+        /// </summary>
+        public static string ItemPriceMasterUpdated {
+            get {
+                return ResourceManager.GetString("ItemPriceMasterUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item type added successfully.
+        /// </summary>
+        public static string ItemTypeAdded {
+            get {
+                return ResourceManager.GetString("ItemTypeAdded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item type not found.
+        /// </summary>
+        public static string ItemTypeNotFound {
+            get {
+                return ResourceManager.GetString("ItemTypeNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item type retrieved successfully.
+        /// </summary>
+        public static string ItemTypeRetrieved {
+            get {
+                return ResourceManager.GetString("ItemTypeRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Item types not found.
         /// </summary>
         public static string ItemTypesNotFound {
@@ -1101,6 +1164,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string ItemTypesRetrieved {
             get {
                 return ResourceManager.GetString("ItemTypesRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item type updated successfully.
+        /// </summary>
+        public static string ItemTypeUpdated {
+            get {
+                return ResourceManager.GetString("ItemTypeUpdated", resourceCulture);
             }
         }
         

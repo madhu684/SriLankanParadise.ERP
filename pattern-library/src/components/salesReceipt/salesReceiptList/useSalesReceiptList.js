@@ -1,7 +1,5 @@
 import { useState, useMemo, useContext } from "react";
 import { get_sales_receipts_with_out_drafts_api } from "../../../services/salesApi";
-import { get_sales_receipts_by_user_id_api } from "../../../services/salesApi";
-import { get_user_permissions_api } from "../../../services/userManagementApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { UserContext } from "../../../context/userContext";
@@ -20,135 +18,38 @@ const useSalesReceiptList = () => {
   const [SRDetail, setSRDetail] = useState("");
   const [filter, setFilter] = useState("all");
 
-  const queryClient = useQueryClient();
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
 
-  const userId = sessionStorage.getItem("userId");
-  const companyId = sessionStorage.getItem("companyId");
+  const { activeCashierSession } = useContext(UserContext);
 
-  const { activeCashierSession, activeCashierSessionLoading } =
-    useContext(UserContext);
-
-  // Retrieve the cashier session from session storage
+  // Retrieve the cashier session
   const isCashierSessionOpen = !!activeCashierSession;
-
-  // Fetch User Permissions
-  const {
-    data: userPermissions,
-    isLoading: isLoadingPermissions,
-    isError: isPermissionsError,
-    error: permissionError,
-  } = useQuery({
-    queryKey: ["userPermissions", userId],
-    queryFn: async () => {
-      const response = await get_user_permissions_api(userId);
-      return response.data.result;
-    },
-    enabled: !!userId,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  });
-
-  // Helper function to check permissions
-  const hasPermission = (permissionName) => {
-    return userPermissions?.some(
-      (permission) =>
-        permission.permission.permissionName === permissionName &&
-        permission.permission.permissionStatus
-    );
-  };
-
-  // Check if user has "View All Sales Receipts" permission
-  const canViewAllReceipts = hasPermission("View All Sales Receipts");
 
   // Fetch Sales Receipts Without Drafts (for users with "View All" permission)
   const {
-    data: allSalesReceipts,
-    isLoading: isLoadingAllReceipts,
-    isError: isAllReceiptsError,
-    error: allReceiptsError,
+    data: salesReceipts,
+    isLoading: isLoadingData,
+    error,
   } = useQuery({
-    queryKey: ["salesReceiptsWithoutDrafts", companyId],
+    queryKey: ["salesReceipts", companyId],
     queryFn: async () => {
       const response = await get_sales_receipts_with_out_drafts_api(companyId);
       return response.data.result || [];
     },
-    enabled: !!companyId && !isLoadingPermissions && canViewAllReceipts,
-    staleTime: 2 * 60 * 1000, // 2 minutes
+    enabled: !!companyId,
   });
-
-  // Fetch Sales Receipts by User ID
-  const {
-    data: userSalesReceipts,
-    isLoading: isLoadingUserReceipts,
-    isError: isUserReceiptsError,
-    error: userReceiptsError,
-  } = useQuery({
-    queryKey: ["salesReceiptsByUserId", userId],
-    queryFn: async () => {
-      const response = await get_sales_receipts_by_user_id_api(userId);
-      return response.data.result || [];
-    },
-    enabled: !!userId && !isLoadingPermissions,
-    staleTime: 2 * 60 * 1000, // 2 minutes
-  });
-
-  // Combine and deduplicate sales receipts
-  const salesReceipts = useMemo(() => {
-    if (canViewAllReceipts) {
-      const allReceipts = allSalesReceipts || [];
-      const userReceipts = userSalesReceipts || [];
-
-      // Find unique receipts from userReceipts that aren't in allReceipts
-      const uniqueUserReceipts = userReceipts.filter(
-        (receipt) =>
-          !allReceipts.some(
-            (existingReceipt) =>
-              existingReceipt.salesReceiptId === receipt.salesReceiptId
-          )
-      );
-
-      return [...allReceipts, ...uniqueUserReceipts];
-    } else {
-      return userSalesReceipts || [];
-    }
-  }, [allSalesReceipts, userSalesReceipts, canViewAllReceipts]);
 
   // Filter sales receipts based on selected filter
   const filteredSalesReceipts = useMemo(() => {
-    return salesReceipts.filter((receipt) => {
-      if (filter === "all") return true;
-      if (filter === "outstanding") return receipt.outstandingAmount > 0;
-      if (filter === "excess") return receipt.excessAmount > 0;
-      return true;
-    });
+    return salesReceipts
+      ? salesReceipts?.filter((receipt) => {
+          if (filter === "all") return true;
+          if (filter === "outstanding") return receipt.outstandingAmount > 0;
+          if (filter === "excess") return receipt.excessAmount > 0;
+          return true;
+        })
+      : [];
   }, [salesReceipts, filter]);
-
-  // Determine loading state
-  const isLoadingData = useMemo(() => {
-    if (isLoadingPermissions) return true;
-    if (canViewAllReceipts) {
-      return isLoadingAllReceipts || isLoadingUserReceipts;
-    }
-    return isLoadingUserReceipts;
-  }, [
-    isLoadingPermissions,
-    canViewAllReceipts,
-    isLoadingAllReceipts,
-    isLoadingUserReceipts,
-  ]);
-
-  // Determine error state
-  const error = useMemo(() => {
-    if (isPermissionsError) return "Error fetching permissions";
-    if (isAllReceiptsError) return "Error fetching all receipts";
-    if (isUserReceiptsError) return "Error fetching user receipts";
-    return null;
-  }, [isPermissionsError, isAllReceiptsError, isUserReceiptsError]);
-
-  // Invalidate queries to refresh data
-  const refreshData = () => {
-    queryClient.invalidateQueries(["salesReceiptsWithoutDrafts", companyId]);
-    queryClient.invalidateQueries(["salesReceiptsByUserId", userId]);
-  };
 
   const handleShowApproveSRModal = () => {
     setShowApproveSRModal(true);
@@ -168,7 +69,6 @@ const useSalesReceiptList = () => {
   };
 
   const handleApproved = async () => {
-    refreshData();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -205,7 +105,6 @@ const useSalesReceiptList = () => {
   };
 
   const handleUpdated = async () => {
-    refreshData();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -286,7 +185,6 @@ const useSalesReceiptList = () => {
   return {
     salesReceipts,
     isLoadingData,
-    isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
@@ -297,10 +195,10 @@ const useSalesReceiptList = () => {
     selectedRowData,
     showCreateSRForm,
     showUpdateSRForm,
-    userPermissions,
     SRDetail,
-    isPermissionsError,
     isCashierSessionOpen,
+    filter,
+    filteredSalesReceipts,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleViewDetails,
@@ -314,15 +212,11 @@ const useSalesReceiptList = () => {
     handleApproved,
     setShowCreateSRForm,
     setShowUpdateSRForm,
-    hasPermission,
     handleUpdate,
     handleUpdated,
     handleClose,
     closeAlertAfterDelay,
-    filter,
     setFilter,
-    filteredSalesReceipts,
-    refreshData,
   };
 };
 

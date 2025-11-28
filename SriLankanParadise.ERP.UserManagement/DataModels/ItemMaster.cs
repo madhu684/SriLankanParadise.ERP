@@ -78,5 +78,6 @@ public partial class ItemMaster
     public virtual ICollection<ItemBatch> ItemBatches { get; set; } = new List<ItemBatch>();
     public virtual ICollection<DailyLocationInventory> DailyLocationInventories { get; set; } = new List<DailyLocationInventory>();
     public virtual ICollection<SalesInvoiceDetail> SalesInvoiceDetails { get; set; } = new List<SalesInvoiceDetail>();
+    public virtual ICollection<SalesOrderDetail> SalesOrderDetails { get; set; } = new List<SalesOrderDetail>();
     public virtual ICollection<ItemPriceDetail> ItemPriceDetails { get; set; } = new List<ItemPriceDetail>();
 }

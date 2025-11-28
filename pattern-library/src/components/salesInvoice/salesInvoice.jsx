@@ -40,6 +40,8 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
     customers,
     isCustomersLoading,
     isCustomersError,
+    hasLineItemChargesChanged,
+    creditMismatchDetails,
     handleCustomerSelect,
     handleResetCustomer,
     refetchCustomers,
@@ -197,32 +199,6 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
 
                 <div className="mb-3">
                   <label
-                    htmlFor="referenceNumber"
-                    className="form-label fw-semibold"
-                  >
-                    Reference Number
-                  </label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      validFields.referenceNumber ? "is-valid" : ""
-                    } ${validationErrors.referenceNumber ? "is-invalid" : ""}`}
-                    id="referenceNumber"
-                    placeholder="Enter reference number"
-                    value={formData.referenceNumber}
-                    onChange={(e) =>
-                      handleInputChange("referenceNumber", e.target.value)
-                    }
-                  />
-                  {validationErrors.referenceNumber && (
-                    <div className="invalid-feedback">
-                      {validationErrors.referenceNumber}
-                    </div>
-                  )}
-                </div>
-
-                <div className="mb-0">
-                  <label
                     htmlFor="storeLocation"
                     className="form-label fw-semibold"
                   >
@@ -256,6 +232,26 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                     </div>
                   )}
                 </div>
+
+                <div className="mb-0">
+                  <label htmlFor="remarks" className="form-label fw-semibold">
+                    Remarks
+                  </label>
+                  <textarea
+                    type="text"
+                    // className={`form-control ${
+                    //   validFields.remarks ? "is-valid" : ""
+                    // } ${validationErrors.remarks ? "is-invalid" : ""}`}
+                    className="form-control"
+                    id="remarks"
+                    placeholder="Enter remarks (Min. 150 words)"
+                    value={formData.remarks}
+                    onChange={(e) =>
+                      handleInputChange("remarks", e.target.value)
+                    }
+                    maxLength={150}
+                  />
+                </div>
               </div>
             </div>
             {/* Sales Order Details */}
@@ -268,42 +264,70 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
               </div>
               <div className="card-body">
                 {salesOrder ? (
-                  <div className="bg-light p-3 rounded">
-                    <div className="row g-2">
-                      <div className="col-12">
-                        <small className="text-muted">Reference No:</small>
-                        <p className="mb-2 fw-semibold">
-                          {salesOrder.referenceNo}
-                        </p>
-                      </div>
+                  <div>
+                    {/* Reference Number - Prominent Display */}
+                    <div className="mb-3 pb-3 border-bottom">
+                      <small className="text-muted d-block mb-1 fw-semibold">
+                        Reference No:
+                      </small>
+                      <h4 className="mb-0 fw-bold text-dark">
+                        {salesOrder.referenceNo}
+                      </h4>
+                    </div>
+
+                    {/* Dates Section - Two Columns */}
+                    <div className="row g-3 mb-3">
                       <div className="col-6">
-                        <small className="text-muted">Order Date:</small>
-                        <p className="mb-2">
+                        <small className="text-muted d-block mb-2 fw-semibold">
+                          <i className="bi bi-calendar3 me-1"></i>Order Date
+                        </small>
+                        <p className="mb-0 fs-6 fw-semibold text-dark">
                           {salesOrder.orderDate?.split("T")[0] ?? ""}
                         </p>
                       </div>
                       <div className="col-6">
-                        <small className="text-muted">Delivery Date:</small>
-                        <p className="mb-2">
+                        <small className="text-muted d-block mb-2 fw-semibold">
+                          <i className="bi bi-calendar-check me-1"></i>Delivery
+                          Date
+                        </small>
+                        <p className="mb-0 fs-6 fw-semibold text-dark">
                           {salesOrder.deliveryDate?.split("T")[0] ?? ""}
                         </p>
                       </div>
-                      <div className="col-12">
-                        <small className="text-muted">Order Type:</small>
-                        <p className="mb-0">
-                          <span className="badge bg-info">
-                            {salesOrder.customerId !== null
-                              ? "Customer Order"
-                              : "Direct Order"}
-                          </span>
-                        </p>
+                    </div>
+
+                    {/* Order Type Badge */}
+                    <div className="row g-3 mb-3">
+                      <div className="col-6">
+                        <small className="text-muted d-block mb-2 fw-semibold">
+                          Order Type
+                        </small>
+                        <span className="badge rounded-pill bg-info text-dark px-3 py-2 fs-6">
+                          <i className="bi bi-tag-fill me-1"></i>
+                          {salesOrder.customerId !== null
+                            ? "Customer Order"
+                            : "Direct Order"}
+                        </span>
+                      </div>
+                      <div className="col-6">
+                        <small className="text-muted d-block mb-2 fw-semibold">
+                          <i className="bi bi-bookmark-plus me-1"></i>Customer
+                          Po Number
+                        </small>
+                        <span className="badge rounded-pill bg-secondary text-dark px-3 py-2 fs-6">
+                          <i className="bi bi-tag-fill me-1"></i>
+                          {salesOrder.customerPoNumber ?? "N/A"}
+                        </span>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="alert alert-warning mb-0" role="alert">
-                    <i className="bi bi-info-circle me-2"></i>
-                    This is a direct sales invoice, no sales order.
+                  <div
+                    className="alert alert-warning mb-0 d-flex align-items-center"
+                    role="alert"
+                  >
+                    <i className="bi bi-info-circle me-2 fs-5"></i>
+                    <div>This is a direct sales invoice, no sales order.</div>
                   </div>
                 )}
               </div>
@@ -324,106 +348,108 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                 <label htmlFor="customer" className="form-label fw-semibold">
                   Customer <span className="text-danger">*</span>
                 </label>
-                <div className="mb-3">
-                  <div className="input-group">
-                    <span className="input-group-text bg-white">
-                      <i className="bi bi-search"></i>
-                    </span>
-                    <input
-                      type="text"
-                      className={`form-control ${
-                        validFields.customer ? "is-valid" : ""
-                      } ${validationErrors.customer ? "is-invalid" : ""}`}
-                      placeholder="Search for a customer..."
-                      value={customerSearchTerm}
-                      onChange={(e) => setCustomerSearchTerm(e.target.value)}
-                      autoFocus={false}
-                    />
-                    {validationErrors.customer && (
-                      <div className="invalid-feedback">
-                        {validationErrors.customer}
-                      </div>
-                    )}
-                    {customerSearchTerm && (
-                      <button
-                        type="button"
-                        className="btn btn-outline-secondary"
-                        onClick={() => setCustomerSearchTerm("")}
-                      >
-                        <i className="bi bi-x"></i>
-                      </button>
-                    )}
-                  </div>
+                {formData?.selectedCustomer === null && (
+                  <div className="mb-3">
+                    <div className="input-group">
+                      <span className="input-group-text bg-white">
+                        <i className="bi bi-search"></i>
+                      </span>
+                      <input
+                        type="text"
+                        className={`form-control ${
+                          validFields.customer ? "is-valid" : ""
+                        } ${validationErrors.customer ? "is-invalid" : ""}`}
+                        placeholder="Search for a customer..."
+                        value={customerSearchTerm}
+                        onChange={(e) => setCustomerSearchTerm(e.target.value)}
+                        autoFocus={false}
+                      />
+                      {validationErrors.customer && (
+                        <div className="invalid-feedback">
+                          {validationErrors.customer}
+                        </div>
+                      )}
+                      {customerSearchTerm && (
+                        <button
+                          type="button"
+                          className="btn btn-outline-secondary"
+                          onClick={() => setCustomerSearchTerm("")}
+                        >
+                          <i className="bi bi-x"></i>
+                        </button>
+                      )}
+                    </div>
 
-                  {/* Dropdown for filtered customers */}
-                  {customerSearchTerm && (
-                    <div className="dropdown position-relative">
-                      <ul
-                        className="dropdown-menu show shadow"
-                        style={{
-                          width: "100%",
-                          maxHeight: "200px",
-                          overflowY: "auto",
-                        }}
-                      >
-                        {isCustomersLoading && (
-                          <li className="dropdown-item text-center">
-                            <i className="bi bi-hourglass-split me-2"></i>
-                            Loading...
-                          </li>
-                        )}
-                        {isCustomersError && (
-                          <li className="dropdown-item text-center text-danger">
-                            <i className="bi bi-exclamation-triangle me-2"></i>
-                            Error loading customers.{" "}
-                            <button
-                              onClick={refetchCustomers}
-                              className="btn btn-link p-0"
-                            >
-                              Retry
-                            </button>
-                          </li>
-                        )}
-                        {!isCustomersLoading &&
-                          !isCustomersError &&
-                          customers.map((cs) => (
-                            <li key={cs.customerId}>
-                              <button
-                                type="button"
-                                className="dropdown-item"
-                                onClick={() => handleCustomerSelect(cs)}
-                              >
-                                <i className="bi bi-person me-2"></i>
-                                {cs?.customerCode} - {cs?.customerName}
-                              </button>
-                            </li>
-                          ))}
-                        {!isCustomersLoading &&
-                          !isCustomersError &&
-                          customers.length === 0 && (
-                            <li className="dropdown-item text-center text-muted">
-                              <i className="bi bi-emoji-frown me-2"></i>
-                              No customers found
+                    {/* Dropdown for filtered customers */}
+                    {customerSearchTerm && (
+                      <div className="dropdown position-relative">
+                        <ul
+                          className="dropdown-menu show shadow"
+                          style={{
+                            width: "100%",
+                            maxHeight: "200px",
+                            overflowY: "auto",
+                          }}
+                        >
+                          {isCustomersLoading && (
+                            <li className="dropdown-item text-center">
+                              <i className="bi bi-hourglass-split me-2"></i>
+                              Loading...
                             </li>
                           )}
-                      </ul>
-                    </div>
-                  )}
+                          {isCustomersError && (
+                            <li className="dropdown-item text-center text-danger">
+                              <i className="bi bi-exclamation-triangle me-2"></i>
+                              Error loading customers.{" "}
+                              <button
+                                onClick={refetchCustomers}
+                                className="btn btn-link p-0"
+                              >
+                                Retry
+                              </button>
+                            </li>
+                          )}
+                          {!isCustomersLoading &&
+                            !isCustomersError &&
+                            customers.map((cs) => (
+                              <li key={cs.customerId}>
+                                <button
+                                  type="button"
+                                  className="dropdown-item"
+                                  onClick={() => handleCustomerSelect(cs)}
+                                >
+                                  <i className="bi bi-person me-2"></i>
+                                  {cs?.customerCode} - {cs?.customerName}
+                                </button>
+                              </li>
+                            ))}
+                          {!isCustomersLoading &&
+                            !isCustomersError &&
+                            customers.length === 0 && (
+                              <li className="dropdown-item text-center text-muted">
+                                <i className="bi bi-emoji-frown me-2"></i>
+                                No customers found
+                              </li>
+                            )}
+                        </ul>
+                      </div>
+                    )}
 
-                  {formData.selectedCustomer === null && (
-                    <div className="mt-2">
-                      <small className="form-text text-muted">
-                        {validationErrors.customerId && (
-                          <div className="text-danger mb-1">
-                            <i className="bi bi-exclamation-circle me-1"></i>
-                            {validationErrors.customerId}
-                          </div>
-                        )}
-                        Please search for a customer and select it
-                      </small>
-                    </div>
-                  )}
-                </div>
+                    {formData.selectedCustomer === null && (
+                      <div className="mt-2">
+                        <small className="form-text text-muted">
+                          {validationErrors.customerId && (
+                            <div className="text-danger mb-1">
+                              <i className="bi bi-exclamation-circle me-1"></i>
+                              {validationErrors.customerId}
+                            </div>
+                          )}
+                          Please search for a customer and select it
+                        </small>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Selected Customer Information */}
                 {formData.selectedCustomer && (
@@ -674,11 +700,18 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                             <li key={item.itemMasterId}>
                               <button
                                 type="button"
-                                className="dropdown-item"
+                                className="dropdown-item py-2 d-flex align-items-center"
                                 onClick={() => handleSelectItem(item)}
                               >
-                                <i className="bi bi-cart4 me-2"></i>
-                                {item?.itemCode} - {item?.itemName}
+                                <i className="bi bi-cart4 text-success me-3 fs-5"></i>
+                                <div>
+                                  <div className="fw-semibold">
+                                    {item.itemCode}
+                                  </div>
+                                  <small className="text-muted">
+                                    {item.itemName}
+                                  </small>
+                                </div>
                               </button>
                             </li>
                           ))
@@ -893,6 +926,34 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
           </div>
         </div>
 
+        {/* Show warning if line item charges were modified */}
+        {salesOrder && hasLineItemChargesChanged && (
+          <div className="alert alert-warning mb-2" role="alert">
+            <i className="bi bi-exclamation-triangle-fill me-2"></i>
+            <strong>Note:</strong> Line item charges have been modified from the
+            original sales requisition. This invoice will be switched to
+            Approval status.
+          </div>
+        )}
+
+        {/* Show warning if customer credit limit or credit duration were modified */}
+        {salesOrder && creditMismatchDetails.hasLimitMismatch && (
+          <div className="alert alert-warning mb-2" role="alert">
+            <i className="bi bi-exclamation-triangle-fill me-2"></i>
+            <strong>Note:</strong> The customer credit limit have been modified
+            from the original sales requisition. This invoice will be switched
+            to Approval status.
+          </div>
+        )}
+        {salesOrder && creditMismatchDetails.hasDurationMismatch && (
+          <div className="alert alert-warning mb-2" role="alert">
+            <i className="bi bi-exclamation-triangle-fill me-2"></i>
+            <strong>Note:</strong> The customer credit duration have been
+            modified from the original sales requisition. This invoice will be
+            switched to Approval status.
+          </div>
+        )}
+
         {/* Action Buttons */}
         <div className="card shadow-sm">
           <div className="card-body">
@@ -939,15 +1000,6 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                   </>
                 )}
               </button>
-              {/* <button
-                type="button"
-                className="btn btn-success"
-                onClick={handlePrint}
-                disabled={loading || loadingDraft || submissionStatus !== null}
-              >
-                <i className="bi bi-printer me-2"></i>
-                Print
-              </button> */}
               <button
                 type="button"
                 className="btn btn-danger"

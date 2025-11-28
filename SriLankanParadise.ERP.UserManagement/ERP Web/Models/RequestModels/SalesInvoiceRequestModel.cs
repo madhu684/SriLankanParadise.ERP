@@ -30,7 +30,7 @@
 
         public DateTime? LastUpdatedDate { get; set; }
 
-        public string? ReferenceNumber { get; set; }
+        public string? Remarks { get; set; }
 
         public int PermissionId { get; set; }
 

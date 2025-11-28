@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   delete_charges_and_deductions_applied_api,
   get_charges_and_deductions_applied_api,
@@ -11,6 +11,8 @@ import toast from "react-hot-toast";
 const SalesInvoiceDelete = ({ show, handleClose, salesInvoice }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
+
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
 
   const queryClient = useQueryClient();
 
@@ -55,14 +57,7 @@ const SalesInvoiceDelete = ({ show, handleClose, salesInvoice }) => {
         handleClose();
         // Reset states when modal closes
         setIsDeleted(false);
-        queryClient.invalidateQueries([
-          "salesInvoicesByUserId",
-          sessionStorage.getItem("userId"),
-        ]);
-        queryClient.invalidateQueries([
-          "salesInvoicesWithoutDrafts",
-          sessionStorage.getItem("companyId"),
-        ]);
+        queryClient.invalidateQueries(["salesInvoices", companyId]);
       }, 2000);
 
       toast.success("Sales Invoice deleted successfully!");

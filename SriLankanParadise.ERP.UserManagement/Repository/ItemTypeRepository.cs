@@ -14,6 +14,35 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             _dbContext = dbContext;
         }
 
+        public async Task AddItemType(ItemType itemType)
+        {
+            try
+            {
+                _dbContext.ItemTypes.Add(itemType);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<ItemType> GetItemTypeById(int itemTypeId)
+        {
+            try
+            {
+                var itemType = await _dbContext.ItemTypes
+                    .Where(it => it.ItemTypeId == itemTypeId)
+                    .FirstOrDefaultAsync();
+
+                return itemType;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<IEnumerable<ItemType>> GetItemTypesByCompanyId(int companyId)
         {
             try
@@ -27,6 +56,24 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             catch (Exception)
             {
 
+                throw;
+            }
+        }
+
+        public async Task UpdateItemType(int itemTypeId, ItemType itemType)
+        {
+            try
+            {
+                var existingItemType = await _dbContext.ItemTypes.FindAsync(itemTypeId);
+
+                if (existingItemType != null)
+                {
+                    _dbContext.Entry(existingItemType).CurrentValues.SetValues(itemType);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
                 throw;
             }
         }

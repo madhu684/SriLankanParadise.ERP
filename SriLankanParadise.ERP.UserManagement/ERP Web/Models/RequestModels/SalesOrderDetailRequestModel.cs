@@ -4,7 +4,7 @@
     {
         public int ItemBatchItemMasterId { get; set; }
 
-        public int ItemBatchBatchId { get; set; }
+        public int? ItemBatchBatchId { get; set; }
 
         public int SalesOrderId { get; set; }
 

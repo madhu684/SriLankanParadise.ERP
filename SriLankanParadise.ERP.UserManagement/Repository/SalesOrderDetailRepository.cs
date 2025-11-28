@@ -88,8 +88,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var salesOrderDetails = await _dbContext.SalesOrderDetails
                     .Where(sod => sod.SalesOrderId == salesOrderId)
-                    .Include(sod => sod.ItemBatch) 
-                    .ThenInclude(ib => ib.ItemMaster)
+                    .Include(sod => sod.Batch) 
+                    .Include(ib => ib.ItemMaster)
                     .ToListAsync();
 
                 return salesOrderDetails;

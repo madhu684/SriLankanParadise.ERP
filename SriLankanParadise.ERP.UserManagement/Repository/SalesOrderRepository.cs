@@ -34,10 +34,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var salesOrders = await _dbContext.SalesOrders
                     .Include(so => so.SalesOrderDetails)
-                    .ThenInclude(sod => sod.ItemBatch)
-                    .ThenInclude(ib => ib.Batch)
+                    .ThenInclude(sod => sod.Batch)
                     .Include(so => so.SalesOrderDetails)
-                    .ThenInclude(sod => sod.ItemBatch)
                     .ThenInclude(ib => ib.ItemMaster)
                     .ThenInclude(im => im.Unit)
                     .Include(so => so.Customer)
@@ -60,13 +58,12 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var salesOrders = await _dbContext.SalesOrders
                     .Where(so => so.Status != 0 && so.CompanyId == companyId)
                     .Include(so => so.SalesOrderDetails)
-                    .ThenInclude(sod => sod.ItemBatch)
-                    .ThenInclude(ib => ib.Batch)
+                        .ThenInclude(ib => ib.Batch)
                     .Include(so => so.SalesOrderDetails)
-                    .ThenInclude(sod => sod.ItemBatch)
-                    .ThenInclude(ib => ib.ItemMaster)
-                    .ThenInclude(im => im.Unit)
+                        .ThenInclude(im => im.ItemMaster)
+                        .ThenInclude(im => im.Unit)
                     .Include(so => so.Customer)
+                        .ThenInclude(cu => cu.CustomerDeliveryAddress)
                     .ToListAsync();
 
                 return salesOrders.Any() ? salesOrders : null;
@@ -85,12 +82,10 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var salesOrders = await _dbContext.SalesOrders
                     .Where(so => so.CreatedUserId == userId)
                     .Include(so => so.SalesOrderDetails)
-                    .ThenInclude(sod => sod.ItemBatch)
-                    .ThenInclude(ib => ib.Batch)
+                        .ThenInclude(ib => ib.Batch)
                     .Include(so => so.SalesOrderDetails)
-                    .ThenInclude(sod => sod.ItemBatch)
-                    .ThenInclude(ib => ib.ItemMaster)
-                    .ThenInclude(im => im.Unit)
+                        .ThenInclude(im => im.ItemMaster)
+                        .ThenInclude(im => im.Unit)
                     .Include(so => so.Customer)
                     .ToListAsync();
 
@@ -133,12 +128,10 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var salesOrder = await _dbContext.SalesOrders
                     .Where(so => so.SalesOrderId == salesOrderId)
                     .Include(so => so.SalesOrderDetails)
-                    .ThenInclude(sod => sod.ItemBatch)
-                    .ThenInclude(ib => ib.Batch)
+                        .ThenInclude(ib => ib.Batch)
                     .Include(so => so.SalesOrderDetails)
-                    .ThenInclude(sod => sod.ItemBatch)
-                    .ThenInclude(ib => ib.ItemMaster)
-                    .ThenInclude(im => im.Unit)
+                        .ThenInclude(im => im.ItemMaster)
+                        .ThenInclude(im => im.Unit)
                     .Include(so => so.Customer)
                     .FirstOrDefaultAsync();
 
@@ -176,8 +169,10 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var salesOrderMasters = await _dbContext.SalesOrders
                     .Where(so => so.OrderDate >= fromDate && so.OrderDate <= toDate)
                     .Include(so => so.SalesOrderDetails)
-                    .ThenInclude(ib => ib.ItemBatch)
-                    .ThenInclude(im => im.ItemMaster)
+                        .ThenInclude(ib => ib.Batch)
+                    .Include(so => so.SalesOrderDetails)
+                        .ThenInclude(im => im.ItemMaster)
+                        .ThenInclude(im => im.Unit)
                     .Include(so => so.Customer)
                     .ToListAsync();
 

@@ -4,6 +4,7 @@ import CashierSessionUpdate from "../cashierSession/cashierSessionUpdate/cashier
 import { useState, useContext } from "react";
 import { UserContext } from "../../context/userContext";
 import { useQueryClient } from "@tanstack/react-query";
+import NotificationBell from "../notificationBell/NotificationBell";
 
 const TopNav = ({ onToggleSidebar }) => {
   const [showCashierSessionModal, setShowCashierSessionModal] = useState(false);
@@ -95,6 +96,9 @@ const TopNav = ({ onToggleSidebar }) => {
           </button>
         </div>
         <span className="navbar-text">Enterprise Resource App</span>
+        {/* <div>
+          <NotificationBell />
+        </div> */}
       </div>
       {/* Render CashierSession modal */}
       {modalType === "create" && showCashierSessionModalInParent && (

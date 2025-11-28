@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import useItemMasterList from "./useItemMasterList";
 import ItemMaster from "../itemMaster";
 import ItemMasterDetail from "../itemMasterDetail/itemMasterDetail";
@@ -7,6 +7,7 @@ import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
 import DeleteConfirmationModal from "../../confirmationModals/deleteConfirmationModal/deleteConfirmationModal";
 import { FaSearch } from "react-icons/fa";
+import { UserContext } from "../../../context/userContext";
 import Pagination from "../../common/Pagination/Pagination";
 
 const ItemMasterList = () => {
@@ -17,7 +18,6 @@ const ItemMasterList = () => {
   const {
     itemMasters,
     isLoadingItemMasters,
-    isLoadingPermissions,
     itemMastersError,
     isAnyRowSelected,
     selectedRows,
@@ -41,13 +41,14 @@ const ItemMasterList = () => {
     setShowCreateIMForm,
     setShowUpdateIMForm,
     setShowDeleteConfirmation,
-    hasPermission,
     handleUpdate,
     handleUpdated,
     handleClose,
     handleConfirmDeleteItemMaster,
     handleCloseDeleteConfirmation,
   } = useItemMasterList();
+
+  const { hasPermission } = useContext(UserContext);
 
   //Handler for search input
   const handleSearch = (e) => {
@@ -69,7 +70,7 @@ const ItemMasterList = () => {
     return <ErrorComponent error={itemMastersError} />;
   }
 
-  if (isLoadingItemMasters || isLoadingPermissions) {
+  if (isLoadingItemMasters) {
     return <LoadingSpinner />;
   }
 

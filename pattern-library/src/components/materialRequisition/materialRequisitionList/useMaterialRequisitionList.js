@@ -1,17 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { get_requisition_masters_with_out_drafts_api } from "../../../services/purchaseApi";
 
-import {
-  get_requisition_masters_by_user_id_api,
-  get_issue_masters_by_requisition_master_id_api,
-} from "../../../services/purchaseApi";
-import { get_user_permissions_api } from "../../../services/userManagementApi";
+import { get_requisition_masters_by_user_id_api } from "../../../services/purchaseApi";
 import { useQuery } from "@tanstack/react-query";
 
 const useMaterialRequisitionList = () => {
-  const [materialRequisitions, setMaterialRequisitions] = useState([]);
-  const [isLoadingData, setIsLoadingData] = useState(true);
-  const [error, setError] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedRowData, setSelectedRowData] = useState([]);
   const [showApproveMRModal, setShowApproveMRModal] = useState(false);
@@ -23,101 +16,22 @@ const useMaterialRequisitionList = () => {
   const [showCreateMRForm, setShowCreateMRForm] = useState(false);
   const [openMINsList, setOpenMINsList] = useState(false);
   const [MRDetail, setMRDetail] = useState("");
-  const [refetch, setRefetch] = useState(false);
 
-  const fetchUserPermissions = async () => {
-    try {
-      const response = await get_user_permissions_api(
-        sessionStorage.getItem("userId")
-      );
-      return response.data.result;
-    } catch (error) {
-      console.error("Error fetching user permissions:", error);
-    }
-  };
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
 
   const {
-    data: userPermissions,
-    isLoading: isLoadingPermissions,
-    isError: isPermissionsError,
-    error: permissionError,
+    data: materialRequisitions = [],
+    isLoading: isLoadingData,
+    error,
   } = useQuery({
-    queryKey: ["userPermissions"],
-    queryFn: fetchUserPermissions,
+    queryKey: ["materialRequisitions", companyId],
+    queryFn: async () => {
+      const response = await get_requisition_masters_with_out_drafts_api(
+        companyId
+      );
+      return response.data.result || [];
+    },
   });
-
-  const fetchData = async () => {
-    try {
-      if (!isLoadingPermissions && userPermissions) {
-        if (hasPermission("Approve Material Requisition Note")) {
-          const requisitionMastersWithoutDraftsResponse =
-            await get_requisition_masters_with_out_drafts_api(
-              sessionStorage.getItem("companyId")
-            );
-
-          const requisitionMastersByUserIdResponse =
-            await get_requisition_masters_by_user_id_api(
-              sessionStorage.getItem("userId")
-            );
-
-          let newMaterialRequisitions = [];
-          if (
-            requisitionMastersWithoutDraftsResponse &&
-            requisitionMastersWithoutDraftsResponse.data.result
-          ) {
-            newMaterialRequisitions =
-              requisitionMastersWithoutDraftsResponse.data.result?.filter(
-                (rm) => rm.requisitionType === "MRN"
-              );
-          }
-
-          let additionalRequisitions = [];
-          if (
-            requisitionMastersByUserIdResponse &&
-            requisitionMastersByUserIdResponse.data.result
-          ) {
-            additionalRequisitions =
-              requisitionMastersByUserIdResponse.data.result?.filter(
-                (rm) => rm.requisitionType === "MRN"
-              );
-          }
-
-          const uniqueNewRequisitions = additionalRequisitions.filter(
-            (requisition) =>
-              !newMaterialRequisitions.some(
-                (existingRequisition) =>
-                  existingRequisition.requisitionMasterId ===
-                  requisition.requisitionMasterId
-              )
-          );
-
-          newMaterialRequisitions = [
-            ...newMaterialRequisitions,
-            ...uniqueNewRequisitions,
-          ];
-          setMaterialRequisitions(newMaterialRequisitions);
-        } else {
-          const requisitionMastersResponse =
-            await get_requisition_masters_by_user_id_api(
-              sessionStorage.getItem("userId")
-            );
-          setMaterialRequisitions(
-            requisitionMastersResponse.data.result?.filter(
-              (rm) => rm.requisitionType === "MRN"
-            ) || []
-          );
-        }
-      }
-    } catch (error) {
-      setError("Error fetching data");
-    } finally {
-      setIsLoadingData(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [isLoadingPermissions, userPermissions, refetch]);
 
   const handleShowApproveMRModal = () => {
     setShowApproveMRModal(true);
@@ -137,7 +51,6 @@ const useMaterialRequisitionList = () => {
   };
 
   const handleApproved = async () => {
-    fetchData();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -169,7 +82,6 @@ const useMaterialRequisitionList = () => {
   };
   const handleViewMinDetails = (mrnId) => {};
   const handleUpdated = async () => {
-    fetchData();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -244,14 +156,6 @@ const useMaterialRequisitionList = () => {
     );
   };
 
-  const hasPermission = (permissionName) => {
-    return userPermissions?.some(
-      (permission) =>
-        permission.permission.permissionName === permissionName &&
-        permission.permission.permissionStatus
-    );
-  };
-
   const formatDateInTimezone = (dateString, timezone) => {
     const date = new Date(dateString);
     const formattedDate = date.toLocaleString("en-US", {
@@ -271,7 +175,6 @@ const useMaterialRequisitionList = () => {
   return {
     materialRequisitions,
     isLoadingData,
-    isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
@@ -282,11 +185,7 @@ const useMaterialRequisitionList = () => {
     selectedRowData,
     showCreateMRForm,
     MRDetail,
-    isPermissionsError,
-    permissionError,
     openMINsList,
-    refetch,
-    setRefetch,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleViewDetails,
@@ -299,7 +198,6 @@ const useMaterialRequisitionList = () => {
     handleCloseDetailMRModal,
     handleApproved,
     setShowCreateMRForm,
-    hasPermission,
     handleUpdated,
     handleClose,
     formatDateInTimezone,

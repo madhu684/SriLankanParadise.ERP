@@ -6,5 +6,7 @@
         public int ItemPriceMasterId { get; set; }
         public int ItemMasterId { get; set; }
         public decimal Price { get; set; }
+
+        public ItemMasterDto? ItemMaster { get; set; }
     }
 }

@@ -12,7 +12,7 @@ namespace SriLankanParadise.ERP.UserManagement.DataModels
         [JsonIgnore]
         public virtual ItemPriceMaster? ItemPriceMaster { get; set; }
 
-        [JsonIgnore]
+        //[JsonIgnore]
         public virtual ItemMaster? ItemMaster { get; set; }
     }
 }

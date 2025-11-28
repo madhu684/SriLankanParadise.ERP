@@ -5,7 +5,7 @@ import moment from "moment";
 import useMinAccept from "./minAccept";
 import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 
-const MinAccept = ({ refetch, setRefetch, show, handleClose, min }) => {
+const MinAccept = ({ show, handleClose, min }) => {
   const {
     approvalStatus,
     loading,
@@ -20,8 +20,6 @@ const MinAccept = ({ refetch, setRefetch, show, handleClose, min }) => {
     getStatusLabel,
   } = useMinAccept({
     min,
-    refetch,
-    setRefetch,
     onFormSubmit: () => {
       handleClose();
     },

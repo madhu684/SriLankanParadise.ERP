@@ -774,7 +774,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 // First, get all ItemMasterIds and BatchIds that match the reference number
                 var itemBatchData = await _dbContext.ItemBatches
-                    .Where(ib => ib.ReferenceNo == reference)
+                    .Where(ib => ib.CustDekNo == reference)
                     .Select(ib => new
                     {
                         ib.ItemMasterId,

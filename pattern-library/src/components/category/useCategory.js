@@ -1,5 +1,7 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { post_category_api } from "../../services/inventoryApi";
+import { useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useCategory = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -12,6 +14,10 @@ const useCategory = ({ onFormSubmit }) => {
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const alertRef = useRef(null);
   const [loading, setLoading] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
 
   const handleInputChange = (field, value) => {
     setFormData((prevFormData) => ({
@@ -86,7 +92,7 @@ const useCategory = ({ onFormSubmit }) => {
           categoryName: formData.categoryName,
           status: status,
           isTreatment: formData.isTreatment === "1" ? true : false,
-          companyId: sessionStorage.getItem("companyId"),
+          companyId: companyId,
           permissionId: 1038,
         };
 
@@ -95,11 +101,13 @@ const useCategory = ({ onFormSubmit }) => {
         if (response.status === 201) {
           if (status === false) {
             setSubmissionStatus("successSavedAsDraft");
-            console.log("Category created as inactive!", formData);
+            toast.success("Category created and saved as draft!");
           } else {
             setSubmissionStatus("successSubmitted");
-            console.log("Category created successfully!", formData);
+            toast.success("Category created successfully!");
           }
+
+          queryClient.invalidateQueries(["categories", companyId]);
 
           setTimeout(() => {
             setSubmissionStatus(null);
@@ -108,6 +116,7 @@ const useCategory = ({ onFormSubmit }) => {
           }, 3000);
         } else {
           setSubmissionStatus("error");
+          toast.error("Category creation failed!");
         }
       }
     } catch (error) {

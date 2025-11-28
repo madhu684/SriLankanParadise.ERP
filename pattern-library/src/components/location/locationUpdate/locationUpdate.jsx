@@ -226,11 +226,13 @@ const LocationUpdate = ({ handleClose, location, handleUpdated }) => {
                   disabled={formData.selectedPriceList !== null}
                 >
                   <option value="">Choose price list...</option>
-                  {itemPriceList?.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.listName}
-                    </option>
-                  ))}
+                  {itemPriceList
+                    ?.filter((ipl) => ipl.status === 1)
+                    .map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.listName}
+                      </option>
+                    ))}
                 </select>
               </div>
 
@@ -327,7 +329,7 @@ const LocationUpdate = ({ handleClose, location, handleUpdated }) => {
                       <i className="bi bi-search me-2 text-info"></i>
                       Parent Location <span className="text-danger">*</span>
                     </label>
-                    <div className="input-group input-group-lg">
+                    <div className="input-group">
                       <span className="input-group-text bg-white">
                         <i className="bi bi-search"></i>
                       </span>

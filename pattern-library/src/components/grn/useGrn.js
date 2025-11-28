@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   get_purchase_orders_with_out_drafts_api,
   get_purchase_requisitions_with_out_drafts_api,
@@ -13,13 +13,14 @@ import {
   get_company_locations_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 const useGrn = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
     grnDate: new Date().toISOString().split("T")[0],
     receivedBy: "",
+    custdeckNo: "",
     receivedDate: "",
     itemDetails: [],
     status: "4",
@@ -60,11 +61,13 @@ const useGrn = ({ onFormSubmit }) => {
   const [searchBySR, setSearchBySR] = useState(false);
   const [supplierSearchTerm, setSupplierSearchTerm] = useState("");
 
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
+
+  const queryClient = useQueryClient();
+
   const fetchLocations = async () => {
     try {
-      const response = await get_company_locations_api(
-        sessionStorage.getItem("companyId")
-      );
+      const response = await get_company_locations_api(companyId);
       return response.data.result;
     } catch (error) {
       console.error("Error fetching locations:", error);
@@ -101,7 +104,7 @@ const useGrn = ({ onFormSubmit }) => {
     error: itemsError,
   } = useQuery({
     queryKey: ["items", searchTerm],
-    queryFn: () => fetchItems(sessionStorage.getItem("companyId"), searchTerm),
+    queryFn: () => fetchItems(companyId, searchTerm),
   });
 
   const fetchPurchaseOrders = async () => {
@@ -157,7 +160,7 @@ const useGrn = ({ onFormSubmit }) => {
   const fetchApprovedSupplyReturnMasters = async () => {
     try {
       const response = await get_approved_supply_return_masters_by_companyId(
-        sessionStorage.getItem("companyId")
+        companyId
       );
       return response.data.result || [];
     } catch (error) {
@@ -166,10 +169,7 @@ const useGrn = ({ onFormSubmit }) => {
   };
 
   const { data: approvedSupplyReturnMasters } = useQuery({
-    queryKey: [
-      "approvedSupplyReturnMasters",
-      sessionStorage.getItem("companyId"),
-    ],
+    queryKey: ["approvedSupplyReturnMasters", companyId],
     queryFn: fetchApprovedSupplyReturnMasters,
   });
 
@@ -186,9 +186,7 @@ const useGrn = ({ onFormSubmit }) => {
 
   const fetchSuppliers = async () => {
     try {
-      const response = await get_company_suppliers_api(
-        sessionStorage.getItem("companyId")
-      );
+      const response = await get_company_suppliers_api(companyId);
 
       const filteredSuppliers = response.data.result?.filter(
         (supplier) => supplier.status === 1
@@ -433,16 +431,6 @@ const useGrn = ({ onFormSubmit }) => {
     }
   }, [submissionStatus]);
 
-  const generateRef = () => {
-    const currentDate = new Date();
-    const formattedDate = currentDate
-      .toISOString()
-      .split("T")[0]
-      .replace(/-/g, "");
-    const randomNum = Math.floor(1000 + Math.random() * 9000);
-    return `GR-${formattedDate}-${randomNum}`;
-  };
-
   const validateField = (
     fieldName,
     fieldDisplayName,
@@ -514,6 +502,12 @@ const useGrn = ({ onFormSubmit }) => {
       formData.supplierId
     );
 
+    const isCustdeckNoValid = validateField(
+      "custdeckNo",
+      "Cust Deck No",
+      formData.custdeckNo
+    );
+
     const isStatusValid = validateField("status", "Status", formData.status);
 
     let isPurchaseOrderIdValid = true;
@@ -579,6 +573,23 @@ const useGrn = ({ onFormSubmit }) => {
 
       isRejectedQuantityValid =
         isRejectedQuantityValid && isValidRejectedQuantity;
+    });
+
+    let isRejectionReasonValid = true;
+    // Validate rejection reason if rejected quantity > 0
+    formData.itemDetails.forEach((item, index) => {
+      if (parseFloat(item.rejectedQuantity) > 0) {
+        const reasonFieldName = `rejectionReason_${index}`;
+        const reasonFieldDisplayName = `Rejection Reason for ${item.name}`;
+
+        const isValidReason = validateField(
+          reasonFieldName,
+          reasonFieldDisplayName,
+          item.rejectionReason
+        );
+
+        isRejectionReasonValid = isRejectionReasonValid && isValidReason;
+      }
     });
 
     let isItemUnitPriceValid = true;
@@ -647,7 +658,9 @@ const useGrn = ({ onFormSubmit }) => {
       isItemQuantityValid &&
       isItemUnitPriceValid &&
       isRejectedQuantityValid &&
+      isRejectionReasonValid &&
       isGrnTypeValid &&
+      isCustdeckNoValid &&
       isWarehouseLocationValid &&
       (isPurchaseOrderIdValid ||
         (isPurchaseRequisitionIdValid && isSupplierValid) ||
@@ -657,8 +670,6 @@ const useGrn = ({ onFormSubmit }) => {
 
   const handleSubmit = async (isSaveAsDraft) => {
     try {
-      const grnRef = generateRef();
-
       const status = isSaveAsDraft ? 0 : 1;
 
       const combinedStatus = parseInt(`${formData.status}${status}`, 10);
@@ -698,12 +709,19 @@ const useGrn = ({ onFormSubmit }) => {
           lastUpdatedDate: currentDate,
           grnType: formData.grnType,
           warehouseLocationId: formData.warehouseLocation,
-          referenceNo: grnRef,
+          custDekNo: formData.custdeckNo,
           permissionId: 20,
         };
 
         const response = await post_grn_master_api(grnData);
         console.log("GRN Response", response);
+
+        if (response.status === 409) {
+          toast.error(response.message);
+          setLoading(false);
+          setLoadingDraft(false);
+          return;
+        }
 
         const grnMasterId = response.data.result.grnMasterId;
 
@@ -720,13 +738,12 @@ const useGrn = ({ onFormSubmit }) => {
             orderedQuantity: item.quantity,
             expiryDate: item.expiryDate,
             itemBarcode: item.itemBarcode,
+            rejectedReason: item.rejectionReason || null,
             permissionId: 20,
           };
 
           // Call post_purchase_requisition_detail_api for each item
           const detailsApiResponse = await post_grn_detail_api(detailsData);
-          console.log("GRN Details Response", detailsApiResponse);
-
           return detailsApiResponse;
         });
 
@@ -752,6 +769,8 @@ const useGrn = ({ onFormSubmit }) => {
             setSubmissionStatus("successSubmitted");
             console.log("GRN submitted successfully!", formData);
           }
+
+          queryClient.invalidateQueries(["grns", companyId]);
 
           setTimeout(() => {
             setSubmissionStatus(null);

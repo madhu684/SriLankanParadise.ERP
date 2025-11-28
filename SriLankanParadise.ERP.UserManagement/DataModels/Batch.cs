@@ -22,4 +22,6 @@ public partial class Batch
     public virtual ICollection<SupplyReturnDetail> SupplyReturnDetails { get; set; } = new List<SupplyReturnDetail>();
 
     public virtual ICollection<SalesInvoiceDetail> SalesInvoiceDetails { get; set; } = new List<SalesInvoiceDetail>();
+
+    public virtual ICollection<SalesOrderDetail> SalesOrderDetails { get; set; } = new List<SalesOrderDetail>();
 }

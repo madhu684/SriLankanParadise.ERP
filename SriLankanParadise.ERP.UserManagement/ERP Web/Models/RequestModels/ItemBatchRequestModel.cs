@@ -26,7 +26,7 @@
 
         public int? Qty { get; set; }
 
-        public string? ReferenceNo { get; set; }
+        public string? CustDekNo { get; set; }
 
         public int PermissionId { get; set; }
     }

@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { get_charges_and_deductions_applied_api } from "../../../services/purchaseApi";
 import { get_company_api } from "../../../services/salesApi";
 import { useQuery } from "@tanstack/react-query";
 
 const useSalesInvoiceDetail = (salesInvoice) => {
+  const [showFullRemarks, setShowFullRemarks] = useState(false);
+
   const calculateSubTotal = () => {
     const subTotal = salesInvoice.salesInvoiceDetails.reduce(
       (total, detail) => total + detail.totalPrice,
@@ -124,8 +127,10 @@ const useSalesInvoiceDetail = (salesInvoice) => {
     isCompanyLoading,
     isCompanyError,
     company,
+    showFullRemarks,
     renderSalesInvoiceDetails,
     calculateSubTotal,
+    setShowFullRemarks,
   };
 };
 

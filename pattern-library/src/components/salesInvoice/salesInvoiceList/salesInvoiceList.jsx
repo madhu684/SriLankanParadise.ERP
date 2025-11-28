@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import useSalesInvoiceList from "./useSalesInvoiceList";
 import SalesInvoiceApproval from "../salesInvoiceApproval/salesInvoiceApproval";
 import SalesInvoice from "../salesInvoice";
@@ -9,6 +9,7 @@ import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
 import Pagination from "../../common/Pagination/Pagination";
 import { FaSearch } from "react-icons/fa";
+import { UserContext } from "../../../context/userContext";
 import SalesInvoiceDelete from "../salesInvoiceDelete/salesInvoiceDelete";
 
 const SalesInvoiceList = () => {
@@ -18,66 +19,65 @@ const SalesInvoiceList = () => {
 
   const {
     salesInvoices,
-    isLoadingData,
-    isLoadingPermissions,
-    isPermissionsError,
-    error,
     isAnyRowSelected,
     selectedRows,
-    selectedRowData,
     showApproveSIModal,
     showApproveSIModalInParent,
     showDetailSIModal,
     showDetailSIModalInParent,
-    showCreateSIForm,
-    showUpdateSIForm,
     showRightOffSIModal,
     showRightOffSIModalInParent,
+    selectedRowData,
+    showCreateSIForm,
+    showUpdateSIForm,
     SIDetail,
     showDeleteSIForm,
+    error,
+    isLoadingSalesInvoices,
     setShowDeleteSIForm,
     areAnySelectedRowsPending,
     areAnySelectedRowsApproved,
-    setSelectedRows,
-    handleRowSelect,
+    handleViewDetails,
     getStatusLabel,
     getStatusBadgeClass,
+    handleRowSelect,
     handleShowApproveSIModal,
     handleCloseApproveSIModal,
     handleShowRightOffSIModal,
     handleCloseRightOffSIModal,
-    handleCloseDetailSIModal,
     handleApproved,
     handleRightOff,
-    handleViewDetails,
     setShowCreateSIForm,
     setShowUpdateSIForm,
-    hasPermission,
     handleUpdate,
     handleUpdated,
     handleClose,
+    handleCloseDetailSIModal,
   } = useSalesInvoiceList();
+
+  const { hasPermission } = useContext(UserContext);
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
     setCurrentPage(1);
   };
 
-  const filteredSalesInvoices = salesInvoices.filter(
-    (si) =>
-      si.referenceNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      si.createdBy.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredSalesInvoices = salesInvoices
+    ? salesInvoices.filter(
+        (si) =>
+          si.referenceNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          si.createdBy.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  if (error || isPermissionsError) {
+  if (error) {
     return <ErrorComponent error={error || "Error fetching data"} />;
   }
 
   if (
-    isLoadingData ||
-    isLoadingPermissions ||
+    isLoadingSalesInvoices ||
     (salesInvoices && !(salesInvoices.length >= 0))
   ) {
     return <LoadingSpinner />;
@@ -110,8 +110,11 @@ const SalesInvoiceList = () => {
           className="d-flex flex-column justify-content-center align-items-center text-center vh-100"
           style={{ maxHeight: "80vh" }}
         >
-          <p>You haven't created any sales invoice. Create a new one.</p>
-          {hasPermission("Create Sales Invoice") && (
+          <p>
+            You haven't created any sales invoice. Create a new one through a
+            Sales Requisition.
+          </p>
+          {/* {hasPermission("Create Sales Invoice") && (
             <button
               type="button"
               className="btn btn-primary"
@@ -119,7 +122,7 @@ const SalesInvoiceList = () => {
             >
               Create
             </button>
-          )}
+          )} */}
         </div>
       </div>
     );
@@ -130,7 +133,7 @@ const SalesInvoiceList = () => {
       <h2>Sales Invoices</h2>
       <div className="mt-3 d-flex justify-content-start align-items-center">
         <div className="btn-group" role="group">
-          {hasPermission("Create Sales Invoice") && (
+          {/* {hasPermission("Create Sales Invoice") && (
             <button
               type="button"
               className="btn btn-primary"
@@ -138,7 +141,7 @@ const SalesInvoiceList = () => {
             >
               Create
             </button>
-          )}
+          )} */}
           {hasPermission("Approve Sales Invoice") &&
             selectedRowData[0]?.createdUserId !==
               parseInt(sessionStorage.getItem("userId")) &&

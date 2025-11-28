@@ -1,10 +1,16 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { approve_requisition_master_api } from "../../../services/purchaseApi";
+import { useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useMaterialRequisitionApproval = ({ onFormSubmit }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const alertRef = useRef(null);
+
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
+
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (approvalStatus === "approved") {
@@ -40,12 +46,11 @@ const useMaterialRequisitionApproval = ({ onFormSubmit }) => {
 
       if (approvalResponse.status === 200) {
         setApprovalStatus("approved");
-        console.log(
-          "Material requisition note approved successfully:",
-          approvalResponse
-        );
+        queryClient.invalidateQueries(["materialRequisitions", companyId]);
+        toast.success("Material requisition approved successfully!");
       } else {
         setApprovalStatus("error");
+        console.error("Error approving Material requisition note");
       }
 
       setTimeout(() => {
@@ -59,6 +64,7 @@ const useMaterialRequisitionApproval = ({ onFormSubmit }) => {
         setApprovalStatus(null);
         setLoading(false);
       }, 2000);
+      console.error("Error approving Material requisition note");
     }
   };
 

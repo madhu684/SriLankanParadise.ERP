@@ -19,19 +19,22 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         private readonly IMapper _mapper;
         private readonly ILogger<SalesOrderController> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly INotificationService _notificationService;
 
         public SalesOrderController(
             ISalesOrderService salesOrderService,
             IActionLogService actionLogService,
             IMapper mapper,
             ILogger<SalesOrderController> logger,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            INotificationService notificationService)
         {
             _salesOrderService = salesOrderService;
             _actionLogService = actionLogService;
             _mapper = mapper;
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
+            _notificationService = notificationService;
         }
 
         [HttpPost]
@@ -42,18 +45,22 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 var salesOrder = _mapper.Map<SalesOrder>(salesOrderRequest);
                 await _salesOrderService.AddSalesOrder(salesOrder);
 
-                // Create action log
-                //var actionLog = new ActionLogModel()
-                //{
-                //    ActionId = salesOrderRequest.PermissionId,
-                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                //    Timestamp = DateTime.UtcNow
-                //};
-                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
-
-                // send response
                 var salesOrderDto = _mapper.Map<SalesOrderDto>(salesOrder);
+
+                // Send notification to all logged-in users
+                await _notificationService.SendNotificationToAllLoggedUsers(new NotificationDto
+                {
+                    Title = "New Sales Order Created",
+                    Type = "SalesOrder",
+                    Action = "Created",
+                    Data = new
+                    {
+                        salesOrderId = salesOrderDto.SalesOrderId,
+                        reference = salesOrderDto.ReferenceNo,
+                        amount = salesOrderDto.TotalAmount,
+                    }
+                });
+
                 _logger.LogInformation(LogMessages.SalesOrderCreated);
                 AddResponseMessage(Response, LogMessages.SalesOrderCreated, salesOrderDto, true, HttpStatusCode.Created);
             }

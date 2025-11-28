@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { post_cashier_session_api } from "../../services/salesApi";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -14,6 +14,8 @@ const useCashierSession = ({ onFormSubmit }) => {
   const [loading, setLoading] = useState(false);
 
   const queryClient = useQueryClient();
+
+  const userId = useMemo(() => sessionStorage.getItem("userId"), []);
 
   useEffect(() => {
     if (submissionStatus != null) {
@@ -79,7 +81,7 @@ const useCashierSession = ({ onFormSubmit }) => {
       if (isFormValid) {
         setLoading(true);
         const cashierSessionData = {
-          userId: sessionStorage.getItem("userId"),
+          userId: userId,
           sessionIn: currentDate,
           sessionOut: null,
           openingBalance: formData.openingBalance,
@@ -97,12 +99,7 @@ const useCashierSession = ({ onFormSubmit }) => {
         if (response.status === 201) {
           setSubmissionStatus("success");
           console.log("Cashier session open successfully", cashierSessionData);
-          queryClient.invalidateQueries({
-            queryKey: [
-              "activeCashierSession",
-              sessionStorage.getItem("userId"),
-            ],
-          });
+          queryClient.invalidateQueries(["activeCashierSession", userId]);
           setTimeout(() => {
             setSubmissionStatus(null);
             setLoading(false);

@@ -5,6 +5,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
     public interface IItemPriceMasterRepository
     {
         Task AddItemPriceMaster(ItemPriceMaster itemPriceMaster);
+        Task UpdateItemPriceMaster(int id, ItemPriceMaster itemPriceMaster);
+        Task ChangeStatus(int id, ItemPriceMaster itemPriceMaster);
         Task<ItemPriceMaster> GetItemPriceMasterById(int id);
         Task<IEnumerable<ItemPriceMaster>> GetItemPriceMasterByCompanyId(int companyId);
     }

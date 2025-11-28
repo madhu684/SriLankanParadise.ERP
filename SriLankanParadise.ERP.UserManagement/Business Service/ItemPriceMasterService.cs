@@ -20,6 +20,11 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             await _repository.AddItemPriceMaster(itemPriceMaster);
         }
 
+        public async Task ChangeStatus(int id, ItemPriceMaster itemPriceMaster)
+        {
+            await _repository.ChangeStatus(id, itemPriceMaster);
+        }
+
         public Task<IEnumerable<ItemPriceMaster>> GetItemPriceMasterByCompanyId(int companyId)
         {
             return _repository.GetItemPriceMasterByCompanyId(companyId);
@@ -45,6 +50,11 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
 
             var itemPriceMaster = await _repository.GetItemPriceMasterById(location.PriceMasterId.Value);
             return itemPriceMaster;
+        }
+
+        public async Task UpdateItemPriceMaster(int id, ItemPriceMaster itemPriceMaster)
+        {
+            await _repository.UpdateItemPriceMaster(id, itemPriceMaster);
         }
     }
 }

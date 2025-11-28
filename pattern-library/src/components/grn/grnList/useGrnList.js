@@ -1,13 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { get_grn_masters_with_out_drafts_api } from "../../../services/purchaseApi";
-import { get_grn_masters_by_user_id_api } from "../../../services/purchaseApi";
-import { get_user_permissions_api } from "../../../services/userManagementApi";
 import { useQuery } from "@tanstack/react-query";
 
 const useGrnList = () => {
-  const [Grns, setGrns] = useState([]);
-  const [isLoadingData, setIsLoadingData] = useState(true);
-  const [error, setError] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedRowData, setSelectedRowData] = useState([]);
   const [showApproveGrnModal, setShowApproveGrnModal] = useState(false);
@@ -20,79 +15,19 @@ const useGrnList = () => {
   const [showUpdateGrnForm, setShowUpdateGrnForm] = useState(false);
   const [GRNDetail, setGRNDetail] = useState("");
 
-  const fetchUserPermissions = async () => {
-    try {
-      const response = await get_user_permissions_api(
-        sessionStorage.getItem("userId")
-      );
-      return response.data.result;
-    } catch (error) {
-      console.error("Error fetching user permissions:", error);
-    }
-  };
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
 
   const {
-    data: userPermissions,
-    isLoading: isLoadingPermissions,
-    isError: isPermissionsError,
-    error: permissionError,
+    data: Grns = [],
+    isLoading: isLoadingData,
+    error,
   } = useQuery({
-    queryKey: ["userPermissions"],
-    queryFn: fetchUserPermissions,
+    queryKey: ["grns", companyId],
+    queryFn: async () => {
+      const GrnResponse = await get_grn_masters_with_out_drafts_api(companyId);
+      return GrnResponse.data.result || [];
+    },
   });
-
-  const fetchData = async () => {
-    try {
-      if (!isLoadingPermissions && userPermissions) {
-        if (hasPermission("Approve Goods Received Note")) {
-          const GrnWithoutDraftsResponse =
-            await get_grn_masters_with_out_drafts_api(
-              sessionStorage.getItem("companyId")
-            );
-
-          const GrnByUserIdResponse = await get_grn_masters_by_user_id_api(
-            sessionStorage.getItem("userId")
-          );
-
-          let newGrns = [];
-          if (
-            GrnWithoutDraftsResponse &&
-            GrnWithoutDraftsResponse.data.result
-          ) {
-            newGrns = GrnWithoutDraftsResponse.data.result;
-          }
-
-          let additionalGrns = [];
-          if (GrnByUserIdResponse && GrnByUserIdResponse.data.result) {
-            additionalGrns = GrnByUserIdResponse.data.result;
-          }
-
-          const uniqueNewGrns = additionalGrns.filter(
-            (grn) =>
-              !newGrns.some(
-                (existingGrn) => existingGrn.grnMasterId === grn.grnMasterId
-              )
-          );
-
-          newGrns = [...newGrns, ...uniqueNewGrns];
-          setGrns(newGrns);
-        } else {
-          const GrnResponse = await get_grn_masters_by_user_id_api(
-            sessionStorage.getItem("userId")
-          );
-          setGrns(GrnResponse.data.result || []);
-        }
-      }
-    } catch (error) {
-      setError("Error fetching data");
-    } finally {
-      setIsLoadingData(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [isLoadingPermissions, userPermissions]);
 
   const handleShowApproveGrnModal = () => {
     setShowApproveGrnModal(true);
@@ -112,7 +47,6 @@ const useGrnList = () => {
   };
 
   const handleApproved = async () => {
-    fetchData();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -149,7 +83,6 @@ const useGrnList = () => {
   };
 
   const handleUpdated = async () => {
-    fetchData();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -234,18 +167,9 @@ const useGrnList = () => {
     });
   };
 
-  const hasPermission = (permissionName) => {
-    return userPermissions?.some(
-      (permission) =>
-        permission.permission.permissionName === permissionName &&
-        permission.permission.permissionStatus
-    );
-  };
-
   return {
     Grns,
     isLoadingData,
-    isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
@@ -256,11 +180,7 @@ const useGrnList = () => {
     selectedRowData,
     showCreateGrnForm,
     showUpdateGrnForm,
-    userPermissions,
     GRNDetail,
-    isLoadingPermissions,
-    isPermissionsError,
-    permissionError,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleViewDetails,
@@ -274,7 +194,6 @@ const useGrnList = () => {
     handleApproved,
     setShowCreateGrnForm,
     setShowUpdateGrnForm,
-    hasPermission,
     handleUpdate,
     handleUpdated,
     handleClose,

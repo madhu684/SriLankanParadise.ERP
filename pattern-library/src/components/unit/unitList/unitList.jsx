@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import useUnitList from "./useUnitList";
 import Unit from "../unit";
 import UnitUpdate from "../unitUpdate/unitUpdate";
@@ -6,6 +6,7 @@ import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
 import DeleteConfirmationModal from "../../confirmationModals/deleteConfirmationModal/deleteConfirmationModal";
 import { FaSearch } from "react-icons/fa";
+import { UserContext } from "../../../context/userContext";
 import Pagination from "../../common/Pagination/Pagination";
 
 const UnitList = () => {
@@ -16,7 +17,6 @@ const UnitList = () => {
   const {
     units,
     isLoadingData,
-    isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
@@ -28,21 +28,20 @@ const UnitList = () => {
     submissionStatus,
     submissionMessage,
     loading,
-    areAnySelectedRowsPending,
-    setSelectedRows,
-    handleRowSelect,
     getStatusLabel,
     getStatusBadgeClass,
+    handleRowSelect,
     setShowCreateUnitForm,
     setShowUpdateUnitForm,
-    setShowDeleteConfirmation,
-    hasPermission,
     handleUpdate,
     handleUpdated,
     handleClose,
-    handleConfirmDeleteUnit,
     handleCloseDeleteConfirmation,
+    setShowDeleteConfirmation,
+    handleConfirmDeleteUnit,
   } = useUnitList();
+
+  const { hasPermission } = useContext(UserContext);
 
   //Handler for search input
   const handleSearch = (e) => {
@@ -51,9 +50,11 @@ const UnitList = () => {
   };
 
   //Filter Units based on search query
-  const filteredUnits = units.filter((unit) =>
-    unit.unitName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredUnits = units
+    ? units.filter((unit) =>
+        unit.unitName.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
 
   //Pagination Handler
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
@@ -62,11 +63,7 @@ const UnitList = () => {
     return <ErrorComponent error={error} />;
   }
 
-  if (
-    isLoadingData ||
-    isLoadingPermissions ||
-    (units && !(units.length >= 0))
-  ) {
+  if (isLoadingData || (units && !(units.length >= 0))) {
     return <LoadingSpinner />;
   }
 

@@ -6,6 +6,7 @@ import {
 } from "../../../services/purchaseApi";
 import { get_item_price_list_by_company_id_api } from "../../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useLocationUpdate = ({ location, onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -243,23 +244,20 @@ const useLocationUpdate = ({ location, onFormSubmit }) => {
 
         if (putResponse.status === 200) {
           setSubmissionStatus("successSubmitted");
-          console.log("Location updated successfully!", formData);
 
           setTimeout(() => {
             setSubmissionStatus(null);
             onFormSubmit();
             setLoading(false);
           }, 2000);
+          toast.success("Location updated successfully!");
         } else {
-          console.error(
-            "Unexpected response status:",
-            putResponse.status || putResponse
-          );
           setSubmissionStatus("error");
           setTimeout(() => {
             setSubmissionStatus(null);
             setLoading(false);
           }, 2000);
+          toast.error("Failed to update location.");
         }
       }
     } catch (error) {

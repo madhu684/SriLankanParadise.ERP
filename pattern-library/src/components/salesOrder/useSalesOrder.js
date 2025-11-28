@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   get_customers_by_company_id_api,
   post_sales_order_api,
@@ -12,15 +12,19 @@ import {
   get_transaction_types_api,
   get_sum_location_inventories_by_locationId_itemMasterId_api,
   get_user_locations_by_user_id_api,
-  get_item_batches_by_item_master_id_api,
 } from "../../services/purchaseApi";
-import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
-import { useQuery } from "@tanstack/react-query";
+import {
+  get_item_masters_by_company_id_with_query_api,
+  get_item_price_list_by_locationId,
+} from "../../services/inventoryApi";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useSalesOrder = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
+    customerPoNumber: "",
     customerId: "",
-    orderDate: "",
+    orderDate: new Date().toISOString().split("T")[0],
     deliveryDate: "",
     itemDetails: [],
     status: 0,
@@ -28,8 +32,9 @@ const useSalesOrder = ({ onFormSubmit }) => {
     totalAmount: 0,
     subTotal: 0,
     selectedCustomer: "",
-    salesPersonId: "",
-    selectedSalesPerson: "",
+    salesPersonId: null,
+    selectedSalesPerson: null,
+    storeLocation: null,
     commonChargesAndDeductions: [],
   });
 
@@ -37,11 +42,9 @@ const useSalesOrder = ({ onFormSubmit }) => {
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
   const [referenceNo, setReferenceNo] = useState(null);
-  const alertRef = useRef(null);
   const [showCreateCustomerModal, setShowCreateCustomerModal] = useState(false);
   const [showCreateCustomerMoalInParent, setShowCreateCustomerModalInParent] =
     useState(false);
-  const [directOrder, setDirectOrder] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBatch, setSelectedBatch] = useState(null);
   const [customerSearchTerm, setCustomerSearchTerm] = useState("");
@@ -49,95 +52,62 @@ const useSalesOrder = ({ onFormSubmit }) => {
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [warehouseLocationId, setWarehouseLocationId] = useState(null);
 
-  const fetchUserLocations = async () => {
-    try {
-      const response = await get_user_locations_by_user_id_api(
-        sessionStorage.getItem("userId")
-      );
-      setWarehouseLocationId(response.data.result[0].locationId);
-      return response.data.result.filter(
-        (location) => location.location.locationTypeId === 2
-      );
-    } catch (error) {
-      console.error("Error fetching user locations:", error);
-    }
-  };
+  const alertRef = useRef(null);
+
+  const queryClient = useQueryClient();
+
+  // ============================================================================
+  // MEMOIZED VALUES
+  // ============================================================================
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
+  const userId = useMemo(() => sessionStorage.getItem("userId"), []);
+  const username = useMemo(() => sessionStorage.getItem("username"), []);
+
+  // ============================================================================
+  // DATA FETCHING - REACT QUERY
+  // ============================================================================
+
+  // Fetch user locations - FIX: Pass function reference, not function call
   const {
     data: userLocations = [],
     isLoading: isUserLocationsLoading,
     isError: isUserLocationsError,
     error: userLocationsError,
   } = useQuery({
-    queryKey: ["userLocations", sessionStorage.getItem("userId")],
-    queryFn: fetchUserLocations,
+    queryKey: ["userLocations", userId],
+    queryFn: async () => {
+      const response = await get_user_locations_by_user_id_api(userId);
+      const filteredLocations = response?.data?.result.filter(
+        (loc) => loc?.location?.locationTypeId === 2
+      );
+      return filteredLocations || [];
+    },
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000,
   });
 
-  // const fetchItemBatches = async (itemMasterId) => {
-  //   try {
-  //     const response = await get_item_batches_by_item_master_id_api(
-  //       itemMasterId,
-  //       sessionStorage.getItem("companyId")
-  //     );
-  //     return response.data.result;
-  //   } catch (error) {
-  //     console.error("Error fetching item batches:", error);
-  //   }
-  // };
-
-  // const {
-  //   data: itemBatches,
-  //   isLoading: isBatchesLoading,
-  //   isError: isBatchesError,
-  //   error: batchesError,
-  //   refetch: refetchItemBatches,
-  // } = useQuery({
-  //   queryKey: ["itemBatches", formData.itemMasterId],
-  //   queryFn: () => fetchItemBatches(formData.itemMasterId),
-  // });
-
-  const fetchItems = async (companyId, searchQuery) => {
-    try {
-      const response = await get_item_masters_by_company_id_with_query_api(
-        companyId,
-        searchQuery,
-        false
-      );
-      return response.data.result;
-    } catch (error) {
-      console.error("Error fetching items:", error);
-    }
-  };
-
+  // Fetch items
   const {
     data: availableItems,
     isLoading: isItemsLoading,
     isError: isItemsError,
     error: itemsError,
   } = useQuery({
-    queryKey: ["items", searchTerm],
-    queryFn: () => fetchItems(sessionStorage.getItem("companyId"), searchTerm),
+    queryKey: ["items", companyId, searchTerm],
+    queryFn: async () => {
+      const response = await get_item_masters_by_company_id_with_query_api(
+        companyId,
+        searchTerm,
+        false
+      );
+      return response.data.result;
+    },
+    enabled: searchTerm.length > 0,
+    staleTime: 2 * 60 * 1000,
   });
 
-  useEffect(() => {
-    if (submissionStatus != null) {
-      // Scroll to the success alert when it becomes visible
-      alertRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [submissionStatus]);
-
-  const fetchCustomers = async () => {
-    try {
-      const response = await get_customers_by_company_id_api(
-        sessionStorage?.getItem("companyId")
-      );
-      return response.data.result || [];
-    } catch (error) {
-      console.error("Error fetching customers:", error);
-    }
-  };
-
+  // Fetch customers
   const {
     data: customers,
     isLoading: isCustomersLoading,
@@ -145,63 +115,45 @@ const useSalesOrder = ({ onFormSubmit }) => {
     error: customersError,
     refetch: refetchCustomers,
   } = useQuery({
-    queryKey: ["customers"],
-    queryFn: fetchCustomers,
+    queryKey: ["customers", companyId],
+    queryFn: async () => {
+      const response = await get_customers_by_company_id_api(companyId);
+      return response.data.result || [];
+    },
+    staleTime: 5 * 60 * 1000,
   });
 
-  const fetchSalesPersons = async () => {
-    try {
-      const response = await get_sales_persons_by_company_id_api(
-        sessionStorage?.getItem("companyId")
-      );
-      return response.data.result || [];
-    } catch (error) {
-      console.error("Error fetching sales persons:", error);
-    }
-  };
-
+  // Fetch sales persons
   const {
     data: salesPersons,
     isLoading: isSalesPersonsLoading,
     isError: isSalesPersonsError,
     error: salesPersonsError,
   } = useQuery({
-    queryKey: ["salesPersons"],
-    queryFn: fetchSalesPersons,
+    queryKey: ["salesPersons", companyId],
+    queryFn: async () => {
+      const response = await get_sales_persons_by_company_id_api(companyId);
+      return response.data.result || [];
+    },
+    staleTime: 5 * 60 * 1000,
   });
 
-  const fetchCompany = async () => {
-    try {
-      const response = await get_company_api(
-        sessionStorage?.getItem("companyId")
-      );
-      return response.data.result;
-    } catch (error) {
-      console.error("Error fetching company:", error);
-    }
-  };
-
+  // Fetch company
   const {
     data: company,
     isLoading: isCompanyLoading,
     isError: isCompanyError,
     error: companyError,
   } = useQuery({
-    queryKey: ["company"],
-    queryFn: fetchCompany,
+    queryKey: ["company", companyId],
+    queryFn: async () => {
+      const response = await get_company_api(companyId);
+      return response.data.result;
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes - company data rarely changes
   });
 
-  const fetchchargesAndDeductions = async () => {
-    try {
-      const response = await get_charges_and_deductions_by_company_id_api(
-        sessionStorage.getItem("companyId")
-      );
-      return response.data.result;
-    } catch (error) {
-      console.error("Error fetching chargesAndDeductions:", error);
-    }
-  };
-
+  // Fetch charges and deductions
   const {
     data: chargesAndDeductions,
     isLoading: isLoadingchargesAndDeductions,
@@ -209,69 +161,174 @@ const useSalesOrder = ({ onFormSubmit }) => {
     error: chargesAndDeductionsError,
     refetch: refetchChargesAndDeductions,
   } = useQuery({
-    queryKey: ["chargesAndDeductions"],
-    queryFn: fetchchargesAndDeductions,
-  });
-
-  const fetchTransactionTypes = async () => {
-    try {
-      const response = await get_transaction_types_api(
-        sessionStorage.getItem("companyId")
+    queryKey: ["chargesAndDeductions", companyId],
+    queryFn: async () => {
+      const response = await get_charges_and_deductions_by_company_id_api(
+        companyId
       );
       return response.data.result;
-    } catch (error) {
-      console.error("Error fetching transaction types:", error);
-    }
-  };
+    },
+    staleTime: 5 * 60 * 1000,
+  });
 
+  // Fetch transaction types
   const {
     data: transactionTypes,
     isLoading: isLoadingTransactionTypes,
     isError: isTransactionTypesError,
     error: transactionTypesError,
   } = useQuery({
-    queryKey: ["transactionTypes"],
-    queryFn: fetchTransactionTypes,
+    queryKey: ["transactionTypes", companyId],
+    queryFn: async () => {
+      const response = await get_transaction_types_api(companyId);
+      return response.data.result;
+    },
+    staleTime: 10 * 60 * 1000,
   });
 
+  // Fetch item price list
+  const {
+    data: itemPriceListByLocation,
+    isLoading: isItemPriceListByLocationLoading,
+    isError: isItemPriceListByLocationError,
+    error: itemPriceListByLocationError,
+  } = useQuery({
+    queryKey: ["itemPriceListByLocation", formData.storeLocation],
+    queryFn: async () => {
+      const response = await get_item_price_list_by_locationId(
+        formData.storeLocation
+      );
+      return response.data.result;
+    },
+    enabled: !!formData.storeLocation,
+  });
+
+  // ============================================================================
+  // MEMOIZED CALCULATIONS
+  // ============================================================================
+
+  const priceListMap = useMemo(() => {
+    if (!itemPriceListByLocation?.itemPriceDetails) {
+      return new Map();
+    }
+    return new Map(
+      itemPriceListByLocation.itemPriceDetails.map((detail) => [
+        detail.itemMasterId,
+        detail.price,
+      ])
+    );
+  }, [itemPriceListByLocation]);
+
+  // Memoized charges initialization
+  const getInitializedCharges = useMemo(() => {
+    return (
+      chargesAndDeductions
+        ?.filter((charge) => charge.isApplicableForLineItem)
+        ?.map((charge) => ({
+          id: charge.chargesAndDeductionId,
+          name: charge.displayName,
+          value: charge.amount || charge.percentage,
+          sign: charge.sign,
+          isPercentage: charge.percentage !== null,
+        })) || []
+    );
+  }, [chargesAndDeductions]);
+
+  // Memoized subtotal calculation
+  const subTotal = useMemo(() => {
+    return formData.itemDetails.reduce(
+      (total, item) => total + item.totalPrice,
+      0
+    );
+  }, [formData.itemDetails]);
+
+  // Memoized total amount calculation
+  const totalAmount = useMemo(() => {
+    let total = subTotal;
+    formData.commonChargesAndDeductions.forEach((charge) => {
+      const amount = charge.isPercentage
+        ? (subTotal * charge.value) / 100
+        : charge.value;
+      total += charge.sign === "+" ? amount : -amount;
+    });
+    return total;
+  }, [subTotal, formData.commonChargesAndDeductions]);
+
+  // ============================================================================
+  // EFFECTS
+  // ============================================================================
+
+  // Update totals when relevant data changes
   useEffect(() => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      subTotal: calculateSubTotal(),
-      totalAmount: calculateTotalAmount(),
+    setFormData((prev) => ({
+      ...prev,
+      subTotal,
+      totalAmount,
     }));
-  }, [formData.itemDetails, formData.commonChargesAndDeductions]);
+  }, [subTotal, totalAmount]);
 
-  const validateField = (
-    fieldName,
-    fieldDisplayName,
-    value,
-    additionalRules = {}
-  ) => {
-    let isFieldValid = true;
-    let errorMessage = "";
-
-    if (value === null || value === undefined || `${value}`.trim() === "") {
-      isFieldValid = false;
-      errorMessage = `${fieldDisplayName} is required`;
+  // Scroll to alert when submission status changes
+  useEffect(() => {
+    if (submissionStatus !== null && alertRef.current) {
+      alertRef.current.scrollIntoView({ behavior: "smooth" });
     }
+  }, [submissionStatus]);
 
+  // Initialize common charges when charges data loads
+  useEffect(() => {
     if (
-      isFieldValid &&
-      additionalRules.validationFunction &&
-      !additionalRules.validationFunction(value)
+      chargesAndDeductions &&
+      formData.commonChargesAndDeductions.length === 0
     ) {
-      isFieldValid = false;
-      errorMessage = additionalRules.errorMessage;
+      const initializedChargesArray = chargesAndDeductions
+        .filter((charge) => charge.isDisableFromSubTotal === false)
+        .map((charge) => ({
+          id: charge.chargesAndDeductionId,
+          name: charge.displayName,
+          value: charge.amount || charge.percentage,
+          sign: charge.sign,
+          isPercentage: charge.percentage !== null,
+        }));
+
+      setFormData((prev) => ({
+        ...prev,
+        commonChargesAndDeductions: initializedChargesArray,
+      }));
     }
+  }, [chargesAndDeductions]);
 
-    setValidFields((prev) => ({ ...prev, [fieldName]: isFieldValid }));
-    setValidationErrors((prev) => ({ ...prev, [fieldName]: errorMessage }));
+  // ============================================================================
+  // VALIDATION
+  // ============================================================================
 
-    return isFieldValid;
-  };
+  const validateField = useCallback(
+    (fieldName, fieldDisplayName, value, additionalRules = {}) => {
+      let isFieldValid = true;
+      let errorMessage = "";
 
-  const validateAttachments = (files) => {
+      if (value === null || value === undefined || `${value}`.trim() === "") {
+        isFieldValid = false;
+        errorMessage = `${fieldDisplayName} is required`;
+      }
+
+      if (
+        isFieldValid &&
+        additionalRules.validationFunction &&
+        !additionalRules.validationFunction(value)
+      ) {
+        isFieldValid = false;
+        errorMessage = additionalRules.errorMessage;
+      }
+
+      setValidFields((prev) => ({ ...prev, [fieldName]: isFieldValid }));
+      setValidationErrors((prev) => ({ ...prev, [fieldName]: errorMessage }));
+
+      return isFieldValid;
+    },
+    []
+  );
+
+  const validateAttachments = useCallback((files) => {
     let isAttachmentsValid = true;
     let errorMessage = "";
     const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
@@ -284,20 +341,21 @@ const useSalesOrder = ({ onFormSubmit }) => {
     ];
 
     if (!files || files.length === 0) {
-      isAttachmentsValid = true; // Attachments are optional, so it's considered valid if there are none.
-      errorMessage = "";
+      return true;
     }
 
     for (const file of files) {
       if (file.size > maxSizeInBytes) {
         isAttachmentsValid = false;
         errorMessage = "Attachment size exceeds the limit (10MB)";
+        break;
       }
 
       if (!allowedTypes.includes(file.type)) {
         isAttachmentsValid = false;
         errorMessage =
           "Invalid file type. Allowed types: JPEG, PNG, PDF, Word documents";
+        break;
       }
     }
 
@@ -305,19 +363,16 @@ const useSalesOrder = ({ onFormSubmit }) => {
     setValidationErrors((prev) => ({ ...prev, attachments: errorMessage }));
 
     return isAttachmentsValid;
-  };
+  }, []);
 
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     let isCustomerValid = true;
 
-    // Check customer validation only if it's not a direct order
-    if (!directOrder) {
-      isCustomerValid = validateField(
-        "customerId",
-        "Customer",
-        formData.customerId
-      );
-    }
+    isCustomerValid = validateField(
+      "customerId",
+      "Customer",
+      formData.customerId
+    );
 
     const isSalesPersonValid = validateField(
       "salesPersonId",
@@ -337,10 +392,21 @@ const useSalesOrder = ({ onFormSubmit }) => {
       formData.deliveryDate
     );
 
+    const isCustomerPoNovalid = validateField(
+      "customerPoNumber",
+      "Customer PO Number",
+      formData.customerPoNumber
+    );
+
+    const isStoreLocationValid = validateField(
+      "storeLocation",
+      "Store Location",
+      formData.storeLocation
+    );
+
     const isAttachmentsValid = validateAttachments(formData.attachments);
 
     let isItemQuantityValid = true;
-    // Validate item details
     formData.itemDetails.forEach((item, index) => {
       const fieldName = `quantity_${index}`;
       const fieldDisplayName = `Quantity for ${item.name}`;
@@ -348,7 +414,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
       const additionalRules = {
         validationFunction: (value) =>
           parseFloat(value) > 0 && parseFloat(value) <= item.tempQuantity,
-        errorMessage: `${fieldDisplayName} must be greater than 0 and less than or equal to temporary quantity ${item.tempQuantity}`,
+        errorMessage: `${fieldDisplayName} must be greater than 0 and less than or equal to ${item.tempQuantity}`,
       };
 
       const isValidQuantity = validateField(
@@ -366,81 +432,67 @@ const useSalesOrder = ({ onFormSubmit }) => {
       isSalesPersonValid &&
       isOrderDateValid &&
       isDeliveryDateValid &&
+      isCustomerPoNovalid &&
       isAttachmentsValid &&
       isItemQuantityValid
     );
-  };
+  }, [formData, validateField, validateAttachments]);
 
-  const getTransactionTypeIdByName = (name) => {
-    const transactionType = transactionTypes.find((type) => type.name === name);
-    return transactionType ? transactionType.transactionTypeId : null;
-  };
+  // ============================================================================
+  // HELPER FUNCTIONS
+  // ============================================================================
 
-  const postChargesAndDeductionsApplied = async (transactionId) => {
-    try {
+  const getPriceFromPriceList = useCallback(
+    (itemMasterId) => {
+      return priceListMap.get(itemMasterId) || 0;
+    },
+    [priceListMap]
+  );
+
+  const getTransactionTypeIdByName = useCallback(
+    (name) => {
+      const transactionType = transactionTypes?.find(
+        (type) => type.name === name
+      );
+      return transactionType ? transactionType.transactionTypeId : null;
+    },
+    [transactionTypes]
+  );
+
+  const postChargesAndDeductionsApplied = useCallback(
+    async (transactionId) => {
       const transactionTypeId = getTransactionTypeIdByName("SaleOrder");
 
-      const chargesAndDeductionsAppliedData = await Promise.all(
-        formData.itemDetails.map(async (item) => {
-          const appliedCharges = await Promise.all(
-            item.chargesAndDeductions.map(async (charge) => {
-              let appliedValue = 0;
-
-              if (charge.isPercentage) {
-                // Calculate the amount based on percentage and sign
-                const amount =
-                  (item.quantity * item.unitPrice * charge.value) / 100;
-                appliedValue = charge.sign === "+" ? amount : -amount;
-              } else {
-                // Use the value directly based on the sign
-                appliedValue =
-                  charge.sign === "+" ? charge.value : -charge.value;
-              }
-
-              const chargesAndDeductionAppliedData = {
-                chargesAndDeductionId: charge.id,
-                transactionId: transactionId,
-                transactionTypeId,
-                lineItemId: item.itemMasterId,
-                appliedValue,
-                dateApplied: new Date().toISOString(),
-                createdBy: sessionStorage?.getItem("userId"),
-                createdDate: new Date().toISOString(),
-                modifiedBy: sessionStorage?.getItem("userId"),
-                modifiedDate: new Date().toISOString(),
-                status: true,
-                companyId: sessionStorage?.getItem("companyId"),
-                permissionId: 1056,
-              };
-
-              return await post_charges_and_deductions_applied_api(
-                chargesAndDeductionAppliedData
-              );
-            })
-          );
-          return appliedCharges;
-        })
-      );
-
-      const commonChargesAndDeductions = await Promise.all(
-        formData.commonChargesAndDeductions.map(async (charge) => {
+      // Process item-level charges
+      const itemChargesPromises = formData.itemDetails.flatMap((item) =>
+        item.chargesAndDeductions.map(async (charge) => {
           let appliedValue = 0;
-          if (charge.isPercentage) {
-            // If the charge is a percentage, calculate based on percentage of total amount
-            appliedValue = (formData.subTotal * charge.value) / 100;
-          } else {
-            // If the charge is not a percentage, use the fixed value
-            appliedValue = charge.value;
-          }
 
-          // Apply the sign (+ or -)
-          appliedValue *= charge.sign === "+" ? 1 : -1;
+          if (charge.name === "SSL") {
+            // Calculate the amount based on percentage and sign
+            const amount =
+              item.isInventoryItem === true
+                ? ((item.quantity * item.unitPrice) / (100 - charge.value)) *
+                  charge.value
+                : (item.unitPrice / (100 - charge.value)) * charge.value;
+            appliedValue = charge.sign === "+" ? amount : -amount;
+          } else if (charge.isPercentage) {
+            // Calculate the amount based on percentage and sign
+            const amount =
+              item.isInventoryItem === true
+                ? (item.quantity * item.unitPrice * charge.value) / 100
+                : (item.unitPrice * charge.value) / 100;
+            appliedValue = charge.sign === "+" ? amount : -amount;
+          } else {
+            // Use the value directly based on the sign
+            appliedValue = charge.sign === "+" ? charge.value : -charge.value;
+          }
 
           const chargesAndDeductionAppliedData = {
             chargesAndDeductionId: charge.id,
             transactionId: transactionId,
             transactionTypeId,
-            lineItemId: null,
+            lineItemId: item.itemMasterId,
             appliedValue,
             dateApplied: new Date().toISOString(),
             createdBy: sessionStorage?.getItem("userId"),
@@ -458,111 +510,113 @@ const useSalesOrder = ({ onFormSubmit }) => {
         })
       );
 
-      // Concatenate chargesAndDeductionsAppliedData and commonChargesAndDeductions
-      const allAppliedData = [
-        ...(Array.isArray(chargesAndDeductionsAppliedData)
-          ? chargesAndDeductionsAppliedData.flat()
-          : [chargesAndDeductionsAppliedData]),
-        ...(Array.isArray(commonChargesAndDeductions)
-          ? commonChargesAndDeductions.flat()
-          : [commonChargesAndDeductions]),
-      ];
+      // Process common charges
+      const commonChargesPromises = formData.commonChargesAndDeductions.map(
+        async (charge) => {
+          const appliedValue = charge.isPercentage
+            ? ((formData.subTotal * charge.value) / 100) *
+              (charge.sign === "+" ? 1 : -1)
+            : charge.value * (charge.sign === "+" ? 1 : -1);
 
-      return allAppliedData;
-    } catch (error) {
-      console.error("Error while posting data:", error);
-      throw error;
-    }
-  };
-
-  const handleSubmit = async (isSaveAsDraft) => {
-    try {
-      console.log("handleSubmit triggered");
-      const customerId = directOrder ? null : formData.customerId;
-      const status = isSaveAsDraft ? 0 : 1;
-      const isFormValid = validateForm();
-      const currentDate = new Date().toISOString();
-      let salesOrderSuccessfull = false;
-      let allDetailsSuccessful = false;
-
-      if (isFormValid) {
-        if (isSaveAsDraft) {
-          setLoadingDraft(true);
-        } else {
-          setLoading(true);
+          return await post_charges_and_deductions_applied_api({
+            chargesAndDeductionId: charge.id,
+            transactionId,
+            transactionTypeId,
+            lineItemId: null,
+            appliedValue,
+            dateApplied: new Date().toISOString(),
+            createdBy: userId,
+            createdDate: new Date().toISOString(),
+            modifiedBy: userId,
+            modifiedDate: new Date().toISOString(),
+            status: true,
+            companyId,
+            permissionId: 1056,
+          });
         }
+      );
 
+      return await Promise.all([
+        ...itemChargesPromises,
+        ...commonChargesPromises,
+      ]);
+    },
+    [formData, getTransactionTypeIdByName, userId, companyId]
+  );
+
+  // ============================================================================
+  // EVENT HANDLERS
+  // ============================================================================
+
+  const handleSubmit = useCallback(
+    async (isSaveAsDraft) => {
+      try {
+        const isFormValid = validateForm();
+        if (!isFormValid) return;
+
+        isSaveAsDraft ? setLoadingDraft(true) : setLoading(true);
+
+        const currentDate = new Date().toISOString();
         const salesOrderData = {
-          customerId: customerId,
+          customerId: formData.customerId,
           orderDate: formData.orderDate,
           deliveryDate: formData.deliveryDate,
           totalAmount: formData.totalAmount,
-          status: status,
-          createdBy: sessionStorage?.getItem("username") ?? null,
-          createdUserId: sessionStorage?.getItem("userId") ?? null,
+          status: isSaveAsDraft ? 0 : 1,
+          createdBy: username,
+          createdUserId: userId,
           approvedBy: null,
           approvedUserId: null,
           approvedDate: null,
-          companyId: sessionStorage?.getItem("companyId") ?? null,
+          companyId,
           createdDate: currentDate,
           lastUpdatedDate: currentDate,
           permissionId: 25,
           salesPersonId: formData.salesPersonId,
-          inventoryLocationId: warehouseLocationId,
+          inventoryLocationId: formData.storeLocation,
+          customerPoNumber: formData.customerPoNumber,
+          customerCreditLimitAtOrder: formData?.selectedCustomer?.creditLimit,
+          customerCreditDurationAtOrder:
+            formData?.selectedCustomer?.creditDuration,
         };
 
-        console.log("Sale order data", salesOrderData);
         const response = await post_sales_order_api(salesOrderData);
-        if (response.status === 201) {
-          salesOrderSuccessfull = true;
-        }
+        if (response.status !== 201)
+          throw new Error("Sales order creation failed");
+
         setReferenceNo(response.data.result.referenceNo);
         const salesOrderId = response.data.result.salesOrderId;
 
-        let detailResponses = [];
-        for (const item of formData.itemDetails) {
-          const salesOrderDetail = {
-            itemBatchItemMasterId: item.itemMasterId,
-            itemBatchBatchId: item.batchId,
-            salesOrderId: salesOrderId,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            totalPrice: item.totalPrice,
-            permissionId: 25,
-          };
-
-          const detailsResponse = await post_sales_order_detail_api(
-            salesOrderDetail
-          );
-          detailResponses.push(detailsResponse);
-        }
-
-        // Process sales order details
-        allDetailsSuccessful = detailResponses.every(
-          (detailsResponse) => detailsResponse.status === 201
+        // Post sales order details
+        const detailResponses = await Promise.all(
+          formData.itemDetails.map((item) =>
+            post_sales_order_detail_api({
+              itemBatchItemMasterId: item.itemMasterId,
+              itemBatchBatchId: item.batchId,
+              salesOrderId,
+              quantity: item.quantity,
+              unitPrice: item.unitPrice,
+              totalPrice: item.totalPrice,
+              permissionId: 25,
+            })
+          )
         );
 
-        // Process charges and deductions
-        const postChargesAndDeductionsAppliedResponse =
-          await postChargesAndDeductionsApplied(salesOrderId);
-        const allAppliedSuccessful =
-          postChargesAndDeductionsAppliedResponse.every(
-            (detailsResponse) => detailsResponse.status === 201
+        // Post charges and deductions
+        const chargesResponses = await postChargesAndDeductionsApplied(
+          salesOrderId
+        );
+
+        const allSuccessful =
+          detailResponses.every((r) => r.status === 201) &&
+          chargesResponses.every((r) => r.status === 201);
+
+        if (allSuccessful) {
+          setSubmissionStatus(
+            isSaveAsDraft ? "successSavedAsDraft" : "successSubmitted"
           );
 
-        // Check final success
-        if (
-          allDetailsSuccessful &&
-          allAppliedSuccessful &&
-          salesOrderSuccessfull
-        ) {
-          if (isSaveAsDraft) {
-            setSubmissionStatus("successSavedAsDraft");
-            console.log("Sales order saved as draft!", formData);
-          } else {
-            setSubmissionStatus("successSubmitted");
-            console.log("Sales order submitted successfully!", formData);
-          }
+          queryClient.invalidateQueries(["salesOrders", companyId]);
 
           setTimeout(() => {
             setSubmissionStatus(null);
@@ -570,497 +624,259 @@ const useSalesOrder = ({ onFormSubmit }) => {
             setLoadingDraft(false);
             onFormSubmit();
           }, 3000);
+
+          toast.success("Sales order submitted successfully");
         } else {
-          setSubmissionStatus("error");
-          console.error("Some operations failed:", {
-            allDetailsSuccessful,
-            allAppliedSuccessful,
-            salesOrderSuccessfull,
-          });
           throw new Error("Some operations failed during submission");
         }
+      } catch (error) {
+        console.error("Error submitting form:", error);
+        setSubmissionStatus("error");
+        setTimeout(() => {
+          setSubmissionStatus(null);
+          setLoading(false);
+          setLoadingDraft(false);
+        }, 3000);
+
+        toast.error(
+          error.response?.data?.message || "Failed to submit sales order"
+        );
       }
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      setSubmissionStatus("error");
-      if (error.response?.data?.message) {
-        console.error("API Error:", error.response.data.message);
-      } else if (error.response?.data?.errors) {
-        console.error("Validation errors:", error.response.data.errors);
-      }
-      setTimeout(() => {
-        setSubmissionStatus(null);
-        setLoading(false);
-        setLoadingDraft(false);
-      }, 3000);
-    }
-  };
-  const handleInputChange = (field, value) => {
-    setFormData((prevFormData) => {
-      // Check if the field belongs to commonChargesAndDeductions
+    },
+    [
+      validateForm,
+      formData,
+      username,
+      userId,
+      companyId,
+      postChargesAndDeductionsApplied,
+      onFormSubmit,
+    ]
+  );
+
+  const handleInputChange = useCallback((field, value) => {
+    setFormData((prev) => {
       if (field.startsWith("commonChargesAndDeductions")) {
-        // Get the charge or deduction index
         const chargeIndex = parseInt(field.split("_")[1]);
-
-        // Update the value of the corresponding charge or deduction
-        const updatedChargesAndDeductions = [
-          ...prevFormData.commonChargesAndDeductions,
-        ];
-
-        updatedChargesAndDeductions[chargeIndex].value = value;
-
-        // Return updated form data with the updated commonChargesAndDeductions array
-        return {
-          ...prevFormData,
-          commonChargesAndDeductions: updatedChargesAndDeductions,
-        };
-      } else {
-        return {
-          ...prevFormData,
-          [field]: value,
-        };
+        const updatedCharges = [...prev.commonChargesAndDeductions];
+        updatedCharges[chargeIndex].value = value;
+        return { ...prev, commonChargesAndDeductions: updatedCharges };
       }
+      return { ...prev, [field]: value };
     });
-  };
+  }, []);
 
-  const handleCustomerChange = (customerId) => {
-    const selectedCustomerId = parseInt(customerId, 10);
-
-    const selectedCustomer = customers.find(
-      (customer) => customer.customerId === selectedCustomerId
-    );
-
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      customerId,
-      selectedCustomer,
-    }));
-  };
-
-  const handleItemDetailsChange = (index, field, value) => {
-    setFormData((prevFormData) => {
-      const updatedItemDetails = [...prevFormData.itemDetails];
-
-      // Check if the field belongs to chargesAndDeductions
-      if (field.startsWith("chargesAndDeductions")) {
-        // Get the charge or deduction index
-        const chargeIndex = parseInt(field.split("_")[1]);
-
-        // Update the value of the corresponding charge or deduction
-        updatedItemDetails[index].chargesAndDeductions[chargeIndex].value =
-          value;
-      } else {
-        // If the field is not part of chargesAndDeductions, update other fields
-        updatedItemDetails[index][field] = value;
-      }
-
-      // Ensure positive values for Quantities and Unit Prices
-      updatedItemDetails[index].quantity = Math.max(
-        0,
-        updatedItemDetails[index].quantity
+  const handleCustomerChange = useCallback(
+    (customerId) => {
+      const selectedCustomer = customers?.find(
+        (customer) => customer.customerId === parseInt(customerId, 10)
       );
+      setFormData((prev) => ({ ...prev, customerId, selectedCustomer }));
+    },
+    [customers]
+  );
 
-      updatedItemDetails[index].unitPrice = !isNaN(
-        parseFloat(updatedItemDetails[index].unitPrice)
-      )
-        ? Math.max(0, parseFloat(updatedItemDetails[index].unitPrice))
-        : 0;
+  const handleItemDetailsChange = useCallback((index, field, value) => {
+    setFormData((prev) => {
+      const updatedItemDetails = prev.itemDetails.map((item, idx) => {
+        if (idx !== index) return item;
 
-      // Calculate total price based on charges and deductions
-      const grandTotalPrice =
-        updatedItemDetails[index].quantity *
-        updatedItemDetails[index].unitPrice;
+        const updatedItem = {
+          ...item,
+          chargesAndDeductions: item.chargesAndDeductions.map((charge) => ({
+            ...charge,
+          })),
+        };
 
-      let totalPrice =
-        updatedItemDetails[index].quantity *
-        updatedItemDetails[index].unitPrice;
-
-      // Add or subtract charges and deductions from total price
-      updatedItemDetails[index].chargesAndDeductions.forEach((charge) => {
-        if (charge.isPercentage) {
-          // If charge is a percentage, calculate the amount and add/subtract it
-          const amount = (grandTotalPrice * charge.value) / 100;
-          if (charge.sign === "+") {
-            totalPrice += amount;
-          } else if (charge.sign === "-") {
-            totalPrice -= amount;
-          }
+        if (field.startsWith("chargesAndDeductions")) {
+          const chargeIndex = parseInt(field.split("_")[1]);
+          updatedItem.chargesAndDeductions[chargeIndex].value = value;
         } else {
-          // If charge is not a percentage, directly add/subtract the value
-          if (charge.sign === "+") {
-            totalPrice += charge.value;
-          } else if (charge.sign === "-") {
-            totalPrice -= charge.value;
-          }
+          updatedItem[field] = value;
         }
+
+        updatedItem.quantity = Math.max(0, updatedItem.quantity);
+        updatedItem.unitPrice = Math.max(
+          0,
+          parseFloat(updatedItem.unitPrice) || 0
+        );
+
+        // Calculate total price
+        const grandTotalPrice = updatedItem.quantity * updatedItem.unitPrice;
+        let totalPrice = grandTotalPrice;
+
+        updatedItem.chargesAndDeductions.forEach((charge) => {
+          if (charge.name === "SSL") {
+            const amount =
+              (grandTotalPrice / (100 - charge.value)) * charge.value;
+            totalPrice += charge.sign === "+" ? amount : -amount;
+          } else if (charge.isPercentage) {
+            const amount = (grandTotalPrice * charge.value) / 100;
+            totalPrice += charge.sign === "+" ? amount : -amount;
+          } else {
+            totalPrice += charge.sign === "+" ? charge.value : -charge.value;
+          }
+        });
+
+        updatedItem.totalPrice = Math.max(0, totalPrice);
+        return updatedItem;
       });
 
-      // Ensure totalPrice is initialized and is a numerical value
-      totalPrice = isNaN(totalPrice) ? 0 : totalPrice;
-
-      updatedItemDetails[index].totalPrice = totalPrice;
-
-      return {
-        ...prevFormData,
-        itemDetails: updatedItemDetails,
-        subTotal: calculateSubTotal(),
-        totalAmount: calculateTotalAmount(),
-      };
+      return { ...prev, itemDetails: updatedItemDetails };
     });
-  };
+  }, []);
 
-  const handleAddItem = () => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      itemDetails: [
-        ...prevFormData.itemDetails,
-        {
-          itemMasterId: "",
-          itemBatchId: "",
-          name: "",
-          quantity: 0,
-          unitPrice: 0.0,
-          totalPrice: 0.0,
-        },
-      ],
+  const handleRemoveItem = useCallback((index) => {
+    setFormData((prev) => ({
+      ...prev,
+      itemDetails: prev.itemDetails.filter((_, idx) => idx !== index),
     }));
-  };
-
-  const handleRemoveItem = (index) => {
-    setFormData((prevFormData) => {
-      const updatedItemDetails = [...prevFormData.itemDetails];
-      updatedItemDetails.splice(index, 1);
-      return {
-        ...prevFormData,
-        itemDetails: updatedItemDetails,
-      };
-    });
     setValidFields({});
     setValidationErrors({});
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      itemMasterId: 0,
-      itemMaster: "",
-    }));
-  };
+  }, []);
 
-  const handlePrint = () => {
-    window.print();
-  };
+  const handleAttachmentChange = useCallback((files) => {
+    setFormData((prev) => ({ ...prev, attachments: files }));
+  }, []);
 
-  const handleAttachmentChange = (files) => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      attachments: files,
-    }));
-  };
+  const handleSelectItem = useCallback(
+    async (item) => {
+      let availableStock = 0;
+      let unitPrice = item.unitPrice || 0;
 
-  const calculateSubTotal = () => {
-    return formData.itemDetails.reduce(
-      (total, item) => total + item.totalPrice,
-      0
-    );
-  };
-
-  const calculateTotalAmount = () => {
-    // Calculate total price based on item details
-    const subtotal = calculateSubTotal();
-
-    // Calculate total amount based on subtotal and common charges and deductions
-    let totalAmount = subtotal;
-    formData.commonChargesAndDeductions.forEach((charge) => {
-      if (charge.isPercentage) {
-        const amount = (subtotal * charge.value) / 100;
-        if (charge.sign === "+") {
-          totalAmount += amount;
-        } else if (charge.sign === "-") {
-          totalAmount -= amount;
-        }
-      } else {
-        if (charge.sign === "+") {
-          totalAmount += charge.value;
-        } else if (charge.sign === "-") {
-          totalAmount -= charge.value;
-        }
-      }
-    });
-
-    return totalAmount;
-  };
-
-  const handleShowCreateCustomerModal = () => {
-    setShowCreateCustomerModal(true);
-    setShowCreateCustomerModalInParent(true);
-  };
-
-  const handleCloseCreateCustomerModal = () => {
-    setShowCreateCustomerModal(false);
-    handleCloseCreateCustomerModalInParent();
-  };
-
-  const handleCloseCreateCustomerModalInParent = () => {
-    const delay = 300;
-    setTimeout(() => {
-      setShowCreateCustomerModalInParent(false);
-    }, delay);
-  };
-
-  const handleAddCustomer = (responseData) => {
-    handleSelectCustomer(responseData);
-    refetchCustomers();
-  };
-
-  // Handler to add the selected item to itemDetails
-  const handleSelectItem = async (item) => {
-    setSearchTerm("");
-
-    if (company?.batchStockType === "FIFO") {
-      // For FIFO, directly add the item without batch selection
-      const initializedCharges =
-        chargesAndDeductions
-          ?.filter((charge) => charge.isApplicableForLineItem)
-          ?.map((charge) => ({
-            id: charge.chargesAndDeductionId,
-            name: charge.displayName,
-            value: charge.amount || charge.percentage,
-            sign: charge.sign,
-            isPercentage: charge.percentage !== null,
-          })) || [];
-
-      // Get available stock for this item
       try {
         const inventory =
           await get_sum_location_inventories_by_locationId_itemMasterId_api(
             item.itemMasterId,
-            userLocations[0]?.locationId
+            formData.storeLocation,
+            null
           );
-        const availableStock = inventory?.data?.result?.totalStockInHand || 0;
+        availableStock = inventory?.data?.result?.totalStockInHand || 0;
 
         if (availableStock <= 0) {
-          console.warn("No stock available for this item");
-          alert("No stock available for this item");
+          toast.error(
+            `No stock available for "${item.itemName}" in user location`
+          );
+          setSearchTerm("");
           return;
         }
 
-        // Get highest selling price from available batches
-        const batchesResponse = await get_item_batches_by_item_master_id_api(
-          item.itemMasterId,
-          sessionStorage.getItem("companyId")
-        );
-        const highestSellingPrice =
-          batchesResponse?.data?.result?.reduce(
-            (maxPrice, batch) =>
-              batch.sellingPrice > maxPrice ? batch.sellingPrice : maxPrice,
-            0
-          ) || 0;
+        unitPrice = getPriceFromPriceList(item.itemMasterId);
 
-        setFormData((prevFormData) => ({
-          ...prevFormData,
+        setFormData((prev) => ({
+          ...prev,
           itemDetails: [
-            ...prevFormData.itemDetails,
+            ...prev.itemDetails,
             {
               itemMasterId: item.itemMasterId,
               name: item.itemName || "",
               unit: item.unit?.unitName || "",
               quantity: 0,
-              unitPrice: highestSellingPrice,
-              totalPrice: 0.0,
-              chargesAndDeductions: initializedCharges,
-              batchId: batchesResponse?.data?.result[0]?.batchId,
+              unitPrice: unitPrice,
+              totalPrice: 0,
+              batchId: null,
               tempQuantity: availableStock,
+              packSize: item?.conversionRate || 1,
+              isInventoryItem: item?.isInventoryItem,
+              chargesAndDeductions: getInitializedCharges,
             },
           ],
         }));
+
+        setSearchTerm("");
       } catch (error) {
-        console.error("Error processing FIFO item:", error);
-        alert("Error processing item. Please try again.");
+        console.error("Error processing item:", error);
+        toast.error("Failed to add item");
+        setSearchTerm("");
       }
-    } else {
-      // For non-FIFO, open batch selection modal
-      openModal();
-    }
-  };
+    },
+    [getPriceFromPriceList, getInitializedCharges, formData.storeLocation]
+  );
 
-  const handleBatchSelection = (batchId) => {
-    const selectedBatchId = parseInt(batchId, 10);
-
-    if (!formData.fifoBatchDetails || formData.fifoBatchDetails.length === 0) {
-      console.error("No batch details available");
-      return;
-    }
-
-    const batch = formData.fifoBatchDetails.find(
-      (batch) => batch.batchId === selectedBatchId
-    );
-
-    if (!batch) {
-      console.error("Batch not found");
-      return;
-    }
-
-    // Generate chargesAndDeductions array for the newly added item
-    const initializedCharges =
-      chargesAndDeductions
-        ?.filter((charge) => charge.isApplicableForLineItem)
-        ?.map((charge) => ({
-          id: charge.chargesAndDeductionId,
-          name: charge.displayName,
-          value: charge.amount || charge.percentage,
-          sign: charge.sign,
-          isPercentage: charge.percentage !== null,
-        })) || [];
-
-    setSelectedBatch(batch);
-
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      itemDetails: [
-        ...prevFormData.itemDetails,
-        {
-          itemMasterId: batch.itemMasterId,
-          itemBatchId: batch.batchId,
-          name: formData.itemMaster?.itemName || "",
-          unit: formData.itemMaster?.unit?.unitName || "",
-          batchRef: batch.batch?.batchRef || "",
-          quantity: 0,
-          unitPrice: batch.sellingPrice,
-          totalPrice: 0.0,
-          chargesAndDeductions: initializedCharges,
-          batch: batch,
-          tempQuantity: batch.tempQuantity,
-        },
-      ],
-    }));
-
-    closeModal();
-  };
-
-  // const handleBatchSelectionFIFO = () => {
-  //   if (
-  //     !locationInventory ||
-  //     !formData.fifoBatchDetails ||
-  //     !chargesAndDeductions ||
-  //     !formData.itemMasterId
-  //   )
-  //     return;
-
-  //   const sortedBatches = formData.fifoBatchDetails?.sort((a, b) => {
-  //     return new Date(a.batch.date) - new Date(b.batch.date);
-  //   });
-
-  //   const totalTempQuantity = locationInventory.totalStockInHand;
-
-  //   if (totalTempQuantity <= 0) {
-  //     console.warn("No stock available for this item");
-  //     return;
-  //   }
-
-  //   const highestSellingPrice = sortedBatches.reduce(
-  //     (maxPrice, currentBatch) =>
-  //       currentBatch.sellingPrice > maxPrice
-  //         ? currentBatch.sellingPrice
-  //         : maxPrice,
-  //     0
-  //   );
-
-  //   const initializedCharges = chargesAndDeductions
-  //     .filter((charge) => charge.isApplicableForLineItem)
-  //     .map((charge) => ({
-  //       id: charge.chargesAndDeductionId,
-  //       name: charge.displayName,
-  //       value: charge.amount || charge.percentage,
-  //       sign: charge.sign,
-  //       isPercentage: charge.percentage !== null,
-  //     }));
-
-  //   setFormData((prevFormData) => ({
-  //     ...prevFormData,
-  //     itemDetails: [
-  //       ...prevFormData.itemDetails,
-  //       {
-  //         itemMasterId: formData.itemMasterId,
-  //         itemBatchId: null,
-  //         name: formData.itemMaster?.itemName || "",
-  //         unit: formData.itemMaster?.unit?.unitName || "",
-  //         batchRef: null,
-  //         quantity: 0,
-  //         unitPrice: highestSellingPrice,
-  //         totalPrice: 0.0,
-  //         chargesAndDeductions: initializedCharges,
-  //         batch: sortedBatches,
-  //         tempQuantity: totalTempQuantity,
-  //       },
-  //     ],
-  //   }));
-  // };
-
-  // useEffect(() => {
-  //   if (
-  //     locationInventory &&
-  //     locationInventory.totalStockInHand > 0 &&
-  //     formData.fifoBatchDetails &&
-  //     formData.fifoBatchDetails.length > 0 &&
-  //     company?.batchStockType === "FIFO" &&
-  //     warehouseLocationId &&
-  //     chargesAndDeductions &&
-  //     formData.itemMasterId
-  //     // Remove this condition: formData.itemDetails.length === 0
-  //   ) {
-  //     handleBatchSelectionFIFO();
-  //   }
-  // }, [
-  //   locationInventory,
-  //   formData.fifoBatchDetails,
-  //   warehouseLocationId,
-  //   company,
-  //   chargesAndDeductions,
-  //   formData.itemMasterId,
-  // ]);
-
-  const handleResetCustomer = () => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      selectedCustomer: "",
-      customerId: "",
-    }));
-  };
-
-  const handleResetSalesPerson = () => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      selectedSalesPerson: "",
-      salesPersonId: "",
-    }));
-  };
-
-  const handleSelectCustomer = (selectedCustomer) => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
+  const handleSelectCustomer = useCallback((selectedCustomer) => {
+    setFormData((prev) => ({
+      ...prev,
       customerId: selectedCustomer.customerId,
-      selectedCustomer: selectedCustomer,
+      selectedCustomer,
     }));
-
-    setCustomerSearchTerm(""); // Clear the supplier search term
+    setCustomerSearchTerm("");
     setValidFields({});
     setValidationErrors({});
-  };
+  }, []);
 
-  const handleSelectSalesPerson = (selectedSalesPerson) => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
+  const handleSelectSalesPerson = useCallback((selectedSalesPerson) => {
+    setFormData((prev) => ({
+      ...prev,
       salesPersonId: selectedSalesPerson.userId,
-      selectedSalesPerson: selectedSalesPerson,
+      selectedSalesPerson,
     }));
-
-    setSalesPersonSearchTerm(""); // Clear the supplier search term
+    setSalesPersonSearchTerm("");
     setValidFields({});
     setValidationErrors({});
-  };
+  }, []);
 
-  const renderColumns = () => {
-    return chargesAndDeductions.map((charge) => {
+  const handleResetCustomer = useCallback(() => {
+    setFormData((prev) => ({ ...prev, selectedCustomer: "", customerId: "" }));
+  }, []);
+
+  const handleResetSalesPerson = useCallback(() => {
+    setFormData((prev) => ({
+      ...prev,
+      selectedSalesPerson: null,
+      salesPersonId: null,
+      itemDetails: [],
+    }));
+  }, []);
+
+  const handleBatchSelection = useCallback(
+    (batchId) => {
+      const selectedBatchId = parseInt(batchId, 10);
+      const batch = formData.fifoBatchDetails?.find(
+        (b) => b.batchId === selectedBatchId
+      );
+
+      if (!batch) {
+        console.error("Batch not found");
+        return;
+      }
+
+      setSelectedBatch(batch);
+      setFormData((prev) => ({
+        ...prev,
+        itemDetails: [
+          ...prev.itemDetails,
+          {
+            itemMasterId: batch.itemMasterId,
+            itemBatchId: batch.batchId,
+            name: formData.itemMaster?.itemName || "",
+            unit: formData.itemMaster?.unit?.unitName || "",
+            batchRef: batch.batch?.batchRef || "",
+            quantity: 0,
+            unitPrice: batch.sellingPrice,
+            totalPrice: 0,
+            chargesAndDeductions: getInitializedCharges,
+            batch,
+            tempQuantity: batch.tempQuantity,
+          },
+        ],
+      }));
+
+      setShowModal(false);
+    },
+    [formData.fifoBatchDetails, formData.itemMaster, getInitializedCharges]
+  );
+
+  const handleAddCustomer = useCallback(
+    (responseData) => {
+      handleSelectCustomer(responseData);
+      refetchCustomers();
+    },
+    [handleSelectCustomer, refetchCustomers]
+  );
+
+  const renderColumns = useCallback(() => {
+    return chargesAndDeductions?.map((charge) => {
       if (charge.isApplicableForLineItem) {
-        // Render columns for charges/deductions applicable for line items
         return (
           <th key={charge.chargesAndDeductionId}>
             {charge.sign + " "}
@@ -1071,172 +887,143 @@ const useSalesOrder = ({ onFormSubmit }) => {
       }
       return null;
     });
-  };
+  }, [chargesAndDeductions]);
 
-  const handleAddCommonChargesAndDeductions = () => {
-    const initializedCharges = chargesAndDeductions.reduce((acc, charge) => {
-      if (!charge.isApplicableForLineItem) {
-        // Initialize additional properties for the common on charges and deductions
-        acc[charge.displayName] = charge.amount || charge.percentage;
-      }
-      return acc;
-    }, {});
+  const renderSubColumns = useCallback(() => {
+    if (!formData.itemDetails[0]) return null;
 
-    // Generate chargesAndDeductions array for the newly added item
-    const initializedChargesArray = chargesAndDeductions
-      .filter((charge) => !charge.isApplicableForLineItem)
-      .map((charge) => ({
-        id: charge.chargesAndDeductionId,
-        name: charge.displayName,
-        value: charge.amount || charge.percentage,
-        sign: charge.sign,
-        isPercentage: charge.percentage !== null,
-      }));
-
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      ...initializedCharges,
-      commonChargesAndDeductions: initializedChargesArray,
-    }));
-  };
-
-  useEffect(() => {
-    chargesAndDeductions && handleAddCommonChargesAndDeductions();
-  }, [isLoadingchargesAndDeductions]);
-
-  const renderSubColumns = () => {
     return formData.commonChargesAndDeductions.map((charge, chargeIndex) => {
-      if (!charge.isApplicableForLineItem) {
-        return (
-          <tr key={chargeIndex}>
-            <td
-              colSpan={
-                5 +
-                formData.itemDetails[0].chargesAndDeductions.length -
-                (company.batchStockType === "FIFO" ? 1 : 0)
-              }
-            ></td>
-            <th>
-              {charge.sign + " "}
-              {charge.name}
-              {charge.isPercentage === true && " (%)"}
-            </th>
-            <td>
-              <input
-                className="form-control"
-                type="number"
-                value={charge.value}
-                onChange={(e) => {
-                  let newValue = parseFloat(e.target.value);
+      if (charge.name === "SSL") return null;
 
-                  // If the entered value is not a valid number, set it to 0
-                  if (isNaN(newValue)) {
-                    newValue = 0;
-                  } else {
-                    // If the charge is a percentage, ensure the value is between 0 and 100
-                    if (charge.isPercentage) {
-                      newValue = Math.min(100, Math.max(0, newValue)); // Clamp the value between 0 and 100
-                    } else {
-                      // For non-percentage charges, ensure the value is positive
-                      newValue = Math.max(0, newValue);
-                    }
-                  }
+      const colSpan =
+        6 +
+        formData.itemDetails[0].chargesAndDeductions.length -
+        (company?.batchStockType === "FIFO" ? 1 : 0);
 
-                  handleInputChange(
-                    `commonChargesAndDeductions_${chargeIndex}_value`,
-                    newValue
-                  );
-                }}
-              />
-            </td>
-            <td></td>
-          </tr>
-        );
-      }
-      return null;
+      return (
+        <tr key={chargeIndex}>
+          <td colSpan={colSpan}></td>
+          <th className="text-end">
+            {/* {charge.sign + " "} */}
+            {charge.name}
+            {charge.isPercentage && " (%)"}
+          </th>
+          <td>
+            <input
+              className="form-control"
+              type="number"
+              value={charge.value}
+              onChange={(e) => {
+                let newValue = parseFloat(e.target.value) || 0;
+                if (charge.isPercentage) {
+                  newValue = Math.min(100, Math.max(0, newValue));
+                } else {
+                  newValue = Math.max(0, newValue);
+                }
+                handleInputChange(
+                  `commonChargesAndDeductions_${chargeIndex}_value`,
+                  newValue
+                );
+              }}
+            />
+          </td>
+        </tr>
+      );
     });
-  };
+  }, [formData, company, handleInputChange]);
 
-  // Function to open modal
-  const openModal = () => {
-    setShowModal(true);
-  };
-
-  // Function to close modal
-  const closeModal = () => {
-    setShowModal(false);
-  };
-
-  console.log("formData", formData);
+  console.log("Sales Order form data: ", formData);
 
   return {
+    // State
     formData,
-    customers,
-    salesPersons,
     submissionStatus,
     validFields,
     validationErrors,
     referenceNo,
-    alertRef,
     showCreateCustomerModal,
     showCreateCustomerMoalInParent,
-    directOrder,
     searchTerm,
-    availableItems,
-    isItemsLoading,
-    isItemsError,
-    itemsError,
     selectedBatch,
-    //itemBatches,
-    // locationInventory,
     customerSearchTerm,
     salesPersonSearchTerm,
-    isCustomersLoading,
-    isSalesPersonsLoading,
-    isCustomersError,
-    isSalesPersonsError,
-    customersError,
-    salesPersonsError,
-    isLoadingchargesAndDeductions,
-    ischargesAndDeductionsError,
-    chargesAndDeductionsError,
-    chargesAndDeductions,
-    isLoadingTransactionTypes,
-    isTransactionTypesError,
-    transactionTypesError,
     loading,
     loadingDraft,
-    isCompanyLoading,
-    isCompanyError,
     showModal,
+
+    // Refs
+    alertRef,
+
+    // Query data
+    customers,
+    salesPersons,
+    availableItems,
+    chargesAndDeductions,
     company,
-    closeModal,
-    handleShowCreateCustomerModal,
-    handleCloseCreateCustomerModal,
+    userLocations,
+
+    // Loading states
+    isItemsLoading,
+    isCustomersLoading,
+    isSalesPersonsLoading,
+    isLoadingchargesAndDeductions,
+    isLoadingTransactionTypes,
+    isCompanyLoading,
+    isWarehouseLocationLoading: isUserLocationsLoading,
+
+    // Error states
+    isItemsError,
+    isCustomersError,
+    isSalesPersonsError,
+    ischargesAndDeductionsError,
+    isTransactionTypesError,
+    itemsError,
+    customersError,
+    salesPersonsError,
+    chargesAndDeductionsError,
+
+    // Setters
+    setSearchTerm,
+    setCustomerSearchTerm,
+    setSalesPersonSearchTerm,
+    setShowCreateCustomerModal,
+    setShowCreateCustomerModalInParent,
+
+    // Handlers
     handleInputChange,
     handleCustomerChange,
     handleItemDetailsChange,
     handleAttachmentChange,
     handleSubmit,
     handleRemoveItem,
-    handlePrint,
-    calculateTotalAmount,
+    handlePrint: () => window.print(),
     handleAddCustomer,
-    setDirectOrder,
-    setSearchTerm,
     handleSelectItem,
     handleBatchSelection,
     handleSelectCustomer,
     handleSelectSalesPerson,
     handleResetCustomer,
     handleResetSalesPerson,
-    setCustomerSearchTerm,
-    setSalesPersonSearchTerm,
-    calculateSubTotal,
+    handleShowCreateCustomerModal: () => {
+      setShowCreateCustomerModal(true);
+      setShowCreateCustomerModalInParent(true);
+    },
+    handleCloseCreateCustomerModal: () => {
+      setShowCreateCustomerModal(false);
+      setTimeout(() => setShowCreateCustomerModalInParent(false), 300);
+    },
+
+    // Calculations
+    calculateSubTotal: () => subTotal,
+    calculateTotalAmount: () => totalAmount,
+
+    // Render helpers
     renderColumns,
     renderSubColumns,
-    warehouseLocationId,
-    isWarehouseLocationLoading: !warehouseLocationId,
+
+    // Modal controls
+    openModal: () => setShowModal(true),
+    closeModal: () => setShowModal(false),
   };
 };
 

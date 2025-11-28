@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import useSalesOrderList from "./useSalesOrderList";
 import SalesOrderApproval from "../salesOrderApproval/salesOrderApproval";
 import SalesOrder from "../salesOrder";
@@ -9,6 +9,7 @@ import ErrorComponent from "../../errorComponent/errorComponent";
 import SalesInvoice from "../../salesInvoice/salesInvoice";
 import Pagination from "../../common/Pagination/Pagination";
 import { FaSearch } from "react-icons/fa";
+import { UserContext } from "../../../context/userContext";
 
 const SalesOrderList = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -18,9 +19,6 @@ const SalesOrderList = () => {
   const {
     salesOrders,
     isLoadingData,
-    isLoadingPermissions,
-    isPermissionsError,
-    permissionError,
     error,
     isAnyRowSelected,
     selectedRows,
@@ -45,7 +43,6 @@ const SalesOrderList = () => {
     handleViewDetails,
     setShowCreateSOForm,
     setShowUpdateSOForm,
-    hasPermission,
     handleUpdate,
     handleUpdated,
     handleClose,
@@ -53,6 +50,8 @@ const SalesOrderList = () => {
     handleConvert,
     setShowConvertSOForm,
   } = useSalesOrderList();
+
+  const { hasPermission } = useContext(UserContext);
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -67,15 +66,11 @@ const SalesOrderList = () => {
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  if (error || isPermissionsError) {
+  if (error) {
     return <ErrorComponent error={error || "Error fetching data"} />;
   }
 
-  if (
-    isLoadingData ||
-    isLoadingPermissions ||
-    (salesOrders && !(salesOrders.length >= 0))
-  ) {
+  if (isLoadingData || (salesOrders && !(salesOrders.length >= 0))) {
     return <LoadingSpinner />;
   }
 
@@ -112,7 +107,7 @@ const SalesOrderList = () => {
   if (salesOrders.length === 0) {
     return (
       <div className="container mt-4">
-        <h2>Sales Orders</h2>
+        <h2>Sales Requisitions</h2>
         <div
           className="d-flex flex-column justify-content-center align-items-center text-center vh-100"
           style={{ maxHeight: "80vh" }}
@@ -134,7 +129,7 @@ const SalesOrderList = () => {
 
   return (
     <div className="container mt-4">
-      <h2>Sales Orders</h2>
+      <h2>Sales Requisitions</h2>
       <div className="mt-3 d-flex justify-content-start align-items-center">
         <div className="btn-group" role="group">
           {hasPermission("Create Sales Order") && (
@@ -168,14 +163,16 @@ const SalesOrderList = () => {
                 Convert
               </button>
             )}
-          {hasPermission("Update Sales Order") && isAnyRowSelected && (
-            <button
-              className="btn btn-warning"
-              onClick={() => setShowUpdateSOForm(true)}
-            >
-              Edit
-            </button>
-          )}
+          {hasPermission("Update Sales Order") &&
+            isAnyRowSelected &&
+            selectedRowData[0]?.status === 1 && (
+              <button
+                className="btn btn-warning"
+                onClick={() => setShowUpdateSOForm(true)}
+              >
+                Edit
+              </button>
+            )}
         </div>
       </div>
       <div className="d-flex justify-content-end mb-3">

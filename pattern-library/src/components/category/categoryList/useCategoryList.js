@@ -1,15 +1,11 @@
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import {
   get_all_categories_by_company_id_api,
   delete_category_api,
 } from "../../../services/inventoryApi";
-import { get_user_permissions_api } from "../../../services/userManagementApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const useCategoryList = () => {
-  const [categories, setCategories] = useState([]);
-  const [isLoadingData, setIsLoadingData] = useState(true);
-  const [error, setError] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedRowData, setSelectedRowData] = useState([]);
   const [showCreateCategoryForm, setShowCreateCategoryForm] = useState(false);
@@ -20,49 +16,24 @@ const useCategoryList = () => {
   const [submissionMessage, setSubmissionMessage] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const fetchUserPermissions = async () => {
-    try {
-      const response = await get_user_permissions_api(
-        sessionStorage.getItem("userId")
-      );
-      return response.data.result;
-    } catch (error) {
-      console.error("Error fetching user permissions:", error);
-    }
-  };
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
+
+  const queryClient = useQueryClient();
 
   const {
-    data: userPermissions,
-    isLoading: isLoadingPermissions,
-    isError: isPermissionsError,
-    error: permissionError,
+    data: categories = [],
+    isLoading: isLoadingData,
+    error,
   } = useQuery({
-    queryKey: ["userPermissions"],
-    queryFn: fetchUserPermissions,
+    queryKey: ["categories", companyId],
+    queryFn: async () => {
+      const CategoryResponse = await get_all_categories_by_company_id_api(
+        companyId
+      );
+      return CategoryResponse.data.result || [];
+    },
+    enabled: !!companyId,
   });
-
-  const fetchData = async () => {
-    try {
-      if (!isLoadingPermissions && userPermissions) {
-        const CategoryResponse = await get_all_categories_by_company_id_api(
-          sessionStorage.getItem("companyId")
-        );
-        setCategories(CategoryResponse.data.result || []);
-      }
-    } catch (error) {
-      setError("Error fetching data");
-    } finally {
-      setIsLoadingData(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchUserPermissions();
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [isLoadingPermissions, userPermissions]);
 
   const handleUpdate = (Category) => {
     setCategoryDetail(Category);
@@ -70,7 +41,6 @@ const useCategoryList = () => {
   };
 
   const handleUpdated = async () => {
-    fetchData();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -97,8 +67,6 @@ const useCategoryList = () => {
       );
 
       if (deleteResponse.status === 204) {
-        console.log("Category deleted", selectedRowData[0]?.categoryId);
-
         setSubmissionStatus("success");
         setSubmissionMessage("Category deleted successfully!");
 
@@ -106,8 +74,8 @@ const useCategoryList = () => {
           setSubmissionStatus(null);
           setSubmissionMessage(null);
 
+          queryClient.invalidateQueries(["categories", companyId]);
           handleCloseDeleteConfirmation();
-          fetchData();
 
           setSelectedRows([]);
           setSelectedRowData([]);
@@ -179,25 +147,15 @@ const useCategoryList = () => {
     );
   };
 
-  const hasPermission = (permissionName) => {
-    return userPermissions?.some(
-      (permission) =>
-        permission.permission.permissionName === permissionName &&
-        permission.permission.permissionStatus
-    );
-  };
-
   return {
     categories,
     isLoadingData,
-    isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
     selectedRowData,
     showCreateCategoryForm,
     showUpdateCategoryForm,
-    userPermissions,
     categoryDetail,
     showDeleteConfirmation,
     submissionStatus,
@@ -210,7 +168,6 @@ const useCategoryList = () => {
     handleRowSelect,
     setShowCreateCategoryForm,
     setShowUpdateCategoryForm,
-    hasPermission,
     handleUpdate,
     handleUpdated,
     handleClose,

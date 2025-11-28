@@ -266,7 +266,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
 
                 var itemBatches = await _dbContext.ItemBatches
                     .Where(ib => batchIds.Contains(ib.BatchId) && ib.CompanyId == companyId)
-                    .GroupBy(ib => ib.ReferenceNo)
+                    .GroupBy(ib => ib.CustDekNo)
                     .Select(g => g.First())
                     .ToListAsync();
 

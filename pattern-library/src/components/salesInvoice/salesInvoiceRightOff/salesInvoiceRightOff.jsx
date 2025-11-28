@@ -1,7 +1,8 @@
-import React from "react";
 import { Modal, Button } from "react-bootstrap";
 import { put_sales_invoice_api } from "../../../services/salesApi";
 import toast from "react-hot-toast";
+import { useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 const SalesInvoiceRightOff = ({
   show,
@@ -9,6 +10,9 @@ const SalesInvoiceRightOff = ({
   salesInvoice,
   handleRightOff,
 }) => {
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
+  const queryClient = useQueryClient();
+
   const handleConfirmRightOff = async () => {
     try {
       await put_sales_invoice_api(salesInvoice.salesInvoiceId, {
@@ -30,6 +34,7 @@ const SalesInvoiceRightOff = ({
         permissionId: salesInvoice.permissionId,
         locationId: salesInvoice.locationId,
       });
+      queryClient.invalidateQueries(["salesInvoices", companyId]);
       handleRightOff();
       handleClose();
       toast.success("Sales invoice righted off successfully.");

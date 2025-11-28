@@ -33,6 +33,7 @@ import EmptyReturnList from "../emptyReturn/emptyReturnList/emptyReturnList.jsx"
 import AddEmpties from "../emptyReturn/addEmpties/addEmpties.jsx";
 import RolePermissionMapping from "../rolePermissionMapping/RolePermissionMapping.jsx";
 import CustomerList from "../customer/customerList/customerList.jsx";
+import ItemPriceListList from "../itemPriceList/ItemPriceListList/ItemPriceListList.jsx";
 
 const useMain = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -97,7 +98,7 @@ const useMain = () => {
         return <PurchaseOrderList />;
       case "Goods Received Notes":
         return <GrnList />;
-      case "Sales Orders":
+      case "Sales Requisitions":
         return <SalesOrderList />;
       case "Sales Invoices":
         return <SalesInvoiceList />;
@@ -155,6 +156,8 @@ const useMain = () => {
         return <RolePermissionMapping />;
       case "Customers":
         return <CustomerList />;
+      case "Price List Maintenance":
+        return <ItemPriceListList />;
       default:
         return null;
     }

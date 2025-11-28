@@ -17,12 +17,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
     {
         private readonly IItemPriceMasterService _itemPriceMasterService;
         private readonly ILogger<ItemPriceMasterController> _logger;
+        private readonly INotificationService _notificationService;
         private readonly IMapper _mapper;
 
-        public ItemPriceMasterController(IItemPriceMasterService itemPriceMasterService, ILogger<ItemPriceMasterController> logger, IMapper mapper)
+        public ItemPriceMasterController(IItemPriceMasterService itemPriceMasterService, ILogger<ItemPriceMasterController> logger, INotificationService notificationService, IMapper mapper)
         {
             _itemPriceMasterService = itemPriceMasterService;
             _logger = logger;
+            _notificationService = notificationService;
             _mapper = mapper;
         }
 
@@ -116,6 +118,78 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     _logger.LogInformation(LogMessages.ItemPriceMasterRetrived);
                     AddResponseMessage(Response, LogMessages.ItemPriceMasterRetrived, itemPriceMasterDto, true, HttpStatusCode.OK);
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ApiResponseModel> UpdateItemPriceMaster(int id, ItemPriceMasterRequestModel requestModel)
+        {
+            try
+            {
+                var existingItemPriceMaster = await _itemPriceMasterService.GetItemPriceMasterById(id);
+                if (existingItemPriceMaster == null)
+                {
+                    _logger.LogWarning(LogMessages.ItemPriceMasterNotFound);
+                    AddResponseMessage(Response, LogMessages.ItemPriceMasterNotFound, null, false, HttpStatusCode.NotFound);
+                    return Response;
+                }
+
+                var updatedItemPriceMaster = _mapper.Map<ItemPriceMaster>(requestModel);
+                updatedItemPriceMaster.Id = id;
+
+                await _itemPriceMasterService.UpdateItemPriceMaster(existingItemPriceMaster.Id, updatedItemPriceMaster);
+
+                _logger.LogInformation(LogMessages.ItemPriceMasterUpdated);
+                AddResponseMessage(Response, LogMessages.ItemPriceMasterUpdated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpPatch("ChangeStatus/{id}")]
+        public async Task<ApiResponseModel> ChangeStatus(int id, ItemPriceMasterStatusChangeRequestModel requestModel)
+        {
+            try
+            {
+                var existingItemPriceMaster = await _itemPriceMasterService.GetItemPriceMasterById(id);
+                if (existingItemPriceMaster == null)
+                {
+                    _logger.LogWarning(LogMessages.ItemPriceMasterNotFound);
+                    AddResponseMessage(Response, LogMessages.ItemPriceMasterNotFound, null, false, HttpStatusCode.NotFound);
+                    return Response;
+                }
+                var itemPriceMasterToUpdate = _mapper.Map<ItemPriceMaster>(requestModel);
+
+                await _itemPriceMasterService.ChangeStatus(existingItemPriceMaster.Id, itemPriceMasterToUpdate);
+
+                // Send notification to all logged-in users
+                await _notificationService.SendNotificationToAllLoggedUsers(new NotificationDto
+                {
+                    Title = itemPriceMasterToUpdate.Status == 0
+                        ? "Item Price Master Deactivated"
+                        : "Item Price Master Activated",
+                    Type = "ItemPriceMaster",
+                    Action = "Updated",
+                    Data = new
+                    {
+                        ItemPriceMasterId = existingItemPriceMaster.Id,
+                        Name = existingItemPriceMaster.ListName,
+                        NewStatus = itemPriceMasterToUpdate.Status
+                    },
+                });
+
+                _logger.LogInformation(LogMessages.ItemPriceMasterStatusChanged);
+                AddResponseMessage(Response, LogMessages.ItemPriceMasterStatusChanged, null, true, HttpStatusCode.OK);
             }
             catch (Exception ex)
             {

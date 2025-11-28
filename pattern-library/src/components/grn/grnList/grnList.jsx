@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import useGrnList from "./useGrnList.js";
 import GrnApproval from "../grnApproval/grnApproval.jsx";
 import Grn from "../grn";
@@ -7,6 +7,7 @@ import GrnUpdate from "../grnUpdate/grnUpdate.jsx";
 import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
 import { FaSearch } from "react-icons/fa";
+import { UserContext } from "../../../context/userContext.jsx";
 import Pagination from "../../common/Pagination/Pagination.jsx";
 
 const GrnList = () => {
@@ -17,37 +18,34 @@ const GrnList = () => {
   const {
     Grns,
     isLoadingData,
-    isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
-    selectedRowData,
     showApproveGrnModal,
     showApproveGrnModalInParent,
     showDetailGrnModal,
     showDetailGrnModalInParent,
+    selectedRowData,
     showCreateGrnForm,
     showUpdateGrnForm,
     GRNDetail,
-    isPermissionsError,
-    permissionError,
     areAnySelectedRowsPending,
-    setSelectedRows,
-    handleRowSelect,
+    handleViewDetails,
     getStatusLabel,
     getStatusBadgeClass,
+    handleRowSelect,
     handleShowApproveGrnModal,
     handleCloseApproveGrnModal,
     handleCloseDetailGrnModal,
     handleApproved,
-    handleViewDetails,
     setShowCreateGrnForm,
     setShowUpdateGrnForm,
-    hasPermission,
     handleUpdate,
     handleUpdated,
     handleClose,
   } = useGrnList();
+
+  const { hasPermission } = useContext(UserContext);
 
   //Handler for search input
   const handleSearch = (e) => {
@@ -63,11 +61,11 @@ const GrnList = () => {
   //Pagination Handler
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  if (error || isPermissionsError) {
+  if (error) {
     return <ErrorComponent error={error || "Error fetching data"} />;
   }
 
-  if (isLoadingData || isLoadingPermissions || (Grns && !(Grns.length >= 0))) {
+  if (isLoadingData || (Grns && !(Grns.length >= 0))) {
     return <LoadingSpinner />;
   }
 

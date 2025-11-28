@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import useMaterialRequisitionList from "./useMaterialRequisitionList";
 import MaterialRequisitionApproval from "../materialRequisitionApproval/materialRequisitionApproval";
 import MaterialRequisition from "../materialRequisition";
@@ -10,6 +10,7 @@ import moment from "moment";
 import "moment-timezone";
 import Pagination from "../../common/Pagination/Pagination";
 import { FaSearch } from "react-icons/fa";
+import { UserContext } from "../../../context/userContext";
 
 const MaterialRequisitionList = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -19,41 +20,32 @@ const MaterialRequisitionList = () => {
   const {
     materialRequisitions,
     isLoadingData,
-    isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
-    selectedRowData,
     showApproveMRModal,
     showApproveMRModalInParent,
     showDetailMRModal,
     showDetailMRModalInParent,
+    selectedRowData,
     showCreateMRForm,
     MRDetail,
-    isPermissionsError,
-    permissionError,
     openMINsList,
-    refetch,
-    setRefetch,
     areAnySelectedRowsPending,
-    setSelectedRows,
-    handleRowSelect,
+    handleViewDetails,
     getStatusLabel,
     getStatusBadgeClass,
+    handleRowSelect,
     handleShowApproveMRModal,
     handleCloseApproveMRModal,
-    handleShowDetailMRModal,
     handleCloseDetailMRModal,
     handleApproved,
-    handleViewDetails,
     setShowCreateMRForm,
-    hasPermission,
     handleUpdated,
-    handleClose,
-    formatDateInTimezone,
     setOpenMINsList,
   } = useMaterialRequisitionList();
 
+  const { hasPermission } = useContext(UserContext);
   const [selectedMrnId, setSelectedMrnId] = useState(null);
 
   //Handler for search input
@@ -63,22 +55,23 @@ const MaterialRequisitionList = () => {
   };
 
   //Filter MRNs based on search query
-  const filteredMaterialRequisitions = materialRequisitions.filter(
-    (mr) =>
-      mr.requestedBy.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      mr.referenceNumber.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredMaterialRequisitions = materialRequisitions
+    ? materialRequisitions.filter(
+        (mr) =>
+          mr.requestedBy.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          mr.referenceNumber.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
 
   //Pagination Handler
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  if (error || isPermissionsError) {
-    return <ErrorComponent error={error || permissionError.message} />;
+  if (error) {
+    return <ErrorComponent error={error || "Something went wrong"} />;
   }
 
   if (
     isLoadingData ||
-    isLoadingPermissions ||
     (materialRequisitions && !(materialRequisitions.length >= 0))
   ) {
     return <LoadingSpinner />;
@@ -98,8 +91,6 @@ const MaterialRequisitionList = () => {
   if (openMINsList) {
     return (
       <MinsListDetail
-        refetch={refetch}
-        setRefetch={setRefetch}
         mrnId={selectedMrnId}
         handleBack={() => setOpenMINsList(false)}
       />

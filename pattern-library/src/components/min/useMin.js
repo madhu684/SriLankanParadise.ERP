@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   get_requisition_masters_with_out_drafts_api,
   get_user_locations_by_user_id_api,
@@ -6,13 +6,12 @@ import {
 import {
   post_issue_master_api,
   post_issue_detail_api,
-  get_issue_masters_by_requisition_master_id_api,
   get_item_batches_api,
   get_locations_inventories_by_location_id_api,
-  post_location_inventory_goods_in_transit_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useMin = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -40,6 +39,11 @@ const useMin = ({ onFormSubmit }) => {
 
   const [noItembatchesError, setNoItembatchesError] = useState(false);
 
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
+  const userId = useMemo(() => sessionStorage.getItem("userId"), []);
+
+  const queryClient = useQueryClient();
+
   // Reset search modes on component mount
   useEffect(() => {
     setSearchByMrn(false);
@@ -64,15 +68,13 @@ const useMin = ({ onFormSubmit }) => {
     isError: isItemsError,
   } = useQuery({
     queryKey: ["items", searchTerm],
-    queryFn: () => fetchItems(sessionStorage.getItem("companyId"), searchTerm),
-    enabled: !!sessionStorage.getItem("companyId") && searchTerm.length > 0,
+    queryFn: () => fetchItems(companyId, searchTerm),
+    enabled: !!companyId && searchTerm.length > 0,
   });
 
   const fetchUserLocations = async () => {
     try {
-      const response = await get_user_locations_by_user_id_api(
-        sessionStorage.getItem("userId")
-      );
+      const response = await get_user_locations_by_user_id_api(userId);
       return response?.data?.result?.filter(
         (loc) => loc.location.locationTypeId === 2
       );
@@ -83,9 +85,9 @@ const useMin = ({ onFormSubmit }) => {
   };
 
   const { data: userLocations = [] } = useQuery({
-    queryKey: ["userLocations", sessionStorage.getItem("userId")],
+    queryKey: ["userLocations", userId],
     queryFn: fetchUserLocations,
-    enabled: !!sessionStorage.getItem("userId") && searchByWithoutMrn,
+    enabled: !!userId && searchByWithoutMrn,
   });
 
   // Handle adding an item to itemDetails
@@ -400,11 +402,11 @@ const useMin = ({ onFormSubmit }) => {
           searchByMrn && formData.mrnId ? parseInt(formData.mrnId) : null,
         issueDate: currentDate,
         createdBy: sessionStorage?.getItem("username") ?? null,
-        createdUserId: sessionStorage?.getItem("userId") ?? null,
+        createdUserId: userId ?? null,
         status: combinedStatus,
         approvedBy: null,
         approvedDate: null,
-        companyId: sessionStorage?.getItem("companyId") ?? null,
+        companyId: companyId ?? null,
         issueType: "MIN",
         referenceNumber: generateReferenceNumber(),
         approvedUserId: null,
@@ -438,12 +440,20 @@ const useMin = ({ onFormSubmit }) => {
         setSubmissionStatus(
           isSaveAsDraft ? "successSavedAsDraft" : "successSubmitted"
         );
+
+        queryClient.invalidateQueries(["mins", companyId]);
         setTimeout(() => {
           setSubmissionStatus(null);
           setLoading(false);
           setLoadingDraft(false);
           onFormSubmit();
         }, 3000);
+
+        toast.success(
+          isSaveAsDraft
+            ? "MIN created and saved as draft!"
+            : "MIN created successfully!"
+        );
       } else {
         setSubmissionStatus("error");
         setTimeout(() => {
@@ -451,6 +461,7 @@ const useMin = ({ onFormSubmit }) => {
           setLoading(false);
           setLoadingDraft(false);
         }, 3000);
+        toast.error("Error creating MIN. Please try again.");
       }
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -460,6 +471,7 @@ const useMin = ({ onFormSubmit }) => {
         setLoading(false);
         setLoadingDraft(false);
       }, 3000);
+      toast.error("Error creating MIN. Please try again.");
     }
   };
 
