@@ -95,10 +95,10 @@ const TopNav = ({ onToggleSidebar }) => {
             {getButtonText()}
           </button>
         </div>
-        {/* <span className="navbar-text">Enterprise Resource App</span> */}
-        <div>
+        <span className="navbar-text">Enterprise Resource App</span>
+        {/* <div>
           <NotificationBell />
-        </div>
+        </div> */}
       </div>
       {/* Render CashierSession modal */}
       {modalType === "create" && showCashierSessionModalInParent && (

@@ -18,14 +18,14 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <UserProvider>
-        <SignalRProvider hubUrl={hubUrl}>
-          <div className="App">
-            <Routers />
-            {/* Toast Container - Global */}
-            <ToastProvider />
-          </div>
-          <ReactQueryDevtools initialIsOpen={false} />
-        </SignalRProvider>
+        {/* <SignalRProvider hubUrl={hubUrl}>
+        </SignalRProvider> */}
+        <div className="App">
+          <Routers />
+          {/* Toast Container - Global */}
+          <ToastProvider />
+        </div>
+        <ReactQueryDevtools initialIsOpen={false} />
       </UserProvider>
     </QueryClientProvider>
   );
