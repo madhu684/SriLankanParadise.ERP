@@ -43,6 +43,7 @@ import AddEmpties from "./components/emptyReturn/addEmpties/addEmpties";
 import RolePermissionMapping from "./components/rolePermissionMapping/RolePermissionMapping";
 import CustomerList from "./components/customer/customerList/customerList";
 import ItemPriceListList from "./components/itemPriceList/ItemPriceListList/ItemPriceListList";
+import ItemTypeList from "./components/itemType/itemTypeList/ItemTypeList";
 
 const Routers = () => {
   return (
@@ -109,6 +110,7 @@ const Routers = () => {
           <Route path="inventory">
             <Route path="items" element={<ItemMasterList />} />
             <Route path="categories" element={<CategoryList />} />
+            <Route path="item-types" element={<ItemTypeList />} />
             <Route path="units" element={<UnitList />} />
             <Route path="locations" element={<LocationList />} />
             <Route path="stock-management" element={<StockManagement />} />

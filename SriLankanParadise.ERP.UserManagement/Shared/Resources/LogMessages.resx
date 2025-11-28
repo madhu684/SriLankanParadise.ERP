@@ -1125,4 +1125,16 @@
   <data name="ItemPriceDetailDeleted" xml:space="preserve">
     <value>Item price detail deleted successfully</value>
   </data>
+  <data name="ItemTypeAdded" xml:space="preserve">
+    <value>Item type added successfully</value>
+  </data>
+  <data name="ItemTypeRetrieved" xml:space="preserve">
+    <value>Item type retrieved successfully</value>
+  </data>
+  <data name="ItemTypeNotFound" xml:space="preserve">
+    <value>Item type not found</value>
+  </data>
+  <data name="ItemTypeUpdated" xml:space="preserve">
+    <value>Item type updated successfully</value>
+  </data>
 </root>

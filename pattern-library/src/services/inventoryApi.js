@@ -289,6 +289,41 @@ export const get_item_types_by_company_id_api = async (companyId) => {
   }
 };
 
+export const post_item_type_api = async (formData) => {
+  try {
+    const response = await api.post("/itemType", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_item_type_by_id_api = async (itemTypeId) => {
+  try {
+    const response = await api.get(`/itemType/${itemTypeId}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const put_item_type_api = async (itemTypeId, itemTypeIdData) => {
+  try {
+    const response = await api.put(`/itemType/${itemTypeId}`, itemTypeIdData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 //measurement types api
 export const get_measurement_types_by_company_id_api = async (companyId) => {
   try {

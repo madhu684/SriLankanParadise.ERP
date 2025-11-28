@@ -42,6 +42,7 @@ const submoduleRouteMap = {
   // Inventory Management
   "Item Masters": "/main/inventory/items",
   Categories: "/main/inventory/categories",
+  "Item Types": "/main/inventory/item-types",
   Units: "/main/inventory/units",
   Locations: "/main/inventory/locations",
   "Item Batch Update": "/main/inventory/batch-update",

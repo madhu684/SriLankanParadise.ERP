@@ -126,7 +126,6 @@ const useCategory = ({ onFormSubmit }) => {
         setSubmissionStatus(null);
         setLoading(false);
       }, 3000);
-      toast.error("Category creation failed!");
     }
   };
 
