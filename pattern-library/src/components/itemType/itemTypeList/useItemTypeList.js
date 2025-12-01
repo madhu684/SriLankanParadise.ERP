@@ -60,12 +60,24 @@ const useItemTypeList = () => {
     return statusClasses[statusCode] || "bg-secondary";
   };
 
+  // Handlers
+  const handleUpdate = useCallback((ItemType) => {
+    setSelectedItemType(ItemType);
+    setShowUpdateItemTypeForm(true);
+  }, []);
+
+  const handleCloseUpdate = useCallback(() => {
+    setSelectedItemType(null);
+    setShowUpdateItemTypeForm(false);
+  }, []);
+
   return {
     searchQuery,
     currentPage,
     itemsPerPage,
     itemTypes,
     filteredItemTypes,
+    selectedItemType,
 
     // loading and error
     isLoadingItemTypes,
@@ -86,6 +98,10 @@ const useItemTypeList = () => {
     // Helpers
     getStatusLabel,
     getStatusBadgeClass,
+
+    // Handlers
+    handleUpdate,
+    handleCloseUpdate,
   };
 };
 

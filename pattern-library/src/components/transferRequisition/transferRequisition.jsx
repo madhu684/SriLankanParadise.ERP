@@ -474,7 +474,7 @@ const TransferRequisition = ({
       </div>
 
       {/* Attachments Section */}
-      <div className="card border-0 shadow-sm mb-4">
+      {/* <div className="card border-0 shadow-sm mb-4">
         <div className="card-header bg-secondary text-white d-flex align-items-center gap-2">
           <i className="bi bi-paperclip"></i>
           <span className="fw-medium">4. Attachments</span>
@@ -502,7 +502,7 @@ const TransferRequisition = ({
             )}
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Action Buttons */}
       <div className="d-flex flex-wrap gap-3 mb-3">

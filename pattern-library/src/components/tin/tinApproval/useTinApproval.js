@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   approve_issue_master_api,
   patch_location_inventory_api,
@@ -8,11 +8,16 @@ import {
   update_min_state_in_mrn_api,
 } from "../../../services/purchaseApi";
 import toast from "react-hot-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 const useTinApproval = ({ tin, onFormSubmit }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const alertRef = useRef(null);
+
+  const queryClient = useQueryClient();
+
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
 
   useEffect(() => {
     if (approvalStatus === "approved") {
@@ -178,6 +183,7 @@ const useTinApproval = ({ tin, onFormSubmit }) => {
         setLoading(false);
       }, 2000);
 
+      queryClient.invalidateQueries(["tinList", companyId]);
       toast.success("Transfer issue note approved successfully.");
     } catch (error) {
       setApprovalStatus("error");

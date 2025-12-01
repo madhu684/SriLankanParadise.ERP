@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import useTransferRequisitionList from "./useTransferRequisitionList";
 import TransferRequisitionApproval from "../transferRequisitionApproval/transferRequisitionApproval";
 import TransferRequisition from "../transferRequisition";
@@ -10,6 +10,8 @@ import moment from "moment";
 import "moment-timezone";
 import { FaSearch } from "react-icons/fa";
 import Pagination from "../../common/Pagination/Pagination";
+import DeleteConfirmationModal from "../../confirmationModals/deleteConfirmationModal/deleteConfirmationModal";
+import { UserContext } from "../../../context/userContext";
 
 const TransferRequisitionList = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -18,46 +20,50 @@ const TransferRequisitionList = () => {
 
   const {
     transferRequisitions,
-    isLoadingData,
-    isLoadingPermissions,
-    error,
     isAnyRowSelected,
     selectedRows,
-    selectedRowData,
     showApproveTRModal,
     showApproveTRModalInParent,
     showDetailTRModal,
     showDetailTRModalInParent,
+    selectedRowData,
     showCreateTRForm,
     TRDetail,
-    isPermissionsError,
-    permissionError,
-    openTINsList,
     selectedWarehouse,
     userWarehouses,
     filter,
     filteredRequisitions,
-    refetch,
-    setRefetch,
+    openTINsList,
+    showTRNDeleteModal,
+    submissionMessage,
+    submissionStatus,
+    isLoading,
+    isLoadingData,
+    error,
+    setShowTRNDeleteModal,
     areAnySelectedRowsPending,
     setSelectedRows,
-    handleRowSelect,
+    handleViewDetails,
     getStatusLabel,
     getStatusBadgeClass,
+    handleRowSelect,
     handleShowApproveTRModal,
     handleCloseApproveTRModal,
     handleShowDetailTRModal,
     handleCloseDetailTRModal,
     handleApproved,
-    handleViewDetails,
     setShowCreateTRForm,
-    hasPermission,
     handleUpdated,
     handleClose,
+    formatDateInTimezone,
     setSelectedWarehouse,
     setFilter,
     setOpenTINsList,
+    handleCloseDeleteConfirmation,
+    handleConfirmDeleteTRN,
   } = useTransferRequisitionList();
+
+  const { hasPermission } = useContext(UserContext);
 
   const [selectedTrnId, setSelectedTrnId] = useState(null);
 
@@ -77,13 +83,12 @@ const TransferRequisitionList = () => {
   //Pagination Handler
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  if (error || isPermissionsError) {
-    return <ErrorComponent error={error || permissionError.message} />;
+  if (error) {
+    return <ErrorComponent error={error || "Error fetching data..."} />;
   }
 
   if (
     isLoadingData ||
-    isLoadingPermissions ||
     (transferRequisitions && !(transferRequisitions.length >= 0))
   ) {
     return <LoadingSpinner />;
@@ -102,8 +107,6 @@ const TransferRequisitionList = () => {
   if (openTINsList) {
     return (
       <TinsListDetail
-        refetch={refetch}
-        setRefetch={setRefetch}
         trnId={selectedTrnId}
         handleBack={() => setOpenTINsList(false)}
       />
@@ -135,8 +138,6 @@ const TransferRequisitionList = () => {
     );
   }
 
-  console.log("transferRequisitions: ", transferRequisitions);
-
   return (
     <div className="container mt-4">
       <h2>Transfer Requisition Notes</h2>
@@ -161,6 +162,20 @@ const TransferRequisitionList = () => {
                 onClick={handleShowApproveTRModal}
               >
                 Approve
+              </button>
+            )}
+          {isAnyRowSelected &&
+            selectedRowData[0]?.status === 1 &&
+            transferRequisitions?.some(
+              (trn) =>
+                trn?.requisitionMasterId ===
+                selectedRowData[0]?.requisitionMasterId
+            ) && (
+              <button
+                className="btn btn-danger"
+                onClick={() => setShowTRNDeleteModal(true)}
+              >
+                Delete
               </button>
             )}
         </div>
@@ -374,6 +389,15 @@ const TransferRequisitionList = () => {
             transferRequisition={TRDetail}
           />
         )}
+        <DeleteConfirmationModal
+          show={showTRNDeleteModal}
+          handleClose={handleCloseDeleteConfirmation}
+          handleConfirmDelete={handleConfirmDeleteTRN}
+          title={`TRN "${selectedRowData[0]?.referenceNumber}"`}
+          submissionStatus={submissionStatus}
+          message={submissionMessage}
+          loading={isLoading}
+        />
       </div>
     </div>
   );

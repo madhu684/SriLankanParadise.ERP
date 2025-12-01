@@ -1,11 +1,16 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { approve_requisition_master_api } from "../../../services/purchaseApi";
 import toast from "react-hot-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 const useTransferRequisitionApproval = ({ onFormSubmit }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const alertRef = useRef(null);
+
+  const queryClient = useQueryClient();
+
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
 
   useEffect(() => {
     if (approvalStatus === "approved") {
@@ -54,6 +59,7 @@ const useTransferRequisitionApproval = ({ onFormSubmit }) => {
         setLoading(false);
       }, 2000);
 
+      queryClient.invalidateQueries(["transferRequisitions", companyId]);
       toast.success("Transfer requisition note approved successfully");
     } catch (error) {
       setApprovalStatus("error");

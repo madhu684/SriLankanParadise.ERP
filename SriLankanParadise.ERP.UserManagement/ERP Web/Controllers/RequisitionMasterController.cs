@@ -195,5 +195,30 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
         }
+
+        [HttpDelete("{requisitionMasterId}")]
+        public async Task<ApiResponseModel> DeleteRrequisitionMasterAndDetailById(int requisitionMasterId)
+        {
+            try
+            {
+                var existingReqMaster = await _requisitionMasterService.GetRequisitionMasterByRequisitionMasterId(requisitionMasterId);
+                if (existingReqMaster == null)
+                {
+                    _logger.LogWarning(LogMessages.RequisitionMasterNotFound);
+                    return AddResponseMessage(Response, LogMessages.RequisitionMasterNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+                await _requisitionMasterService.DeleteRrequisitionMasterAndDetailById(requisitionMasterId);
+
+                _logger.LogInformation(LogMessages.RequisitionMasterDeleted);
+                return AddResponseMessage(Response, LogMessages.RequisitionMasterDeleted, null, true, HttpStatusCode.NoContent);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

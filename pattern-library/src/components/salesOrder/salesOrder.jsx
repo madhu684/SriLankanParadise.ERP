@@ -51,6 +51,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
     isCompanyError,
     showModal,
     company,
+    hasLineItemChargesChanged,
     closeModal,
     handleShowCreateCustomerModal,
     handleCloseCreateCustomerModal,
@@ -446,14 +447,16 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                   >
                     <option value="">Select Location</option>
                     {userLocations && userLocations != null
-                      ? userLocations.map((location) => (
-                          <option
-                            key={location.location.locationId}
-                            value={location.location.locationId}
-                          >
-                            {location.location.locationName}
-                          </option>
-                        ))
+                      ? userLocations
+                          .filter((loc) => loc.location.locationTypeId === 2)
+                          .map((location) => (
+                            <option
+                              key={location.location.locationId}
+                              value={location.location.locationId}
+                            >
+                              {location.location.locationName}
+                            </option>
+                          ))
                       : ""}
                   </select>
                   {validationErrors.storeLocation && (
@@ -999,6 +1002,15 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
             </div>
           </div>
         </div>
+
+        {hasLineItemChargesChanged && (
+          <div className="alert alert-warning mb-2" role="alert">
+            <i className="bi bi-exclamation-triangle-fill me-2"></i>
+            <strong>Note:</strong> Line item charges have been modified or added
+            to the sales requisition. This requisition will be switched to
+            Approval status from FM.
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className="card shadow-sm mb-4">

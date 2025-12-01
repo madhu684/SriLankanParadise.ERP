@@ -7,7 +7,7 @@ import CurrentDateTime from "../../currentDateTime/currentDateTime";
 import TinDetails from "../tinAccept/tinAccept.jsx";
 import { useQuery } from "@tanstack/react-query";
 
-const TinsListDetail = ({ refetch, setRefetch, trnId, handleBack }) => {
+const TinsListDetail = ({ trnId, handleBack }) => {
   const { getStatusBadgeClass, getStatusLabel } = useTinList();
 
   const [tinDetail, setTinDetail] = useState("");
@@ -116,8 +116,6 @@ const TinsListDetail = ({ refetch, setRefetch, trnId, handleBack }) => {
         </table>
         {showTinAcceptModal && (
           <TinDetails
-            refetch={refetch}
-            setRefetch={setRefetch}
             show={showTinAcceptModal}
             handleClose={handleCloseDetailTinModal}
             tin={tinDetail}

@@ -231,6 +231,31 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpDelete("{id}")]
+        public async Task<ApiResponseModel> DeleteIssueMasterAndDetail(int id)
+        {
+            try
+            {
+                var existingIssueMaster = await _issueMasterService.GetIssueMasterByIssueMasterId(id);
+                if(existingIssueMaster == null)
+                {
+                    _logger.LogWarning(LogMessages.IssueMastersNotFound);
+                    return AddResponseMessage(Response, LogMessages.IssueMastersNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+                await _issueMasterService.DeleteIssueMasterAndDetailById(id);
+
+                _logger.LogInformation(LogMessages.IssueMasterDeleted);
+                return AddResponseMessage(Response, LogMessages.IssueMasterDeleted, null, true, HttpStatusCode.NoContent);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
         // Helper method
         private bool IsUniqueConstraintViolation(DbUpdateException ex, string constraintName)
         {

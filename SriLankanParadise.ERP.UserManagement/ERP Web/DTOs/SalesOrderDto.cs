@@ -46,6 +46,7 @@
         public decimal? CustomerCreditLimitAtOrder { get; set; }
 
         public int? CustomerCreditDurationAtOrder { get; set; }
+        public bool isLineChargesChanged { get; set; }
 
         public virtual IEnumerable<SalesOrderDetailDto>? SalesOrderDetails { get; set; }
     }

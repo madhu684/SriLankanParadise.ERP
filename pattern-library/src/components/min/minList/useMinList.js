@@ -25,7 +25,10 @@ const useMinList = () => {
     queryKey: ["mins", companyId],
     queryFn: async () => {
       const response = await get_issue_masters_with_out_drafts_api(companyId);
-      return response.data.result || [];
+      const filteredMins = response.data.result.filter(
+        (min) => min.issueType === "MIN"
+      );
+      return filteredMins || [];
     },
     enabled: !!companyId,
   });

@@ -1137,4 +1137,10 @@
   <data name="ItemTypeUpdated" xml:space="preserve">
     <value>Item type updated successfully</value>
   </data>
+  <data name="IssueMasterDeleted" xml:space="preserve">
+    <value>Issue master and issue detail deleted successfully</value>
+  </data>
+  <data name="RequisitionMasterDeleted" xml:space="preserve">
+    <value>Requisition master and detail deleted successfully</value>
+  </data>
 </root>

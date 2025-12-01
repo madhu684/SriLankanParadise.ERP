@@ -52,5 +52,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             return await _issueMasterRepository.GetIssueMastersById(id);
         }
+
+        public async Task DeleteIssueMasterAndDetailById(int issueMasterId)
+        {
+            await _issueMasterRepository.DeleteIssueMasterAndDetailById(issueMasterId);
+        }
     }
 }

@@ -4,7 +4,7 @@ import moment from "moment";
 import useTinAccept from "./tinAccept";
 import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 
-const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
+const TinAccept = ({ show, handleClose, tin }) => {
   const {
     approvalStatus,
     loading,
@@ -21,8 +21,6 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
     isAccepted,
   } = useTinAccept({
     tin,
-    refetch,
-    setRefetch,
     onFormSubmit: handleClose,
   });
 
@@ -169,8 +167,11 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
             <div className="d-flex justify-content-between align-items-start flex-wrap gap-3">
               <div>
                 <p className="fs-5 fw-bold mb-0">{tin.referenceNumber}</p>
-                <p className="fs-6 text-muted fw-bold mb-0">
-                  {tin.issuingCustDekNo || "N/A"}
+                <p className="fs-6 fw-bold mb-0">
+                  Issuing Cust Dek No:{" "}
+                  <span className="text-muted">
+                    {tin.issuingCustDekNo || "N/A"}
+                  </span>
                 </p>
               </div>
               <div className="text-end">
@@ -359,7 +360,7 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
                         </td>
                         <td>
                           <span className="badge bg-light text-dark border">
-                            {item.itemMaster?.unit.unitName}
+                            {item.itemMaster?.conversionRate || "N/A"} ml
                           </span>
                         </td>
                         <td>

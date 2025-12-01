@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import useTinList from "./useTinList.js";
 import TinApproval from "../tinApproval/tinApproval.jsx";
 import Tin from "../tin.jsx";
@@ -9,6 +9,8 @@ import moment from "moment";
 import "moment-timezone";
 import { FaSearch } from "react-icons/fa";
 import Pagination from "../../common/Pagination/Pagination.jsx";
+import DeleteConfirmationModal from "../../confirmationModals/deleteConfirmationModal/deleteConfirmationModal.jsx";
+import { UserContext } from "../../../context/userContext";
 
 const TinList = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -18,36 +20,42 @@ const TinList = () => {
   const {
     Tins,
     isLoadingData,
-    isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
-    selectedRowData,
     showApproveTinModal,
     showApproveTinModalInParent,
     showDetailTinModal,
     showDetailTinModalInParent,
+    selectedRowData,
     showCreateTinForm,
     showUpdateTinForm,
     TinDetail,
-    isPermissionsError,
-    permissionError,
+    submissionMessage,
+    submissionStatus,
+    isLoading,
+    showTINDeleteModal,
+    setShowTINDeleteModal,
     areAnySelectedRowsPending,
     setSelectedRows,
-    handleRowSelect,
+    handleViewDetails,
     getStatusLabel,
     getStatusBadgeClass,
+    handleRowSelect,
     handleShowApproveTinModal,
     handleCloseApproveTinModal,
+    handleShowDetailTinModal,
     handleCloseDetailTinModal,
     handleApproved,
-    handleViewDetails,
     setShowCreateTinForm,
     setShowUpdateTinForm,
-    hasPermission,
     handleUpdated,
     handleClose,
+    handleConfirmDeleteTIN,
+    handleCloseDeleteConfirmation,
   } = useTinList();
+
+  const { hasPermission } = useContext(UserContext);
 
   //Handler for search input
   const handleSearch = (e) => {
@@ -63,11 +71,11 @@ const TinList = () => {
   //Pagination Handler
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  if (error || isPermissionsError) {
-    return <ErrorComponent error={error || "Error fetching data"} />;
+  if (error) {
+    return <ErrorComponent error={error || "Error fetching data..."} />;
   }
 
-  if (isLoadingData || isLoadingPermissions || (Tins && !(Tins?.length >= 0))) {
+  if (isLoadingData || (Tins && !(Tins?.length >= 0))) {
     return <LoadingSpinner />;
   }
 
@@ -128,6 +136,18 @@ const TinList = () => {
                 onClick={handleShowApproveTinModal}
               >
                 Approve
+              </button>
+            )}
+          {isAnyRowSelected &&
+            selectedRowData[0]?.status === 41 &&
+            Tins?.some(
+              (trn) => trn?.issueMasterId === selectedRowData[0]?.issueMasterId
+            ) && (
+              <button
+                className="btn btn-danger"
+                onClick={() => setShowTINDeleteModal(true)}
+              >
+                Delete
               </button>
             )}
         </div>
@@ -238,6 +258,15 @@ const TinList = () => {
             handleApproved={handleApproved}
           />
         )}
+        <DeleteConfirmationModal
+          show={showTINDeleteModal}
+          handleClose={handleCloseDeleteConfirmation}
+          handleConfirmDelete={handleConfirmDeleteTIN}
+          title={`TIN "${selectedRowData[0]?.referenceNumber}"`}
+          submissionStatus={submissionStatus}
+          message={submissionMessage}
+          loading={isLoading}
+        />
       </div>
     </div>
   );

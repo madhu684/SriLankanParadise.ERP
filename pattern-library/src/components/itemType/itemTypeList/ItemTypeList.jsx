@@ -5,6 +5,7 @@ import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import Pagination from "../../common/Pagination/Pagination";
 import { FaSearch } from "react-icons/fa";
 import ItemType from "../ItemType";
+import ItemTypeUpdate from "../itemTypeUpdate/ItemTypeUpdate";
 
 const ItemTypeList = () => {
   const {
@@ -13,6 +14,7 @@ const ItemTypeList = () => {
     itemsPerPage,
     itemTypes,
     filteredItemTypes,
+    selectedItemType,
     isLoadingItemTypes,
     error,
     showCreateItemTypeForm,
@@ -25,6 +27,8 @@ const ItemTypeList = () => {
     handleSearch,
     getStatusLabel,
     getStatusBadgeClass,
+    handleUpdate,
+    handleCloseUpdate,
   } = useItemTypeList();
 
   if (error) {
@@ -37,6 +41,15 @@ const ItemTypeList = () => {
 
   if (showCreateItemTypeForm) {
     return <ItemType handleClose={() => setShowCreateItemTypeForm(false)} />;
+  }
+
+  if (showUpdateItemTypeForm) {
+    return (
+      <ItemTypeUpdate
+        itemType={selectedItemType}
+        handleClose={handleCloseUpdate}
+      />
+    );
   }
 
   if (itemTypes.length === 0) {
@@ -152,7 +165,7 @@ const ItemTypeList = () => {
                       <td className="text-center">
                         <button
                           className="btn btn-warning btn-sm px-3 shadow-sm"
-                          //onClick={() => handleUpdate(c)}
+                          onClick={() => handleUpdate(it)}
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"

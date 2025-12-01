@@ -21,7 +21,7 @@ const TRANSACTION_TYPE_ID = 5;
 const STATUS_COMPLETED = 5;
 const APPROVAL_TIMEOUT = 2000;
 
-const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
+const useTinAccept = ({ tin, onFormSubmit }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
   const [receivedQuantities, setReceivedQuantities] = useState({});
   const [returnedQuantities, setReturnedQuantities] = useState({});
@@ -441,12 +441,11 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
         queryClient.invalidateQueries(["tins", tinId]);
         queryClient.invalidateQueries(["locationInventories", toLocationId]);
         queryClient.invalidateQueries(["locationInventories", fromLocationId]);
+        queryClient.invalidateQueries(["transferRequisitions", companyId]);
         queryClient.invalidateQueries([
           "locationInventories",
           DAMAGE_LOCATION_ID,
         ]);
-
-        setRefetch(!refetch);
         setShowValidation(false);
         setApprovalStatus("approved");
         toast.success("Transfer issue note accepted successfully");
@@ -474,8 +473,6 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
       createItemBatchData,
       updateMrnState,
       queryClient,
-      refetch,
-      setRefetch,
     ]
   );
 

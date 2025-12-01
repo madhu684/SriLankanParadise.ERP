@@ -29,7 +29,10 @@ const useMaterialRequisitionList = () => {
       const response = await get_requisition_masters_with_out_drafts_api(
         companyId
       );
-      return response.data.result || [];
+      const filteredRequisitions = response?.data?.result?.filter(
+        (rm) => rm.requisitionType === "MRN"
+      );
+      return filteredRequisitions || [];
     },
   });
 

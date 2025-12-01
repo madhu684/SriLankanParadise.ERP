@@ -192,5 +192,44 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task DeleteIssueMasterAndDetailById(int issueMasterId)
+        {
+            var executionStrategy = _dbContext.Database.CreateExecutionStrategy();
+            await executionStrategy.ExecuteAsync(async () =>
+            {
+                using var transaction = await _dbContext.Database.BeginTransactionAsync();
+                try
+                {
+                    // Delete all associated IssueDetails
+                    var issueDetails = await _dbContext.IssueDetails
+                        .Where(d => d.IssueMasterId == issueMasterId)
+                        .ToListAsync();
+
+                    if (issueDetails.Any())
+                    {
+                        _dbContext.IssueDetails.RemoveRange(issueDetails);
+                        await _dbContext.SaveChangesAsync();
+                    }
+
+                    // Delete the IssueMaster
+                    var issueMaster = await _dbContext.IssueMasters
+                        .FirstOrDefaultAsync(m => m.IssueMasterId == issueMasterId);
+
+                    if (issueMaster != null)
+                    {
+                        _dbContext.IssueMasters.Remove(issueMaster);
+                        await _dbContext.SaveChangesAsync();
+                    }
+
+                    await transaction.CommitAsync();
+                }
+                catch (Exception)
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            });
+        }
     }
 }
