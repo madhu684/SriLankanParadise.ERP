@@ -173,8 +173,8 @@ const TransferRequisitionApproval = ({
                     <th className="ps-3"></th>
                     <th>Item Name</th>
                     <th className="text-center">Unit</th>
-                    <th className="text-center">Pack Size</th>
                     <th className="text-end pe-3">Requested Quantity</th>
+                    <th className="text-center">Cust Dek No</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -190,17 +190,17 @@ const TransferRequisitionApproval = ({
                       </td>
                       <td className="text-center">
                         <span className="badge bg-light text-dark">
-                          {item.itemMaster.unit.unitName}
-                        </span>
-                      </td>
-                      <td className="text-center">
-                        <span className="badge bg-light text-dark">
                           {item.itemMaster.conversionRate} ml
                         </span>
                       </td>
                       <td className="text-end pe-3">
                         <span className="badge bg-primary fs-6 px-3 py-2">
                           {item.quantity}
+                        </span>
+                      </td>
+                      <td className="text-end pe-3">
+                        <span className="badge bg-light text-dark">
+                          {item.custDekNo}
                         </span>
                       </td>
                     </tr>

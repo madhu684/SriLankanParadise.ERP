@@ -28,7 +28,6 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
     isItemBatchesError,
     isLocationInventoriesLoading,
     isLocationInventoriesError,
-    locationInventories,
     handleInputChange,
     handleItemDetailsChange,
     handleRemoveItem,
@@ -145,6 +144,30 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
                   {validationErrors.status && (
                     <div className="invalid-feedback">
                       {validationErrors.status}
+                    </div>
+                  )}
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="status" className="form-label fw-semibold">
+                    Issuing Cust Dek No <span className="text-danger">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    className={`form-control ${
+                      validFields.issuingCustDekNo ? "is-valid" : ""
+                    } ${validationErrors.issuingCustDekNo ? "is-invalid" : ""}`}
+                    id="issuingCustDekNo"
+                    name="issuingCustDekNo"
+                    value={formData.issuingCustDekNo}
+                    onChange={(e) =>
+                      handleInputChange("issuingCustDekNo", e.target.value)
+                    }
+                    placeholder="Eg:- I-00009"
+                    required
+                  />
+                  {validationErrors.issuingCustDekNo && (
+                    <div className="invalid-feedback">
+                      {validationErrors.issuingCustDekNo}
                     </div>
                   )}
                 </div>
@@ -282,16 +305,6 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
                         <div className="col-12">
                           <div className="d-flex">
                             <strong className="text-muted me-2">
-                              GRN Reference:
-                            </strong>
-                            <span className="badge bg-info">
-                              {selectedTrn?.grnDekReference || "N/A"}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="col-12">
-                          <div className="d-flex">
-                            <strong className="text-muted me-2">
                               Requested By:
                             </strong>
                             <span>{selectedTrn?.requestedBy}</span>
@@ -365,6 +378,7 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
                     <tr>
                       <th className="text-nowrap">Item Name</th>
                       <th className="text-nowrap">Unit</th>
+                      <th className="text-nowrap">Cust Dek No</th>
                       <th className="text-nowrap">Requested Qty</th>
                       <th className="text-nowrap">Available Stock</th>
                       <th className="text-nowrap">Dispatched Qty</th>
@@ -376,6 +390,11 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
                       <tr key={index}>
                         <td className="fw-semibold">{item.name}</td>
                         <td>{item.unit}</td>
+                        <td>
+                          <span className="badge bg-secondary rounded-pill">
+                            {item.custDekNo}
+                          </span>
+                        </td>
                         <td>
                           <span className="badge bg-primary rounded-pill">
                             {item.quantity}
@@ -465,7 +484,7 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
             <i className="bi bi-x-circle me-2"></i>
             Cancel
           </button>
-          <button
+          {/* <button
             type="button"
             className="btn btn-success"
             onClick={handlePrint}
@@ -473,7 +492,7 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
           >
             <i className="bi bi-printer me-2"></i>
             Print
-          </button>
+          </button> */}
           <button
             type="button"
             className="btn btn-primary"

@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   approve_requisition_master_api,
   get_issue_details_api,
   get_locations_inventories_by_location_id_item_master_id_api,
   patch_issue_detail_api,
   patch_location_inventory_api,
+  post_batch_api,
   post_itemBatch_api,
   post_location_inventory_api,
   post_location_inventory_movement_api,
@@ -13,287 +14,335 @@ import {
 } from "../../../services/purchaseApi";
 import toast from "react-hot-toast";
 
+// Constants
+const DAMAGE_LOCATION_ID = 5;
+const MOVEMENT_TYPE_ID = 1;
+const TRANSACTION_TYPE_ID = 5;
+const STATUS_COMPLETED = 5;
+const APPROVAL_TIMEOUT = 2000;
+
 const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
   const [receivedQuantities, setReceivedQuantities] = useState({});
   const [returnedQuantities, setReturnedQuantities] = useState({});
   const [loading, setLoading] = useState(false);
+  const [showValidation, setShowValidation] = useState(true);
+
   const queryClient = useQueryClient();
   const alertRef = useRef(null);
 
-  console.log("tin in useTinAccept: ", tin);
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
+  const username = useMemo(() => sessionStorage.getItem("username"), []);
+  const userId = useMemo(() => sessionStorage.getItem("userId"), []);
 
+  // Check if already accepted
+  const isAccepted = useMemo(
+    () => tin?.requisitionMaster?.isMINAccepted === true,
+    [tin?.requisitionMaster?.isMINAccepted]
+  );
+
+  // Fetch issue details
   const { data: issuedetails } = useQuery({
     queryKey: ["tins", tin.issueMasterId],
     queryFn: () => get_issue_details_api(tin.issueMasterId),
     select: (r) => r?.data?.result || [],
+    enabled: !!tin.issueMasterId,
   });
 
+  // Auto-close form after approval
   useEffect(() => {
     if (approvalStatus === "approved") {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
+        setShowValidation(false);
         onFormSubmit();
-      }, 2000);
+        // Reset states
+        setTimeout(() => {
+          setApprovalStatus(null);
+          setShowValidation(true);
+        }, 500);
+      }, APPROVAL_TIMEOUT);
+      return () => clearTimeout(timer);
     }
   }, [approvalStatus, onFormSubmit]);
 
+  // Scroll to alert
   useEffect(() => {
-    if (approvalStatus != null) {
+    if (approvalStatus) {
       alertRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [approvalStatus]);
 
+  // Initialize quantities from issue details
   useEffect(() => {
     if (issuedetails?.length > 0) {
-      const updatedReceivedQuantities = issuedetails.reduce((acc, item) => {
-        acc[item.issueDetailId] = item.quantity !== null ? item.quantity : 0;
-        return acc;
-      }, {});
+      const received = {};
+      const returned = {};
 
-      const updatedReturnedQuantities = issuedetails.reduce((acc, item) => {
-        acc[item.issueDetailId] =
-          item.returnedQuantity !== null ? item.returnedQuantity : 0;
-        return acc;
-      }, {});
+      issuedetails.forEach((item) => {
+        received[item.issueDetailId] = item.quantity ?? 0;
+        returned[item.issueDetailId] = item.returnedQuantity ?? 0;
+      });
 
-      setReceivedQuantities(updatedReceivedQuantities);
-      setReturnedQuantities(updatedReturnedQuantities);
+      setReceivedQuantities(received);
+      setReturnedQuantities(returned);
     }
   }, [issuedetails]);
 
-  const getStatusLabel = () => {
-    let statusLabel = "Unknown Status";
-    if (tin?.requisitionMaster?.isMINAccepted === false) {
-      statusLabel = "In Progress";
+  // Reset validation display when modal reopens or status changes
+  useEffect(() => {
+    if (isAccepted) {
+      setShowValidation(false);
     } else {
-      statusLabel = "Completed";
+      setShowValidation(true);
     }
-    return statusLabel;
-  };
+  }, [isAccepted]);
 
-  const getStatusBadgeClass = () => {
-    let statusClass = "bg-secondary";
-    if (tin?.requisitionMaster?.isMINAccepted === false) {
-      statusClass = "bg-info";
-    } else {
-      statusClass = "bg-success";
-    }
-    return statusClass;
-  };
+  // Status helpers
+  const getStatusLabel = useCallback(() => {
+    return tin?.requisitionMaster?.isMINAccepted ? "Completed" : "In Progress";
+  }, [tin?.requisitionMaster?.isMINAccepted]);
 
-  const handleReceivedQuantityChange = (issueDetailId, newQuantity) => {
-    setReceivedQuantities((prev) => ({
-      ...prev,
-      [issueDetailId]: newQuantity,
-    }));
-  };
+  const getStatusBadgeClass = useCallback(() => {
+    return tin?.requisitionMaster?.isMINAccepted ? "bg-success" : "bg-info";
+  }, [tin?.requisitionMaster?.isMINAccepted]);
 
-  const handleReturnedQuantityChange = (issueDetailId, newQuantity) => {
-    setReturnedQuantities((prev) => ({
-      ...prev,
-      [issueDetailId]: newQuantity,
-    }));
-  };
+  // Quantity change handlers
+  const handleReceivedQuantityChange = useCallback(
+    (issueDetailId, newQuantity) => {
+      const value = parseFloat(newQuantity) || 0;
+      setReceivedQuantities((prev) => ({
+        ...prev,
+        [issueDetailId]: value,
+      }));
+    },
+    []
+  );
 
+  const handleReturnedQuantityChange = useCallback(
+    (issueDetailId, newQuantity) => {
+      const value = parseFloat(newQuantity) || 0;
+      setReturnedQuantities((prev) => ({
+        ...prev,
+        [issueDetailId]: value,
+      }));
+    },
+    []
+  );
+
+  // Update issue details mutation
   const mutation = useMutation({
     mutationFn: ({ issuemasterid, updatedDetails }) =>
       patch_issue_detail_api(issuemasterid, updatedDetails),
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries(["tins", tin.issueMasterId]);
     },
     onError: (error) => {
       console.error("Failed to update received quantities:", error);
+      toast.error("Failed to update quantities");
     },
   });
 
-  const updateInventory = async (
-    details,
-    formattedDate,
-    toLocationId,
-    fromLocationId
+  // Generate batch reference
+  const generateBatchRef = useCallback(() => {
+    const formattedDate = new Date()
+      .toISOString()
+      .split("T")[0]
+      .replace(/-/g, "");
+    const randomNum = Math.floor(1000 + Math.random() * 9000);
+    return `B-${formattedDate}-${randomNum}`;
+  }, []);
+
+  // Create batch
+  const createBatch = useCallback(async () => {
+    const batchData = {
+      batchRef: generateBatchRef(),
+      date: new Date().toISOString(),
+      companyId,
+      permissionId: 1047,
+    };
+
+    const response = await post_batch_api(batchData);
+    return response.data.result?.batchId;
+  }, [companyId, generateBatchRef]);
+
+  // Update or create location inventory
+  const updateOrCreateInventory = async (
+    locationId,
+    itemMasterId,
+    batchId,
+    quantity,
+    operation,
+    permissionId
   ) => {
     try {
-      const locationId = parseInt(toLocationId, 10);
-      const fromLocId = parseInt(fromLocationId, 10);
+      const response = await patch_location_inventory_api(
+        locationId,
+        itemMasterId,
+        batchId,
+        operation,
+        { stockInHand: quantity, permissionId }
+      );
 
-      for (const detail of details) {
-        const { itemMasterId, batchId, issueDetailId } = detail;
-
-        // Get the received and returned quantities for this detail
-        const receivedQty = parseFloat(receivedQuantities[issueDetailId] || 0);
-        const returnedQty = parseFloat(returnedQuantities[issueDetailId] || 0);
-
-        console.log(
-          `Item ${itemMasterId}: Received=${receivedQty}, Returned=${returnedQty}`
-        );
-
-        // Skip if batchId is invalid
-        if (!batchId) {
-          console.warn(
-            `Skipping item: itemMasterId=${itemMasterId}, batchId=${batchId}`
+      // If inventory doesn't exist, create it
+      if (response?.status === 404) {
+        const existingItemDetails =
+          await get_locations_inventories_by_location_id_item_master_id_api(
+            tin?.requisitionMaster?.requestedFromLocationId,
+            itemMasterId
           );
-          continue;
-        }
 
-        // Handle received quantity - ADD to TO location (Location B)
-        if (receivedQty > 0) {
-          try {
-            // Use patch instead of post to update existing inventory
-            const patchResponse = await patch_location_inventory_api(
-              fromLocId, // To Location (Location B)
-              itemMasterId,
-              batchId,
-              "add", // Add the received quantity
-              {
-                stockInHand: receivedQty,
-                permissionId: 1088,
-              }
-            );
-            if (patchResponse && patchResponse.status === 404) {
-              const existingItemDetails =
-                await get_locations_inventories_by_location_id_item_master_id_api(
-                  tin?.requisitionMaster?.requestedFromLocationId,
-                  itemMasterId
-                );
-              const reOrderMaxOrderDetails =
-                existingItemDetails?.data?.result?.[0] || {};
-              const payload = {
-                itemMasterId,
-                batchId,
-                locationId: fromLocId,
-                stockInHand: receivedQty,
-                permissionId: 1088,
-                reOrderLevel: reOrderMaxOrderDetails?.reOrderLevel || 0,
-                maxStockLevel: reOrderMaxOrderDetails?.maxStockLevel || 0,
-              };
-              await post_location_inventory_api(payload);
-            }
+        const reOrderMaxOrderDetails =
+          existingItemDetails?.data?.result?.[0] || {};
 
-            console.log(
-              `Added ${receivedQty} to location ${locationId} for item ${itemMasterId}`
-            );
-          } catch (error) {
-            console.error(
-              `Failed to update location inventory for item ${itemMasterId}:`,
-              error
-            );
-            throw new Error(
-              `Failed to update inventory for item ${itemMasterId}`
-            );
-          }
-
-          // Post Location Inventory Movement API for received quantity
-          await post_location_inventory_movement_api({
-            movementTypeId: 1,
-            transactionTypeId: 5,
-            itemMasterId,
-            batchId,
-            locationId: fromLocId, // To Location
-            date: formattedDate,
-            qty: receivedQty,
-            permissionId: 1090,
-          });
-        }
-
-        // Handle returned quantity - ADD back to FROM location (Location A)
-        if (returnedQty > 0) {
-          try {
-            await patch_location_inventory_api(
-              locationId, // From Location (Location A)
-              itemMasterId,
-              batchId,
-              "add", // Add the returned quantity back
-              {
-                stockInHand: returnedQty,
-                permissionId: 1089,
-              }
-            );
-
-            console.log(
-              `Added ${returnedQty} back to location ${fromLocId} for item ${itemMasterId}`
-            );
-          } catch (error) {
-            console.error(
-              `Failed to update return inventory for item ${itemMasterId}:`,
-              error
-            );
-            throw new Error(
-              `Failed to update return inventory for item ${itemMasterId}`
-            );
-          }
-
-          // Post Location Inventory Movement API for returned quantity
-          await post_location_inventory_movement_api({
-            movementTypeId: 1,
-            transactionTypeId: 5,
-            itemMasterId,
-            batchId,
-            locationId: locationId, // From Location
-            date: formattedDate,
-            qty: returnedQty,
-            permissionId: 1090,
-          });
-        }
-      }
-    } catch (error) {
-      throw new Error("Error updating inventory: " + error.message);
-    }
-  };
-
-  const updateMrnState = async () => {
-    try {
-      await update_min_state_in_mrn_api(tin.requisitionMasterId, {
-        isMINApproved: tin?.requisitionMaster?.isMINApproved,
-        isMINAccepted: true,
-      });
-      if (tin?.requisitionMaster?.status !== 5) {
-        await approve_requisition_master_api(tin.requisitionMasterId, {
-          status: 5,
-          approvedBy: tin?.requisitionMaster?.approvedBy,
-          approvedUserId: tin?.requisitionMaster?.approvedUserId,
-          approvedDate: tin?.requisitionMaster?.approvedDate,
-          permissionId: 1053,
+        await post_location_inventory_api({
+          itemMasterId,
+          batchId,
+          locationId,
+          stockInHand: quantity,
+          permissionId,
+          reOrderLevel: reOrderMaxOrderDetails?.reOrderLevel || 0,
+          maxStockLevel: reOrderMaxOrderDetails?.maxStockLevel || 0,
         });
       }
     } catch (error) {
-      console.error("Error updating MRN state:", error);
+      console.error(
+        `Failed to update inventory for item ${itemMasterId}:`,
+        error
+      );
+      throw error;
     }
   };
 
-  // const createItemBatchData = async (tin) => {
-  //   for (const item of tin?.issueDetails) {
-  //     const formData = {
-  //       batchId: item.batchId,
-  //       itemMasterId: item.itemMasterId,
-  //       costPrice: item.itemMaster.unitPrice || 0,
-  //       sellingPrice: item.itemMaster.unitPrice || 0,
-  //       status: true,
-  //       companyId: sessionStorage.getItem("companyId"),
-  //       createdBy: sessionStorage.getItem("username"),
-  //       createdUserId: sessionStorage.getItem("userId"),
-  //       tempQuantity: item.receivedQuantity,
-  //       locationId: item?.requisitionMaster?.requestedFromLocationId,
-  //       qty: item.receivedQuantity,
-  //       referenceNo: item?.requisitionMaster?.grnDekReference,
-  //       permissionId: 1048,
-  //     };
+  // Record inventory movement
+  const recordInventoryMovement = async (
+    locationId,
+    itemMasterId,
+    batchId,
+    qty,
+    date
+  ) => {
+    await post_location_inventory_movement_api({
+      movementTypeId: MOVEMENT_TYPE_ID,
+      transactionTypeId: TRANSACTION_TYPE_ID,
+      itemMasterId,
+      batchId,
+      locationId,
+      date,
+      qty,
+      permissionId: 1090,
+    });
+  };
 
-  //     try {
-  //       const response = await post_itemBatch_api(formData);
-  //       console.log("Item batch created successfully", response);
-  //     } catch (error) {
-  //       console.error("Error creating item batch:", error);
-  //     }
-  //   }
-  // };
+  // Update inventory with damage logic
+  const updateInventory = async (
+    batchId,
+    details,
+    formattedDate,
+    fromLocationId
+  ) => {
+    const fromLocId = parseInt(fromLocationId, 10);
 
-  const validateQuantities = () => {
+    for (const detail of details) {
+      const { itemMasterId, issueDetailId } = detail;
+      const receivedQty = parseFloat(receivedQuantities[issueDetailId] || 0);
+      const returnedQty = parseFloat(returnedQuantities[issueDetailId] || 0);
+
+      if (!batchId) {
+        console.warn(`Skipping item ${itemMasterId}: Invalid batchId`);
+        continue;
+      }
+
+      // Handle received quantity - ADD to FROM location (destination)
+      if (receivedQty > 0) {
+        await updateOrCreateInventory(
+          fromLocId,
+          itemMasterId,
+          batchId,
+          receivedQty,
+          "add",
+          1088
+        );
+        await recordInventoryMovement(
+          fromLocId,
+          itemMasterId,
+          batchId,
+          receivedQty,
+          formattedDate
+        );
+      }
+
+      // Handle damaged/returned quantity - ADD to DAMAGE location (ID: 5)
+      if (returnedQty > 0) {
+        await updateOrCreateInventory(
+          DAMAGE_LOCATION_ID,
+          itemMasterId,
+          batchId,
+          returnedQty,
+          "add",
+          1089
+        );
+        await recordInventoryMovement(
+          DAMAGE_LOCATION_ID,
+          itemMasterId,
+          batchId,
+          returnedQty,
+          formattedDate
+        );
+      }
+    }
+  };
+
+  // Update MRN state
+  const updateMrnState = useCallback(async () => {
+    await update_min_state_in_mrn_api(tin.requisitionMasterId, {
+      isMINApproved: tin?.requisitionMaster?.isMINApproved,
+      isMINAccepted: true,
+    });
+
+    if (tin?.requisitionMaster?.status !== STATUS_COMPLETED) {
+      await approve_requisition_master_api(tin.requisitionMasterId, {
+        status: STATUS_COMPLETED,
+        approvedBy: tin?.requisitionMaster?.approvedBy,
+        approvedUserId: tin?.requisitionMaster?.approvedUserId,
+        approvedDate: tin?.requisitionMaster?.approvedDate,
+        permissionId: 1053,
+      });
+    }
+  }, [tin]);
+
+  // Create item batch data
+  const createItemBatchData = useCallback(
+    async (batchId, fromLocationId) => {
+      const promises = tin?.issueDetails.map(async (item) => {
+        const formData = {
+          batchId,
+          itemMasterId: item.itemMasterId,
+          costPrice: item.itemMaster.unitPrice || 0,
+          sellingPrice: item.itemMaster.unitPrice || 0,
+          status: true,
+          companyId,
+          createdBy: username,
+          createdUserId: userId,
+          tempQuantity: item.quantity,
+          locationId: fromLocationId,
+          qty: item.quantity,
+          custDekNo: tin.issuingCustDekNo || "",
+          permissionId: 1048,
+        };
+
+        return post_itemBatch_api(formData);
+      });
+
+      await Promise.all(promises);
+    },
+    [tin, companyId, username, userId]
+  );
+
+  // Validate quantities
+  const validateQuantities = useCallback(() => {
     const errors = [];
 
-    // Check if issuedetails is available and is an array
-    if (!issuedetails || !Array.isArray(issuedetails)) {
-      return errors;
-    }
+    if (!issuedetails?.length || !showValidation || isAccepted) return errors;
 
     issuedetails.forEach((item) => {
       const receivedQty = parseFloat(
@@ -303,97 +352,134 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
         returnedQuantities[item.issueDetailId] || 0
       );
       const issuedQty = parseFloat(item.quantity || 0);
+      const itemIdentifier = item.itemMaster?.itemName || item.itemMasterId;
 
       // Check for negative quantities
       if (receivedQty < 0) {
         errors.push(
-          `Received quantity cannot be negative for item ${item.itemMasterId}`
+          `Received quantity cannot be negative for item ${itemIdentifier}`
         );
       }
 
       if (returnedQty < 0) {
         errors.push(
-          `Returned quantity cannot be negative for item ${item.itemMasterId}`
+          `Damaged quantity cannot be negative for item ${itemIdentifier}`
         );
       }
 
-      // Check if both received and returned quantities are 0
+      // Check if both received and damaged quantities are 0
       if (receivedQty === 0 && returnedQty === 0) {
         errors.push(
-          `Both received and returned quantities cannot be 0 for item ${item.itemMasterId}`
+          `Both received and damaged quantities cannot be 0 for item ${itemIdentifier}`
         );
       }
 
-      // Check if received quantity plus returned quantity equals issued quantity
-      if (receivedQty + returnedQty !== issuedQty) {
+      // Check if received + damaged equals issued quantity
+      const totalQty = receivedQty + returnedQty;
+      if (totalQty !== issuedQty) {
         errors.push(
-          `Received quantity plus returned quantity must equal issued quantity for item ${item.itemMasterId}`
+          `Received quantity plus Damaged quantity must equal issued quantity for item ${itemIdentifier}`
         );
       }
     });
 
     return errors;
-  };
+  }, [
+    issuedetails,
+    receivedQuantities,
+    returnedQuantities,
+    showValidation,
+    isAccepted,
+  ]);
 
-  const handleAccept = async (tinId) => {
-    try {
-      setLoading(true);
-      setApprovalStatus(null);
+  // Handle accept
+  const handleAccept = useCallback(
+    async (tinId) => {
+      try {
+        setLoading(true);
+        setApprovalStatus(null);
 
-      // Validate quantities before proceeding
-      const validationErrors = validateQuantities();
-      if (validationErrors.length > 0) {
-        console.error("Validation errors:", validationErrors);
+        // Validate quantities
+        const validationErrors = validateQuantities();
+        if (validationErrors.length > 0) {
+          validationErrors.forEach((error) => toast.error(error));
+          setApprovalStatus("error");
+
+          // Auto-clear error status after 3 seconds
+          setTimeout(() => {
+            setApprovalStatus(null);
+          }, 3000);
+          return;
+        }
+
+        const formattedDate = new Date().toISOString();
+        const toLocationId = tin?.requisitionMaster?.requestedToLocationId;
+        const fromLocationId = tin?.requisitionMaster?.requestedFromLocationId;
+
+        // Prepare updated details
+        const updatedDetails = issuedetails.map((item) => ({
+          issueDetailId: item.issueDetailId,
+          receivedQuantity: receivedQuantities[item.issueDetailId] || 0,
+          returnedQuantity: returnedQuantities[item.issueDetailId] || 0,
+        }));
+
+        // Update issue details
+        mutation.mutate({ issuemasterid: tin.issueMasterId, updatedDetails });
+
+        // Create batch and process
+        const batchId = await createBatch();
+        await createItemBatchData(batchId, fromLocationId);
+        await updateInventory(
+          batchId,
+          tin.issueDetails,
+          formattedDate,
+          fromLocationId
+        );
+        await updateMrnState();
+
+        // Invalidate queries
+        queryClient.invalidateQueries(["tins", tinId]);
+        queryClient.invalidateQueries(["locationInventories", toLocationId]);
+        queryClient.invalidateQueries(["locationInventories", fromLocationId]);
+        queryClient.invalidateQueries([
+          "locationInventories",
+          DAMAGE_LOCATION_ID,
+        ]);
+
+        setRefetch(!refetch);
+        setShowValidation(false);
+        setApprovalStatus("approved");
+        toast.success("Transfer issue note accepted successfully");
+      } catch (error) {
+        console.error("Error accepting transfer issue note:", error);
         setApprovalStatus("error");
+        toast.error(error.message || "Error accepting transfer issue note");
+
+        // Auto-clear error status after 3 seconds
         setTimeout(() => {
           setApprovalStatus(null);
-          setLoading(false);
         }, 3000);
-        return;
-      }
-
-      const currentDate = new Date();
-      const formattedDate = currentDate.toISOString();
-      const toLocationId = tin?.requisitionMaster?.requestedToLocationId;
-      const fromLocationId = tin?.requisitionMaster?.requestedFromLocationId;
-
-      const updatedDetails = issuedetails.map((item) => ({
-        issueDetailId: item.issueDetailId,
-        receivedQuantity: receivedQuantities[item.issueDetailId] || 0,
-        returnedQuantity: returnedQuantities[item.issueDetailId] || 0,
-      }));
-
-      // Update the issue details with received and returned quantities
-      mutation.mutate({ issuemasterid: tin.issueMasterId, updatedDetails });
-
-      await updateInventory(
-        tin.issueDetails,
-        formattedDate,
-        toLocationId,
-        fromLocationId
-      );
-      await updateMrnState();
-      queryClient.invalidateQueries(["tins", tinId]);
-      queryClient.invalidateQueries(["locationInventories", toLocationId]);
-      queryClient.invalidateQueries(["locationInventories", fromLocationId]);
-      setRefetch(!refetch);
-      setApprovalStatus("approved");
-
-      toast.success("Transfer issue note accepted successfully");
-    } catch (error) {
-      setApprovalStatus("error");
-      console.error("Error accepting transfer issue note:", error);
-      setTimeout(() => {
-        setApprovalStatus(null);
+      } finally {
         setLoading(false);
-      }, 2000);
-      toast.error("Error accepting transfer issue note");
-    } finally {
-      setLoading(false);
-    }
-  };
+      }
+    },
+    [
+      tin,
+      issuedetails,
+      receivedQuantities,
+      returnedQuantities,
+      validateQuantities,
+      mutation,
+      createBatch,
+      createItemBatchData,
+      updateMrnState,
+      queryClient,
+      refetch,
+      setRefetch,
+    ]
+  );
 
-  console.log(receivedQuantities, returnedQuantities);
+  console.log("tin: ", tin);
 
   return {
     approvalStatus,
@@ -407,6 +493,8 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
     validateQuantities,
     getStatusBadgeClass,
     getStatusLabel,
+    showValidation,
+    isAccepted,
   };
 };
 

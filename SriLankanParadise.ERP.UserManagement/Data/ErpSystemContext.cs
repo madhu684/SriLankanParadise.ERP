@@ -489,7 +489,7 @@ public partial class ErpSystemContext : DbContext
 
         modelBuilder.Entity<GrnMaster>(entity =>
         {
-            entity.HasKey(e => e.GrnMasterId).HasName("PK__GrnMaste__2A763230BEE7D0ED");
+            entity.HasKey(e => e.GrnMasterId).HasName("PK__GrnMaster__2A763230BEE7D0ED");
 
             entity.ToTable("GrnMaster");
 
@@ -549,6 +549,10 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.IssueDate).HasColumnType("datetime");
             entity.Property(e => e.IssueType).HasMaxLength(50);
             entity.Property(e => e.ReferenceNumber).HasMaxLength(255);
+
+            entity.HasIndex(e => e.IssuingCustDekNo)
+                .IsUnique()
+                .HasDatabaseName("IX_IssueMaster_IssuingCustDekNo_Unique");
 
             entity.HasOne(d => d.RequisitionMaster).WithMany(p => p.IssueMasters)
                 .HasForeignKey(d => d.RequisitionMasterId)

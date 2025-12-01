@@ -20,6 +20,7 @@ const INITIAL_FORM_STATE = {
   itemDetails: [],
   status: STATUS_OPTIONS[0].id,
   trnId: "",
+  issuingCustDekNo: "",
 };
 
 const SUBMISSION_STATUS = {
@@ -61,6 +62,7 @@ const createItemDetail = (
   stockInHand: stockInHand,
   issuedQuantity: "",
   batchId: "",
+  custDekNo: requestItem.custDekNo,
 });
 
 // Custom Hook
@@ -127,30 +129,6 @@ const useTin = ({ onFormSubmit }) => {
     }
   }, [companyId]);
 
-  const fetchLocationInventoriesByRef = useCallback(async () => {
-    if (!selectedTrn?.grnDekReference || !selectedTrn?.requestedToLocationId) {
-      return [];
-    }
-
-    try {
-      const response = await get_sum_location_inventories_by_ref_api(
-        selectedTrn.grnDekReference,
-        selectedTrn.requestedToLocationId
-      );
-      console.log(
-        `Fetched location inventories for GRN reference ${selectedTrn.grnDekReference}:`,
-        response.data.result
-      );
-      return response.data.result || [];
-    } catch (error) {
-      console.error(
-        `Error fetching location inventories for GRN reference ${selectedTrn?.grnDekReference}:`,
-        error
-      );
-      throw error;
-    }
-  }, [selectedTrn?.grnDekReference, selectedTrn?.requestedToLocationId]);
-
   // React Query Hooks
   const {
     data: trns = [],
@@ -184,23 +162,6 @@ const useTin = ({ onFormSubmit }) => {
     queryKey: ["itemBatches", companyId],
     queryFn: fetchItemBatches,
     staleTime: 10 * 60 * 1000,
-  });
-
-  const {
-    data: locationInventories = [],
-    isLoading: isLocationInventoriesLoading,
-    isError: isLocationInventoriesError,
-    refetch: refetchLocationInventories,
-  } = useQuery({
-    queryKey: [
-      "locationInventoriesByRef",
-      selectedTrn?.grnDekReference,
-      selectedTrn?.requestedToLocationId,
-    ],
-    queryFn: fetchLocationInventoriesByRef,
-    enabled:
-      !!selectedTrn?.grnDekReference && !!selectedTrn?.requestedToLocationId,
-    staleTime: 2 * 60 * 1000,
   });
 
   // Validation Functions
@@ -242,6 +203,11 @@ const useTin = ({ onFormSubmit }) => {
       "Transfer requisition reference number",
       formData.trnId
     );
+    const isIssuingCustDekNoValid = validateField(
+      "issuingCustDekNo",
+      "Issuing Cust Dek Number",
+      formData.issuingCustDekNo
+    );
 
     let isItemQuantityValid = true;
 
@@ -276,7 +242,11 @@ const useTin = ({ onFormSubmit }) => {
     }
 
     return (
-      isStatusValid && isTrnIdValid && isItemQuantityValid && isItemsPresent
+      isStatusValid &&
+      isTrnIdValid &&
+      isIssuingCustDekNoValid &&
+      isItemQuantityValid &&
+      isItemsPresent
     );
   }, [formData, validateField]);
 
@@ -310,10 +280,19 @@ const useTin = ({ onFormSubmit }) => {
           approvedUserId: null,
           issuedLocationId:
             parseInt(selectedTrn?.requestedToLocationId) || null,
+          issuingCustDekNo: formData.issuingCustDekNo,
           permissionId: 1061,
         };
 
         const response = await post_issue_master_api(tinData);
+
+        if (response.status === 409) {
+          toast.error(response.message);
+          setLoading(false);
+          setLoadingDraft(false);
+          return;
+        }
+
         const issueMasterId = response.data.result.issueMasterId;
 
         const itemDetailsPromises = formData.itemDetails.map((item) =>
@@ -322,6 +301,7 @@ const useTin = ({ onFormSubmit }) => {
             itemMasterId: item.id,
             batchId: parseInt(item.batchId),
             quantity: parseFloat(item.issuedQuantity),
+            custDekNo: item.custDekNo,
             permissionId: 1063,
           })
         );
@@ -475,11 +455,11 @@ const useTin = ({ onFormSubmit }) => {
 
   // Effects
   useEffect(() => {
-    if (!selectedTrn || locationInventories.length === 0) return;
+    if (!selectedTrn) return;
 
-    const updateItemDetails = () => {
-      const itemDetails = selectedTrn.requisitionDetails
-        .map((requestItem) => {
+    const updateItemDetails = async () => {
+      const itemDetailsPromises = selectedTrn.requisitionDetails.map(
+        async (requestItem) => {
           const issuedQty =
             tins.length > 0
               ? calculateIssuedQuantity(
@@ -488,32 +468,46 @@ const useTin = ({ onFormSubmit }) => {
                 )
               : 0;
 
-          // Find matching inventory for this item
-          const inventory = locationInventories.find(
-            (inv) => inv.itemMasterId === requestItem.itemMaster?.itemMasterId
-          );
+          let stockInHand = 0;
+          let inventory = null;
 
-          const stockInHand = inventory?.totalStockInHand || 0;
+          try {
+            const response = await get_sum_location_inventories_by_ref_api(
+              requestItem.custDekNo,
+              selectedTrn.requestedToLocationId
+            );
 
-          // Create item detail with stock info
+            if (response?.data?.result && response.data.result.length > 0) {
+              inventory = response.data.result.find(
+                (inv) =>
+                  inv.itemMasterId === requestItem.itemMaster?.itemMasterId
+              );
+              stockInHand = inventory?.totalStockInHand || 0;
+            }
+          } catch (error) {
+            console.error("Error fetching location inventory:", error);
+          }
+
           const itemDetail = createItemDetail(
             requestItem,
             issuedQty,
             stockInHand
           );
 
-          if (itemBatches.length > 0 && inventory) {
+          if (itemBatches.length > 0) {
             const batch = itemBatches.find(
-              (ib) =>
-                ib.itemMasterId === requestItem.itemMaster?.itemMasterId &&
-                ib.referenceNo === selectedTrn.grnDekReference
+              (ib) => ib.custDekNo === requestItem.custDekNo
             );
             itemDetail.batchId = batch?.batchId ?? null;
           }
 
           return itemDetail;
-        })
-        .filter((item) => item.remainingQuantity > 0);
+        }
+      );
+
+      const itemDetails = (await Promise.all(itemDetailsPromises)).filter(
+        (item) => item.remainingQuantity > 0
+      );
 
       setFormData((prev) => ({
         ...prev,
@@ -523,7 +517,7 @@ const useTin = ({ onFormSubmit }) => {
     };
 
     updateItemDetails();
-  }, [selectedTrn, tins, locationInventories]);
+  }, [selectedTrn, tins, itemBatches]);
 
   useEffect(() => {
     if (submissionStatus && alertRef.current) {
@@ -533,30 +527,16 @@ const useTin = ({ onFormSubmit }) => {
 
   // Computed values
   const isLoading = useMemo(
-    () =>
-      isTrnsLoading ||
-      isTinsLoading ||
-      isItemBatchesLoading ||
-      isLocationInventoriesLoading,
-    [
-      isTrnsLoading,
-      isTinsLoading,
-      isItemBatchesLoading,
-      isLocationInventoriesLoading,
-    ]
+    () => isTrnsLoading || isTinsLoading || isItemBatchesLoading,
+    [isTrnsLoading, isTinsLoading, isItemBatchesLoading]
   );
 
   const isError = useMemo(
-    () =>
-      isTrnsError ||
-      isTinsError ||
-      isItemBatchesError ||
-      isLocationInventoriesError,
-    [isTrnsError, isTinsError, isItemBatchesError, isLocationInventoriesError]
+    () => isTrnsError || isItemBatchesError,
+    [isTrnsError, isItemBatchesError]
   );
 
   console.log("FormData: ", formData);
-  console.log("Location Inventories: ", locationInventories);
 
   // Return values
   return {
@@ -576,9 +556,6 @@ const useTin = ({ onFormSubmit }) => {
     itemBatches,
     isItemBatchesLoading,
     isItemBatchesError,
-    isLocationInventoriesLoading,
-    isLocationInventoriesError,
-    locationInventories,
     handleInputChange,
     handleItemDetailsChange,
     handleRemoveItem,

@@ -37,8 +37,6 @@ public partial class RequisitionMaster
 
     public bool IsMINAccepted { get; set; }
 
-    public string? GrnDekReference { get; set; }
-
     public virtual ICollection<IssueMaster> IssueMasters { get; set; } = new List<IssueMaster>();
 
     public virtual Location? RequestedFromLocation { get; set; }

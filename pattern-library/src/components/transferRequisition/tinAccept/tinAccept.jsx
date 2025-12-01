@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import moment from "moment";
-import useMinList from "../../min/minList/useMinList";
 import useTinAccept from "./tinAccept";
 import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 
@@ -18,35 +17,90 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
     validateQuantities,
     getStatusBadgeClass,
     getStatusLabel,
+    showValidation,
+    isAccepted,
   } = useTinAccept({
     tin,
     refetch,
     setRefetch,
-    onFormSubmit: () => {
-      handleClose();
-    },
+    onFormSubmit: handleClose,
   });
 
-  // Get validation errors for display
-  const validationErrors = validateQuantities();
+  // Memoized computations
+  const validationErrors = useMemo(
+    () => validateQuantities(),
+    [validateQuantities]
+  );
   const hasValidationErrors = validationErrors.length > 0;
 
-  // Helper function to get validation error for specific item
-  const getItemValidationError = (itemMasterId) => {
-    return validationErrors.find((error) =>
-      error.includes(`item ${itemMasterId}`)
+  const totals = useMemo(() => {
+    if (!tin?.issueDetails) return { issued: 0, received: 0, damaged: 0 };
+
+    return tin.issueDetails.reduce(
+      (acc, item) => {
+        const received =
+          receivedQuantities[item.issueDetailId] !== undefined
+            ? parseFloat(receivedQuantities[item.issueDetailId])
+            : parseFloat(item.quantity || 0);
+
+        const damaged =
+          returnedQuantities[item.issueDetailId] !== undefined
+            ? parseFloat(returnedQuantities[item.issueDetailId])
+            : parseFloat(item.returnedQuantity || 0);
+
+        return {
+          issued: acc.issued + parseFloat(item.quantity || 0),
+          received: acc.received + received,
+          damaged: acc.damaged + damaged,
+        };
+      },
+      { issued: 0, received: 0, damaged: 0 }
     );
+  }, [tin?.issueDetails, receivedQuantities, returnedQuantities]);
+
+  // Check if an item has validation error
+  const getItemValidationStatus = (item) => {
+    if (!showValidation || isAccepted) return [];
+
+    const receivedQty = parseFloat(receivedQuantities[item.issueDetailId] || 0);
+    const damagedQty = parseFloat(returnedQuantities[item.issueDetailId] || 0);
+    const issuedQty = parseFloat(item.quantity || 0);
+
+    const errors = [];
+
+    if (receivedQty < 0) {
+      errors.push("Received quantity cannot be negative");
+    }
+
+    if (damagedQty < 0) {
+      errors.push("Damaged quantity cannot be negative");
+    }
+
+    if (receivedQty === 0 && damagedQty === 0) {
+      errors.push("Both received and damaged quantities cannot be 0");
+    }
+
+    const totalQty = receivedQty + damagedQty;
+    if (totalQty !== issuedQty) {
+      errors.push(
+        "Received quantity plus Damaged quantity must equal Issued quantity"
+      );
+    }
+
+    return errors;
   };
 
-  // Helper function to check if received quantity exceeds issued quantity
+  // Helper to check if received exceeds issued
   const isReceivedExceedsIssued = (item) => {
     const receivedQty = parseFloat(receivedQuantities[item.issueDetailId] || 0);
     const issuedQty = parseFloat(item.quantity || 0);
     return receivedQty > issuedQty;
   };
 
-  // Check if TIN is already accepted
-  const isAccepted = tin.requisitionMaster.isMINAccepted === true;
+  // Format date helper
+  const formatDate = (date) => {
+    return moment.utc(date).tz("Asia/Colombo").format("YYYY-MM-DD hh:mm:ss A");
+  };
 
   return (
     <Modal
@@ -63,6 +117,7 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
           Accept Transfer Issue Note
         </Modal.Title>
       </Modal.Header>
+
       <Modal.Body className="p-4">
         <div ref={alertRef}></div>
 
@@ -76,26 +131,31 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
             Transfer Issue Note accepted successfully!
           </div>
         )}
+
         {approvalStatus === "error" && (
           <div
             className="alert alert-danger alert-dismissible fade show mb-4"
             role="alert"
           >
             <i className="bi bi-exclamation-triangle-fill me-2"></i>
-            Error accepting transfer issue note. Please try again.
+            Error accepting transfer issue note. Please check the details and
+            try again.
           </div>
         )}
-        {/* {hasValidationErrors && (
+
+        {/* Validation Errors Summary - Only show when validation is active */}
+        {showValidation && hasValidationErrors && !isAccepted && (
           <div className="alert alert-warning mb-4" role="alert">
             <i className="bi bi-exclamation-triangle-fill me-2"></i>
             <strong>Validation Errors:</strong>
-            <ul className="mb-0 mt-2">
+            <ul className="mb-0 mt-2 small">
               {validationErrors.map((error, idx) => (
                 <li key={idx}>{error}</li>
               ))}
             </ul>
           </div>
-        )} */}
+        )}
+
         {isAccepted && (
           <div className="alert alert-info mb-4" role="alert">
             <i className="bi bi-info-circle-fill me-2"></i>
@@ -108,16 +168,15 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
           <div className="card-body">
             <div className="d-flex justify-content-between align-items-start flex-wrap gap-3">
               <div>
-                <h5 className="card-title text-success mb-2">
-                  <i className="bi bi-hash me-1"></i>
-                  Reference Number
-                </h5>
                 <p className="fs-5 fw-bold mb-0">{tin.referenceNumber}</p>
+                <p className="fs-6 text-muted fw-bold mb-0">
+                  {tin.issuingCustDekNo || "N/A"}
+                </p>
               </div>
               <div className="text-end">
                 <h6 className="text-muted mb-2">TIN Status</h6>
                 <span className={`badge fs-6 ${getStatusBadgeClass()}`}>
-                  {getStatusLabel(tin.status)}
+                  {getStatusLabel()}
                 </span>
               </div>
             </div>
@@ -154,10 +213,7 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
                         Dispatched Date
                       </small>
                       <span className="fw-semibold">
-                        {moment
-                          .utc(tin?.issueDate)
-                          .tz("Asia/Colombo")
-                          .format("YYYY-MM-DD hh:mm:ss A")}
+                        {formatDate(tin?.issueDate)}
                       </span>
                     </div>
                   </div>
@@ -206,7 +262,7 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
                   </div>
                 )}
 
-                {parseInt(tin.status.toString().charAt(1), 10) === 2 && (
+                {parseInt(tin.status.toString().charAt(1), 10) === 2 ? (
                   <>
                     <div className="mb-3">
                       <div className="d-flex align-items-start">
@@ -228,18 +284,13 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
                             Approved Date
                           </small>
                           <span className="fw-semibold">
-                            {moment
-                              .utc(tin?.approvedDate)
-                              .tz("Asia/Colombo")
-                              .format("YYYY-MM-DD hh:mm:ss A")}
+                            {formatDate(tin?.approvedDate)}
                           </span>
                         </div>
                       </div>
                     </div>
                   </>
-                )}
-
-                {parseInt(tin.status.toString().charAt(1), 10) !== 2 && (
+                ) : (
                   <div className="alert alert-warning mb-0 py-2">
                     <i className="bi bi-hourglass-split me-2"></i>
                     <small>Approval pending</small>
@@ -255,7 +306,7 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
           <div className="card-header bg-secondary text-white">
             <h6 className="mb-0">
               <i className="bi bi-box-seam me-2"></i>
-              Item Details - Enter Received & Returned Quantities
+              Item Details - Enter Received & Damaged Quantities
             </h6>
           </div>
           <div className="card-body p-0">
@@ -263,40 +314,48 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
               <table className="table table-hover mb-0 align-middle">
                 <thead className="table-light">
                   <tr>
-                    <th className="ps-3"></th>
+                    <th className="ps-3">#</th>
                     <th>Item Name</th>
                     <th>Unit</th>
-                    <th>Batch</th>
+                    <th>Cust Dek No</th>
                     <th className="text-center">Issued Qty</th>
                     <th className="text-center">Received Qty</th>
-                    <th className="text-center">Returned Qty</th>
+                    <th className="text-center">Damaged Qty</th>
                   </tr>
                 </thead>
                 <tbody>
                   {tin.issueDetails.map((item, index) => {
+                    const itemErrors = getItemValidationStatus(item);
+                    const hasError = itemErrors.length > 0 && showValidation;
                     const receivedExceedsIssued = isReceivedExceedsIssued(item);
-                    const itemError = getItemValidationError(
-                      item.itemMaster?.itemMasterId
-                    );
 
                     return (
                       <tr
-                        key={index}
-                        className={itemError ? "table-warning" : ""}
+                        key={item.issueDetailId}
+                        className={hasError ? "table-warning" : ""}
                       >
                         <td className="ps-3 text-muted fw-semibold">
                           {index + 1}
                         </td>
                         <td>
-                          <span className="fw-semibold">
-                            {item.itemMaster?.itemName}
-                          </span>
-                          {itemError && (
-                            <small className="text-danger d-block mt-1">
-                              <i className="bi bi-exclamation-triangle me-1"></i>
-                              {itemError}
-                            </small>
-                          )}
+                          <div>
+                            <span className="fw-semibold d-block">
+                              {item.itemMaster?.itemName}
+                            </span>
+                            {hasError && (
+                              <div className="mt-1">
+                                {itemErrors.map((error, idx) => (
+                                  <small
+                                    key={idx}
+                                    className="text-danger d-block"
+                                  >
+                                    <i className="bi bi-exclamation-triangle me-1"></i>
+                                    {error}
+                                  </small>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         </td>
                         <td>
                           <span className="badge bg-light text-dark border">
@@ -305,7 +364,7 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
                         </td>
                         <td>
                           <span className="badge bg-secondary">
-                            {item.batch?.batchRef}
+                            {item.custDekNo || "N/A"}
                           </span>
                         </td>
                         <td className="text-center">
@@ -318,14 +377,12 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
                             <Form.Control
                               type="number"
                               min="0"
-                              max={item.quantity}
                               step="0.1"
                               size="sm"
                               value={
-                                receivedQuantities[item.issueDetailId] !==
-                                undefined
-                                  ? receivedQuantities[item.issueDetailId]
-                                  : item.quantity ?? 0
+                                receivedQuantities[item.issueDetailId] ??
+                                item.quantity ??
+                                0
                               }
                               onChange={(e) =>
                                 handleReceivedQuantityChange(
@@ -351,14 +408,12 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
                             <Form.Control
                               type="number"
                               min="0"
-                              max={receivedQuantities[item.issueDetailId] || 0}
                               step="0.1"
                               size="sm"
                               value={
-                                returnedQuantities[item.issueDetailId] !==
-                                undefined
-                                  ? returnedQuantities[item.issueDetailId]
-                                  : item.returnedQuantity ?? 0
+                                returnedQuantities[item.issueDetailId] ??
+                                item.returnedQuantity ??
+                                0
                               }
                               onChange={(e) =>
                                 handleReturnedQuantityChange(
@@ -366,7 +421,7 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
                                   e.target.value
                                 )
                               }
-                              placeholder="Returned"
+                              placeholder="Damaged"
                               disabled={loading || isAccepted}
                             />
                           </div>
@@ -387,73 +442,64 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
               <div className="d-flex gap-3">
                 <small className="text-muted">
                   <i className="bi bi-box-arrow-in-down me-1"></i>
-                  Total Issued:{" "}
-                  <span className="fw-bold">
-                    {tin.issueDetails.reduce(
-                      (sum, item) => sum + item.quantity,
-                      0
-                    )}
-                  </span>
+                  Total Issued: <span className="fw-bold">{totals.issued}</span>
                 </small>
                 <small className="text-muted">
                   <i className="bi bi-check2-circle me-1"></i>
                   Total Received:{" "}
                   <span className="fw-bold text-success">
-                    {tin.issueDetails.reduce((sum, item) => {
-                      const received =
-                        receivedQuantities[item.issueDetailId] !== undefined
-                          ? parseFloat(receivedQuantities[item.issueDetailId])
-                          : parseFloat(item.quantity || 0);
-                      return sum + received;
-                    }, 0)}
+                    {totals.received}
                   </span>
                 </small>
                 <small className="text-muted">
-                  <i className="bi bi-arrow-return-left me-1"></i>
-                  Total Returned:{" "}
-                  <span className="fw-bold text-warning">
-                    {tin.issueDetails.reduce((sum, item) => {
-                      const returned =
-                        returnedQuantities[item.issueDetailId] !== undefined
-                          ? parseFloat(returnedQuantities[item.issueDetailId])
-                          : parseFloat(item.returnedQuantity || 0);
-                      return sum + returned;
-                    }, 0)}
-                  </span>
+                  <i className="bi bi-exclamation-triangle me-1"></i>
+                  Total Damaged:{" "}
+                  <span className="fw-bold text-warning">{totals.damaged}</span>
                 </small>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Help Text */}
-        {/* <div className="alert alert-light border mt-4 mb-0" role="alert">
-          <div className="d-flex">
-            <i className="bi bi-lightbulb text-warning me-2 mt-1"></i>
-            <div>
-              <strong>Instructions:</strong>
-              <ul className="mb-0 mt-2 small">
-                <li>
-                  Enter the <strong>Received Quantity</strong> for each item
-                  (cannot exceed issued quantity)
-                </li>
-                <li>
-                  Enter the <strong>Returned Quantity</strong> if any items need
-                  to be returned (cannot exceed received quantity)
-                </li>
-                <li>
-                  All quantities must be validated before accepting the transfer
-                </li>
-              </ul>
+        {/* Help Instructions - Only show when validation is active */}
+        {/* {showValidation && !isAccepted && (
+          <div className="alert alert-light border mt-4 mb-0" role="alert">
+            <div className="d-flex">
+              <i className="bi bi-lightbulb text-warning me-2 mt-1 fs-5"></i>
+              <div>
+                <strong>Instructions:</strong>
+                <ul className="mb-0 mt-2 small">
+                  <li>
+                    <strong>
+                      Received Quantity + Damaged Quantity must equal Issued
+                      Quantity
+                    </strong>{" "}
+                    for each item
+                  </li>
+                  <li>
+                    Enter the quantity actually received in good condition in
+                    the <strong>Received Qty</strong> column
+                  </li>
+                  <li>
+                    Enter any damaged or unusable quantity in the{" "}
+                    <strong>Damaged Qty</strong> column
+                  </li>
+                  <li>
+                    Both quantities cannot be zero - at least some quantity must
+                    be accounted for
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
-        </div> */}
+        )} */}
       </Modal.Body>
+
       <Modal.Footer className="bg-light">
         <Button
           variant="secondary"
           onClick={handleClose}
-          disabled={loading || approvalStatus !== null}
+          disabled={loading || approvalStatus === "approved"}
           className="d-flex align-items-center gap-2"
         >
           <i className="bi bi-x-circle"></i>
@@ -464,7 +510,7 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
           onClick={() => handleAccept(tin.issueMasterId)}
           disabled={
             loading ||
-            approvalStatus !== null ||
+            approvalStatus === "approved" ||
             isAccepted ||
             hasValidationErrors
           }
