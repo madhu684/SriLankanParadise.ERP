@@ -330,6 +330,8 @@ const useTin = ({ onFormSubmit }) => {
             onFormSubmit();
           }, ALERT_TIMEOUT);
 
+          queryClient.invalidateQueries(["tinList", companyId]);
+
           toast.success(
             isSaveAsDraft
               ? "Transfer issue note saved as draft successfully!"

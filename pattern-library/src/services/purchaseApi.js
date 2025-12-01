@@ -597,6 +597,21 @@ export const post_requisition_detail_api = async (formData) => {
   }
 };
 
+export const delete_requisition_master_api = async (requisitionMasterId) => {
+  try {
+    const response = await api.delete(
+      `/requisitionMaster/${requisitionMasterId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 //ChargesAndDeduction apis
 export const get_charges_and_deductions_by_company_id_api = async (
   companyId
@@ -887,6 +902,18 @@ export const approve_issue_master_api = async (issueMasterId, approvalData) => {
     );
     return response.data;
   } catch (error) {
+    throw error;
+  }
+};
+
+export const delete_issue_master_api = async (issueMasterId) => {
+  try {
+    const response = await api.delete(`/issueMaster/${issueMasterId}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
     throw error;
   }
 };

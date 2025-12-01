@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import {
   get_company_locations_api,
   post_requisition_master_api,
@@ -10,7 +10,7 @@ import {
   get_location_inventory_by_batch_id_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 const useTransferRequisition = ({ onFormSubmit }) => {
@@ -33,6 +33,10 @@ const useTransferRequisition = ({ onFormSubmit }) => {
   const [isUpdatingStock, setIsUpdatingStock] = useState(false);
   const [isTRGenerated, setIsTRGenerated] = useState(false);
   const [showToast, setShowToast] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
 
   const fetchLocations = async () => {
     try {
@@ -397,6 +401,8 @@ const useTransferRequisition = ({ onFormSubmit }) => {
               formData
             );
           }
+
+          queryClient.invalidateQueries(["transferRequisitions", companyId]);
 
           setTimeout(() => {
             setSubmissionStatus(null);

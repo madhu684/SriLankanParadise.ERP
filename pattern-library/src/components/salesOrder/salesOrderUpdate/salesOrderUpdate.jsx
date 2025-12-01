@@ -48,6 +48,7 @@ const SalesOrderUpdate = ({
     isCompanyError,
     company,
     itemIdsToBeDeleted,
+    hasLineItemChargesChanged,
     closeModal,
     handleInputChange,
     handleItemDetailsChange,
@@ -966,6 +967,15 @@ const SalesOrderUpdate = ({
             </div>
           </div>
         </div>
+
+        {hasLineItemChargesChanged && (
+          <div className="alert alert-warning mb-2" role="alert">
+            <i className="bi bi-exclamation-triangle-fill me-2"></i>
+            <strong>Note:</strong> Line item charges have been modified or added
+            to the sales requisition. This requisition will be switched to
+            Approval status from FM.
+          </div>
+        )}
 
         {/* Action Buttons */}
         <div className="card shadow-sm mb-4">

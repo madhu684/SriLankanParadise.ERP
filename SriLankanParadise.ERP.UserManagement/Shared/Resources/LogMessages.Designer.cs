@@ -880,6 +880,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Issue master and issue detail deleted successfully.
+        /// </summary>
+        public static string IssueMasterDeleted {
+            get {
+                return ResourceManager.GetString("IssueMasterDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Issue master not found.
         /// </summary>
         public static string IssueMasterNotFound {
@@ -1965,6 +1974,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string RequisitionMasterCreated {
             get {
                 return ResourceManager.GetString("RequisitionMasterCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Requisition master and detail deleted successfully.
+        /// </summary>
+        public static string RequisitionMasterDeleted {
+            get {
+                return ResourceManager.GetString("RequisitionMasterDeleted", resourceCulture);
             }
         }
         

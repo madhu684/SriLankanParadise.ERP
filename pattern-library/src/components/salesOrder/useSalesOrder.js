@@ -53,6 +53,13 @@ const useSalesOrder = ({ onFormSubmit }) => {
   const [loadingDraft, setLoadingDraft] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
+  const [hasLineItemChargesChanged, setHasLineItemChargesChanged] =
+    useState(false);
+
+  const [originalLineItemCharges, setOriginalLineItemCharges] = useState(
+    new Map()
+  );
+
   const alertRef = useRef(null);
 
   const queryClient = useQueryClient();
@@ -254,6 +261,16 @@ const useSalesOrder = ({ onFormSubmit }) => {
     return total;
   }, [subTotal, formData.commonChargesAndDeductions]);
 
+  const compareCharges = useCallback((original, current) => {
+    if (!original || !current) return false;
+    if (original.length !== current.length) return true;
+
+    return original.some((origCharge, index) => {
+      const currCharge = current[index];
+      return parseFloat(origCharge.value) !== parseFloat(currCharge.value);
+    });
+  }, []);
+
   // ============================================================================
   // EFFECTS
   // ============================================================================
@@ -296,6 +313,27 @@ const useSalesOrder = ({ onFormSubmit }) => {
       }));
     }
   }, [chargesAndDeductions]);
+
+  useEffect(() => {
+    if (originalLineItemCharges.size === 0) {
+      setHasLineItemChargesChanged(false);
+      return;
+    }
+
+    let hasChanged = false;
+
+    for (const item of formData.itemDetails) {
+      const originalCharges = originalLineItemCharges.get(item.itemMasterId);
+      if (!originalCharges) continue;
+
+      if (compareCharges(originalCharges, item.chargesAndDeductions)) {
+        hasChanged = true;
+        break;
+      }
+    }
+
+    setHasLineItemChargesChanged(hasChanged);
+  }, [formData.itemDetails, originalLineItemCharges, compareCharges]);
 
   // ============================================================================
   // VALIDATION
@@ -578,6 +616,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
           customerCreditLimitAtOrder: formData?.selectedCustomer?.creditLimit,
           customerCreditDurationAtOrder:
             formData?.selectedCustomer?.creditDuration,
+          isLineChargesChanged: hasLineItemChargesChanged,
         };
 
         const response = await post_sales_order_api(salesOrderData);
@@ -625,7 +664,11 @@ const useSalesOrder = ({ onFormSubmit }) => {
             onFormSubmit();
           }, 3000);
 
-          toast.success("Sales order submitted successfully");
+          toast.success(
+            `Sales Order submitted successfully ${
+              hasLineItemChargesChanged ? "with modified line item charges" : ""
+            }`
+          );
         } else {
           throw new Error("Some operations failed during submission");
         }
@@ -762,6 +805,18 @@ const useSalesOrder = ({ onFormSubmit }) => {
         }
 
         unitPrice = getPriceFromPriceList(item.itemMasterId);
+
+        const initialCharges = getInitializedCharges;
+
+        // NEW: Store original charges for this item
+        setOriginalLineItemCharges((prev) => {
+          const newMap = new Map(prev);
+          newMap.set(
+            item.itemMasterId,
+            JSON.parse(JSON.stringify(initialCharges))
+          );
+          return newMap;
+        });
 
         setFormData((prev) => ({
           ...prev,
@@ -950,6 +1005,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
     loading,
     loadingDraft,
     showModal,
+    hasLineItemChargesChanged,
 
     // Refs
     alertRef,

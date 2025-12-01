@@ -41,8 +41,11 @@ const TinDetail = ({ show, handleClose, tin }) => {
             <div className="d-flex justify-content-between align-items-start flex-wrap gap-3">
               <div>
                 <p className="fs-5 fw-bold mb-0">{tin.referenceNumber}</p>
-                <p className="fs-6 text-muted fw-bold mb-0">
-                  {tin.issuingCustDekNo || "N/A"}
+                <p className="fs-6 fw-bold mb-0">
+                  Issuing Cust Dek No:{" "}
+                  <span className="text-muted">
+                    {tin.issuingCustDekNo || "N/A"}
+                  </span>
                 </p>
               </div>
               <div className="text-end">
