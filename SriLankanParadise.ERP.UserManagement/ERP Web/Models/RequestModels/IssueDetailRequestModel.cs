@@ -13,6 +13,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels
 
         public int? Quantity { get; set; }
 
+        public string? CustDekNo { get; set; }
+
         public int PermissionId { get; set; }
   
     }

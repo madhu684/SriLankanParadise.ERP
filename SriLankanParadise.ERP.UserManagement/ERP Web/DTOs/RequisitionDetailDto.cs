@@ -8,6 +8,9 @@
 
         public int ItemMasterId { get; set; }
 
+
+        public string? CustDekNo { get; set; }
+
         public virtual ItemMasterDto? ItemMaster { get; set; }
 
         public int? Quantity { get; set; }

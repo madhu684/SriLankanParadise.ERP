@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   get_company_locations_api,
   post_requisition_master_api,
@@ -7,6 +7,7 @@ import {
   get_sum_location_inventories_by_locationId_itemMasterId_api,
   get_unique_item_batch_ref,
   get_sum_location_inventories_by_ref_api,
+  get_location_inventory_by_batch_id_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
@@ -165,6 +166,16 @@ const useTransferRequisition = ({ onFormSubmit }) => {
       return null;
     }
   };
+
+  const fetchStockDetailsByBatch = useCallback(async (batchId) => {
+    try {
+      const response = await get_location_inventory_by_batch_id_api(batchId);
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching stock details by batch:", error);
+      return null;
+    }
+  }, []);
 
   useEffect(() => {
     if (submissionStatus != null) {
@@ -344,7 +355,6 @@ const useTransferRequisition = ({ onFormSubmit }) => {
           requestedFromLocationId: formData.fromWarehouseLocation,
           requestedToLocationId: formData.toWarehouseLocation,
           referenceNumber: generateReferenceNumber(),
-          grnDekReference: formData?.reference?.referenceNo,
           permissionId: 1052,
         };
 
@@ -359,6 +369,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
             requisitionMasterId,
             itemMasterId: item.id,
             quantity: item.quantity,
+            custDekNo: item.custDekNo,
             permissionId: 1052,
           };
 
@@ -439,21 +450,139 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     }));
   };
 
-  const handleItemDetailsChange = (index, field, value) => {
-    setFormData((prevFormData) => {
-      const updatedItemDetails = [...prevFormData.itemDetails];
-      updatedItemDetails[index][field] = value;
+  // const handleItemDetailsChange = async (index, field, value) => {
+  //   if (field === "batchId") {
+  //     setFormData((prevFormData) => {
+  //       const updatedItemDetails = [...prevFormData.itemDetails];
+  //       updatedItemDetails[index].isLoadingStock = true;
+  //       return {
+  //         ...prevFormData,
+  //         itemDetails: updatedItemDetails,
+  //       };
+  //     });
 
-      updatedItemDetails[index].quantity = Math.max(
-        0,
-        updatedItemDetails[index].quantity
+  //     // Find the selected batch to get custDekNo
+  //     const selectedBatch = uniqueItemBatchRefs?.find(
+  //       (batch) => batch.batchId === parseInt(value)
+  //     );
+
+  //     const batchInventories = await fetchStockDetailsByBatch(value);
+  //     console.log("batchInventories: ", batchInventories);
+
+  //     setFormData((prevFormData) => {
+  //       const updatedItemDetails = [...prevFormData.itemDetails];
+  //       const currentItem = updatedItemDetails[index];
+
+  //       // Only update if still the same item (prevents race conditions)
+  //       if (currentItem.id) {
+  //         const matchingInventory =
+  //           batchInventories?.find(
+  //             (inv) => inv.itemMasterId === currentItem.id
+  //           ) || null;
+
+  //         updatedItemDetails[index] = {
+  //           ...currentItem,
+  //           [field]: value,
+  //           custDekNo: selectedBatch?.custDekNo || "",
+  //           totalStockInHandTo: matchingInventory?.stockInHand || 0,
+  //           isLoadingStock: false,
+  //           quantity: Math.max(0, currentItem.quantity),
+  //         };
+  //       }
+
+  //       return {
+  //         ...prevFormData,
+  //         itemDetails: updatedItemDetails,
+  //       };
+  //     });
+  //   } else {
+  //     setFormData((prevFormData) => ({
+  //       ...prevFormData,
+  //       itemDetails: prevFormData.itemDetails.map((item, i) =>
+  //         i === index
+  //           ? {
+  //               ...item,
+  //               [field]: value,
+  //               quantity: Math.max(
+  //                 0,
+  //                 field === "quantity" ? value : item.quantity
+  //               ),
+  //             }
+  //           : item
+  //       ),
+  //     }));
+  //   }
+  // };
+
+  const handleItemDetailsChange = async (index, field, value) => {
+    if (field === "batchId") {
+      setFormData((prevFormData) => {
+        const updatedItemDetails = [...prevFormData.itemDetails];
+        updatedItemDetails[index].isLoadingStock = true;
+        return {
+          ...prevFormData,
+          itemDetails: updatedItemDetails,
+        };
+      });
+
+      // Find the selected batch to get custDekNo
+      const selectedBatch = uniqueItemBatchRefs?.find(
+        (batch) => batch.batchId === parseInt(value)
       );
 
-      return {
+      const batchInventories = await fetchStockDetailsByBatch(value);
+
+      // Get current item to check inventory before state update
+      const currentItem = formData.itemDetails[index];
+      const matchingInventory =
+        batchInventories?.find((inv) => inv.itemMasterId === currentItem.id) ||
+        null;
+
+      console.log("matchingInventory: ", matchingInventory);
+
+      // Show toast before state update
+      if (matchingInventory === null) {
+        toast.error("No stock found for the selected Cust Dek.");
+      }
+
+      setFormData((prevFormData) => {
+        const updatedItemDetails = [...prevFormData.itemDetails];
+        const currentItem = updatedItemDetails[index];
+
+        // Only update if still the same item (prevents race conditions)
+        if (currentItem.id) {
+          updatedItemDetails[index] = {
+            ...currentItem,
+            [field]: value,
+            custDekNo: selectedBatch?.custDekNo || "",
+            totalStockInHandTo: matchingInventory?.stockInHand || 0,
+            isLoadingStock: false,
+            quantity: Math.max(0, currentItem.quantity),
+          };
+        }
+
+        return {
+          ...prevFormData,
+          itemDetails: updatedItemDetails,
+        };
+      });
+    } else {
+      setFormData((prevFormData) => ({
         ...prevFormData,
-        itemDetails: updatedItemDetails,
-      };
-    });
+        itemDetails: prevFormData.itemDetails.map((item, i) =>
+          i === index
+            ? {
+                ...item,
+                [field]: value,
+                quantity: Math.max(
+                  0,
+                  field === "quantity" ? value : item.quantity
+                ),
+              }
+            : item
+        ),
+      }));
+    }
   };
 
   const handleRemoveItem = (index) => {
@@ -494,7 +623,6 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     }
 
     let currentStockDetails = null;
-    let toStockDetails = null;
 
     // Only fetch stock details if both warehouse locations are selected
     if (formData.fromWarehouseLocation) {
@@ -505,23 +633,15 @@ const useTransferRequisition = ({ onFormSubmit }) => {
       );
     }
 
-    if (formData.toWarehouseLocation) {
-      toStockDetails = await fetchStockDetails(
-        formData.toWarehouseLocation,
-        null,
-        item.itemMasterId
-      );
-    }
-
     const newItem = {
       id: item.itemMasterId,
       name: item.itemName,
       unit: item.unit.unitName,
       quantity: 0,
+      batchId: null,
+      custDekNo: "",
       totalStockInHand: currentStockDetails?.totalStockInHand || 0,
-      totalStockInHandTo: toStockDetails?.totalStockInHand || 0,
-      reOrderLevel: currentStockDetails?.minReOrderLevel || 0,
-      maxStockLevel: currentStockDetails?.maxStockLevel || 0,
+      totalStockInHandTo: 0,
     };
 
     setFormData((prevFormData) => ({

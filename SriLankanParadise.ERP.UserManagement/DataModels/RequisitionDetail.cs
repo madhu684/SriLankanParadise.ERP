@@ -13,6 +13,8 @@ public partial class RequisitionDetail
 
     public decimal? Quantity { get; set; }
 
+    public string? CustDekNo { get; set; }
+
     public virtual ItemMaster ItemMaster { get; set; } = null!;
 
     public virtual RequisitionMaster RequisitionMaster { get; set; } = null!;

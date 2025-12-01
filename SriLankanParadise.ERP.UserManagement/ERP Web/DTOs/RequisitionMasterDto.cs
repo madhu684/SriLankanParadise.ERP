@@ -34,8 +34,6 @@
 
         public bool IsMINAccepted { get; set; }
 
-        public string? GrnDekReference { get; set; }
-
         public virtual LocationDto? RequestedFromLocation { get; set; }
 
         public virtual LocationDto? RequestedToLocation { get; set; }

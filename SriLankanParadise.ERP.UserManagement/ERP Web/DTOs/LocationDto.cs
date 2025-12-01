@@ -15,6 +15,8 @@
         public int? ParentId { get; set; }
 
         public int? PriceMasterId { get; set; }
+
+        public string? Alias { get; set; }
         public virtual LocationTypeDto? LocationType { get; set; }
 
     }

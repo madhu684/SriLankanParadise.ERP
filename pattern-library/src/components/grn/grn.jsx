@@ -268,6 +268,7 @@ const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
                     onChange={(e) =>
                       handleInputChange("grnType", e.target.value)
                     }
+                    disabled
                     required
                   >
                     <option value="">Select GRN Type</option>
@@ -339,7 +340,9 @@ const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
                     <option value="">Select Warehouse</option>
                     {locations
                       ?.filter(
-                        (location) => location.locationType.name === "Warehouse"
+                        (location) =>
+                          location.locationType.name === "Warehouse" &&
+                          location.alias !== "DMG"
                       )
                       ?.map((location) => (
                         <option
@@ -1420,7 +1423,7 @@ const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
               </>
             )}
           </button>
-          <button
+          {/* <button
             type="button"
             className="btn btn-secondary px-4"
             onClick={() => handleSubmit(true)}
@@ -1446,7 +1449,7 @@ const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
             disabled={loading || loadingDraft || submissionStatus !== null}
           >
             <i className="bi bi-printer me-2"></i>Print
-          </button>
+          </button> */}
           <button
             type="button"
             className="btn btn-danger px-4"

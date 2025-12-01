@@ -19,6 +19,8 @@ public partial class Location
 
     public int? PriceMasterId { get; set; }
 
+    public string? Alias { get; set; }
+
     public virtual Company Company { get; set; } = null!;
 
     public virtual LocationType? LocationType { get; set; }

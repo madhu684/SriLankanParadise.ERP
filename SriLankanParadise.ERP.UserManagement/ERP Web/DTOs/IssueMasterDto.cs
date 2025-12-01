@@ -31,6 +31,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
         public int? ApprovedUserId { get; set; }
 
         public int? IssuedLocationId { get; set; }
+        public string? IssuingCustDekNo { get; set; }
 
         public virtual IEnumerable<IssueDetailDto>? IssueDetails { get; set; }
     }

@@ -324,7 +324,9 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                   <option value="">Select Warehouse</option>
                   {locations
                     ?.filter(
-                      (location) => location.locationType.name === "Warehouse"
+                      (location) =>
+                        location.locationType.name === "Warehouse" &&
+                        location.alias !== "DMG"
                     )
                     ?.map((location) => (
                       <option
@@ -752,7 +754,7 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
             </>
           )}
         </button>
-        <button
+        {/* <button
           type="button"
           className="btn btn-secondary px-4"
           onClick={() => handleSubmit(true)}
@@ -778,7 +780,7 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
           disabled={loading || loadingDraft || submissionStatus !== null}
         >
           <i className="bi bi-printer me-2"></i>Print
-        </button>
+        </button> */}
         <button
           type="button"
           className="btn btn-danger px-4"

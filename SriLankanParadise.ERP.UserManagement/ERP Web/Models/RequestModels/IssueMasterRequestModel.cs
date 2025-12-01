@@ -26,6 +26,8 @@
 
         public int? IssuedLocationId { get; set; }
 
+        public string? IssuingCustDekNo { get; set; }
+
         public int PermissionId { get; set; }
     }
 }

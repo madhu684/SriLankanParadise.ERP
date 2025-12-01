@@ -104,7 +104,7 @@ const TransferRequisition = ({
 
       <div className="row g-4 mb-4">
         {/* Left Column - Request Information */}
-        <div className="col-lg-6">
+        <div className="col-lg-12">
           <div className="card border-0 shadow-sm h-100">
             <div className="card-header bg-primary text-white d-flex align-items-center gap-2">
               <i className="bi bi-info-circle"></i>
@@ -153,7 +153,11 @@ const TransferRequisition = ({
                 >
                   <option value="">Select Warehouse</option>
                   {userLocations
-                    .filter((ul) => ul.location.locationTypeId === 2)
+                    .filter(
+                      (ul) =>
+                        ul.location.locationTypeId === 2 &&
+                        ul.location.alias !== "BOND"
+                    )
                     .map((ul) => (
                       <option
                         key={ul.location.locationId}
@@ -189,6 +193,7 @@ const TransferRequisition = ({
                   {locations
                     .filter(
                       (location) =>
+                        location.alias !== "DMG" &&
                         location.locationTypeId === 2 &&
                         location.locationId !==
                           parseInt(formData.fromWarehouseLocation)
@@ -211,81 +216,6 @@ const TransferRequisition = ({
             </div>
           </div>
         </div>
-
-        {/* Right Column - Reference Selection */}
-        <div className="col-lg-6">
-          <div className="card border-0 shadow-sm h-100">
-            <div className="card-header bg-danger text-white d-flex align-items-center gap-2">
-              <i className="bi bi-bookmarks"></i>
-              <span className="fw-medium">2. Reference Selection</span>
-            </div>
-            <div className="card-body">
-              <div className="mb-3">
-                <label className="form-label fw-medium">
-                  Reference <span className="text-danger">*</span>
-                </label>
-                <select
-                  className="form-select"
-                  disabled={
-                    formData.toWarehouseLocation === null ||
-                    formData.fromWarehouseLocation === null
-                  }
-                  //value={formData.referenceNo ?? ""}
-                  onChange={(e) => {
-                    const selectedRef = JSON.parse(e.target.value);
-                    handleInputChange("reference", selectedRef);
-                    handleGenerateTRN(selectedRef);
-                  }}
-                >
-                  <option value="">Select Reference</option>
-                  {uniqueItemBatchRefs.map((ref, index) => (
-                    <option key={index} value={JSON.stringify(ref)}>
-                      {ref.referenceNo}
-                    </option>
-                  ))}
-                </select>
-                {/* <small className="text-muted form-text">
-                  Please search for a reference and select it.
-                </small> */}
-              </div>
-
-              {formData.reference && (
-                <div className="alert alert-info d-flex align-items-center justify-content-between mt-5 mb-0">
-                  <div className="d-flex align-items-center gap-2">
-                    <i className="bi bi-info-circle-fill"></i>
-                    <span className="fw-medium">Selected Reference:</span>
-                  </div>
-                  <div className="d-flex flex-column align-items-end">
-                    <span className="badge bg-primary fs-6 mb-1">
-                      {formData.reference.referenceNo}
-                    </span>
-                    {trGenerating ? (
-                      <small className="text-muted">
-                        <ButtonLoadingSpinner text="Loading items..." />
-                      </small>
-                    ) : (
-                      formData.itemDetails.length > 0 && (
-                        <small className="text-muted">
-                          <i className="bi bi-box-seam me-1"></i>
-                          {formData.itemDetails.length} item(s) available
-                        </small>
-                      )
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {!formData.reference && (
-                <div className="alert alert-light border d-flex align-items-center gap-2 mb-0">
-                  <i className="bi bi-arrow-up-circle text-muted"></i>
-                  <small className="text-muted mb-0">
-                    Please select a reference to view available items
-                  </small>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Item Details Section */}
@@ -297,7 +227,7 @@ const TransferRequisition = ({
         <div className="card-body">
           <div className="row">
             <div className="col-lg-6 mb-3">
-              {/* <label className="form-label fw-medium">Search Items</label>
+              <label className="form-label fw-medium">Search Items</label>
               <div className="input-group">
                 <span className="input-group-text">
                   <i className="bi bi-search"></i>
@@ -308,6 +238,10 @@ const TransferRequisition = ({
                   placeholder="Search for an item..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  disabled={
+                    formData.fromWarehouseLocation === null ||
+                    formData.toWarehouseLocation === null
+                  }
                 />
                 {searchTerm && (
                   <button
@@ -318,7 +252,7 @@ const TransferRequisition = ({
                     <i className="bi bi-x"></i>
                   </button>
                 )}
-              </div> */}
+              </div>
 
               {searchTerm && (
                 <div className="dropdown w-100 mt-2">
@@ -362,10 +296,15 @@ const TransferRequisition = ({
                               className="dropdown-item"
                               onClick={(e) => handleSelectItem(item, e)}
                             >
-                              <span className="me-3">
-                                <i className="bi bi-cart4"></i>
-                              </span>
-                              {item.itemCode} - {item.itemName}
+                              <i className="bi bi-cart4 text-success me-3 fs-5"></i>
+                              <div>
+                                <div className="fw-semibold">
+                                  {item.itemCode}
+                                </div>
+                                <small className="text-muted">
+                                  {item.itemName}
+                                </small>
+                              </div>
                             </button>
                           </li>
                         ))
@@ -383,11 +322,10 @@ const TransferRequisition = ({
                   <tr>
                     <th>Item Name</th>
                     <th>Unit</th>
+                    <th>Cust Dek No</th>
                     <th>Quantity</th>
-                    <th>Available Stock</th>
-                    <th>Requested Location Stock</th>
-                    {/* <th>Reorder Level</th>
-                    <th>Max Stock Level</th> */}
+                    <th>Duty Paid W. Stock</th>
+                    <th>Bonded W. Stock</th>
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -399,6 +337,34 @@ const TransferRequisition = ({
                         <span className="badge bg-light text-dark">
                           {item.unit}
                         </span>
+                      </td>
+                      <td>
+                        <select
+                          className={`form-select ${
+                            validFields[`custDekNo_${index}`] ? "is-valid" : ""
+                          } ${
+                            validationErrors[`custDekNo_${index}`]
+                              ? "is-invalid"
+                              : ""
+                          }`}
+                          value={item.batchId || ""}
+                          onChange={(e) =>
+                            handleItemDetailsChange(
+                              index,
+                              "batchId",
+                              parseInt(e.target.value)
+                            )
+                          }
+                        >
+                          <option value="" disabled>
+                            Select Cust Dek No
+                          </option>
+                          {uniqueItemBatchRefs?.map((cd) => (
+                            <option key={cd.batchId} value={cd.batchId}>
+                              {cd.custDekNo}
+                            </option>
+                          ))}
+                        </select>
                       </td>
                       <td>
                         <input
@@ -425,10 +391,30 @@ const TransferRequisition = ({
                           </div>
                         )}
                       </td>
-                      <td><span className="badge bg-primary fs-6 px-3 py-2">{item.totalStockInHand}</span></td>
-                      <td><span className="badge bg-success fs-6 px-3 py-2">{item.totalStockInHandTo}</span></td>
-                      {/* <td>{item.reOrderLevel}</td>
-                      <td>{item.maxStockLevel}</td> */}
+                      <td>
+                        <span className="badge bg-primary fs-6 px-3 py-2">
+                          {item.totalStockInHand}
+                        </span>
+                      </td>
+                      {/* <td>
+                        <span className="badge bg-success fs-6 px-3 py-2">
+                          {item.totalStockInHandTo}
+                        </span>
+                      </td> */}
+                      <td>
+                        {item.isLoadingStock ? (
+                          <div
+                            className="spinner-border spinner-border-sm text-success"
+                            role="status"
+                          >
+                            <span className="visually-hidden">Loading...</span>
+                          </div>
+                        ) : (
+                          <span className="badge bg-success fs-6 px-3 py-2">
+                            {item.totalStockInHandTo}
+                          </span>
+                        )}
+                      </td>
                       <td>
                         <button
                           type="button"
@@ -539,14 +525,14 @@ const TransferRequisition = ({
             </>
           )}
         </button>
-        <button
+        {/* <button
           type="button"
           className="btn btn-secondary px-4"
           disabled={loading || submissionStatus !== null}
         >
           <i className="bi bi-save me-2"></i>
           Save as Draft
-        </button>
+        </button> */}
         <button
           type="button"
           className="btn btn-danger px-4"

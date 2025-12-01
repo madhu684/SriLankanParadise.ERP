@@ -40,11 +40,10 @@ const TinApproval = ({ show, handleClose, handleApproved, tin }) => {
           <div className="card-body">
             <div className="d-flex justify-content-between align-items-start flex-wrap gap-3">
               <div>
-                <h5 className="card-title text-primary mb-2">
-                  <i className="bi bi-hash me-1"></i>
-                  Reference Number
-                </h5>
                 <p className="fs-5 fw-bold mb-0">{tin.referenceNumber}</p>
+                <p className="fs-6 text-muted fw-bold mb-0">
+                  {tin.issuingCustDekNo || "N/A"}
+                </p>
               </div>
               <div className="text-end">
                 <h6 className="text-muted mb-2">TIN Status</h6>
@@ -216,7 +215,7 @@ const TinApproval = ({ show, handleClose, handleApproved, tin }) => {
                     <th className="ps-3"></th>
                     <th>Item Name</th>
                     <th>Unit</th>
-                    <th>Item Batch</th>
+                    <th>Cust Dek No</th>
                     <th className="text-center">Dispatched Quantity</th>
                   </tr>
                 </thead>
@@ -236,7 +235,7 @@ const TinApproval = ({ show, handleClose, handleApproved, tin }) => {
                       </td>
                       <td>
                         <span className="badge bg-secondary">
-                          {item.batch?.batchRef}
+                          {item.custDekNo || "N/A"}
                         </span>
                       </td>
                       <td className="text-center">
