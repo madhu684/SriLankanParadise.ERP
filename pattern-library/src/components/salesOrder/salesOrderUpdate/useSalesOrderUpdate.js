@@ -1261,8 +1261,8 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
                 (company.batchStockType === "FIFO" ? 1 : 0)
               }
             ></td>
-            <th>
-              {charge.sign + " "}
+            <th className="text-end">
+              {/* {charge.sign + " "} */}
               {charge.name}
               {charge.isPercentage === true && " (%)"}
             </th>
