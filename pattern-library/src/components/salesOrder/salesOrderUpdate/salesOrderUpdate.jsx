@@ -932,7 +932,7 @@ const SalesOrderUpdate = ({
         </div>
 
         {/* Section 4: Attachments */}
-        <div className="card shadow-sm mb-4">
+        {/* <div className="card shadow-sm mb-4">
           <div className="card-header bg-light">
             <h5 className="mb-0">
               <i className="bi bi-paperclip me-2"></i>Attachments
@@ -966,7 +966,7 @@ const SalesOrderUpdate = ({
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {hasLineItemChargesChanged && (
           <div className="alert alert-warning mb-2" role="alert">
@@ -1000,7 +1000,7 @@ const SalesOrderUpdate = ({
                   </>
                 )}
               </button>
-              <button
+              {/* <button
                 type="button"
                 className="btn btn-secondary px-4"
                 onClick={() => handleSubmit(true)}
@@ -1026,7 +1026,7 @@ const SalesOrderUpdate = ({
                 disabled={loading || loadingDraft || submissionStatus !== null}
               >
                 <i className="bi bi-printer me-2"></i>Print
-              </button>
+              </button> */}
               <button
                 type="button"
                 className="btn btn-danger px-4"
