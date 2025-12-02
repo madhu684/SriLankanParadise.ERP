@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import {
   delete_issue_master_api,
   get_issue_masters_with_out_drafts_api,
+  get_requisition_masters_with_out_drafts_api,
 } from "../../../services/purchaseApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -42,6 +43,23 @@ const useTinList = () => {
       return filteredTins || [];
     },
     enabled: !!companyId,
+  });
+
+  const {
+    data: transferRequisitions = [],
+    isLoading: isLoadingTrn,
+    error: trnError,
+  } = useQuery({
+    queryKey: ["transferRequisitions", companyId],
+    queryFn: async () => {
+      const response = await get_requisition_masters_with_out_drafts_api(
+        companyId
+      );
+      const filteredRequisitions = response?.data?.result?.filter(
+        (rm) => rm.requisitionType === "TRN" && rm.status === 2
+      );
+      return filteredRequisitions || [];
+    },
   });
 
   const handleShowApproveTinModal = () => {
@@ -235,6 +253,8 @@ const useTinList = () => {
     submissionStatus,
     isLoading,
     showTINDeleteModal,
+    transferRequisitions,
+    isLoadingTrn,
     setShowTINDeleteModal,
     areAnySelectedRowsPending,
     setSelectedRows,
