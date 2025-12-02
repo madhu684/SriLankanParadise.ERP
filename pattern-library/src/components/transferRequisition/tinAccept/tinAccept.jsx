@@ -142,7 +142,7 @@ const TinAccept = ({ show, handleClose, tin }) => {
         )}
 
         {/* Validation Errors Summary - Only show when validation is active */}
-        {showValidation && hasValidationErrors && !isAccepted && (
+        {/* {showValidation && hasValidationErrors && !isAccepted && (
           <div className="alert alert-warning mb-4" role="alert">
             <i className="bi bi-exclamation-triangle-fill me-2"></i>
             <strong>Validation Errors:</strong>
@@ -152,7 +152,7 @@ const TinAccept = ({ show, handleClose, tin }) => {
               ))}
             </ul>
           </div>
-        )}
+        )} */}
 
         {isAccepted && (
           <div className="alert alert-info mb-4" role="alert">

@@ -27,6 +27,7 @@ const useTinAccept = ({ tin, onFormSubmit }) => {
   const [returnedQuantities, setReturnedQuantities] = useState({});
   const [loading, setLoading] = useState(false);
   const [showValidation, setShowValidation] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false); // NEW: Prevent state updates during processing
 
   const queryClient = useQueryClient();
   const alertRef = useRef(null);
@@ -59,6 +60,7 @@ const useTinAccept = ({ tin, onFormSubmit }) => {
         setTimeout(() => {
           setApprovalStatus(null);
           setShowValidation(true);
+          setIsProcessing(false);
         }, 500);
       }, APPROVAL_TIMEOUT);
       return () => clearTimeout(timer);
@@ -72,21 +74,26 @@ const useTinAccept = ({ tin, onFormSubmit }) => {
     }
   }, [approvalStatus]);
 
-  // Initialize quantities from issue details
+  // Initialize quantities from issue details - FIXED VERSION
   useEffect(() => {
+    // Don't update state if we're currently processing acceptance
+    if (isProcessing) return;
+
     if (issuedetails?.length > 0) {
       const received = {};
       const returned = {};
 
       issuedetails.forEach((item) => {
-        received[item.issueDetailId] = item.quantity ?? 0;
+        // CRITICAL FIX: Use receivedQuantity if it exists, otherwise default to issued quantity
+        received[item.issueDetailId] =
+          item.receivedQuantity ?? item.quantity ?? 0;
         returned[item.issueDetailId] = item.returnedQuantity ?? 0;
       });
 
       setReceivedQuantities(received);
       setReturnedQuantities(returned);
     }
-  }, [issuedetails]);
+  }, [issuedetails, isProcessing]);
 
   // Reset validation display when modal reopens or status changes
   useEffect(() => {
@@ -134,7 +141,8 @@ const useTinAccept = ({ tin, onFormSubmit }) => {
     mutationFn: ({ issuemasterid, updatedDetails }) =>
       patch_issue_detail_api(issuemasterid, updatedDetails),
     onSuccess: () => {
-      queryClient.invalidateQueries(["tins", tin.issueMasterId]);
+      // Don't invalidate immediately - we'll do it after all operations complete
+      console.log("Issue details updated successfully");
     },
     onError: (error) => {
       console.error("Failed to update received quantities:", error);
@@ -392,11 +400,12 @@ const useTinAccept = ({ tin, onFormSubmit }) => {
     isAccepted,
   ]);
 
-  // Handle accept
+  // Handle accept - FIXED VERSION
   const handleAccept = useCallback(
     async (tinId) => {
       try {
         setLoading(true);
+        setIsProcessing(true);
         setApprovalStatus(null);
 
         // Validate quantities
@@ -409,6 +418,7 @@ const useTinAccept = ({ tin, onFormSubmit }) => {
           setTimeout(() => {
             setApprovalStatus(null);
           }, 3000);
+          setIsProcessing(false);
           return;
         }
 
@@ -423,8 +433,11 @@ const useTinAccept = ({ tin, onFormSubmit }) => {
           returnedQuantity: returnedQuantities[item.issueDetailId] || 0,
         }));
 
-        // Update issue details
-        mutation.mutate({ issuemasterid: tin.issueMasterId, updatedDetails });
+        // Update issue details and wait for completion
+        await mutation.mutateAsync({
+          issuemasterid: tin.issueMasterId,
+          updatedDetails,
+        });
 
         // Create batch and process
         const batchId = await createBatch();
@@ -437,7 +450,7 @@ const useTinAccept = ({ tin, onFormSubmit }) => {
         );
         await updateMrnState();
 
-        // Invalidate queries
+        // NOW invalidate queries after everything is complete
         queryClient.invalidateQueries(["tins", tinId]);
         queryClient.invalidateQueries(["locationInventories", toLocationId]);
         queryClient.invalidateQueries(["locationInventories", fromLocationId]);
@@ -446,12 +459,14 @@ const useTinAccept = ({ tin, onFormSubmit }) => {
           "locationInventories",
           DAMAGE_LOCATION_ID,
         ]);
+
         setShowValidation(false);
         setApprovalStatus("approved");
         toast.success("Transfer issue note accepted successfully");
       } catch (error) {
         console.error("Error accepting transfer issue note:", error);
         setApprovalStatus("error");
+        setIsProcessing(false);
         toast.error(error.message || "Error accepting transfer issue note");
 
         // Auto-clear error status after 3 seconds
@@ -473,6 +488,7 @@ const useTinAccept = ({ tin, onFormSubmit }) => {
       createItemBatchData,
       updateMrnState,
       queryClient,
+      companyId,
     ]
   );
 
