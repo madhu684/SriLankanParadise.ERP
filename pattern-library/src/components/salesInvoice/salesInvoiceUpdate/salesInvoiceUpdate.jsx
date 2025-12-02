@@ -881,7 +881,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
         </div>
 
         {/* Attachments Section */}
-        <div className="card shadow-sm mb-4">
+        {/* <div className="card shadow-sm mb-4">
           <div className="card-header bg-light">
             <h5 className="mb-0">
               <i className="bi bi-paperclip me-2"></i>6. Attachments
@@ -914,7 +914,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Action Buttons */}
         <div className="card shadow-sm">
@@ -941,7 +941,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                   </>
                 )}
               </button>
-              <button
+              {/* <button
                 type="button"
                 className="btn btn-secondary"
                 onClick={() => handleSubmit(true)}
@@ -961,7 +961,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                     Save as Draft
                   </>
                 )}
-              </button>
+              </button> */}
               {/* <button
                 type="button"
                 className="btn btn-success"

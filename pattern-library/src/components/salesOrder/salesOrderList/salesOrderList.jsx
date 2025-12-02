@@ -141,7 +141,11 @@ const SalesOrderList = () => {
               Create
             </button>
           )}
-          {hasPermission("Approve Sales Order") &&
+          {hasPermission(
+            selectedRowData[0]?.isLineChargesChanged
+              ? "Approve Charges Change Sales Order"
+              : "Approve Sales Order"
+          ) &&
             selectedRowData[0]?.createdUserId !==
               parseInt(sessionStorage.getItem("userId")) &&
             isAnyRowSelected &&
