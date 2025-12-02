@@ -1,12 +1,12 @@
-import React from "react";
-import useTin from "./useTin";
-import CurrentDateTime from "../currentDateTime/currentDateTime";
-import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
-import LoadingSpinner from "../loadingSpinner/loadingSpinner";
-import ErrorComponent from "../errorComponent/errorComponent";
-import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 import moment from "moment";
 import "moment-timezone";
+import { useContext } from "react";
+import { UserContext } from "../../context/userContext";
+import CurrentDateTime from "../currentDateTime/currentDateTime";
+import ErrorComponent from "../errorComponent/errorComponent";
+import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
+import LoadingSpinner from "../loadingSpinner/loadingSpinner";
+import useTin from "./useTin";
 
 const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
   const {
@@ -28,12 +28,13 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
     isItemBatchesError,
     isLocationInventoriesLoading,
     isLocationInventoriesError,
+    calculateTotalAmount,
+    isTrnsLoading,
     handleInputChange,
     handleItemDetailsChange,
     handleRemoveItem,
     handleSubmit,
     handlePrint,
-    calculateTotalAmount,
     handleTrnChange,
     handleStatusChange,
     setTrnSearchTerm,
@@ -44,6 +45,8 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
       handleUpdated();
     },
   });
+
+  const { user } = useContext(UserContext);
 
   if (isLoading || isItemBatchesLoading) {
     return <LoadingSpinner />;
@@ -231,13 +234,17 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
                           }}
                         >
                           {trns
-                            .filter((trn) =>
-                              trn.referenceNumber
-                                ?.replace(/\s/g, "")
-                                ?.toLowerCase()
-                                .includes(
-                                  trnSearchTerm.toLowerCase().replace(/\s/g, "")
-                                )
+                            .filter(
+                              (trn) =>
+                                trn.requestedUserId !== user?.userId &&
+                                trn.referenceNumber
+                                  ?.replace(/\s/g, "")
+                                  ?.toLowerCase()
+                                  .includes(
+                                    trnSearchTerm
+                                      .toLowerCase()
+                                      .replace(/\s/g, "")
+                                  )
                             )
                             .map((trn) => (
                               <li
@@ -256,13 +263,15 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
                                 </button>
                               </li>
                             ))}
-                          {trns.filter((trn) =>
-                            trn.referenceNumber
-                              ?.replace(/\s/g, "")
-                              ?.toLowerCase()
-                              .includes(
-                                trnSearchTerm.toLowerCase().replace(/\s/g, "")
-                              )
+                          {trns.filter(
+                            (trn) =>
+                              trn.requestedUserId !== user?.userId &&
+                              trn.referenceNumber
+                                ?.replace(/\s/g, "")
+                                ?.toLowerCase()
+                                .includes(
+                                  trnSearchTerm.toLowerCase().replace(/\s/g, "")
+                                )
                           ).length === 0 && (
                             <li className="list-group-item text-center text-muted py-3">
                               <i className="bi bi-emoji-frown me-2"></i>
@@ -467,7 +476,7 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
             {selectedTrn !== null && formData.itemDetails.length === 0 && (
               <div className="alert alert-danger mb-0" role="alert">
                 <i className="bi bi-exclamation-triangle me-2"></i>
-                Selected transfer requisition has no remaining items to issue.
+                TIN is already issued for Selected transfer requisition.
               </div>
             )}
           </div>

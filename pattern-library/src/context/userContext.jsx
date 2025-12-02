@@ -5,6 +5,7 @@ import {
   get_user_permissions_api,
 } from "../services/userManagementApi";
 import { get_cashier_session_by_user_id_api } from "../services/salesApi";
+import { get_user_locations_by_user_id_api } from "../services/purchaseApi";
 
 export const UserContext = createContext();
 
@@ -20,6 +21,23 @@ const UserProvider = ({ children }) => {
     queryFn: async () => {
       const response = await get_user_by_user_id(userId);
       return response.data.result;
+    },
+    enabled: !!userId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const {
+    data: userLocations = [],
+    isLoading: userLocationsLoading,
+    isError: userLocationsError,
+  } = useQuery({
+    queryKey: ["userLocations", userId],
+    queryFn: async () => {
+      const response = await get_user_locations_by_user_id_api(userId);
+      const filteredLocations = response.data.result.filter(
+        (loc) => loc.location.locationTypeId === 2
+      );
+      return filteredLocations || [];
     },
     enabled: !!userId,
     staleTime: 5 * 60 * 1000,
@@ -101,8 +119,10 @@ const UserProvider = ({ children }) => {
     <UserContext.Provider
       value={{
         user,
+        userLocations,
         activeCashierSession,
         userLoading,
+        userLocationsLoading,
         activeCashierSessionLoading,
         hasPermission,
         hasAllPermissions,
