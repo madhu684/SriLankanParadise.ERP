@@ -433,8 +433,7 @@ const TransferRequisition = ({
             <div className="alert alert-info d-flex align-items-center gap-2 mb-0">
               <i className="bi bi-info-circle"></i>
               <span>
-                No items added yet. Search and select items to add to the
-                invoice.
+                No items added yet. Search and select items to add to the TRN.
               </span>
             </div>
           )}

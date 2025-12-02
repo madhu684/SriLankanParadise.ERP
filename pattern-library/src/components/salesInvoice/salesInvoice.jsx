@@ -891,7 +891,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
         </div>
 
         {/* Attachments Section */}
-        <div className="card shadow-sm mb-4">
+        {/* <div className="card shadow-sm mb-4">
           <div className="card-header bg-light">
             <h5 className="mb-0">
               <i className="bi bi-paperclip me-2"></i>6. Attachments
@@ -924,7 +924,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Show warning if line item charges were modified */}
         {salesOrder && hasLineItemChargesChanged && (
@@ -979,7 +979,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                   </>
                 )}
               </button>
-              <button
+              {/* <button
                 type="button"
                 className="btn btn-secondary"
                 onClick={() => handleSubmit(true)}
@@ -999,7 +999,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                     Save as Draft
                   </>
                 )}
-              </button>
+              </button> */}
               <button
                 type="button"
                 className="btn btn-danger"
