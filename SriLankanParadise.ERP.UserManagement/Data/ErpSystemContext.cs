@@ -170,6 +170,8 @@ public partial class ErpSystemContext : DbContext
     public virtual DbSet<ItemPriceMaster> ItemPriceMasters { get; set; }
 
     public virtual DbSet<ItemPriceDetail> ItemPriceDetails { get; set; }
+    public virtual DbSet<SalesPerson> SalesPersons { get; set; }
+    public virtual DbSet<Region> Regions { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
