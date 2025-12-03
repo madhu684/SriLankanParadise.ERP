@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
 import useGrnList from "./useGrnList.js";
 import GrnApproval from "../grnApproval/grnApproval.jsx";
 import Grn from "../grn";
@@ -45,7 +45,7 @@ const GrnList = () => {
     handleClose,
   } = useGrnList();
 
-  const { hasPermission } = useContext(UserContext);
+  const { hasPermission, userLocations } = useContext(UserContext);
 
   //Handler for search input
   const handleSearch = (e) => {
@@ -127,6 +127,8 @@ const GrnList = () => {
             </button>
           )}
           {hasPermission("Approve Goods Received Note") &&
+            selectedRowData[0]?.warehouseLocationId ===
+              userLocations[0]?.locationId &&
             selectedRowData[0]?.receivedUserId !==
               parseInt(sessionStorage.getItem("userId")) &&
             isAnyRowSelected &&
@@ -174,6 +176,7 @@ const GrnList = () => {
               <th>Id</th>
               <th>Received By</th>
               <th>Received Date</th>
+              <th>Warehouse Location</th>
               <th>Status</th>
               <th>Details</th>
             </tr>
@@ -191,6 +194,7 @@ const GrnList = () => {
                 <td>{Grn.grnMasterId}</td>
                 <td>{Grn.receivedBy}</td>
                 <td>{Grn?.receivedDate?.split("T")[0]}</td>
+                <td>{Grn?.warehouseLocation?.locationName || "-"}</td>
                 <td>
                   <span
                     className={`badge rounded-pill ${getStatusBadgeClass(
