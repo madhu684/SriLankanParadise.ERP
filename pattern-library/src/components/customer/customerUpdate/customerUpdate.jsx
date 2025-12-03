@@ -5,17 +5,24 @@ import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/butt
 
 const CustomerUpdate = ({ handleClose, customer }) => {
   const {
+    regions,
+    salesPersons,
     formData,
     validFields,
     validationErrors,
     submissionStatus,
     alertRef,
     loading,
+    salesPersonSearchTerm,
+    setSalesPersonSearchTerm,
+    validateForm,
     handleInputChange,
     handleFormSubmit,
     addDeliveryAddress,
     removeDeliveryAddress,
     handleDeliveryAddressChange,
+    handleSelectSalesPerson,
+    handleResetSalesPerson,
   } = useCustomerUpdate({
     customer,
     onFormSubmit: () => handleClose(),
@@ -418,6 +425,214 @@ const CustomerUpdate = ({ handleClose, customer }) => {
                   )}
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+
+        {/* Region & Sales Information - Second Row (Full Width) */}
+        <div className="row g-4 mb-4">
+          <div className="col-12">
+            <div className="bg-white rounded-3 shadow p-4">
+              <div className="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom border-2 border-info">
+                <div className="bg-info bg-opacity-10 p-2 rounded-3">
+                  <i className="bi bi-geo-fill text-info fs-6"></i>
+                </div>
+                <h2 className="h5 fw-bold text-dark mb-0">
+                  Region & Sales Information
+                </h2>
+              </div>
+
+              <div className="row g-3">
+                {/* Region Dropdown */}
+                <div className="col-md-6">
+                  <label className="form-label">
+                    <i className="bi bi-pin-map-fill me-2"></i>Region{" "}
+                    <span className="text-danger">*</span>
+                  </label>
+                  <select
+                    className={`form-select ${
+                      validFields.regionId ? "is-valid" : ""
+                    } ${validationErrors.regionId ? "is-invalid" : ""}`}
+                    value={formData.regionId || ""}
+                    onChange={(e) =>
+                      handleInputChange("regionId", parseInt(e.target.value))
+                    }
+                  >
+                    <option value="">Select a region</option>
+                    {regions.map((region) => (
+                      <option key={region.regionId} value={region.regionId}>
+                        {region.name}
+                      </option>
+                    ))}
+                  </select>
+                  {validationErrors.regionId && (
+                    <div className="invalid-feedback">
+                      {validationErrors.regionId}
+                    </div>
+                  )}
+                </div>
+
+                {/* Sales Person Search and Selection */}
+                <div className="col-md-6">
+                  <label className="form-label">
+                    <i className="bi bi-person-badge-fill me-2"></i>Sales Person
+                  </label>
+                  {formData.selectedSalesPerson === null && (
+                    <div className="position-relative">
+                      <div className="input-group">
+                        <span className="input-group-text bg-white border-end-0">
+                          <i className="bi bi-search text-muted"></i>
+                        </span>
+                        <input
+                          type="text"
+                          className={`form-control border-start-0 ps-0 ${
+                            validFields.salesPersonId ? "is-valid" : ""
+                          } ${
+                            validationErrors.salesPersonId ? "is-invalid" : ""
+                          }
+                          }`}
+                          placeholder="Search by name or contact..."
+                          value={salesPersonSearchTerm}
+                          onChange={(e) =>
+                            setSalesPersonSearchTerm(e.target.value)
+                          }
+                        />
+                        {validationErrors.salesPersonId && (
+                          <div className="invalid-feedback">
+                            {validationErrors.salesPersonId}
+                          </div>
+                        )}
+                        {salesPersonSearchTerm && (
+                          <button
+                            type="button"
+                            className="btn btn-outline-secondary"
+                            onClick={() => setSalesPersonSearchTerm("")}
+                          >
+                            <i className="bi bi-x-lg"></i>
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Dropdown for filtered sales persons */}
+                      {salesPersonSearchTerm && (
+                        <div className="dropdown w-100">
+                          <ul
+                            className="dropdown-menu show w-100 shadow-lg border-0"
+                            style={{ maxHeight: "300px", overflowY: "auto" }}
+                          >
+                            {salesPersons
+                              ?.filter(
+                                (salesPerson) =>
+                                  salesPerson.firstName
+                                    .toLowerCase()
+                                    .includes(
+                                      salesPersonSearchTerm.toLowerCase()
+                                    ) ||
+                                  salesPerson.lastName
+                                    .toLowerCase()
+                                    .includes(
+                                      salesPersonSearchTerm.toLowerCase()
+                                    ) ||
+                                  salesPerson.contactNo
+                                    .replace(/\s/g, "")
+                                    .includes(
+                                      salesPersonSearchTerm.replace(/\s/g, "")
+                                    )
+                              )
+                              .map((salesPerson) => (
+                                <li key={salesPerson.salesPersonId}>
+                                  <button
+                                    type="button"
+                                    className="dropdown-item py-2 d-flex align-items-center"
+                                    onClick={() =>
+                                      handleSelectSalesPerson(salesPerson)
+                                    }
+                                  >
+                                    <i className="bi bi-person-lines-fill text-primary me-3 fs-5"></i>
+                                    <div>
+                                      <div className="fw-semibold">
+                                        {salesPerson?.firstName}{" "}
+                                        {salesPerson?.lastName}
+                                      </div>
+                                      <small className="text-muted">
+                                        {salesPerson?.contactNo}
+                                      </small>
+                                    </div>
+                                  </button>
+                                </li>
+                              ))}
+                            {salesPersons?.filter(
+                              (salesPerson) =>
+                                salesPerson.firstName
+                                  .toLowerCase()
+                                  .includes(
+                                    salesPersonSearchTerm.toLowerCase()
+                                  ) ||
+                                salesPerson.lastName
+                                  .toLowerCase()
+                                  .includes(
+                                    salesPersonSearchTerm.toLowerCase()
+                                  ) ||
+                                salesPerson.contactNo
+                                  .replace(/\s/g, "")
+                                  .includes(
+                                    salesPersonSearchTerm.replace(/\s/g, "")
+                                  )
+                            ).length === 0 && (
+                              <li className="dropdown-item text-center py-3">
+                                <i className="bi bi-emoji-frown fs-3 text-muted d-block mb-2"></i>
+                                <span className="text-muted">
+                                  No sales person found
+                                </span>
+                              </li>
+                            )}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Sales Person Details Card */}
+                  {formData.selectedSalesPerson && (
+                    <div className="card border-success">
+                      <div className="card-header bg-success bg-opacity-10 py-2">
+                        <span className="fw-semibold text-success">
+                          <i className="bi bi-check-circle-fill me-2"></i>
+                          Selected Sales Person
+                        </span>
+                      </div>
+                      <div className="card-body p-3">
+                        <div className="d-flex justify-content-between align-items-start mb-2">
+                          <div>
+                            <small className="text-muted d-block">Name</small>
+                            <span className="fw-semibold">
+                              {formData.selectedSalesPerson.firstName}{" "}
+                              {formData.selectedSalesPerson.lastName}
+                            </span>
+                          </div>
+                          <div>
+                            <small className="text-muted d-block">
+                              Contact
+                            </small>
+                            <span className="small">
+                              <i className="bi bi-telephone me-1"></i>
+                              {formData.selectedSalesPerson.contactNo}
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          className="btn btn-outline-danger btn-sm w-100 mt-2"
+                          onClick={handleResetSalesPerson}
+                        >
+                          <i className="bi bi-x-circle me-1"></i>Reset Sales
+                          Person
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>

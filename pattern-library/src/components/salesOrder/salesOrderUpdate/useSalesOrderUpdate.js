@@ -161,27 +161,6 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
     queryFn: fetchSalesPersons,
   });
 
-  const fetchSalesPersonByUserId = async () => {
-    try {
-      const response = await get_sales_persons_by_user_id_api(
-        salesOrder.salesPersonId
-      );
-      return response.data.result || [];
-    } catch (error) {
-      console.error("Error fetching sales person by user id:", error);
-    }
-  };
-
-  const {
-    data: salesPersonDetails,
-    isLoading: isSalesPersonDetailsLoading,
-    isError: isSalesPersonDetailsError,
-    error: salesPersonDetailsError,
-  } = useQuery({
-    queryKey: ["salesPersonsByUserId"],
-    queryFn: fetchSalesPersonByUserId,
-  });
-
   const fetchchargesAndDeductions = async () => {
     try {
       const response = await get_charges_and_deductions_by_company_id_api(
@@ -478,14 +457,14 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
           salesOrderId: deepCopySalesOrder?.salesOrderId ?? "",
           customerPoNumber: deepCopySalesOrder?.customerPoNumber ?? "",
           customerId: deepCopySalesOrder?.customerId ?? "",
-          salesPersonId: deepCopySalesOrder?.salesPersonId ?? "",
+          salesPersonId: deepCopySalesOrder?.salesPersonId ?? null,
           orderDate: deepCopySalesOrder?.orderDate?.split("T")[0] ?? "",
           deliveryDate: deepCopySalesOrder?.deliveryDate?.split("T")[0] ?? "",
           itemDetails: initializedLineItemCharges,
           attachments: deepCopySalesOrder?.attachments ?? [],
           totalAmount: deepCopySalesOrder?.totalAmount ?? "",
           selectedCustomer: deepCopySalesOrder?.customer ?? "",
-          selectedSalesPerson: salesPersonDetails,
+          selectedSalesPerson: deepCopySalesOrder?.salesPerson ?? null,
           subTotal: deepCopySalesOrder?.totalAmount ?? "",
           storeLocation: deepCopySalesOrder?.inventoryLocationId ?? null,
           commonChargesAndDeductions: initializedCommonCharges,
@@ -949,6 +928,25 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
         }
 
         if (putSalesOrderSuccessful && allAppliedSuccessful) {
+          const updatedSalesOrder = {
+            ...salesOrder,
+            salesPersonId: formData.salesPersonId,
+            salesPerson: formData.selectedSalesPerson,
+            customerPoNumber: formData.customerPoNumber,
+            orderDate: formData.orderDate,
+            deliveryDate: formData.deliveryDate,
+            totalAmount: formData.totalAmount,
+            customerId: formData.customerId,
+            customer: formData.selectedCustomer,
+            inventoryLocationId: formData.storeLocation,
+            isLineChargesChanged: hasLineItemChargesChanged
+              ? true
+              : formData.isLineChargesChanged,
+          };
+
+          // Update the salesOrder reference
+          Object.assign(salesOrder, updatedSalesOrder);
+
           if (isSaveAsDraft) {
             setSubmissionStatus("successSavedAsDraft");
             console.log("Sales order updated and saved as draft!", formData);
@@ -1127,6 +1125,14 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
       ...prev,
       customerId: selectedCustomer.customerId,
       selectedCustomer,
+      selectedSalesPerson:
+        selectedCustomer.salesPerson !== null
+          ? selectedCustomer.salesPerson
+          : null,
+      salesPersonId:
+        selectedCustomer.salesPerson !== null
+          ? selectedCustomer.salesPerson.salesPersonId
+          : null,
     }));
     setCustomerSearchTerm("");
     setValidFields({});
@@ -1156,7 +1162,7 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
   const handleSelectSalesPerson = useCallback((selectedSalesPerson) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
-      salesPersonId: selectedSalesPerson.userId,
+      salesPersonId: selectedSalesPerson.salesPersonId,
       selectedSalesPerson: selectedSalesPerson,
     }));
 

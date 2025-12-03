@@ -6,8 +6,6 @@
 
         public int? CustomerId { get; set; }
 
-        public virtual CustomerDto? Customer { get; set; }
-
         public DateTime? OrderDate { get; set; }
 
         public DateTime? DeliveryDate { get; set; }
@@ -48,6 +46,10 @@
         public int? CustomerCreditDurationAtOrder { get; set; }
         public bool isLineChargesChanged { get; set; }
 
+
+        public virtual CustomerDto? Customer { get; set; }
+
+        public virtual SalesPersonDto? SalesPerson { get; set; }
         public virtual IEnumerable<SalesOrderDetailDto>? SalesOrderDetails { get; set; }
     }
 }

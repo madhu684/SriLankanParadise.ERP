@@ -15,6 +15,8 @@ const GrnList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  const { hasPermission, userLocations } = useContext(UserContext);
+
   const {
     Grns,
     isLoadingData,
@@ -43,9 +45,7 @@ const GrnList = () => {
     handleUpdate,
     handleUpdated,
     handleClose,
-  } = useGrnList();
-
-  const { hasPermission, userLocations } = useContext(UserContext);
+  } = useGrnList(userLocations);
 
   //Handler for search input
   const handleSearch = (e) => {

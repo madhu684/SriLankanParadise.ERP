@@ -90,7 +90,9 @@ const CustomerView = ({ show, handleClose, customer }) => {
             <Modal.Title className="mb-1 text-dark">
               Customer Details
             </Modal.Title>
-            <small className="text-muted">ID: {customer.customerId}</small>
+            <small className="text-dark">
+              Customer Code: {customer?.customerCode}
+            </small>
           </div>
           <div className="d-flex flex-column text-start">
             <small className="text-dark d-block">Status</small>
@@ -119,10 +121,10 @@ const CustomerView = ({ show, handleClose, customer }) => {
                     label="Customer Name"
                     value={customer?.customerName}
                   />
-                  <InfoRow
+                  {/* <InfoRow
                     label="Customer Code"
                     value={customer?.customerCode}
-                  />
+                  /> */}
                   <InfoRow
                     label="Contact Person"
                     value={customer?.contactPerson}
@@ -136,6 +138,15 @@ const CustomerView = ({ show, handleClose, customer }) => {
                     customer?.billingAddressLine1 +
                     ", " +
                     customer?.billingAddressLine2
+                  }
+                />
+                <InfoRow label="Region" value={customer?.region?.name} />
+                <InfoRow
+                  label="Sales Person"
+                  value={
+                    customer?.salesPerson?.firstName +
+                    " " +
+                    customer?.salesPerson?.lastName
                   }
                 />
               </InfoCard>

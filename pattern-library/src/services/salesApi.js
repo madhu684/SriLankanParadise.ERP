@@ -169,9 +169,9 @@ export const get_sales_persons_api = async () => {
   }
 };
 
-export const get_sales_persons_by_user_id_api = async (id) => {
+export const get_sales_persons_by_user_id_api = async (salesPersonId) => {
   try {
-    const response = await api.get(`/salesperson/${id}`, {
+    const response = await api.get(`/salesperson/${salesPersonId}`, {
       withCredentials: true,
     });
     return response.data;
@@ -957,6 +957,19 @@ export const get_cashier_expense_outs_by_user_id_api = async (userId) => {
         withCredentials: true,
       }
     );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+// region apis
+export const get_regions_api = async () => {
+  try {
+    const response = await api.get("/region", {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);

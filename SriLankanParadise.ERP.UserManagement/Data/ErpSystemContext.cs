@@ -1134,14 +1134,15 @@ public partial class ErpSystemContext : DbContext
                 .HasDefaultValueSql("('SO'+CONVERT([nvarchar](20),NEXT VALUE FOR [dbo].[SalesOrderReferenceNoSeq]))");
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
 
-            entity.HasOne(d => d.Customer).WithMany(p => p.SalesOrders)
+            entity.HasOne(d => d.Customer)
+                .WithMany(p => p.SalesOrders)
                 .HasForeignKey(d => d.CustomerId)
                 .HasConstraintName("FK__SalesOrde__Custo__1F63A897");
 
             entity.HasOne(d => d.SalesPerson)
                 .WithMany(p => p.SalesOrders)
                 .HasForeignKey(d => d.SalesPersonId)
-                .OnDelete(DeleteBehavior.Restrict)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_SalesOrder_SalesPerson");
         });
 

@@ -853,6 +853,14 @@ const useSalesOrder = ({ onFormSubmit }) => {
       ...prev,
       customerId: selectedCustomer.customerId,
       selectedCustomer,
+      selectedSalesPerson:
+        selectedCustomer.salesPerson !== null
+          ? selectedCustomer.salesPerson
+          : null,
+      salesPersonId:
+        selectedCustomer.salesPerson !== null
+          ? selectedCustomer.salesPerson.salesPersonId
+          : null,
     }));
     setCustomerSearchTerm("");
     setValidFields({});

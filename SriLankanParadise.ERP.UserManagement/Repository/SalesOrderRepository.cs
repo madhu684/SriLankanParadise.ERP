@@ -34,11 +34,12 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var salesOrders = await _dbContext.SalesOrders
                     .Include(so => so.SalesOrderDetails)
-                    .ThenInclude(sod => sod.Batch)
+                        .ThenInclude(sod => sod.Batch)
                     .Include(so => so.SalesOrderDetails)
-                    .ThenInclude(ib => ib.ItemMaster)
-                    .ThenInclude(im => im.Unit)
+                        .ThenInclude(ib => ib.ItemMaster)
+                        .ThenInclude(im => im.Unit)
                     .Include(so => so.Customer)
+                    .Include(so => so.SalesPerson)
                     .ToListAsync();
 
 
@@ -64,6 +65,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         .ThenInclude(im => im.Unit)
                     .Include(so => so.Customer)
                         .ThenInclude(cu => cu.CustomerDeliveryAddress)
+                    .Include(so => so.SalesPerson)
                     .ToListAsync();
 
                 return salesOrders.Any() ? salesOrders : null;
@@ -87,6 +89,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         .ThenInclude(im => im.ItemMaster)
                         .ThenInclude(im => im.Unit)
                     .Include(so => so.Customer)
+                    .Include(so => so.SalesPerson)
                     .ToListAsync();
 
 
@@ -133,6 +136,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         .ThenInclude(im => im.ItemMaster)
                         .ThenInclude(im => im.Unit)
                     .Include(so => so.Customer)
+                    .Include(so => so.SalesPerson)
                     .FirstOrDefaultAsync();
 
                 return salesOrder;
@@ -174,6 +178,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         .ThenInclude(im => im.ItemMaster)
                         .ThenInclude(im => im.Unit)
                     .Include(so => so.Customer)
+                    .Include(so => so.SalesPerson)
                     .ToListAsync();
 
                 return salesOrderMasters.Any() ? salesOrderMasters : null;

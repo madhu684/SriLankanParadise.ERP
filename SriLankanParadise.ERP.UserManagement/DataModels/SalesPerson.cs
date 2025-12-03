@@ -13,5 +13,6 @@
         public int? CreatedBy { get; set; }
 
         public virtual ICollection<Customer>? Customers { get; set; } = new List<Customer>();
+        public virtual ICollection<SalesOrder>? SalesOrders { get; set; } = new List<SalesOrder>();
     }
 }
