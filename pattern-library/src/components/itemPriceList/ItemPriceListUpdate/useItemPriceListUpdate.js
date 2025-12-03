@@ -11,18 +11,18 @@ import {
 import toast from "react-hot-toast";
 
 const useItemPriceListUpdate = (itemPriceList, handleClose) => {
-  const STATUS_OPTIONS = useMemo(
-    () => [
-      { id: "1", label: "Active" },
-      { id: "0", label: "Inactive" },
-    ],
-    []
-  );
+  // const STATUS_OPTIONS = useMemo(
+  //   () => [
+  //     { id: "1", label: "Active" },
+  //     { id: "0", label: "Inactive" },
+  //   ],
+  //   []
+  // );
 
   const [formData, setFormData] = useState({
     listName: "",
     effectiveDate: new Date().toISOString().split("T")[0],
-    status: STATUS_OPTIONS[0].id,
+    status: 5,
     remark: "",
     itemDetails: [],
   });
@@ -55,7 +55,7 @@ const useItemPriceListUpdate = (itemPriceList, handleClose) => {
         effectiveDate: itemPriceList.effectiveDate
           ? new Date(itemPriceList.effectiveDate).toISOString().split("T")[0]
           : new Date().toISOString().split("T")[0],
-        status: itemPriceList.status?.toString() || STATUS_OPTIONS[0].id,
+        status: itemPriceList.status?.toString() || 5,
         remark: itemPriceList.remark || "",
         itemDetails: Array.isArray(itemPriceList.itemDetails)
           ? itemPriceList.itemDetails.map((detail) => ({
@@ -68,7 +68,7 @@ const useItemPriceListUpdate = (itemPriceList, handleClose) => {
           : [],
       });
     }
-  }, [itemPriceList, STATUS_OPTIONS]);
+  }, [itemPriceList]);
 
   // ============================================================================
   // DATA FETCHING - REACT QUERY
@@ -138,7 +138,7 @@ const useItemPriceListUpdate = (itemPriceList, handleClose) => {
       formData.effectiveDate
     );
 
-    const isStatusValid = validateField("status", "Status", formData.status);
+    // const isStatusValid = validateField("status", "Status", formData.status);
 
     let isItemPriceValid = true;
     formData.itemDetails.forEach((item, index) => {
@@ -157,7 +157,7 @@ const useItemPriceListUpdate = (itemPriceList, handleClose) => {
     return (
       isListNameValid &&
       isEffectiveDateValid &&
-      isStatusValid &&
+      // isStatusValid &&
       isItemPriceValid
     );
   }, [formData, validateField]);
@@ -276,14 +276,14 @@ const useItemPriceListUpdate = (itemPriceList, handleClose) => {
     setFormData({
       listName: "",
       effectiveDate: new Date().toISOString().split("T")[0],
-      status: STATUS_OPTIONS[0].id,
+      status: 5,
       remark: "",
       itemDetails: [],
     });
     setValidFields({});
     setValidationErrors({});
     setDeletedItemIds([]);
-  }, [STATUS_OPTIONS]);
+  }, []);
 
   // ============================================================================
   // Submission
@@ -307,7 +307,7 @@ const useItemPriceListUpdate = (itemPriceList, handleClose) => {
       // Update master data
       const itemPriceMasterData = {
         listName: formData.listName,
-        status: parseInt(formData.status),
+        status: 5,
         effectiveDate: formData.effectiveDate,
         companyId: itemPriceList.companyId,
         createdBy: itemPriceList.createdBy,
@@ -383,7 +383,9 @@ const useItemPriceListUpdate = (itemPriceList, handleClose) => {
 
       // Success
       await queryClient.invalidateQueries(["itemPriceList", companyId]);
-      toast.success("Item price list updated successfully");
+      toast.success(
+        "Item price list updated successfully. Approve before it can be used."
+      );
 
       setTimeout(() => {
         setIsSubmitting(false);
@@ -428,7 +430,7 @@ const useItemPriceListUpdate = (itemPriceList, handleClose) => {
 
   return {
     formData,
-    statusOptions: STATUS_OPTIONS,
+    // statusOptions: STATUS_OPTIONS,
     availableItems: filteredAvailableItems,
     isItemsLoading,
     allItemsLoading,
