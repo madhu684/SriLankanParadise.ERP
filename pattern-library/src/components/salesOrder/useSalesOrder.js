@@ -4,7 +4,7 @@ import {
   post_sales_order_api,
   post_sales_order_detail_api,
   get_company_api,
-  get_sales_persons_by_company_id_api,
+  get_sales_persons_api,
 } from "../../services/salesApi";
 import {
   get_charges_and_deductions_by_company_id_api,
@@ -137,9 +137,9 @@ const useSalesOrder = ({ onFormSubmit }) => {
     isError: isSalesPersonsError,
     error: salesPersonsError,
   } = useQuery({
-    queryKey: ["salesPersons", companyId],
+    queryKey: ["salesPersons"],
     queryFn: async () => {
-      const response = await get_sales_persons_by_company_id_api(companyId);
+      const response = await get_sales_persons_api();
       return response.data.result || [];
     },
     staleTime: 5 * 60 * 1000,
@@ -853,6 +853,14 @@ const useSalesOrder = ({ onFormSubmit }) => {
       ...prev,
       customerId: selectedCustomer.customerId,
       selectedCustomer,
+      selectedSalesPerson:
+        selectedCustomer.salesPerson !== null
+          ? selectedCustomer.salesPerson
+          : null,
+      salesPersonId:
+        selectedCustomer.salesPerson !== null
+          ? selectedCustomer.salesPerson.salesPersonId
+          : null,
     }));
     setCustomerSearchTerm("");
     setValidFields({});
@@ -862,7 +870,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
   const handleSelectSalesPerson = useCallback((selectedSalesPerson) => {
     setFormData((prev) => ({
       ...prev,
-      salesPersonId: selectedSalesPerson.userId,
+      salesPersonId: selectedSalesPerson.salesPersonId,
       selectedSalesPerson,
     }));
     setSalesPersonSearchTerm("");

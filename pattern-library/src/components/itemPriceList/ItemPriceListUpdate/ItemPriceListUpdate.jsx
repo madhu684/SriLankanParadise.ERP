@@ -232,7 +232,7 @@ const ItemPriceListUpdate = ({ itemPriceList, handleClose }) => {
                           </div>
                         )}
                       </div>
-                      <div className="mb-3">
+                      {/* <div className="mb-3">
                         <label className="form-label">
                           <i className="bi bi-distribute-vertical me-2"></i>
                           Status
@@ -257,6 +257,20 @@ const ItemPriceListUpdate = ({ itemPriceList, handleClose }) => {
                             {validationErrors.status}
                           </div>
                         )}
+                      </div> */}
+                      <div className="mb-3">
+                        <label className="form-label">
+                          <i className="bi bi-file-earmark me-2"></i>
+                          Remarks
+                        </label>
+                        <textarea
+                          className="form-control"
+                          rows="3"
+                          placeholder="Enter remarks"
+                          maxLength={150}
+                          value={formData.remark}
+                          onChange={handleRemarkChange}
+                        />
                       </div>
                     </div>
                     <div className="col-md-6">
@@ -281,20 +295,6 @@ const ItemPriceListUpdate = ({ itemPriceList, handleClose }) => {
                             {validationErrors.effectiveDate}
                           </div>
                         )}
-                      </div>
-                      <div className="mb-3">
-                        <label className="form-label">
-                          <i className="bi bi-file-earmark me-2"></i>
-                          Remarks
-                        </label>
-                        <textarea
-                          className="form-control"
-                          rows="3"
-                          placeholder="Enter remarks"
-                          maxLength={150}
-                          value={formData.remark}
-                          onChange={handleRemarkChange}
-                        />
                       </div>
                     </div>
                   </div>
@@ -450,7 +450,7 @@ const ItemPriceListUpdate = ({ itemPriceList, handleClose }) => {
                     <ButtonLoadingSpinner text="Updating..." />
                   ) : (
                     <>
-                      <i className="bi bi-check-circle me-2"></i>Update Order
+                      <i className="bi bi-check-circle me-2"></i>Update List
                     </>
                   )}
                 </button>

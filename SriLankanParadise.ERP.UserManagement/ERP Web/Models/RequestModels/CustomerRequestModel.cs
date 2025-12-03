@@ -21,5 +21,7 @@
         public string? BusinessRegistrationNo { get; set; }
         public bool IsVATRegistered { get; set; }
         public string? VATRegistrationNo { get; set; }
+        public int? SalesPersonId { get; set; }
+        public int? RegionId { get; set; }
     }
 }

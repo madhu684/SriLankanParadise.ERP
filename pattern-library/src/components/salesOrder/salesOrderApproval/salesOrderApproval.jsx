@@ -211,6 +211,16 @@ const SalesOrderApproval = ({
                           </span>
                         </div>
                       </div>
+                      <div className="col-12">
+                        <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
+                          <span className="text-muted">Sales PErson:</span>
+                          <span className="fw-semibold text-end text-break">
+                            {salesOrder.salesPerson.firstName +
+                              " " +
+                              salesOrder.salesPerson.lastName || "N/A"}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

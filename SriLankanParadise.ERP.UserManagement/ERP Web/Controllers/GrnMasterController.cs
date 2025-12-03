@@ -50,7 +50,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 _logger.LogInformation(LogMessages.GrnMasterCreated);
                 AddResponseMessage(Response, LogMessages.GrnMasterCreated, grnMasterDto, true, HttpStatusCode.Created);
             }
-            catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex, "UK_GrnMaster_CustDekNo") ||
+            catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex, "UK_SalesPerson_SalesPersonCode") ||
                                        IsUniqueConstraintViolation(ex, "IX_GrnMaster_CustDekNo_Unique"))
             {
                 _logger.LogWarning(ex, "Attempt to create duplicate CustDekNo: {CustDekNo}", grnMasterRequest.CustDekNo);

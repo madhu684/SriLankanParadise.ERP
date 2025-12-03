@@ -8,8 +8,11 @@
         public string? LastName { get; set; }
         public string? ContactNo { get; set; }
         public string? Email { get; set; }
-        public bool IsActive { get; set; }
-        public DateTime CreatedDate { get; set; }
+        public bool IsActive { get; set; } = true;
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
         public int? CreatedBy { get; set; }
+
+        public virtual ICollection<Customer>? Customers { get; set; } = new List<Customer>();
+        public virtual ICollection<SalesOrder>? SalesOrders { get; set; } = new List<SalesOrder>();
     }
 }

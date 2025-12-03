@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo, useState, useRef } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   get_item_price_list_by_company_id_api,
   update_item_price_master_status_api,
@@ -20,8 +20,7 @@ const useItemPriceListList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const companyIdRef = useRef(sessionStorage.getItem("companyId"));
-  const companyId = companyIdRef.current;
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
 
   const queryClient = useQueryClient();
 
@@ -35,7 +34,6 @@ const useItemPriceListList = () => {
       const response = await get_item_price_list_by_company_id_api(companyId);
       return response.data.result;
     },
-    staleTime: 5 * 60 * 1000,
   });
 
   const handleSearch = useCallback((e) => {
@@ -134,10 +132,10 @@ const useItemPriceListList = () => {
 
         if (response.status === 200) {
           setTimeout(() => {
-            queryClient.invalidateQueries(["itemPriceList", companyId]);
             setSubmissionStatus("successSubmitted");
             setSubmissionMessage("Item Price List updated successfully!");
           }, 3000);
+          queryClient.invalidateQueries(["itemPriceList", companyId]);
           setShowDeleteModal(false);
           setSelectedItemPriceList(null);
         } else {

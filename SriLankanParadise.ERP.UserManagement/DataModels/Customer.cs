@@ -15,7 +15,6 @@ public partial class Customer
     public int Status { get; set; }
     public string? BillingAddressLine1 { get; set; }
     public string? BillingAddressLine2 { get; set; }
-    public int? ReigonId { get; set; }
     public string LisenNumber { get; set; }
     public DateTime LisenStartDate { get; set; }
     public DateTime LisenEndDate { get; set; }
@@ -25,8 +24,12 @@ public partial class Customer
     public string? BusinessRegistrationNo { get; set; }
     public bool IsVATRegistered { get; set; }
     public string? VATRegistrationNo { get; set; }
+    public int? SalesPersonId { get; set; }
+    public int? RegionId { get; set; }
 
     public virtual Company Company { get; set; } = null!;
+    public virtual SalesPerson? SalesPerson { get; set; }
+    public virtual Region? Region { get; set; }
     public virtual ICollection<SalesOrder> SalesOrders { get; set; } = new List<SalesOrder>();
     public virtual ICollection<PackingSlip> PackingSlips { get; set; } = new List<PackingSlip>();
     public virtual ICollection<Lead> Leads { get; set; } = new List<Lead>();

@@ -1,75 +1,94 @@
-import React, { memo, useCallback } from "react";
+import React, { memo, useCallback, useContext } from "react";
 import useItemPriceListList from "./useItemPriceListList";
 import ErrorComponent from "../../errorComponent/errorComponent";
 import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import { FiEye, FiEdit } from "react-icons/fi";
-import { MdOutlineToggleOn, MdOutlineToggleOff } from "react-icons/md";
+import {
+  MdOutlineToggleOn,
+  MdOutlineToggleOff,
+  MdOutlineAssignmentLate,
+} from "react-icons/md";
 import { FaPlus } from "react-icons/fa";
 import ItemPriceList from "../ItemPriceList";
 import moment from "moment";
 import ItemPriceListUpdate from "../ItemPriceListUpdate/ItemPriceListUpdate";
 import DeleteConfirmationModal from "../../confirmationModals/deleteConfirmationModal/deleteConfirmationModal";
 import ItemPriceListView from "../ItemPriceListView/ItemPriceListView";
+import { UserContext } from "../../../context/userContext";
 
 // Memoized table row component
-const PriceListRow = memo(({ item, onEdit, onDelete, onView }) => {
-  const handleEdit = useCallback(() => {
-    onEdit(item);
-  }, [item, onEdit]);
+const PriceListRow = memo(
+  ({ item, onEdit, onDelete, onView, hasPermission }) => {
+    const handleEdit = useCallback(() => {
+      onEdit(item);
+    }, [item, onEdit]);
 
-  const handleDelete = useCallback(() => {
-    onDelete(item);
-  }, [item, onDelete]);
+    const handleDelete = useCallback(() => {
+      onDelete(item);
+    }, [item, onDelete]);
 
-  const handleView = useCallback(() => {
-    onView(item);
-  }, [item, onView]);
+    const handleView = useCallback(() => {
+      onView(item);
+    }, [item, onView]);
 
-  return (
-    <tr>
-      <td className="fw-medium">{item.listName}</td>
-      <td>{item.createdBy}</td>
-      <td>{moment(item.effectiveDate).format("Do MMM YYYY")}</td>
-      <td>
-        {item.status === 1 ? (
-          <span className="badge bg-success">Active</span>
-        ) : (
-          <span className="badge bg-danger">Inactive</span>
-        )}
-      </td>
-      <td className="text-center">
-        <button
-          className="btn btn-sm btn-outline-primary me-2"
-          onClick={handleView}
-        >
-          <FiEye className="me-1" /> View
-        </button>
-        <button
-          className="btn btn-sm btn-outline-warning me-2"
-          onClick={handleEdit}
-        >
-          <FiEdit className="me-1" />
-          Edit
-        </button>
-        {item.status === 1 ? (
+    return (
+      <tr>
+        <td className="fw-medium">{item.listName}</td>
+        <td>{item.createdBy}</td>
+        <td>{moment(item.effectiveDate).format("Do MMM YYYY")}</td>
+        <td>
+          {item.status === 5 ? (
+            <span className="badge bg-secondary">Pending</span>
+          ) : item.status === 1 ? (
+            <span className="badge bg-success">Active</span>
+          ) : (
+            <span className="badge bg-danger">Inactive</span>
+          )}
+        </td>
+        <td className="text-center">
           <button
-            className="btn btn-sm btn-outline-danger"
-            onClick={handleDelete}
+            className="btn btn-sm btn-outline-primary me-2"
+            onClick={handleView}
           >
-            <MdOutlineToggleOff className="me-1" /> Deactivate
+            <FiEye className="me-1" /> View
           </button>
-        ) : (
           <button
-            className="btn btn-sm btn-outline-success"
-            onClick={handleDelete}
+            className="btn btn-sm btn-outline-warning me-2"
+            onClick={handleEdit}
           >
-            <MdOutlineToggleOn className="me-1" /> Activate
+            <FiEdit className="me-1" />
+            Edit
           </button>
-        )}
-      </td>
-    </tr>
-  );
-});
+          {item.status === 5 ? (
+            <button
+              className="btn btn-sm btn-outline-secondary"
+              onClick={handleDelete}
+              disabled={!hasPermission("Approve Item Price List")}
+            >
+              <MdOutlineAssignmentLate className="me-1" /> Approve
+            </button>
+          ) : item.status === 1 ? (
+            <button
+              className="btn btn-sm btn-outline-danger"
+              onClick={handleDelete}
+              disabled={!hasPermission("Deactivate Item Price List")}
+            >
+              <MdOutlineToggleOff className="me-1" /> Deactivate
+            </button>
+          ) : (
+            <button
+              className="btn btn-sm btn-outline-success"
+              onClick={handleDelete}
+              disabled={!hasPermission("Activate Item Price List")}
+            >
+              <MdOutlineToggleOn className="me-1" /> Activate
+            </button>
+          )}
+        </td>
+      </tr>
+    );
+  }
+);
 
 PriceListRow.displayName = "PriceListRow";
 
@@ -104,6 +123,8 @@ const ItemPriceListList = () => {
     handleCloseDeleteModal,
     handleActivateDeactivate,
   } = useItemPriceListList();
+
+  const { hasPermission } = useContext(UserContext);
 
   if (isLoadingItemPriceList) return <LoadingSpinner />;
 
@@ -202,6 +223,7 @@ const ItemPriceListList = () => {
                     onEdit={handleOpenUpdateModal}
                     onDelete={handleOpenDeleteModal}
                     onView={handleOpenViewModal}
+                    hasPermission={hasPermission}
                   />
                 ))}
               </tbody>
@@ -215,7 +237,11 @@ const ItemPriceListList = () => {
               message={submissionMessage}
               loading={loading}
               type={
-                selectedItemPriceList?.status === 1 ? "Deactivate" : "Activate"
+                selectedItemPriceList?.status === 5
+                  ? "Approve"
+                  : selectedItemPriceList?.status === 1
+                  ? "Deactivate"
+                  : "Activate"
               }
             />
           </div>

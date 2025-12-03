@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   put_customer_api,
   post_customer_delivery_address_api,
   delete_customer_delivery_address_api,
   update_customer_delivery_address_api,
+  get_regions_api,
+  get_sales_persons_api,
 } from "../../../services/salesApi";
 
 const useCustomerUpdate = ({ customer, onFormSubmit }) => {
@@ -18,7 +20,6 @@ const useCustomerUpdate = ({ customer, onFormSubmit }) => {
     status: 1,
     billingAddress1: "",
     billingAddress2: "",
-    reigonId: 1,
     lisenNumber: "",
     lisenStartDate: "",
     lisenEndDate: "",
@@ -29,8 +30,12 @@ const useCustomerUpdate = ({ customer, onFormSubmit }) => {
     isVatRegistered: "0",
     vatRegistrationNo: null,
     deliveryAddresses: [{ addressLine1: "", addressLine2: "" }],
+    selectedSalesPerson: null,
+    salesPersonId: null,
+    regionId: null,
   });
   const [addressIdsToDelete, setAddressIdsToDelete] = useState([]);
+  const [salesPersonSearchTerm, setSalesPersonSearchTerm] = useState("");
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
   const [submissionStatus, setSubmissionStatus] = useState(null);
@@ -38,6 +43,28 @@ const useCustomerUpdate = ({ customer, onFormSubmit }) => {
   const [loading, setLoading] = useState(false);
 
   const queryClient = useQueryClient();
+
+  // Fetch data
+  const { data: regions = [], isLoading: isRegionsLoading } = useQuery({
+    queryKey: ["regions"],
+    queryFn: async () => {
+      const response = await get_regions_api();
+      return response.data.result || [];
+    },
+  });
+
+  const {
+    data: salesPersons,
+    isLoading: isSalesPersonsLoading,
+    isError: isSalesPersonsError,
+    error: salesPersonsError,
+  } = useQuery({
+    queryKey: ["salesPersons"],
+    queryFn: async () => {
+      const response = await get_sales_persons_api();
+      return response.data.result || [];
+    },
+  });
 
   useEffect(() => {
     if (customer) {
@@ -52,7 +79,6 @@ const useCustomerUpdate = ({ customer, onFormSubmit }) => {
         status: customer.status,
         billingAddress1: customer.billingAddressLine1,
         billingAddress2: customer.billingAddressLine2,
-        reigonId: customer.reigonId,
         lisenNumber: customer.lisenNumber,
         lisenStartDate: customer.lisenStartDate.split("T")[0],
         lisenEndDate: customer.lisenEndDate.split("T")[0],
@@ -66,8 +92,11 @@ const useCustomerUpdate = ({ customer, onFormSubmit }) => {
           id: address.id,
           addressLine1: address.addressLine1,
           addressLine2: address.addressLine2,
-          isNew: false, // Mark existing addresses
+          isNew: false,
         })),
+        selectedSalesPerson: customer?.salesPerson,
+        salesPersonId: customer?.salesPerson?.salesPersonId,
+        regionId: customer?.regionId,
       });
     }
   }, [customer]);
@@ -203,6 +232,18 @@ const useCustomerUpdate = ({ customer, onFormSubmit }) => {
       formData.isVatRegistered
     );
 
+    const isRegionValid = validateField(
+      "regionId",
+      "Region",
+      formData.regionId
+    );
+
+    const isSalesPErsonValid = validateField(
+      "salesPersonId",
+      "Sales Person",
+      formData.salesPersonId
+    );
+
     let areDeliveryAddressesValid = true;
     formData.deliveryAddresses.forEach((address, index) => {
       const isLine1Valid = validateField(
@@ -235,6 +276,8 @@ const useCustomerUpdate = ({ customer, onFormSubmit }) => {
       isLisenEndDateValid &&
       isLisenNumberValid &&
       isVatRegisteredValid &&
+      isRegionValid &&
+      isSalesPErsonValid &&
       areDeliveryAddressesValid
     );
   };
@@ -243,6 +286,25 @@ const useCustomerUpdate = ({ customer, onFormSubmit }) => {
     setFormData((prevData) => ({
       ...prevData,
       [field]: value,
+    }));
+  };
+
+  const handleSelectSalesPerson = (selectedSalesPerson) => {
+    setFormData((prev) => ({
+      ...prev,
+      salesPersonId: selectedSalesPerson.salesPersonId,
+      selectedSalesPerson,
+    }));
+    setSalesPersonSearchTerm("");
+    setValidFields({});
+    setValidationErrors({});
+  };
+
+  const handleResetSalesPerson = () => {
+    setFormData((prev) => ({
+      ...prev,
+      selectedSalesPerson: null,
+      salesPersonId: null,
     }));
   };
 
@@ -395,7 +457,6 @@ const useCustomerUpdate = ({ customer, onFormSubmit }) => {
           status: formData.status,
           billingAddressLine1: formData.billingAddress1,
           billingAddressLine2: formData.billingAddress2,
-          reigonId: 1,
           lisenNumber: formData.lisenNumber,
           lisenStartDate: formData.lisenStartDate,
           lisenEndDate: formData.lisenEndDate,
@@ -405,6 +466,8 @@ const useCustomerUpdate = ({ customer, onFormSubmit }) => {
           businessRegistrationNo: formData.businessRegNo,
           isVatRegistered: formData.isVatRegistered === "1" ? true : false,
           vatRegistrationNo: formData.vatRegistrationNo,
+          salesPersonId: formData.salesPersonId,
+          regionId: formData.regionId,
         };
 
         const response = await put_customer_api(
@@ -459,18 +522,24 @@ const useCustomerUpdate = ({ customer, onFormSubmit }) => {
   console.log("Address Ids To Delete: ", addressIdsToDelete);
 
   return {
+    regions,
+    salesPersons,
     formData,
     validFields,
     validationErrors,
     submissionStatus,
     alertRef,
     loading,
+    salesPersonSearchTerm,
+    setSalesPersonSearchTerm,
     validateForm,
     handleInputChange,
     handleFormSubmit,
     addDeliveryAddress,
     removeDeliveryAddress,
     handleDeliveryAddressChange,
+    handleSelectSalesPerson,
+    handleResetSalesPerson,
   };
 };
 

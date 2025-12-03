@@ -91,9 +91,14 @@ const ItemPriceListViewModal = memo(({ itemPriceList, show, handleClose }) => {
                   <i className="bi bi-toggle-on text-success me-3 mt-1 fs-5"></i>
                   <div>
                     <small className="text-muted d-block">Status</small>
-                    {itemPriceList.status === 1 ? (
-                      <span className="badge bg-success">
+                    {itemPriceList.status === 5 ? (
+                      <span className="badge bg-secondary">
                         <i className="bi bi-check-circle me-1"></i>
+                        Pending
+                      </span>
+                    ) : itemPriceList.status === 1 ? (
+                      <span className="badge bg-success">
+                        <i className="bi bi-x-circle me-1"></i>
                         Active
                       </span>
                     ) : (

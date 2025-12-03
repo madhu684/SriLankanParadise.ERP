@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { get_grn_masters_with_out_drafts_api } from "../../../services/purchaseApi";
 import { useQuery } from "@tanstack/react-query";
 
-const useGrnList = () => {
+const useGrnList = (userLocations) => {
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedRowData, setSelectedRowData] = useState([]);
   const [showApproveGrnModal, setShowApproveGrnModal] = useState(false);
@@ -16,17 +16,22 @@ const useGrnList = () => {
   const [GRNDetail, setGRNDetail] = useState("");
 
   const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
+  const locationId = userLocations?.[0]?.locationId;
 
   const {
     data: Grns = [],
     isLoading: isLoadingData,
     error,
   } = useQuery({
-    queryKey: ["grns", companyId],
+    queryKey: ["grns", companyId, locationId],
     queryFn: async () => {
       const GrnResponse = await get_grn_masters_with_out_drafts_api(companyId);
-      return GrnResponse.data.result || [];
+      const filteredGrns = GrnResponse.data.result.filter(
+        (grn) => grn.warehouseLocationId === locationId
+      );
+      return filteredGrns || [];
     },
+    enabled: !!companyId && !!locationId, // Only run query when both values exist
   });
 
   const handleShowApproveGrnModal = () => {

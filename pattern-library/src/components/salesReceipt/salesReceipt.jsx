@@ -431,7 +431,6 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                     <thead className="table-light">
                       <tr>
                         <th className="fw-semibold small">SI Ref No</th>
-                        <th className="fw-semibold small">Ref Number</th>
                         <th className="fw-semibold small">Invoice Total</th>
                         <th className="fw-semibold small">Amount Due</th>
                         <th className="fw-semibold small">Excess Amount</th>
@@ -454,7 +453,6 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                       {formData.selectedSalesInvoices.map((item, index) => (
                         <tr key={index}>
                           <td className="small">{item.referenceNo}</td>
-                          <td className="small">{item?.referenceNumber}</td>
                           <td className="small">
                             {formatTotals(item.totalAmount.toFixed(2))}
                           </td>
@@ -573,7 +571,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                     </tbody>
                     <tfoot className="table-light border-top">
                       <tr>
-                        <td colSpan="8" className="text-end fw-semibold">
+                        <td colSpan="7" className="text-end fw-semibold">
                           Total Excess Amount:
                         </td>
                         <td className="fw-bold">
@@ -583,7 +581,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                         </td>
                       </tr>
                       <tr>
-                        <td colSpan="8" className="text-end fw-semibold">
+                        <td colSpan="7" className="text-end fw-semibold">
                           Total Outstanding Amount:
                         </td>
                         <td className="fw-bold">
@@ -593,7 +591,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                         </td>
                       </tr>
                       <tr>
-                        <td colSpan="8" className="text-end fw-semibold">
+                        <td colSpan="7" className="text-end fw-semibold">
                           Total Amount Received:
                         </td>
                         <td className="fw-bold">
@@ -601,7 +599,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                         </td>
                       </tr>
                       <tr className="table-primary">
-                        <td colSpan="8" className="text-end fw-bold">
+                        <td colSpan="7" className="text-end fw-bold">
                           Total Amount Collected:
                         </td>
                         <td className="fw-bold fs-6">

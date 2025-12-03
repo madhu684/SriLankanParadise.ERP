@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import {
+  get_regions_api,
+  get_sales_persons_api,
   post_customer_api,
   post_customer_delivery_address_api,
 } from "../../services/salesApi";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const useCustomer = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -23,17 +25,41 @@ const useCustomer = ({ onFormSubmit }) => {
     businessRegNo: "",
     isVatRegistered: "0",
     vatRegistrationNo: null,
-    deliveryAddresses: [
-      { addressLine1: "", addressLine2: "" }, // Initialize with first delivery address
-    ],
+    deliveryAddresses: [{ addressLine1: "", addressLine2: "" }],
+    selectedSalesPerson: null,
+    salesPersonId: null,
+    regionId: null,
   });
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
   const [submissionStatus, setSubmissionStatus] = useState(null);
+  const [salesPersonSearchTerm, setSalesPersonSearchTerm] = useState("");
   const alertRef = useRef(null);
   const [loading, setLoading] = useState(false);
 
   const queryClient = useQueryClient();
+
+  // Fetch data
+  const { data: regions = [], isLoading: isRegionsLoading } = useQuery({
+    queryKey: ["regions"],
+    queryFn: async () => {
+      const response = await get_regions_api();
+      return response.data.result || [];
+    },
+  });
+
+  const {
+    data: salesPersons,
+    isLoading: isSalesPersonsLoading,
+    isError: isSalesPersonsError,
+    error: salesPersonsError,
+  } = useQuery({
+    queryKey: ["salesPersons"],
+    queryFn: async () => {
+      const response = await get_sales_persons_api();
+      return response.data.result || [];
+    },
+  });
 
   // Sync billing address with first delivery address
   useEffect(() => {
@@ -179,6 +205,18 @@ const useCustomer = ({ onFormSubmit }) => {
       formData.isVatRegistered
     );
 
+    const isRegionValid = validateField(
+      "regionId",
+      "Region",
+      formData.regionId
+    );
+
+    const isSalesPErsonValid = validateField(
+      "salesPersonId",
+      "Sales Person",
+      formData.salesPersonId
+    );
+
     // Validate delivery addresses (billing address is auto-synced from first delivery address)
     let areDeliveryAddressesValid = true;
     formData.deliveryAddresses.forEach((address, index) => {
@@ -212,6 +250,8 @@ const useCustomer = ({ onFormSubmit }) => {
       isLisenEndDateValid &&
       isLisenNumberValid &&
       isVatRegisteredValid &&
+      isRegionValid &&
+      isSalesPErsonValid &&
       areDeliveryAddressesValid
     );
   };
@@ -220,6 +260,25 @@ const useCustomer = ({ onFormSubmit }) => {
     setFormData((prevData) => ({
       ...prevData,
       [field]: value,
+    }));
+  };
+
+  const handleSelectSalesPerson = (selectedSalesPerson) => {
+    setFormData((prev) => ({
+      ...prev,
+      salesPersonId: selectedSalesPerson.salesPersonId,
+      selectedSalesPerson,
+    }));
+    setSalesPersonSearchTerm("");
+    setValidFields({});
+    setValidationErrors({});
+  };
+
+  const handleResetSalesPerson = () => {
+    setFormData((prev) => ({
+      ...prev,
+      selectedSalesPerson: null,
+      salesPersonId: null,
     }));
   };
 
@@ -312,7 +371,6 @@ const useCustomer = ({ onFormSubmit }) => {
           status: formData.status,
           billingAddressLine1: formData.billingAddress1,
           billingAddressLine2: formData.billingAddress2,
-          reigonId: 1,
           lisenNumber: formData.lisenNumber,
           lisenStartDate: formData.lisenStartDate.split("T")[0],
           lisenEndDate: formData.lisenEndDate.split("T")[0],
@@ -322,6 +380,8 @@ const useCustomer = ({ onFormSubmit }) => {
           businessRegistrationNo: formData.businessRegNo,
           isVatRegistered: formData.isVatRegistered === "1" ? true : false,
           vatRegistrationNo: formData.vatRegistrationNo,
+          salesPersonId: formData.salesPersonId,
+          regionId: formData.regionId,
         };
 
         const response = await post_customer_api(customerData);
@@ -373,18 +433,24 @@ const useCustomer = ({ onFormSubmit }) => {
   console.log("Form Data: ", formData);
 
   return {
+    regions,
+    salesPersons,
     formData,
     validFields,
     validationErrors,
     submissionStatus,
     alertRef,
     loading,
+    salesPersonSearchTerm,
+    setSalesPersonSearchTerm,
     validateForm,
     handleInputChange,
     handleFormSubmit,
     addDeliveryAddress,
     removeDeliveryAddress,
     handleDeliveryAddressChange,
+    handleSelectSalesPerson,
+    handleResetSalesPerson,
   };
 };
 

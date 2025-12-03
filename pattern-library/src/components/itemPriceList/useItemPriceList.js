@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo, useState, useRef } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   get_item_masters_by_company_id_api,
   get_item_masters_by_company_id_with_query_api,
@@ -9,18 +9,18 @@ import {
 import toast from "react-hot-toast";
 
 const useItemPriceList = (handleClose) => {
-  const STATUS_OPTIONS = useMemo(
-    () => [
-      { id: "1", label: "Active" },
-      { id: "0", label: "Inactive" },
-    ],
-    []
-  );
+  // const STATUS_OPTIONS = useMemo(
+  //   () => [
+  //     { id: "1", label: "Active" },
+  //     { id: "0", label: "Inactive" },
+  //   ],
+  //   []
+  // );
 
   const [formData, setFormData] = useState({
     listName: "",
     effectiveDate: new Date().toISOString().split("T")[0],
-    status: STATUS_OPTIONS[0].id,
+    status: 5,
     remark: "",
     itemDetails: [],
   });
@@ -30,13 +30,9 @@ const useItemPriceList = (handleClose) => {
   const [validationErrors, setValidationErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const companyIdRef = useRef(sessionStorage.getItem("companyId"));
-  const userIdRef = useRef(sessionStorage.getItem("userId"));
-  const usernameRef = useRef(sessionStorage.getItem("username"));
-
-  const companyId = companyIdRef.current;
-  const userId = userIdRef.current;
-  const username = usernameRef.current;
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
+  const userId = useMemo(() => sessionStorage.getItem("userId"), []);
+  const username = useMemo(() => sessionStorage.getItem("username"), []);
 
   const queryClient = useQueryClient();
 
@@ -108,7 +104,7 @@ const useItemPriceList = (handleClose) => {
       formData.effectiveDate
     );
 
-    const isStatusValid = validateField("status", "Status", formData.status);
+    // const isStatusValid = validateField("status", "Status", formData.status);
 
     let isItemPriceValid = true;
     formData.itemDetails.forEach((item, index) => {
@@ -127,7 +123,7 @@ const useItemPriceList = (handleClose) => {
     return (
       isListNameValid &&
       isEffectiveDateValid &&
-      isStatusValid &&
+      // isStatusValid &&
       isItemPriceValid
     );
   }, [formData, validateField]);
@@ -232,13 +228,13 @@ const useItemPriceList = (handleClose) => {
     setFormData({
       listName: "",
       effectiveDate: new Date().toISOString().split("T")[0],
-      status: STATUS_OPTIONS[0].id,
+      status: 5,
       remark: "",
       itemDetails: [],
     });
     setValidFields({});
     setValidationErrors({});
-  }, [STATUS_OPTIONS]);
+  }, []);
 
   // ============================================================================
   // Submission
@@ -261,7 +257,7 @@ const useItemPriceList = (handleClose) => {
 
       const itemPriceMasterData = {
         listName: formData.listName,
-        status: parseInt(formData.status),
+        status: 5,
         effectiveDate: formData.effectiveDate,
         companyId: companyId,
         createdBy: username,
@@ -294,7 +290,9 @@ const useItemPriceList = (handleClose) => {
 
         if (allSuccessful) {
           await queryClient.invalidateQueries(["itemPriceList", companyId]);
-          toast.success("Item price list created successfully");
+          toast.success(
+            "Item price list created successfully. Approve before it can be used."
+          );
 
           setTimeout(() => {
             setIsSubmitting(false);
@@ -343,7 +341,7 @@ const useItemPriceList = (handleClose) => {
 
   return {
     formData,
-    statusOptions: STATUS_OPTIONS,
+    // statusOptions: STATUS_OPTIONS,
     availableItems: filteredAvailableItems,
     isItemsLoading,
     allItemsLoading,

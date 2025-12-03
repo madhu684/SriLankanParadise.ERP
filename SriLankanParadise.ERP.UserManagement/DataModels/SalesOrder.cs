@@ -52,7 +52,7 @@ public partial class SalesOrder
 
     public virtual Customer? Customer { get; set; }
 
-    public virtual User SalesPerson { get; set; }
+    public virtual SalesPerson? SalesPerson { get; set; }
 
     public virtual ICollection<SalesInvoice> SalesInvoices { get; set; } = new List<SalesInvoice>();
 

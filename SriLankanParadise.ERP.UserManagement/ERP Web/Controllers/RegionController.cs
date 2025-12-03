@@ -28,7 +28,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             try
             {
                 var regions = await _regionService.GetAll();
+                if(!regions.Any())
+                {
+                    _logger.LogError("No regions found");
+                    AddResponseMessage(Response, "No regions found.", null, true, HttpStatusCode.NotFound);
+                }
+
                 var dtos = _mapper.Map<IEnumerable<RegionDto>>(regions);
+                _logger.LogInformation("Regions retrieved successfully");
                 AddResponseMessage(Response, "Regions retrieved successfully.", dtos, true, HttpStatusCode.OK);
             }
             catch (Exception ex)

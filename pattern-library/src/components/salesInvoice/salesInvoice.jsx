@@ -932,7 +932,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
             <i className="bi bi-exclamation-triangle-fill me-2"></i>
             <strong>Note:</strong> Line item charges have been modified from the
             original sales requisition. This invoice will be switched to
-            Approval status.
+            Approval status from FM.
           </div>
         )}
 
@@ -942,7 +942,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
             <i className="bi bi-exclamation-triangle-fill me-2"></i>
             <strong>Note:</strong> The customer credit limit have been modified
             from the original sales requisition. This invoice will be switched
-            to Approval status.
+            to Approval status from FM.
           </div>
         )}
         {salesOrder && creditMismatchDetails.hasDurationMismatch && (
@@ -950,7 +950,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
             <i className="bi bi-exclamation-triangle-fill me-2"></i>
             <strong>Note:</strong> The customer credit duration have been
             modified from the original sales requisition. This invoice will be
-            switched to Approval status.
+            switched to Approval status from FM.
           </div>
         )}
 

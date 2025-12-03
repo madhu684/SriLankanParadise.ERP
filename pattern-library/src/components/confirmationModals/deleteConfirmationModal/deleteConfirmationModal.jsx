@@ -47,7 +47,11 @@ const DeleteConfirmationModal = ({
         </Button>
         <Button
           variant={
-            type === "Delete" || type === "Deactivate" ? "danger" : "success"
+            type === "Delete" || type === "Approve"
+              ? "warning"
+              : type === "Deactivate"
+              ? "danger"
+              : "success"
           }
           onClick={handleConfirmDelete}
           disabled={loading}

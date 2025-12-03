@@ -44,6 +44,7 @@ import RolePermissionMapping from "./components/rolePermissionMapping/RolePermis
 import CustomerList from "./components/customer/customerList/customerList";
 import ItemPriceListList from "./components/itemPriceList/ItemPriceListList/ItemPriceListList";
 import ItemTypeList from "./components/itemType/itemTypeList/ItemTypeList";
+import SalesPersonList from "./components/salesPerson/salesPersonList/SalesPersonList";
 
 const Routers = () => {
   return (
@@ -103,6 +104,7 @@ const Routers = () => {
             <Route path="packing-slips" element={<PackingSlipList />} />
             <Route path="customers" element={<CustomerList />} />
             <Route path="price-lists" element={<ItemPriceListList />} />
+            <Route path="sales-persons" element={<SalesPersonList />} />
             <Route path="reports/orders" element={<SalesOrderReport />} />
           </Route>
 

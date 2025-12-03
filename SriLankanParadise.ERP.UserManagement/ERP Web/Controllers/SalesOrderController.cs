@@ -48,18 +48,18 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 var salesOrderDto = _mapper.Map<SalesOrderDto>(salesOrder);
 
                 // Send notification to all logged-in users
-                await _notificationService.SendNotificationToAllLoggedUsers(new NotificationDto
-                {
-                    Title = "New Sales Order Created",
-                    Type = "SalesOrder",
-                    Action = "Created",
-                    Data = new
-                    {
-                        salesOrderId = salesOrderDto.SalesOrderId,
-                        reference = salesOrderDto.ReferenceNo,
-                        amount = salesOrderDto.TotalAmount,
-                    }
-                });
+                //await _notificationService.SendNotificationToAllLoggedUsers(new NotificationDto
+                //{
+                //    Title = "New Sales Order Created",
+                //    Type = "SalesOrder",
+                //    Action = "Created",
+                //    Data = new
+                //    {
+                //        salesOrderId = salesOrderDto.SalesOrderId,
+                //        reference = salesOrderDto.ReferenceNo,
+                //        amount = salesOrderDto.TotalAmount,
+                //    }
+                //});
 
                 _logger.LogInformation(LogMessages.SalesOrderCreated);
                 AddResponseMessage(Response, LogMessages.SalesOrderCreated, salesOrderDto, true, HttpStatusCode.Created);
