@@ -1,11 +1,13 @@
-﻿using System.Net;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
+using System.Net;
 
 namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 {
@@ -42,6 +44,12 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                 var dto = _mapper.Map<SalesPersonDto>(salesPerson);
                 AddResponseMessage(Response, "SalesPerson created successfully.", dto, true, HttpStatusCode.Created);
+            }
+            catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex, "UK_SalesPerson_SalesPersonCode") ||
+                                       IsUniqueConstraintViolation(ex, "IX_SalesPerson_SalesPersonCode_Unique"))
+            {
+                _logger.LogWarning(ex, "Attempt to create duplicate Sales person code: {SalesPersonCode}", request.SalesPersonCode);
+                AddResponseMessage(Response, "Sales Person Code already exists. Please use a unique value.", null, false, HttpStatusCode.Conflict);
             }
             catch (Exception ex)
             {
@@ -193,6 +201,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
 
             return Response;
+        }
+
+        private bool IsUniqueConstraintViolation(DbUpdateException ex, string constraintName)
+        {
+            // SQL Server error number for unique violation is 2601 or 2627
+            return ex.InnerException is SqlException sqlEx &&
+                   (sqlEx.Number == 2601 || sqlEx.Number == 2627) &&
+                   sqlEx.Message.Contains(constraintName);
         }
     }
 }

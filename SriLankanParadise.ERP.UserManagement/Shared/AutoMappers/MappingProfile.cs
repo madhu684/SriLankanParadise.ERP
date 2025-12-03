@@ -176,6 +176,9 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<ItemPriceMaster, ItemPriceMasterDto>();
             CreateMap<ItemPriceDetailRequestModel, ItemPriceDetail>();
             CreateMap<ItemPriceDetail, ItemPriceDetailDto>();
+            CreateMap<Region, RegionDto>();
+            CreateMap<SalesPersonRequestModel, SalesPerson>();
+            CreateMap<SalesPerson, SalesPersonDto>();
             // Add more mapping configurations if needed
 
         }

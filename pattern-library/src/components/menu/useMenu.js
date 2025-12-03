@@ -37,6 +37,7 @@ const submoduleRouteMap = {
   "Packing Slip": "/main/sales/packing-slips",
   Customers: "/main/sales/customers",
   "Price List Maintenance": "/main/sales/price-lists",
+  "Sales Persons": "/main/sales/sales-persons",
   "Sales Order Report": "/main/sales/reports/orders",
 
   // Inventory Management

@@ -532,7 +532,12 @@ const SalesOrderUpdate = ({
                             {salesPersons
                               .filter(
                                 (salesPerson) =>
-                                  salesPerson.firstname
+                                  salesPerson.firstName
+                                    .toLowerCase()
+                                    .includes(
+                                      salesPersonSearchTerm.toLowerCase()
+                                    ) ||
+                                  salesPerson.lastName
                                     .toLowerCase()
                                     .includes(
                                       salesPersonSearchTerm.toLowerCase()
@@ -555,7 +560,8 @@ const SalesOrderUpdate = ({
                                     <i className="bi bi-person-lines-fill text-primary me-3 fs-5"></i>
                                     <div>
                                       <div className="fw-semibold">
-                                        {salesPerson?.firstname}
+                                        {salesPerson?.firstName}{" "}
+                                        {salesPerson?.lastName}
                                       </div>
                                       <small className="text-muted">
                                         {salesPerson?.contactNo}
@@ -566,7 +572,12 @@ const SalesOrderUpdate = ({
                               ))}
                             {salesPersons.filter(
                               (salesPerson) =>
-                                salesPerson.firstname
+                                salesPerson.firstName
+                                  .toLowerCase()
+                                  .includes(
+                                    salesPersonSearchTerm.toLowerCase()
+                                  ) ||
+                                salesPerson.lastName
                                   .toLowerCase()
                                   .includes(
                                     salesPersonSearchTerm.toLowerCase()
@@ -608,7 +619,8 @@ const SalesOrderUpdate = ({
                                 Sales Person Name
                               </small>
                               <span className="fw-semibold">
-                                {formData.selectedSalesPerson.firstname}
+                                {formData.selectedSalesPerson.firstName}{" "}
+                                {formData.selectedSalesPerson.lastName}
                               </span>
                             </div>
                           </div>

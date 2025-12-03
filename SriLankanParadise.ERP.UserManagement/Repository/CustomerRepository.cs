@@ -53,6 +53,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 return await _dbContext.Customers
                     .Include(c => c.CustomerDeliveryAddress)
+                    .Include(c => c.Region)
+                    .Include(c => c.SalesPerson)
                     .ToListAsync();
             }
             catch (Exception)
@@ -68,6 +70,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var customer = await _dbContext.Customers
                     .Include(c => c.CustomerDeliveryAddress)
+                    .Include(c => c.Region)
+                    .Include(c => c.SalesPerson)
                     .FirstOrDefaultAsync(c => c.CustomerId == id);
                 return customer != null ? customer : null!;
             }
@@ -83,6 +87,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var customers = await _dbContext.Customers
                     .Where(c => c.CompanyId == companyId)
+                    .Include(c => c.Region)
+                    .Include(c => c.SalesPerson)
                     .Include(c => c.CustomerDeliveryAddress)
                     .ToListAsync();
 
@@ -110,7 +116,10 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 // Apply search query
                 query = query.Where(cu => cu.CustomerName.Contains(searchQuery) || cu.CustomerCode.Contains(searchQuery));
 
-                query = query.Include(cu => cu.CustomerDeliveryAddress);
+                query = query
+                    .Include(c => c.Region)
+                    .Include(c => c.SalesPerson)
+                    .Include(cu => cu.CustomerDeliveryAddress);
 
                 var customers = await query.ToListAsync();
                 return customers.Any() ? customers : null!;

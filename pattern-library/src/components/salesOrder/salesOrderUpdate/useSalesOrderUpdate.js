@@ -6,8 +6,8 @@ import {
   post_sales_order_detail_api,
   delete_sales_order_detail_api,
   get_company_api,
-  get_sales_persons_by_company_id_api,
   get_sales_persons_by_user_id_api,
+  get_sales_persons_api,
 } from "../../../services/salesApi";
 import {
   put_item_batch_api,
@@ -144,7 +144,7 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
 
   const fetchSalesPersons = async () => {
     try {
-      const response = await get_sales_persons_by_company_id_api(companyId);
+      const response = await get_sales_persons_api();
       return response.data.result || [];
     } catch (error) {
       console.error("Error fetching sales persons:", error);

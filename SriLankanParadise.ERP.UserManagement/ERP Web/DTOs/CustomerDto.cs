@@ -24,7 +24,11 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
         public string? BusinessRegistrationNo { get; set; }
         public bool IsVATRegistered { get; set; }
         public string? VATRegistrationNo { get; set; }
+        public int? SalesPersonId { get; set; }
+        public int? RegionId { get; set; }
 
+        public virtual RegionDto? Region { get; set; }
+        public virtual SalesPersonDto? SalesPerson { get; set; }
         public virtual IEnumerable<CustomerDeliveryAddress>? CustomerDeliveryAddress { get; set; }
     }
 }

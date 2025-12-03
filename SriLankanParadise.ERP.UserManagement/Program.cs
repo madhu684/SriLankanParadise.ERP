@@ -219,6 +219,10 @@ builder.Services.AddScoped<IItemPriceMasterService, ItemPriceMasterService>();
 builder.Services.AddScoped<IItemPriceMasterRepository, ItemPriceMasterRepository>();
 builder.Services.AddScoped<IItemPriceDetailService, ItemPriceDetailService>();
 builder.Services.AddScoped<IItemPriceDetailRepository, ItemPriceDetailRepository>();
+builder.Services.AddScoped<IRegionService, RegionService>();
+builder.Services.AddScoped<IRegionRepository, RegionRepository>();
+builder.Services.AddScoped<ISalesPersonService, SalesPersonService>();
+builder.Services.AddScoped<ISalesPersonRepository, SalesPersonRepository>();
 
 // Register custom services
 builder.Services.AddSingleton<IUserConnectionService, UserConnectionService>();

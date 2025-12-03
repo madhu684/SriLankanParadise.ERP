@@ -430,6 +430,16 @@ public partial class ErpSystemContext : DbContext
                 .HasForeignKey(d => d.CompanyId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Customer_Company");
+
+            entity.HasOne(d => d.Region).WithMany(p => p.Customers)
+                .HasForeignKey(d => d.RegionId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Customer_Region");
+
+            entity.HasOne(d => d.SalesPerson).WithMany(p => p.Customers)
+                .HasForeignKey(d => d.SalesPersonId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Customer_SalesPerson");
         });
 
         modelBuilder.Entity<DailyStockBalance>(entity =>
@@ -1604,6 +1614,23 @@ public partial class ErpSystemContext : DbContext
                 .HasForeignKey(d => d.ItemMasterId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ItemPriceDetail_ItemMaster");
+        });
+
+        modelBuilder.Entity<SalesPerson>(entity =>
+        {
+            entity.ToTable("SalesPerson", "dbo");
+
+            entity.HasKey(e => e.SalesPersonId)
+              .HasName("PK_SalesPerson");
+
+            entity.HasIndex(e => e.SalesPersonCode)
+              .IsUnique()
+              .HasDatabaseName("IX_SalesPerson_SalesPersonCode_Unique");
+        });
+
+        modelBuilder.Entity<Region>(entity =>
+        {
+            entity.ToTable("Region", "dbo");
         });
 
 

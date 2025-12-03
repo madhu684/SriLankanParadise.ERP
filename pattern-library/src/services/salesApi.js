@@ -157,14 +157,11 @@ export const update_outstanding_balance_api = async (
 };
 
 //sales person apis
-export const get_sales_persons_by_company_id_api = async (companyId) => {
+export const get_sales_persons_api = async () => {
   try {
-    const response = await api.get(
-      `/user/GetAllUsersByCompanyId/${companyId}`,
-      {
-        withCredentials: true,
-      }
-    );
+    const response = await api.get("/salesperson", {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);
@@ -172,9 +169,45 @@ export const get_sales_persons_by_company_id_api = async (companyId) => {
   }
 };
 
-export const get_sales_persons_by_user_id_api = async (userId) => {
+export const get_sales_persons_by_user_id_api = async (id) => {
   try {
-    const response = await api.get(`/user/GetUserByUserId/${userId}`, {
+    const response = await api.get(`/salesperson/${id}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const post_sales_person_api = async (formData) => {
+  try {
+    const response = await api.post("/salesperson", formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const put_sales_person_api = async (id, formData) => {
+  try {
+    const response = await api.put(`/salesperson/${id}`, formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const patch_sales_person_api = async (id, formData) => {
+  try {
+    const response = await api.patch(`/salesperson/${id}`, formData, {
       withCredentials: true,
     });
     return response.data;
