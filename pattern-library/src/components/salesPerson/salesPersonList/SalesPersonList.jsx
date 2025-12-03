@@ -45,7 +45,7 @@ const SalesPersonList = () => {
     return <ErrorComponent error={error || "Error fetching data"} />;
   }
 
-  if (isLoadingSalesPersons || (salesPerson && salesPerson.length === 0)) {
+  if (isLoadingSalesPersons) {
     return <LoadingSpinner />;
   }
 
