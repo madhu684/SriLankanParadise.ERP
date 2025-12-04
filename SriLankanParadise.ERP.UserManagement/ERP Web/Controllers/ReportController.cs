@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SriLankanParadise.ERP.UserManagement.Business_Service;
@@ -20,6 +21,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         private readonly IDailyLocationInventoryService _dailyLocationInventoryService;
         private readonly IItemMasterService _itemMasterService;
         private readonly ILocationService _locationService;
+        private readonly ISalesInvoiceService _salesInvoiceService;
+        private readonly IMapper _mapper;
         private readonly ILogger<ReportController> _logger;
 
         public ReportController
@@ -29,6 +32,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 IDailyLocationInventoryService dailyLocationInventoryService,
                 IItemMasterService itemMasterService,
                 ILocationService locationService,
+                ISalesInvoiceService salesInvoiceService,
+                IMapper mapper,
                 ILogger<ReportController> logger
             )
         {
@@ -37,6 +42,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             _dailyLocationInventoryService = dailyLocationInventoryService;
             _itemMasterService = itemMasterService;
             _locationService = locationService;
+            _salesInvoiceService = salesInvoiceService;
+            _mapper = mapper;
             _logger = logger;
         }
 
@@ -170,6 +177,31 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 }
 
 
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("GetSalesReportByDateRange/{fromDate}/{toDate}")]
+        public async Task<ApiResponseModel> GetSalesReportByDateRange(DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                var salesInvoices = await _salesInvoiceService.GetSalesInvoiceByDateRange(fromDate, toDate);
+                if (salesInvoices != null)
+                {
+                    var salesInvoiceDtos = _mapper.Map<IEnumerable<SalesInvoiceDto>>(salesInvoices);
+                    AddResponseMessage(Response, LogMessages.SalesInvoicesRetrieved, salesInvoiceDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.SalesInvoicesNotFound);
+                    AddResponseMessage(Response, LogMessages.SalesInvoicesNotFound, null, true, HttpStatusCode.NotFound);
+                }
             }
             catch (Exception ex)
             {

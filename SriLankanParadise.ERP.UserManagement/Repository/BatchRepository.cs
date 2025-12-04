@@ -47,6 +47,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var batch =  await _dbContext.Batches
                     .Where(b => b.BatchId == batchId)
+                    .Include(b => b.ItemBatches)
                     .FirstOrDefaultAsync();
 
                 return batch;

@@ -30,7 +30,11 @@ const useRolePermissionMapping = () => {
       const response = await company_modules_api(
         sessionStorage.getItem("companyId")
       );
-      return response.data.result || [];
+      const filteredModules =
+        response.data.result.filter(
+          (module) => module?.subscriptionModule?.module?.status === true
+        ) || [];
+      return filteredModules || [];
     },
   });
 
@@ -54,7 +58,11 @@ const useRolePermissionMapping = () => {
       const response = await get_permissions_by_company_id_api(
         sessionStorage.getItem("companyId")
       );
-      return response.data.result || [];
+      const filteredPermissions =
+        response.data.result.filter(
+          (permission) => permission.permissionStatus === true
+        ) || [];
+      return filteredPermissions || [];
     },
   });
 
@@ -106,12 +114,12 @@ const useRolePermissionMapping = () => {
       setMappingsLoading(true);
       setMappingsError(null);
       const response = await role_permissions_api([roleId]);
-      const roleMappingsData = (response.data.result[roleId] || []).map(
-        (item) => ({
+      const roleMappingsData = (response.data.result[roleId] || [])
+        // .filter((r) => r?.permission?.permissionStatus === true)
+        .map((item) => ({
           permissionId: item.permission.permissionId,
           permissionName: item.permission.permissionName,
-        })
-      );
+        }));
       setRoleMappings(roleMappingsData);
     } catch (error) {
       setMappingsError("Failed to load role mappings.");

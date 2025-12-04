@@ -22,5 +22,7 @@
         public string? BatchNo { get; set; }
         public int? ReOrderLevel { get; internal set; }
         public int? MaxStockLevel { get; internal set; }
+
+        public string? CustDekNo { get; set; }
     }
 }

@@ -94,7 +94,7 @@ const TinList = () => {
     );
   }
 
-  if (Tins?.length === 0) {
+  if (Tins?.length === 0 && nonUserTrns?.length === 0) {
     return (
       <div className="container-fluid px-4 py-4">
         <div className="d-flex justify-content-between align-items-center mb-4">

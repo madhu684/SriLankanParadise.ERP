@@ -66,6 +66,41 @@ const useCustomerUpdate = ({ customer, onFormSubmit }) => {
     },
   });
 
+  // useEffect(() => {
+  //   if (customer) {
+  //     setFormData({
+  //       customerId: parseInt(customer.customerId),
+  //       customerName: customer.customerName,
+  //       customerCode: customer.customerCode,
+  //       contactPerson: customer.contactPerson,
+  //       phone: customer.phone,
+  //       email: customer.email,
+  //       companyId: customer.companyId,
+  //       status: customer.status,
+  //       billingAddress1: customer.billingAddressLine1,
+  //       billingAddress2: customer.billingAddressLine2,
+  //       lisenNumber: customer.lisenNumber,
+  //       lisenStartDate: customer.lisenStartDate.split("T")[0],
+  //       lisenEndDate: customer.lisenEndDate.split("T")[0],
+  //       creditLimit: customer.creditLimit,
+  //       creditDuration: customer.creditDuration,
+  //       outstandingBalance: customer.outstandingAmount,
+  //       businessRegNo: customer.businessRegistrationNo,
+  //       isVatRegistered: customer.isVATRegistered === true ? "1" : "0",
+  //       vatRegistrationNo: customer.vatRegistrationNo || null,
+  //       deliveryAddresses: customer.customerDeliveryAddress.map((address) => ({
+  //         id: address.id,
+  //         addressLine1: address.addressLine1,
+  //         addressLine2: address.addressLine2,
+  //         isNew: false,
+  //       })),
+  //       selectedSalesPerson: customer?.salesPerson,
+  //       salesPersonId: customer?.salesPerson?.salesPersonId,
+  //       regionId: customer?.regionId,
+  //     });
+  //   }
+  // }, [customer]);
+
   useEffect(() => {
     if (customer) {
       setFormData({
@@ -88,12 +123,34 @@ const useCustomerUpdate = ({ customer, onFormSubmit }) => {
         businessRegNo: customer.businessRegistrationNo,
         isVatRegistered: customer.isVATRegistered === true ? "1" : "0",
         vatRegistrationNo: customer.vatRegistrationNo || null,
-        deliveryAddresses: customer.customerDeliveryAddress.map((address) => ({
-          id: address.id,
-          addressLine1: address.addressLine1,
-          addressLine2: address.addressLine2,
-          isNew: false,
-        })),
+        deliveryAddresses: [
+          // Always add primary billing address as first item
+          {
+            id: customer.customerDeliveryAddress.find(
+              (addr) =>
+                addr.addressLine1 === customer.billingAddressLine1 &&
+                addr.addressLine2 === customer.billingAddressLine2
+            )?.id,
+            addressLine1: customer.billingAddressLine1,
+            addressLine2: customer.billingAddressLine2,
+            isNew: false,
+          },
+          // Add remaining delivery addresses (excluding the billing address)
+          ...customer.customerDeliveryAddress
+            .filter(
+              (address) =>
+                !(
+                  address.addressLine1 === customer.billingAddressLine1 &&
+                  address.addressLine2 === customer.billingAddressLine2
+                )
+            )
+            .map((address) => ({
+              id: address.id,
+              addressLine1: address.addressLine1,
+              addressLine2: address.addressLine2,
+              isNew: false,
+            })),
+        ],
         selectedSalesPerson: customer?.salesPerson,
         salesPersonId: customer?.salesPerson?.salesPersonId,
         regionId: customer?.regionId,

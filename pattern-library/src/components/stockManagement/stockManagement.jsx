@@ -137,7 +137,7 @@ const StockManagement = () => {
                 <th>Item Name</th>
                 <th>UOM</th>
                 <th>Stock in Hand</th>
-                <th>Batch Number</th>
+                <th>Cust Dek Number</th>
                 {/* <th>Adjusted Quantity</th> */}
               </tr>
             </thead>
@@ -158,7 +158,7 @@ const StockManagement = () => {
                     <td>{item.itemName}</td>
                     <td>{item.unitName}</td>
                     <td>{item.stockInHand}</td>
-                    <td>{item.batchNo}</td>
+                    <td>{item.custDekNo}</td>
                     {/* <td>
                       <input
                         type="number"
@@ -199,24 +199,19 @@ const StockManagement = () => {
             paginate={paginate}
             currentPage={currentPage}
           />
-          <div className="d-flex">
-            <button
-              className="btn btn-danger me-2"
-              //onClick={handleClear}
-            >
+          {/* <div className="d-flex">
+            <button className="btn btn-danger me-2" onClick={handleClear}>
               Clear
             </button>
             <button
               className="btn btn-primary me-2"
-              //onClick={handleSubmit}
-              // disable={
-              //   isSubmitting
-              // }
-              //loading={isSubmitting}
+              onClick={handleSubmit}
+              disable={isSubmitting}
+              loading={isSubmitting}
             >
               Submit
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
       {/* )} */}

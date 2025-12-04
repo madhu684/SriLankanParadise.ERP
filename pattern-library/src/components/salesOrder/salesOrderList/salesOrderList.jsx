@@ -193,6 +193,13 @@ const SalesOrderList = () => {
           </span>
         </div>
       </div>
+      <div className="mt-3">
+        <p>
+          <span className="badge bg-warning text-dark me-2">Yellow</span>
+          {" - "}
+          Line item charges added or changed Sales Requisitions
+        </p>
+      </div>
       <div className="table-responsive">
         <table className="table mt-2">
           <thead>
@@ -214,7 +221,10 @@ const SalesOrderList = () => {
                 currentPage * itemsPerPage
               )
               .map((so) => (
-                <tr key={so.salesOrderId}>
+                <tr
+                  key={so.salesOrderId}
+                  className={so.isLineChargesChanged ? "table-warning" : ""}
+                >
                   <td>
                     <input
                       type="checkbox"

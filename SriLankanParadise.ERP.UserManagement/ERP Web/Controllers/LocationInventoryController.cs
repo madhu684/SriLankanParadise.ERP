@@ -200,7 +200,9 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                         BatchNo = batch?.BatchRef ?? locationInventory.BatchNo ?? "N/A",
                         StockInHand = locationInventory.StockInHand,
                         ReOrderLevel = locationInventory.ReOrderLevel,
-                        MaxStockLevel = locationInventory.MaxStockLevel
+                        MaxStockLevel = locationInventory.MaxStockLevel,
+                        CustDekNo = batch?.ItemBatches
+                            .FirstOrDefault(ib => ib.ItemMasterId == locationInventory.ItemMasterId && ib.BatchId == locationInventory.BatchId)?.CustDekNo ?? "N/A"
                     });
                 }
 
