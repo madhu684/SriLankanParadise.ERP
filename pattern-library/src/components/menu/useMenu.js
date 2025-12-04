@@ -39,6 +39,7 @@ const submoduleRouteMap = {
   "Price List Maintenance": "/main/sales/price-lists",
   "Sales Persons": "/main/sales/sales-persons",
   "Sales Order Report": "/main/sales/reports/orders",
+  "Sales Report": "/main/sales/reports/sales-report",
 
   // Inventory Management
   "Item Masters": "/main/inventory/items",
@@ -141,27 +142,40 @@ const useMenu = (props = {}) => {
     const fetchUserModules = async () => {
       try {
         const { data } = await user_modules_api(userId);
-        const result = data.result || [];
+        let result = data.result || [];
+
+        // Filter only active modules (status === true)
+        result = result.filter((module) => module.status === true);
 
         const modulesWithSubmodules = await Promise.all(
           result.map(async (module) => {
             const subRes = await submodules_api(module.moduleId);
-            const subResult = subRes.data.result || [];
+            let subResult = subRes.data.result || [];
+
+            // Filter only active submodules
+            subResult = subResult.filter((sub) => sub.status === true);
 
             const submodules = subResult.map((s) => ({
               id: s.subModuleId,
               name: s.subModuleName,
+              status: s.status,
             }));
 
             return {
               id: module.moduleId,
               name: module.moduleName,
+              status: module.status,
               submodules,
             };
           })
         );
 
-        setModules(modulesWithSubmodules);
+        // Filter only include modules that have at least one active submodule (optional)
+        const activeModulesWithSubs = modulesWithSubmodules.filter(
+          (module) => module.submodules.length > 0
+        );
+
+        setModules(activeModulesWithSubs);
       } catch (err) {
         console.error("Error fetching modules:", err);
         toast.error("Failed to load menu.");
@@ -201,6 +215,16 @@ const useMenu = (props = {}) => {
     const route = submoduleRouteMap[submoduleName];
 
     if (route) {
+      const module = modules.find((m) => m.id === moduleId);
+      const submodule = module?.submodules.find(
+        (s) => s.name === submoduleName
+      );
+
+      if (submodule && submodule.status === false) {
+        toast.error("Access denied: This module is inactive.");
+        return;
+      }
+
       navigate(route);
       setActiveSubmodule(submoduleName);
 

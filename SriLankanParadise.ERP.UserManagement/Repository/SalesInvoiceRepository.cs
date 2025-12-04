@@ -295,5 +295,31 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task<IEnumerable<SalesInvoice>> GetSalesInvoiceByDateRange(DateTime fromDate, DateTime toDate)
+        {
+            try
+            {
+                var salesInvoices = await _dbContext.SalesInvoices
+                     .Where(x => EF.Functions.DateDiffDay(fromDate, x.InvoiceDate) >= 0
+                                    && EF.Functions.DateDiffDay(toDate, x.InvoiceDate) <= 0)
+                    .Include(si => si.Customer)
+                        .ThenInclude(c => c.SalesPerson)
+                    .Include(si => si.Customer)
+                        .ThenInclude(c => c.Region)
+                    .Include(si => si.CustomerDeliveryAddress)
+                    .Include(si => si.SalesInvoiceDetails)
+                        .ThenInclude(ib => ib.ItemMaster)
+                        .ThenInclude(im => im.Unit)
+                    .OrderBy(si => si.ApprovedDate)
+                    .ToListAsync();
+
+                return salesInvoices.Any() ? salesInvoices : null!;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

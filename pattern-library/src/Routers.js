@@ -45,6 +45,7 @@ import CustomerList from "./components/customer/customerList/customerList";
 import ItemPriceListList from "./components/itemPriceList/ItemPriceListList/ItemPriceListList";
 import ItemTypeList from "./components/itemType/itemTypeList/ItemTypeList";
 import SalesPersonList from "./components/salesPerson/salesPersonList/SalesPersonList";
+import SalesReport from "./components/salesReport/SalesReport.jsx";
 
 const Routers = () => {
   return (
@@ -106,6 +107,7 @@ const Routers = () => {
             <Route path="price-lists" element={<ItemPriceListList />} />
             <Route path="sales-persons" element={<SalesPersonList />} />
             <Route path="reports/orders" element={<SalesOrderReport />} />
+            <Route path="reports/sales-report" element={<SalesReport />} />
           </Route>
 
           {/* Inventory Management Module */}

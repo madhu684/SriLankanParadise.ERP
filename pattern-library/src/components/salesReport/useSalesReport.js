@@ -1,0 +1,181 @@
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import * as XLSX from "xlsx";
+import { get_sales_invoice_by_date_range_api } from "../../services/reportApi";
+
+const useSalesReport = () => {
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+
+  const {
+    data: reportData = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["salesReportByDateRange", fromDate, toDate],
+    queryFn: async () => {
+      const response = await get_sales_invoice_by_date_range_api(
+        fromDate,
+        toDate
+      );
+      return response.data.result || [];
+    },
+    enabled: !!fromDate && !!toDate,
+  });
+
+  const exportToExcel = () => {
+    if (!reportData || reportData.length === 0) {
+      alert("No data to export");
+      return;
+    }
+
+    // Prepare summary data
+    const summaryData = [
+      ["Sales Report"],
+      [`Date Range: ${fromDate} to ${toDate}`],
+      [],
+      ["Summary"],
+      ["Total Invoices", reportData.length],
+      [
+        "Total Amount",
+        reportData.reduce((sum, inv) => sum + inv.totalAmount, 0),
+      ],
+      [
+        "Total Amount Due",
+        reportData.reduce((sum, inv) => sum + inv.amountDue, 0),
+      ],
+      [
+        "Total Litres",
+        reportData.reduce((sum, inv) => sum + inv.totalLitres, 0),
+      ],
+      [],
+    ];
+
+    // Prepare main invoice data
+    const invoiceHeaders = [
+      "Reference No",
+      "Invoiced Date",
+      "Due Date",
+      "Customer Code",
+      "Customer Name",
+      "Contact Person",
+      "Phone",
+      "Sales Person",
+      "Region",
+      "Total Amount",
+      "Amount Due",
+      "Total Litres",
+      "Status",
+      "Remarks",
+    ];
+
+    const invoiceRows = reportData.map((invoice) => {
+      const statusMap = { 1: "Pending", 2: "Approved", 3: "Cancelled" };
+      return [
+        invoice.referenceNo,
+        new Date(invoice.invoiceDate).toLocaleDateString(),
+        new Date(invoice.dueDate).toLocaleDateString(),
+        invoice.customer.customerCode,
+        invoice.customer.customerName,
+        invoice.customer.contactPerson,
+        invoice.customer.phone,
+        `${invoice.customer.salesPerson.firstName} ${invoice.customer.salesPerson.lastName}`,
+        invoice.customer.region.name,
+        invoice.totalAmount,
+        invoice.amountDue,
+        invoice.totalLitres,
+        statusMap[invoice.status] || "Unknown",
+        invoice.remarks || "",
+      ];
+    });
+
+    // Prepare detailed line items data
+    const lineItemsData = [[], ["Invoice Line Items"], []];
+    const lineItemHeaders = [
+      "Invoice Reference",
+      "Item Code",
+      "Item Name",
+      "Quantity",
+      "Unit Price",
+      "Total Price",
+    ];
+    lineItemsData.push(lineItemHeaders);
+
+    reportData.forEach((invoice) => {
+      invoice.salesInvoiceDetails.forEach((detail) => {
+        lineItemsData.push([
+          invoice.referenceNo,
+          detail.itemMaster.itemCode,
+          detail.itemMaster.itemName,
+          detail.quantity,
+          detail.unitPrice,
+          detail.totalPrice,
+        ]);
+      });
+    });
+
+    // Create workbook and worksheets
+    const wb = XLSX.utils.book_new();
+
+    // Summary and Invoice Data Sheet
+    const ws1Data = [
+      ...summaryData,
+      ["Invoices"],
+      invoiceHeaders,
+      ...invoiceRows,
+    ];
+    const ws1 = XLSX.utils.aoa_to_sheet(ws1Data);
+
+    // Set column widths
+    ws1["!cols"] = [
+      { wch: 15 }, // Invoice #
+      { wch: 12 }, // Date
+      { wch: 12 }, // Due Date
+      { wch: 15 }, // Customer Code
+      { wch: 25 }, // Customer Name
+      { wch: 20 }, // Contact Person
+      { wch: 15 }, // Phone
+      { wch: 20 }, // Sales Person
+      { wch: 18 }, // Region
+      { wch: 15 }, // Total Amount
+      { wch: 15 }, // Amount Due
+      { wch: 12 }, // Total Litres
+      { wch: 12 }, // Status
+      { wch: 20 }, // Remarks
+    ];
+
+    // Line Items Sheet
+    const ws2 = XLSX.utils.aoa_to_sheet(lineItemsData);
+    ws2["!cols"] = [
+      { wch: 15 }, // Invoice #
+      { wch: 15 }, // Item Code
+      { wch: 35 }, // Item Name
+      { wch: 10 }, // Quantity
+      { wch: 15 }, // Unit Price
+      { wch: 15 }, // Total Price
+    ];
+
+    // Add worksheets to workbook
+    XLSX.utils.book_append_sheet(wb, ws1, "Sales Report");
+    XLSX.utils.book_append_sheet(wb, ws2, "Line Items");
+
+    // Generate filename with date range
+    const filename = `Sales_Report_${fromDate}_to_${toDate}.xlsx`;
+
+    // Save file
+    XLSX.writeFile(wb, filename);
+  };
+
+  return {
+    fromDate,
+    toDate,
+    reportData,
+    isLoading,
+    error,
+    setFromDate,
+    setToDate,
+    exportToExcel,
+  };
+};
+
+export default useSalesReport;

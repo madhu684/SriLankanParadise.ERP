@@ -13,6 +13,19 @@ import {
 import { get_company_locations_api } from "../../services/purchaseApi.js";
 
 class Registration extends React.Component {
+  /*************  ✨ Windsurf Command ⭐  *************/
+  /**
+   * Constructor for the Registration component.
+   *
+   * Initializes the state with empty values for all fields,
+   * except for companyId which defaults to the value stored in sessionStorage.
+   *
+   * Also initializes several boolean flags to false, and an
+   * empty object for validation errors.
+   *
+   * @param {Object} props - The props passed to the component.
+   */
+  /*******  59c499e1-3fcd-40ce-a767-131b51f272c8  *******/
   constructor(props) {
     super(props);
     this.state = {
@@ -564,7 +577,10 @@ class Registration extends React.Component {
     const companyId = this.state.formData.basic.companyId;
     try {
       const modulesData = await company_modules_api(companyId);
-      const modulesArray = modulesData.data.result || [];
+      const modulesArray =
+        modulesData.data.result.filter(
+          (m) => m?.subscriptionModule?.module?.status === true
+        ) || [];
 
       this.setState((prevState) => ({
         formData: {
@@ -708,12 +724,15 @@ class Registration extends React.Component {
                           ...assignedRole,
                           permissions: {
                             assignedPermissions: [],
-                            availablePermissions: rolePermissions.map(
-                              (permission) => ({
+                            availablePermissions: rolePermissions
+                              .filter(
+                                (rp) =>
+                                  rp?.permission?.permissionStatus === true
+                              )
+                              .map((permission) => ({
                                 id: permission.permission.permissionId,
                                 name: permission.permission.permissionName,
-                              })
-                            ),
+                              })),
                           },
                         };
                       }

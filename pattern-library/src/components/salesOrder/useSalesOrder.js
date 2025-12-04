@@ -890,7 +890,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
       // Check if item price list exists for the selected location
       if (!itemPriceListByLocation || itemPriceListByLocation.length === 0) {
         toast.error(
-          "No active item price list found for the selected location. Please activate or create an item price list for this location."
+          "Please check the price list. If there is no active price list, or if item prices have been modified, please obtain an active or approved price list before adding items."
         );
         setSearchTerm("");
         return;
@@ -902,7 +902,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
       // Check if unit price is found in price list
       if (unitPrice === 0) {
         toast.error(
-          `No price found for "${item.itemName}" in the selected location's price list. Please add this item to the location's price list.`
+          `No price found for "${item.itemName}" in the selected location's price list. Please add a price for this item to the location's price list.`
         );
         setSearchTerm("");
         return;

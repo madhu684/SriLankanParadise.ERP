@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import useSystemPrivilegeList from "./useSystemPrivilageList";
 import SystemPrivilege from "../systemPrivilage";
@@ -7,6 +7,7 @@ import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
 import DeleteConfirmationModal from "../../confirmationModals/deleteConfirmationModal/deleteConfirmationModal";
 import { FaSearch } from "react-icons/fa";
+import { UserContext } from "../../../context/userContext";
 import Pagination from "../../common/Pagination/Pagination";
 
 const SystemPrivilegeList = () => {
@@ -43,6 +44,8 @@ const SystemPrivilegeList = () => {
   } = useSystemPrivilegeList();
 
   const handleSearch = (event) => setSearchTerm(event.target.value);
+
+  const { hasPermission } = useContext(UserContext);
 
   useEffect(() => {
     if (submissionStatus) {
@@ -180,6 +183,7 @@ const SystemPrivilegeList = () => {
                   <button
                     className="btn btn-warning me-2"
                     onClick={() => handleUpdate(p)}
+                    disabled={!hasPermission("Update Permission")}
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -190,16 +194,17 @@ const SystemPrivilegeList = () => {
                       viewBox="0 0 16 16"
                     >
                       <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11z" />
-                    </svg>{' '}
+                    </svg>{" "}
                     Edit
                   </button>
 
                   <button
                     className="btn btn-danger me-2"
                     onClick={() => {
-                      handleRowSelect([p.permissionId])
-                      handleDelete(p)
+                      handleRowSelect([p.permissionId]);
+                      handleDelete(p);
                     }}
+                    disabled={!hasPermission("Update Permission")}
                   >
                     Delete
                   </button>
@@ -228,7 +233,7 @@ const SystemPrivilegeList = () => {
         />
       )}
     </div>
-  )
+  );
 };
 
 export default SystemPrivilegeList;
