@@ -470,6 +470,21 @@ export const delete_grn_detail_api = async (grnDetailId) => {
   }
 };
 
+export const get_grn_masters_by_warehouse_location_api = async (locationId) => {
+  try {
+    const response = await api.get(
+      `/grnMaster/GetGrnMastersByWarehouseLocationId/${locationId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 //company locations api
 export const get_company_locations_api = async (companyId) => {
   try {

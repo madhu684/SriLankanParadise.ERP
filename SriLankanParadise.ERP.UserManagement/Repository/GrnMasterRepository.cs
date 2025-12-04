@@ -2,6 +2,7 @@
 using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
+using System.ComponentModel.Design;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
 {
@@ -170,5 +171,27 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                  throw;
              }
          }
+
+        public async Task<IEnumerable<GrnMaster>> GetGrnMastersByWarehouseLocationId(int warehouseLocationId)
+        {
+            try
+            {
+                var grnMasters = await _dbContext.GrnMasters
+                    .Where(gm => !gm.Status.ToString().EndsWith("0") && gm.WarehouseLocationId == warehouseLocationId)
+                    .Include(gm => gm.PurchaseOrder)
+                    .Include(gm => gm.GrnDetails)
+                    .ThenInclude(gd => gd.Item)
+                    .ThenInclude(im => im.Unit)
+                    .Include(gm => gm.WarehouseLocation)
+                    .ToListAsync();
+
+                return grnMasters.Any() ? grnMasters : null;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }

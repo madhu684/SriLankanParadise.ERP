@@ -7,7 +7,13 @@ import "moment-timezone";
 import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 import ManageItem from "./manageItem/manageItem";
 
-const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
+const GrnApproval = ({
+  show,
+  handleClose,
+  handleApproved,
+  grn,
+  userLocation,
+}) => {
   const {
     approvalStatus,
     loading,
@@ -25,6 +31,7 @@ const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
     handleOpenManageItemModal,
   } = useGrnApproval({
     grn,
+    userLocation,
     onFormSubmit: () => {
       handleClose();
       handleApproved();
