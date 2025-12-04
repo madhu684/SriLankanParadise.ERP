@@ -110,7 +110,7 @@ const SalesOrderApproval = ({
                         </div>
                       </div>
                       <div className="col-12">
-                        <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
+                        {/* <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
                           <span className="text-muted">Order Type:</span>
                           <span className="fw-semibold text-end">
                             <span className="badge bg-info text-dark">
@@ -118,6 +118,12 @@ const SalesOrderApproval = ({
                                 ? "Customer Order"
                                 : "Direct Order"}
                             </span>
+                          </span>
+                        </div> */}
+                        <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
+                          <span className="text-muted">Region:</span>
+                          <span className="fw-semibold text-end">
+                            {salesOrder?.customer?.region?.name || "N/A"}
                           </span>
                         </div>
                       </div>
@@ -213,7 +219,7 @@ const SalesOrderApproval = ({
                       </div>
                       <div className="col-12">
                         <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
-                          <span className="text-muted">Sales PErson:</span>
+                          <span className="text-muted">Sales Person:</span>
                           <span className="fw-semibold text-end text-break">
                             {salesOrder.salesPerson.firstName +
                               " " +

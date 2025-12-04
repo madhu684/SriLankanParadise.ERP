@@ -327,8 +327,8 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                       <div className="card-header bg-success bg-opacity-10 d-flex justify-content-between align-items-center">
                         <span className="fw-semibold text-success">
                           <i className="bi bi-check-circle-fill me-2"></i>
-                          {/* {formData.selectedCustomer.customerName} */}
-                          Selected Customer
+                          {formData.selectedCustomer.customerName}
+                          {/* Selected Customer */}
                         </span>
                       </div>
                       <div className="card-body">

@@ -302,6 +302,21 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                                 className="text-muted"
                                 style={{ minWidth: "130px" }}
                               >
+                                Region:
+                              </span>
+                              <span className="fw-semibold text-end flex-grow-1 ms-2">
+                                {salesInvoice?.customer?.region
+                                  ? salesInvoice?.customer?.region?.name
+                                  : "-"}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="col-12">
+                            <div className="d-flex justify-content-between align-items-start border-bottom pb-2">
+                              <span
+                                className="text-muted"
+                                style={{ minWidth: "130px" }}
+                              >
                                 Email:
                               </span>
                               <span className="fw-semibold text-end flex-grow-1 ms-2 text-break">
@@ -344,10 +359,13 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                     {/* Sales Order Card */}
                     {salesInvoice.salesOrder ? (
                       <div className="card shadow-sm">
-                        <div className="card-header bg-info text-white">
+                        <div className="card-header bg-info text-white d-flex align-items-center justify-content-between">
                           <h6 className="mb-0 fw-semibold">
                             <i className="bi bi-cart-check me-2"></i>Associated
                             Sales Order
+                          </h6>
+                          <h6 className="mb-0 fw-semibold">
+                            {salesInvoice.salesOrder.referenceNo}
                           </h6>
                         </div>
                         <div className="card-body">
@@ -358,10 +376,15 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                                   className="text-muted"
                                   style={{ minWidth: "120px" }}
                                 >
-                                  Reference No:
+                                  Sales Person:
                                 </span>
                                 <span className="fw-semibold text-end flex-grow-1 ms-2">
-                                  {salesInvoice.salesOrder.referenceNo}
+                                  {salesInvoice.customer.salesPerson
+                                    ? salesInvoice.customer.salesPerson
+                                        .firstName +
+                                      " " +
+                                      salesInvoice.customer.salesPerson.lastName
+                                    : "N/A"}
                                 </span>
                               </div>
                             </div>

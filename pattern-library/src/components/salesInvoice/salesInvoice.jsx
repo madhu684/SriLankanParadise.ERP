@@ -266,13 +266,25 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                 {salesOrder ? (
                   <div>
                     {/* Reference Number - Prominent Display */}
-                    <div className="mb-3 pb-3 border-bottom">
-                      <small className="text-muted d-block mb-1 fw-semibold">
-                        Reference No:
-                      </small>
-                      <h4 className="mb-0 fw-bold text-dark">
-                        {salesOrder.referenceNo}
-                      </h4>
+                    <div className="mb-3 pb-3 border-bottom d-flex align-items-center justify-content-between">
+                      <div>
+                        <small className="text-muted d-block mb-1 fw-semibold">
+                          Reference No:
+                        </small>
+                        <h4 className="mb-0 fw-bold text-dark">
+                          {salesOrder.referenceNo}
+                        </h4>
+                      </div>
+                      <div>
+                        <small className="text-muted d-block mb-1 fw-semibold">
+                          Region:
+                        </small>
+                        <h4 className="mb-0 fw-bold text-dark">
+                          {salesOrder?.customer?.region?.name
+                            ?.replace(/\s*Region$/i, "")
+                            .trim()}
+                        </h4>
+                      </div>
                     </div>
 
                     {/* Dates Section - Two Columns */}
@@ -296,17 +308,19 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                       </div>
                     </div>
 
-                    {/* Order Type Badge */}
+                    {/* Sales Person */}
                     <div className="row g-3 mb-3">
                       <div className="col-6">
                         <small className="text-muted d-block mb-2 fw-semibold">
-                          Order Type
+                          Sales Person
                         </small>
                         <span className="badge rounded-pill bg-info text-dark px-3 py-2 fs-6">
                           <i className="bi bi-tag-fill me-1"></i>
-                          {salesOrder.customerId !== null
-                            ? "Customer Order"
-                            : "Direct Order"}
+                          {salesOrder.salesPerson
+                            ? salesOrder.salesPerson?.firstName +
+                              " " +
+                              salesOrder.salesPerson?.lastName
+                            : "N/A"}
                         </span>
                       </div>
                       <div className="col-6">
@@ -456,14 +470,14 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                   <div className="bg-light p-3 rounded mb-3">
                     <div className="d-flex justify-content-between align-items-start mb-2">
                       <h6 className="mb-0 text-primary">Selected Customer</h6>
-                      <button
+                      {/* <button
                         type="button"
                         className="btn btn-sm btn-outline-danger"
                         onClick={handleResetCustomer}
                       >
                         <i className="bi bi-x-circle me-1"></i>
                         Reset
-                      </button>
+                      </button> */}
                     </div>
                     <hr className="my-2" />
                     <div className="row g-2 small">

@@ -11,7 +11,6 @@
         public int Status { get; set; }
         public string? BillingAddressLine1 { get; set; }
         public string? BillingAddressLine2 { get; set; }
-        public int? ReigonId { get; set; }
         public string LisenNumber { get; set; }
         public DateTime LisenStartDate { get; set; }
         public DateTime LisenEndDate { get; set; }
