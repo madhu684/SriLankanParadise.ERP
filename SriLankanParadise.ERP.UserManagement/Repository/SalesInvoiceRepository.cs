@@ -34,6 +34,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 return await _dbContext.SalesInvoices
                     .Include(si => si.Customer)
+                        .ThenInclude(c => c.SalesPerson)
+                    .Include(si => si.Customer)
+                        .ThenInclude(c => c.Region)
                     .Include(si => si.CustomerDeliveryAddress)
                     .Include(si => si.SalesInvoiceDetails)
                     .ToListAsync();
@@ -52,6 +55,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var salesInvoices = await _dbContext.SalesInvoices
                     .Where(si => si.Status != 0 && si.CompanyId == companyId)
                     .Include(si => si.Customer)
+                        .ThenInclude(c => c.SalesPerson)
+                    .Include(si => si.Customer)
+                        .ThenInclude(c => c.Region)
                     .Include(si => si.CustomerDeliveryAddress)
                     .Include(si => si.SalesInvoiceDetails)
                         .ThenInclude(ib => ib.Batch)
@@ -78,6 +84,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var salesInvoices = await _dbContext.SalesInvoices
                     .Where(si => si.CreatedUserId == userId)
                     .Include(si => si.Customer)
+                        .ThenInclude(c => c.SalesPerson)
+                    .Include(si => si.Customer)
+                        .ThenInclude(c => c.Region)
                     .Include(si => si.CustomerDeliveryAddress)
                     .Include(si => si.SalesInvoiceDetails)
                         .ThenInclude(ib => ib.Batch)
@@ -125,6 +134,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var salesInvoice = await _dbContext.SalesInvoices
                     .Where(si => si.SalesInvoiceId == salesInvoiceId)
                     .Include(si => si.Customer)
+                        .ThenInclude(c => c.SalesPerson)
+                    .Include(si => si.Customer)
+                        .ThenInclude(c => c.Region)
                     .Include(si => si.CustomerDeliveryAddress)
                     .Include(si => si.SalesInvoiceDetails)
                         .ThenInclude(ib => ib.Batch)
@@ -213,6 +225,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var salesInvoice = await _dbContext.SalesInvoices
                     .Include(si => si.Customer)
+                        .ThenInclude(c => c.SalesPerson)
+                    .Include(si => si.Customer)
+                        .ThenInclude(c => c.Region)
                     .Include(si => si.CustomerDeliveryAddress)
                     .Include(si => si.SalesInvoiceDetails)
                     .FirstOrDefaultAsync(si => si.SalesInvoiceId == salesInvoiceId);
@@ -231,6 +246,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var salesInvoice = await _dbContext.SalesInvoices
                     .Where(si => si.CustomerId == customerId && si.Status == status)
                     .Include(si => si.Customer)
+                        .ThenInclude(c => c.SalesPerson)
+                    .Include(si => si.Customer)
+                        .ThenInclude(c => c.Region)
                     .Include(si => si.CustomerDeliveryAddress)
                     .Include(si => si.SalesInvoiceDetails)
                     .OrderBy(si => si.ApprovedDate)
@@ -256,7 +274,11 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
 
                 var query = _dbContext.SalesInvoices.Where(si => si.ReferenceNo.Contains(reference) && si.Status == status);
 
-                query = query.Include(si => si.Customer)
+                query = query
+                    .Include(si => si.Customer)
+                        .ThenInclude(c => c.SalesPerson)
+                    .Include(si => si.Customer)
+                        .ThenInclude(c => c.Region)
                     .Include(si => si.CustomerDeliveryAddress)
                     .Include(si => si.SalesInvoiceDetails)
                         .ThenInclude(ib => ib.ItemMaster)

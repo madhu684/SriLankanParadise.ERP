@@ -17,7 +17,7 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
-const useGrnApproval = ({ grn, onFormSubmit }) => {
+const useGrnApproval = ({ grn, userLocation, onFormSubmit }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const alertRef = useRef(null);
@@ -31,6 +31,8 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
   };
 
   const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
+
+  const locationId = userLocation?.[0]?.locationId;
 
   const queryClient = useQueryClient();
 
@@ -161,7 +163,7 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
           await updatePO();
         }
 
-        queryClient.invalidateQueries(["grns", companyId]);
+        queryClient.invalidateQueries(["grns", locationId]);
         toast.success("GRN approved successfully !");
       } else {
         setApprovalStatus("error");

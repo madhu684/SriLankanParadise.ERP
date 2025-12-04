@@ -154,7 +154,7 @@ const SalesInvoiceList = () => {
                 Approve
               </button>
             )}
-          {hasPermission("Update Sales Invoice") &&
+          {/* {hasPermission("Update Sales Invoice") &&
             isAnyRowSelected &&
             selectedRowData[0]?.status === 1 && (
               <button
@@ -163,7 +163,7 @@ const SalesInvoiceList = () => {
               >
                 Edit
               </button>
-            )}
+            )} */}
           {isAnyRowSelected &&
             areAnySelectedRowsPending(selectedRows) &&
             selectedRowData[0]?.status === 1 && (

@@ -247,6 +247,31 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpGet("GetGrnMastersByWarehouseLocationId/{warehouseLocationId}")]
+        public async Task<ApiResponseModel> GetGrnMastersByWarehouseLocationId(int warehouseLocationId)
+        {
+            try
+            {
+                var grnMasters = await _grnMasterService.GetGrnMastersByWarehouseLocationId(warehouseLocationId);
+                if (grnMasters != null)
+                {
+                    var grnMasterDtos = _mapper.Map<IEnumerable<GrnMasterDto>>(grnMasters);
+                    AddResponseMessage(Response, LogMessages.GrnMastersRetrieved, grnMasterDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.GrnMastersNotFound);
+                    AddResponseMessage(Response, LogMessages.GrnMastersNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
 
 
         private bool IsUniqueConstraintViolation(DbUpdateException ex, string constraintName)

@@ -8,6 +8,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
 
         Task<IEnumerable<GrnMaster>> GetAll();
 
+        Task<IEnumerable<GrnMaster>> GetGrnMastersByWarehouseLocationId(int warehouseLocationId);
 
         Task<IEnumerable<GrnMaster>> GetGrnMastersWithoutDraftsByCompanyId(int companyId);
 

@@ -252,12 +252,19 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
     isError: isItemPriceListByLocationError,
     error: itemPriceListByLocationError,
   } = useQuery({
-    queryKey: ["itemPriceListByLocation", formData.storeLocation],
+    queryKey: ["itemPriceList", companyId],
     queryFn: async () => {
       const response = await get_item_price_list_by_locationId(
         formData.storeLocation
       );
-      return response.data.result;
+      const priceListMaster = response?.data?.result;
+      if (priceListMaster && priceListMaster.status === 1) {
+        return {
+          ...priceListMaster,
+          itemPriceDetails: priceListMaster.itemPriceDetails || [],
+        };
+      }
+      return null;
     },
     enabled: !!formData.storeLocation,
   });
@@ -423,8 +430,33 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
         );
 
         // Initialize common charges and deductions
+        // const initializedCommonCharges = chargesAndDeductionsApplied
+        //   ?.filter((charge) => !charge.lineItemId)
+        //   .map((charge) => {
+        //     let value;
+        //     if (charge.chargesAndDeduction.percentage !== null) {
+        //       value = (Math.abs(charge.appliedValue) / subTotal) * 100;
+        //     } else {
+        //       value = Math.abs(charge.appliedValue);
+        //     }
+        //     return {
+        //       id: charge.chargesAndDeduction.chargesAndDeductionId,
+        //       name: charge.chargesAndDeduction.displayName,
+        //       value: value.toFixed(2),
+        //       sign: charge.chargesAndDeduction.sign,
+        //       isPercentage: charge.chargesAndDeduction.percentage !== null,
+        //       chargesAndDeductionAppliedId: charge.chargesAndDeductionAppliedId,
+        //     };
+        //   });
         const initializedCommonCharges = chargesAndDeductionsApplied
-          ?.filter((charge) => !charge.lineItemId)
+          ?.filter((charge) => {
+            if (charge.lineItemId) return false;
+            if (charge.chargesAndDeduction.displayName === "VAT") {
+              return deepCopySalesOrder?.customer?.isVATRegistered === true;
+            }
+
+            return true;
+          })
           .map((charge) => {
             let value;
             if (charge.chargesAndDeduction.percentage !== null) {
@@ -550,40 +582,51 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
       );
 
       const commonChargesAndDeductions = await Promise.all(
-        formData.commonChargesAndDeductions.map(async (charge) => {
-          let appliedValue = 0;
-          if (charge.isPercentage) {
-            // If the charge is a percentage, calculate based on percentage of total amount
-            appliedValue = (formData.subTotal * charge.value) / 100;
-          } else {
-            // If the charge is not a percentage, use the fixed value
-            appliedValue = charge.value;
-          }
+        formData.commonChargesAndDeductions
+          .filter((charge) => {
+            if (
+              charge.name === "VAT" &&
+              formData.selectedCustomer &&
+              !formData.selectedCustomer.isVATRegistered
+            ) {
+              return false;
+            }
+            return true;
+          })
+          .map(async (charge) => {
+            let appliedValue = 0;
+            if (charge.isPercentage) {
+              // If the charge is a percentage, calculate based on percentage of total amount
+              appliedValue = (formData.subTotal * charge.value) / 100;
+            } else {
+              // If the charge is not a percentage, use the fixed value
+              appliedValue = charge.value;
+            }
 
-          // Apply the sign (+ or -)
-          appliedValue *= charge.sign === "+" ? 1 : -1;
+            // Apply the sign (+ or -)
+            appliedValue *= charge.sign === "+" ? 1 : -1;
 
-          const chargesAndDeductionAppliedData = {
-            chargesAndDeductionId: charge.id,
-            transactionId: transactionId,
-            transactionTypeId,
-            lineItemId: null,
-            appliedValue,
-            dateApplied: new Date().toISOString(),
-            createdBy: sessionStorage?.getItem("userId"),
-            createdDate: new Date().toISOString(),
-            modifiedBy: sessionStorage?.getItem("userId"),
-            modifiedDate: new Date().toISOString(),
-            status: true,
-            companyId: sessionStorage?.getItem("companyId"),
-            permissionId: 1057,
-          };
+            const chargesAndDeductionAppliedData = {
+              chargesAndDeductionId: charge.id,
+              transactionId: transactionId,
+              transactionTypeId,
+              lineItemId: null,
+              appliedValue,
+              dateApplied: new Date().toISOString(),
+              createdBy: sessionStorage?.getItem("userId"),
+              createdDate: new Date().toISOString(),
+              modifiedBy: sessionStorage?.getItem("userId"),
+              modifiedDate: new Date().toISOString(),
+              status: true,
+              companyId: sessionStorage?.getItem("companyId"),
+              permissionId: 1057,
+            };
 
-          return await put_charges_and_deductions_applied_api(
-            charge.chargesAndDeductionAppliedId,
-            chargesAndDeductionAppliedData
-          );
-        })
+            return await put_charges_and_deductions_applied_api(
+              charge.chargesAndDeductionAppliedId,
+              chargesAndDeductionAppliedData
+            );
+          })
       );
 
       // Concatenate chargesAndDeductionsAppliedData and commonChargesAndDeductions
@@ -1120,24 +1163,95 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
     }));
   }, []);
 
-  const handleSelectCustomer = useCallback((selectedCustomer) => {
-    setFormData((prev) => ({
-      ...prev,
-      customerId: selectedCustomer.customerId,
-      selectedCustomer,
-      selectedSalesPerson:
-        selectedCustomer.salesPerson !== null
-          ? selectedCustomer.salesPerson
-          : null,
-      salesPersonId:
-        selectedCustomer.salesPerson !== null
-          ? selectedCustomer.salesPerson.salesPersonId
-          : null,
-    }));
-    setCustomerSearchTerm("");
-    setValidFields({});
-    setValidationErrors({});
-  }, []);
+  // const handleSelectCustomer = useCallback((selectedCustomer) => {
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     customerId: selectedCustomer.customerId,
+  //     selectedCustomer,
+  //     selectedSalesPerson:
+  //       selectedCustomer.salesPerson !== null
+  //         ? selectedCustomer.salesPerson
+  //         : null,
+  //     salesPersonId:
+  //       selectedCustomer.salesPerson !== null
+  //         ? selectedCustomer.salesPerson.salesPersonId
+  //         : null,
+  //   }));
+  //   setCustomerSearchTerm("");
+  //   setValidFields({});
+  //   setValidationErrors({});
+  // }, []);
+  const handleSelectCustomer = useCallback(
+    (selectedCustomer) => {
+      setFormData((prev) => {
+        // Get the VAT charge from master data
+        const vatCharge = chargesAndDeductions?.find(
+          (charge) =>
+            charge.displayName === "VAT" &&
+            charge.isDisableFromSubTotal === false
+        );
+
+        let updatedCommonCharges = [...prev.commonChargesAndDeductions];
+
+        if (vatCharge) {
+          const hasVATInCommon = updatedCommonCharges.some(
+            (charge) => charge.name === "VAT"
+          );
+
+          // If customer IS VAT registered and VAT is NOT in common charges, add it
+          if (selectedCustomer.isVATRegistered && !hasVATInCommon) {
+            updatedCommonCharges.push({
+              id: vatCharge.chargesAndDeductionId,
+              name: vatCharge.displayName,
+              value: vatCharge.amount || vatCharge.percentage,
+              sign: vatCharge.sign,
+              isPercentage: vatCharge.percentage !== null,
+              chargesAndDeductionAppliedId: null,
+            });
+          }
+
+          // If customer is NOT VAT registered and VAT IS in common charges, remove it
+          if (!selectedCustomer.isVATRegistered && hasVATInCommon) {
+            const removedVATCharge = updatedCommonCharges.find(
+              (charge) => charge.name === "VAT"
+            );
+
+            // If the VAT charge has an applied ID, mark it for deletion
+            if (removedVATCharge?.chargesAndDeductionAppliedId) {
+              setChargesAndDeductionsAppliedIdsToBeDeleted((prev) => [
+                ...prev,
+                removedVATCharge.chargesAndDeductionAppliedId,
+              ]);
+            }
+
+            updatedCommonCharges = updatedCommonCharges.filter(
+              (charge) => charge.name !== "VAT"
+            );
+          }
+        }
+
+        return {
+          ...prev,
+          customerId: selectedCustomer.customerId,
+          selectedCustomer,
+          selectedSalesPerson:
+            selectedCustomer.salesPerson !== null
+              ? selectedCustomer.salesPerson
+              : null,
+          salesPersonId:
+            selectedCustomer.salesPerson !== null
+              ? selectedCustomer.salesPerson.salesPersonId
+              : null,
+          commonChargesAndDeductions: updatedCommonCharges,
+        };
+      });
+
+      setCustomerSearchTerm("");
+      setValidFields({});
+      setValidationErrors({});
+    },
+    [chargesAndDeductions]
+  );
 
   const handleAddCustomer = useCallback(
     (responseData) => {
@@ -1147,8 +1261,43 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
     [handleSelectCustomer, refetchCustomers]
   );
 
+  // const handleResetCustomer = useCallback(() => {
+  //   setFormData((prev) => ({ ...prev, selectedCustomer: "", customerId: "" }));
+  // }, []);
   const handleResetCustomer = useCallback(() => {
-    setFormData((prev) => ({ ...prev, selectedCustomer: "", customerId: "" }));
+    setFormData((prev) => {
+      // When resetting customer, remove VAT if it exists
+      const hasVATInCommon = prev.commonChargesAndDeductions.some(
+        (charge) => charge.name === "VAT"
+      );
+
+      let updatedCommonCharges = [...prev.commonChargesAndDeductions];
+
+      if (hasVATInCommon) {
+        const removedVATCharge = updatedCommonCharges.find(
+          (charge) => charge.name === "VAT"
+        );
+
+        // If the VAT charge has an applied ID, mark it for deletion
+        if (removedVATCharge?.chargesAndDeductionAppliedId) {
+          setChargesAndDeductionsAppliedIdsToBeDeleted((prevIds) => [
+            ...prevIds,
+            removedVATCharge.chargesAndDeductionAppliedId,
+          ]);
+        }
+
+        updatedCommonCharges = updatedCommonCharges.filter(
+          (charge) => charge.name !== "VAT"
+        );
+      }
+
+      return {
+        ...prev,
+        selectedCustomer: "",
+        customerId: "",
+        commonChargesAndDeductions: updatedCommonCharges,
+      };
+    });
   }, []);
 
   const handleResetSalesPerson = useCallback(() => {
@@ -1172,32 +1321,115 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
   }, []);
 
   // Handler to add the selected item to itemDetails
+  // const handleSelectItem = useCallback(
+  //   async (item) => {
+  //     let availableStock = 0;
+  //     let unitPrice = item.unitPrice || 0;
+
+  //     try {
+  //       const inventory =
+  //         await get_sum_location_inventories_by_locationId_itemMasterId_api(
+  //           item.itemMasterId,
+  //           formData.storeLocation
+  //         );
+  //       availableStock = inventory?.data?.result?.totalStockInHand || 0;
+
+  //       if (availableStock <= 0) {
+  //         toast.error(
+  //           `No stock available for "${item.itemName}" in user location`
+  //         );
+  //         setSearchTerm("");
+  //         return;
+  //       }
+
+  //       unitPrice = getPriceFromPriceList(item.itemMasterId);
+
+  //       const initialCharges = getInitializedCharges;
+
+  //       // NEW: Store original charges for this new item
+  //       setOriginalLineItemCharges((prev) => {
+  //         const newMap = new Map(prev);
+  //         newMap.set(
+  //           item.itemMasterId,
+  //           JSON.parse(JSON.stringify(initialCharges))
+  //         );
+  //         return newMap;
+  //       });
+
+  //       setFormData((prev) => ({
+  //         ...prev,
+  //         itemDetails: [
+  //           ...prev.itemDetails,
+  //           {
+  //             salesOrderDetailId: null,
+  //             itemMasterId: item.itemMasterId,
+  //             name: item.itemName || "",
+  //             unit: item.unit?.unitName || "",
+  //             quantity: 0,
+  //             unitPrice: unitPrice,
+  //             totalPrice: 0,
+  //             batchId: null,
+  //             tempQuantity: availableStock,
+  //             packSize: item?.conversionRate || 1,
+  //             isInventoryItem: item?.isInventoryItem,
+  //             chargesAndDeductions: getInitializedCharges,
+  //           },
+  //         ],
+  //       }));
+
+  //       setSearchTerm("");
+  //     } catch (error) {
+  //       console.error("Error processing item:", error);
+  //       toast.error("Failed to add item");
+  //       setSearchTerm("");
+  //     }
+  //   },
+  //   [getInitializedCharges, getPriceFromPriceList, formData.storeLocation]
+  // );
+
   const handleSelectItem = useCallback(
     async (item) => {
+      // Check if item price list exists for the selected location
+      if (!itemPriceListByLocation || itemPriceListByLocation.length === 0) {
+        toast.error(
+          "No active item price list found for the selected location. Please activate or create an item price list for this location."
+        );
+        setSearchTerm("");
+        return;
+      }
+
       let availableStock = 0;
-      let unitPrice = item.unitPrice || 0;
+      let unitPrice = getPriceFromPriceList(item.itemMasterId);
+
+      // Check if unit price is found in price list
+      if (unitPrice === 0) {
+        toast.error(
+          `No price found for "${item.itemName}" in the selected location's price list. Please add this item to the location's price list.`
+        );
+        setSearchTerm("");
+        return;
+      }
 
       try {
         const inventory =
           await get_sum_location_inventories_by_locationId_itemMasterId_api(
             item.itemMasterId,
-            formData.storeLocation
+            formData.storeLocation,
+            null
           );
         availableStock = inventory?.data?.result?.totalStockInHand || 0;
 
         if (availableStock <= 0) {
           toast.error(
-            `No stock available for "${item.itemName}" in user location`
+            `No stock available for "${item.itemName}" in selected location`
           );
           setSearchTerm("");
           return;
         }
 
-        unitPrice = getPriceFromPriceList(item.itemMasterId);
-
         const initialCharges = getInitializedCharges;
 
-        // NEW: Store original charges for this new item
+        // Store original charges for this item
         setOriginalLineItemCharges((prev) => {
           const newMap = new Map(prev);
           newMap.set(
@@ -1212,7 +1444,6 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
           itemDetails: [
             ...prev.itemDetails,
             {
-              salesOrderDetailId: null,
               itemMasterId: item.itemMasterId,
               name: item.itemName || "",
               unit: item.unit?.unitName || "",
@@ -1235,7 +1466,12 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
         setSearchTerm("");
       }
     },
-    [getInitializedCharges, getPriceFromPriceList, formData.storeLocation]
+    [
+      getPriceFromPriceList,
+      getInitializedCharges,
+      formData.storeLocation,
+      itemPriceListByLocation,
+    ]
   );
 
   const renderColumns = useCallback(() => {

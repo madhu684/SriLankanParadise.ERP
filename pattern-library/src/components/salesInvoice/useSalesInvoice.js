@@ -1557,6 +1557,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     });
   }, [salesOrder, formData.selectedCustomer]);
 
+  // console.log("SO: ", salesOrder);
   // console.log("Form data: ", formData);
   // console.log("hasLineItemChargesChanged:", hasLineItemChargesChanged);
 

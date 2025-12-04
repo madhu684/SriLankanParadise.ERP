@@ -140,13 +140,18 @@ const CustomerView = ({ show, handleClose, customer }) => {
                     customer?.billingAddressLine2
                   }
                 />
-                <InfoRow label="Region" value={customer?.region?.name} />
+                <InfoRow
+                  label="Region"
+                  value={customer?.region?.name || "N/A"}
+                />
                 <InfoRow
                   label="Sales Person"
                   value={
-                    customer?.salesPerson?.firstName +
-                    " " +
-                    customer?.salesPerson?.lastName
+                    customer?.salesPerson
+                      ? customer?.salesPerson?.firstName +
+                        " " +
+                        customer?.salesPerson?.lastName
+                      : "N/A"
                   }
                 />
               </InfoCard>

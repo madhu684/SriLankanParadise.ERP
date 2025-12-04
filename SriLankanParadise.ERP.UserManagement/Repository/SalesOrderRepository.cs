@@ -39,6 +39,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         .ThenInclude(ib => ib.ItemMaster)
                         .ThenInclude(im => im.Unit)
                     .Include(so => so.Customer)
+                        .ThenInclude(cu => cu.Region)
                     .Include(so => so.SalesPerson)
                     .ToListAsync();
 
@@ -65,6 +66,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         .ThenInclude(im => im.Unit)
                     .Include(so => so.Customer)
                         .ThenInclude(cu => cu.CustomerDeliveryAddress)
+                    .Include(so => so.Customer)
+                        .ThenInclude(cu => cu.Region)
                     .Include(so => so.SalesPerson)
                     .ToListAsync();
 
@@ -89,6 +92,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         .ThenInclude(im => im.ItemMaster)
                         .ThenInclude(im => im.Unit)
                     .Include(so => so.Customer)
+                        .ThenInclude(cu => cu.Region)
                     .Include(so => so.SalesPerson)
                     .ToListAsync();
 
@@ -136,6 +140,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         .ThenInclude(im => im.ItemMaster)
                         .ThenInclude(im => im.Unit)
                     .Include(so => so.Customer)
+                        .ThenInclude(cu => cu.Region)
                     .Include(so => so.SalesPerson)
                     .FirstOrDefaultAsync();
 

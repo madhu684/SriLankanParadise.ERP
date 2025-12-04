@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { get_grn_masters_with_out_drafts_api } from "../../../services/purchaseApi";
+import { get_grn_masters_by_warehouse_location_api } from "../../../services/purchaseApi";
 import { useQuery } from "@tanstack/react-query";
 
 const useGrnList = (userLocations) => {
@@ -15,7 +15,6 @@ const useGrnList = (userLocations) => {
   const [showUpdateGrnForm, setShowUpdateGrnForm] = useState(false);
   const [GRNDetail, setGRNDetail] = useState("");
 
-  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
   const locationId = userLocations?.[0]?.locationId;
 
   const {
@@ -23,15 +22,14 @@ const useGrnList = (userLocations) => {
     isLoading: isLoadingData,
     error,
   } = useQuery({
-    queryKey: ["grns", companyId, locationId],
+    queryKey: ["grns", locationId],
     queryFn: async () => {
-      const GrnResponse = await get_grn_masters_with_out_drafts_api(companyId);
-      const filteredGrns = GrnResponse.data.result.filter(
-        (grn) => grn.warehouseLocationId === locationId
+      const GrnResponse = await get_grn_masters_by_warehouse_location_api(
+        locationId
       );
-      return filteredGrns || [];
+      return GrnResponse.data.result || [];
     },
-    enabled: !!companyId && !!locationId, // Only run query when both values exist
+    enabled: !!locationId,
   });
 
   const handleShowApproveGrnModal = () => {

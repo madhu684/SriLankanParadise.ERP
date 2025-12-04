@@ -200,12 +200,19 @@ const useSalesOrder = ({ onFormSubmit }) => {
     isError: isItemPriceListByLocationError,
     error: itemPriceListByLocationError,
   } = useQuery({
-    queryKey: ["itemPriceListByLocation", formData.storeLocation],
+    queryKey: ["itemPriceList", companyId],
     queryFn: async () => {
       const response = await get_item_price_list_by_locationId(
         formData.storeLocation
       );
-      return response.data.result;
+      const priceListMaster = response?.data?.result;
+      if (priceListMaster && priceListMaster.status === 1) {
+        return {
+          ...priceListMaster,
+          itemPriceDetails: priceListMaster.itemPriceDetails || [],
+        };
+      }
+      return null;
     },
     enabled: !!formData.storeLocation,
   });
@@ -292,13 +299,43 @@ const useSalesOrder = ({ onFormSubmit }) => {
   }, [submissionStatus]);
 
   // Initialize common charges when charges data loads
+  // useEffect(() => {
+  //   if (
+  //     chargesAndDeductions &&
+  //     formData.commonChargesAndDeductions.length === 0
+  //   ) {
+  //     const initializedChargesArray = chargesAndDeductions
+  //       .filter((charge) => charge.isDisableFromSubTotal === false)
+  //       .map((charge) => ({
+  //         id: charge.chargesAndDeductionId,
+  //         name: charge.displayName,
+  //         value: charge.amount || charge.percentage,
+  //         sign: charge.sign,
+  //         isPercentage: charge.percentage !== null,
+  //       }));
+
+  //     setFormData((prev) => ({
+  //       ...prev,
+  //       commonChargesAndDeductions: initializedChargesArray,
+  //     }));
+  //   }
+  // }, [chargesAndDeductions]);
   useEffect(() => {
-    if (
-      chargesAndDeductions &&
-      formData.commonChargesAndDeductions.length === 0
-    ) {
+    if (chargesAndDeductions) {
       const initializedChargesArray = chargesAndDeductions
-        .filter((charge) => charge.isDisableFromSubTotal === false)
+        .filter((charge) => {
+          if (charge.isDisableFromSubTotal === true) return false;
+
+          if (
+            charge.displayName === "VAT" &&
+            formData.selectedCustomer &&
+            !formData.selectedCustomer.isVATRegistered
+          ) {
+            return false;
+          }
+
+          return true;
+        })
         .map((charge) => ({
           id: charge.chargesAndDeductionId,
           name: charge.displayName,
@@ -312,7 +349,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
         commonChargesAndDeductions: initializedChargesArray,
       }));
     }
-  }, [chargesAndDeductions]);
+  }, [chargesAndDeductions, formData.selectedCustomer]);
 
   useEffect(() => {
     if (originalLineItemCharges.size === 0) {
@@ -782,10 +819,94 @@ const useSalesOrder = ({ onFormSubmit }) => {
     setFormData((prev) => ({ ...prev, attachments: files }));
   }, []);
 
+  // const handleSelectItem = useCallback(
+  //   async (item) => {
+  //     let availableStock = 0;
+  //     let unitPrice = item.unitPrice || 0;
+
+  //     try {
+  //       const inventory =
+  //         await get_sum_location_inventories_by_locationId_itemMasterId_api(
+  //           item.itemMasterId,
+  //           formData.storeLocation,
+  //           null
+  //         );
+  //       availableStock = inventory?.data?.result?.totalStockInHand || 0;
+
+  //       if (availableStock <= 0) {
+  //         toast.error(
+  //           `No stock available for "${item.itemName}" in user location`
+  //         );
+  //         setSearchTerm("");
+  //         return;
+  //       }
+
+  //       unitPrice = getPriceFromPriceList(item.itemMasterId);
+
+  //       const initialCharges = getInitializedCharges;
+
+  //       // NEW: Store original charges for this item
+  //       setOriginalLineItemCharges((prev) => {
+  //         const newMap = new Map(prev);
+  //         newMap.set(
+  //           item.itemMasterId,
+  //           JSON.parse(JSON.stringify(initialCharges))
+  //         );
+  //         return newMap;
+  //       });
+
+  //       setFormData((prev) => ({
+  //         ...prev,
+  //         itemDetails: [
+  //           ...prev.itemDetails,
+  //           {
+  //             itemMasterId: item.itemMasterId,
+  //             name: item.itemName || "",
+  //             unit: item.unit?.unitName || "",
+  //             quantity: 0,
+  //             unitPrice: unitPrice,
+  //             totalPrice: 0,
+  //             batchId: null,
+  //             tempQuantity: availableStock,
+  //             packSize: item?.conversionRate || 1,
+  //             isInventoryItem: item?.isInventoryItem,
+  //             chargesAndDeductions: getInitializedCharges,
+  //           },
+  //         ],
+  //       }));
+
+  //       setSearchTerm("");
+  //     } catch (error) {
+  //       console.error("Error processing item:", error);
+  //       toast.error("Failed to add item");
+  //       setSearchTerm("");
+  //     }
+  //   },
+  //   [getPriceFromPriceList, getInitializedCharges, formData.storeLocation]
+  // );
+
   const handleSelectItem = useCallback(
     async (item) => {
+      // Check if item price list exists for the selected location
+      if (!itemPriceListByLocation || itemPriceListByLocation.length === 0) {
+        toast.error(
+          "No active item price list found for the selected location. Please activate or create an item price list for this location."
+        );
+        setSearchTerm("");
+        return;
+      }
+
       let availableStock = 0;
-      let unitPrice = item.unitPrice || 0;
+      let unitPrice = getPriceFromPriceList(item.itemMasterId);
+
+      // Check if unit price is found in price list
+      if (unitPrice === 0) {
+        toast.error(
+          `No price found for "${item.itemName}" in the selected location's price list. Please add this item to the location's price list.`
+        );
+        setSearchTerm("");
+        return;
+      }
 
       try {
         const inventory =
@@ -798,17 +919,15 @@ const useSalesOrder = ({ onFormSubmit }) => {
 
         if (availableStock <= 0) {
           toast.error(
-            `No stock available for "${item.itemName}" in user location`
+            `No stock available for "${item.itemName}" in selected location`
           );
           setSearchTerm("");
           return;
         }
 
-        unitPrice = getPriceFromPriceList(item.itemMasterId);
-
         const initialCharges = getInitializedCharges;
 
-        // NEW: Store original charges for this item
+        // Store original charges for this item
         setOriginalLineItemCharges((prev) => {
           const newMap = new Map(prev);
           newMap.set(
@@ -845,7 +964,12 @@ const useSalesOrder = ({ onFormSubmit }) => {
         setSearchTerm("");
       }
     },
-    [getPriceFromPriceList, getInitializedCharges, formData.storeLocation]
+    [
+      getPriceFromPriceList,
+      getInitializedCharges,
+      formData.storeLocation,
+      itemPriceListByLocation,
+    ]
   );
 
   const handleSelectCustomer = useCallback((selectedCustomer) => {
@@ -861,6 +985,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
         selectedCustomer.salesPerson !== null
           ? selectedCustomer.salesPerson.salesPersonId
           : null,
+      commonChargesAndDeductions: [],
     }));
     setCustomerSearchTerm("");
     setValidFields({});
@@ -879,7 +1004,13 @@ const useSalesOrder = ({ onFormSubmit }) => {
   }, []);
 
   const handleResetCustomer = useCallback(() => {
-    setFormData((prev) => ({ ...prev, selectedCustomer: "", customerId: "" }));
+    setFormData((prev) => ({
+      ...prev,
+      selectedCustomer: "",
+      customerId: "",
+      commonChargesAndDeductions: [],
+      itemDetails: [],
+    }));
   }, []);
 
   const handleResetSalesPerson = useCallback(() => {

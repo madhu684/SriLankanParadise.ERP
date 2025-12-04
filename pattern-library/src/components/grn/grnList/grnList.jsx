@@ -54,9 +54,11 @@ const GrnList = () => {
   };
 
   //Filter MRNs based on search query
-  const filteredGRNs = Grns.filter((grn) =>
-    grn.receivedBy.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredGRNs = Grns
+    ? Grns.filter((grn) =>
+        grn.receivedBy.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
 
   //Pagination Handler
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
@@ -65,7 +67,7 @@ const GrnList = () => {
     return <ErrorComponent error={error || "Error fetching data"} />;
   }
 
-  if (isLoadingData || (Grns && !(Grns.length >= 0))) {
+  if (isLoadingData) {
     return <LoadingSpinner />;
   }
 
@@ -260,6 +262,7 @@ const GrnList = () => {
             handleClose={handleCloseApproveGrnModal}
             grn={selectedRowData[0]}
             handleApproved={handleApproved}
+            userLocation={userLocations}
           />
         )}
         {showDetailGrnModalInParent && (
