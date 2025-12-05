@@ -1,23 +1,80 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import * as XLSX from "xlsx";
 import { get_sales_invoice_by_date_range_api } from "../../services/reportApi";
+import {
+  get_customers_by_company_id_api,
+  get_regions_api,
+  get_sales_persons_api,
+} from "../../services/salesApi";
 
 const useSalesReport = () => {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const [selectedCustomerId, setSelectedCustomerId] = useState("");
+  const [selectedRegionId, setSelectedRegionId] = useState("");
+  const [selectedSalesPersonId, setSelectedSalesPersonId] = useState("");
 
+  const companyId = sessionStorage.getItem("companyId");
+
+  // Fetch master Data
+  const {
+    data: customers,
+    isLoading: isCustomersLoading,
+    isError: isCustomersError,
+    error: customersError,
+    refetch: refetchCustomers,
+  } = useQuery({
+    queryKey: ["customers", companyId],
+    queryFn: async () => {
+      const response = await get_customers_by_company_id_api(companyId);
+      return response.data.result || [];
+    },
+  });
+
+  const { data: regions = [], isLoading: isRegionsLoading } = useQuery({
+    queryKey: ["regions"],
+    queryFn: async () => {
+      const response = await get_regions_api();
+      return response.data.result || [];
+    },
+  });
+
+  const {
+    data: salesPersons,
+    isLoading: isSalesPersonsLoading,
+    isError: isSalesPersonsError,
+    error: salesPersonsError,
+  } = useQuery({
+    queryKey: ["salesPersons"],
+    queryFn: async () => {
+      const response = await get_sales_persons_api();
+      return response.data.result || [];
+    },
+  });
+
+  // Fetch sales report
   const {
     data: reportData = [],
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["salesReportByDateRange", fromDate, toDate],
+    queryKey: [
+      "salesReportByDateRange",
+      fromDate,
+      toDate,
+      selectedCustomerId,
+      selectedRegionId,
+      selectedSalesPersonId,
+    ],
     queryFn: async () => {
-      const response = await get_sales_invoice_by_date_range_api(
+      const response = await get_sales_invoice_by_date_range_api({
         fromDate,
-        toDate
-      );
+        toDate,
+        customerId: selectedCustomerId || null,
+        regionId: selectedRegionId || null,
+        salesPersonId: selectedSalesPersonId || null,
+      });
       return response.data.result || [];
     },
     enabled: !!fromDate && !!toDate,
@@ -172,9 +229,21 @@ const useSalesReport = () => {
     reportData,
     isLoading,
     error,
+    customers,
+    regions,
+    salesPersons,
+    selectedCustomerId,
+    selectedRegionId,
+    selectedSalesPersonId,
+    isCustomersLoading,
+    isRegionsLoading,
+    isSalesPersonsLoading,
     setFromDate,
     setToDate,
     exportToExcel,
+    setSelectedCustomerId,
+    setSelectedRegionId,
+    setSelectedSalesPersonId,
   };
 };
 

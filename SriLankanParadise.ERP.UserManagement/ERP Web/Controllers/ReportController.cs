@@ -186,13 +186,20 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
-        [HttpGet("GetSalesReportByDateRange/{fromDate}/{toDate}")]
-        public async Task<ApiResponseModel> GetSalesReportByDateRange(DateTime fromDate, DateTime toDate)
+        [HttpGet("GetSalesReportByDateRange")]
+        public async Task<ApiResponseModel> GetSalesReportByDateRange(
+            [FromQuery] DateTime fromDate,
+            [FromQuery] DateTime toDate,
+            [FromQuery] int? customerId = null,
+            [FromQuery] int? regionId = null,
+            [FromQuery] int? salesPersonId = null)
         {
             try
             {
-                var salesInvoices = await _salesInvoiceService.GetSalesInvoiceByDateRange(fromDate, toDate);
-                if (salesInvoices != null)
+                var salesInvoices = await _salesInvoiceService.GetSalesInvoiceByDateRange(
+                    fromDate, toDate, customerId, regionId, salesPersonId);
+
+                if (salesInvoices?.Any() == true)
                 {
                     var salesInvoiceDtos = _mapper.Map<IEnumerable<SalesInvoiceDto>>(salesInvoices);
                     AddResponseMessage(Response, LogMessages.SalesInvoicesRetrieved, salesInvoiceDtos, true, HttpStatusCode.OK);
@@ -208,6 +215,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 _logger.LogError(ex, ErrorMessages.InternalServerError);
                 AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
+
             return Response;
         }
     }

@@ -296,13 +296,19 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<SalesInvoice>> GetSalesInvoiceByDateRange(DateTime fromDate, DateTime toDate)
+        public async Task<IEnumerable<SalesInvoice>> GetSalesInvoiceByDateRange(
+            DateTime fromDate,
+            DateTime toDate,
+            int? customerId = null,
+            int? regionId = null,
+            int? salesPersonId = null)
         {
             try
             {
-                var salesInvoices = await _dbContext.SalesInvoices
-                     .Where(x => EF.Functions.DateDiffDay(fromDate, x.InvoiceDate) >= 0
-                                    && EF.Functions.DateDiffDay(toDate, x.InvoiceDate) <= 0)
+                var fromDateStart = fromDate.Date;
+                var toDateEnd = toDate.Date.AddDays(1).AddTicks(-1);
+
+                var query = _dbContext.SalesInvoices
                     .Include(si => si.Customer)
                         .ThenInclude(c => c.SalesPerson)
                     .Include(si => si.Customer)
@@ -311,6 +317,25 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(si => si.SalesInvoiceDetails)
                         .ThenInclude(ib => ib.ItemMaster)
                         .ThenInclude(im => im.Unit)
+                    .Where(si => si.InvoiceDate >= fromDateStart && si.InvoiceDate <= toDateEnd);
+
+                // Apply optional filters
+                if (customerId.HasValue)
+                {
+                    query = query.Where(si => si.CustomerId == customerId.Value);
+                }
+
+                if (regionId.HasValue)
+                {
+                    query = query.Where(si => si.Customer.RegionId == regionId.Value);
+                }
+
+                if (salesPersonId.HasValue)
+                {
+                    query = query.Where(si => si.Customer.SalesPersonId == salesPersonId.Value);
+                }
+
+                var salesInvoices = await query
                     .OrderBy(si => si.ApprovedDate)
                     .ToListAsync();
 

@@ -26,6 +26,6 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
 
         Task<IEnumerable<SalesInvoice>> GetSalesInvoiceByReference(string reference, int status);
 
-        Task<IEnumerable<SalesInvoice>> GetSalesInvoiceByDateRange(DateTime fromDate, DateTime toDate);
+        Task<IEnumerable<SalesInvoice>> GetSalesInvoiceByDateRange(DateTime fromDate, DateTime toDate, int? customerId = null, int? regionId = null, int? salesPersonId = null);
     }
 }

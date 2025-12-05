@@ -68,9 +68,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             return _salesInvoiceRepository.GetSalesInvoiceByReference(reference, status);
         }
 
-        public async Task<IEnumerable<SalesInvoice>> GetSalesInvoiceByDateRange(DateTime fromDate, DateTime toDate)
+        public async Task<IEnumerable<SalesInvoice>> GetSalesInvoiceByDateRange(DateTime fromDate, DateTime toDate, int? customerId = null, int? regionId = null, int? salesPersonId = null)
         {
-            return await _salesInvoiceRepository.GetSalesInvoiceByDateRange(fromDate, toDate);
+            return await _salesInvoiceRepository.GetSalesInvoiceByDateRange(fromDate, toDate, customerId, regionId, salesPersonId);
         }
     }
 }

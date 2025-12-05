@@ -1,10 +1,16 @@
 import React, { useState } from "react";
-import { FiCalendar, FiPrinter, FiSearch } from "react-icons/fi";
-import { BsFileEarmarkExcel } from "react-icons/bs";
+import {
+  FiAlertCircle,
+  FiCalendar,
+  FiDollarSign,
+  FiFileText,
+} from "react-icons/fi";
+import { BsDroplet, BsFileEarmarkExcel } from "react-icons/bs";
 import useSalesReport from "./useSalesReport";
 import ErrorComponent from "../errorComponent/errorComponent";
 import LoadingSpinner from "../loadingSpinner/loadingSpinner";
 import CurrentDateTime from "../currentDateTime/currentDateTime";
+import SummaryCard from "./components/SummaryCard";
 
 const SalesReport = () => {
   const {
@@ -13,14 +19,24 @@ const SalesReport = () => {
     reportData,
     isLoading,
     error,
+    customers,
+    regions,
+    salesPersons,
+    selectedCustomerId,
+    selectedRegionId,
+    selectedSalesPersonId,
+    isCustomersLoading,
+    isRegionsLoading,
+    isSalesPersonsLoading,
     setFromDate,
     setToDate,
     exportToExcel,
+    setSelectedCustomerId,
+    setSelectedRegionId,
+    setSelectedSalesPersonId,
   } = useSalesReport();
 
   const [expandedInvoice, setExpandedInvoice] = useState(null);
-  const [localFromDate, setLocalFromDate] = useState("");
-  const [localToDate, setLocalToDate] = useState("");
 
   // Calculate totals
   const calculateTotals = () => {
@@ -70,16 +86,26 @@ const SalesReport = () => {
     );
   };
 
-  const handleSearch = () => {
-    setFromDate(localFromDate);
-    setToDate(localToDate);
+  const formatLargeNumber = (amount) => {
+    const absAmount = Math.abs(amount);
+
+    if (absAmount >= 1_000_000_000) {
+      return `LKR ${(amount / 1_000_000_000).toFixed(2)}B`;
+    } else if (absAmount >= 1_000_000) {
+      return `LKR ${(amount / 1_000_000).toFixed(2)}M`;
+    } else if (absAmount >= 1_000) {
+      return `LKR ${(amount / 1_000).toFixed(2)}K`;
+    } else {
+      return formatCurrency(amount);
+    }
   };
 
   const handleClear = () => {
-    setLocalFromDate("");
-    setLocalToDate("");
     setFromDate("");
     setToDate("");
+    setSelectedCustomerId("");
+    setSelectedRegionId("");
+    setSelectedSalesPersonId("");
   };
 
   const handleExport = () => {
@@ -114,7 +140,7 @@ const SalesReport = () => {
       <div className="card shadow-sm mb-4">
         <div className="card-body">
           <div className="row g-3 align-items-end">
-            <div className="col-md-4">
+            <div className="col-md-3">
               <label htmlFor="fromDate" className="form-label fw-semibold">
                 <FiCalendar className="me-1" />
                 From Date
@@ -123,11 +149,11 @@ const SalesReport = () => {
                 type="date"
                 className="form-control"
                 id="fromDate"
-                value={localFromDate}
-                onChange={(e) => setLocalFromDate(e.target.value)}
+                value={fromDate}
+                onChange={(e) => setFromDate(e.target.value)}
               />
             </div>
-            <div className="col-md-4">
+            <div className="col-md-3">
               <label htmlFor="toDate" className="form-label fw-semibold">
                 <FiCalendar className="me-1" />
                 To Date
@@ -136,22 +162,77 @@ const SalesReport = () => {
                 type="date"
                 className="form-control"
                 id="toDate"
-                value={localToDate}
-                onChange={(e) => setLocalToDate(e.target.value)}
-                min={localFromDate}
+                value={toDate}
+                onChange={(e) => setToDate(e.target.value)}
+                min={fromDate}
               />
             </div>
-            <div className="col-md-4">
-              <button
-                className="btn btn-primary me-2"
-                disabled={!localFromDate || !localToDate}
-                onClick={handleSearch}
+            <div className="col-md-2">
+              <label
+                htmlFor="customerFilter"
+                className="form-label fw-semibold"
               >
-                <FiSearch className="me-1" />
-                Search
-              </button>
+                Customer
+              </label>
+              <select
+                className="form-select"
+                id="customerFilter"
+                value={selectedCustomerId}
+                onChange={(e) => setSelectedCustomerId(e.target.value)}
+                disabled={isCustomersLoading}
+              >
+                <option value="">All Customers</option>
+                {customers?.map((customer) => (
+                  <option key={customer.customerId} value={customer.customerId}>
+                    {customer.customerName}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="col-md-2">
+              <label htmlFor="regionFilter" className="form-label fw-semibold">
+                Region
+              </label>
+              <select
+                className="form-select"
+                id="regionFilter"
+                value={selectedRegionId}
+                onChange={(e) => setSelectedRegionId(e.target.value)}
+                disabled={isRegionsLoading}
+              >
+                <option value="">All Regions</option>
+                {regions?.map((region) => (
+                  <option key={region.regionId} value={region.regionId}>
+                    {region.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="col-md-2">
+              <label
+                htmlFor="salesPersonFilter"
+                className="form-label fw-semibold"
+              >
+                Sales Person
+              </label>
+              <select
+                className="form-select"
+                id="salesPersonFilter"
+                value={selectedSalesPersonId}
+                onChange={(e) => setSelectedSalesPersonId(e.target.value)}
+                disabled={isSalesPersonsLoading}
+              >
+                <option value="">All Sales Persons</option>
+                {salesPersons?.map((sp) => (
+                  <option key={sp.salesPersonId} value={sp.salesPersonId}>
+                    {sp.firstName + " " + sp.lastName}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="col-md-2">
               <button
-                className="btn btn-outline-secondary"
+                className="btn btn-outline-danger w-100"
                 onClick={handleClear}
               >
                 Clear
@@ -162,52 +243,43 @@ const SalesReport = () => {
       </div>
 
       {/* Summary Cards */}
-      {/* {totals && (
+      {totals && (
         <div className="row g-3 mb-4">
-          <div className="col-md-3">
-            <div className="card text-center shadow-sm border-primary">
-              <div className="card-body">
-                <h6 className="card-subtitle mb-2 text-muted">
-                  Total Invoices
-                </h6>
-                <h3 className="card-title text-primary mb-0">
-                  {totals.totalInvoices}
-                </h3>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-3">
-            <div className="card text-center shadow-sm border-success">
-              <div className="card-body">
-                <h6 className="card-subtitle mb-2 text-muted">Total Amount</h6>
-                <h3 className="card-title text-success mb-0">
-                  {formatCurrency(totals.totalAmount)}
-                </h3>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-3">
-            <div className="card text-center shadow-sm border-warning">
-              <div className="card-body">
-                <h6 className="card-subtitle mb-2 text-muted">Amount Due</h6>
-                <h3 className="card-title text-warning mb-0">
-                  {formatCurrency(totals.totalDue)}
-                </h3>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-3">
-            <div className="card text-center shadow-sm border-info">
-              <div className="card-body">
-                <h6 className="card-subtitle mb-2 text-muted">Total Litres</h6>
-                <h3 className="card-title text-info mb-0">
-                  {totals.totalLitres.toFixed(2)} L
-                </h3>
-              </div>
-            </div>
-          </div>
+          <SummaryCard
+            title="Total Invoices"
+            value={totals.totalInvoices}
+            borderColor="primary"
+            textColor="primary"
+            icon={FiFileText}
+          />
+
+          <SummaryCard
+            title="Total Amount"
+            value={formatLargeNumber(totals.totalAmount)}
+            subtitle={formatCurrency(totals.totalAmount)}
+            borderColor="success"
+            textColor="success"
+            icon={FiDollarSign}
+          />
+
+          <SummaryCard
+            title="Amount Due"
+            value={formatLargeNumber(totals.totalDue)}
+            subtitle={formatCurrency(totals.totalDue)}
+            borderColor="warning"
+            textColor="warning"
+            icon={FiAlertCircle}
+          />
+
+          <SummaryCard
+            title="Total Litres"
+            value={`${totals.totalLitres.toFixed(2)} L`}
+            borderColor="info"
+            textColor="info"
+            icon={BsDroplet}
+          />
         </div>
-      )} */}
+      )}
 
       {/* Action Buttons */}
       {reportData.length > 0 && (
