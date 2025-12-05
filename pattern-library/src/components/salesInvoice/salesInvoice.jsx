@@ -642,7 +642,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
           </div>
           <div className="card-body">
             <div className="row">
-              <div className="col-lg-6 mb-3">
+              {/* <div className="col-lg-6 mb-3">
                 <label className="form-label fw-semibold">Search Items</label>
                 <div className="input-group">
                   <span className="input-group-text bg-white">
@@ -666,7 +666,6 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                   )}
                 </div>
 
-                {/* Dropdown for filtered items */}
                 {searchTerm && (
                   <div className="dropdown position-relative">
                     <ul
@@ -733,7 +732,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                     </ul>
                   </div>
                 )}
-              </div>
+              </div> */}
             </div>
 
             {formData.itemDetails.length > 0 ? (
