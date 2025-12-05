@@ -295,7 +295,9 @@ const InvoicePrintPreview = ({
                   margin: "8px 0",
                 }}
               >
-                INVOICE
+                {salesInvoice?.customer?.isVATRegistered === true
+                  ? "VAT INVOICE"
+                  : "INVOICE"}
               </h2>
 
               {/* Customer Info */}
