@@ -16,13 +16,18 @@ export const get_sales_invoice_by_date_range_api = async ({
   customerId = null,
   regionId = null,
   salesPersonId = null,
+  pageNumber = 1,
+  pageSize = 10,
 }) => {
   try {
     const params = {
       fromDate,
       toDate,
+      pageNumber,
+      pageSize,
     };
 
+    // Optional filters
     if (customerId) params.customerId = customerId;
     if (regionId) params.regionId = regionId;
     if (salesPersonId) params.salesPersonId = salesPersonId;

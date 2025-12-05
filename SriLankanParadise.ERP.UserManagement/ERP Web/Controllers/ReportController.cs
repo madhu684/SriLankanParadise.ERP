@@ -8,6 +8,7 @@ using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Shared.Resources;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 
 namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
@@ -192,27 +193,43 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             [FromQuery] DateTime toDate,
             [FromQuery] int? customerId = null,
             [FromQuery] int? regionId = null,
-            [FromQuery] int? salesPersonId = null)
+            [FromQuery] int? salesPersonId = null,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
         {
             try
             {
-                var salesInvoices = await _salesInvoiceService.GetSalesInvoiceByDateRange(
-                    fromDate, toDate, customerId, regionId, salesPersonId);
+                var result = await _salesInvoiceService.GetSalesInvoiceByDateRange(
+                    fromDate, toDate, customerId, regionId, salesPersonId,
+                    pageNumber, pageSize);
 
-                if (salesInvoices?.Any() == true)
+                if (result.Items.Any())
                 {
-                    var salesInvoiceDtos = _mapper.Map<IEnumerable<SalesInvoiceDto>>(salesInvoices);
-                    AddResponseMessage(Response, LogMessages.SalesInvoicesRetrieved, salesInvoiceDtos, true, HttpStatusCode.OK);
+                    var dtos = _mapper.Map<IEnumerable<SalesInvoiceDto>>(result.Items);
+                    var responseData = new
+                    {
+                        Data = dtos,
+                        Pagination = new
+                        {
+                            result.TotalCount,
+                            result.PageNumber,
+                            result.PageSize,
+                            result.TotalPages,
+                            result.HasPreviousPage,
+                            result.HasNextPage
+                        }
+                    };
+
+                    AddResponseMessage(Response, "Sales report retrieved successfully", responseData, true, HttpStatusCode.OK);
                 }
                 else
                 {
-                    _logger.LogWarning(LogMessages.SalesInvoicesNotFound);
-                    AddResponseMessage(Response, LogMessages.SalesInvoicesNotFound, null, true, HttpStatusCode.NotFound);
+                    AddResponseMessage(Response, "No records found", null, true, HttpStatusCode.OK);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                _logger.LogError(ex, "Error in GetSalesReportByDateRange");
                 AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
 

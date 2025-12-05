@@ -1,5 +1,6 @@
 ﻿using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Repository;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
@@ -68,9 +69,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             return _salesInvoiceRepository.GetSalesInvoiceByReference(reference, status);
         }
 
-        public async Task<IEnumerable<SalesInvoice>> GetSalesInvoiceByDateRange(DateTime fromDate, DateTime toDate, int? customerId = null, int? regionId = null, int? salesPersonId = null)
+        public async Task<PagedResult<SalesInvoice>> GetSalesInvoiceByDateRange(DateTime fromDate, DateTime toDate, int? customerId = null, int? regionId = null, int? salesPersonId = null, int pageNumber = 1, int pageSize = 10)
         {
-            return await _salesInvoiceRepository.GetSalesInvoiceByDateRange(fromDate, toDate, customerId, regionId, salesPersonId);
+            return await _salesInvoiceRepository.GetSalesInvoiceByDateRange(fromDate, toDate, customerId, regionId, salesPersonId, pageNumber, pageSize);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
 {
@@ -26,6 +27,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
 
         Task<IEnumerable<SalesInvoice>> GetSalesInvoiceByReference(string reference, int status);
 
-        Task<IEnumerable<SalesInvoice>> GetSalesInvoiceByDateRange(DateTime fromDate, DateTime toDate, int? customerId = null, int? regionId = null, int? salesPersonId = null);
+        Task<PagedResult<SalesInvoice>> GetSalesInvoiceByDateRange(DateTime fromDate, DateTime toDate, int? customerId = null, int? regionId = null, int? salesPersonId = null, int pageNumber = 1, int pageSize = 10);
     }
 }

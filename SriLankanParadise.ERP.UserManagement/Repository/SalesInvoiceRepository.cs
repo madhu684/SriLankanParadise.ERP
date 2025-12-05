@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
@@ -296,19 +297,28 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<SalesInvoice>> GetSalesInvoiceByDateRange(
+        public async Task<PagedResult<SalesInvoice>> GetSalesInvoiceByDateRange(
             DateTime fromDate,
             DateTime toDate,
             int? customerId = null,
             int? regionId = null,
-            int? salesPersonId = null)
+            int? salesPersonId = null,
+            int pageNumber = 1, 
+            int pageSize = 10)
         {
             try
             {
+
+                // Input validation
+                if (pageNumber < 1) pageNumber = 1;
+                if (pageSize < 1) pageSize = 10;
+                if (pageSize > 100) pageSize = 100;
+
                 var fromDateStart = fromDate.Date;
                 var toDateEnd = toDate.Date.AddDays(1).AddTicks(-1);
 
                 var query = _dbContext.SalesInvoices
+                    .AsNoTracking()
                     .Include(si => si.Customer)
                         .ThenInclude(c => c.SalesPerson)
                     .Include(si => si.Customer)
@@ -336,10 +346,26 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 }
 
                 var salesInvoices = await query
-                    .OrderBy(si => si.ApprovedDate)
+                    .OrderBy(si => si.InvoiceDate)
                     .ToListAsync();
 
-                return salesInvoices.Any() ? salesInvoices : null!;
+                // Get total count (for pagination metadata)
+                var totalCount = await query.CountAsync();
+
+                // Apply pagination
+                var items = await query
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                return new PagedResult<SalesInvoice>
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+                };
             }
             catch (Exception)
             {
