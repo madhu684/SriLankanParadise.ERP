@@ -1,4 +1,6 @@
 ﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
@@ -28,5 +30,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task<IEnumerable<SalesInvoice>> GetSalesInvoiceByReference(string reference, int status);
 
         Task<PagedResult<SalesInvoice>> GetSalesInvoiceByDateRange(DateTime fromDate, DateTime toDate, int? customerId = null, int? regionId = null, int? salesPersonId = null, int pageNumber = 1, int pageSize = 10);
+
+        Task<AgeAnalysisWithTotalsDto> GetAgeAnalysisWithTotals(AgeAnalysisRequest request);
     }
 }

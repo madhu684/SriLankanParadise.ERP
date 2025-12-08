@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using SriLankanParadise.ERP.UserManagement.Business_Service;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Shared.Resources;
 using System.Collections.Generic;
@@ -230,6 +231,173 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in GetSalesReportByDateRange");
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+
+            return Response;
+        }
+
+
+        [HttpPost("age-analysis")]
+        public async Task<ApiResponseModel> GetAgeAnalysis([FromBody] AgeAnalysisRequest request)
+        {
+            try
+            {
+                // Validate request
+                if (request == null)
+                {
+                    AddResponseMessage(Response, "Request body is required", null, false, HttpStatusCode.BadRequest);
+                    return Response;
+                }
+
+                // Set default values if not provided
+                if (request.PageNumber < 1) request.PageNumber = 1;
+                if (request.PageSize < 1) request.PageSize = 10;
+                if (request.AsOfDate == default) request.AsOfDate = DateTime.UtcNow;
+
+                // Validate slabs
+                //if (request.Slabs == null || !request.Slabs.Any())
+                //{
+                //    AddResponseMessage(Response, "Slabs are required in the request body", null, false, HttpStatusCode.BadRequest);
+                //    return Response;
+                //}
+                request.Slabs ??= new List<SlabDefinition>();
+
+                // Validate slabs
+                if (!request.Slabs.Any())
+                {
+                    AddResponseMessage(Response, "Slabs are required in the request body", null, false, HttpStatusCode.BadRequest);
+                    return Response;
+                }
+
+                var result = await _salesInvoiceService.GetAgeAnalysis(request);
+
+                if (result.Items != null && result.Items.Any())
+                {
+                    var responseData = new
+                    {
+                        Data = result.Items,
+                        Pagination = new
+                        {
+                            result.TotalCount,
+                            result.PageNumber,
+                            result.PageSize,
+                            result.TotalPages,
+                            result.HasPreviousPage,
+                            result.HasNextPage
+                        },
+                        Summary = new
+                        {
+                            result.SlabTotals,
+                            result.TotalAmountDue
+                        }
+                    };
+
+                    AddResponseMessage(Response, "Age analysis report retrieved successfully", responseData, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    var emptyResponseData = new
+                    {
+                        Data = new List<AgeAnalysisInvoiceItem>(),
+                        Pagination = new
+                        {
+                            TotalCount = 0,
+                            PageNumber = request.PageNumber,
+                            PageSize = request.PageSize,
+                            TotalPages = 0,
+                            HasPreviousPage = false,
+                            HasNextPage = false
+                        },
+                        Summary = new
+                        {
+                            SlabTotals = new Dictionary<string, decimal>(),
+                            TotalAmountDue = 0m
+                        }
+                    };
+                    AddResponseMessage(Response, "No records found", emptyResponseData, true, HttpStatusCode.OK);
+                }
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogWarning(ex, "Invalid request parameters for GetAgeAnalysis");
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.BadRequest);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetAgeAnalysis");
+                AddResponseMessage(Response, "An error occurred while processing your request", null, false, HttpStatusCode.InternalServerError);
+            }
+
+            return Response;
+        }
+
+        // GET endpoint with query parameters
+        [HttpGet("age-analysis")]
+        public async Task<ApiResponseModel> GetAgeAnalysisByQuery(
+            [FromQuery] DateTime? asOfDate = null,
+            [FromQuery] int? customerId = null,
+            [FromQuery] int? regionId = null,
+            [FromQuery] int? salesPersonId = null,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                // Define default slabs if needed
+                var defaultSlabs = new List<SlabDefinition>
+            {
+                new SlabDefinition { FromDays = 0, ToDays = 30, Label = "0-30 Days" },
+                new SlabDefinition { FromDays = 31, ToDays = 60, Label = "31-60 Days" },
+                new SlabDefinition { FromDays = 61, ToDays = 90, Label = "61-90 Days" },
+                new SlabDefinition { FromDays = 91, ToDays = 120, Label = "91-120 Days" },
+                new SlabDefinition { FromDays = 121, ToDays = null, Label = "Over 120 Days" }
+            };
+
+                var request = new AgeAnalysisRequest
+                {
+                    AsOfDate = asOfDate ?? DateTime.UtcNow,
+                    Slabs = defaultSlabs,
+                    CustomerId = customerId,
+                    RegionId = regionId,
+                    SalesPersonId = salesPersonId,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize
+                };
+
+                var result = await _salesInvoiceService.GetAgeAnalysis(request);
+
+                if (result.Items.Any())
+                {
+                    var responseData = new
+                    {
+                        Data = result.Items,
+                        Pagination = new
+                        {
+                            result.TotalCount,
+                            result.PageNumber,
+                            result.PageSize,
+                            result.TotalPages,
+                            result.HasPreviousPage,
+                            result.HasNextPage
+                        },
+                        Summary = new
+                        {
+                            result.SlabTotals,
+                            result.TotalAmountDue
+                        }
+                    };
+
+                    AddResponseMessage(Response, "Age analysis report retrieved successfully", responseData, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    AddResponseMessage(Response, "No records found", null, true, HttpStatusCode.OK);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetAgeAnalysisByQuery");
                 AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
 

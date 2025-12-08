@@ -1,5 +1,7 @@
 ﻿using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Repository;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
@@ -72,6 +74,22 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         public async Task<PagedResult<SalesInvoice>> GetSalesInvoiceByDateRange(DateTime fromDate, DateTime toDate, int? customerId = null, int? regionId = null, int? salesPersonId = null, int pageNumber = 1, int pageSize = 10)
         {
             return await _salesInvoiceRepository.GetSalesInvoiceByDateRange(fromDate, toDate, customerId, regionId, salesPersonId, pageNumber, pageSize);
+        }
+
+        public async Task<AgeAnalysisResultDto> GetAgeAnalysis(AgeAnalysisRequest request)
+        {
+            var result = await _salesInvoiceRepository.GetAgeAnalysisWithTotals(request);
+
+            return new AgeAnalysisResultDto
+            {
+                Items = result.Items,
+                TotalCount = result.TotalCount,
+                PageNumber = result.PageNumber,
+                PageSize = result.PageSize,
+                TotalPages = result.TotalPages,
+                SlabTotals = result.SlabTotals,
+                TotalAmountDue = result.TotalAmountDue
+            };
         }
     }
 }
