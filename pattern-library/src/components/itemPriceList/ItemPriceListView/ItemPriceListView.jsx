@@ -175,6 +175,9 @@ const ItemPriceListViewModal = memo(({ itemPriceList, show, handleClose }) => {
                       <th className="text-end pe-4" style={{ width: "200px" }}>
                         Price
                       </th>
+                      <th className="text-end pe-4" style={{ width: "200px" }}>
+                        VAT Added Price
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -192,6 +195,18 @@ const ItemPriceListViewModal = memo(({ itemPriceList, show, handleClose }) => {
                           <span className="badge bg-success bg-opacity-10 text-success fw-semibold px-3 py-2">
                             LKR{" "}
                             {parseFloat(item.price || 0).toLocaleString(
+                              "en-US",
+                              {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              }
+                            )}
+                          </span>
+                        </td>
+                        <td className="text-end pe-4">
+                          <span className="badge bg-danger bg-opacity-10 text-danger fw-semibold px-3 py-2">
+                            LKR{" "}
+                            {parseFloat(item.vatAddedPrice || 0).toLocaleString(
                               "en-US",
                               {
                                 minimumFractionDigits: 2,

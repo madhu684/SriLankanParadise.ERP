@@ -299,27 +299,6 @@ const useSalesOrder = ({ onFormSubmit }) => {
   }, [submissionStatus]);
 
   // Initialize common charges when charges data loads
-  // useEffect(() => {
-  //   if (
-  //     chargesAndDeductions &&
-  //     formData.commonChargesAndDeductions.length === 0
-  //   ) {
-  //     const initializedChargesArray = chargesAndDeductions
-  //       .filter((charge) => charge.isDisableFromSubTotal === false)
-  //       .map((charge) => ({
-  //         id: charge.chargesAndDeductionId,
-  //         name: charge.displayName,
-  //         value: charge.amount || charge.percentage,
-  //         sign: charge.sign,
-  //         isPercentage: charge.percentage !== null,
-  //       }));
-
-  //     setFormData((prev) => ({
-  //       ...prev,
-  //       commonChargesAndDeductions: initializedChargesArray,
-  //     }));
-  //   }
-  // }, [chargesAndDeductions]);
   useEffect(() => {
     if (chargesAndDeductions) {
       const initializedChargesArray = chargesAndDeductions
@@ -818,72 +797,6 @@ const useSalesOrder = ({ onFormSubmit }) => {
   const handleAttachmentChange = useCallback((files) => {
     setFormData((prev) => ({ ...prev, attachments: files }));
   }, []);
-
-  // const handleSelectItem = useCallback(
-  //   async (item) => {
-  //     let availableStock = 0;
-  //     let unitPrice = item.unitPrice || 0;
-
-  //     try {
-  //       const inventory =
-  //         await get_sum_location_inventories_by_locationId_itemMasterId_api(
-  //           item.itemMasterId,
-  //           formData.storeLocation,
-  //           null
-  //         );
-  //       availableStock = inventory?.data?.result?.totalStockInHand || 0;
-
-  //       if (availableStock <= 0) {
-  //         toast.error(
-  //           `No stock available for "${item.itemName}" in user location`
-  //         );
-  //         setSearchTerm("");
-  //         return;
-  //       }
-
-  //       unitPrice = getPriceFromPriceList(item.itemMasterId);
-
-  //       const initialCharges = getInitializedCharges;
-
-  //       // NEW: Store original charges for this item
-  //       setOriginalLineItemCharges((prev) => {
-  //         const newMap = new Map(prev);
-  //         newMap.set(
-  //           item.itemMasterId,
-  //           JSON.parse(JSON.stringify(initialCharges))
-  //         );
-  //         return newMap;
-  //       });
-
-  //       setFormData((prev) => ({
-  //         ...prev,
-  //         itemDetails: [
-  //           ...prev.itemDetails,
-  //           {
-  //             itemMasterId: item.itemMasterId,
-  //             name: item.itemName || "",
-  //             unit: item.unit?.unitName || "",
-  //             quantity: 0,
-  //             unitPrice: unitPrice,
-  //             totalPrice: 0,
-  //             batchId: null,
-  //             tempQuantity: availableStock,
-  //             packSize: item?.conversionRate || 1,
-  //             isInventoryItem: item?.isInventoryItem,
-  //             chargesAndDeductions: getInitializedCharges,
-  //           },
-  //         ],
-  //       }));
-
-  //       setSearchTerm("");
-  //     } catch (error) {
-  //       console.error("Error processing item:", error);
-  //       toast.error("Failed to add item");
-  //       setSearchTerm("");
-  //     }
-  //   },
-  //   [getPriceFromPriceList, getInitializedCharges, formData.storeLocation]
-  // );
 
   const handleSelectItem = useCallback(
     async (item) => {

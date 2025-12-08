@@ -8,6 +8,7 @@ namespace SriLankanParadise.ERP.UserManagement.DataModels
         public int ItemPriceMasterId { get; set; }
         public int ItemMasterId { get; set; }
         public decimal Price { get; set; }
+        public decimal? VATAddedPrice { get; set; }
 
         [JsonIgnore]
         public virtual ItemPriceMaster? ItemPriceMaster { get; set; }

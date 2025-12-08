@@ -9,13 +9,8 @@ import {
 import toast from "react-hot-toast";
 
 const useItemPriceList = (handleClose) => {
-  // const STATUS_OPTIONS = useMemo(
-  //   () => [
-  //     { id: "1", label: "Active" },
-  //     { id: "0", label: "Inactive" },
-  //   ],
-  //   []
-  // );
+  // VAT Rate constant
+  const VAT_RATE = 18;
 
   const [formData, setFormData] = useState({
     listName: "",
@@ -35,6 +30,22 @@ const useItemPriceList = (handleClose) => {
   const username = useMemo(() => sessionStorage.getItem("username"), []);
 
   const queryClient = useQueryClient();
+
+  // ============================================================================
+  // UTILITY FUNCTIONS
+  // ============================================================================
+
+  const calculateVATAddedPrice = useCallback(
+    (costPrice) => {
+      if (!costPrice || costPrice === "" || isNaN(costPrice)) {
+        return "";
+      }
+      const price = parseFloat(costPrice);
+      const vatAddedPrice = (price * (100 + VAT_RATE)) / 100;
+      return vatAddedPrice.toFixed(2);
+    },
+    [VAT_RATE]
+  );
 
   // ============================================================================
   // DATA FETCHING - REACT QUERY
@@ -104,28 +115,27 @@ const useItemPriceList = (handleClose) => {
       formData.effectiveDate
     );
 
-    // const isStatusValid = validateField("status", "Status", formData.status);
-
-    let isItemPriceValid = true;
+    let isItemValid = true;
     formData.itemDetails.forEach((item, index) => {
-      const fieldName = `costPrice_${index}`;
-      const fieldDisplayName = `Cost price for ${item.name}`;
-
-      const isValidCostPrice = validateField(
-        fieldName,
-        fieldDisplayName,
+      // Validate costPrice
+      const costPriceValid = validateField(
+        `costPrice_${index}`,
+        `Cost Price for ${item.name || `item ${index + 1}`}`,
         item.costPrice
       );
 
-      isItemPriceValid = isItemPriceValid && isValidCostPrice;
+      // Validate vatAddedPrice
+      const vatAddedPriceValid = validateField(
+        `vatAddedPrice_${index}`,
+        `VAT Added Price for ${item.name || `item ${index + 1}`}`,
+        item.vatAddedPrice
+      );
+
+      // Both must be valid for this item
+      isItemValid = isItemValid && costPriceValid && vatAddedPriceValid;
     });
 
-    return (
-      isListNameValid &&
-      isEffectiveDateValid &&
-      // isStatusValid &&
-      isItemPriceValid
-    );
+    return isListNameValid && isEffectiveDateValid && isItemValid;
   }, [formData, validateField]);
 
   // ============================================================================
@@ -142,6 +152,7 @@ const useItemPriceList = (handleClose) => {
           itemMasterId: item.itemMasterId,
           name: item.itemName || "",
           costPrice: "",
+          vatAddedPrice: "",
         }));
 
         // Use functional update to avoid stale closure
@@ -177,6 +188,7 @@ const useItemPriceList = (handleClose) => {
             itemMasterId: item.itemMasterId,
             name: item.itemName || "",
             costPrice: "",
+            vatAddedPrice: "",
           },
         ],
       };
@@ -185,17 +197,32 @@ const useItemPriceList = (handleClose) => {
     setSearchTerm("");
   }, []);
 
-  const handleItemDetailsChange = useCallback((index, field, value) => {
-    setFormData((prevData) => {
-      const newItemDetails = [...prevData.itemDetails];
-      newItemDetails[index] = { ...newItemDetails[index], [field]: value };
+  const handleItemDetailsChange = useCallback(
+    (index, field, value) => {
+      setFormData((prevData) => {
+        const newItemDetails = [...prevData.itemDetails];
 
-      return {
-        ...prevData,
-        itemDetails: newItemDetails,
-      };
-    });
-  }, []);
+        // If changing cost price, calculate VAT added price automatically
+        if (field === "costPrice") {
+          const vatAddedPrice = calculateVATAddedPrice(value);
+          newItemDetails[index] = {
+            ...newItemDetails[index],
+            costPrice: value,
+            vatAddedPrice: vatAddedPrice,
+          };
+        } else {
+          // For other fields, just update the field
+          newItemDetails[index] = { ...newItemDetails[index], [field]: value };
+        }
+
+        return {
+          ...prevData,
+          itemDetails: newItemDetails,
+        };
+      });
+    },
+    [calculateVATAddedPrice]
+  );
 
   const handleInputChange = useCallback((field, value) => {
     setFormData((prevData) => ({
@@ -214,12 +241,14 @@ const useItemPriceList = (handleClose) => {
     setValidFields((prev) => {
       const newValidFields = { ...prev };
       delete newValidFields[`costPrice_${index}`];
+      delete newValidFields[`vatAddedPrice_${index}`];
       return newValidFields;
     });
 
     setValidationErrors((prev) => {
       const newValidationErrors = { ...prev };
       delete newValidationErrors[`costPrice_${index}`];
+      delete newValidationErrors[`vatAddedPrice_${index}`];
       return newValidationErrors;
     });
   }, []);
@@ -277,6 +306,7 @@ const useItemPriceList = (handleClose) => {
             itemPriceMasterId: itemPriceListId,
             itemMasterId: item.itemMasterId,
             price: item.costPrice,
+            vatAddedPrice: item.vatAddedPrice,
           })
         );
 
@@ -341,7 +371,6 @@ const useItemPriceList = (handleClose) => {
 
   return {
     formData,
-    // statusOptions: STATUS_OPTIONS,
     availableItems: filteredAvailableItems,
     isItemsLoading,
     allItemsLoading,

@@ -76,6 +76,7 @@ const useItemPriceListList = () => {
             itemMasterId: detail.itemMasterId,
             itemName: detail.itemMaster?.itemName || "",
             price: detail.price,
+            vatAddedPrice: detail.vatAddedPrice,
           }))
         : [],
     };
