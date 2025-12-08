@@ -221,6 +221,17 @@ const useSalesOrder = ({ onFormSubmit }) => {
   // MEMOIZED CALCULATIONS
   // ============================================================================
 
+  // const priceListMap = useMemo(() => {
+  //   if (!itemPriceListByLocation?.itemPriceDetails) {
+  //     return new Map();
+  //   }
+  //   return new Map(
+  //     itemPriceListByLocation.itemPriceDetails.map((detail) => [
+  //       detail.itemMasterId,
+  //       detail.price,
+  //     ])
+  //   );
+  // }, [itemPriceListByLocation]);
   const priceListMap = useMemo(() => {
     if (!itemPriceListByLocation?.itemPriceDetails) {
       return new Map();
@@ -228,7 +239,10 @@ const useSalesOrder = ({ onFormSubmit }) => {
     return new Map(
       itemPriceListByLocation.itemPriceDetails.map((detail) => [
         detail.itemMasterId,
-        detail.price,
+        {
+          price: detail.price,
+          vatAddedPrice: detail.vatAddedPrice,
+        },
       ])
     );
   }, [itemPriceListByLocation]);
@@ -350,6 +364,47 @@ const useSalesOrder = ({ onFormSubmit }) => {
 
     setHasLineItemChargesChanged(hasChanged);
   }, [formData.itemDetails, originalLineItemCharges, compareCharges]);
+
+  useEffect(() => {
+    // Update item prices when customer VAT status changes
+    if (formData.itemDetails.length > 0 && formData.selectedCustomer) {
+      setFormData((prev) => ({
+        ...prev,
+        itemDetails: prev.itemDetails.map((item) => {
+          const priceData = priceListMap.get(item.itemMasterId);
+          if (!priceData) return item;
+
+          // Determine unit price based on customer VAT status
+          const newUnitPrice = !formData.selectedCustomer.isVATRegistered
+            ? priceData.vatAddedPrice || priceData.price || 0
+            : priceData.price || 0;
+
+          // Recalculate total price with new unit price
+          const grandTotalPrice = item.quantity * newUnitPrice;
+          let totalPrice = grandTotalPrice;
+
+          item.chargesAndDeductions.forEach((charge) => {
+            if (charge.name === "SSL") {
+              const amount =
+                (grandTotalPrice / (100 - charge.value)) * charge.value;
+              totalPrice += charge.sign === "+" ? amount : -amount;
+            } else if (charge.isPercentage) {
+              const amount = (grandTotalPrice * charge.value) / 100;
+              totalPrice += charge.sign === "+" ? amount : -amount;
+            } else {
+              totalPrice += charge.sign === "+" ? charge.value : -charge.value;
+            }
+          });
+
+          return {
+            ...item,
+            unitPrice: newUnitPrice,
+            totalPrice: Math.max(0, totalPrice),
+          };
+        }),
+      }));
+    }
+  }, [formData.selectedCustomer?.isVATRegistered, priceListMap]);
 
   // ============================================================================
   // VALIDATION
@@ -496,11 +551,28 @@ const useSalesOrder = ({ onFormSubmit }) => {
   // HELPER FUNCTIONS
   // ============================================================================
 
+  // const getPriceFromPriceList = useCallback(
+  //   (itemMasterId) => {
+  //     return priceListMap.get(itemMasterId) || 0;
+  //   },
+  //   [priceListMap]
+  // );
   const getPriceFromPriceList = useCallback(
     (itemMasterId) => {
-      return priceListMap.get(itemMasterId) || 0;
+      const priceData = priceListMap.get(itemMasterId);
+      if (!priceData) return 0;
+
+      // If customer is not VAT registered, use vatAddedPrice, otherwise use regular price
+      if (
+        formData.selectedCustomer &&
+        !formData.selectedCustomer.isVATRegistered
+      ) {
+        return priceData.vatAddedPrice || priceData.price || 0;
+      }
+
+      return priceData.price || 0;
     },
-    [priceListMap]
+    [priceListMap, formData.selectedCustomer]
   );
 
   const getTransactionTypeIdByName = useCallback(
@@ -810,7 +882,20 @@ const useSalesOrder = ({ onFormSubmit }) => {
       }
 
       let availableStock = 0;
-      let unitPrice = getPriceFromPriceList(item.itemMasterId);
+      const priceData = priceListMap.get(item.itemMasterId);
+      let unitPrice = 0;
+
+      if (priceData) {
+        // If customer is not VAT registered, use vatAddedPrice
+        if (
+          formData.selectedCustomer &&
+          !formData.selectedCustomer.isVATRegistered
+        ) {
+          unitPrice = priceData.vatAddedPrice || priceData.price || 0;
+        } else {
+          unitPrice = priceData.price || 0;
+        }
+      }
 
       // Check if unit price is found in price list
       if (unitPrice === 0) {
