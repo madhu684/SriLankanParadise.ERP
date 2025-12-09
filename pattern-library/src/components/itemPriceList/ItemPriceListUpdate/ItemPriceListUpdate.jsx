@@ -74,18 +74,20 @@ const ItemRow = memo(
       [index, onItemChange]
     );
 
+    const handleVATAddedPriceChange = useCallback(
+      (e) => {
+        onItemChange(index, "vatAddedPrice", e.target.value);
+      },
+      [index, onItemChange]
+    );
+
     const handleRemove = useCallback(() => {
       onRemove(index);
     }, [index, onRemove]);
 
     return (
       <tr>
-        <td className="ps-4 fw-semibold">
-          {item.name}
-          {/* {item.isExisting && (
-            <span className="badge bg-secondary ms-2 small">Existing</span>
-          )} */}
-        </td>
+        <td className="ps-4 fw-semibold">{item.name}</td>
         <td>
           <input
             type="number"
@@ -101,6 +103,27 @@ const ItemRow = memo(
           {validationErrors[`costPrice_${index}`] && (
             <div className="invalid-feedback">
               {validationErrors[`costPrice_${index}`]}
+            </div>
+          )}
+        </td>
+        <td>
+          <input
+            type="number"
+            className={`form-control form-control-sm ${
+              validFields[`vatAddedPrice_${index}`] ? "is-valid" : ""
+            } ${
+              validationErrors[`vatAddedPrice_${index}`] ? "is-invalid" : ""
+            }`}
+            placeholder="Auto-calculated"
+            value={item.vatAddedPrice || ""}
+            onChange={handleVATAddedPriceChange}
+            min="0"
+            step="0.01"
+            readOnly
+          />
+          {validationErrors[`vatAddedPrice_${index}`] && (
+            <div className="invalid-feedback">
+              {validationErrors[`vatAddedPrice_${index}`]}
             </div>
           )}
         </td>
@@ -232,32 +255,6 @@ const ItemPriceListUpdate = ({ itemPriceList, handleClose }) => {
                           </div>
                         )}
                       </div>
-                      {/* <div className="mb-3">
-                        <label className="form-label">
-                          <i className="bi bi-distribute-vertical me-2"></i>
-                          Status
-                        </label>
-                        <select
-                          id="status"
-                          className={`form-control ${
-                            validFields.status ? "is-valid" : ""
-                          } ${validationErrors.status ? "is-invalid" : ""}`}
-                          value={formData.status}
-                          onChange={handleStatusChange}
-                        >
-                          <option value="">Select Status</option>
-                          {statusOptions.map((option) => (
-                            <option key={option.id} value={option.id}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                        {validationErrors.status && (
-                          <div className="invalid-feedback">
-                            {validationErrors.status}
-                          </div>
-                        )}
-                      </div> */}
                       <div className="mb-3">
                         <label className="form-label">
                           <i className="bi bi-file-earmark me-2"></i>
@@ -399,6 +396,13 @@ const ItemPriceListUpdate = ({ itemPriceList, handleClose }) => {
                           style={{ width: "200px" }}
                         >
                           Cost Price
+                        </th>
+                        <th
+                          scope="col"
+                          className="text-center"
+                          style={{ width: "200px" }}
+                        >
+                          VAT Added Price
                         </th>
                         <th
                           scope="col"

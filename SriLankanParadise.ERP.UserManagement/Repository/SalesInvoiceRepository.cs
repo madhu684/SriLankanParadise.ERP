@@ -1,6 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
@@ -296,13 +299,28 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<SalesInvoice>> GetSalesInvoiceByDateRange(DateTime fromDate, DateTime toDate)
+        public async Task<PagedResult<SalesInvoice>> GetSalesInvoiceByDateRange(
+            DateTime fromDate,
+            DateTime toDate,
+            int? customerId = null,
+            int? regionId = null,
+            int? salesPersonId = null,
+            int pageNumber = 1, 
+            int pageSize = 10)
         {
             try
             {
-                var salesInvoices = await _dbContext.SalesInvoices
-                     .Where(x => EF.Functions.DateDiffDay(fromDate, x.InvoiceDate) >= 0
-                                    && EF.Functions.DateDiffDay(toDate, x.InvoiceDate) <= 0)
+
+                // Input validation
+                if (pageNumber < 1) pageNumber = 1;
+                if (pageSize < 1) pageSize = 10;
+                if (pageSize > 100) pageSize = 100;
+
+                var fromDateStart = fromDate.Date;
+                var toDateEnd = toDate.Date.AddDays(1).AddTicks(-1);
+
+                var query = _dbContext.SalesInvoices
+                    .AsNoTracking()
                     .Include(si => si.Customer)
                         .ThenInclude(c => c.SalesPerson)
                     .Include(si => si.Customer)
@@ -311,15 +329,236 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(si => si.SalesInvoiceDetails)
                         .ThenInclude(ib => ib.ItemMaster)
                         .ThenInclude(im => im.Unit)
-                    .OrderBy(si => si.ApprovedDate)
+                    .Where(si => si.InvoiceDate >= fromDateStart && si.InvoiceDate <= toDateEnd);
+
+                // Apply optional filters
+                if (customerId.HasValue)
+                {
+                    query = query.Where(si => si.CustomerId == customerId.Value);
+                }
+
+                if (regionId.HasValue)
+                {
+                    query = query.Where(si => si.Customer.RegionId == regionId.Value);
+                }
+
+                if (salesPersonId.HasValue)
+                {
+                    query = query.Where(si => si.Customer.SalesPersonId == salesPersonId.Value);
+                }
+
+                var salesInvoices = await query
+                    .OrderBy(si => si.InvoiceDate)
                     .ToListAsync();
 
-                return salesInvoices.Any() ? salesInvoices : null!;
+                // Get total count (for pagination metadata)
+                var totalCount = await query.CountAsync();
+
+                // Apply pagination
+                var items = await query
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                return new PagedResult<SalesInvoice>
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+                };
             }
             catch (Exception)
             {
                 throw;
             }
+        }
+
+        public async Task<AgeAnalysisWithTotalsDto> GetAgeAnalysisWithTotals(AgeAnalysisRequest request)
+        {
+            try
+            {
+                // Input validation
+                if (request.PageNumber < 1) request.PageNumber = 1;
+                if (request.PageSize < 1) request.PageSize = 10;
+                if (request.PageSize > 100) request.PageSize = 100;
+
+                // Validate slabs
+                if (request.Slabs == null || request.Slabs.Count == 0 || request.Slabs.Count > 5)
+                {
+                    throw new ArgumentException("Slabs must be provided and cannot exceed 5 slabs.");
+                }
+
+                var sortedSlabs = request.Slabs.OrderBy(s => s.FromDays).ToList();
+
+                // Query sales invoices with amount due > 0 (unpaid or partially paid)
+                var query = _dbContext.SalesInvoices
+                    .AsNoTracking()
+                    .Include(si => si.Customer)
+                        .ThenInclude(c => c.SalesPerson)
+                    .Include(si => si.Customer)
+                        .ThenInclude(c => c.Region)
+                        .Where(si => si.AmountDue > 0);
+                    //.Where(si => si.Status != 0 && si.AmountDue.HasValue && si.AmountDue.Value > 0);
+
+                // Apply optional filters
+                if (request.CustomerId.HasValue)
+                {
+                    query = query.Where(si => si.CustomerId == request.CustomerId.Value);
+                }
+
+                if (request.RegionId.HasValue)
+                {
+                    query = query.Where(si => si.Customer.RegionId == request.RegionId.Value);
+                }
+
+                if (request.SalesPersonId.HasValue)
+                {
+                    query = query.Where(si => si.Customer.SalesPersonId == request.SalesPersonId.Value);
+                }
+
+                // Get all invoices (we'll process aging in memory)
+                var allInvoices = await query.ToListAsync();
+
+                if (!allInvoices.Any())
+                {
+                    // Return empty result if no invoices found
+                    return new AgeAnalysisWithTotalsDto
+                    {
+                        Items = new List<AgeAnalysisInvoiceItem>(),
+                        TotalCount = 0,
+                        PageNumber = request.PageNumber,
+                        PageSize = request.PageSize,
+                        TotalPages = 0,
+                        SlabTotals = sortedSlabs.ToDictionary(s => s.Label, s => 0m),
+                        TotalAmountDue = 0m
+                    };
+                }
+
+                // Calculate aging and assign to slabs for ALL invoices
+                //var processedInvoices = allInvoices
+                //    .Where(si => si.InvoiceDate.HasValue)
+                //    .Select(si =>
+                //    {
+                //        // Calculate aging days
+                //        var agingDays = (request.AsOfDate.Date - si.InvoiceDate.Value.Date).Days;
+
+                //        // Determine which slab this invoice belongs to
+                //        var assignedSlab = DetermineSlabForInvoice(agingDays, sortedSlabs);
+
+                //        // Create slab amounts dictionary
+                //        var slabAmounts = new Dictionary<string, decimal>();
+                //        foreach (var slab in sortedSlabs)
+                //        {
+                //            slabAmounts[slab.Label] = (slab.Label == assignedSlab.Label) ? si.AmountDue.Value : 0;
+                //        }
+
+                //        return new AgeAnalysisInvoiceItem
+                //        {
+                //            SalesInvoiceId = si.SalesInvoiceId,
+                //            ReferenceNo = si.ReferenceNo ?? "",
+                //            CustomerName = si.Customer?.CustomerName ?? "",
+                //            SalesPersonName = (si.Customer?.SalesPerson?.FirstName + " " + si.Customer?.SalesPerson?.LastName)?.Trim() ?? "",
+                //            RegionName = si.Customer?.Region?.Name ?? "",
+                //            InvoiceDate = si.InvoiceDate,
+                //            TotalAmount = si.TotalAmount,
+                //            AmountDue = si.AmountDue,
+                //            AgingDays = agingDays,
+                //            SlabLabel = assignedSlab.Label,
+                //            SlabAmounts = slabAmounts
+                //        };
+                //    })
+                //    .OrderByDescending(i => i.AgingDays)
+                //    .ToList();
+
+                var processedInvoices = allInvoices
+                    .Select(si =>
+                    {
+                        // Safely calculate aging days – if InvoiceDate is null, treat as 0 aging (or very high – your choice)
+                        var invoiceDate = si.InvoiceDate?.Date ?? request.AsOfDate.Date; // fallback to AsOfDate → 0 days
+                        var agingDays = (request.AsOfDate.Date - invoiceDate).Days;
+
+                        var assignedSlab = DetermineSlabForInvoice(agingDays, sortedSlabs);
+
+                        var slabAmounts = sortedSlabs.ToDictionary(
+                            s => s.Label,
+                            s => s.Label == assignedSlab.Label ? si.AmountDue.Value : 0m);
+
+                        return new AgeAnalysisInvoiceItem
+                        {
+                            SalesInvoiceId = si.SalesInvoiceId,
+                            ReferenceNo = si.ReferenceNo ?? "",
+                            CustomerName = si.Customer?.CustomerName ?? "",
+                            SalesPersonName = (si.Customer?.SalesPerson?.FirstName + " " + si.Customer?.SalesPerson?.LastName)?.Trim() ?? "",
+                            RegionName = si.Customer?.Region?.Name ?? "",
+                            InvoiceDate = si.InvoiceDate,
+                            TotalAmount = si.TotalAmount,
+                            AmountDue = si.AmountDue,
+                            AgingDays = agingDays,
+                            SlabLabel = assignedSlab.Label,
+                            SlabAmounts = slabAmounts
+                        };
+                    })
+                    .OrderByDescending(i => i.AgingDays)
+                    .ToList();
+
+                // Calculate totals from ALL processed invoices
+                var slabTotals = new Dictionary<string, decimal>();
+                foreach (var slab in sortedSlabs)
+                {
+                    slabTotals[slab.Label] = processedInvoices.Sum(i => i.SlabAmounts[slab.Label]);
+                }
+                var totalAmountDue = processedInvoices.Sum(i => i.AmountDue ?? 0);
+
+                // Get total count
+                var totalCount = processedInvoices.Count;
+
+                // Apply pagination to get current page items
+                var pagedItems = processedInvoices
+                    .Skip((request.PageNumber - 1) * request.PageSize)
+                    .Take(request.PageSize)
+                    .ToList();
+
+                return new AgeAnalysisWithTotalsDto
+                {
+                    Items = pagedItems,
+                    TotalCount = totalCount,
+                    PageNumber = request.PageNumber,
+                    PageSize = request.PageSize,
+                    TotalPages = (int)Math.Ceiling(totalCount / (double)request.PageSize),
+                    SlabTotals = slabTotals,
+                    TotalAmountDue = totalAmountDue
+                };
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        private SlabDefinition DetermineSlabForInvoice(int agingDays, List<SlabDefinition> slabs)
+        {
+            // Iterate through slabs to find the matching one
+            foreach (var slab in slabs)
+            {
+                // If ToDays is null, this is the "over" slab (catches everything >= FromDays)
+                if (!slab.ToDays.HasValue)
+                {
+                    if (agingDays >= slab.FromDays)
+                    {
+                        return slab;
+                    }
+                }
+                // Check if aging days falls within the range [FromDays, ToDays]
+                else if (agingDays >= slab.FromDays && agingDays <= slab.ToDays.Value)
+                {
+                    return slab;
+                }
+            }
+
+            // If no slab found, return the last slab (fallback)
+            return slabs.Last();
         }
     }
 }

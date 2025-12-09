@@ -213,6 +213,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                     onChange={(e) =>
                       handleInputChange("storeLocation", e.target.value)
                     }
+                    disabled
                   >
                     <option value="">Select Location</option>
                     {userLocations && userLocations != null

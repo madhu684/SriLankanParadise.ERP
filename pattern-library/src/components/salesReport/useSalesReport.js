@@ -1,27 +1,94 @@
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import * as XLSX from "xlsx";
 import { get_sales_invoice_by_date_range_api } from "../../services/reportApi";
+import {
+  get_customers_by_company_id_api,
+  get_regions_api,
+  get_sales_persons_api,
+} from "../../services/salesApi";
 
 const useSalesReport = () => {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+  const [selectedCustomerId, setSelectedCustomerId] = useState("");
+  const [selectedRegionId, setSelectedRegionId] = useState("");
+  const [selectedSalesPersonId, setSelectedSalesPersonId] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const companyId = sessionStorage.getItem("companyId");
+
+  // Fetch master Data
+  const {
+    data: customers,
+    isLoading: isCustomersLoading,
+    isError: isCustomersError,
+    error: customersError,
+    refetch: refetchCustomers,
+  } = useQuery({
+    queryKey: ["customers", companyId],
+    queryFn: async () => {
+      const response = await get_customers_by_company_id_api(companyId);
+      return response.data.result || [];
+    },
+  });
+
+  const { data: regions = [], isLoading: isRegionsLoading } = useQuery({
+    queryKey: ["regions"],
+    queryFn: async () => {
+      const response = await get_regions_api();
+      return response.data.result || [];
+    },
+  });
 
   const {
-    data: reportData = [],
+    data: salesPersons,
+    isLoading: isSalesPersonsLoading,
+    isError: isSalesPersonsError,
+    error: salesPersonsError,
+  } = useQuery({
+    queryKey: ["salesPersons"],
+    queryFn: async () => {
+      const response = await get_sales_persons_api();
+      return response.data.result || [];
+    },
+  });
+
+  // Fetch sales report
+  const {
+    data: reportResponse = [],
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["salesReportByDateRange", fromDate, toDate],
+    queryKey: [
+      "salesReportByDateRange",
+      fromDate,
+      toDate,
+      selectedCustomerId,
+      selectedRegionId,
+      selectedSalesPersonId,
+      currentPage,
+      pageSize,
+    ],
     queryFn: async () => {
-      const response = await get_sales_invoice_by_date_range_api(
+      const response = await get_sales_invoice_by_date_range_api({
         fromDate,
-        toDate
-      );
+        toDate,
+        customerId: selectedCustomerId || null,
+        regionId: selectedRegionId || null,
+        salesPersonId: selectedSalesPersonId || null,
+        pageNumber: currentPage,
+        pageSize: pageSize,
+      });
       return response.data.result || [];
     },
     enabled: !!fromDate && !!toDate,
   });
+
+  const reportData = reportResponse?.data || [];
+  const pagination = reportResponse?.pagination || null;
 
   const exportToExcel = () => {
     if (!reportData || reportData.length === 0) {
@@ -70,7 +137,13 @@ const useSalesReport = () => {
     ];
 
     const invoiceRows = reportData.map((invoice) => {
-      const statusMap = { 1: "Pending", 2: "Approved", 3: "Cancelled" };
+      const statusMap = {
+        1: "Pending",
+        2: "Approved",
+        3: "Cancelled",
+        5: "Settled",
+        8: "Wright Off",
+      };
       return [
         invoice.referenceNo,
         new Date(invoice.invoiceDate).toLocaleDateString(),
@@ -128,31 +201,31 @@ const useSalesReport = () => {
 
     // Set column widths
     ws1["!cols"] = [
-      { wch: 15 }, // Invoice #
-      { wch: 12 }, // Date
-      { wch: 12 }, // Due Date
-      { wch: 15 }, // Customer Code
-      { wch: 25 }, // Customer Name
-      { wch: 20 }, // Contact Person
-      { wch: 15 }, // Phone
-      { wch: 20 }, // Sales Person
-      { wch: 18 }, // Region
-      { wch: 15 }, // Total Amount
-      { wch: 15 }, // Amount Due
-      { wch: 12 }, // Total Litres
-      { wch: 12 }, // Status
-      { wch: 20 }, // Remarks
+      { wch: 15 },
+      { wch: 12 },
+      { wch: 12 },
+      { wch: 15 },
+      { wch: 25 },
+      { wch: 20 },
+      { wch: 15 },
+      { wch: 20 },
+      { wch: 18 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 12 },
+      { wch: 12 },
+      { wch: 20 },
     ];
 
     // Line Items Sheet
     const ws2 = XLSX.utils.aoa_to_sheet(lineItemsData);
     ws2["!cols"] = [
-      { wch: 15 }, // Invoice #
-      { wch: 15 }, // Item Code
-      { wch: 35 }, // Item Name
-      { wch: 10 }, // Quantity
-      { wch: 15 }, // Unit Price
-      { wch: 15 }, // Total Price
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 35 },
+      { wch: 10 },
+      { wch: 15 },
+      { wch: 15 },
     ];
 
     // Add worksheets to workbook
@@ -172,9 +245,26 @@ const useSalesReport = () => {
     reportData,
     isLoading,
     error,
+    customers,
+    regions,
+    salesPersons,
+    selectedCustomerId,
+    selectedRegionId,
+    selectedSalesPersonId,
+    isCustomersLoading,
+    isRegionsLoading,
+    isSalesPersonsLoading,
+    pagination,
+    currentPage,
+    pageSize,
+    setCurrentPage,
+    setSelectedCustomerId,
+    setSelectedRegionId,
+    setSelectedSalesPersonId,
     setFromDate,
     setToDate,
     exportToExcel,
+    setPageSize,
   };
 };
 

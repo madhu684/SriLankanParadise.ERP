@@ -221,6 +221,17 @@ const useSalesOrder = ({ onFormSubmit }) => {
   // MEMOIZED CALCULATIONS
   // ============================================================================
 
+  // const priceListMap = useMemo(() => {
+  //   if (!itemPriceListByLocation?.itemPriceDetails) {
+  //     return new Map();
+  //   }
+  //   return new Map(
+  //     itemPriceListByLocation.itemPriceDetails.map((detail) => [
+  //       detail.itemMasterId,
+  //       detail.price,
+  //     ])
+  //   );
+  // }, [itemPriceListByLocation]);
   const priceListMap = useMemo(() => {
     if (!itemPriceListByLocation?.itemPriceDetails) {
       return new Map();
@@ -228,7 +239,10 @@ const useSalesOrder = ({ onFormSubmit }) => {
     return new Map(
       itemPriceListByLocation.itemPriceDetails.map((detail) => [
         detail.itemMasterId,
-        detail.price,
+        {
+          price: detail.price,
+          vatAddedPrice: detail.vatAddedPrice,
+        },
       ])
     );
   }, [itemPriceListByLocation]);
@@ -299,27 +313,6 @@ const useSalesOrder = ({ onFormSubmit }) => {
   }, [submissionStatus]);
 
   // Initialize common charges when charges data loads
-  // useEffect(() => {
-  //   if (
-  //     chargesAndDeductions &&
-  //     formData.commonChargesAndDeductions.length === 0
-  //   ) {
-  //     const initializedChargesArray = chargesAndDeductions
-  //       .filter((charge) => charge.isDisableFromSubTotal === false)
-  //       .map((charge) => ({
-  //         id: charge.chargesAndDeductionId,
-  //         name: charge.displayName,
-  //         value: charge.amount || charge.percentage,
-  //         sign: charge.sign,
-  //         isPercentage: charge.percentage !== null,
-  //       }));
-
-  //     setFormData((prev) => ({
-  //       ...prev,
-  //       commonChargesAndDeductions: initializedChargesArray,
-  //     }));
-  //   }
-  // }, [chargesAndDeductions]);
   useEffect(() => {
     if (chargesAndDeductions) {
       const initializedChargesArray = chargesAndDeductions
@@ -371,6 +364,47 @@ const useSalesOrder = ({ onFormSubmit }) => {
 
     setHasLineItemChargesChanged(hasChanged);
   }, [formData.itemDetails, originalLineItemCharges, compareCharges]);
+
+  useEffect(() => {
+    // Update item prices when customer VAT status changes
+    if (formData.itemDetails.length > 0 && formData.selectedCustomer) {
+      setFormData((prev) => ({
+        ...prev,
+        itemDetails: prev.itemDetails.map((item) => {
+          const priceData = priceListMap.get(item.itemMasterId);
+          if (!priceData) return item;
+
+          // Determine unit price based on customer VAT status
+          const newUnitPrice = !formData.selectedCustomer.isVATRegistered
+            ? priceData.vatAddedPrice || priceData.price || 0
+            : priceData.price || 0;
+
+          // Recalculate total price with new unit price
+          const grandTotalPrice = item.quantity * newUnitPrice;
+          let totalPrice = grandTotalPrice;
+
+          item.chargesAndDeductions.forEach((charge) => {
+            if (charge.name === "SSL") {
+              const amount =
+                (grandTotalPrice / (100 - charge.value)) * charge.value;
+              totalPrice += charge.sign === "+" ? amount : -amount;
+            } else if (charge.isPercentage) {
+              const amount = (grandTotalPrice * charge.value) / 100;
+              totalPrice += charge.sign === "+" ? amount : -amount;
+            } else {
+              totalPrice += charge.sign === "+" ? charge.value : -charge.value;
+            }
+          });
+
+          return {
+            ...item,
+            unitPrice: newUnitPrice,
+            totalPrice: Math.max(0, totalPrice),
+          };
+        }),
+      }));
+    }
+  }, [formData.selectedCustomer?.isVATRegistered, priceListMap]);
 
   // ============================================================================
   // VALIDATION
@@ -517,11 +551,28 @@ const useSalesOrder = ({ onFormSubmit }) => {
   // HELPER FUNCTIONS
   // ============================================================================
 
+  // const getPriceFromPriceList = useCallback(
+  //   (itemMasterId) => {
+  //     return priceListMap.get(itemMasterId) || 0;
+  //   },
+  //   [priceListMap]
+  // );
   const getPriceFromPriceList = useCallback(
     (itemMasterId) => {
-      return priceListMap.get(itemMasterId) || 0;
+      const priceData = priceListMap.get(itemMasterId);
+      if (!priceData) return 0;
+
+      // If customer is not VAT registered, use vatAddedPrice, otherwise use regular price
+      if (
+        formData.selectedCustomer &&
+        !formData.selectedCustomer.isVATRegistered
+      ) {
+        return priceData.vatAddedPrice || priceData.price || 0;
+      }
+
+      return priceData.price || 0;
     },
-    [priceListMap]
+    [priceListMap, formData.selectedCustomer]
   );
 
   const getTransactionTypeIdByName = useCallback(
@@ -819,72 +870,6 @@ const useSalesOrder = ({ onFormSubmit }) => {
     setFormData((prev) => ({ ...prev, attachments: files }));
   }, []);
 
-  // const handleSelectItem = useCallback(
-  //   async (item) => {
-  //     let availableStock = 0;
-  //     let unitPrice = item.unitPrice || 0;
-
-  //     try {
-  //       const inventory =
-  //         await get_sum_location_inventories_by_locationId_itemMasterId_api(
-  //           item.itemMasterId,
-  //           formData.storeLocation,
-  //           null
-  //         );
-  //       availableStock = inventory?.data?.result?.totalStockInHand || 0;
-
-  //       if (availableStock <= 0) {
-  //         toast.error(
-  //           `No stock available for "${item.itemName}" in user location`
-  //         );
-  //         setSearchTerm("");
-  //         return;
-  //       }
-
-  //       unitPrice = getPriceFromPriceList(item.itemMasterId);
-
-  //       const initialCharges = getInitializedCharges;
-
-  //       // NEW: Store original charges for this item
-  //       setOriginalLineItemCharges((prev) => {
-  //         const newMap = new Map(prev);
-  //         newMap.set(
-  //           item.itemMasterId,
-  //           JSON.parse(JSON.stringify(initialCharges))
-  //         );
-  //         return newMap;
-  //       });
-
-  //       setFormData((prev) => ({
-  //         ...prev,
-  //         itemDetails: [
-  //           ...prev.itemDetails,
-  //           {
-  //             itemMasterId: item.itemMasterId,
-  //             name: item.itemName || "",
-  //             unit: item.unit?.unitName || "",
-  //             quantity: 0,
-  //             unitPrice: unitPrice,
-  //             totalPrice: 0,
-  //             batchId: null,
-  //             tempQuantity: availableStock,
-  //             packSize: item?.conversionRate || 1,
-  //             isInventoryItem: item?.isInventoryItem,
-  //             chargesAndDeductions: getInitializedCharges,
-  //           },
-  //         ],
-  //       }));
-
-  //       setSearchTerm("");
-  //     } catch (error) {
-  //       console.error("Error processing item:", error);
-  //       toast.error("Failed to add item");
-  //       setSearchTerm("");
-  //     }
-  //   },
-  //   [getPriceFromPriceList, getInitializedCharges, formData.storeLocation]
-  // );
-
   const handleSelectItem = useCallback(
     async (item) => {
       // Check if item price list exists for the selected location
@@ -897,7 +882,20 @@ const useSalesOrder = ({ onFormSubmit }) => {
       }
 
       let availableStock = 0;
-      let unitPrice = getPriceFromPriceList(item.itemMasterId);
+      const priceData = priceListMap.get(item.itemMasterId);
+      let unitPrice = 0;
+
+      if (priceData) {
+        // If customer is not VAT registered, use vatAddedPrice
+        if (
+          formData.selectedCustomer &&
+          !formData.selectedCustomer.isVATRegistered
+        ) {
+          unitPrice = priceData.vatAddedPrice || priceData.price || 0;
+        } else {
+          unitPrice = priceData.price || 0;
+        }
+      }
 
       // Check if unit price is found in price list
       if (unitPrice === 0) {

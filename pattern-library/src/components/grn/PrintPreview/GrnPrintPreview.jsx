@@ -209,17 +209,16 @@ const GrnPrintPreview = ({
                       textAlign: "center",
                     }}
                   >
-                    ABL Beverages International Limited
+                    ABEYWARDANA DISTRIBUTORS (PVT) LTD
                   </h1>
                   <p
                     style={{
-                      fontSize: "11px",
-                      fontStyle: "italic",
-                      margin: "2px 0",
+                      fontSize: "9px",
+                      margin: "1px 0",
                       textAlign: "center",
                     }}
                   >
-                    House of Finest Wines & Spirits
+                    No. 89/4, Stanley Thilakaratne Mw, Nugegoda, Sri Lanka
                   </p>
                   <p
                     style={{
@@ -227,8 +226,10 @@ const GrnPrintPreview = ({
                       margin: "1px 0",
                       textAlign: "center",
                     }}
+                    className="fw-semibold"
                   >
-                    No. 24, Fairfield Gardens, Colombo 8, Sri Lanka
+                    Tel: 011 2699797 Email: sales@adlbeverages.com Web:
+                    www.adlbeverages.com
                   </p>
                   <p
                     style={{
@@ -236,9 +237,10 @@ const GrnPrintPreview = ({
                       margin: "1px 0",
                       textAlign: "center",
                     }}
+                    className="fw-semibold"
                   >
-                    Tel: 011 267 9146 Fax: 011 267 9149 Email:
-                    sales@adlbeverages.com Web: www.adlbeverages.com
+                    Warehouse: No.189/2, Stanley Thilakaratne Mw, Nugegoda, Sri
+                    Lanka
                   </p>
                   <p
                     style={{
@@ -246,8 +248,9 @@ const GrnPrintPreview = ({
                       margin: "1px 0",
                       textAlign: "center",
                     }}
+                    className="fw-semibold"
                   >
-                    Warehouse: No. 65, Keshewa Road, Boralesgamuwa
+                    VAT REG NO - 114201863 - 7000
                   </p>
                   <p
                     style={{
@@ -255,17 +258,9 @@ const GrnPrintPreview = ({
                       margin: "1px 0",
                       textAlign: "center",
                     }}
+                    className="fw-semibold"
                   >
-                    Company Reg. No: PB 4922
-                  </p>
-                  <p
-                    style={{
-                      fontSize: "9px",
-                      margin: "1px 0",
-                      textAlign: "center",
-                    }}
-                  >
-                    VAT Reg: 134049227-7000
+                    Reg. No. PV 6751
                   </p>
                 </div>
                 <div
@@ -298,7 +293,7 @@ const GrnPrintPreview = ({
                   margin: "8px 0",
                 }}
               >
-                GOOD RECEIVE NOTE
+                GOOD RECEIVED NOTE
               </h2>
 
               {/* GRN Info */}

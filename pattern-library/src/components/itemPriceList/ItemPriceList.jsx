@@ -73,6 +73,13 @@ const ItemRow = memo(
       [index, onItemChange]
     );
 
+    const handleVATAddedPriceChange = useCallback(
+      (e) => {
+        onItemChange(index, "vatAddedPrice", e.target.value);
+      },
+      [index, onItemChange]
+    );
+
     const handleRemove = useCallback(() => {
       onRemove(index);
     }, [index, onRemove]);
@@ -95,6 +102,27 @@ const ItemRow = memo(
           {validationErrors[`costPrice_${index}`] && (
             <div className="invalid-feedback">
               {validationErrors[`costPrice_${index}`]}
+            </div>
+          )}
+        </td>
+        <td>
+          <input
+            type="number"
+            className={`form-control form-control-sm ${
+              validFields[`vatAddedPrice_${index}`] ? "is-valid" : ""
+            } ${
+              validationErrors[`vatAddedPrice_${index}`] ? "is-invalid" : ""
+            }`}
+            placeholder="Auto-calculated"
+            value={item.vatAddedPrice || ""} // FIXED: Changed from item.costPrice to item.vatAddedPrice
+            onChange={handleVATAddedPriceChange}
+            min="0"
+            step="0.01"
+            readOnly // Optional: make it read-only since it's auto-calculated
+          />
+          {validationErrors[`vatAddedPrice_${index}`] && (
+            <div className="invalid-feedback">
+              {validationErrors[`vatAddedPrice_${index}`]}
             </div>
           )}
         </td>
@@ -391,6 +419,13 @@ const ItemPriceList = ({ handleClose }) => {
                           style={{ width: "200px" }}
                         >
                           Cost Price
+                        </th>
+                        <th
+                          scope="col"
+                          className="text-center"
+                          style={{ width: "200px" }}
+                        >
+                          VAT Added Price
                         </th>
                         <th
                           scope="col"

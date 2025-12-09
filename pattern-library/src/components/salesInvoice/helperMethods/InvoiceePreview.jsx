@@ -206,17 +206,17 @@ const InvoicePrintPreview = ({
                       textAlign: "center",
                     }}
                   >
-                    ABL Beverages International Limited
+                    ABEYWARDANA DISTRIBUTORS (PVT) LTD
                   </h1>
                   <p
                     style={{
-                      fontSize: "11px",
-                      fontStyle: "italic",
-                      margin: "2px 0",
+                      fontSize: "9px",
+                      margin: "1px 0",
                       textAlign: "center",
                     }}
+                    className="fw-semibold"
                   >
-                    House of Finest Wines & Spirits
+                    No. 89/4, Stanley Thilakaratne Mw, Nugegoda, Sri Lanka
                   </p>
                   <p
                     style={{
@@ -224,8 +224,10 @@ const InvoicePrintPreview = ({
                       margin: "1px 0",
                       textAlign: "center",
                     }}
+                    className="fw-semibold"
                   >
-                    No. 24, Fairfield Gardens, Colombo 8, Sri Lanka
+                    Tel: 011 2699797 Email: sales@adlbeverages.com Web:
+                    www.adlbeverages.com
                   </p>
                   <p
                     style={{
@@ -233,9 +235,10 @@ const InvoicePrintPreview = ({
                       margin: "1px 0",
                       textAlign: "center",
                     }}
+                    className="fw-semibold"
                   >
-                    Tel: 011 267 9146 Fax: 011 267 9149 Email:
-                    sales@adlbeverages.com Web: www.adlbeverages.com
+                    Warehouse: No.189/2, Stanley Thilakaratne Mw, Nugegoda, Sri
+                    Lanka
                   </p>
                   <p
                     style={{
@@ -243,8 +246,9 @@ const InvoicePrintPreview = ({
                       margin: "1px 0",
                       textAlign: "center",
                     }}
+                    className="fw-semibold"
                   >
-                    Warehouse: No. 65, Keshewa Road, Boralesgamuwa
+                    VAT REG NO - 114201863 - 7000
                   </p>
                   <p
                     style={{
@@ -252,17 +256,9 @@ const InvoicePrintPreview = ({
                       margin: "1px 0",
                       textAlign: "center",
                     }}
+                    className="fw-semibold"
                   >
-                    Company Reg. No: PB 4922
-                  </p>
-                  <p
-                    style={{
-                      fontSize: "9px",
-                      margin: "1px 0",
-                      textAlign: "center",
-                    }}
-                  >
-                    VAT Reg: 134049227-7000
+                    Reg. No. PV 6751
                   </p>
                 </div>
                 <div
@@ -270,97 +266,34 @@ const InvoicePrintPreview = ({
                 >
                   <div
                     style={{
-                      fontSize: "18px",
-                      fontWeight: "bold",
-                      color: "red",
+                      fontSize: "10px",
+                      marginTop: "80px",
+                      marginRight: "5px",
                     }}
                   >
-                    {salesInvoice.referenceNo}
-                  </div>
-                  <div style={{ fontSize: "10px", marginTop: "75px" }}>
                     <span className="fw-bold">Customer Copy</span>
                   </div>
                 </div>
               </div>
 
-              {/* INVOICE Title */}
-              <h2
-                style={{
-                  textAlign: "center",
-                  fontSize: "20px",
-                  fontWeight: "bold",
-                  borderTop: "2px solid black",
-                  borderBottom: "2px solid black",
-                  padding: "6px",
-                  margin: "8px 0",
-                }}
-              >
-                {salesInvoice?.customer?.isVATRegistered === true
-                  ? "VAT INVOICE"
-                  : "INVOICE"}
-              </h2>
-
               {/* Customer Info */}
               <div
-                style={{ display: "flex", fontSize: "10px", marginTop: "5px" }}
+                style={{
+                  display: "flex",
+                  fontSize: "10px",
+                  marginTop: "5px",
+                  alignItems: "stretch",
+                }}
               >
-                <div
-                  style={{
-                    flex: 1,
-                    border: "1px solid black",
-                    paddingLeft: "10px",
-                    paddingRight: "10px",
-                  }}
-                >
-                  <div
-                    style={{
-                      borderBottom: "1px solid black",
-                      padding: "3px 0 0 0",
-                    }}
-                  >
-                    <strong>Bill To</strong>
-                  </div>
-                  <div style={{ minHeight: "60px", padding: "5px 0" }}>
-                    <p style={{ margin: "2px 0" }}>
-                      {salesInvoice.customer.customerName}
-                    </p>
-                    <p style={{ margin: "2px 0" }}>
-                      {salesInvoice.customer.billingAddressLine1 +
-                        ", " +
-                        salesInvoice.customer.billingAddressLine2}
-                    </p>
-                  </div>
-                  <div
-                    style={{
-                      borderTop: "1px solid black",
-                      borderBottom: "1px solid black",
-                      padding: "3px 0 0 0",
-                    }}
-                  >
-                    <strong>Deliver To</strong>
-                  </div>
-                  <div style={{ minHeight: "40px", padding: "5px 0" }}>
-                    <p style={{ margin: "2px 0" }}>
-                      {(() => {
-                        const deliveryAddress =
-                          salesInvoice.customer.customerDeliveryAddress.find(
-                            (cd) =>
-                              cd.id === salesInvoice.customerDeliveryAddressId
-                          );
-                        return deliveryAddress
-                          ? `${deliveryAddress.addressLine1}, ${deliveryAddress.addressLine2}`
-                          : "No address found";
-                      })()}
-                    </p>
-                  </div>
-                </div>
-                {/* Invoice Info Table */}
-                <div style={{ width: "180px", paddingLeft: "10px" }}>
+                {/* Left Table - Customer Info */}
+                <div style={{ flex: 1, display: "flex", paddingLeft: "1px" }}>
                   <table
                     style={{
                       width: "100%",
                       fontSize: "10px",
                       borderCollapse: "collapse",
+                      border: "2px solid black",
+                      height: "100%",
                     }}
                   >
                     <tbody>
@@ -368,91 +301,217 @@ const InvoicePrintPreview = ({
                         <td
                           style={{
                             border: "1px solid black",
-                            padding: "3px",
+                            padding: "8px 10px",
                             fontWeight: "bold",
+                            width: "35%",
+                            backgroundColor: "#f8f8f8",
+                            height: "38px",
                           }}
                         >
-                          Date
+                          CUSTOMER CODE
                         </td>
                         <td
-                          style={{ border: "1px solid black", padding: "3px" }}
+                          style={{
+                            border: "1px solid black",
+                            padding: "8px 10px",
+                            height: "38px",
+                          }}
+                          className="fw-semibold"
                         >
-                          {new Date().toISOString().split("T")[0]}
+                          {salesInvoice?.customer ? (
+                            <>
+                              {`${salesInvoice.customer.customerCode}`} -{" "}
+                              <span className="text-uppercase">
+                                {salesInvoice.customer.isVATRegistered === true
+                                  ? "VAT INVOICE"
+                                  : "INVOICE"}
+                              </span>
+                            </>
+                          ) : (
+                            ""
+                          )}
                         </td>
                       </tr>
                       <tr>
                         <td
                           style={{
                             border: "1px solid black",
-                            padding: "3px",
+                            padding: "8px 10px",
                             fontWeight: "bold",
+                            backgroundColor: "#f8f8f8",
+                            verticalAlign: "top",
                           }}
                         >
-                          VAT No.
+                          INVOICED TO
                         </td>
                         <td
-                          style={{ border: "1px solid black", padding: "3px" }}
-                        ></td>
+                          style={{
+                            border: "1px solid black",
+                            padding: "8px 10px",
+                            verticalAlign: "top",
+                          }}
+                        >
+                          <div>
+                            <div style={{ margin: "0" }}>
+                              {salesInvoice.customer.customerName}
+                            </div>
+                            <div style={{ margin: "4px 0 0 0" }}>
+                              {salesInvoice.customer.billingAddressLine1 +
+                                ", " +
+                                salesInvoice.customer.billingAddressLine2}
+                            </div>
+                          </div>
+                        </td>
                       </tr>
                       <tr>
                         <td
                           style={{
                             border: "1px solid black",
-                            padding: "3px",
+                            padding: "8px 10px",
                             fontWeight: "bold",
+                            backgroundColor: "#f8f8f8",
+                            verticalAlign: "top",
+                            height: "38px",
                           }}
                         >
-                          Invoice No.
+                          DELIVERED TO
                         </td>
                         <td
-                          style={{ border: "1px solid black", padding: "3px" }}
+                          style={{
+                            border: "1px solid black",
+                            padding: "8px 10px",
+                            verticalAlign: "top",
+                            height: "38px",
+                          }}
+                        >
+                          <div>
+                            <div style={{ margin: "0" }}>
+                              {(() => {
+                                const deliveryAddress =
+                                  salesInvoice.customer.customerDeliveryAddress.find(
+                                    (cd) =>
+                                      cd.id ===
+                                      salesInvoice.customerDeliveryAddressId
+                                  );
+                                return deliveryAddress
+                                  ? `${deliveryAddress.addressLine1}, ${deliveryAddress.addressLine2}`
+                                  : "No address found";
+                              })()}
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Right Table - Invoice Info */}
+                <div
+                  style={{
+                    width: "260px",
+                    display: "flex",
+                    paddingLeft: "10px",
+                  }}
+                >
+                  <table
+                    style={{
+                      width: "100%",
+                      fontSize: "10px",
+                      borderCollapse: "collapse",
+                      border: "2px solid black",
+                      height: "100%",
+                    }}
+                  >
+                    <tbody>
+                      <tr style={{ height: "38px" }}>
+                        <td
+                          style={{
+                            border: "1px solid black",
+                            padding: "8px 10px",
+                            fontWeight: "bold",
+                            width: "50%",
+                            backgroundColor: "#f8f8f8",
+                            height: "38px",
+                          }}
+                        >
+                          INVOICE NO.
+                        </td>
+                        <td
+                          style={{
+                            border: "1px solid black",
+                            padding: "8px 10px",
+                            fontWeight: "bold",
+                            color: "#dc3545",
+                            height: "38px",
+                          }}
                         >
                           {salesInvoice.referenceNo}
                         </td>
                       </tr>
-                      <tr>
+                      <tr style={{ height: "38px" }}>
                         <td
                           style={{
                             border: "1px solid black",
-                            padding: "3px",
+                            padding: "8px 10px",
                             fontWeight: "bold",
+                            backgroundColor: "#f8f8f8",
+                            height: "38px",
                           }}
                         >
-                          Order No.
+                          INVOICE DATE
                         </td>
                         <td
-                          style={{ border: "1px solid black", padding: "3px" }}
-                        ></td>
+                          style={{
+                            border: "1px solid black",
+                            padding: "8px 10px",
+                            height: "38px",
+                          }}
+                        >
+                          {salesInvoice.invoiceDate.split("T")[0] || ""}
+                        </td>
                       </tr>
-                      <tr>
+                      <tr style={{ height: "38px" }}>
                         <td
                           style={{
                             border: "1px solid black",
-                            padding: "3px",
+                            padding: "8px 10px",
                             fontWeight: "bold",
+                            backgroundColor: "#f8f8f8",
+                            height: "38px",
                           }}
                         >
-                          Delivery No.
+                          PO. NO.
                         </td>
                         <td
-                          style={{ border: "1px solid black", padding: "3px" }}
-                        ></td>
+                          style={{
+                            border: "1px solid black",
+                            padding: "8px 10px",
+                            height: "38px",
+                          }}
+                        >
+                          {salesInvoice.salesOrder.customerPoNumber || ""}
+                        </td>
                       </tr>
-                      <tr>
+                      <tr style={{ height: "38px" }}>
                         <td
                           style={{
                             border: "1px solid black",
-                            padding: "3px",
+                            padding: "8px 10px",
                             fontWeight: "bold",
+                            backgroundColor: "#f8f8f8",
+                            height: "38px",
                           }}
                         >
-                          Driver Name/ Vehicle No.
+                          CUSTOMER VAT NO.
                         </td>
                         <td
-                          style={{ border: "1px solid black", padding: "3px" }}
+                          style={{
+                            border: "1px solid black",
+                            padding: "8px 10px",
+                            height: "38px",
+                          }}
                         >
-                          {salesInvoice.driverName || ""} <br />
-                          {salesInvoice.vehicleNumber || " "}
+                          {salesInvoice.customer.vatRegistrationNo || ""}
                         </td>
                       </tr>
                     </tbody>
@@ -639,7 +698,14 @@ const InvoicePrintPreview = ({
             <div
               style={{ display: "flex", marginTop: "8px", fontSize: "10px" }}
             >
-              <div style={{ flex: 1, paddingRight: "10px" }}>
+              <div
+                style={{
+                  flex: 1,
+                  paddingRight: "10px",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
                 <div
                   className="d-flex justify-content-between align-items-center"
                   style={{
@@ -649,7 +715,7 @@ const InvoicePrintPreview = ({
                   }}
                 >
                   <p style={{ margin: "2px 0", fontWeight: "bold" }}>
-                    TOTAL LITRES:
+                    Quantity Issued in ml:
                   </p>
                   <p
                     style={{
@@ -658,54 +724,39 @@ const InvoicePrintPreview = ({
                       textAlign: "right",
                     }}
                   >
-                    {numberToWords(salesInvoice.totalLitres.toFixed(2))}
+                    {formatTotals((salesInvoice.totalLitres * 1000).toFixed(2))}
                   </p>
                 </div>
-                <p
-                  style={{
-                    fontWeight: "bold",
-                    margin: "8px 0 5px 0",
-                    fontSize: "11px",
-                  }}
-                >
-                  All cheques should be drawn in favour of ABL Beverages
-                  International Limited.
-                </p>
+
                 <div
                   style={{
+                    border: "2px solid black",
+                    borderTop: "none",
+                    padding: "6px 8px",
+                    backgroundColor: "#FFF4CC",
+                    fontWeight: "bold",
+                    textAlign: "left",
+                    flex: 1,
                     display: "flex",
-                    justifyContent: "space-between",
-                    marginTop: "50px",
+                    flexDirection: "column",
+                    justifyContent: "center",
                   }}
                 >
-                  <div style={{ textAlign: "center", flex: 1 }}>
-                    <div
-                      style={{
-                        borderTop: "1px dotted black",
-                        paddingTop: "5px",
-                        marginTop: "30px",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Authorized by
-                    </div>
-                  </div>
-                  <div className="px-2"></div>
-                  <div style={{ textAlign: "center", flex: 1 }}>
-                    <div
-                      style={{
-                        borderTop: "1px dotted black",
-                        paddingTop: "5px",
-                        marginTop: "30px",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Checked by
-                    </div>
-                  </div>
+                  Please Make Payment In Favour Of
+                  <br />
+                  <span
+                    style={{
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      paddingTop: "4px",
+                    }}
+                  >
+                    "ABEYWARDANA DISTRIBUTORS (PVT) LTD"
+                  </span>
                 </div>
               </div>
-              <div style={{ width: "190px" }}>
+
+              <div style={{ width: "230px" }}>
                 <table
                   style={{
                     width: "100%",
@@ -729,48 +780,76 @@ const InvoicePrintPreview = ({
                         {formatTotals(subTotal.toFixed(2))}
                       </td>
                     </tr>
-                    {charges.map((charge, index) => {
-                      const value = Math.abs(charge.appliedValue);
-                      const percentage = charge.chargesAndDeduction.percentage
-                        ? ((value / subTotal) * 100).toFixed(2)
-                        : null;
 
-                      return (
-                        <tr key={index}>
-                          <td
-                            style={{
-                              border: "1px solid black",
-                              padding: "4px",
-                            }}
-                          >
-                            {charge.chargesAndDeduction.displayName}
-                            {percentage && ` (${percentage}%)`}
-                          </td>
-                          <td
-                            style={{
-                              border: "1px solid black",
-                              padding: "4px",
-                              textAlign: "right",
-                            }}
-                          >
-                            {charge.chargesAndDeduction.sign === "+"
-                              ? "+"
-                              : "-"}
-                            {value.toFixed(2)}
-                          </td>
-                        </tr>
-                      );
-                    })}
+                    {charges.length > 0 ? (
+                      charges.map((charge, index) => {
+                        const value = Math.abs(charge.appliedValue);
+                        return (
+                          <tr key={index}>
+                            <td
+                              style={{
+                                border: "1px solid black",
+                                padding: "4px",
+                              }}
+                            >
+                              {charge.chargesAndDeduction.displayName}
+                            </td>
+                            <td
+                              style={{
+                                border: "1px solid black",
+                                padding: "4px",
+                                textAlign: "right",
+                              }}
+                            >
+                              {formatTotals(value.toFixed(2))}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td
+                          style={{
+                            border: "1px solid black",
+                            padding: "4px",
+                          }}
+                        >
+                          VAT
+                        </td>
+                        <td
+                          style={{
+                            border: "1px solid black",
+                            padding: "4px",
+                            textAlign: "right",
+                          }}
+                        ></td>
+                      </tr>
+                    )}
+
+                    <tr>
+                      <td
+                        style={{ border: "1px solid black", padding: "4px" }}
+                      ></td>
+                      <td
+                        style={{
+                          border: "1px solid black",
+                          padding: "4px",
+                          textAlign: "right",
+                          height: "18px",
+                        }}
+                      ></td>
+                    </tr>
+
                     <tr style={{ backgroundColor: "#FFF4CC" }}>
                       <td
                         style={{
                           border: "1px solid black",
                           padding: "6px",
                           fontWeight: "bold",
-                          fontSize: "11px",
+                          fontSize: "8.5px",
                         }}
                       >
-                        TOTAL VALUE
+                        TOTAL INVOICE VALUE
                       </td>
                       <td
                         style={{
@@ -784,29 +863,6 @@ const InvoicePrintPreview = ({
                         {formatTotals(salesInvoice.totalAmount.toFixed(2))}
                       </td>
                     </tr>
-                    {/* <tr style={{ backgroundColor: "#FFF4CC" }}>
-                      <td
-                        style={{
-                          border: "1px solid black",
-                          padding: "6px",
-                          fontWeight: "bold",
-                          fontSize: "11px",
-                        }}
-                      >
-                        TOTAL LITRES
-                      </td>
-                      <td
-                        style={{
-                          border: "1px solid black",
-                          padding: "6px",
-                          textAlign: "right",
-                          fontWeight: "bold",
-                          fontSize: "11px",
-                        }}
-                      >
-                        {salesInvoice.totalLitres.toFixed(2)}
-                      </td>
-                    </tr> */}
                   </tbody>
                 </table>
               </div>
@@ -816,82 +872,155 @@ const InvoicePrintPreview = ({
             <div
               style={{
                 marginTop: "12px",
-                border: "2px solid black",
+                fontFamily: "Arial, sans-serif",
                 fontSize: "9px",
+                color: "black",
               }}
             >
-              <div
-                style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr" }}
-              >
-                <div
-                  style={{
-                    textAlign: "center",
-                    borderRight: "1px solid black",
-                    padding: "8px",
-                    borderBottom: "1px solid black",
-                    height: "80px",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    textAlign: "center",
-                    borderRight: "1px solid black",
-                    padding: "8px",
-                    borderBottom: "1px solid black",
-                    height: "80px",
-                  }}
-                ></div>
-                <div
-                  style={{
-                    textAlign: "center",
-                    padding: "8px",
-                    borderBottom: "1px solid black",
-                    height: "80px",
-                  }}
-                ></div>
-              </div>
-              <div
-                style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr" }}
-              >
-                <div
-                  style={{
-                    textAlign: "center",
-                    borderRight: "1px solid black",
-                    padding: "8px",
-                  }}
-                >
-                  <p style={{ fontWeight: "bold", margin: 0 }}>
-                    Contact Person / Number
-                  </p>
-                </div>
-                <div
-                  style={{
-                    textAlign: "center",
-                    borderRight: "1px solid black",
-                    padding: "8px",
-                  }}
-                >
-                  <p style={{ fontWeight: "bold", margin: 0 }}>
-                    Name and Designation
-                  </p>
-                </div>
-                <div style={{ textAlign: "center", padding: "8px" }}>
-                  <p style={{ fontWeight: "bold", margin: 0 }}>
-                    Signature & Rubber Stamp
-                  </p>
-                </div>
-              </div>
-              <div
+              <table
                 style={{
-                  textAlign: "center",
-                  padding: "6px",
-                  borderTop: "1px solid black",
+                  width: "100%",
+                  borderCollapse: "collapse",
+                  border: "2px solid black",
                 }}
               >
-                <p className="fw-bold" style={{ margin: 0, fontSize: "9px" }}>
-                  Received the above mentioned goods in order
-                </p>
-              </div>
+                <tbody>
+                  <tr>
+                    <td
+                      colSpan="2"
+                      style={{
+                        border: "1px solid black",
+                        padding: "6px 8px",
+                        width: "70%",
+                      }}
+                    >
+                      <strong>THIS INVOICE SHOULD BE SETTLED ON</strong>
+                    </td>
+                    <td
+                      style={{
+                        border: "1px solid black",
+                        padding: "6px 8px",
+                        width: "15%",
+                      }}
+                    >
+                      <strong>Current Balance</strong>
+                    </td>
+                    <td
+                      style={{
+                        border: "1px solid black",
+                        padding: "6px 8px",
+                        width: "15%",
+                      }}
+                    >
+                      <strong>
+                        {/* {salesInvoice?.customer?.outstandingAmount || "0.00"} */}
+                      </strong>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      style={{
+                        border: "1px solid black",
+                        padding: "8px",
+                        height: "35px",
+                        width: "25%",
+                      }}
+                    >
+                      <strong>Prepared and Issued by</strong>
+                    </td>
+                    <td
+                      style={{
+                        border: "1px solid black",
+                        padding: "8px",
+                        height: "35px",
+                        width: "25%",
+                      }}
+                    ></td>
+                    <td style={{ border: "1px solid black", padding: "8px" }}>
+                      <strong>Driver’s Signature</strong>
+                    </td>
+                    <td
+                      style={{
+                        border: "1px solid black",
+                        padding: "8px",
+                        height: "35px",
+                      }}
+                    ></td>
+                  </tr>
+                  <tr>
+                    <td
+                      style={{
+                        border: "1px solid black",
+                        padding: "8px",
+                        verticalAlign: "top",
+                      }}
+                    >
+                      <div>
+                        Received above goods in correct quantity and in good
+                        condition
+                      </div>
+                      <div style={{ marginTop: "10px" }}>Name/Designation</div>
+                    </td>
+                    <td
+                      style={{ border: "1px solid black", padding: "8px" }}
+                    ></td>
+                    <td style={{ border: "1px solid black", padding: "8px" }}>
+                      <strong>Vehicle No</strong>
+                    </td>
+                    <td style={{ border: "1px solid black", padding: "8px" }}>
+                      {salesInvoice?.vehicleNumber || ""}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      rowSpan="2"
+                      style={{
+                        border: "1px solid black",
+                        padding: "8px",
+                        height: "35px",
+                      }}
+                    >
+                      <strong>Signature & Rubber Stamp</strong>
+                    </td>
+                    <td
+                      rowSpan="2"
+                      style={{
+                        border: "1px solid black",
+                        padding: "8px",
+                      }}
+                    ></td>
+                    <td style={{ border: "1px solid black", padding: "8px" }}>
+                      <strong>Security Officer</strong>
+                    </td>
+                    <td
+                      style={{ border: "1px solid black", padding: "8px" }}
+                    ></td>
+                  </tr>
+                  <tr>
+                    <td style={{ border: "1px solid black", padding: "8px" }}>
+                      <strong>Manager’s Signature</strong>
+                    </td>
+                    <td
+                      style={{ border: "1px solid black", padding: "8px" }}
+                    ></td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td
+                      colSpan="4"
+                      style={{
+                        border: "1px solid black",
+                        padding: "6px 8px",
+                        fontSize: "9px",
+                        fontFamily: "Arial, sans-serif",
+                      }}
+                    >
+                      <strong>Serial No</strong>
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
             </div>
           </div>
         </div>
