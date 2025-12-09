@@ -360,12 +360,26 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
     return total;
   }, [subTotal, formData.commonChargesAndDeductions]);
 
+  // const compareCharges = useCallback((original, current) => {
+  //   if (!original || !current) return false;
+  //   if (original.length !== current.length) return true;
+
+  //   return original.some((origCharge, index) => {
+  //     const currCharge = current[index];
+  //     return parseFloat(origCharge.value) !== parseFloat(currCharge.value);
+  //   });
+  // }, []);
   const compareCharges = useCallback((original, current) => {
     if (!original || !current) return false;
-    if (original.length !== current.length) return true;
 
-    return original.some((origCharge, index) => {
-      const currCharge = current[index];
+    const filteredOriginal = original.filter((charge) => charge !== null);
+    const filteredCurrent = current.filter((charge) => charge !== null);
+
+    if (filteredOriginal.length !== filteredCurrent.length) return true;
+
+    return filteredOriginal.some((origCharge, index) => {
+      const currCharge = filteredCurrent[index];
+      if (!origCharge || !currCharge) return true;
       return parseFloat(origCharge.value) !== parseFloat(currCharge.value);
     });
   }, []);
@@ -1193,6 +1207,43 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
     }));
   }, []);
 
+  // const handleRemoveItem = useCallback((index, item) => {
+  //   setFormData((prevFormData) => {
+  //     const updatedItemDetails = [...prevFormData.itemDetails];
+  //     updatedItemDetails.splice(index, 1);
+  //     return {
+  //       ...prevFormData,
+  //       itemDetails: updatedItemDetails,
+  //     };
+  //   });
+
+  //   if (
+  //     item.salesOrderDetailId !== null &&
+  //     item.salesOrderDetailId !== undefined
+  //   ) {
+  //     setItemIdsToBeDeleted((prevIds) => [...prevIds, item]);
+  //   }
+
+  //   item?.chargesAndDeductions.map((charge) => {
+  //     if (
+  //       charge.chargesAndDeductionAppliedId !== null &&
+  //       charge.chargesAndDeductionAppliedId !== undefined
+  //     ) {
+  //       setChargesAndDeductionsAppliedIdsToBeDeleted((prevIds) => [
+  //         ...prevIds,
+  //         charge.chargesAndDeductionAppliedId,
+  //       ]);
+  //     }
+  //   });
+  //   setValidFields({});
+  //   setValidationErrors({});
+  //   setFormData((prevFormData) => ({
+  //     ...prevFormData,
+  //     itemMasterId: 0,
+  //     itemMaster: "",
+  //   }));
+  // }, []);
+
   const handleRemoveItem = useCallback((index, item) => {
     setFormData((prevFormData) => {
       const updatedItemDetails = [...prevFormData.itemDetails];
@@ -1203,6 +1254,13 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
       };
     });
 
+    // Clean up original charges map
+    setOriginalLineItemCharges((prev) => {
+      const newMap = new Map(prev);
+      newMap.delete(item.itemMasterId);
+      return newMap;
+    });
+
     if (
       item.salesOrderDetailId !== null &&
       item.salesOrderDetailId !== undefined
@@ -1210,24 +1268,23 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
       setItemIdsToBeDeleted((prevIds) => [...prevIds, item]);
     }
 
-    item?.chargesAndDeductions.map((charge) => {
-      if (
-        charge.chargesAndDeductionAppliedId !== null &&
-        charge.chargesAndDeductionAppliedId !== undefined
-      ) {
-        setChargesAndDeductionsAppliedIdsToBeDeleted((prevIds) => [
-          ...prevIds,
-          charge.chargesAndDeductionAppliedId,
-        ]);
-      }
-    });
+    // Filter out null charges before processing
+    item?.chargesAndDeductions
+      ?.filter((charge) => charge !== null)
+      .forEach((charge) => {
+        if (
+          charge.chargesAndDeductionAppliedId !== null &&
+          charge.chargesAndDeductionAppliedId !== undefined
+        ) {
+          setChargesAndDeductionsAppliedIdsToBeDeleted((prevIds) => [
+            ...prevIds,
+            charge.chargesAndDeductionAppliedId,
+          ]);
+        }
+      });
+
     setValidFields({});
     setValidationErrors({});
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      itemMasterId: 0,
-      itemMaster: "",
-    }));
   }, []);
 
   const handleAttachmentChange = useCallback((files) => {
@@ -1237,28 +1294,9 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
     }));
   }, []);
 
-  // const handleSelectCustomer = useCallback((selectedCustomer) => {
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     customerId: selectedCustomer.customerId,
-  //     selectedCustomer,
-  //     selectedSalesPerson:
-  //       selectedCustomer.salesPerson !== null
-  //         ? selectedCustomer.salesPerson
-  //         : null,
-  //     salesPersonId:
-  //       selectedCustomer.salesPerson !== null
-  //         ? selectedCustomer.salesPerson.salesPersonId
-  //         : null,
-  //   }));
-  //   setCustomerSearchTerm("");
-  //   setValidFields({});
-  //   setValidationErrors({});
-  // }, []);
   const handleSelectCustomer = useCallback(
     (selectedCustomer) => {
       setFormData((prev) => {
-        // Get the VAT charge from master data
         const vatCharge = chargesAndDeductions?.find(
           (charge) =>
             charge.displayName === "VAT" &&
@@ -1272,7 +1310,6 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
             (charge) => charge.name === "VAT"
           );
 
-          // If customer IS VAT registered and VAT is NOT in common charges, add it
           if (selectedCustomer.isVATRegistered && !hasVATInCommon) {
             updatedCommonCharges.push({
               id: vatCharge.chargesAndDeductionId,
@@ -1335,9 +1372,6 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
     [handleSelectCustomer, refetchCustomers]
   );
 
-  // const handleResetCustomer = useCallback(() => {
-  //   setFormData((prev) => ({ ...prev, selectedCustomer: "", customerId: "" }));
-  // }, []);
   const handleResetCustomer = useCallback(() => {
     setFormData((prev) => {
       // When resetting customer, remove VAT if it exists
@@ -1395,72 +1429,6 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
   }, []);
 
   // Handler to add the selected item to itemDetails
-  // const handleSelectItem = useCallback(
-  //   async (item) => {
-  //     let availableStock = 0;
-  //     let unitPrice = item.unitPrice || 0;
-
-  //     try {
-  //       const inventory =
-  //         await get_sum_location_inventories_by_locationId_itemMasterId_api(
-  //           item.itemMasterId,
-  //           formData.storeLocation
-  //         );
-  //       availableStock = inventory?.data?.result?.totalStockInHand || 0;
-
-  //       if (availableStock <= 0) {
-  //         toast.error(
-  //           `No stock available for "${item.itemName}" in user location`
-  //         );
-  //         setSearchTerm("");
-  //         return;
-  //       }
-
-  //       unitPrice = getPriceFromPriceList(item.itemMasterId);
-
-  //       const initialCharges = getInitializedCharges;
-
-  //       // NEW: Store original charges for this new item
-  //       setOriginalLineItemCharges((prev) => {
-  //         const newMap = new Map(prev);
-  //         newMap.set(
-  //           item.itemMasterId,
-  //           JSON.parse(JSON.stringify(initialCharges))
-  //         );
-  //         return newMap;
-  //       });
-
-  //       setFormData((prev) => ({
-  //         ...prev,
-  //         itemDetails: [
-  //           ...prev.itemDetails,
-  //           {
-  //             salesOrderDetailId: null,
-  //             itemMasterId: item.itemMasterId,
-  //             name: item.itemName || "",
-  //             unit: item.unit?.unitName || "",
-  //             quantity: 0,
-  //             unitPrice: unitPrice,
-  //             totalPrice: 0,
-  //             batchId: null,
-  //             tempQuantity: availableStock,
-  //             packSize: item?.conversionRate || 1,
-  //             isInventoryItem: item?.isInventoryItem,
-  //             chargesAndDeductions: getInitializedCharges,
-  //           },
-  //         ],
-  //       }));
-
-  //       setSearchTerm("");
-  //     } catch (error) {
-  //       console.error("Error processing item:", error);
-  //       toast.error("Failed to add item");
-  //       setSearchTerm("");
-  //     }
-  //   },
-  //   [getInitializedCharges, getPriceFromPriceList, formData.storeLocation]
-  // );
-
   const handleSelectItem = useCallback(
     async (item) => {
       // Check if item price list exists for the selected location
@@ -1531,6 +1499,7 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
           itemDetails: [
             ...prev.itemDetails,
             {
+              salesOrderDetailId: null,
               itemMasterId: item.itemMasterId,
               name: item.itemName || "",
               unit: item.unit?.unitName || "",

@@ -403,17 +403,17 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     //.Where(si => si.Status != 0 && si.AmountDue.HasValue && si.AmountDue.Value > 0);
 
                 // Apply optional filters
-                if (request.CustomerId.HasValue)
+                if (request.CustomerId.HasValue && request.CustomerId.Value > 0)
                 {
                     query = query.Where(si => si.CustomerId == request.CustomerId.Value);
                 }
 
-                if (request.RegionId.HasValue)
+                if (request.RegionId.HasValue && request.RegionId.Value > 0)
                 {
                     query = query.Where(si => si.Customer.RegionId == request.RegionId.Value);
                 }
 
-                if (request.SalesPersonId.HasValue)
+                if (request.SalesPersonId.HasValue && request.SalesPersonId.Value > 0)
                 {
                     query = query.Where(si => si.Customer.SalesPersonId == request.SalesPersonId.Value);
                 }
