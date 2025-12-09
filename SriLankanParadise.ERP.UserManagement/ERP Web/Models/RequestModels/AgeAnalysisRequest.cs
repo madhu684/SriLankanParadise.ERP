@@ -16,6 +16,6 @@
     {
         public int FromDays { get; set; }
         public int? ToDays { get; set; } // Null means "over" (e.g., over 120)
-        public string Label { get; set; } // e.g., "0-30", "31-60", "Over 120"
+        public string Label { get; set; }
     }
 }
