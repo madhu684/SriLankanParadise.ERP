@@ -1,9 +1,11 @@
 import { get_charges_and_deductions_applied_api } from "../../../services/purchaseApi";
 import { get_company_api } from "../../../services/salesApi";
 import { useQuery } from "@tanstack/react-query";
-import SalesOrder from "../salesOrder";
 
 const useSalesOrderDetail = (salesOrder) => {
+
+  console.log(salesOrder)
+
   const calculateSubTotal = () => {
     const subTotal = salesOrder.salesOrderDetails.reduce(
       (total, detail) => total + detail.totalPrice,

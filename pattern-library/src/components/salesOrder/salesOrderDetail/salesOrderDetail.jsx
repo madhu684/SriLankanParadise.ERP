@@ -331,7 +331,7 @@ const SalesOrderDetail = ({ show, handleClose, salesOrder }) => {
                             }
                           )}
                           <td className="text-end fw-semibold">
-                            {formatTotals(item.totalPrice.toFixed(2))}
+                            {formatTotals(item.totalPrice)}
                           </td>
                         </tr>
                       ))}

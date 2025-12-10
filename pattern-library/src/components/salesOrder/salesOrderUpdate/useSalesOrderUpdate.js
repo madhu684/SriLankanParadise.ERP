@@ -26,6 +26,7 @@ import {
 } from "../../../services/inventoryApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { cascadingRound } from "../../../util/financialCalculations";
 
 const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -600,7 +601,7 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
                 transactionId: transactionId,
                 transactionTypeId,
                 lineItemId: item.itemMasterId,
-                appliedValue,
+                appliedValue: cascadingRound(appliedValue),
                 dateApplied: new Date().toISOString(),
                 createdBy: userId,
                 createdDate: new Date().toISOString(),
@@ -657,7 +658,7 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
               transactionId: transactionId,
               transactionTypeId,
               lineItemId: null,
-              appliedValue,
+              appliedValue: cascadingRound(appliedValue),
               dateApplied: new Date().toISOString(),
               createdBy: sessionStorage?.getItem("userId"),
               createdDate: new Date().toISOString(),
@@ -695,8 +696,8 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
-      subTotal,
-      totalAmount,
+      subTotal: cascadingRound(subTotal),
+      totalAmount: cascadingRound(totalAmount),
     }));
   }, [subTotal, totalAmount]);
 
@@ -722,7 +723,6 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
     setHasLineItemChargesChanged(hasChanged);
   }, [formData.itemDetails, originalLineItemCharges, compareCharges]);
 
-  // Add this new useEffect after the existing useEffects:
   useEffect(() => {
     // Update item prices when customer VAT status changes
     if (formData.itemDetails.length > 0 && formData.selectedCustomer) {
@@ -745,10 +745,16 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
             if (charge.name === "SSL") {
               const amount =
                 (grandTotalPrice / (100 - charge.value)) * charge.value;
-              totalPrice += charge.sign === "+" ? amount : -amount;
+              totalPrice +=
+                charge.sign === "+"
+                  ? cascadingRound(amount)
+                  : -cascadingRound(amount);
             } else if (charge.isPercentage) {
               const amount = (grandTotalPrice * charge.value) / 100;
-              totalPrice += charge.sign === "+" ? amount : -amount;
+              totalPrice +=
+                charge.sign === "+"
+                  ? cascadingRound(amount)
+                  : -cascadingRound(amount);
             } else {
               totalPrice += charge.sign === "+" ? charge.value : -charge.value;
             }
@@ -1173,10 +1179,16 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
           if (charge.name === "SSL") {
             const amount =
               (grandTotalPrice / (100 - charge.value)) * charge.value;
-            totalPrice += charge.sign === "+" ? amount : -amount;
+            totalPrice +=
+              charge.sign === "+"
+                ? cascadingRound(amount)
+                : -cascadingRound(amount);
           } else if (charge.isPercentage) {
             const amount = (grandTotalPrice * charge.value) / 100;
-            totalPrice += charge.sign === "+" ? amount : -amount;
+            totalPrice +=
+              charge.sign === "+"
+                ? cascadingRound(amount)
+                : -cascadingRound(amount);
           } else {
             totalPrice += charge.sign === "+" ? charge.value : -charge.value;
           }

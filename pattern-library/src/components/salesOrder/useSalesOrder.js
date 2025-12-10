@@ -19,6 +19,7 @@ import {
 } from "../../services/inventoryApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { cascadingRound } from "../../util/financialCalculations";
 
 const useSalesOrder = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -300,8 +301,8 @@ const useSalesOrder = ({ onFormSubmit }) => {
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
-      subTotal,
-      totalAmount,
+      subTotal: cascadingRound(subTotal),
+      totalAmount: cascadingRound(totalAmount),
     }));
   }, [subTotal, totalAmount]);
 
@@ -619,7 +620,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
             transactionId: transactionId,
             transactionTypeId,
             lineItemId: item.itemMasterId,
-            appliedValue,
+            appliedValue: cascadingRound(appliedValue),
             dateApplied: new Date().toISOString(),
             createdBy: sessionStorage?.getItem("userId"),
             createdDate: new Date().toISOString(),
@@ -649,7 +650,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
             transactionId,
             transactionTypeId,
             lineItemId: null,
-            appliedValue,
+            appliedValue: cascadingRound(appliedValue),
             dateApplied: new Date().toISOString(),
             createdBy: userId,
             createdDate: new Date().toISOString(),
@@ -840,10 +841,16 @@ const useSalesOrder = ({ onFormSubmit }) => {
           if (charge.name === "SSL") {
             const amount =
               (grandTotalPrice / (100 - charge.value)) * charge.value;
-            totalPrice += charge.sign === "+" ? amount : -amount;
+            totalPrice +=
+              charge.sign === "+"
+                ? cascadingRound(amount)
+                : -cascadingRound(amount);
           } else if (charge.isPercentage) {
             const amount = (grandTotalPrice * charge.value) / 100;
-            totalPrice += charge.sign === "+" ? amount : -amount;
+            totalPrice +=
+              charge.sign === "+"
+                ? cascadingRound(amount)
+                : -cascadingRound(amount);
           } else {
             totalPrice += charge.sign === "+" ? charge.value : -charge.value;
           }
