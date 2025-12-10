@@ -24,6 +24,7 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { cascadingRound } from "../../util/financialCalculations";
 
 const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   const [formData, setFormData] = useState({
@@ -276,7 +277,8 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     formData.commonChargesAndDeductions.forEach((charge) => {
       const value = parseFloat(charge.value) || 0;
       const amount = charge.isPercentage ? (subtotal * value) / 100 : value;
-      totalAmount += charge.sign === "+" ? amount : -amount;
+      totalAmount +=
+        charge.sign === "+" ? cascadingRound(amount) : -cascadingRound(amount);
     });
 
     return totalAmount;
@@ -508,10 +510,16 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
           if (charge.name === "SSL") {
             const amount =
               (grandTotalPrice / (100 - charge.value)) * charge.value;
-            totalPrice += charge.sign === "+" ? amount : -amount;
+            totalPrice +=
+              charge.sign === "+"
+                ? cascadingRound(amount)
+                : -cascadingRound(amount);
           } else if (charge.isPercentage) {
             const amount = (grandTotalPrice * charge.value) / 100;
-            totalPrice += charge.sign === "+" ? amount : -amount;
+            totalPrice +=
+              charge.sign === "+"
+                ? cascadingRound(amount)
+                : -cascadingRound(amount);
           } else {
             totalPrice += charge.sign === "+" ? charge.value : -charge.value;
           }
@@ -675,7 +683,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
                   transactionId: transactionId,
                   transactionTypeId,
                   lineItemId: item.id,
-                  appliedValue,
+                  appliedValue: cascadingRound(appliedValue),
                   dateApplied: currentDate,
                   createdBy: userId,
                   createdDate: currentDate,
@@ -708,7 +716,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
               transactionId: transactionId,
               transactionTypeId,
               lineItemId: null,
-              appliedValue,
+              appliedValue: cascadingRound(appliedValue),
               dateApplied: currentDate,
               createdBy: userId,
               createdDate: currentDate,
