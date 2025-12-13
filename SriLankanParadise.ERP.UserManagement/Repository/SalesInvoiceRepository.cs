@@ -5,6 +5,7 @@ using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
+using System.Linq;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
 {
@@ -400,22 +401,28 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(si => si.Customer)
                         .ThenInclude(c => c.Region)
                         .Where(si => si.AmountDue > 0);
-                    //.Where(si => si.Status != 0 && si.AmountDue.HasValue && si.AmountDue.Value > 0);
+                //.Where(si => si.Status != 0 && si.AmountDue.HasValue && si.AmountDue.Value > 0);
 
                 // Apply optional filters
-                if (request.CustomerId.HasValue && request.CustomerId.Value > 0)
+                if (request.CustomerIds != null && request.CustomerIds.Any())
                 {
-                    query = query.Where(si => si.CustomerId == request.CustomerId.Value);
+                    var customerIds = request.CustomerIds.Where(id => id > 0).ToList();
+                    if (customerIds.Any())
+                        query = query.Where(si => customerIds.Contains(si.CustomerId.Value));
                 }
 
-                if (request.RegionId.HasValue && request.RegionId.Value > 0)
+                if (request.RegionIds != null && request.RegionIds.Any())
                 {
-                    query = query.Where(si => si.Customer.RegionId == request.RegionId.Value);
+                    var regionIds = request.RegionIds.Where(id => id > 0).ToList();
+                    if (regionIds.Any())
+                        query = query.Where(si => regionIds.Contains(si.Customer.RegionId.Value));
                 }
 
-                if (request.SalesPersonId.HasValue && request.SalesPersonId.Value > 0)
+                if (request.SalesPersonIds != null && request.SalesPersonIds.Any())
                 {
-                    query = query.Where(si => si.Customer.SalesPersonId == request.SalesPersonId.Value);
+                    var salesPersonIds = request.SalesPersonIds.Where(id => id > 0).ToList();
+                    if (salesPersonIds.Any())
+                        query = query.Where(si => salesPersonIds.Contains(si.Customer.SalesPersonId.Value));
                 }
 
                 // Get all invoices (we'll process aging in memory)
@@ -437,41 +444,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 }
 
                 // Calculate aging and assign to slabs for ALL invoices
-                //var processedInvoices = allInvoices
-                //    .Where(si => si.InvoiceDate.HasValue)
-                //    .Select(si =>
-                //    {
-                //        // Calculate aging days
-                //        var agingDays = (request.AsOfDate.Date - si.InvoiceDate.Value.Date).Days;
-
-                //        // Determine which slab this invoice belongs to
-                //        var assignedSlab = DetermineSlabForInvoice(agingDays, sortedSlabs);
-
-                //        // Create slab amounts dictionary
-                //        var slabAmounts = new Dictionary<string, decimal>();
-                //        foreach (var slab in sortedSlabs)
-                //        {
-                //            slabAmounts[slab.Label] = (slab.Label == assignedSlab.Label) ? si.AmountDue.Value : 0;
-                //        }
-
-                //        return new AgeAnalysisInvoiceItem
-                //        {
-                //            SalesInvoiceId = si.SalesInvoiceId,
-                //            ReferenceNo = si.ReferenceNo ?? "",
-                //            CustomerName = si.Customer?.CustomerName ?? "",
-                //            SalesPersonName = (si.Customer?.SalesPerson?.FirstName + " " + si.Customer?.SalesPerson?.LastName)?.Trim() ?? "",
-                //            RegionName = si.Customer?.Region?.Name ?? "",
-                //            InvoiceDate = si.InvoiceDate,
-                //            TotalAmount = si.TotalAmount,
-                //            AmountDue = si.AmountDue,
-                //            AgingDays = agingDays,
-                //            SlabLabel = assignedSlab.Label,
-                //            SlabAmounts = slabAmounts
-                //        };
-                //    })
-                //    .OrderByDescending(i => i.AgingDays)
-                //    .ToList();
-
                 var processedInvoices = allInvoices
                     .Select(si =>
                     {
@@ -490,8 +462,11 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                             SalesInvoiceId = si.SalesInvoiceId,
                             ReferenceNo = si.ReferenceNo ?? "",
                             CustomerName = si.Customer?.CustomerName ?? "",
+                            CustomerCode = si.Customer?.CustomerCode ?? "",
                             SalesPersonName = (si.Customer?.SalesPerson?.FirstName + " " + si.Customer?.SalesPerson?.LastName)?.Trim() ?? "",
+                            SalesPersonCode = si.Customer?.SalesPerson?.SalesPersonCode ?? "",
                             RegionName = si.Customer?.Region?.Name ?? "",
+                            RegionCode = si.Customer?.Region?.Alias ?? "",
                             InvoiceDate = si.InvoiceDate,
                             TotalAmount = si.TotalAmount,
                             AmountDue = si.AmountDue,

@@ -40,6 +40,7 @@ const submoduleRouteMap = {
   "Sales Persons": "/main/sales/sales-persons",
   "Sales Order Report": "/main/sales/reports/orders",
   "Sales Report": "/main/sales/reports/sales-report",
+  "Age Analysis Report": "/main/sales/reports/age-analysis-report",
 
   // Inventory Management
   "Item Masters": "/main/inventory/items",
