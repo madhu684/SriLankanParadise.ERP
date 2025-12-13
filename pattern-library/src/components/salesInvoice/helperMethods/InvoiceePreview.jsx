@@ -229,7 +229,7 @@ const InvoicePrintPreview = ({
                       margin: "1px 0",
                       textAlign: "center",
                     }}
-                    className="fw-semibold"
+                    className="fw-bold"
                   >
                     Tel: 011 2699797 Email: sales@adlbeverages.com Web:
                     www.adlbeverages.com
@@ -242,8 +242,8 @@ const InvoicePrintPreview = ({
                     }}
                     className="fw-semibold"
                   >
-                    Warehouse: No.189/2, Stanley Thilakaratne Mw, Nugegoda, Sri
-                    Lanka
+                    <span className="fw-bold">Warehouse:</span> No.189/2,
+                    Stanley Thilakaratne Mw, Nugegoda, Sri Lanka
                   </p>
                   <p
                     style={{
@@ -251,7 +251,7 @@ const InvoicePrintPreview = ({
                       margin: "1px 0",
                       textAlign: "center",
                     }}
-                    className="fw-semibold"
+                    className="fw-bold"
                   >
                     VAT REG NO - 114201863 - 7000
                   </p>
@@ -261,7 +261,7 @@ const InvoicePrintPreview = ({
                       margin: "1px 0",
                       textAlign: "center",
                     }}
-                    className="fw-semibold"
+                    className="fw-bold"
                   >
                     Reg. No. PV 6751
                   </p>
@@ -838,7 +838,7 @@ const InvoicePrintPreview = ({
                   }}
                 >
                   <p style={{ margin: "2px 0", fontWeight: "bold" }}>
-                    Quantity Issued in ml:
+                    QUANTITY ISSUED IN ML:
                   </p>
                   <p
                     style={{
@@ -865,7 +865,7 @@ const InvoicePrintPreview = ({
                     borderRadius: "4px",
                   }}
                 >
-                  Please Make Payment In Favour Of
+                  PLEASE MAKE PAYMENT IN FAVOUR OF
                   <br />
                   <span
                     style={{
@@ -909,8 +909,11 @@ const InvoicePrintPreview = ({
                                 border: "1px solid black",
                                 padding: "4px",
                               }}
+                              className="fw-bold"
                             >
-                              {charge.chargesAndDeduction.displayName}
+                              {charge.chargesAndDeduction.displayName === "VAT"
+                                ? "V.A.T."
+                                : charge.chargesAndDeduction.displayName}
                             </td>
                             <td
                               style={{
@@ -918,6 +921,7 @@ const InvoicePrintPreview = ({
                                 padding: "4px",
                                 textAlign: "right",
                               }}
+                              className="fw-semibold"
                             >
                               {formatTotals(value.toFixed(2))}
                             </td>

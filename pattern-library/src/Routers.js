@@ -46,6 +46,7 @@ import ItemPriceListList from "./components/itemPriceList/ItemPriceListList/Item
 import ItemTypeList from "./components/itemType/itemTypeList/ItemTypeList";
 import SalesPersonList from "./components/salesPerson/salesPersonList/SalesPersonList";
 import SalesReport from "./components/salesReport/SalesReport.jsx";
+import AgeAnalysisReport from "./components/ageAnalysisReport/AgeAnalysisReport.jsx";
 
 const Routers = () => {
   return (
@@ -108,6 +109,10 @@ const Routers = () => {
             <Route path="sales-persons" element={<SalesPersonList />} />
             <Route path="reports/orders" element={<SalesOrderReport />} />
             <Route path="reports/sales-report" element={<SalesReport />} />
+            <Route
+              path="reports/age-analysis-report"
+              element={<AgeAnalysisReport />}
+            />
           </Route>
 
           {/* Inventory Management Module */}

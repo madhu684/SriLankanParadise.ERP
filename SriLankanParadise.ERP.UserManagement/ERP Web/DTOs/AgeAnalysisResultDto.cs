@@ -30,8 +30,11 @@
         public int SalesInvoiceId { get; set; }
         public string ReferenceNo { get; set; }
         public string CustomerName { get; set; }
+        public string CustomerCode { get; set; }
         public string SalesPersonName { get; set; }
+        public string SalesPersonCode { get; set; }
         public string RegionName { get; set; }
+        public string RegionCode { get; set; }
         public DateTime? InvoiceDate { get; set; }
         public decimal? TotalAmount { get; set; }
         public decimal? AmountDue { get; set; }
