@@ -53,8 +53,8 @@ const InvoicePrintPreview = ({
           print-color-adjust: exact !important;
         }
         table, th, td {
-          border-collapse: collapse !important;
-          border: 1px solid black !important;
+          border-collapse: seperate !important;
+          border: 3px solid black !important;
           page-break-inside: avoid;
         }
         tr { 
