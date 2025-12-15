@@ -39,6 +39,16 @@ export const get_customers_by_company_id_api = async (companyId) => {
   }
 };
 
+export const get_all_customers_api = async () => {
+  try {
+    const response = await api.get("/customer");
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 //sales person apis
 export const get_sales_persons_by_company_id_api = async (companyId) => {
   try {

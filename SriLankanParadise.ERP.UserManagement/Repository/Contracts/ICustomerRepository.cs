@@ -10,6 +10,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
 
         Task<Customer> GetCustomerById(int id);
 
-        Task<IEnumerable<Customer>> GetCustomersByCompanyId(int companyId);
+        //Task<IEnumerable<Customer>> GetCustomersByCompanyId(int companyId);
+
+        Task<IEnumerable<Customer>> SearchCustomerByNamePhone(string searchTerm);
     }
 }

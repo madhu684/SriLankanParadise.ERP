@@ -42,16 +42,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 var customer = _mapper.Map<Customer>(customerRequest);
                 await _customerService.AddCustomer(customer);
 
-                // Create action log
-                //var actionLog = new ActionLogModel()
-                //{
-                //    ActionId = customerRequest.PermissionId,
-                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                //    Timestamp = DateTime.UtcNow
-                //};
-                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
-
                 // send response
                 var CustomerDto = _mapper.Map<CustomerDto>(customer);
                 _logger.LogInformation(LogMessages.CustomerCreated);
@@ -88,8 +78,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             try
             {
                 var customer = await _customerService.GetCustomerById(id);
-                
-                if(customer != null)
+
+                if (customer != null)
                 {
                     var customerDto = _mapper.Map<CustomerDto>(customer);
                     AddResponseMessage(Response, LogMessages.CustomersRetrieved, customerDto, true, HttpStatusCode.OK);
@@ -108,13 +98,39 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
-        [HttpGet("GetCustomersByCompanyId/{companyId}")]
-        public async Task<ApiResponseModel> GetCustomersByCompanyId(int companyId)
+        //[HttpGet("GetCustomersByCompanyId/{companyId}")]
+        //public async Task<ApiResponseModel> GetCustomersByCompanyId(int companyId)
+        //{
+        //    try
+        //    {
+        //        var customers = await _customerService.GetCustomersByCompanyId(companyId);
+        //        if (customers != null)
+        //        {
+        //            var customerDtos = _mapper.Map<IEnumerable<CustomerDto>>(customers);
+        //            AddResponseMessage(Response, LogMessages.CustomersRetrieved, customerDtos, true, HttpStatusCode.OK);
+        //        }
+        //        else
+        //        {
+        //            _logger.LogWarning(LogMessages.CustomersNotFound);
+        //            AddResponseMessage(Response, LogMessages.CustomersNotFound, null, true, HttpStatusCode.NotFound);
+        //        }
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, ErrorMessages.InternalServerError);
+        //        AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+        //    }
+        //    return Response;
+        //}
+
+        [HttpGet("search-customers")]
+        public async Task<ApiResponseModel> SearchCustomersByNamePhone([FromQuery] string searchTerm)
         {
             try
             {
-                var customers = await _customerService.GetCustomersByCompanyId(companyId);
-                if (customers != null)
+                var customers = await _customerService.SearchCustomerByNamePhone(searchTerm);
+                if (customers != null && customers.Any())
                 {
                     var customerDtos = _mapper.Map<IEnumerable<CustomerDto>>(customers);
                     AddResponseMessage(Response, LogMessages.CustomersRetrieved, customerDtos, true, HttpStatusCode.OK);
@@ -124,7 +140,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     _logger.LogWarning(LogMessages.CustomersNotFound);
                     AddResponseMessage(Response, LogMessages.CustomersNotFound, null, true, HttpStatusCode.NotFound);
                 }
-
             }
             catch (Exception ex)
             {

@@ -23,7 +23,7 @@ public partial class Company
 
     public virtual ICollection<CompanySubscriptionModule> CompanySubscriptionModules { get; set; } = new List<CompanySubscriptionModule>();
 
-    public virtual ICollection<Customer> Customers { get; set; } = new List<Customer>();
+    //public virtual ICollection<Customer> Customers { get; set; } = new List<Customer>();
 
     public virtual ICollection<Location> Locations { get; set; } = new List<Location>();
 

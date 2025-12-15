@@ -3,6 +3,7 @@ using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
+using System.ComponentModel.Design;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
 {
@@ -361,6 +362,34 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ToListAsync();
 
                 return items.Any() ? items : new List<SameCategoryTypeSupplierItemDto>();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<ItemMaster>> SearchItemByCode(string searchTerm)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(searchTerm))
+                {
+                    return null;
+                }
+
+                // Apply search query
+                var query = _dbContext.ItemMasters.Where(im => im.ItemCode.Contains(searchTerm));
+
+                query = query.Include(im => im.Category)
+                    .Include(im => im.Unit)
+                    .ThenInclude(u => u.MeasurementType)
+                    .Include(im => im.ItemType)
+                    .Include(im => im.InventoryUnit)
+                    .ThenInclude(u => u.MeasurementType);
+
+                var itemMasters = await query.ToListAsync();
+                return itemMasters.Any() ? itemMasters : null;
             }
             catch (Exception)
             {

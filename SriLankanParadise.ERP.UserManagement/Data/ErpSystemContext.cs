@@ -412,16 +412,6 @@ public partial class ErpSystemContext : DbContext
             entity.HasKey(e => e.CustomerId).HasName("PK__Customer__A4AE64D8B489EACD");
 
             entity.ToTable("Customer");
-
-            entity.Property(e => e.ContactPerson).HasMaxLength(50);
-            entity.Property(e => e.CustomerName).HasMaxLength(50);
-            entity.Property(e => e.Email).HasMaxLength(50);
-            entity.Property(e => e.Phone).HasMaxLength(12);
-
-            entity.HasOne(d => d.Company).WithMany(p => p.Customers)
-                .HasForeignKey(d => d.CompanyId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Customer_Company");
         });
 
         modelBuilder.Entity<DailyStockBalance>(entity =>

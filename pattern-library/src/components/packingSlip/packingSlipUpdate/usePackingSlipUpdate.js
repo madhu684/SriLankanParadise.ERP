@@ -15,7 +15,7 @@ import { get_item_masters_by_company_id_with_query_api } from "../../../services
 import {
   delete_packing_slip_detail_api,
   get_company_api,
-  get_customers_by_company_id_api,
+  get_all_customers_api,
   post_packing_slip_detail_api,
   put_packing_slip_api,
   put_packing_slip_detail_api,
@@ -131,9 +131,7 @@ const usePackingSlipUpdate = ({ packingSlip, onFormSubmit }) => {
 
   const fetchCustomers = async () => {
     try {
-      const response = await get_customers_by_company_id_api(
-        sessionStorage?.getItem("companyId")
-      );
+      const response = await get_all_customers_api();
       return response.data.result || [];
     } catch (error) {
       console.error("Error fetching customers:", error);
