@@ -9,19 +9,19 @@ public partial class Customer
 
     public string? CustomerName { get; set; }
 
-    public string? ContactPerson { get; set; }
-
     public string? Phone { get; set; }
 
-    public string? Email { get; set; }
+    //public string? ContactPerson { get; set; }
 
-    public int CompanyId { get; set; }
+    //public string? Email { get; set; }
 
-    public double? Latitude { get; set; }
+    //public int CompanyId { get; set; }
 
-    public double? Longitude { get; set; }
+    //public double? Latitude { get; set; }
 
-    public virtual Company Company { get; set; } = null!;
+    //public double? Longitude { get; set; }
+
+    //public virtual Company Company { get; set; } = null!;
 
     public virtual ICollection<SalesOrder> SalesOrders { get; set; } = new List<SalesOrder>();
 

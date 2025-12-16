@@ -116,7 +116,6 @@ const PurchaseOrderApproval = ({
                     <th>Unit</th>
                     <th>Quantity</th>
                     <th>Unit Price</th>
-                    <th>Discount (%)</th>
                     {uniqueLineItemDisplayNames.map((displayName, index) => {
                       // Find the charge/deduction associated with the current display name
                       const charge = lineItemChargesAndDeductions.find(
@@ -144,13 +143,6 @@ const PurchaseOrderApproval = ({
                       <td>{item.itemMaster?.unit.unitName}</td>
                       <td>{item.quantity}</td>
                       <td>{item.unitPrice.toFixed(2)}</td>
-                      <td>
-                        {calculateLineItemDiscount(
-                          item.quantity,
-                          item.unitPrice,
-                          item.totalPrice
-                        )}
-                      </td>
                       {/* Render line item charges/deductions */}
                       {uniqueLineItemDisplayNames.map((displayName, idx) => {
                         const charge = lineItemChargesAndDeductions.find(
@@ -168,7 +160,7 @@ const PurchaseOrderApproval = ({
                             value = Math.abs(value);
                           }
 
-                          if (charge.chargesAndDeduction.percentage) {
+                          if (charge.chargesAndDeduction.percentage !== null) {
                             // Calculate percentage value
                             const percentageValue =
                               (value / (item.unitPrice * item.quantity)) * 100;
@@ -190,7 +182,7 @@ const PurchaseOrderApproval = ({
                 </tbody>
                 <tfoot>
                   <tr>
-                    <td colSpan={4 + uniqueLineItemDisplayNames.length}></td>
+                    <td colSpan={3 + uniqueLineItemDisplayNames.length}></td>
                     <th>Sub Total</th>
                     <td className="text-end">
                       {calculateSubTotal().toFixed(2)}
@@ -211,7 +203,7 @@ const PurchaseOrderApproval = ({
                       ); // Remove negative sign
 
                       // Check if the charge is percentage-based
-                      if (charge.chargesAndDeduction.percentage) {
+                      if (charge.chargesAndDeduction.percentage !== null) {
                         // Calculate percentage value based on subtotal
                         const percentageValue =
                           (renderedValue / calculateSubTotal()) * 100;
@@ -223,7 +215,7 @@ const PurchaseOrderApproval = ({
                       return (
                         <tr key={`${index}-${chargeIndex}`}>
                           <td
-                            colSpan={4 + uniqueLineItemDisplayNames.length}
+                            colSpan={3 + uniqueLineItemDisplayNames.length}
                           ></td>
                           <th>
                             {charge.chargesAndDeduction.sign}{" "}
@@ -235,7 +227,7 @@ const PurchaseOrderApproval = ({
                     });
                   })}
                   <tr>
-                    <td colSpan={4 + uniqueLineItemDisplayNames.length}></td>
+                    <td colSpan={3 + uniqueLineItemDisplayNames.length}></td>
                     <th>Total Amount</th>
                     <td className="text-end">
                       {purchaseOrder.totalAmount.toFixed(2)}

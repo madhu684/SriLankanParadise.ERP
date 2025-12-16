@@ -11,7 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import {
   get_company_api,
-  get_customers_by_company_id_api,
+  get_all_customers_api,
   post_packing_slip_api,
   post_packing_slip_detail_api,
 } from "../../services/salesApi";
@@ -49,9 +49,7 @@ const usePackingSlip = ({ onFormSubmit, handleRefetchSlip }) => {
 
   const fetchCustomers = async () => {
     try {
-      const response = await get_customers_by_company_id_api(
-        sessionStorage?.getItem("companyId")
-      );
+      const response = await get_all_customers_api();
       return response.data.result || [];
     } catch (error) {
       console.error("Error fetching customers:", error);

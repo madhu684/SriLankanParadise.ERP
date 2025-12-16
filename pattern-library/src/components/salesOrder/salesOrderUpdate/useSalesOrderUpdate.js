@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  get_customers_by_company_id_api,
+  get_all_customers_api,
   put_sales_order_api,
   put_sales_order_detail_api,
   post_sales_order_detail_api,
@@ -114,9 +114,7 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
 
   const fetchCustomers = async () => {
     try {
-      const response = await get_customers_by_company_id_api(
-        sessionStorage?.getItem("companyId")
-      );
+      const response = await get_all_customers_api();
       return response.data.result || [];
     } catch (error) {
       console.error("Error fetching customers:", error);

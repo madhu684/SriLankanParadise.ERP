@@ -2,6 +2,7 @@
 using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
+using System.ComponentModel.Design;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
 {
@@ -55,21 +56,42 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<Customer>> GetCustomersByCompanyId(int companyId)
+        public async Task<IEnumerable<Customer>> SearchCustomerByNamePhone(string searchTerm)
         {
             try
             {
-                var customers = await _dbContext.Customers
-                    .Where(c => c.CompanyId == companyId)
-                    .ToListAsync();
+                if (string.IsNullOrEmpty(searchTerm))
+                {
+                    return null;
+                }
 
-                return customers.Any() ? customers : null;
+                // Apply search query
+                var query = _dbContext.Customers.Where(im => im.CustomerName.Contains(searchTerm) || im.Phone.Contains(searchTerm));
+                var customers = await query.ToListAsync();
+
+                return customers.Any() ? customers : null!;
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
+
+        //public async Task<IEnumerable<Customer>> GetCustomersByCompanyId(int companyId)
+        //{
+        //    try
+        //    {
+        //        var customers = await _dbContext.Customers
+        //            .Where(c => c.CompanyId == companyId)
+        //            .ToListAsync();
+
+        //        return customers.Any() ? customers : null;
+        //    }
+        //    catch (Exception)
+        //    {
+
+        //        throw;
+        //    }
+        //}
     }
 }

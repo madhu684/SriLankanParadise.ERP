@@ -324,10 +324,12 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
               inventory?.data?.result?.totalStockInHand || 0;
 
             const initializedCharges = chargesAndDeductionsApplied
-              ?.filter((charge) => charge.lineItemId === item.itemMasterId)
+              ?.filter(
+                (charge) => charge.lineItemId === item.itemBatchItemMasterId
+              )
               .map((charge) => {
                 let value;
-                if (charge.chargesAndDeduction.percentage) {
+                if (charge.chargesAndDeduction.percentage !== null) {
                   value =
                     (Math.abs(charge.appliedValue) /
                       (item.unitPrice * item.quantity)) *
@@ -347,7 +349,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
               });
 
             const sortedLineItemCharges = chargesAndDeductions
-              .filter((charge) => charge.isApplicableForLineItem)
+              .filter((charge) => charge.isApplicableForLineItem === true)
               .map((charge) => {
                 const displayName = charge.displayName;
                 const matchedCharge = initializedCharges.find(
@@ -382,7 +384,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           ?.filter((charge) => !charge.lineItemId)
           .map((charge) => {
             let value;
-            if (charge.chargesAndDeduction.percentage) {
+            if (charge.chargesAndDeduction.percentage !== null) {
               // Calculate percentage value based on subtotal
               value = (Math.abs(charge.appliedValue) / subTotal) * 100;
             } else {
@@ -443,18 +445,26 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
             item.chargesAndDeductions.map(async (charge) => {
               let appliedValue = 0;
 
+              const chargeValue = parseFloat(charge.value) || 0;
+
               if (charge.isPercentage) {
-                // Calculate the amount based on percentage and sign
-                const amount =
-                  item.IsInventoryItem === true
-                    ? (item.quantity * item.unitPrice * charge.value) / 100
-                    : (item.unitPrice * charge.value) / 100;
+                // Calculate the amount based on percentage
+                const baseAmount =
+                  item.isInventoryItem === true
+                    ? item.quantity * item.unitPrice
+                    : item.unitPrice;
+
+                const amount = (baseAmount * chargeValue) / 100;
                 appliedValue = charge.sign === "+" ? amount : -amount;
               } else {
                 // Use the value directly based on the sign
-                appliedValue =
-                  charge.sign === "+" ? charge.value : -charge.value;
+                appliedValue = charge.sign === "+" ? chargeValue : -chargeValue;
               }
+
+              console.log(
+                `Applied charge for ${item.itemMasterId}: `,
+                appliedValue
+              );
 
               const chargesAndDeductionAppliedData = {
                 chargesAndDeductionId: charge.id,
@@ -1153,11 +1163,12 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   };
 
   console.log("formData", formData);
-  console.log(
-    "chargesAndDeductionsAppliedIdsToBeDeleted: ",
-    chargesAndDeductionsAppliedIdsToBeDeleted
-  );
-  console.log("itemIdsToBeDeleted: ", itemIdsToBeDeleted);
+  console.log("salesInvoice: ", salesInvoice);
+  // console.log(
+  //   "chargesAndDeductionsAppliedIdsToBeDeleted: ",
+  //   chargesAndDeductionsAppliedIdsToBeDeleted
+  // );
+  // console.log("itemIdsToBeDeleted: ", itemIdsToBeDeleted);
 
   return {
     formData,
