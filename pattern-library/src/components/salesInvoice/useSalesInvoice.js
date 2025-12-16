@@ -500,7 +500,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
                 chargesAndDeductionId: charge.id,
                 transactionId: transactionId,
                 transactionTypeId,
-                lineItemId: item.itemMasterId,
+                lineItemId: item.id,
                 appliedValue,
                 dateApplied: new Date().toISOString(),
                 createdBy: sessionStorage?.getItem("userId"),
@@ -936,7 +936,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
 
   const handleAddCommonChargesAndDeductions = () => {
     const initializedCharges = chargesAndDeductions.reduce((acc, charge) => {
-      if (!charge.isApplicableForLineItem) {
+      if (charge.isDisableFromSubTotal === false) {
         // Initialize additional properties for the common on charges and deductions
         acc[charge.displayName] = charge.amount || charge.percentage;
       }
@@ -945,13 +945,14 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
 
     // Generate chargesAndDeductions array for the newly added item
     const initializedChargesArray = chargesAndDeductions
-      .filter((charge) => !charge.isApplicableForLineItem)
+      .filter((charge) => charge.isDisableFromSubTotal === false)
       .map((charge) => ({
         id: charge.chargesAndDeductionId,
         name: charge.displayName,
         value: charge.amount || charge.percentage,
         sign: charge.sign,
         isPercentage: charge.percentage !== null,
+        isDisableFromSubTotal: charge.isDisableFromSubTotal,
       }));
 
     setFormData((prevFormData) => ({
@@ -967,7 +968,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
 
   const renderSubColumns = () => {
     return formData.commonChargesAndDeductions.map((charge, chargeIndex) => {
-      if (!charge.isApplicableForLineItem) {
+      if (charge.isDisableFromSubTotal === false) {
         return (
           <tr key={chargeIndex}>
             <td

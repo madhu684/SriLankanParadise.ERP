@@ -149,7 +149,7 @@ const MinAccept = ({ refetch, setRefetch, show, handleClose, min }) => {
                         value={
                           receivedQuantities[item.issueDetailId] !== undefined
                             ? receivedQuantities[item.issueDetailId]
-                            : item.receivedQuantity ?? 0
+                            : item.quantity ?? 0
                         }
                         onChange={(e) =>
                           handleReceivedQuantityChange(
@@ -200,40 +200,6 @@ const MinAccept = ({ refetch, setRefetch, show, handleClose, min }) => {
             </tbody>
           </table>
         </div>
-
-        {/* Summary Section */}
-        {/* <div className="mt-3 p-3 bg-light rounded">
-          <h6>Summary</h6>
-          <div className="row">
-            <div className="col-md-4">
-              <small className="text-muted">Total Items:</small>
-              <div className="fw-bold">{min.issueDetails.length}</div>
-            </div>
-            <div className="col-md-4">
-              <small className="text-muted">Total Issued:</small>
-              <div className="fw-bold">
-                {min.issueDetails
-                  .reduce(
-                    (sum, item) => sum + parseFloat(item.quantity || 0),
-                    0
-                  )
-                  .toFixed(2)}
-              </div>
-            </div>
-            <div className="col-md-4">
-              <small className="text-muted">Total Net Received:</small>
-              <div className="fw-bold text-success">
-                {min.issueDetails
-                  .reduce(
-                    (sum, item) => sum + getNetQuantity(item.issueDetailId),
-                    0
-                  )
-                  .toFixed(2)}
-              </div>
-            </div>
-          </div>
-        </div> */}
-
         <div ref={alertRef}></div>
         {approvalStatus === "approved" && (
           <div

@@ -1,15 +1,18 @@
+using AutoMapper;
+using Consul;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
+using Polly;
+using Polly.Extensions.Http;
 using SriLankanParadise.ERP.UserManagement.Business_Service;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
+using SriLankanParadise.ERP.UserManagement.Data;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Middlewares;
 using SriLankanParadise.ERP.UserManagement.Repository;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
-using AutoMapper;
 using SriLankanParadise.ERP.UserManagement.Shared.AutoMappers;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.EntityFrameworkCore.Query;
-using SriLankanParadise.ERP.UserManagement.ERP_Web.Middlewares;
-using Consul;
-using SriLankanParadise.ERP.UserManagement.Data;
+using SriLankanParadise.ERP.UserManagement.Utility;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,6 +73,33 @@ builder.Services.AddLogging(loggingBuilder =>
 {
     loggingBuilder.AddConsole(); // You can add other logging providers here
 });
+
+builder.Services.AddHttpClient("AyuOMSClient", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["AyuOMS:BaseUrl"]);
+    client.Timeout = TimeSpan.FromSeconds(30);
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+    client.DefaultRequestHeaders.Add("User-Agent", "SriLankanParadise-ERP");
+})
+.AddPolicyHandler(GetRetryPolicy())
+.AddPolicyHandler(GetCircuitBreakerPolicy());
+
+builder.Services.AddScoped<IHttpClientHelper, HttpClientHelper>();
+
+// Resilience policies using Polly
+static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+{
+    return HttpPolicyExtensions
+        .HandleTransientHttpError()
+        .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+}
+
+static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
+{
+    return HttpPolicyExtensions
+        .HandleTransientHttpError()
+        .CircuitBreakerAsync(5, TimeSpan.FromSeconds(30));
+}
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
