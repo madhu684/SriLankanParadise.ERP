@@ -408,7 +408,6 @@ const PurchaseOrderUpdate = ({ handleClose, purchaseOrder, handleUpdated }) => {
                   <th>Unit</th>
                   <th>Quantity</th>
                   <th>Unit Price</th>
-                  <th>Discount (%)</th>
                   {renderColumns()}
                   <th className="text-end">Total Price</th>
                   <th className="text-end">Action</th>
@@ -466,34 +465,6 @@ const PurchaseOrderUpdate = ({ handleClose, purchaseOrder, handleUpdated }) => {
                       {validationErrors[`unitPrice_${index}`] && (
                         <div className="invalid-feedback">
                           {validationErrors[`unitPrice_${index}`]}
-                        </div>
-                      )}
-                    </td>
-                    <td>
-                      <input
-                        type="number"
-                        className={`form-control ${
-                          validFields[`discount_${index}`] ? "is-valid" : ""
-                        } ${
-                          validationErrors[`discount_${index}`]
-                            ? "is-invalid"
-                            : ""
-                        }`}
-                        value={item.discount}
-                        onChange={(e) =>
-                          handleItemDetailsChange(
-                            index,
-                            "discount",
-                            e.target.value
-                          )
-                        }
-                        max={100}
-                        min={0}
-                        step={0.01}
-                      />
-                      {validationErrors[`discount_${index}`] && (
-                        <div className="invalid-feedback">
-                          {validationErrors[`discount_${index}`]}
                         </div>
                       )}
                     </td>

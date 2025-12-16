@@ -344,7 +344,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                       // If batchStockType is FIFO, filter out items already present in formData.itemDetails
                       if (company.batchStockType === "FIFO") {
                         return !formData.itemDetails.some(
-                          (detail) => detail.itemMasterId === item.itemMasterId
+                          (detail) => detail.id === item.itemMasterId
                         );
                       }
                       // Otherwise, include all items
@@ -362,8 +362,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                         // If batchStockType is FIFO, filter out items already present in formData.itemDetails
                         if (company.batchStockType === "FIFO") {
                           return !formData.itemDetails.some(
-                            (detail) =>
-                              detail.itemMasterId === item.itemMasterId
+                            (detail) => detail.id === item.itemMasterId
                           );
                         }
                         // Otherwise, include all items

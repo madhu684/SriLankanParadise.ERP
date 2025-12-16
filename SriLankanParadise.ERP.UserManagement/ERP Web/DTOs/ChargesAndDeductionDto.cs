@@ -32,5 +32,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public int? CompanyId { get; set; }
 
+        public bool IsDisableFromSubTotal { get; set; }
+
     }
 }

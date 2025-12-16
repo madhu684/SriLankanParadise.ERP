@@ -28,6 +28,8 @@
 
         public int? CompanyId { get; set; }
 
+        public bool IsDisableFromSubTotal { get; set; }
+
         public int PermissionId { get; set; }
     }
 }

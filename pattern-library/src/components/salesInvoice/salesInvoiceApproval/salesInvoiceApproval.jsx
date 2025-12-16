@@ -218,7 +218,7 @@ const SalesInvoiceApproval = ({
                             value = Math.abs(value);
                           }
 
-                          if (charge.chargesAndDeduction.percentage) {
+                          if (charge.chargesAndDeduction.percentage !== null) {
                             // Calculate percentage value
                             const percentageValue =
                               (value / (item.unitPrice * item.quantity)) * 100;
@@ -266,7 +266,7 @@ const SalesInvoiceApproval = ({
                       ); // Remove negative sign
 
                       // Check if the charge is percentage-based
-                      if (charge.chargesAndDeduction.percentage) {
+                      if (charge.chargesAndDeduction.percentage !== null) {
                         // Calculate percentage value based on subtotal
                         const percentageValue =
                           (renderedValue / calculateSubTotal()) * 100;

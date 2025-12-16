@@ -176,15 +176,15 @@ const usePurchaseOrderUpdate = ({ purchaseOrder, onFormSubmit }) => {
             )
             .map((charge) => {
               let value;
-              //if (charge.chargesAndDeduction.percentage) {
-              // Calculate percentage value
-              value =
-                (Math.abs(charge.appliedValue) /
-                  (item.unitPrice * item.quantity)) *
-                100;
-              //} else {
-              //value = Math.abs(charge.appliedValue);
-              //}
+              if (charge.chargesAndDeduction.percentage !== null) {
+                // Calculate percentage value
+                value =
+                  (Math.abs(charge.appliedValue) /
+                    (item.unitPrice * item.quantity)) *
+                  100;
+              } else {
+                value = Math.abs(charge.appliedValue);
+              }
               return {
                 id: charge.chargesAndDeduction.chargesAndDeductionId,
                 name: charge.chargesAndDeduction.displayName,
@@ -198,13 +198,13 @@ const usePurchaseOrderUpdate = ({ purchaseOrder, onFormSubmit }) => {
 
           // Sort the charges and deductions according to the order of display names
           const sortedLineItemCharges = chargesAndDeductions
-            .filter((charge) => charge.isApplicableForLineItem)
+            .filter((charge) => charge.isApplicableForLineItem === true)
             .map((charge) => {
-              const displayName = charge.displayName; // Extract display name from charge
+              const displayName = charge.displayName;
               const matchedCharge = initializedCharges.find(
                 (c) => c.name === displayName
               );
-              return matchedCharge || null; // Return null if no matching charge is found
+              return matchedCharge || null;
             });
 
           const priceDifference = parseFloat(
@@ -234,12 +234,12 @@ const usePurchaseOrderUpdate = ({ purchaseOrder, onFormSubmit }) => {
         ?.filter((charge) => !charge.lineItemId)
         .map((charge) => {
           let value;
-          //if (charge.chargesAndDeduction.percentage) {
-          // Calculate percentage value based on subtotal
-          value = (Math.abs(charge.appliedValue) / subTotal) * 100;
-          //} else {
-          //value = Math.abs(charge.appliedValue);
-          //}
+          if (charge.chargesAndDeduction.percentage !== null) {
+            // Calculate percentage value based on subtotal
+            value = (Math.abs(charge.appliedValue) / subTotal) * 100;
+          } else {
+            value = Math.abs(charge.appliedValue);
+          }
           console.log(value);
           return {
             id: charge.chargesAndDeduction.chargesAndDeductionId,
@@ -444,22 +444,29 @@ const usePurchaseOrderUpdate = ({ purchaseOrder, onFormSubmit }) => {
             item.chargesAndDeductions.map(async (charge) => {
               let appliedValue = 0;
 
+              // IMPORTANT: Parse the charge value as a float
+              const chargeValue = parseFloat(charge.value) || 0;
+
               if (charge.isPercentage) {
                 // Calculate the amount based on percentage and sign
-                const amount =
-                  (item.quantity * item.unitPrice * charge.value) / 100;
+                const grandTotalPrice =
+                  (item.quantity *
+                    item.unitPrice *
+                    (100 - (item.discount || 0))) /
+                  100;
+
+                const amount = (grandTotalPrice * chargeValue) / 100;
                 appliedValue = charge.sign === "+" ? amount : -amount;
               } else {
                 // Use the value directly based on the sign
-                appliedValue =
-                  charge.sign === "+" ? charge.value : -charge.value;
+                appliedValue = charge.sign === "+" ? chargeValue : -chargeValue;
               }
 
               const chargesAndDeductionAppliedData = {
                 chargesAndDeductionId: charge.id,
                 transactionId: transactionId,
                 transactionTypeId,
-                lineItemId: item.id,
+                lineItemId: item.itemMasterId,
                 appliedValue,
                 dateApplied: new Date().toISOString(),
                 createdBy: sessionStorage?.getItem("userId"),
@@ -490,12 +497,16 @@ const usePurchaseOrderUpdate = ({ purchaseOrder, onFormSubmit }) => {
       const commonChargesAndDeductions = await Promise.all(
         formData.commonChargesAndDeductions.map(async (charge) => {
           let appliedValue = 0;
+
+          // IMPORTANT: Parse the charge value as a float
+          const chargeValue = parseFloat(charge.value) || 0;
+
           if (charge.isPercentage) {
             // If the charge is a percentage, calculate based on percentage of total amount
-            appliedValue = (formData.subTotal * charge.value) / 100;
+            appliedValue = (formData.subTotal * chargeValue) / 100;
           } else {
             // If the charge is not a percentage, use the fixed value
-            appliedValue = charge.value;
+            appliedValue = chargeValue;
           }
 
           // Apply the sign (+ or -)
