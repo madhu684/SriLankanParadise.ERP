@@ -21,5 +21,7 @@
         public string? ReasonCashInHandDifference { get; set; }
 
         public string? ReasonChequesInHandDifference { get; set; }
+
+        public bool IsActiveSession { get; set; }
     }
 }
