@@ -6,11 +6,11 @@ import {
   post_sales_receipt_sales_invoice_api,
   put_sales_invoice_api,
 } from "../../services/salesApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const useSalesReceipt = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
-    receiptDate: "",
+    receiptDate: new Date().toISOString().split("T")[0],
     referenceNo: "",
     paymentModeId: "",
     attachments: [],
@@ -32,6 +32,8 @@ const useSalesReceipt = ({ onFormSubmit }) => {
   const [siSearchTerm, setSiSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
+
+  const queryClient = useQueryClient();
 
   const fetchsalesInvoices = async () => {
     try {
@@ -179,6 +181,12 @@ const useSalesReceipt = ({ onFormSubmit }) => {
       formData.salesInvoiceIds
     );
 
+    const isPaymentReferenceValid = validateField(
+      "paymentReference",
+      "Payment reference",
+      formData.referenceNo
+    );
+
     const isAttachmentsValid = validateAttachments(formData.attachments);
 
     // Validate each payment value
@@ -210,6 +218,7 @@ const useSalesReceipt = ({ onFormSubmit }) => {
       isPaymentModeIdValid &&
       isSalesInvoiceIdValid &&
       isAttachmentsValid &&
+      isPaymentReferenceValid &&
       isPaymentValid
     );
   };
@@ -256,7 +265,7 @@ const useSalesReceipt = ({ onFormSubmit }) => {
           status: status,
           excessAmount: formData.excessAmount,
           outstandingAmount: formData.outstandingAmount,
-          amountCollect: calculateTotalAmountCollected(),
+          amountCollect: calculateTotalAmountCollected().toFixed(2),
           createdDate: currentDate,
           lastUpdatedDate: currentDate,
           referenceNumber: generateReferenceNumber(),
@@ -276,9 +285,9 @@ const useSalesReceipt = ({ onFormSubmit }) => {
               outstandingAmount: item.outstandingAmount,
               amountCollect:
                 item.payment -
-                (item.customerBalance || 0) +
+                (item.customerBalance.toFixed(2) || 0) +
                 (item.excessAmount || 0),
-              customerBalance: item.customerBalance,
+              customerBalance: item.customerBalance.toFixed(2),
               permissionId: 34,
             };
 
@@ -312,7 +321,7 @@ const useSalesReceipt = ({ onFormSubmit }) => {
               approvedDate: item.approvedDate,
               companyId: item.companyId,
               salesOrderId: item.salesOrderId,
-              amountDue: newAmountDue, // Update with the remaining amount
+              amountDue: newAmountDue.toFixed(2),
               permissionId: 31,
             };
 
@@ -341,6 +350,15 @@ const useSalesReceipt = ({ onFormSubmit }) => {
           } else {
             setSubmissionStatus("successSubmitted");
           }
+
+          queryClient.invalidateQueries([
+            "salesReceiptsWithoutDrafts",
+            sessionStorage.getItem("companyId"),
+          ]);
+          queryClient.invalidateQueries([
+            "salesReceiptsByUserId",
+            sessionStorage.getItem("userId"),
+          ]);
 
           setTimeout(() => {
             setSubmissionStatus(null);
@@ -378,17 +396,17 @@ const useSalesReceipt = ({ onFormSubmit }) => {
       const currentItem = updatedSelectedSalesInvoices[index];
 
       // Store previous values before changes
-      const prevExcess = parseFloat(currentItem.excessAmount) || 0;
-      const prevCustomerBalance = parseFloat(currentItem.customerBalance) || 0;
+      const prevExcess = currentItem.excessAmount.toFixed(2) || 0;
+      const prevCustomerBalance = currentItem.customerBalance.toFixed(2) || 0;
 
       // Update the changed field
       currentItem[field] = value;
 
       // Recalculate based on what changed
       if (field === "excessAmount") {
-        const newExcess = parseFloat(value) || 0;
-        const payment = parseFloat(currentItem.payment) || 0;
-        const amountDue = parseFloat(currentItem.amountDue) || 0;
+        const newExcess = value.toFixed(2) || 0;
+        const payment = currentItem.payment.toFixed(2) || 0;
+        const amountDue = currentItem.amountDue.toFixed(2) || 0;
 
         // Calculate available balance that could be converted back
         const totalAvailable = payment - amountDue;
@@ -404,13 +422,13 @@ const useSalesReceipt = ({ onFormSubmit }) => {
       }
 
       // Maintain all other existing calculations
-      const payment = parseFloat(currentItem.payment) || 0;
-      const amountDue = parseFloat(currentItem.amountDue) || 0;
-      const excessAmount = parseFloat(currentItem.excessAmount) || 0;
+      const payment = currentItem.payment || 0;
+      const amountDue = currentItem.amountDue || 0;
+      const excessAmount = currentItem.excessAmount || 0;
 
       // NEW LOGIC: Check if invoice is fully settled
       const totalReceived = payment; // Amount received for this invoice
-      const invoiceTotal = parseFloat(currentItem.totalAmount) || 0; // Original invoice total
+      const invoiceTotal = currentItem.totalAmount || 0; // Original invoice total
 
       if (invoiceTotal <= totalReceived) {
         // Invoice is fully settled - Amount Due should be 0
@@ -441,7 +459,7 @@ const useSalesReceipt = ({ onFormSubmit }) => {
       return {
         ...prevFormData,
         selectedSalesInvoices: updatedSelectedSalesInvoices,
-        totalAmountReceived: calculateTotalAmount(),
+        totalAmountReceived: calculateTotalAmount().toFixed(2),
       };
     });
   };
@@ -455,13 +473,12 @@ const useSalesReceipt = ({ onFormSubmit }) => {
 
       // Convert full customer balance to excess
       currentItem.excessAmount =
-        (parseFloat(currentItem.excessAmount) || 0) +
-        (parseFloat(currentItem.customerBalance) || 0);
+        (currentItem.excessAmount || 0) + (currentItem.customerBalance || 0);
       currentItem.customerBalance = 0;
 
       // Maintain other calculations
-      const payment = parseFloat(currentItem.payment) || 0;
-      const amountDue = parseFloat(currentItem.amountDue) || 0;
+      const payment = currentItem.payment || 0;
+      const amountDue = currentItem.amountDue || 0;
       currentItem.outstandingAmount = Math.max(0, amountDue - payment);
       currentItem.updatedAmountDue = Math.max(0, amountDue - payment);
 
@@ -578,6 +595,8 @@ const useSalesReceipt = ({ onFormSubmit }) => {
       ),
     }));
   };
+
+  console.log(formData);
 
   return {
     formData,

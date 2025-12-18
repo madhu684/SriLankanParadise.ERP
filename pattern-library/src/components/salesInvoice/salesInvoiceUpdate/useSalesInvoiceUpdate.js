@@ -283,42 +283,6 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
         // Initialize line item charges and deductions
         const initializedLineItemCharges = salesInvoiceDetails.map(
           (item, index) => {
-            // const initializedCharges = chargesAndDeductionsApplied
-            //   ?.filter(
-            //     (charge) => charge.lineItemId === item?.itemMaster?.itemMasterId
-            //   )
-            //   .map((charge) => {
-            //     let value;
-            //     if (charge.chargesAndDeduction.percentage) {
-            //       // Calculate percentage value
-            //       value =
-            //         (Math.abs(charge.appliedValue) /
-            //           (item.unitPrice * item.quantity)) *
-            //         100;
-            //     } else {
-            //       value = Math.abs(charge.appliedValue);
-            //     }
-            //     return {
-            //       id: charge.chargesAndDeduction.chargesAndDeductionId,
-            //       name: charge.chargesAndDeduction.displayName,
-            //       value: value.toFixed(2),
-            //       sign: charge.chargesAndDeduction.sign,
-            //       isPercentage: charge.chargesAndDeduction.percentage !== null,
-            //       chargesAndDeductionAppliedId:
-            //         charge.chargesAndDeductionAppliedId,
-            //     };
-            //   });
-
-            // // Sort the charges and deductions according to the order of display names
-            // const sortedLineItemCharges = chargesAndDeductions
-            //   .filter((charge) => charge.isApplicableForLineItem)
-            //   .map((charge) => {
-            //     const displayName = charge.displayName; // Extract display name from charge
-            //     const matchedCharge = initializedCharges.find(
-            //       (c) => c.name === displayName
-            //     );
-            //     return matchedCharge || null; // Return null if no matching charge is found
-            //   });
             const inventory = inventoryResults[index];
             const availableStock =
               inventory?.data?.result?.totalStockInHand || 0;

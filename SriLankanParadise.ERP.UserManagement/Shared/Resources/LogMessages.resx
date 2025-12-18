@@ -1065,4 +1065,7 @@
   <data name="SalesInvoiceDeleted" xml:space="preserve">
     <value>Sales Invoice deleted successfully</value>
   </data>
+  <data name="CashierSessionRetrieved" xml:space="preserve">
+    <value>Cashier session retrieved successfully</value>
+  </data>
 </root>

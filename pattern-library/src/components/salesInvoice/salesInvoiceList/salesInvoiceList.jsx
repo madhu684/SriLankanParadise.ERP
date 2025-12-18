@@ -10,6 +10,7 @@ import ErrorComponent from "../../errorComponent/errorComponent";
 import Pagination from "../../common/Pagination/Pagination";
 import { FaSearch } from "react-icons/fa";
 import SalesInvoiceDelete from "../salesInvoiceDelete/salesInvoiceDelete";
+import useFormatCurrency from "../../../utility/useFormatCurrency";
 
 const SalesInvoiceList = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -62,6 +63,8 @@ const SalesInvoiceList = () => {
     setSearchQuery(e.target.value);
     setCurrentPage(1);
   };
+
+  const formatTotals = useFormatCurrency();
 
   const filteredSalesInvoices = salesInvoices.filter(
     (si) =>
@@ -207,6 +210,7 @@ const SalesInvoiceList = () => {
               <th>Reference No</th>
               <th>Created By</th>
               <th>Invoice Date</th>
+              <th>Amount Due</th>
               <th>Status</th>
               <th>Details</th>
             </tr>
@@ -229,6 +233,7 @@ const SalesInvoiceList = () => {
                   <td>{si.referenceNo}</td>
                   <td>{si.createdBy}</td>
                   <td>{si?.invoiceDate?.split("T")[0]}</td>
+                  <td className="text-danger fw-bold">{formatTotals(si.amountDue)}</td>
                   <td>
                     <span
                       className={`badge rounded-pill ${getStatusBadgeClass(

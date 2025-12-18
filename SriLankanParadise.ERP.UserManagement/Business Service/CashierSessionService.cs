@@ -17,6 +17,11 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             await _cashierSessionRepository.AddCashierSession(cashierSession);
         }
 
+        public async Task<CashierSession> GetActiveSessionByUserId(int userId)
+        {
+            return await _cashierSessionRepository.GetActiveSessionByUserId(userId);
+        }
+
         public async Task<IEnumerable<CashierSession>> GetAll()
         {
             return await _cashierSessionRepository.GetAll();
