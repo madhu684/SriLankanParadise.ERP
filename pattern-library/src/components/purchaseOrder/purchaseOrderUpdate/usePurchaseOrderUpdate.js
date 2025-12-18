@@ -166,63 +166,54 @@ const usePurchaseOrderUpdate = ({ purchaseOrder, onFormSubmit }) => {
       chargesAndDeductions
     ) {
       const deepCopyPurchaseOrder = JSON.parse(JSON.stringify(purchaseOrder));
+      let purchaseOrderDetails = purchaseOrder.purchaseOrderDetails;
 
       // Initialize line item charges and deductions
-      const initializedLineItemCharges =
-        deepCopyPurchaseOrder.purchaseOrderDetails.map((item) => {
-          const initializedCharges = chargesAndDeductionsApplied
-            ?.filter(
-              (charge) => charge.lineItemId === item.itemMaster.itemMasterId
-            )
-            .map((charge) => {
-              let value;
-              if (charge.chargesAndDeduction.percentage !== null) {
-                // Calculate percentage value
-                value =
-                  (Math.abs(charge.appliedValue) /
-                    (item.unitPrice * item.quantity)) *
-                  100;
-              } else {
-                value = Math.abs(charge.appliedValue);
-              }
-              return {
-                id: charge.chargesAndDeduction.chargesAndDeductionId,
-                name: charge.chargesAndDeduction.displayName,
-                value: value.toFixed(2),
-                sign: charge.chargesAndDeduction.sign,
-                isPercentage: charge.chargesAndDeduction.percentage !== null,
-                chargesAndDeductionAppliedId:
-                  charge.chargesAndDeductionAppliedId,
-              };
-            });
+      const initializedLineItemCharges = purchaseOrderDetails.map((item) => {
+        const initializedCharges = chargesAndDeductionsApplied
+          ?.filter(
+            (charge) => charge.lineItemId === item.itemMaster.itemMasterId
+          )
+          .map((charge) => {
+            let value;
+            if (charge.chargesAndDeduction.percentage !== null) {
+              // Calculate percentage value
+              value =
+                (Math.abs(charge.appliedValue) /
+                  (item.unitPrice * item.quantity)) *
+                100;
+            } else {
+              value = Math.abs(charge.appliedValue);
+            }
+            return {
+              id: charge.chargesAndDeduction.chargesAndDeductionId,
+              name: charge.chargesAndDeduction.displayName,
+              value: value.toFixed(2),
+              sign: charge.chargesAndDeduction.sign,
+              isPercentage: charge.chargesAndDeduction.percentage !== null,
+              chargesAndDeductionAppliedId: charge.chargesAndDeductionAppliedId,
+            };
+          });
 
-          // Sort the charges and deductions according to the order of display names
-          const sortedLineItemCharges = chargesAndDeductions
-            .filter((charge) => charge.isApplicableForLineItem === true)
-            .map((charge) => {
-              const displayName = charge.displayName;
-              const matchedCharge = initializedCharges.find(
-                (c) => c.name === displayName
-              );
-              return matchedCharge || null;
-            });
+        // Sort the charges and deductions according to the order of display names
+        const sortedLineItemCharges = chargesAndDeductions
+          .filter((charge) => charge.isApplicableForLineItem === true)
+          .map((charge) => {
+            const displayName = charge.displayName;
+            const matchedCharge = initializedCharges.find(
+              (c) => c.name === displayName
+            );
+            return matchedCharge || null;
+          });
 
-          const priceDifference = parseFloat(
-            item.quantity * item.unitPrice - item.totalPrice
-          );
-
-          const lineItemDiscount =
-            (priceDifference / (item.quantity * item.unitPrice)) * 100;
-
-          return {
-            ...item,
-            id: item.itemMasterId,
-            name: item.itemMaster.itemName,
-            unit: item.itemMaster.unit.unitName,
-            discount: lineItemDiscount.toFixed(2),
-            chargesAndDeductions: sortedLineItemCharges,
-          };
-        });
+        return {
+          ...item,
+          id: item.itemMasterId,
+          name: item.itemMaster.itemName,
+          unit: item.itemMaster.unit.unitName,
+          chargesAndDeductions: sortedLineItemCharges,
+        };
+      });
 
       const subTotal = deepCopyPurchaseOrder.purchaseOrderDetails.reduce(
         (total, item) => total + item.totalPrice,
@@ -287,12 +278,12 @@ const usePurchaseOrderUpdate = ({ purchaseOrder, onFormSubmit }) => {
     }
   }, [submissionStatus]);
 
-  useEffect(() => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      totalAmount: calculateTotalAmount(),
-    }));
-  }, [formData.itemDetails]);
+  // useEffect(() => {
+  //   setFormData((prevFormData) => ({
+  //     ...prevFormData,
+  //     totalAmount: calculateTotalAmount(),
+  //   }));
+  // }, [formData.itemDetails]);
 
   const validateField = (
     fieldName,
@@ -734,6 +725,88 @@ const usePurchaseOrderUpdate = ({ purchaseOrder, onFormSubmit }) => {
     setValidationErrors({});
   };
 
+  // const handleItemDetailsChange = (index, field, value) => {
+  //   setFormData((prevFormData) => {
+  //     const updatedItemDetails = [...prevFormData.itemDetails];
+
+  //     // Check if the field belongs to chargesAndDeductions
+  //     if (field.startsWith("chargesAndDeductions")) {
+  //       // Get the charge or deduction index
+  //       const chargeIndex = parseInt(field.split("_")[1]);
+
+  //       // Update the value of the corresponding charge or deduction
+  //       updatedItemDetails[index].chargesAndDeductions[chargeIndex].value =
+  //         value;
+  //     } else {
+  //       // If the field is not part of chargesAndDeductions, update other fields
+  //       updatedItemDetails[index][field] =
+  //         field === "discount" ? parseFloat(value) : value;
+  //     }
+
+  //     // Ensure positive values for Quantities, Unit Prices and discounts
+  //     updatedItemDetails[index].quantity = Math.max(
+  //       0,
+  //       updatedItemDetails[index].quantity
+  //     );
+
+  //     updatedItemDetails[index].unitPrice = !isNaN(
+  //       parseFloat(updatedItemDetails[index].unitPrice)
+  //     )
+  //       ? Math.max(0, parseFloat(updatedItemDetails[index].unitPrice))
+  //       : 0;
+
+  //     updatedItemDetails[index].discount = Math.max(
+  //       0,
+  //       updatedItemDetails[index].discount
+  //     );
+
+  //     // Calculate total price based on charges and deductions
+  //     const grandTotalPrice =
+  //       (updatedItemDetails[index].quantity *
+  //         updatedItemDetails[index].unitPrice *
+  //         (100 - updatedItemDetails[index].discount)) /
+  //       100;
+
+  //     let totalPrice =
+  //       (updatedItemDetails[index].quantity *
+  //         updatedItemDetails[index].unitPrice *
+  //         (100 - updatedItemDetails[index].discount)) /
+  //       100;
+
+  //     // Add or subtract charges and deductions from total price
+  //     updatedItemDetails[index].chargesAndDeductions.forEach((charge) => {
+  //       if (charge.isPercentage) {
+  //         // If charge is a percentage, calculate the amount and add/subtract it
+  //         const amount = (grandTotalPrice * charge.value) / 100;
+  //         if (charge.sign === "+") {
+  //           totalPrice += amount;
+  //         } else if (charge.sign === "-") {
+  //           totalPrice -= amount;
+  //         }
+  //       } else {
+  //         // If charge is not a percentage, directly add/subtract the value
+  //         if (charge.sign === "+") {
+  //           totalPrice += charge.value;
+  //         } else if (charge.sign === "-") {
+  //           totalPrice -= charge.value;
+  //         }
+  //       }
+  //     });
+
+  //     // Ensure totalPrice is initialized and is a numerical value
+  //     totalPrice = isNaN(totalPrice) ? 0 : totalPrice;
+
+  //     updatedItemDetails[index].totalPrice = totalPrice;
+
+  //     return {
+  //       ...prevFormData,
+  //       itemDetails: updatedItemDetails,
+  //       subTotal: calculateSubTotal(),
+  //       totalAmount: calculateTotalAmount(),
+  //     };
+  //   });
+  // };
+
   const handleItemDetailsChange = (index, field, value) => {
     setFormData((prevFormData) => {
       const updatedItemDetails = [...prevFormData.itemDetails];
@@ -748,14 +821,13 @@ const usePurchaseOrderUpdate = ({ purchaseOrder, onFormSubmit }) => {
           value;
       } else {
         // If the field is not part of chargesAndDeductions, update other fields
-        updatedItemDetails[index][field] =
-          field === "discount" ? parseFloat(value) : value;
+        updatedItemDetails[index][field] = value;
       }
 
       // Ensure positive values for Quantities, Unit Prices and discounts
       updatedItemDetails[index].quantity = Math.max(
         0,
-        updatedItemDetails[index].quantity
+        parseFloat(updatedItemDetails[index].quantity) || 0
       );
 
       updatedItemDetails[index].unitPrice = !isNaN(
@@ -764,29 +836,22 @@ const usePurchaseOrderUpdate = ({ purchaseOrder, onFormSubmit }) => {
         ? Math.max(0, parseFloat(updatedItemDetails[index].unitPrice))
         : 0;
 
-      updatedItemDetails[index].discount = Math.max(
-        0,
-        updatedItemDetails[index].discount
-      );
-
       // Calculate total price based on charges and deductions
       const grandTotalPrice =
-        (updatedItemDetails[index].quantity *
-          updatedItemDetails[index].unitPrice *
-          (100 - updatedItemDetails[index].discount)) /
-        100;
+        updatedItemDetails[index].quantity *
+        updatedItemDetails[index].unitPrice;
 
       let totalPrice =
-        (updatedItemDetails[index].quantity *
-          updatedItemDetails[index].unitPrice *
-          (100 - updatedItemDetails[index].discount)) /
-        100;
+        updatedItemDetails[index].quantity *
+        updatedItemDetails[index].unitPrice;
 
       // Add or subtract charges and deductions from total price
       updatedItemDetails[index].chargesAndDeductions.forEach((charge) => {
+        const chargeValue = parseFloat(charge.value) || 0;
+
         if (charge.isPercentage) {
           // If charge is a percentage, calculate the amount and add/subtract it
-          const amount = (grandTotalPrice * charge.value) / 100;
+          const amount = (grandTotalPrice * chargeValue) / 100;
           if (charge.sign === "+") {
             totalPrice += amount;
           } else if (charge.sign === "-") {
@@ -795,9 +860,9 @@ const usePurchaseOrderUpdate = ({ purchaseOrder, onFormSubmit }) => {
         } else {
           // If charge is not a percentage, directly add/subtract the value
           if (charge.sign === "+") {
-            totalPrice += charge.value;
+            totalPrice += chargeValue;
           } else if (charge.sign === "-") {
-            totalPrice -= charge.value;
+            totalPrice -= chargeValue;
           }
         }
       });

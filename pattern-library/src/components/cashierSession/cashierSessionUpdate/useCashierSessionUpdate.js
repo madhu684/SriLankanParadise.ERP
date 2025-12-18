@@ -288,7 +288,7 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
   // Calculate totals for each payment mode
   const totalsByPaymentMode = salesReceipts.reduce((totals, receipt) => {
     const modeId = receipt.paymentMode.paymentModeId;
-    totals[modeId] = (totals[modeId] || 0) + receipt.amountReceived;
+    totals[modeId] = (totals[modeId] || 0) + receipt.amountCollect;
     return totals;
   }, {});
 

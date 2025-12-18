@@ -173,21 +173,21 @@ const SalesReceiptDetail = ({ show, handleClose, salesReceipt }) => {
               <tr>
                 <td colSpan="5"></td>
                 <th>Total Excess Amount</th>
-                <td className="text-end">
+                <td className="text-end text-success">
                   {displaySalesReceipt?.excessAmount?.toFixed(2) || "0.00"}
                 </td>
               </tr>
               <tr>
                 <td colSpan="5"></td>
                 <th>Total Outstanding Amount</th>
-                <td className="text-end">
+                <td className="text-end text-danger">
                   {displaySalesReceipt?.outstandingAmount?.toFixed(2) || "0.00"}
                 </td>
               </tr>
               <tr>
                 <td colSpan="5"></td>
                 <th>Total Amount Received</th>
-                <td className="text-end">
+                <td className="text-end text-primary">
                   {displaySalesReceipt?.amountReceived?.toFixed(2) || "0.00"}
                 </td>
               </tr>
