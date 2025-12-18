@@ -1246,23 +1246,20 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   //     }
 
   //     if (lowStockItems.length > 0) {
-  //       // Generate chargesAndDeductions array for each low-stock item
-  //       const initializedCharges =
-  //         chargesAndDeductions
-  //           ?.filter((charge) => charge.isApplicableForLineItem)
-  //           .map((charge) => ({
-  //             id: charge.chargesAndDeductionId,
-  //             name: charge.displayName,
-  //             value: charge.amount || charge.percentage,
-  //             sign: charge.sign,
-  //             isPercentage: charge.percentage !== null,
-  //           })) || [];
-
   //       const companyId = sessionStorage.getItem("companyId");
-
-  //       // Transform low-stock items into itemDetails format with API calls
   //       const newItemDetails = await Promise.all(
   //         lowStockItems.map(async (item) => {
+  //           const initializedCharges =
+  //             chargesAndDeductions
+  //               ?.filter((charge) => charge.isApplicableForLineItem)
+  //               .map((charge) => ({
+  //                 id: charge.chargesAndDeductionId,
+  //                 name: charge.displayName,
+  //                 value: charge.amount || charge.percentage,
+  //                 sign: charge.sign,
+  //                 isPercentage: charge.percentage !== null,
+  //               })) || [];
+
   //           const itemBatch = await get_item_batches_by_item_master_id_api(
   //             item.itemMasterId,
   //             sessionStorage.getItem("companyId")
@@ -1330,6 +1327,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     try {
       setPOGenerating(true);
       setIsPOGenerated(true);
+
       const response = await get_Low_Stock_Items_api(
         formData.supplierId,
         userLocation[0]?.locationId
@@ -1346,77 +1344,107 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
         return;
       }
 
-      if (lowStockItems.length > 0) {
-        const companyId = sessionStorage.getItem("companyId");
-        const newItemDetails = await Promise.all(
-          lowStockItems.map(async (item) => {
-            const initializedCharges =
-              chargesAndDeductions
-                ?.filter((charge) => charge.isApplicableForLineItem)
-                .map((charge) => ({
-                  id: charge.chargesAndDeductionId,
-                  name: charge.displayName,
-                  value: charge.amount || charge.percentage,
-                  sign: charge.sign,
-                  isPercentage: charge.percentage !== null,
-                })) || [];
+      const companyId = sessionStorage.getItem("companyId");
 
-            const itemBatch = await get_item_batches_by_item_master_id_api(
-              item.itemMasterId,
-              sessionStorage.getItem("companyId")
+      const newItemDetails = await Promise.all(
+        lowStockItems.map(async (item) => {
+          const initializedCharges =
+            chargesAndDeductions
+              ?.filter((charge) => charge.isApplicableForLineItem)
+              .map((charge) => ({
+                id: charge.chargesAndDeductionId,
+                name: charge.displayName,
+                value: charge.amount || charge.percentage,
+                sign: charge.sign,
+                isPercentage: charge.percentage !== null,
+              })) || [];
+
+          const itemBatch = await get_item_batches_by_item_master_id_api(
+            item.itemMasterId,
+            companyId
+          );
+
+          const latestBatch = itemBatch.data.result
+            ? itemBatch.data.result.sort((a, b) => b.batchId - a.batchId)[0]
+            : null;
+
+          const supplierItemResponse =
+            await get_supplier_items_by_type_category_api(
+              companyId,
+              parseInt(item.itemMaster?.itemType?.itemTypeId),
+              parseInt(item.itemMaster?.category?.categoryId),
+              userLocation[0]?.locationId
             );
 
-            const latestBatch = itemBatch.data.result
-              ? itemBatch.data.result.sort((a, b) => b.batchId - a.batchId)[0]
-              : null;
+          const supplierItems = supplierItemResponse.data.result
+            ? supplierItemResponse.data.result.filter(
+                (si) =>
+                  si.itemMasterId !== item.itemMasterId &&
+                  si.supplierName !== formData?.selectedSupplier?.supplierName
+              )
+            : [];
 
-            const supplierItemResponse =
-              await get_supplier_items_by_type_category_api(
-                companyId,
-                parseInt(item.itemMaster?.itemType?.itemTypeId),
-                parseInt(item.itemMaster?.category?.categoryId),
-                userLocation[0]?.locationId
-              );
+          // Calculate initial totalPrice with line-item charges
+          const basePrice =
+            (item.maxStockLevel - item.totalStockInHand >= 0
+              ? item.maxStockLevel - item.totalStockInHand
+              : 0) * (latestBatch?.costPrice || 0);
 
-            const supplierItems = supplierItemResponse.data.result
-              ? supplierItemResponse.data.result.filter(
-                  (si) =>
-                    si.itemMasterId !== item.itemMasterId &&
-                    si.supplierName !== formData?.selectedSupplier?.supplierName
-                )
-              : [];
+          let totalPrice = basePrice;
+          initializedCharges.forEach((charge) => {
+            if (charge.isPercentage) {
+              const amount = (basePrice * charge.value) / 100;
+              totalPrice += charge.sign === "+" ? amount : -amount;
+            } else {
+              totalPrice += charge.sign === "+" ? charge.value : -charge.value;
+            }
+          });
 
-            return {
-              id: item.itemMasterId,
-              name: item.itemMaster.itemName,
-              unit: item.itemMaster.unit?.unitName || "",
-              categoryId: item.itemMaster?.category?.categoryId || "",
-              itemTypeId: item.itemMaster?.itemType?.itemTypeId || "",
-              quantity:
-                item.maxStockLevel - item.totalStockInHand >= 0
-                  ? item.maxStockLevel - item.totalStockInHand
-                  : 0,
-              unitPrice: latestBatch?.costPrice || 0.0,
-              totalPrice: 0.0,
-              supplierItems: supplierItems,
-              totalStockInHand: item.totalStockInHand,
-              minReOrderLevel: item.minReOrderLevel,
-              maxStockLevel: item.maxStockLevel,
-              chargesAndDeductions: initializedCharges,
-            };
-          })
+          return {
+            id: item.itemMasterId,
+            name: item.itemMaster.itemName,
+            unit: item.itemMaster.unit?.unitName || "",
+            categoryId: item.itemMaster?.category?.categoryId || "",
+            itemTypeId: item.itemMaster?.itemType?.itemTypeId || "",
+            quantity:
+              item.maxStockLevel - item.totalStockInHand >= 0
+                ? item.maxStockLevel - item.totalStockInHand
+                : 0,
+            unitPrice: latestBatch?.costPrice || 0.0,
+            totalPrice: totalPrice, // Now correctly calculated
+            supplierItems,
+            totalStockInHand: item.totalStockInHand,
+            minReOrderLevel: item.minReOrderLevel,
+            maxStockLevel: item.maxStockLevel,
+            chargesAndDeductions: initializedCharges,
+          };
+        })
+      );
+
+      // Update state with correct totals using fresh data
+      setFormData((prevFormData) => {
+        const subTotal = newItemDetails.reduce(
+          (sum, item) => sum + item.totalPrice,
+          0
         );
 
-        // Update formData with new itemDetails
-        setFormData((prevFormData) => ({
+        let totalAmount = subTotal;
+        prevFormData.commonChargesAndDeductions.forEach((charge) => {
+          if (charge.isPercentage) {
+            const amount = (subTotal * charge.value) / 100;
+            totalAmount += charge.sign === "+" ? amount : -amount;
+          } else {
+            totalAmount += charge.sign === "+" ? charge.value : -charge.value;
+          }
+        });
+
+        return {
           ...prevFormData,
           itemDetails: newItemDetails,
-          subTotal: calculateSubTotal(),
-          totalAmount: calculateTotalAmount(),
-        }));
-      } else {
-        console.log("No low-stock items found.");
-      }
+          subTotal,
+          totalAmount,
+        };
+      });
     } catch (error) {
       console.error("Error generating purchase order:", error);
     } finally {
