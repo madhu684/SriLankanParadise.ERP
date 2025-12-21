@@ -62,7 +62,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     chargesAndDeductionsAppliedIdsToBeDeleted,
     setChargesAndDeductionsAppliedIdsToBeDeleted,
   ] = useState([]);
-  const [showModal, setShowModal] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -86,6 +86,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     data: appointments = [],
     isLoading: isAppointmentsLoading,
     error: appointmentsError,
+    refetch: refetchAppointments,
   } = useQuery({
     queryKey: ["appointments", formData.invoiceDate],
     queryFn: async () => {
@@ -1165,6 +1166,15 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     }));
   };
 
+  const handleRefreshAppointments = async () => {
+    setIsRefreshing(true);
+    await refetchAppointments();
+    // Keep spinning for a bit even after data is fetched for better UX
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 600);
+  };
+
   const calculateSubTotal = () => {
     return formData.itemDetails.reduce(
       (total, item) => total + item.totalPrice,
@@ -1372,19 +1382,20 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     loadingDraft,
     isCompanyLoading,
     isCompanyError,
-    showModal,
     company,
     itemIdsToBeDeleted,
     locationInventories,
     useAppointment,
-    setUseAppointment,
     appointmentSearchTerm,
-    setAppointmentSearchTerm,
     selectedAppointment,
     isAppointmentLoading,
     appointments,
     isAppointmentsLoading,
     appointmentsError,
+    isRefreshing,
+    handleRefreshAppointments,
+    setUseAppointment,
+    setAppointmentSearchTerm,
     handleSelectAppointment,
     handleResetAppointment,
     handleInputChange,
@@ -1400,6 +1411,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     renderColumns,
     calculateSubTotal,
     renderSubColumns,
+    refetchAppointments,
   };
 };
 

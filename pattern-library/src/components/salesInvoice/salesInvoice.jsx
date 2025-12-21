@@ -3,6 +3,7 @@ import CurrentDateTime from "../currentDateTime/currentDateTime";
 import LoadingSpinner from "../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../errorComponent/errorComponent";
 import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
+import "./invoice.css";
 
 const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
   const {
@@ -40,6 +41,8 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
     appointments,
     appointmentsError,
     isAppointmentsLoading,
+    isRefreshing,
+    handleRefreshAppointments,
     setAppointmentSearchTerm,
     setUseAppointment,
     handleSelectAppointment,
@@ -56,6 +59,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
     renderColumns,
     renderSubColumns,
     calculateSubTotal,
+    refetchAppointments,
   } = useSalesInvoice({
     onFormSubmit: () => {
       handleClose();
@@ -250,20 +254,39 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
 
             {/* Appointment Section */}
             <div className="mt-3">
-              <div className="form-check mb-3">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  id="useAppointmentCheck"
-                  checked={useAppointment}
-                  onChange={(e) => setUseAppointment(e.target.checked)}
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor="useAppointmentCheck"
-                >
-                  Raise Sales Invoice using Appointment
-                </label>
+              <div className="d-flex align-items-center justify-content-between mb-3">
+                <div className="form-check">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    id="useAppointmentCheck"
+                    checked={useAppointment}
+                    onChange={(e) => setUseAppointment(e.target.checked)}
+                  />
+                  <label
+                    className="form-check-label"
+                    htmlFor="useAppointmentCheck"
+                  >
+                    Raise Sales Invoice using Appointment
+                  </label>
+                </div>
+                {useAppointment && (
+                  <i
+                    className="bi bi-arrow-clockwise"
+                    onClick={handleRefreshAppointments}
+                    style={{
+                      cursor: isRefreshing ? "not-allowed" : "pointer",
+                      fontSize: "1.2rem",
+                      color: isRefreshing ? "#6c757d" : "#0d6efd",
+                      transition: "transform 0.6s ease-in-out",
+                      transform: isRefreshing
+                        ? "rotate(360deg)"
+                        : "rotate(0deg)",
+                      display: "inline-block",
+                    }}
+                    title="Refresh appointments"
+                  ></i>
+                )}
               </div>
 
               {useAppointment && !selectedAppointment && (
