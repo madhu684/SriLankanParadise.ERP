@@ -17,12 +17,19 @@ import {
   get_locations_inventories_by_location_id_api,
   get_item_batch_by_itemMasterId_batchId_api,
   get_sum_location_inventories_by_locationId_itemMasterId_api,
+  get_sum_location_inventories_by_locationId_itemCode_api,
 } from "../../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../../services/inventoryApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { batch } from "react-redux";
+import {
+  get_appointment_by_id_api,
+  get_appointment_tokens_by_date_api,
+} from "../../../services/ayuOMSApi";
 
 const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
+  const [useAppointment, setUseAppointment] = useState(false);
+  const [appointmentSearchTerm, setAppointmentSearchTerm] = useState("");
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [formData, setFormData] = useState({
     storeLocation: null,
     invoiceDate: "",
@@ -30,6 +37,8 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     referenceNumber: "",
     patientName: "",
     patientNo: "",
+    appointmentId: null,
+    tokenNo: null,
     itemDetails: [],
     attachments: [],
     totalAmount: 0,
@@ -54,6 +63,37 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   const [showModal, setShowModal] = useState(false);
 
   const queryClient = useQueryClient();
+
+  const {
+    data: appointmentDetails,
+    isLoading: isAppointmentLoading,
+    isError: isAppointmentError,
+  } = useQuery({
+    queryKey: ["appointmentDetails", salesInvoice?.appointmentId],
+    queryFn: async () => {
+      if (!salesInvoice?.appointmentId) return null;
+      const response = await get_appointment_by_id_api(
+        salesInvoice.appointmentId
+      );
+      return response.data.result;
+    },
+    enabled: !!salesInvoice?.appointmentId,
+  });
+
+  const {
+    data: appointments = [],
+    isLoading: isAppointmentsLoading,
+    error: appointmentsError,
+  } = useQuery({
+    queryKey: ["appointments", formData.invoiceDate],
+    queryFn: async () => {
+      const response = await get_appointment_tokens_by_date_api(
+        formData.invoiceDate
+      );
+      return response.data.result || [];
+    },
+    enabled: !!formData.invoiceDate && useAppointment,
+  });
 
   const fetchItems = async (companyId, searchQuery) => {
     try {
@@ -202,60 +242,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     queryFn: fetchCompany,
   });
 
-  // useEffect(() => {
-  //   if (groupedSalesInvoiceDetails) {
-  //     const promises = Object.values(groupedSalesInvoiceDetails).map(
-  //       async (item) => {
-  //         try {
-  //           // Fetch batches for the current itemMasterId
-  //           const response = await get_item_batches_by_item_master_id_api(
-  //             item.itemBatchItemMasterId,
-  //             sessionStorage.getItem("companyId")
-  //           );
-  //           console.log("Item batches 230:", response.data.result);
-
-  //           // Calculate total temporary quantity from batches
-  //           const tempQuantity = response.data.result.reduce(
-  //             (total, batch) => total + (batch.tempQuantity || 0),
-  //             0
-  //           );
-
-  //           // Update quantity and totalPrice
-  //           item.itemBatch.tempQuantity = tempQuantity;
-
-  //           // Update tempQuantity of fetched batches based on salesOrderDetails
-  //           const updatedBatches = response.data.result.map((batch) => {
-  //             const correspondingDetail = salesInvoice.salesInvoiceDetails.find(
-  //               (detail) => detail.itemBatchBatchId === batch.batchId
-  //             );
-  //             if (correspondingDetail) {
-  //               batch.tempQuantity += correspondingDetail.quantity;
-  //             }
-  //             return batch;
-  //           });
-
-  //           // Update item.batches with the updated batches
-  //           item.batches = updatedBatches;
-
-  //           return item;
-  //         } catch (error) {
-  //           console.error("Error processing item:", error);
-  //           throw error; // Propagate the error
-  //         }
-  //       }
-  //     );
-
-  //     Promise.all(promises)
-  //       .then((processedItems) => {
-  //         // Handle processed items here
-  //         setProcessedItems(processedItems);
-  //       })
-  //       .catch((error) => {
-  //         // Handle error if any
-  //         console.error("Error processing items:", error);
-  //       });
-  //   }
-  // }, []);
+  // Effects
 
   useEffect(() => {
     if (
@@ -371,6 +358,8 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           referenceNumber: deepCopySalesInvoice?.referenceNo ?? "",
           patientName: deepCopySalesInvoice?.inVoicedPersonName ?? "",
           patientNo: deepCopySalesInvoice?.inVoicedPersonMobileNo ?? "",
+          appointmentId: deepCopySalesInvoice?.appointmentId ?? null,
+          tokenNo: deepCopySalesInvoice?.tokenNo ?? null,
           itemDetails: initializedLineItemCharges,
           attachments: deepCopySalesInvoice?.attachments ?? [],
           totalAmount: deepCopySalesInvoice?.totalAmount ?? "",
@@ -393,6 +382,19 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     company,
     locationInventories,
   ]);
+
+  useEffect(() => {
+    if (appointmentDetails && !selectedAppointment) {
+      setSelectedAppointment(appointmentDetails);
+      setUseAppointment(true);
+    }
+  }, [appointmentDetails]);
+
+  useEffect(() => {
+    if (!useAppointment && selectedAppointment) {
+      handleResetAppointment();
+    }
+  }, [useAppointment]);
 
   const getTransactionTypeIdByName = (name) => {
     const transactionType = transactionTypes.find((type) => type.name === name);
@@ -948,6 +950,220 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     }));
   };
 
+  const handleSelectAppointment = async (appointment) => {
+    setSelectedAppointment(appointment);
+    setAppointmentSearchTerm("");
+
+    // Set patient details and appointment ID
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      appointmentId: appointment.id,
+      tokenNo: appointment.tokenNo,
+      patientName: appointment.customerName,
+      patientNo: appointment.contactNo,
+    }));
+
+    // Process appointment treatments and replace item details
+    if (
+      appointment.appointmentTreatments &&
+      appointment.appointmentTreatments.length > 0
+    ) {
+      try {
+        const itemDetailsPromises = appointment.appointmentTreatments.map(
+          async (treatment) => {
+            const itemCode = treatment.treatmentType.treatmentShortCode;
+
+            try {
+              // Fetch inventory by item code
+              const inventoryResponse =
+                await get_sum_location_inventories_by_locationId_itemCode_api(
+                  itemCode,
+                  formData.storeLocation || salesInvoice.locationId
+                );
+
+              const inventoryData = inventoryResponse?.data?.result;
+
+              if (!inventoryData || !inventoryData.itemMaster) {
+                console.warn(
+                  `No inventory found for treatment: ${treatment.treatmentType.name}`
+                );
+                return null;
+              }
+
+              const itemMaster = inventoryData.itemMaster;
+              const isInventoryItem = itemMaster.isInventoryItem;
+
+              // Initialize charges and deductions
+              const initializedCharges =
+                chargesAndDeductions
+                  ?.filter((charge) => charge.isApplicableForLineItem)
+                  ?.map((charge) => ({
+                    id: charge.chargesAndDeductionId,
+                    name: charge.displayName,
+                    value: charge.amount || charge.percentage,
+                    sign: charge.sign,
+                    isPercentage: charge.percentage !== null,
+                  })) || [];
+
+              // Handle inventory items
+              if (isInventoryItem) {
+                const availableStock = inventoryData.totalStockInHand || 0;
+
+                if (availableStock <= 0) {
+                  console.warn(
+                    `No stock available for treatment: ${treatment.treatmentType.name}`
+                  );
+                  alert(
+                    `No stock available for treatment: ${treatment.treatmentType.name}`
+                  );
+                  return null;
+                }
+
+                // Get highest selling price from available batches
+                let highestSellingPrice = 0;
+                const batchesResponse =
+                  await get_item_batches_by_item_master_id_api(
+                    itemMaster.itemMasterId,
+                    sessionStorage.getItem("companyId")
+                  );
+                highestSellingPrice =
+                  batchesResponse?.data?.result?.reduce(
+                    (maxPrice, batch) =>
+                      batch.sellingPrice > maxPrice
+                        ? batch.sellingPrice
+                        : maxPrice,
+                    0
+                  ) || 0;
+
+                return {
+                  salesInvoiceDetailId: null,
+                  salesInvoiceId: salesInvoice.salesInvoiceId,
+                  itemMasterId: itemMaster.itemMasterId,
+                  isInventoryItem: true,
+                  name: treatment.treatmentType.name,
+                  unit: itemMaster.unit?.unitName || "Unit",
+                  stockInHand: availableStock,
+                  quantity: 1,
+                  unitPrice: highestSellingPrice,
+                  totalPrice: highestSellingPrice,
+                  chargesAndDeductions: initializedCharges,
+                };
+              }
+              // Handle non-inventory items (services)
+              else {
+                return {
+                  salesInvoiceDetailId: null,
+                  salesInvoiceId: salesInvoice.salesInvoiceId,
+                  itemMasterId: itemMaster.itemMasterId,
+                  isInventoryItem: false,
+                  name: treatment.treatmentType.name,
+                  unit: itemMaster.unit?.unitName || "Service",
+                  stockInHand: 0,
+                  quantity: 1,
+                  unitPrice:
+                    itemMaster.unitPrice || itemMaster.sellingPrice || 0,
+                  totalPrice:
+                    itemMaster.unitPrice || itemMaster.sellingPrice || 0,
+                  chargesAndDeductions: initializedCharges,
+                };
+              }
+            } catch (error) {
+              console.error(
+                `Error processing treatment ${treatment.treatmentType.name}:`,
+                error
+              );
+              return null;
+            }
+          }
+        );
+
+        // Wait for all items to be processed
+        const itemDetails = await Promise.all(itemDetailsPromises);
+
+        // Filter out null values (items that couldn't be processed)
+        const validItemDetails = itemDetails.filter((item) => item !== null);
+
+        if (validItemDetails.length === 0) {
+          alert("No valid items could be added from this appointment.");
+          return;
+        }
+
+        // Mark existing items for deletion
+        const existingItemsToDelete = formData.itemDetails.filter(
+          (item) => item.salesInvoiceDetailId !== null
+        );
+
+        if (existingItemsToDelete.length > 0) {
+          setItemIdsToBeDeleted((prevIds) => [
+            ...prevIds,
+            ...existingItemsToDelete,
+          ]);
+
+          // Mark charges and deductions for deletion
+          existingItemsToDelete.forEach((item) => {
+            item.chargesAndDeductions.forEach((charge) => {
+              if (charge.chargesAndDeductionAppliedId !== null) {
+                setChargesAndDeductionsAppliedIdsToBeDeleted((prevIds) => [
+                  ...prevIds,
+                  charge.chargesAndDeductionAppliedId,
+                ]);
+              }
+            });
+          });
+        }
+
+        // Replace item details with new appointment items
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          itemDetails: validItemDetails,
+        }));
+      } catch (error) {
+        console.error("Error processing appointment treatments:", error);
+        alert("Error processing appointment treatments. Please try again.");
+      }
+    }
+  };
+
+  // Add handler for resetting appointment
+  const handleResetAppointment = () => {
+    setSelectedAppointment(null);
+    setAppointmentSearchTerm("");
+
+    // Mark all existing items for deletion
+    const existingItemsToDelete = formData.itemDetails.filter(
+      (item) => item.salesInvoiceDetailId !== null
+    );
+
+    if (existingItemsToDelete.length > 0) {
+      setItemIdsToBeDeleted((prevIds) => [
+        ...prevIds,
+        ...existingItemsToDelete,
+      ]);
+
+      // Mark charges and deductions for deletion
+      existingItemsToDelete.forEach((item) => {
+        item.chargesAndDeductions.forEach((charge) => {
+          if (charge.chargesAndDeductionAppliedId !== null) {
+            setChargesAndDeductionsAppliedIdsToBeDeleted((prevIds) => [
+              ...prevIds,
+              charge.chargesAndDeductionAppliedId,
+            ]);
+          }
+        });
+      });
+    }
+
+    // Clear form data
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      appointmentId: null,
+      tokenNo: null,
+      patientName: "",
+      patientNo: "",
+      itemDetails: [],
+    }));
+  };
+
   const calculateSubTotal = () => {
     return formData.itemDetails.reduce(
       (total, item) => total + item.totalPrice,
@@ -1159,6 +1375,17 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     company,
     itemIdsToBeDeleted,
     locationInventories,
+    useAppointment,
+    setUseAppointment,
+    appointmentSearchTerm,
+    setAppointmentSearchTerm,
+    selectedAppointment,
+    isAppointmentLoading,
+    appointments,
+    isAppointmentsLoading,
+    appointmentsError,
+    handleSelectAppointment,
+    handleResetAppointment,
     handleInputChange,
     handleItemDetailsChange,
     handleSubmit,
