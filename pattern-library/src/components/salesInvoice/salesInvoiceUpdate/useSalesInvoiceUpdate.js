@@ -27,7 +27,9 @@ import {
 } from "../../../services/ayuOMSApi";
 
 const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
-  const [useAppointment, setUseAppointment] = useState(false);
+  const [useAppointment, setUseAppointment] = useState(
+    !!salesInvoice?.appointmentId
+  );
   const [appointmentSearchTerm, setAppointmentSearchTerm] = useState("");
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [formData, setFormData] = useState({
@@ -386,7 +388,6 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   useEffect(() => {
     if (appointmentDetails && !selectedAppointment) {
       setSelectedAppointment(appointmentDetails);
-      setUseAppointment(true);
     }
   }, [appointmentDetails]);
 

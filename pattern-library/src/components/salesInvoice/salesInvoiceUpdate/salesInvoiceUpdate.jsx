@@ -1,6 +1,6 @@
 import useSalesInvoiceUpdate from "./useSalesInvoiceUpdate";
 import CurrentDateTime from "../../currentDateTime/currentDateTime";
-import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
+import ButtonLoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
 
@@ -229,8 +229,8 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                 </label>
               </div>
 
-              {/* Appointment Search - Only show when checkbox is checked AND no appointment selected */}
-              {useAppointment && !selectedAppointment && (
+              {/* Appointment Search - Only show when checkbox is checked AND no appointment selected AND not loading */}
+              {useAppointment && !selectedAppointment && !isAppointmentLoading && (
                 <div className="mb-3">
                   <label htmlFor="appointmentSearch" className="form-label">
                     Search Appointment by Token No
@@ -332,8 +332,15 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                 </div>
               )}
 
+              {/* Loading Indicator for Appointment */}
+              {useAppointment && isAppointmentLoading && (
+                <div className="d-flex justify-content-center my-3">
+                  <ButtonLoadingSpinner text="Loading Appointment Details..." />
+                </div>
+              )}
+
               {/* Selected Appointment Display - Only show when appointment is selected */}
-              {useAppointment && selectedAppointment && (
+              {useAppointment && selectedAppointment && !isAppointmentLoading && (
                 <div className="card mb-3">
                   <div className="card-header bg-success text-white">
                     <strong>Selected Appointment</strong>
