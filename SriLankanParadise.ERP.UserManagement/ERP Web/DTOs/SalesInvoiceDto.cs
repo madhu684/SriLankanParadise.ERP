@@ -44,6 +44,10 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public string? InVoicedPersonMobileNo { get; set; }
 
+        public int? AppointmentId { get; set; }
+
+        public int? TokenNo { get; set; }
+
         public virtual SalesOrderDto? SalesOrder { get; set; }
 
         public virtual IEnumerable<SalesInvoiceDetailDto>? SalesInvoiceDetails { get; set; }

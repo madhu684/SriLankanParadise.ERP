@@ -761,5 +761,67 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemCode(int? locationId, string itemCode)
+        {
+            if (string.IsNullOrWhiteSpace(itemCode))
+            {
+                throw new ArgumentException("ItemCode is required.");
+            }
+
+            try
+            {
+                var query = from li in _dbContext.LocationInventories
+                            join im in _dbContext.ItemMasters
+                                on li.ItemMasterId equals im.ItemMasterId
+                            where im.ItemCode == itemCode
+                            select new { li, im };
+
+                // Apply location filter if provided
+                if (locationId.HasValue)
+                {
+                    query = query.Where(x => x.li.LocationId == locationId.Value);
+                }
+
+                var summaryData = await query
+                    .GroupBy(x => new { x.li.LocationId, x.im.ItemMasterId })
+                    .Select(g => new LocationInventorySummary
+                    {
+                        LocationInventoryId = g.First().li.LocationInventoryId, // or 0 if no record
+                        LocationId = g.Key.LocationId,
+                        ItemMasterId = g.Key.ItemMasterId,
+                        TotalStockInHand = g.Sum(x => x.li.StockInHand ?? 0),
+                        MinReOrderLevel = g.Min(x => x.li.ReOrderLevel ?? 0),
+                        MaxStockLevel = g.Max(x => x.li.MaxStockLevel ?? 0),
+                        ItemMaster = g.First().im
+                    })
+                    .FirstOrDefaultAsync();
+
+                // If no data found, return a default object with ItemMaster details (if item exists)
+                if (summaryData == null)
+                {
+                    var itemMaster = await _dbContext.ItemMasters
+                        .FirstOrDefaultAsync(im => im.ItemCode == itemCode);
+
+                    return new LocationInventorySummary
+                    {
+                        LocationInventoryId = 0,
+                        LocationId = locationId ?? 0,
+                        ItemMasterId = itemMaster?.ItemMasterId ?? 0,
+                        TotalStockInHand = 0,
+                        MinReOrderLevel = 0,
+                        MaxStockLevel = 0,
+                        ItemMaster = itemMaster
+                    };
+                }
+
+                return summaryData;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception if you have a logger
+                throw; // or wrap: throw new Exception("Error fetching inventory summary", ex);
+            }
+        }
     }
 }

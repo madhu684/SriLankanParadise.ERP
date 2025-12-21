@@ -1491,6 +1491,25 @@ export const get_sum_location_inventories_by_locationId_itemMasterId_api =
     }
   };
 
+export const get_sum_location_inventories_by_locationId_itemCode_api = async (
+  itemCode,
+  locationId = null
+) => {
+  try {
+    const response = await api.get(
+      `/locationInventory/GetSumLocationInventoriesByLocationIdItemCode/${itemCode}`,
+      {
+        params: { locationId },
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching sum location inventories:", error);
+    throw error;
+  }
+};
+
 export const get_sum_location_inventories_by_itemMasterId_api = async (
   itemMasterId
 ) => {

@@ -107,5 +107,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             await _locationInventoryRepository.UpdateReorderLevelMaxStockLevel(locationId, itemMasterId, locationInventory);
         }
+
+        public async Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemCode(int? locationId, string itemCode)
+        {
+            return await _locationInventoryRepository.GetSumLocationInventoriesByLocationIdItemCode(locationId, itemCode);
+        }
     }
 }

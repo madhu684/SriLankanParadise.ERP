@@ -531,5 +531,30 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
         }
+
+        [HttpGet("GetSumLocationInventoriesByLocationIdItemCode/{itemCode}")]
+        public async Task<ApiResponseModel> GetSumLocationInventoriesByLocationIdItemCode([FromRoute] string itemCode, [FromQuery] int? locationId = null)
+        {
+            try
+            {
+                var locationInventorySummary = await _locationInventoryService.GetSumLocationInventoriesByLocationIdItemCode(locationId, itemCode);
+                if (locationInventorySummary != null)
+                {
+                    var locationInventorySummaryDto = _mapper.Map<LocationInventorySummaryDto>(locationInventorySummary);
+                    AddResponseMessage(Response, LogMessages.LocationInventoriesRetrieved, locationInventorySummaryDto, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.LocationInventoriesNotFound);
+                    AddResponseMessage(Response, LogMessages.LocationInventoriesNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }
