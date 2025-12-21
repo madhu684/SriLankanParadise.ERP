@@ -39,6 +39,8 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
     appointments,
     isAppointmentsLoading,
     appointmentsError,
+    isRefreshing,
+    handleRefreshAppointments,
     handleSelectAppointment,
     handleResetAppointment,
     handleInputChange,
@@ -54,6 +56,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
     renderColumns,
     calculateSubTotal,
     renderSubColumns,
+    refetchAppointments,
   } = useSalesInvoiceUpdate({
     salesInvoice,
     onFormSubmit: () => {
@@ -213,124 +216,146 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
             )}
 
             <div className="mt-3">
-              <div className="form-check mb-3">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  id="useAppointmentCheck"
-                  checked={useAppointment}
-                  onChange={(e) => setUseAppointment(e.target.checked)}
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor="useAppointmentCheck"
-                >
-                  Raise Sales Invoice using Appointment
-                </label>
+              <div className="d-flex align-items-center justify-content-between mb-3">
+                <div className="form-check mb-3">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    id="useAppointmentCheck"
+                    checked={useAppointment}
+                    onChange={(e) => setUseAppointment(e.target.checked)}
+                  />
+                  <label
+                    className="form-check-label"
+                    htmlFor="useAppointmentCheck"
+                  >
+                    Raise Sales Invoice using Appointment
+                  </label>
+                </div>
+                {useAppointment && (
+                  <i
+                    className="bi bi-arrow-clockwise"
+                    onClick={handleRefreshAppointments}
+                    style={{
+                      cursor: isRefreshing ? "not-allowed" : "pointer",
+                      fontSize: "1.2rem",
+                      color: isRefreshing ? "#6c757d" : "#0d6efd",
+                      transition: "transform 0.6s ease-in-out",
+                      transform: isRefreshing
+                        ? "rotate(360deg)"
+                        : "rotate(0deg)",
+                      display: "inline-block",
+                    }}
+                    title="Refresh appointments"
+                  ></i>
+                )}
               </div>
 
-              {/* Appointment Search - Only show when checkbox is checked AND no appointment selected AND not loading */}
-              {useAppointment && !selectedAppointment && !isAppointmentLoading && (
-                <div className="mb-3">
-                  <label htmlFor="appointmentSearch" className="form-label">
-                    Search Appointment by Token No
-                  </label>
-                  <div className="input-group">
-                    <span className="input-group-text bg-transparent">
-                      <i className="bi bi-search"></i>
-                    </span>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="appointmentSearch"
-                      placeholder="Enter token number..."
-                      value={appointmentSearchTerm}
-                      onChange={(e) => setAppointmentSearchTerm(e.target.value)}
-                    />
-                    {appointmentSearchTerm && (
-                      <span
-                        className="input-group-text bg-transparent"
-                        style={{ cursor: "pointer" }}
-                        onClick={() => setAppointmentSearchTerm("")}
-                      >
-                        <i className="bi bi-x"></i>
+              {useAppointment &&
+                !selectedAppointment &&
+                !isAppointmentLoading && (
+                  <div className="mb-3">
+                    <label htmlFor="appointmentSearch" className="form-label">
+                      Search Appointment by Token No
+                    </label>
+                    <div className="input-group">
+                      <span className="input-group-text bg-transparent">
+                        <i className="bi bi-search"></i>
                       </span>
-                    )}
-                  </div>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="appointmentSearch"
+                        placeholder="Enter token number..."
+                        value={appointmentSearchTerm}
+                        onChange={(e) =>
+                          setAppointmentSearchTerm(e.target.value)
+                        }
+                      />
+                      {appointmentSearchTerm && (
+                        <span
+                          className="input-group-text bg-transparent"
+                          style={{ cursor: "pointer" }}
+                          onClick={() => setAppointmentSearchTerm("")}
+                        >
+                          <i className="bi bi-x"></i>
+                        </span>
+                      )}
+                    </div>
 
-                  {/* Appointment Dropdown */}
-                  {appointmentSearchTerm && (
-                    <div className="dropdown" style={{ width: "100%" }}>
-                      <ul
-                        className="dropdown-menu"
-                        style={{
-                          display: "block",
-                          width: "100%",
-                          maxHeight: "300px",
-                          overflowY: "auto",
-                        }}
-                      >
-                        {isAppointmentsLoading ? (
-                          <li className="dropdown-item">
-                            <ButtonLoadingSpinner text="Searching appointments..." />
-                          </li>
-                        ) : appointmentsError ? (
-                          <li className="dropdown-item text-danger">
-                            Error loading appointments
-                          </li>
-                        ) : appointments?.filter((apt) =>
-                            apt.tokenNo
-                              ?.toString()
-                              .includes(appointmentSearchTerm.trim())
-                          ).length === 0 ? (
-                          <li className="dropdown-item">
-                            <span className="me-3">
-                              <i className="bi bi-emoji-frown"></i>
-                            </span>
-                            No appointments found
-                          </li>
-                        ) : (
-                          appointments
-                            ?.filter((apt) =>
+                    {/* Appointment Dropdown */}
+                    {appointmentSearchTerm && (
+                      <div className="dropdown" style={{ width: "100%" }}>
+                        <ul
+                          className="dropdown-menu"
+                          style={{
+                            display: "block",
+                            width: "100%",
+                            maxHeight: "300px",
+                            overflowY: "auto",
+                          }}
+                        >
+                          {isAppointmentsLoading ? (
+                            <li className="dropdown-item">
+                              <ButtonLoadingSpinner text="Searching appointments..." />
+                            </li>
+                          ) : appointmentsError ? (
+                            <li className="dropdown-item text-danger">
+                              Error loading appointments
+                            </li>
+                          ) : appointments?.filter((apt) =>
                               apt.tokenNo
                                 ?.toString()
                                 .includes(appointmentSearchTerm.trim())
-                            )
-                            .map((appointment) => (
-                              <li key={appointment.id}>
-                                <button
-                                  type="button"
-                                  className="dropdown-item"
-                                  onClick={() =>
-                                    handleSelectAppointment(appointment)
-                                  }
-                                >
-                                  <div>
-                                    <strong>
-                                      Token No: {appointment.tokenNo}
-                                    </strong>
-                                    <br />
-                                    <small>
-                                      Patient: {appointment.customerName} |
-                                      Contact: {appointment.contactNo}
+                            ).length === 0 ? (
+                            <li className="dropdown-item">
+                              <span className="me-3">
+                                <i className="bi bi-emoji-frown"></i>
+                              </span>
+                              No appointments found
+                            </li>
+                          ) : (
+                            appointments
+                              ?.filter((apt) =>
+                                apt.tokenNo
+                                  ?.toString()
+                                  .includes(appointmentSearchTerm.trim())
+                              )
+                              .map((appointment) => (
+                                <li key={appointment.id}>
+                                  <button
+                                    type="button"
+                                    className="dropdown-item"
+                                    onClick={() =>
+                                      handleSelectAppointment(appointment)
+                                    }
+                                  >
+                                    <div>
+                                      <strong>
+                                        Token No: {appointment.tokenNo}
+                                      </strong>
                                       <br />
-                                      Date:{" "}
-                                      {new Date(
-                                        appointment.scheduleDate
-                                      ).toLocaleDateString()}{" "}
-                                      | Time: {appointment.fromTime} -{" "}
-                                      {appointment.toTime}
-                                    </small>
-                                  </div>
-                                </button>
-                              </li>
-                            ))
-                        )}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
+                                      <small>
+                                        Patient: {appointment.customerName} |
+                                        Contact: {appointment.contactNo}
+                                        <br />
+                                        Date:{" "}
+                                        {new Date(
+                                          appointment.scheduleDate
+                                        ).toLocaleDateString()}{" "}
+                                        | Time: {appointment.fromTime} -{" "}
+                                        {appointment.toTime}
+                                      </small>
+                                    </div>
+                                  </button>
+                                </li>
+                              ))
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
 
               {/* Loading Indicator for Appointment */}
               {useAppointment && isAppointmentLoading && (
@@ -340,47 +365,50 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
               )}
 
               {/* Selected Appointment Display - Only show when appointment is selected */}
-              {useAppointment && selectedAppointment && !isAppointmentLoading && (
-                <div className="card mb-3">
-                  <div className="card-header bg-success text-white">
-                    <strong>Selected Appointment</strong>
-                  </div>
-                  <div className="card-body">
-                    <div className="row">
-                      <div className="col-md-6">
-                        <p className="mb-2">
-                          <strong>Token No:</strong>{" "}
-                          {selectedAppointment.tokenNo}
-                        </p>
-                        <p className="mb-2">
-                          <strong>Patient:</strong>{" "}
-                          {selectedAppointment.customerName}
-                        </p>
+              {useAppointment &&
+                selectedAppointment &&
+                !isAppointmentLoading && (
+                  <div className="card mb-3">
+                    <div className="card-header bg-success text-white">
+                      <strong>Selected Appointment</strong>
+                    </div>
+                    <div className="card-body">
+                      <div className="row">
+                        <div className="col-md-6">
+                          <p className="mb-2">
+                            <strong>Token No:</strong>{" "}
+                            {selectedAppointment.tokenNo}
+                          </p>
+                          <p className="mb-2">
+                            <strong>Patient:</strong>{" "}
+                            {selectedAppointment.customerName}
+                          </p>
+                        </div>
+                        <div className="col-md-6">
+                          <p className="mb-2">
+                            <strong>Contact:</strong>{" "}
+                            {selectedAppointment.contactNo}
+                          </p>
+                          <p className="mb-2">
+                            <strong>Time:</strong>{" "}
+                            {selectedAppointment.fromTime} -{" "}
+                            {selectedAppointment.toTime}
+                          </p>
+                        </div>
                       </div>
-                      <div className="col-md-6">
-                        <p className="mb-2">
-                          <strong>Contact:</strong>{" "}
-                          {selectedAppointment.contactNo}
-                        </p>
-                        <p className="mb-2">
-                          <strong>Time:</strong> {selectedAppointment.fromTime}{" "}
-                          - {selectedAppointment.toTime}
-                        </p>
+                      <div className="mt-3">
+                        <button
+                          type="button"
+                          className="btn btn-danger btn-sm w-100"
+                          onClick={handleResetAppointment}
+                        >
+                          <i className="bi bi-arrow-clockwise me-2"></i>
+                          Reset Appointment
+                        </button>
                       </div>
                     </div>
-                    <div className="mt-3">
-                      <button
-                        type="button"
-                        className="btn btn-danger btn-sm w-100"
-                        onClick={handleResetAppointment}
-                      >
-                        <i className="bi bi-arrow-clockwise me-2"></i>
-                        Reset Appointment
-                      </button>
-                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
 
             {/* Patient Details - Only show when NOT using appointment */}

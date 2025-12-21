@@ -49,7 +49,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   const [selectedBatch, setSelectedBatch] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
-  const [initialized, setInitialized] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const fetchUserLocations = async () => {
     try {
@@ -224,6 +224,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     data: appointments = [],
     isLoading: isAppointmentsLoading,
     error: appointmentsError,
+    refetch: refetchAppointments,
   } = useQuery({
     queryKey: ["appointments", formData.invoiceDate],
     queryFn: async () => {
@@ -1008,6 +1009,15 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     }));
   };
 
+  const handleRefreshAppointments = async () => {
+    setIsRefreshing(true);
+    await refetchAppointments();
+    // Keep spinning for a bit even after data is fetched for better UX
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 600);
+  };
+
   const calculateSubTotal = () => {
     return formData.itemDetails.reduce(
       (total, item) => total + item.totalPrice,
@@ -1256,6 +1266,8 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     useAppointment,
     appointmentSearchTerm,
     selectedAppointment,
+    isRefreshing,
+    handleRefreshAppointments,
     setUseAppointment,
     setAppointmentSearchTerm,
     handleSelectAppointment,
@@ -1274,6 +1286,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     calculateSubTotal,
     renderColumns,
     renderSubColumns,
+    refetchAppointments,
   };
 };
 
