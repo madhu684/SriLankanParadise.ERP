@@ -538,6 +538,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Customer updated successfully.
+        /// </summary>
+        public static string CustomerUpdated {
+            get {
+                return ResourceManager.GetString("CustomerUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Daily stock balance created successfully.
         /// </summary>
         public static string DailyStockBalanceCreated {

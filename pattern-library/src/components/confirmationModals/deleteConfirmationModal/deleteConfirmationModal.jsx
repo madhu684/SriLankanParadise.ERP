@@ -10,6 +10,7 @@ const DeleteConfirmationModal = ({
   submissionStatus,
   message,
   loading,
+  type = "Delete",
 }) => {
   return (
     <Modal
@@ -20,10 +21,10 @@ const DeleteConfirmationModal = ({
       keyboard={!(loading || submissionStatus !== null)}
     >
       <Modal.Header closeButton={!(loading || submissionStatus !== null)}>
-        <Modal.Title>Confirm Delete</Modal.Title>
+        <Modal.Title>Confirm {type}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        Are you sure you want to delete this {title.toLowerCase()}?
+        Are you sure you want to {type} this {title}?
         {/* Display success or error messages if provided */}
         {submissionStatus && message && (
           <>
@@ -41,22 +42,24 @@ const DeleteConfirmationModal = ({
         )}
       </Modal.Body>
       <Modal.Footer>
-        <Button
-          variant="secondary"
-          onClick={handleClose}
-          disabled={loading || submissionStatus !== null}
-        >
+        <Button variant="secondary" onClick={handleClose} disabled={loading}>
           Cancel
         </Button>
         <Button
-          variant="danger"
+          variant={
+            type === "Delete" || type === "Approve"
+              ? "warning"
+              : type === "Deactivate"
+              ? "danger"
+              : "success"
+          }
           onClick={handleConfirmDelete}
-          disabled={loading || submissionStatus !== null}
+          disabled={loading}
         >
           {loading && submissionStatus === null ? (
             <ButtonLoadingSpinner text="Deleting..." />
           ) : (
-            "Delete"
+            type
           )}
         </Button>
       </Modal.Footer>

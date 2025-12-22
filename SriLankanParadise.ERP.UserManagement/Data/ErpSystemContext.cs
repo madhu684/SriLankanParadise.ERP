@@ -413,6 +413,12 @@ public partial class ErpSystemContext : DbContext
         {
             entity.HasKey(e => e.CustomerId).HasName("PK__Customer__A4AE64D8B489EACD");
 
+            entity.Property(e => e.Status)
+                .HasDefaultValue(1);
+
+            entity.Property(e => e.IsVATRegistered)
+                .HasDefaultValue(false);
+
             entity.ToTable("Customer");
         });
 

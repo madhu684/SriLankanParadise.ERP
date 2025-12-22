@@ -77,21 +77,55 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        //public async Task<IEnumerable<Customer>> GetCustomersByCompanyId(int companyId)
-        //{
-        //    try
-        //    {
-        //        var customers = await _dbContext.Customers
-        //            .Where(c => c.CompanyId == companyId)
-        //            .ToListAsync();
+        public async Task<IEnumerable<Customer>> GetCustomersByCompanyId(int companyId)
+        {
+            try
+            {
+                var customers = await _dbContext.Customers
+                    .Where(c => c.CompanyId == companyId)
+                    .ToListAsync();
 
-        //        return customers.Any() ? customers : null;
-        //    }
-        //    catch (Exception)
-        //    {
+                return customers.Any() ? customers : null;
+            }
+            catch (Exception)
+            {
 
-        //        throw;
-        //    }
-        //}
+                throw;
+            }
+        }
+
+        public async Task UpdateCustomer(int customerId, Customer customer)
+        {
+            try
+            {
+                var existingCustomer = await _dbContext.Customers.FindAsync(customerId);
+                if (existingCustomer != null)
+                {
+                    _dbContext.Entry(existingCustomer).CurrentValues.SetValues(customer);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task ActiveDeactiveUser(int customerId, Customer customer)
+        {
+            try
+            {
+                var existingCustomer = await _dbContext.Customers.FindAsync(customerId);
+                if (existingCustomer != null)
+                {
+                    existingCustomer.Status = customer.Status;
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

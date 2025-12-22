@@ -1080,4 +1080,7 @@
   <data name="SalesCustomersRetrieved" xml:space="preserve">
     <value>Sales customers retrieved</value>
   </data>
+  <data name="CustomerUpdated" xml:space="preserve">
+    <value>Customer updated successfully</value>
+  </data>
 </root>
