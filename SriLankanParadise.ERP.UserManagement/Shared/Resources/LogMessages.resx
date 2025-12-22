@@ -1068,4 +1068,16 @@
   <data name="CashierSessionRetrieved" xml:space="preserve">
     <value>Cashier session retrieved successfully</value>
   </data>
+  <data name="SalesCustomerCreated" xml:space="preserve">
+    <value>Sales customer created successfully</value>
+  </data>
+  <data name="SalesCustomerNotFound" xml:space="preserve">
+    <value>Sales customer not found</value>
+  </data>
+  <data name="SalesCustomerRetrieved" xml:space="preserve">
+    <value>Sales customer retrieved</value>
+  </data>
+  <data name="SalesCustomersRetrieved" xml:space="preserve">
+    <value>Sales customers retrieved</value>
+  </data>
 </root>

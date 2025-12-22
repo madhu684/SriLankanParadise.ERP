@@ -1879,6 +1879,42 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Sales customer created successfully.
+        /// </summary>
+        public static string SalesCustomerCreated {
+            get {
+                return ResourceManager.GetString("SalesCustomerCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales customer not found.
+        /// </summary>
+        public static string SalesCustomerNotFound {
+            get {
+                return ResourceManager.GetString("SalesCustomerNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales customer retrieved.
+        /// </summary>
+        public static string SalesCustomerRetrieved {
+            get {
+                return ResourceManager.GetString("SalesCustomerRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales customers retrieved.
+        /// </summary>
+        public static string SalesCustomersRetrieved {
+            get {
+                return ResourceManager.GetString("SalesCustomersRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Sales invoice approved.
         /// </summary>
         public static string SalesInvoiceApproved {

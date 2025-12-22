@@ -165,6 +165,8 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<SupplierItem> SupplierItems { get; set; }
 
+    public virtual DbSet<SalesCustomer> SalesCustomers { get; set; }
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:LocalSqlServerConnection");
@@ -1542,6 +1544,11 @@ public partial class ErpSystemContext : DbContext
                   .HasForeignKey(e => e.ItemMasterId)
                   .HasConstraintName("FK_SupplierItems_ItemMaster")
                   .IsRequired();
+        });
+
+        modelBuilder.Entity<SalesCustomer>(entity =>
+        {
+            entity.ToTable("SalesCustomer");
         });
 
 

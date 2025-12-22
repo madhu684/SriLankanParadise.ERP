@@ -257,14 +257,18 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
               <div className="d-flex align-items-center justify-content-between mb-3">
                 <div className="form-check">
                   <input
-                    className="form-check-input"
+                    className={`form-check-input ${
+                      useAppointment
+                        ? "bg-success"
+                        : "bg-secondary bg-opacity-50"
+                    }`}
                     type="checkbox"
                     id="useAppointmentCheck"
                     checked={useAppointment}
                     onChange={(e) => setUseAppointment(e.target.checked)}
                   />
                   <label
-                    className="form-check-label"
+                    className="form-check-label text-dark fw-bold"
                     htmlFor="useAppointmentCheck"
                   >
                     Raise Sales Invoice using Appointment
@@ -748,7 +752,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
         )}
 
         {/* Attachments */}
-        <h4>4. Attachments</h4>
+        {/* <h4>4. Attachments</h4>
         <div className="col-md-6 mb-3">
           <label htmlFor="attachment" className="form-label">
             Attachments (if any)
@@ -768,7 +772,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
               {validationErrors.attachments}
             </div>
           )}
-        </div>
+        </div> */}
 
         {/* Actions */}
         <div className="mb-3">
@@ -789,7 +793,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
               "Submit"
             )}
           </button>
-          <button
+          {/* <button
             type="button"
             className="btn btn-secondary me-2"
             onClick={() => handleSubmit(true)}
@@ -813,7 +817,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
             disabled={loading || loadingDraft || submissionStatus !== null}
           >
             Print
-          </button>
+          </button> */}
           <button
             type="button"
             className="btn btn-danger"

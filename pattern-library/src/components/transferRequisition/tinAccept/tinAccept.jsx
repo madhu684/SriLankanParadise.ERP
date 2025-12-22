@@ -1,7 +1,6 @@
 import React from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import moment from "moment";
-import useMinList from "../../min/minList/useMinList";
 import useTinAccept from "./tinAccept";
 import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 
