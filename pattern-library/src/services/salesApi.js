@@ -806,3 +806,19 @@ export const get_cashier_expense_outs_by_user_id_api = async (userId) => {
     throw error;
   }
 };
+
+// Sales Customers API
+export const get_sales_customers_by_company_id_api = async (companyId) => {
+  try {
+    const response = await api.get(
+      `/salesCustomer/GetByCompanyId/${companyId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

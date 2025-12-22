@@ -537,7 +537,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
         )}
 
         {/* Attachments */}
-        <h4>4. Attachments</h4>
+        {/* <h4>4. Attachments</h4>
         <div className="col-md-6 mb-3">
           <label htmlFor="attachment" className="form-label">
             Attachments (if any)
@@ -557,7 +557,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
               {validationErrors.attachments}
             </div>
           )}
-        </div>
+        </div> */}
 
         {/* Actions */}
         <div className="mb-3">
@@ -578,7 +578,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
               "Submit"
             )}
           </button>
-          <button
+          {/* <button
             type="button"
             className="btn btn-secondary me-2"
             onClick={() => handleSubmitClick(true)}
@@ -602,7 +602,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
             disabled={loading || loadingDraft || submissionStatus !== null}
           >
             Print
-          </button>
+          </button> */}
           <button
             type="button"
             className="btn btn-danger"

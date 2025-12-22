@@ -289,13 +289,13 @@ const SalesOrderUpdate = ({
                     <div className="card-header">Selected Customer</div>
                     <div className="card-body">
                       <p>
-                        Customer Name: {formData.selectedCustomer.customerName}
+                        Customer Name: {formData.selectedCustomer.salesCustomerName}
                       </p>
                       <p>
                         Contact Person:{" "}
                         {formData.selectedCustomer.contactPerson}
                       </p>
-                      <p>Phone: {formData.selectedCustomer.phone}</p>
+                      <p>Phone: {formData.selectedCustomer.contactNo}</p>
                       <p>Email: {formData.selectedCustomer.email}</p>
                       <button
                         type="button"
@@ -309,6 +309,59 @@ const SalesOrderUpdate = ({
                 )}
               </div>
             )}
+          </div>
+
+          <div className="col-md-5">
+            {/* Order Information */}
+            <h4>2. Order Information</h4>
+            <div className="d-flex justify-content-between">
+              <div className="mb-3">
+                <label htmlFor="orderDate" className="form-label">
+                  Order Date
+                </label>
+                <input
+                  type="date"
+                  className={`form-control ${
+                    validFields.orderDate ? "is-valid" : ""
+                  } ${validationErrors.orderDate ? "is-invalid" : ""}`}
+                  id="orderDate"
+                  placeholder="Enter order date"
+                  value={formData.orderDate}
+                  onChange={(e) =>
+                    handleInputChange("orderDate", e.target.value)
+                  }
+                  required
+                />
+                {validationErrors.orderDate && (
+                  <div className="invalid-feedback">
+                    {validationErrors.orderDate}
+                  </div>
+                )}
+              </div>
+              <div className="mb-3">
+                <label htmlFor="deliveryDate" className="form-label">
+                  Delivery Date
+                </label>
+                <input
+                  type="date"
+                  className={`form-control ${
+                    validFields.deliveryDate ? "is-valid" : ""
+                  } ${validationErrors.deliveryDate ? "is-invalid" : ""}`}
+                  id="deliveryDate"
+                  placeholder="Enter delivery date"
+                  value={formData.deliveryDate}
+                  onChange={(e) =>
+                    handleInputChange("deliveryDate", e.target.value)
+                  }
+                  required
+                />
+                {validationErrors.deliveryDate && (
+                  <div className="invalid-feedback">
+                    {validationErrors.deliveryDate}
+                  </div>
+                )}
+              </div>
+            </div>
 
             {/* Sales Person Information */}
             <label htmlFor="salesPersonId" className="form-label mt-3">
@@ -424,55 +477,6 @@ const SalesOrderUpdate = ({
                 </div>
               </div>
             )}
-          </div>
-
-          <div className="col-md-5">
-            {/* Order Information */}
-            <h4>2. Order Information</h4>
-            <div className="mb-3 mt-3">
-              <label htmlFor="orderDate" className="form-label">
-                Order Date
-              </label>
-              <input
-                type="date"
-                className={`form-control ${
-                  validFields.orderDate ? "is-valid" : ""
-                } ${validationErrors.orderDate ? "is-invalid" : ""}`}
-                id="orderDate"
-                placeholder="Enter order date"
-                value={formData.orderDate}
-                onChange={(e) => handleInputChange("orderDate", e.target.value)}
-                required
-              />
-              {validationErrors.orderDate && (
-                <div className="invalid-feedback">
-                  {validationErrors.orderDate}
-                </div>
-              )}
-            </div>
-            <div className="mb-3">
-              <label htmlFor="deliveryDate" className="form-label">
-                Delivery Date
-              </label>
-              <input
-                type="date"
-                className={`form-control ${
-                  validFields.deliveryDate ? "is-valid" : ""
-                } ${validationErrors.deliveryDate ? "is-invalid" : ""}`}
-                id="deliveryDate"
-                placeholder="Enter delivery date"
-                value={formData.deliveryDate}
-                onChange={(e) =>
-                  handleInputChange("deliveryDate", e.target.value)
-                }
-                required
-              />
-              {validationErrors.deliveryDate && (
-                <div className="invalid-feedback">
-                  {validationErrors.deliveryDate}
-                </div>
-              )}
-            </div>
           </div>
         </div>
 
