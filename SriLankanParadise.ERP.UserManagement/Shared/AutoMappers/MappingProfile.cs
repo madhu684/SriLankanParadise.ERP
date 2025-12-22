@@ -2,6 +2,7 @@
 using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models;
 
 namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
 {
@@ -167,6 +168,9 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<EmptyReturnMaster, EmptyReturnMasterDto>();
             CreateMap<SupplierItemRequestModel, SupplierItem>();
             CreateMap<SupplierItem, SupplierItemDto>();
+            CreateMap<SalesCustomerRequestModel, SalesCustomer>();
+            CreateMap<SalesCustomer, SalesCustomerDto>();
+            CreateMap<CustomerUpdateRequestModel, Customer>();
             // Add more mapping configurations if needed
 
         }

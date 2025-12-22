@@ -42,16 +42,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 var salesOrder = _mapper.Map<SalesOrder>(salesOrderRequest);
                 await _salesOrderService.AddSalesOrder(salesOrder);
 
-                // Create action log
-                //var actionLog = new ActionLogModel()
-                //{
-                //    ActionId = salesOrderRequest.PermissionId,
-                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                //    Timestamp = DateTime.UtcNow
-                //};
-                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
-
                 // send response
                 var salesOrderDto = _mapper.Map<SalesOrderDto>(salesOrder);
                 _logger.LogInformation(LogMessages.SalesOrderCreated);

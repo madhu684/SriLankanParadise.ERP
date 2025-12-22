@@ -165,6 +165,8 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<SupplierItem> SupplierItems { get; set; }
 
+    public virtual DbSet<SalesCustomer> SalesCustomers { get; set; }
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:LocalSqlServerConnection");
@@ -410,6 +412,12 @@ public partial class ErpSystemContext : DbContext
         modelBuilder.Entity<Customer>(entity =>
         {
             entity.HasKey(e => e.CustomerId).HasName("PK__Customer__A4AE64D8B489EACD");
+
+            entity.Property(e => e.Status)
+                .HasDefaultValue(1);
+
+            entity.Property(e => e.IsVATRegistered)
+                .HasDefaultValue(false);
 
             entity.ToTable("Customer");
         });
@@ -1091,12 +1099,11 @@ public partial class ErpSystemContext : DbContext
                 .HasDefaultValueSql("('SO'+CONVERT([nvarchar](20),NEXT VALUE FOR [dbo].[SalesOrderReferenceNoSeq]))");
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
 
-            entity.HasOne(d => d.Customer).WithMany(p => p.SalesOrders)
-                .HasForeignKey(d => d.CustomerId)
-                .HasConstraintName("FK__SalesOrde__Custo__1F63A897");
+            entity.HasOne(d => d.SalesCustomer).WithMany(p => p.SalesOrders)
+                .HasForeignKey(d => d.SalesCustomerId)
+                .HasConstraintName("FK_SalesOrder_SalesCustomer");
 
-            entity.HasOne(d => d.SalesPerson)
-                .WithMany(p => p.SalesOrders)
+            entity.HasOne(d => d.SalesPerson).WithMany(p => p.SalesOrders)
                 .HasForeignKey(d => d.SalesPersonId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_SalesOrder_SalesPerson");
@@ -1542,6 +1549,11 @@ public partial class ErpSystemContext : DbContext
                   .HasForeignKey(e => e.ItemMasterId)
                   .HasConstraintName("FK_SupplierItems_ItemMaster")
                   .IsRequired();
+        });
+
+        modelBuilder.Entity<SalesCustomer>(entity =>
+        {
+            entity.ToTable("SalesCustomer");
         });
 
 

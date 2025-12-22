@@ -1,6 +1,5 @@
 import React from "react";
 import { Button, Form, Modal } from "react-bootstrap";
-import useMinList from "../../min/minList/useMinList";
 import moment from "moment";
 import useMinAccept from "./minAccept";
 import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
@@ -207,7 +206,7 @@ const MinAccept = ({ refetch, setRefetch, show, handleClose, min }) => {
             role="alert"
           >
             <i className="bi bi-check-circle-fill me-2"></i>
-            Material Issue Note accepted successfully!
+            Material Issue Note accepted!
           </div>
         )}
         {approvalStatus === "error" && (

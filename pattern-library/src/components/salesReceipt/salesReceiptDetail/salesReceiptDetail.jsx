@@ -91,6 +91,10 @@ const SalesReceiptDetail = ({ show, handleClose, salesReceipt }) => {
           </div>
           <div className="col-md-6">
             <p>
+              <strong>Payment Reference No:</strong>{" "}
+              {displaySalesReceipt?.paymentReferenceNo || "N/A"}
+            </p>
+            <p>
               <strong>Created Date:</strong>{" "}
               {displaySalesReceipt?.createdDate
                 ? moment
@@ -121,7 +125,7 @@ const SalesReceiptDetail = ({ show, handleClose, salesReceipt }) => {
             <thead>
               <tr>
                 <th>SI Ref No</th>
-                <th>Ref Number</th>
+                {/* <th>Payment Ref No</th> */}
                 <th>Invoice Total</th>
                 <th>Amount Due</th>
                 <th>Excess Amount</th>
@@ -136,7 +140,7 @@ const SalesReceiptDetail = ({ show, handleClose, salesReceipt }) => {
                   (item, index) => (
                     <tr key={index}>
                       <td>{item.salesInvoice?.referenceNo || "N/A"}</td>
-                      <td>{item.salesInvoice?.referenceNumber || "N/A"}</td>
+                      {/* <td>{item.salesInvoice?.paymentReferenceNo || "N/A"}</td> */}
                       <td>
                         {item.salesInvoice?.totalAmount?.toFixed(2) || "0.00"}
                       </td>
@@ -171,28 +175,28 @@ const SalesReceiptDetail = ({ show, handleClose, salesReceipt }) => {
             </tbody>
             <tfoot>
               <tr>
-                <td colSpan="5"></td>
+                <td colSpan="4"></td>
                 <th>Total Excess Amount</th>
                 <td className="text-end text-success">
                   {displaySalesReceipt?.excessAmount?.toFixed(2) || "0.00"}
                 </td>
               </tr>
               <tr>
-                <td colSpan="5"></td>
+                <td colSpan="4"></td>
                 <th>Total Outstanding Amount</th>
                 <td className="text-end text-danger">
                   {displaySalesReceipt?.outstandingAmount?.toFixed(2) || "0.00"}
                 </td>
               </tr>
               <tr>
-                <td colSpan="5"></td>
+                <td colSpan="4"></td>
                 <th>Total Amount Received</th>
                 <td className="text-end text-primary">
                   {displaySalesReceipt?.amountReceived?.toFixed(2) || "0.00"}
                 </td>
               </tr>
               <tr>
-                <td colSpan="5"></td>
+                <td colSpan="4"></td>
                 <th>Total Amount Collected</th>
                 <td className="text-end">
                   {displaySalesReceipt?.amountCollect?.toFixed(2) || "0.00"}

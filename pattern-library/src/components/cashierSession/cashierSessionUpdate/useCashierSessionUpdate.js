@@ -22,8 +22,8 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
     useState(false);
   const [reasonCashInHand, setReasonCashInHand] = useState("");
   const [reasonChequesInHand, setReasonChequesInHand] = useState("");
-  const [actualCashInHand, setActualCashInHand] = useState("");
-  const [actualChequesInHand, setActualChequesInHand] = useState("");
+  const [actualCashInHand, setActualCashInHand] = useState(0);
+  const [actualChequesInHand, setActualChequesInHand] = useState(0);
   const [selectedMode, setSelectedMode] = useState(null);
   const [showExpenseOutDetailModal, setShowExpenseOutDetailModal] =
     useState(false);

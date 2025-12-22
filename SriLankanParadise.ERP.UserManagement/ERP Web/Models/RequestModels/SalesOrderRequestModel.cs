@@ -2,7 +2,7 @@
 {
     public class SalesOrderRequestModel
     {
-        public int? CustomerId { get; set; }
+        public int? SalesCustomerId { get; set; }
 
         public DateTime? OrderDate { get; set; }
 

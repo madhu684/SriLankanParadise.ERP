@@ -8,6 +8,7 @@ import {
   get_company_api,
   get_sales_persons_by_company_id_api,
   get_sales_persons_by_user_id_api,
+  get_sales_customers_by_company_id_api,
 } from "../../../services/salesApi";
 import {
   get_item_batches_by_item_master_id_api,
@@ -25,7 +26,7 @@ import { useQuery } from "@tanstack/react-query";
 
 const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
   const [formData, setFormData] = useState({
-    customerId: "",
+    salesCustomerId: "",
     orderDate: "",
     deliveryDate: "",
     itemDetails: [],
@@ -112,24 +113,19 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
     }
   }, [submissionStatus]);
 
-  const fetchCustomers = async () => {
-    try {
-      const response = await get_all_customers_api();
-      return response.data.result || [];
-    } catch (error) {
-      console.error("Error fetching customers:", error);
-    }
-  };
-
   const {
     data: customers,
     isLoading: isCustomersLoading,
     isError: isCustomersError,
     error: customersError,
-    refetch: refetchCustomers,
   } = useQuery({
     queryKey: ["customers"],
-    queryFn: fetchCustomers,
+    queryFn: async () => {
+      const response = await get_sales_customers_by_company_id_api(
+        sessionStorage?.getItem("companyId")
+      );
+      return response.data.result || [];
+    },
   });
 
   const fetchSalesPersons = async () => {
@@ -296,7 +292,7 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
               )
               .map((charge) => {
                 let value;
-                if (charge.chargesAndDeduction.percentage) {
+                if (charge.chargesAndDeduction.percentage !== null) {
                   value =
                     (Math.abs(charge.appliedValue) /
                       (item.unitPrice * item.quantity)) *
@@ -349,7 +345,7 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
           ?.filter((charge) => !charge.lineItemId)
           .map((charge) => {
             let value;
-            if (charge.chargesAndDeduction.percentage) {
+            if (charge.chargesAndDeduction.percentage !== null) {
               value = (Math.abs(charge.appliedValue) / subTotal) * 100;
             } else {
               value = Math.abs(charge.appliedValue);
@@ -366,14 +362,14 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
 
         setFormData({
           salesOrderId: deepCopySalesOrder?.salesOrderId ?? "",
-          customerId: deepCopySalesOrder?.customerId ?? "",
+          salesCustomerId: deepCopySalesOrder?.salesCustomerId ?? "",
           salesPersonId: deepCopySalesOrder?.salesPersonId ?? "",
           orderDate: deepCopySalesOrder?.orderDate?.split("T")[0] ?? "",
           deliveryDate: deepCopySalesOrder?.deliveryDate?.split("T")[0] ?? "",
           itemDetails: initializedLineItemCharges,
           attachments: deepCopySalesOrder?.attachments ?? [],
           totalAmount: deepCopySalesOrder?.totalAmount ?? "",
-          selectedCustomer: deepCopySalesOrder?.customer ?? "",
+          selectedCustomer: deepCopySalesOrder?.salesCustomer ?? "",
           selectedSalesPerson: salesPersonDetails,
           itemMasterId: deepCopySalesOrder?.itemMasterId ?? "",
           itemMaster: deepCopySalesOrder?.itemMaster ?? "",
@@ -663,7 +659,7 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
         }
 
         const salesOrderData = {
-          customerId: customerId,
+          salesCustomerId: customerId,
           orderDate: formData.orderDate,
           deliveryDate: formData.deliveryDate,
           totalAmount: formData.totalAmount,

@@ -5,6 +5,7 @@ import {
   post_sales_order_detail_api,
   get_company_api,
   get_sales_persons_by_company_id_api,
+  get_sales_customers_by_company_id_api,
 } from "../../services/salesApi";
 import {
   get_charges_and_deductions_by_company_id_api,
@@ -127,24 +128,19 @@ const useSalesOrder = ({ onFormSubmit }) => {
     }
   }, [submissionStatus]);
 
-  const fetchCustomers = async () => {
-    try {
-      const response = await get_all_customers_api();
-      return response.data.result || [];
-    } catch (error) {
-      console.error("Error fetching customers:", error);
-    }
-  };
-
   const {
     data: customers,
     isLoading: isCustomersLoading,
     isError: isCustomersError,
     error: customersError,
-    refetch: refetchCustomers,
   } = useQuery({
     queryKey: ["customers"],
-    queryFn: fetchCustomers,
+    queryFn: async () => {
+      const response = await get_sales_customers_by_company_id_api(
+        sessionStorage?.getItem("companyId")
+      );
+      return response.data.result || [];
+    },
   });
 
   const fetchSalesPersons = async () => {
@@ -491,7 +487,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
         }
 
         const salesOrderData = {
-          customerId: customerId,
+          salesCustomerId: customerId,
           orderDate: formData.orderDate,
           deliveryDate: formData.deliveryDate,
           totalAmount: formData.totalAmount,
@@ -625,7 +621,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
     const selectedCustomerId = parseInt(customerId, 10);
 
     const selectedCustomer = customers.find(
-      (customer) => customer.customerId === selectedCustomerId
+      (customer) => customer.salesCustomerId === selectedCustomerId
     );
 
     setFormData((prevFormData) => ({
@@ -805,7 +801,6 @@ const useSalesOrder = ({ onFormSubmit }) => {
 
   const handleAddCustomer = (responseData) => {
     handleSelectCustomer(responseData);
-    refetchCustomers();
   };
 
   // Handler to add the selected item to itemDetails
@@ -1034,7 +1029,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
   const handleSelectCustomer = (selectedCustomer) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
-      customerId: selectedCustomer.customerId,
+      customerId: selectedCustomer.salesCustomerId,
       selectedCustomer: selectedCustomer,
     }));
 
@@ -1073,7 +1068,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
 
   const handleAddCommonChargesAndDeductions = () => {
     const initializedCharges = chargesAndDeductions.reduce((acc, charge) => {
-      if (!charge.isApplicableForLineItem) {
+      if (charge.isDisableFromSubTotal === false) {
         // Initialize additional properties for the common on charges and deductions
         acc[charge.displayName] = charge.amount || charge.percentage;
       }
@@ -1082,7 +1077,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
 
     // Generate chargesAndDeductions array for the newly added item
     const initializedChargesArray = chargesAndDeductions
-      .filter((charge) => !charge.isApplicableForLineItem)
+      .filter((charge) => charge.isDisableFromSubTotal === false)
       .map((charge) => ({
         id: charge.chargesAndDeductionId,
         name: charge.displayName,

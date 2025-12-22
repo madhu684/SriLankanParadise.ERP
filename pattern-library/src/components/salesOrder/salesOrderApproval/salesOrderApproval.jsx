@@ -79,25 +79,28 @@ const SalesOrderApproval = ({
                 </p>
                 <p>
                   <strong>Order Type:</strong>{" "}
-                  {salesOrder.customerId !== null
+                  {salesOrder.salesCustomerId !== null
                     ? "Customer Order"
                     : "Direct Order"}
                 </p>
-                {salesOrder.customerId !== null && (
+                {salesOrder.salesCustomerId !== null && (
                   <>
                     <p>
                       <strong>Customer Name:</strong>{" "}
-                      {salesOrder.customer.customerName}
+                      {salesOrder?.salesCustomer?.salesCustomerName ||
+                        "Unknown"}
                     </p>
                     <p>
                       <strong>Contact Person:</strong>{" "}
-                      {salesOrder.customer.contactPerson}
+                      {salesOrder?.salesCustomer?.contactPerson || "Unknown"}
                     </p>
                     <p>
-                      <strong>Phone:</strong> {salesOrder.customer.phone}
+                      <strong>Phone:</strong>{" "}
+                      {salesOrder?.salesCustomer?.contactNo || "Unknown"}
                     </p>
                     <p>
-                      <strong>Email:</strong> {salesOrder.customer.email}
+                      <strong>Email:</strong>{" "}
+                      {salesOrder?.salesCustomer?.email || "Unknown"}
                     </p>
                   </>
                 )}
@@ -188,7 +191,7 @@ const SalesOrderApproval = ({
                             value = Math.abs(value);
                           }
 
-                          if (charge.chargesAndDeduction.percentage) {
+                          if (charge.chargesAndDeduction.percentage !== null) {
                             // Calculate percentage value
                             const percentageValue =
                               (value / (item.unitPrice * item.quantity)) * 100;
@@ -236,7 +239,7 @@ const SalesOrderApproval = ({
                       ); // Remove negative sign
 
                       // Check if the charge is percentage-based
-                      if (charge.chargesAndDeduction.percentage) {
+                      if (charge.chargesAndDeduction.percentage !== null) {
                         // Calculate percentage value based on subtotal
                         const percentageValue =
                           (renderedValue / calculateSubTotal()) * 100;

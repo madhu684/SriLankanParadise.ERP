@@ -49,6 +49,37 @@ export const get_all_customers_api = async () => {
   }
 };
 
+export const put_customer_api = async (customerId, formData) => {
+  try {
+    const response = await api.put(`/customer/${customerId}`, formData, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const activate_deactivate_customer_api = async (
+  customerId,
+  formData
+) => {
+  try {
+    const response = await api.patch(
+      `/customer/ActiveDeactiveUser/${customerId}`,
+      formData,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 //sales person apis
 export const get_sales_persons_by_company_id_api = async (companyId) => {
   try {
@@ -796,6 +827,22 @@ export const get_cashier_expense_outs_by_user_id_api = async (userId) => {
   try {
     const response = await api.get(
       `/cashierExpenseOut/GetCashierExpenseOutsByUserId/${userId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+// Sales Customers API
+export const get_sales_customers_by_company_id_api = async (companyId) => {
+  try {
+    const response = await api.get(
+      `/salesCustomer/GetByCompanyId/${companyId}`,
       {
         withCredentials: true,
       }

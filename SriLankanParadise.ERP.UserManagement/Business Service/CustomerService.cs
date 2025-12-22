@@ -32,9 +32,19 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             return _customerRepository.SearchCustomerByNamePhone(searchTerm);
         }
 
-        //public async Task<IEnumerable<Customer>> GetCustomersByCompanyId(int companyId)
-        //{
-        //    return await _customerRepository.GetCustomersByCompanyId(companyId);
-        //}
+        public async Task<IEnumerable<Customer>> GetCustomersByCompanyId(int companyId)
+        {
+            return await _customerRepository.GetCustomersByCompanyId(companyId);
+        }
+
+        public async Task UpdateCustomer(int customerId, Customer customer)
+        {
+            await _customerRepository.UpdateCustomer(customerId, customer);
+        }
+
+        public async Task ActiveDeactiveUser(int customerId, Customer customer)
+        {
+            await _customerRepository.ActiveDeactiveUser(customerId, customer);
+        }
     }
 }

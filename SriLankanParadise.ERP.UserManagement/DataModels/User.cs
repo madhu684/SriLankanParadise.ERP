@@ -26,6 +26,9 @@ public partial class User
     public int? LocationId { get; set; }
 
     public bool IsDeleted { get; set; }
+    public virtual Company Company { get; set; } = null!;
+
+    public virtual Location? Location { get; set; }
 
     public virtual ICollection<ActionLog> ActionLogs { get; set; } = new List<ActionLog>();
 
@@ -34,10 +37,6 @@ public partial class User
     public virtual ICollection<CashierExpenseOut> CashierExpenseOuts { get; set; } = new List<CashierExpenseOut>();
 
     public virtual ICollection<CashierSession> CashierSessions { get; set; } = new List<CashierSession>();
-
-    public virtual Company Company { get; set; } = null!;
-
-    public virtual Location? Location { get; set; }
 
     public virtual ICollection<UserLocation> UserLocations { get; set; } = new List<UserLocation>();
 

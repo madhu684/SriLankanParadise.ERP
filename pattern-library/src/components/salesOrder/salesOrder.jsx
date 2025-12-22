@@ -207,17 +207,17 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                           {customers
                             .filter(
                               (customer) =>
-                                customer.customerName
+                                customer.salesCustomerName
                                   .toLowerCase()
                                   .includes(customerSearchTerm.toLowerCase()) ||
-                                customer.phone
+                                customer.contactNo
                                   .replace(/\s/g, "")
                                   .includes(
                                     customerSearchTerm.replace(/\s/g, "")
                                   )
                             )
                             .map((customer) => (
-                              <li key={customer.customerId}>
+                              <li key={customer.salesCustomerId}>
                                 <button
                                   className="dropdown-item"
                                   onClick={() => handleSelectCustomer(customer)}
@@ -225,16 +225,17 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                                   <span className="me-3">
                                     <i className="bi-person-lines-fill"></i>
                                   </span>{" "}
-                                  {customer?.customerName} - {customer?.phone}
+                                  {customer?.salesCustomerName} -{" "}
+                                  {customer?.contactNo}
                                 </button>
                               </li>
                             ))}
                           {customers.filter(
                             (customer) =>
-                              customer.customerName
+                              customer.salesCustomerName
                                 .toLowerCase()
                                 .includes(customerSearchTerm.toLowerCase()) ||
-                              customer.phone
+                              customer.contactNo
                                 .replace(/\s/g, "")
                                 .includes(customerSearchTerm.replace(/\s/g, ""))
                           ).length === 0 && (
@@ -249,7 +250,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                                 If the customer is not found, you can add a new
                                 one.
                               </li>
-                              <div className="d-flex justify-content-center">
+                              {/* <div className="d-flex justify-content-center">
                                 <button
                                   type="button"
                                   className="btn btn-outline-primary mx-3 mt-2 mb-2 "
@@ -257,7 +258,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                                 >
                                   Add New Customer
                                 </button>
-                              </div>
+                              </div> */}
                             </>
                           )}
                         </ul>
@@ -283,13 +284,14 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                     <div className="card-header">Selected Customer</div>
                     <div className="card-body">
                       <p>
-                        Customer Name: {formData.selectedCustomer.customerName}
+                        Customer Name:{" "}
+                        {formData.selectedCustomer.salesCustomerName}
                       </p>
                       <p>
                         Contact Person:{" "}
                         {formData.selectedCustomer.contactPerson}
                       </p>
-                      <p>Phone: {formData.selectedCustomer.phone}</p>
+                      <p>Phone: {formData.selectedCustomer.contactNo}</p>
                       <p>Email: {formData.selectedCustomer.email}</p>
                       <button
                         type="button"
@@ -303,6 +305,59 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                 )}
               </div>
             )}
+          </div>
+
+          <div className="col-md-5">
+            {/* Order Information */}
+            <h4>2. Order Information</h4>
+            <div className="d-flex justify-content-between">
+              <div className="mb-3">
+                <label htmlFor="orderDate" className="form-label">
+                  Order Date
+                </label>
+                <input
+                  type="date"
+                  className={`form-control ${
+                    validFields.orderDate ? "is-valid" : ""
+                  } ${validationErrors.orderDate ? "is-invalid" : ""}`}
+                  id="orderDate"
+                  placeholder="Enter order date"
+                  value={formData.orderDate}
+                  onChange={(e) =>
+                    handleInputChange("orderDate", e.target.value)
+                  }
+                  required
+                />
+                {validationErrors.orderDate && (
+                  <div className="invalid-feedback">
+                    {validationErrors.orderDate}
+                  </div>
+                )}
+              </div>
+              <div className="mb-3">
+                <label htmlFor="deliveryDate" className="form-label">
+                  Delivery Date
+                </label>
+                <input
+                  type="date"
+                  className={`form-control ${
+                    validFields.deliveryDate ? "is-valid" : ""
+                  } ${validationErrors.deliveryDate ? "is-invalid" : ""}`}
+                  id="deliveryDate"
+                  placeholder="Enter delivery date"
+                  value={formData.deliveryDate}
+                  onChange={(e) =>
+                    handleInputChange("deliveryDate", e.target.value)
+                  }
+                  required
+                />
+                {validationErrors.deliveryDate && (
+                  <div className="invalid-feedback">
+                    {validationErrors.deliveryDate}
+                  </div>
+                )}
+              </div>
+            </div>
 
             {/* Sales Person Information */}
             <label htmlFor="salesPersonId" className="form-label mt-3">
@@ -418,55 +473,6 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                 </div>
               </div>
             )}
-          </div>
-
-          <div className="col-md-5">
-            {/* Order Information */}
-            <h4>2. Order Information</h4>
-            <div className="mb-3 mt-3">
-              <label htmlFor="orderDate" className="form-label">
-                Order Date
-              </label>
-              <input
-                type="date"
-                className={`form-control ${
-                  validFields.orderDate ? "is-valid" : ""
-                } ${validationErrors.orderDate ? "is-invalid" : ""}`}
-                id="orderDate"
-                placeholder="Enter order date"
-                value={formData.orderDate}
-                onChange={(e) => handleInputChange("orderDate", e.target.value)}
-                required
-              />
-              {validationErrors.orderDate && (
-                <div className="invalid-feedback">
-                  {validationErrors.orderDate}
-                </div>
-              )}
-            </div>
-            <div className="mb-3">
-              <label htmlFor="deliveryDate" className="form-label">
-                Delivery Date
-              </label>
-              <input
-                type="date"
-                className={`form-control ${
-                  validFields.deliveryDate ? "is-valid" : ""
-                } ${validationErrors.deliveryDate ? "is-invalid" : ""}`}
-                id="deliveryDate"
-                placeholder="Enter delivery date"
-                value={formData.deliveryDate}
-                onChange={(e) =>
-                  handleInputChange("deliveryDate", e.target.value)
-                }
-                required
-              />
-              {validationErrors.deliveryDate && (
-                <div className="invalid-feedback">
-                  {validationErrors.deliveryDate}
-                </div>
-              )}
-            </div>
           </div>
         </div>
 
