@@ -532,8 +532,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
         }
 
-        [HttpGet("GetSumLocationInventoriesByLocationIdItemCode/{itemCode}")]
-        public async Task<ApiResponseModel> GetSumLocationInventoriesByLocationIdItemCode([FromRoute] string itemCode, [FromQuery] int? locationId = null)
+        [HttpGet("GetSumLocationInventoriesByLocationIdItemCode")]
+        public async Task<ApiResponseModel> GetSumLocationInventoriesByLocationIdItemCode([FromQuery] string itemCode, [FromQuery] int? locationId = null)
         {
             try
             {

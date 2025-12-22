@@ -1497,9 +1497,9 @@ export const get_sum_location_inventories_by_locationId_itemCode_api = async (
 ) => {
   try {
     const response = await api.get(
-      `/locationInventory/GetSumLocationInventoriesByLocationIdItemCode/${itemCode}`,
+      "/locationInventory/GetSumLocationInventoriesByLocationIdItemCode",
       {
-        params: { locationId },
+        params: { itemCode, locationId },
         withCredentials: true,
       }
     );
