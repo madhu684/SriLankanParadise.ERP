@@ -156,8 +156,7 @@ const CustomerList = () => {
               </th>
               <th>Customer Name</th>
               <th>Mobile Number</th>
-              <th>Customer Code</th>
-              <th>Contact Person</th>
+              <th>Customer Type</th>
               <th>Status</th>
               <th>Details</th>
             </tr>
@@ -179,8 +178,19 @@ const CustomerList = () => {
                   </td>
                   <td>{im.customerName}</td>
                   <td>{im.phone}</td>
-                  <td>{im.customerCode || "N/A"}</td>
-                  <td>{im.contactPerson || "N/A"}</td>
+                  <td>
+                    <span
+                      className={`badge ${
+                        im.customerType === "patient"
+                          ? "border border-primary text-primary bg-primary bg-opacity-10"
+                          : "border border-danger text-danger bg-danger bg-opacity-10"
+                      }`}
+                    >
+                      {im.customerType === "patient"
+                        ? "Patient"
+                        : "Sales Customer"}
+                    </span>
+                  </td>
                   <td>
                     <span
                       className={`badge rounded-pill ${getStatusBadgeClass(

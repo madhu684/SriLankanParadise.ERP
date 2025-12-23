@@ -289,13 +289,13 @@ const SalesOrderUpdate = ({
                     <div className="card-header">Selected Customer</div>
                     <div className="card-body">
                       <p>
-                        Customer Name: {formData.selectedCustomer.salesCustomerName}
+                        Customer Name: {formData.selectedCustomer.customerName}
                       </p>
                       <p>
                         Contact Person:{" "}
                         {formData.selectedCustomer.contactPerson}
                       </p>
-                      <p>Phone: {formData.selectedCustomer.contactNo}</p>
+                      <p>Phone: {formData.selectedCustomer.phone}</p>
                       <p>Email: {formData.selectedCustomer.email}</p>
                       <button
                         type="button"

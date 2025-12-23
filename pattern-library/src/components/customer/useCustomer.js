@@ -3,7 +3,18 @@ import { post_customer_api } from "../../services/salesApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const useCustomer = ({ onFormSubmit }) => {
+  const customerTypes = [
+    {
+      value: "patient",
+      label: "Patient",
+    },
+    {
+      value: "salesCustomer",
+      label: "Sales Customer",
+    },
+  ];
   const [formData, setFormData] = useState({
+    customerType: "patient",
     customerName: "",
     customerCode: null,
     contactPerson: null,
@@ -322,6 +333,7 @@ const useCustomer = ({ onFormSubmit }) => {
           businessRegistrationNo: formData.businessRegNo,
           isVatRegistered: formData.isVatRegistered === "1" ? true : false,
           vatRegistrationNo: formData.vatRegistrationNo,
+          customerType: formData.customerType,
         };
 
         const response = await post_customer_api(customerData);
@@ -361,6 +373,7 @@ const useCustomer = ({ onFormSubmit }) => {
   console.log("Form Data: ", formData);
 
   return {
+    customerTypes,
     formData,
     validFields,
     validationErrors,

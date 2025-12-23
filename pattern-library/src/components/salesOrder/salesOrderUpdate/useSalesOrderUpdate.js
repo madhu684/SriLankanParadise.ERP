@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  get_all_customers_api,
   put_sales_order_api,
   put_sales_order_detail_api,
   post_sales_order_detail_api,
@@ -8,7 +7,7 @@ import {
   get_company_api,
   get_sales_persons_by_company_id_api,
   get_sales_persons_by_user_id_api,
-  get_sales_customers_by_company_id_api,
+  get_customers_by_customer_type_api,
 } from "../../../services/salesApi";
 import {
   get_item_batches_by_item_master_id_api,
@@ -26,7 +25,7 @@ import { useQuery } from "@tanstack/react-query";
 
 const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
   const [formData, setFormData] = useState({
-    salesCustomerId: "",
+    customerId: "",
     orderDate: "",
     deliveryDate: "",
     itemDetails: [],
@@ -119,10 +118,11 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
     isError: isCustomersError,
     error: customersError,
   } = useQuery({
-    queryKey: ["customers"],
+    queryKey: ["customers", "salesCustomer"],
     queryFn: async () => {
-      const response = await get_sales_customers_by_company_id_api(
-        sessionStorage?.getItem("companyId")
+      const response = await get_customers_by_customer_type_api(
+        sessionStorage?.getItem("companyId"),
+        "salesCustomer"
       );
       return response.data.result || [];
     },
@@ -362,14 +362,14 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
 
         setFormData({
           salesOrderId: deepCopySalesOrder?.salesOrderId ?? "",
-          salesCustomerId: deepCopySalesOrder?.salesCustomerId ?? "",
+          customerId: deepCopySalesOrder?.customerId ?? "",
           salesPersonId: deepCopySalesOrder?.salesPersonId ?? "",
           orderDate: deepCopySalesOrder?.orderDate?.split("T")[0] ?? "",
           deliveryDate: deepCopySalesOrder?.deliveryDate?.split("T")[0] ?? "",
           itemDetails: initializedLineItemCharges,
           attachments: deepCopySalesOrder?.attachments ?? [],
           totalAmount: deepCopySalesOrder?.totalAmount ?? "",
-          selectedCustomer: deepCopySalesOrder?.salesCustomer ?? "",
+          selectedCustomer: deepCopySalesOrder?.customer ?? "",
           selectedSalesPerson: salesPersonDetails,
           itemMasterId: deepCopySalesOrder?.itemMasterId ?? "",
           itemMaster: deepCopySalesOrder?.itemMaster ?? "",
@@ -659,7 +659,7 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
         }
 
         const salesOrderData = {
-          salesCustomerId: customerId,
+          customerId: customerId,
           orderDate: formData.orderDate,
           deliveryDate: formData.deliveryDate,
           totalAmount: formData.totalAmount,

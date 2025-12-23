@@ -86,9 +86,14 @@ const CustomerView = ({ show, handleClose, customer }) => {
             <Modal.Title className="mb-1 text-dark">
               Customer Details
             </Modal.Title>
-            {/* <small className="text-dark">
-              Customer Code: {customer?.customerCode}
-            </small> */}
+            <small className="text-dark">
+              Customer Type:{" "}
+              <span className="fw-semibold">
+                {customer?.customerType === "patient"
+                  ? "Patient"
+                  : "Sales Customer"}
+              </span>
+            </small>
           </div>
           <div className="d-flex flex-column text-start">
             <small className="text-dark d-block">Status</small>

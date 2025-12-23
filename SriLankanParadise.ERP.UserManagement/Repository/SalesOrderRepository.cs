@@ -40,7 +40,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(sod => sod.ItemBatch)
                     .ThenInclude(ib => ib.ItemMaster)
                     .ThenInclude(im => im.Unit)
-                    .Include(so => so.SalesCustomer)
+                    .Include(so => so.Customer)
                     .ToListAsync();
 
 
@@ -66,7 +66,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(sod => sod.ItemBatch)
                     .ThenInclude(ib => ib.ItemMaster)
                     .ThenInclude(im => im.Unit)
-                    .Include(so => so.SalesCustomer)
+                    .Include(so => so.Customer)
                     .ToListAsync();
 
                 return salesOrders.Any() ? salesOrders : null;
@@ -91,7 +91,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(sod => sod.ItemBatch)
                     .ThenInclude(ib => ib.ItemMaster)
                     .ThenInclude(im => im.Unit)
-                    .Include(so => so.SalesCustomer)
+                    .Include(so => so.Customer)
                     .ToListAsync();
 
 
@@ -139,7 +139,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(sod => sod.ItemBatch)
                     .ThenInclude(ib => ib.ItemMaster)
                     .ThenInclude(im => im.Unit)
-                    .Include(so => so.SalesCustomer)
+                    .Include(so => so.Customer)
                     .FirstOrDefaultAsync();
 
                 return salesOrder;
@@ -178,7 +178,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(so => so.SalesOrderDetails)
                     .ThenInclude(ib => ib.ItemBatch)
                     .ThenInclude(im => im.ItemMaster)
-                    .Include(so => so.SalesCustomer)
+                    .Include(so => so.Customer)
                     .ToListAsync();
 
                 return salesOrderMasters.Any() ? salesOrderMasters : null;

@@ -4,6 +4,7 @@ import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonL
 
 const Customer = ({ handleClose }) => {
   const {
+    customerTypes,
     formData,
     validFields,
     validationErrors,
@@ -82,6 +83,35 @@ const Customer = ({ handleClose }) => {
                   <i className="bi bi-person-fill text-primary fs-6"></i>
                 </div>
                 <h2 className="h5 fw-bold text-dark mb-0">Basic Information</h2>
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label">
+                  Customer Type <span className="text-danger">*</span>
+                </label>
+                <select
+                  className={`form-control ${
+                    validFields.customerType ? "is-valid" : ""
+                  } ${validationErrors.customerType ? "is-invalid" : ""}`}
+                  value={formData.customerType}
+                  onChange={(e) =>
+                    handleInputChange("customerType", e.target.value)
+                  }
+                >
+                  <option value="" disabled>
+                    Select customer type
+                  </option>
+                  {customerTypes.map((customerType) => (
+                    <option key={customerType.value} value={customerType.value}>
+                      {customerType.label}
+                    </option>
+                  ))}
+                </select>
+                {validationErrors.customerName && (
+                  <div className="invalid-feedback">
+                    {validationErrors.customerName}
+                  </div>
+                )}
               </div>
 
               <div className="mb-3">
