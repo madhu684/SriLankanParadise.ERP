@@ -57,28 +57,27 @@ const SalesOrderDetail = ({ show, handleClose, salesOrder }) => {
                 </p>
                 <p>
                   <strong>Order Type:</strong>{" "}
-                  {salesOrder.salesCustomerId !== null
+                  {salesOrder.customerId !== null
                     ? "Customer Order"
                     : "Direct Order"}
                 </p>
-                {salesOrder.salesCustomerId !== null && (
+                {salesOrder.customerId !== null && (
                   <>
                     <p>
                       <strong>Customer Name:</strong>{" "}
-                      {salesOrder?.salesCustomer?.salesCustomerName ||
-                        "Unknown"}
+                      {salesOrder?.customer?.customerName || "Unknown"}
                     </p>
                     <p>
                       <strong>Contact Person:</strong>{" "}
-                      {salesOrder?.salesCustomer?.contactPerson || "Unknown"}
+                      {salesOrder?.customer?.contactPerson || "Unknown"}
                     </p>
                     <p>
                       <strong>Phone:</strong>{" "}
-                      {salesOrder?.salesCustomer?.contactNo || "Unknown"}
+                      {salesOrder?.customer?.phone || "Unknown"}
                     </p>
                     <p>
                       <strong>Email:</strong>{" "}
-                      {salesOrder?.salesCustomer?.email || "Unknown"}
+                      {salesOrder?.customer?.email || "Unknown"}
                     </p>
                   </>
                 )}

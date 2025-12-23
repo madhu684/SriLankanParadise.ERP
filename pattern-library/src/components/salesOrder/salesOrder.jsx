@@ -207,17 +207,17 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                           {customers
                             .filter(
                               (customer) =>
-                                customer.salesCustomerName
+                                customer.customerName
                                   .toLowerCase()
                                   .includes(customerSearchTerm.toLowerCase()) ||
-                                customer.contactNo
+                                customer.phone
                                   .replace(/\s/g, "")
                                   .includes(
                                     customerSearchTerm.replace(/\s/g, "")
                                   )
                             )
                             .map((customer) => (
-                              <li key={customer.salesCustomerId}>
+                              <li key={customer.customerId}>
                                 <button
                                   className="dropdown-item"
                                   onClick={() => handleSelectCustomer(customer)}
@@ -225,17 +225,16 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                                   <span className="me-3">
                                     <i className="bi-person-lines-fill"></i>
                                   </span>{" "}
-                                  {customer?.salesCustomerName} -{" "}
-                                  {customer?.contactNo}
+                                  {customer?.customerName} - {customer?.phone}
                                 </button>
                               </li>
                             ))}
                           {customers.filter(
                             (customer) =>
-                              customer.salesCustomerName
+                              customer.customerName
                                 .toLowerCase()
                                 .includes(customerSearchTerm.toLowerCase()) ||
-                              customer.contactNo
+                              customer.phone
                                 .replace(/\s/g, "")
                                 .includes(customerSearchTerm.replace(/\s/g, ""))
                           ).length === 0 && (
@@ -284,14 +283,13 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                     <div className="card-header">Selected Customer</div>
                     <div className="card-body">
                       <p>
-                        Customer Name:{" "}
-                        {formData.selectedCustomer.salesCustomerName}
+                        Customer Name: {formData.selectedCustomer.customerName}
                       </p>
                       <p>
                         Contact Person:{" "}
                         {formData.selectedCustomer.contactPerson}
                       </p>
-                      <p>Phone: {formData.selectedCustomer.contactNo}</p>
+                      <p>Phone: {formData.selectedCustomer.phone}</p>
                       <p>Email: {formData.selectedCustomer.email}</p>
                       <button
                         type="button"
@@ -806,7 +804,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
               "Submit"
             )}
           </button>
-          <button
+          {/* <button
             type="button"
             className="btn btn-secondary me-2"
             onClick={() => handleSubmit(true)}
@@ -830,7 +828,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
             disabled={loading || loadingDraft || submissionStatus !== null}
           >
             Print
-          </button>
+          </button> */}
           <button
             type="button"
             className="btn btn-danger"

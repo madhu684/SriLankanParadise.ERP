@@ -3,7 +3,18 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { put_customer_api } from "../../../services/salesApi";
 
 const useCustomerUpdate = ({ customer, onFormSubmit }) => {
+  const customerTypes = [
+    {
+      value: "patient",
+      label: "Patient",
+    },
+    {
+      value: "salesCustomer",
+      label: "Sales Customer",
+    },
+  ];
   const [formData, setFormData] = useState({
+    customerType: "",
     customerId: "",
     customerName: "",
     customerCode: null,
@@ -37,6 +48,7 @@ const useCustomerUpdate = ({ customer, onFormSubmit }) => {
     if (customer) {
       setFormData({
         customerId: parseInt(customer.customerId),
+        customerType: customer.customerType,
         customerName: customer.customerName,
         customerCode: customer.customerCode,
         contactPerson: customer.contactPerson,
@@ -354,6 +366,7 @@ const useCustomerUpdate = ({ customer, onFormSubmit }) => {
           businessRegistrationNo: formData.businessRegNo,
           isVatRegistered: formData.isVatRegistered === "1" ? true : false,
           vatRegistrationNo: formData.vatRegistrationNo,
+          customerType: formData.customerType,
         };
 
         const response = await put_customer_api(
@@ -393,6 +406,7 @@ const useCustomerUpdate = ({ customer, onFormSubmit }) => {
   console.log("Address Ids To Delete: ", addressIdsToDelete);
 
   return {
+    customerTypes,
     formData,
     validFields,
     validationErrors,

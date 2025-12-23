@@ -39,6 +39,25 @@ export const get_customers_by_company_id_api = async (companyId) => {
   }
 };
 
+export const get_customers_by_customer_type_api = async (
+  companyId,
+  customerType
+) => {
+  try {
+    const response = await api.get(
+      `/customer/GetCustomersByCustomerTypeCompanyId/${companyId}`,
+      {
+        params: { customerType },
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const get_all_customers_api = async () => {
   try {
     const response = await api.get("/customer");

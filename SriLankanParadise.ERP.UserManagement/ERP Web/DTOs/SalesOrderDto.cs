@@ -4,7 +4,7 @@
     {
         public int SalesOrderId { get; set; }
 
-        public int? SalesCustomerId { get; set; }
+        public int? CustomerId { get; set; }
 
         public DateTime? OrderDate { get; set; }
 
@@ -38,7 +38,7 @@
         public double? Longitude { get; set; }
         public int InventoryLocationId { get; set; }
 
-        public virtual SalesCustomerDto? SalesCustomer { get; set; }
+        public virtual CustomerDto? Customer { get; set; }
         public virtual IEnumerable<SalesOrderDetailDto>? SalesOrderDetails { get; set; }
     }
 }

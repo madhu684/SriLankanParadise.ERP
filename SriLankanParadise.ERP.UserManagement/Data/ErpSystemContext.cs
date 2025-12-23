@@ -419,6 +419,10 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.IsVATRegistered)
                 .HasDefaultValue(false);
 
+            entity.Property(e => e.CustomerType)
+                .HasMaxLength(50)
+                .HasDefaultValue("patient");
+
             entity.ToTable("Customer");
         });
 
@@ -1099,9 +1103,9 @@ public partial class ErpSystemContext : DbContext
                 .HasDefaultValueSql("('SO'+CONVERT([nvarchar](20),NEXT VALUE FOR [dbo].[SalesOrderReferenceNoSeq]))");
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
 
-            entity.HasOne(d => d.SalesCustomer).WithMany(p => p.SalesOrders)
-                .HasForeignKey(d => d.SalesCustomerId)
-                .HasConstraintName("FK_SalesOrder_SalesCustomer");
+            entity.HasOne(d => d.Customer).WithMany(p => p.SalesOrders)
+                .HasForeignKey(d => d.CustomerId)
+                .HasConstraintName("FK_SalesOrder_Customer");
 
             entity.HasOne(d => d.SalesPerson).WithMany(p => p.SalesOrders)
                 .HasForeignKey(d => d.SalesPersonId)

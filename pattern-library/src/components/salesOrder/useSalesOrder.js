@@ -1,11 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  get_all_customers_api,
   post_sales_order_api,
   post_sales_order_detail_api,
   get_company_api,
   get_sales_persons_by_company_id_api,
-  get_sales_customers_by_company_id_api,
+  get_customers_by_customer_type_api,
 } from "../../services/salesApi";
 import {
   get_charges_and_deductions_by_company_id_api,
@@ -21,7 +20,7 @@ import { useQuery } from "@tanstack/react-query";
 const useSalesOrder = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
     customerId: "",
-    orderDate: "",
+    orderDate: new Date().toISOString().split("T")[0],
     deliveryDate: "",
     itemDetails: [],
     status: 0,
@@ -134,10 +133,11 @@ const useSalesOrder = ({ onFormSubmit }) => {
     isError: isCustomersError,
     error: customersError,
   } = useQuery({
-    queryKey: ["customers"],
+    queryKey: ["customers", "salesCustomer"],
     queryFn: async () => {
-      const response = await get_sales_customers_by_company_id_api(
-        sessionStorage?.getItem("companyId")
+      const response = await get_customers_by_customer_type_api(
+        sessionStorage?.getItem("companyId"),
+        "salesCustomer"
       );
       return response.data.result || [];
     },
@@ -487,7 +487,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
         }
 
         const salesOrderData = {
-          salesCustomerId: customerId,
+          customerId: customerId,
           orderDate: formData.orderDate,
           deliveryDate: formData.deliveryDate,
           totalAmount: formData.totalAmount,
@@ -621,7 +621,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
     const selectedCustomerId = parseInt(customerId, 10);
 
     const selectedCustomer = customers.find(
-      (customer) => customer.salesCustomerId === selectedCustomerId
+      (customer) => customer.customerId === selectedCustomerId
     );
 
     setFormData((prevFormData) => ({
@@ -1029,7 +1029,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
   const handleSelectCustomer = (selectedCustomer) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
-      customerId: selectedCustomer.salesCustomerId,
+      customerId: selectedCustomer.customerId,
       selectedCustomer: selectedCustomer,
     }));
 

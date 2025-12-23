@@ -20,5 +20,6 @@
         public string? BusinessRegistrationNo { get; set; }
         public bool? IsVATRegistered { get; set; }
         public string? VATRegistrationNo { get; set; }
+        public string CustomerType { get; set; }
     }
 }

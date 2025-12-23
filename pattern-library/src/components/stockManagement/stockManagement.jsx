@@ -199,24 +199,24 @@ const StockManagement = () => {
             paginate={paginate}
             currentPage={currentPage}
           />
-          <div className="d-flex">
+          {/* <div className="d-flex">
             <button
               className="btn btn-danger me-2"
-              //onClick={handleClear}
+              onClick={handleClear}
             >
               Clear
             </button>
             <button
               className="btn btn-primary me-2"
-              //onClick={handleSubmit}
-              // disable={
-              //   isSubmitting
-              // }
-              //loading={isSubmitting}
+              onClick={handleSubmit}
+              disable={
+                isSubmitting
+              }
+              loading={isSubmitting}
             >
               Submit
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
       {/* )} */}

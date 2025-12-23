@@ -25,7 +25,10 @@ public partial class Customer
     public bool? IsVATRegistered { get; set; }
     public string? VATRegistrationNo { get; set; }
 
+    public string CustomerType { get; set; }
+
     public virtual ICollection<PackingSlip> PackingSlips { get; set; } = new List<PackingSlip>();
 
+    public virtual ICollection<SalesOrder> SalesOrders { get; set; } = new List<SalesOrder>();
     public virtual ICollection<Lead> Leads { get; set; } = new List<Lead>();
 }
