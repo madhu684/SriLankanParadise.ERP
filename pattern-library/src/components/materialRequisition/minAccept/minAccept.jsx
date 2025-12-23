@@ -132,68 +132,83 @@ const MinAccept = ({ refetch, setRefetch, show, handleClose, min }) => {
                 );
 
                 return (
-                  <tr key={index} className={itemError ? "table-warning" : ""}>
-                    <td>{item.itemMaster?.itemName}</td>
-                    <td>{item.itemMaster?.unit.unitName}</td>
-                    <td className="text-nowrap">{item.batch?.batchRef}</td>
-                    <td>
-                      <span className="fw-bold">{item.quantity}</span>
-                    </td>
-                    <td>
-                      <Form.Control
-                        type="number"
-                        min="0"
-                        max={item.quantity} // Prevent exceeding issued quantity
-                        step="0.1"
-                        value={
-                          receivedQuantities[item.issueDetailId] !== undefined
-                            ? receivedQuantities[item.issueDetailId]
-                            : item.quantity ?? 0
-                        }
-                        onChange={(e) =>
-                          handleReceivedQuantityChange(
-                            item.issueDetailId,
-                            e.target.value
-                          )
-                        }
-                        placeholder="Enter received qty"
-                        className={receivedExceedsIssued ? "is-invalid" : ""}
-                        disabled={
-                          loading ||
-                          min.requisitionMaster.isMINAccepted === true
-                        }
-                      />
-                      {receivedExceedsIssued && (
-                        <div className="invalid-feedback">
-                          Cannot exceed issued quantity
-                        </div>
-                      )}
-                    </td>
-                    <td>
-                      <Form.Control
-                        type="number"
-                        min="0"
-                        max={receivedQuantities[item.issueDetailId] || 0} // Prevent exceeding received quantity
-                        step="0.1"
-                        value={
-                          returnedQuantities[item.issueDetailId] !== undefined
-                            ? returnedQuantities[item.issueDetailId]
-                            : item.returnedQuantity ?? 0
-                        }
-                        onChange={(e) =>
-                          handleReturnedQuantityChange(
-                            item.issueDetailId,
-                            e.target.value
-                          )
-                        }
-                        placeholder="Enter returned qty"
-                        disabled={
-                          loading ||
-                          min.requisitionMaster.isMINAccepted === true
-                        }
-                      />
-                    </td>
-                  </tr>
+                  <React.Fragment key={index}>
+                    <tr className={itemError ? "table-warning" : ""}>
+                      <td>{item.itemMaster?.itemName}</td>
+                      <td>{item.itemMaster?.unit.unitName}</td>
+                      <td className="text-nowrap">{item.batch?.batchRef}</td>
+                      <td>
+                        <span className="fw-bold">{item.quantity}</span>
+                      </td>
+                      <td>
+                        <Form.Control
+                          type="number"
+                          min="0"
+                          max={item.quantity} // Prevent exceeding issued quantity
+                          step="0.1"
+                          value={
+                            receivedQuantities[item.issueDetailId] !== undefined
+                              ? receivedQuantities[item.issueDetailId]
+                              : item.quantity ?? 0
+                          }
+                          onChange={(e) =>
+                            handleReceivedQuantityChange(
+                              item.issueDetailId,
+                              e.target.value
+                            )
+                          }
+                          placeholder="Enter received qty"
+                          className={receivedExceedsIssued ? "is-invalid" : ""}
+                          disabled={
+                            loading ||
+                            min.requisitionMaster.isMINAccepted === true
+                          }
+                        />
+                        {receivedExceedsIssued && (
+                          <div className="invalid-feedback">
+                            Cannot exceed issued quantity
+                          </div>
+                        )}
+                      </td>
+                      <td>
+                        <Form.Control
+                          type="number"
+                          min="0"
+                          max={receivedQuantities[item.issueDetailId] || 0} // Prevent exceeding received quantity
+                          step="0.1"
+                          value={
+                            returnedQuantities[item.issueDetailId] !== undefined
+                              ? returnedQuantities[item.issueDetailId]
+                              : item.returnedQuantity ?? 0
+                          }
+                          onChange={(e) =>
+                            handleReturnedQuantityChange(
+                              item.issueDetailId,
+                              e.target.value
+                            )
+                          }
+                          placeholder="Enter returned qty"
+                          disabled={
+                            loading ||
+                            min.requisitionMaster.isMINAccepted === true
+                          }
+                        />
+                      </td>
+                    </tr>
+                    {itemError && (
+                      <tr className="table-warning">
+                        <td colSpan="6">
+                          <div className="text-danger small">
+                            <i className="bi bi-exclamation-circle me-1"></i>
+                            {itemError.replace(
+                              `item ${item.itemMaster?.itemMasterId}`,
+                              `item ${item.itemMaster?.itemName}`
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
                 );
               })}
             </tbody>

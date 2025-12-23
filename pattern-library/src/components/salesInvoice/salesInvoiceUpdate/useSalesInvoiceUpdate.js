@@ -681,6 +681,8 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           locationId: salesInvoice.locationId,
           inVoicedPersonName: formData.patientName,
           inVoicedPersonMobileNo: formData.patientNo,
+          appointmentId: formData.appointmentId,
+          tokenNo: formData.tokenNo,
         };
 
         const response = await put_sales_invoice_api(

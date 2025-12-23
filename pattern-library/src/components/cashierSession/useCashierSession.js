@@ -99,7 +99,7 @@ const useCashierSession = ({ onFormSubmit }) => {
           queryClient.invalidateQueries({
             queryKey: [
               "activeCashierSession",
-              sessionStorage.getItem("userId"),
+              parseInt(sessionStorage.getItem("userId")),
             ],
           });
           setTimeout(() => {

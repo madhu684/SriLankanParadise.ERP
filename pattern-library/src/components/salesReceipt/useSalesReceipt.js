@@ -322,6 +322,14 @@ const useSalesReceipt = ({ onFormSubmit }) => {
               companyId: item.companyId,
               salesOrderId: item.salesOrderId,
               amountDue: newAmountDue.toFixed(2),
+              createdDate: item.createdDate,
+              lastUpdatedDate: currentDate,
+              referenceNumber: item.referenceNumber,
+              locationId: item.locationId,
+              inVoicedPersonName: item.inVoicedPersonName,
+              inVoicedPersonMobileNo: item.inVoicedPersonMobileNo,
+              appointmentId: item.appointmentId,
+              tokenNo: item.tokenNo,
               permissionId: 31,
             };
 

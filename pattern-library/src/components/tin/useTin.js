@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   get_requisition_masters_with_out_drafts_api,
   post_issue_master_api,
@@ -27,6 +27,8 @@ const useTin = ({ onFormSubmit }) => {
   const [trnSearchTerm, setTrnSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
+
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
   const queryClient = useQueryClient();
 
   // Fetch TRNs
@@ -370,6 +372,7 @@ const useTin = ({ onFormSubmit }) => {
             : "Transfer issue note submitted successfully!",
           formData
         );
+        queryClient.invalidateQueries(["tinList", companyId]);
         setTimeout(() => {
           setSubmissionStatus(null);
           setLoading(false);

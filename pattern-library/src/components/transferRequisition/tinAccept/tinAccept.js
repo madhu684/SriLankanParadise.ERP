@@ -19,7 +19,7 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
   const queryClient = useQueryClient();
   const alertRef = useRef(null);
 
-  console.log("tin in useTinAccept: ", tin);
+  const companyId = sessionStorage.getItem("companyId");
 
   const { data: issuedetails } = useQuery({
     queryKey: ["tins", tin.issueMasterId],
@@ -348,6 +348,7 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
       queryClient.invalidateQueries(["tins", tinId]);
       queryClient.invalidateQueries(["locationInventories", toLocationId]);
       queryClient.invalidateQueries(["locationInventories", fromLocationId]);
+      queryClient.invalidateQueries(["transferRequisitions", companyId]);
       setRefetch(!refetch);
       setApprovalStatus("approved");
     } catch (error) {
