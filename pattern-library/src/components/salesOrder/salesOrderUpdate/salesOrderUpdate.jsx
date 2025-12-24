@@ -114,17 +114,15 @@ const SalesOrderUpdate = ({
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <button
-            onClick={handleBack}
-            className="btn btn-dark d-flex align-items-center"
-          >
-            Back
-          </button>
+          <i
+            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+            onClick={handleClose}
+          />
           <p>
             <CurrentDateTime />
           </p>
         </div>
-        <h1 className="mt-2 text-center">Sales Order</h1>
+        <h1 className="mt-2 text-center">Sales Order Update</h1>
         <hr />
       </div>
 
@@ -815,7 +813,7 @@ const SalesOrderUpdate = ({
               "Update and Submit"
             )}
           </button>
-          <button
+          {/* <button
             type="button"
             className="btn btn-secondary me-2"
             onClick={() => handleSubmit(true)}
@@ -834,7 +832,7 @@ const SalesOrderUpdate = ({
             disabled={loading || loadingDraft || submissionStatus !== null}
           >
             Print
-          </button>
+          </button> */}
           <button
             type="button"
             className="btn btn-danger"

@@ -63,7 +63,6 @@ const useSalesReceiptDetail = (salesReceiptId) => {
             })),
         };
       }
-
       setRefreshedSalesReceipt(salesReceiptData);
       setError(null);
     } catch (err) {

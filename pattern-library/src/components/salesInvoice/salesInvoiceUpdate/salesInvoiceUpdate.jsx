@@ -88,7 +88,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
             <CurrentDateTime />
           </p>
         </div>
-        <h1 className="mt-2 text-center">Sales Invoice</h1>
+        <h1 className="mt-2 text-center">Sales Invoice Upate</h1>
         <hr />
       </div>
 
