@@ -253,6 +253,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
             )}
 
             {/* Appointment Section */}
+
             <div className="mt-3">
               <div className="d-flex align-items-center justify-content-between mb-3">
                 <div className="form-check">
@@ -266,6 +267,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                     id="useAppointmentCheck"
                     checked={useAppointment}
                     onChange={(e) => setUseAppointment(e.target.checked)}
+                    disabled={formData?.salesOrderId}
                   />
                   <label
                     className="form-check-label text-dark fw-bold"

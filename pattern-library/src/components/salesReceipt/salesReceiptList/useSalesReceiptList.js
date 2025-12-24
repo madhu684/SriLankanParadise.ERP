@@ -1,5 +1,8 @@
 import { useState, useMemo, useContext } from "react";
-import { get_sales_receipts_with_out_drafts_api } from "../../../services/salesApi";
+import {
+  get_sales_invoices_with_out_drafts_api,
+  get_sales_receipts_with_out_drafts_api,
+} from "../../../services/salesApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { UserContext } from "../../../context/userContext";
@@ -39,6 +42,17 @@ const useSalesReceiptList = () => {
     enabled: !!companyId,
   });
 
+  const { data: invoices = [], isLoading: isLoadingInvoices } = useQuery({
+    queryKey: ["SalesInvoices", companyId],
+    queryFn: async () => {
+      const response = await get_sales_invoices_with_out_drafts_api(companyId);
+      const filteredInvoices = response.data.result
+        ? response.data.result.filter((si) => si.status === 2)
+        : [];
+      return filteredInvoices;
+    },
+  });
+
   // Filter sales receipts based on selected filter
   const filteredSalesReceipts = useMemo(() => {
     return salesReceipts
@@ -50,6 +64,10 @@ const useSalesReceiptList = () => {
         })
       : [];
   }, [salesReceipts, filter]);
+
+  const approvedInvoices = useMemo(() => {
+    return invoices || [];
+  }, [invoices]);
 
   const handleShowApproveSRModal = () => {
     setShowApproveSRModal(true);
@@ -182,8 +200,13 @@ const useSalesReceiptList = () => {
     }, 3000);
   };
 
+  console.log(approvedInvoices);
+
   return {
     salesReceipts,
+    invoices,
+    approvedInvoices,
+    isLoadingInvoices,
     isLoadingData,
     error,
     isAnyRowSelected,

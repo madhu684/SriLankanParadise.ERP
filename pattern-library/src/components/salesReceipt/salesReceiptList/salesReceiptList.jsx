@@ -8,6 +8,8 @@ import ErrorComponent from "../../errorComponent/errorComponent";
 import Pagination from "../../common/Pagination/Pagination";
 import { FaSearch, FaPlus, FaFilter } from "react-icons/fa";
 import { UserContext } from "../../../context/userContext";
+import moment from "moment";
+import useFormatCurrency from "../../../utility/useFormatCurrency";
 
 const SalesReceiptList = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -16,6 +18,8 @@ const SalesReceiptList = () => {
 
   const {
     salesReceipts,
+    invoices,
+    isLoadingInvoices,
     isLoadingData,
     error,
     showDetailSRModal,
@@ -40,6 +44,8 @@ const SalesReceiptList = () => {
   } = useSalesReceiptList();
 
   const { hasPermission } = useContext(UserContext);
+
+  const formatCurrency = useFormatCurrency();
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -83,11 +89,94 @@ const SalesReceiptList = () => {
 
   if (salesReceipts.length === 0) {
     return (
-      <div className="container-fluid px-4 py-4">
+      <div className="container-fluid px-4">
         <div className="card border-0 shadow-sm">
           <div className="card-body">
             <h2 className="card-title mb-4 fw-bold">Sales Receipts</h2>
-            <div className="d-flex flex-column justify-content-center align-items-center text-center py-5">
+            {invoices.length > 0 && (
+              <div className="card border-0 shadow-sm mb-4">
+                <div
+                  className="card-header bg-secondary text-white py-3"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  }}
+                >
+                  <div className="d-flex justify-content-between align-items-center">
+                    <h5 className="mb-0 d-flex align-items-center gap-2">
+                      <i className="bi bi-clipboard-check"></i>
+                      Available Approved Sales Invoices
+                    </h5>
+                    <span className="badge bg-white text-dark fw-semibold px-3 py-2">
+                      {invoices.length} Available
+                    </span>
+                  </div>
+                </div>
+                <div className="card-body p-0">
+                  {invoices.length > 0 ? (
+                    <div
+                      className="table-responsive"
+                      style={{
+                        maxHeight: "320px",
+                        overflowY: "auto",
+                      }}
+                    >
+                      <table className="table table-hover mb-0">
+                        <thead className="table-light sticky-top">
+                          <tr>
+                            <th className="text-nowrap py-3 px-4 border-bottom">
+                              Reference Number
+                            </th>
+                            <th className="text-nowrap py-3 px-4 border-bottom">
+                              Customer
+                            </th>
+                            <th className="text-nowrap py-3 px-4 border-bottom">
+                              Invoiced Date
+                            </th>
+                            <th className="text-nowrap py-3 px-4 border-bottom">
+                              Amount Due
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {invoices.map((trn) => (
+                            <tr
+                              key={trn.salesInvoiceId}
+                              className="border-bottom"
+                            >
+                              <td className="fw-semibold py-3 px-4 text-dark">
+                                {trn.referenceNo}
+                              </td>
+                              <td className="py-3 px-4">
+                                {trn.inVoicedPersonName || "N/A"}
+                              </td>
+                              <td className="py-3 px-4 text-muted">
+                                {moment
+                                  .utc(trn.invoiceDate)
+                                  .tz("Asia/Colombo")
+                                  .format("YYYY-MM-DD hh:mm:ss A")}
+                              </td>
+                              <td className="py-3 px-4 text-danger">
+                                {formatCurrency(trn.amountDue)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="text-center py-3">
+                      <i className="bi bi-inbox display-4 text-muted d-block mb-3"></i>
+                      <p className="text-muted mb-0">
+                        No approved Transfer Requisitions available
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="d-flex flex-column justify-content-center align-items-center text-center py-1">
               <div className="mb-4">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -155,6 +244,89 @@ const SalesReceiptList = () => {
             </button>
           )} */}
           </div>
+
+          {invoices.length > 0 && (
+            <div className="card border-0 shadow-sm mb-4">
+              <div
+                className="card-header bg-secondary text-white py-3"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                }}
+              >
+                <div className="d-flex justify-content-between align-items-center">
+                  <h5 className="mb-0 d-flex align-items-center gap-2">
+                    <i className="bi bi-clipboard-check"></i>
+                    Available Approved Sales Invoices
+                  </h5>
+                  <span className="badge bg-white text-dark fw-semibold px-3 py-2">
+                    {invoices.length} Available
+                  </span>
+                </div>
+              </div>
+              <div className="card-body p-0">
+                {invoices.length > 0 ? (
+                  <div
+                    className="table-responsive"
+                    style={{
+                      maxHeight: "320px",
+                      overflowY: "auto",
+                    }}
+                  >
+                    <table className="table table-hover mb-0">
+                      <thead className="table-light sticky-top">
+                        <tr>
+                          <th className="text-nowrap py-3 px-4 border-bottom">
+                            Reference Number
+                          </th>
+                          <th className="text-nowrap py-3 px-4 border-bottom">
+                            Customer
+                          </th>
+                          <th className="text-nowrap py-3 px-4 border-bottom">
+                            Invoiced Date
+                          </th>
+                          <th className="text-nowrap py-3 px-4 border-bottom">
+                            Amount Due
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {invoices.map((trn) => (
+                          <tr
+                            key={trn.salesInvoiceId}
+                            className="border-bottom"
+                          >
+                            <td className="fw-semibold py-3 px-4 text-dark">
+                              {trn.referenceNo}
+                            </td>
+                            <td className="py-3 px-4">
+                              {trn.inVoicedPersonName || "N/A"}
+                            </td>
+                            <td className="py-3 px-4 text-muted">
+                              {moment
+                                .utc(trn.invoiceDate)
+                                .tz("Asia/Colombo")
+                                .format("YYYY-MM-DD hh:mm:ss A")}
+                            </td>
+                            <td className="py-3 px-4 text-danger">
+                              {formatCurrency(trn.amountDue)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="text-center py-3">
+                    <i className="bi bi-inbox display-4 text-muted d-block mb-3"></i>
+                    <p className="text-muted mb-0">
+                      No approved Transfer Requisitions available
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {showCreateSRForm && !isCashierSessionOpen && (
             <div

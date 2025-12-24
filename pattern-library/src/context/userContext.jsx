@@ -48,7 +48,7 @@ const UserProvider = ({ children }) => {
     isLoading: activeCashierSessionLoading,
     isError: activeCashierSessionError,
   } = useQuery({
-    queryKey: ["activeCashierSession", userId],
+    queryKey: ["activeCashierSession", parseInt(userId)],
     queryFn: async () => {
       const response = await get_cashier_session_by_user_id_api(userId);
       return response.data.result;

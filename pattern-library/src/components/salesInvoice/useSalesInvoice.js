@@ -283,6 +283,113 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     }
   }, [userLocations]);
 
+  // useEffect(() => {
+  //   if (
+  //     salesOrder !== null &&
+  //     !isChargesAndDeductionsAppliedLoading &&
+  //     chargesAndDeductionsApplied &&
+  //     !isLoadingchargesAndDeductions &&
+  //     chargesAndDeductions
+  //   ) {
+  //     const deepCopySalesOrder = JSON.parse(JSON.stringify(salesOrder));
+
+  //     // Initialize line item charges and deductions
+  //     const initializedLineItemCharges =
+  //       deepCopySalesOrder.salesOrderDetails.map((item) => {
+  //         const initializedCharges = chargesAndDeductionsApplied
+  //           ?.filter(
+  //             (charge) => charge.lineItemId === item.itemBatch.itemMasterId
+  //           )
+  //           .map((charge) => {
+  //             let value;
+  //             if (charge.chargesAndDeduction.percentage !== null) {
+  //               // Calculate percentage value
+  //               value =
+  //                 (Math.abs(charge.appliedValue) /
+  //                   (item.unitPrice * item.quantity)) *
+  //                 100;
+  //             } else {
+  //               value = Math.abs(charge.appliedValue);
+  //             }
+  //             return {
+  //               id: charge.chargesAndDeduction.chargesAndDeductionId,
+  //               name: charge.chargesAndDeduction.displayName,
+  //               value: value.toFixed(2),
+  //               sign: charge.chargesAndDeduction.sign,
+  //               isPercentage: charge.chargesAndDeduction.percentage !== null,
+  //               chargesAndDeductionAppliedId:
+  //                 charge.chargesAndDeductionAppliedId,
+  //             };
+  //           });
+
+  //         // Sort the charges and deductions according to the order of display names
+  //         const sortedLineItemCharges = chargesAndDeductions
+  //           .filter((charge) => charge.isApplicableForLineItem)
+  //           .map((charge) => {
+  //             const displayName = charge.displayName; // Extract display name from charge
+  //             const matchedCharge = initializedCharges.find(
+  //               (c) => c.name === displayName
+  //             );
+  //             return matchedCharge || null; // Return null if no matching charge is found
+  //           });
+
+  //         return {
+  //           ...item,
+  //           itemMasterId: item.itemBatch.itemMasterId,
+  //           itemBatchId: item.itemBatch.batchId,
+  //           name: item.itemBatch.itemMaster.itemName,
+  //           unit: item.itemBatch.itemMaster.unit.unitName,
+  //           batchRef: item.itemBatch.batch.batchRef,
+  //           tempQuantity: item.itemBatch.tempQuantity + item.quantity,
+  //           chargesAndDeductions: sortedLineItemCharges,
+  //           batch: item.itemBatch,
+  //           isInventoryItem: item.isInventoryItem,
+  //         };
+  //       });
+
+  //     const subTotal = deepCopySalesOrder.salesOrderDetails.reduce(
+  //       (total, item) => total + item.totalPrice,
+  //       0
+  //     );
+
+  //     // Initialize common charges and deductions
+  //     const initializedCommonCharges = chargesAndDeductionsApplied
+  //       ?.filter((charge) => !charge.lineItemId)
+  //       .map((charge) => {
+  //         let value;
+  //         if (charge.chargesAndDeduction.percentage !== null) {
+  //           // Calculate percentage value based on subtotal
+  //           value = (Math.abs(charge.appliedValue) / subTotal) * 100;
+  //         } else {
+  //           value = Math.abs(charge.appliedValue);
+  //         }
+  //         return {
+  //           id: charge.chargesAndDeduction.chargesAndDeductionId,
+  //           name: charge.chargesAndDeduction.displayName,
+  //           value: value.toFixed(2),
+  //           sign: charge.chargesAndDeduction.sign,
+  //           isPercentage: charge.chargesAndDeduction.percentage !== null,
+  //           chargesAndDeductionAppliedId: charge.chargesAndDeductionAppliedId,
+  //         };
+  //       });
+
+  //     setFormData((prevFormData) => ({
+  //       ...prevFormData,
+  //       patientName: salesOrder?.customer?.customerName || "",
+  //       patientNo: salesOrder?.customer?.phone || "",
+  //       itemDetails: initializedLineItemCharges,
+  //       salesOrderId: salesOrder.salesOrderId,
+  //       commonChargesAndDeductions: initializedCommonCharges,
+  //     }));
+  //   }
+  // }, [
+  //   salesOrder,
+  //   isChargesAndDeductionsAppliedLoading,
+  //   chargesAndDeductionsApplied,
+  //   isLoadingchargesAndDeductions,
+  //   chargesAndDeductions,
+  // ]);
+
   useEffect(() => {
     if (
       salesOrder !== null &&
@@ -302,19 +409,17 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
             )
             .map((charge) => {
               let value;
-              if (charge.chargesAndDeduction.percentage) {
-                // Calculate percentage value
-                value =
-                  (Math.abs(charge.appliedValue) /
-                    (item.unitPrice * item.quantity)) *
-                  100;
+              if (charge.chargesAndDeduction.percentage !== null) {
+                // Calculate percentage value - Fixed calculation
+                const baseAmount = item.unitPrice * item.quantity;
+                value = (Math.abs(charge.appliedValue) / baseAmount) * 100;
               } else {
                 value = Math.abs(charge.appliedValue);
               }
               return {
                 id: charge.chargesAndDeduction.chargesAndDeductionId,
                 name: charge.chargesAndDeduction.displayName,
-                value: value.toFixed(2),
+                value: parseFloat(value.toFixed(2)),
                 sign: charge.chargesAndDeduction.sign,
                 isPercentage: charge.chargesAndDeduction.percentage !== null,
                 chargesAndDeductionAppliedId:
@@ -326,11 +431,11 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
           const sortedLineItemCharges = chargesAndDeductions
             .filter((charge) => charge.isApplicableForLineItem)
             .map((charge) => {
-              const displayName = charge.displayName; // Extract display name from charge
+              const displayName = charge.displayName;
               const matchedCharge = initializedCharges.find(
                 (c) => c.name === displayName
               );
-              return matchedCharge || null; // Return null if no matching charge is found
+              return matchedCharge || null;
             });
 
           return {
@@ -348,7 +453,8 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         });
 
       const subTotal = deepCopySalesOrder.salesOrderDetails.reduce(
-        (total, item) => total + item.totalPrice,
+        (total, item) =>
+          total + (item.totalPrice || item.quantity * item.unitPrice),
         0
       );
 
@@ -357,24 +463,30 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         ?.filter((charge) => !charge.lineItemId)
         .map((charge) => {
           let value;
-          if (charge.chargesAndDeduction.percentage) {
-            // Calculate percentage value based on subtotal
-            value = (Math.abs(charge.appliedValue) / subTotal) * 100;
+          if (charge.chargesAndDeduction.percentage !== null) {
+            // Calculate percentage value based on subtotal - Fixed calculation
+            value = subTotal
+              ? (Math.abs(charge.appliedValue) / subTotal) * 100
+              : 0;
           } else {
             value = Math.abs(charge.appliedValue);
           }
           return {
             id: charge.chargesAndDeduction.chargesAndDeductionId,
             name: charge.chargesAndDeduction.displayName,
-            value: value.toFixed(2),
+            value: parseFloat(value.toFixed(2)),
             sign: charge.chargesAndDeduction.sign,
             isPercentage: charge.chargesAndDeduction.percentage !== null,
             chargesAndDeductionAppliedId: charge.chargesAndDeductionAppliedId,
+            isDisableFromSubTotal:
+              charge.chargesAndDeduction.isDisableFromSubTotal,
           };
         });
 
       setFormData((prevFormData) => ({
         ...prevFormData,
+        patientName: salesOrder?.customer?.customerName || "",
+        patientNo: salesOrder?.customer?.phone || "",
         itemDetails: initializedLineItemCharges,
         salesOrderId: salesOrder.salesOrderId,
         commonChargesAndDeductions: initializedCommonCharges,
@@ -1107,7 +1219,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
             unit: item?.unit?.unitName,
             batchId: null,
             stockInHand: availableStock,
-            quantity: 1,
+            quantity: item.isInventoryItem === false ? 1 : 0,
             unitPrice:
               item.isInventoryItem === true
                 ? highestSellingPrice
@@ -1146,22 +1258,48 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     });
   };
 
+  // const handleAddCommonChargesAndDeductions = () => {
+  //   const initializedCharges = chargesAndDeductions.reduce((acc, charge) => {
+  //     if (charge.isDisableFromSubTotal === false) {
+  //       // Initialize additional properties for the common on charges and deductions
+  //       acc[charge.displayName] = charge.amount || charge.percentage;
+  //     }
+  //     return acc;
+  //   }, {});
+
+  //   // Generate chargesAndDeductions array for the newly added item
+  //   const initializedChargesArray = chargesAndDeductions
+  //     .filter((charge) => charge.isDisableFromSubTotal === false)
+  //     .map((charge) => ({
+  //       id: charge.chargesAndDeductionId,
+  //       name: charge.displayName,
+  //       value: charge.amount || charge.percentage,
+  //       sign: charge.sign,
+  //       isPercentage: charge.percentage !== null,
+  //       isDisableFromSubTotal: charge.isDisableFromSubTotal,
+  //     }));
+
+  //   setFormData((prevFormData) => ({
+  //     ...prevFormData,
+  //     ...initializedCharges,
+  //     commonChargesAndDeductions: initializedChargesArray,
+  //   }));
+  // };
+
   const handleAddCommonChargesAndDeductions = () => {
     const initializedCharges = chargesAndDeductions.reduce((acc, charge) => {
       if (charge.isDisableFromSubTotal === false) {
-        // Initialize additional properties for the common on charges and deductions
         acc[charge.displayName] = charge.amount || charge.percentage;
       }
       return acc;
     }, {});
 
-    // Generate chargesAndDeductions array for the newly added item
     const initializedChargesArray = chargesAndDeductions
       .filter((charge) => charge.isDisableFromSubTotal === false)
       .map((charge) => ({
         id: charge.chargesAndDeductionId,
         name: charge.displayName,
-        value: charge.amount || charge.percentage,
+        value: parseFloat(charge.amount || charge.percentage), // Ensure it's a number
         sign: charge.sign,
         isPercentage: charge.percentage !== null,
         isDisableFromSubTotal: charge.isDisableFromSubTotal,
@@ -1170,13 +1308,24 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
       ...initializedCharges,
-      commonChargesAndDeductions: initializedChargesArray,
+      // Only set commonChargesAndDeductions if there's no sales order
+      // or if it hasn't been set yet
+      commonChargesAndDeductions: prevFormData.salesOrderId
+        ? prevFormData.commonChargesAndDeductions
+        : initializedChargesArray,
     }));
   };
 
+  // useEffect(() => {
+  //   chargesAndDeductions && handleAddCommonChargesAndDeductions();
+  // }, [isLoadingchargesAndDeductions]);
+
   useEffect(() => {
-    chargesAndDeductions && handleAddCommonChargesAndDeductions();
-  }, [isLoadingchargesAndDeductions]);
+    // Only initialize common charges if there's no sales order
+    if (chargesAndDeductions && !formData.salesOrderId) {
+      handleAddCommonChargesAndDeductions();
+    }
+  }, [isLoadingchargesAndDeductions, formData.salesOrderId]);
 
   const renderSubColumns = () => {
     return formData.commonChargesAndDeductions.map((charge, chargeIndex) => {
@@ -1232,6 +1381,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   };
 
   console.log("formData", formData);
+  console.log("SO", salesOrder);
 
   return {
     formData,

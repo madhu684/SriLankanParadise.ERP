@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useContext } from "react";
 import {
   get_requisition_masters_with_out_drafts_api,
   post_issue_master_api,
@@ -8,11 +8,12 @@ import {
   get_locations_inventories_by_location_id_api,
 } from "../../services/purchaseApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { UserContext } from "../../context/userContext";
 
 const useTin = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
     itemDetails: [],
-    status: "",
+    status: "4",
     trnId: "",
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
@@ -27,7 +28,19 @@ const useTin = ({ onFormSubmit }) => {
   const [trnSearchTerm, setTrnSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
+
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
   const queryClient = useQueryClient();
+
+  const { userLocations } = useContext(UserContext);
+
+  const warehouseUserLocation = userLocations
+    ? userLocations
+        .filter((loc) => loc.location.locationTypeId === 2)
+        .map((l) => l.locationId)
+    : null;
+
+  console.log("warehouseUserLocation: ", warehouseUserLocation);
 
   // Fetch TRNs
   const fetchTrns = async () => {
@@ -36,7 +49,10 @@ const useTin = ({ onFormSubmit }) => {
         sessionStorage?.getItem("companyId")
       );
       const filteredTrns = response.data.result?.filter(
-        (rm) => rm.requisitionType === "TRN" && rm.status === 2
+        (rm) =>
+          rm.requisitionType === "TRN" &&
+          rm.status === 2 &&
+          rm.requestedToLocationId === warehouseUserLocation[0]
       );
       return filteredTrns || [];
     } catch (error) {
@@ -370,6 +386,7 @@ const useTin = ({ onFormSubmit }) => {
             : "Transfer issue note submitted successfully!",
           formData
         );
+        queryClient.invalidateQueries(["tinList", companyId]);
         setTimeout(() => {
           setSubmissionStatus(null);
           setLoading(false);

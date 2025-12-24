@@ -263,7 +263,7 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
           queryClient.invalidateQueries({
             queryKey: [
               "activeCashierSession",
-              sessionStorage.getItem("userId"),
+              parseInt(sessionStorage.getItem("userId")),
             ],
           });
           setTimeout(() => {

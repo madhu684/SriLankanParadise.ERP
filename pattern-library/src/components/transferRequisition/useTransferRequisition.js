@@ -8,7 +8,8 @@ import {
   get_Low_Stock_Items_for_location_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { use } from "react";
 
 const useTransferRequisition = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -29,6 +30,10 @@ const useTransferRequisition = ({ onFormSubmit }) => {
   const [isUpdatingStock, setIsUpdatingStock] = useState(false);
   const [isTRGenerated, setIsTRGenerated] = useState(false);
   const [showToast, setShowToast] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const companyId = sessionStorage.getItem("companyId");
 
   const fetchLocations = async () => {
     try {
@@ -411,6 +416,8 @@ const useTransferRequisition = ({ onFormSubmit }) => {
               formData
             );
           }
+
+          queryClient.invalidateQueries(["transferRequisitions", companyId]);
 
           setTimeout(() => {
             setSubmissionStatus(null);

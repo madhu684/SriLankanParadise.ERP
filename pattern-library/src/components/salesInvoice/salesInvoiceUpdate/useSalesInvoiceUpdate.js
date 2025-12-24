@@ -681,6 +681,8 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           locationId: salesInvoice.locationId,
           inVoicedPersonName: formData.patientName,
           inVoicedPersonMobileNo: formData.patientNo,
+          appointmentId: formData.appointmentId,
+          tokenNo: formData.tokenNo,
         };
 
         const response = await put_sales_invoice_api(
@@ -934,11 +936,11 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
         ]);
       }
     });
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      itemMasterId: 0,
-      itemMaster: "",
-    }));
+    // setFormData((prevFormData) => ({
+    //   ...prevFormData,
+    //   itemMasterId: 0,
+    //   itemMaster: "",
+    // }));
   };
 
   const handlePrint = () => {
@@ -1264,7 +1266,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
             name: item?.itemName,
             unit: item?.unit?.unitName,
             stockInHand: item.isInventoryItem === true ? availableStock : 0,
-            quantity: 0,
+            quantity: item.isInventoryItem === false ? 1 : 0,
             unitPrice:
               item.isInventoryItem === false
                 ? item.unitPrice
@@ -1354,12 +1356,11 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   };
 
   console.log("formData", formData);
-  console.log("salesInvoice: ", salesInvoice);
   // console.log(
   //   "chargesAndDeductionsAppliedIdsToBeDeleted: ",
   //   chargesAndDeductionsAppliedIdsToBeDeleted
   // );
-  // console.log("itemIdsToBeDeleted: ", itemIdsToBeDeleted);
+  console.log("itemIdsToBeDeleted: ", itemIdsToBeDeleted);
 
   return {
     formData,

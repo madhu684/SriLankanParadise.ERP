@@ -54,7 +54,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Where(sr => sr.Status != 0 && sr.CompanyId == companyId)
                     .Include(sr => sr.PaymentMode)
                     .Include(sr => sr.SalesReceiptSalesInvoices)
-                    .ThenInclude(srsi => srsi.SalesInvoice)
+                        .ThenInclude(srsi => srsi.SalesInvoice)
+                            .ThenInclude(si => si.SalesInvoiceDetails)
+                                .ThenInclude(sid => sid.ItemMaster)
                     .ToListAsync();
 
                 return salesReceipts.Any() ? salesReceipts : null;
@@ -74,7 +76,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Where(sr => sr.CreatedUserId == userId)
                     .Include(sr => sr.PaymentMode)
                     .Include(sr => sr.SalesReceiptSalesInvoices)
-                    .ThenInclude(srsi => srsi.SalesInvoice)
+                        .ThenInclude(srsi => srsi.SalesInvoice)
+                            .ThenInclude(si => si.SalesInvoiceDetails)
+                                .ThenInclude(sid => sid.ItemMaster)
                     .ToListAsync();
 
 

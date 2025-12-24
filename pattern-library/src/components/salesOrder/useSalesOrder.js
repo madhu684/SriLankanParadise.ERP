@@ -56,10 +56,11 @@ const useSalesOrder = ({ onFormSubmit }) => {
       const response = await get_user_locations_by_user_id_api(
         sessionStorage.getItem("userId")
       );
-      setWarehouseLocationId(response.data.result[0].locationId);
-      return response.data.result.filter(
+      const filteredLoc = response.data.result.filter(
         (location) => location.location.locationTypeId === 2
       );
+      setWarehouseLocationId(filteredLoc?.map((lc) => lc.locationId)[0]);
+      return filteredLoc;
     } catch (error) {
       console.error("Error fetching user locations:", error);
     }

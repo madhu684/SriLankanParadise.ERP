@@ -19,7 +19,7 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
   const queryClient = useQueryClient();
   const alertRef = useRef(null);
 
-  console.log("tin in useTinAccept: ", tin);
+  const companyId = sessionStorage.getItem("companyId");
 
   const { data: issuedetails } = useQuery({
     queryKey: ["tins", tin.issueMasterId],
@@ -45,13 +45,17 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
     if (issuedetails?.length > 0) {
       const updatedReceivedQuantities = issuedetails.reduce((acc, item) => {
         acc[item.issueDetailId] =
-          item.receivedQuantity !== undefined ? item.quantity : "";
+          item.receivedQuantity !== undefined && item.receivedQuantity !== null
+            ? item.receivedQuantity
+            : item.quantity;
         return acc;
       }, {});
 
       const updatedReturnedQuantities = issuedetails.reduce((acc, item) => {
         acc[item.issueDetailId] =
-          item.returnedQuantity !== undefined ? item.returnedQuantity : "";
+          item.returnedQuantity !== undefined && item.returnedQuantity !== null
+            ? item.returnedQuantity
+            : 0;
         return acc;
       }, {});
 
@@ -348,6 +352,7 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
       queryClient.invalidateQueries(["tins", tinId]);
       queryClient.invalidateQueries(["locationInventories", toLocationId]);
       queryClient.invalidateQueries(["locationInventories", fromLocationId]);
+      queryClient.invalidateQueries(["transferRequisitions", companyId]);
       setRefetch(!refetch);
       setApprovalStatus("approved");
     } catch (error) {

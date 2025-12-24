@@ -45,13 +45,17 @@ const useMinAccept = ({ min, refetch, setRefetch, onFormSubmit }) => {
     if (issuedetails?.length > 0) {
       const updatedReceivedQuantities = issuedetails.reduce((acc, item) => {
         acc[item.issueDetailId] =
-          item.receivedQuantity !== undefined ? item.quantity : "";
+          item.receivedQuantity !== undefined && item.receivedQuantity !== null
+            ? item.receivedQuantity
+            : item.quantity;
         return acc;
       }, {});
 
       const updatedReturnedQuantities = issuedetails.reduce((acc, item) => {
         acc[item.issueDetailId] =
-          item.returnedQuantity !== undefined ? item.returnedQuantity : "";
+          item.returnedQuantity !== undefined && item.returnedQuantity !== null
+            ? item.returnedQuantity
+            : 0;
         return acc;
       }, {});
 

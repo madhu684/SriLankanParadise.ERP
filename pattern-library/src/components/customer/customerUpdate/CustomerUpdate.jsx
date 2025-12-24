@@ -138,7 +138,7 @@ const CustomerUpdate = ({ handleClose, customer }) => {
 
               <div className="mb-3">
                 <label className="form-label">
-                  Customer Code <span className="text-danger">*</span>
+                  Customer Code <span className="text-danger"></span>
                 </label>
                 <input
                   type="text"
@@ -160,7 +160,7 @@ const CustomerUpdate = ({ handleClose, customer }) => {
 
               <div className="mb-3">
                 <label className="form-label ">
-                  Contact Person <span className="text-danger">*</span>
+                  Contact Person <span className="text-danger"></span>
                 </label>
                 <input
                   type="text"
@@ -204,7 +204,7 @@ const CustomerUpdate = ({ handleClose, customer }) => {
               <div className="mb-3">
                 <label className="form-label ">
                   <i className="bi bi-envelope-fill me-2"></i>Email{" "}
-                  <span className="text-danger">*</span>
+                  <span className="text-danger"></span>
                 </label>
                 <input
                   type="email"
@@ -245,7 +245,7 @@ const CustomerUpdate = ({ handleClose, customer }) => {
               <div className="mb-3">
                 <label className="form-label ">
                   <i className="bi bi-file-text-fill me-2"></i>License Number{" "}
-                  <span className="text-danger">*</span>
+                  <span className="text-danger"></span>
                 </label>
                 <input
                   type="text"
@@ -269,7 +269,7 @@ const CustomerUpdate = ({ handleClose, customer }) => {
                 <div className="col-6">
                   <label className="form-label ">
                     <i className="bi bi-calendar-fill me-2"></i>License Start
-                    Date <span className="text-danger">*</span>
+                    Date <span className="text-danger"></span>
                   </label>
                   <input
                     type="date"
@@ -291,7 +291,7 @@ const CustomerUpdate = ({ handleClose, customer }) => {
                 <div className="col-6">
                   <label className="form-label ">
                     <i className="bi bi-calendar-fill me-2"></i>License End Date{" "}
-                    <span className="text-danger">*</span>
+                    <span className="text-danger"></span>
                   </label>
                   <input
                     type="date"
@@ -313,8 +313,7 @@ const CustomerUpdate = ({ handleClose, customer }) => {
 
               <div className="mb-3">
                 <label className="form-label ">
-                  Business Registration No{" "}
-                  <span className="text-danger">*</span>
+                  Business Registration No <span className="text-danger"></span>
                 </label>
                 <input
                   type="text"
@@ -338,7 +337,7 @@ const CustomerUpdate = ({ handleClose, customer }) => {
                 <div className="col-6">
                   <label className="form-label ">
                     <i className="bi bi-credit-card-fill me-2"></i>Credit Limit
-                    (LKR) <span className="text-danger">*</span>
+                    (LKR) <span className="text-danger"></span>
                   </label>
                   <input
                     type="number"
@@ -384,7 +383,7 @@ const CustomerUpdate = ({ handleClose, customer }) => {
 
               <div className="mb-3 p-3 bg-light rounded-3">
                 <label className="form-label  mb-3">
-                  Is VAT Registered? <span className="text-danger">*</span>
+                  Is VAT Registered? <span className="text-danger"></span>
                 </label>
                 <div className="d-flex gap-4">
                   <div className="form-check">
@@ -431,7 +430,7 @@ const CustomerUpdate = ({ handleClose, customer }) => {
               {formData.isVatRegistered === "1" && (
                 <div className="mb-3">
                   <label className="form-label ">
-                    VAT Registration No <span className="text-danger">*</span>
+                    VAT Registration No <span className="text-danger"></span>
                   </label>
                   <input
                     type="text"

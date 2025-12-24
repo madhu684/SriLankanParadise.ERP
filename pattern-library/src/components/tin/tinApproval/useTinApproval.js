@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   approve_issue_master_api,
   patch_location_inventory_api,
@@ -7,11 +7,15 @@ import {
   post_location_inventory_goods_in_transit_api,
   update_min_state_in_mrn_api,
 } from "../../../services/purchaseApi";
+import { useQueryClient } from "@tanstack/react-query";
 
 const useTinApproval = ({ tin, onFormSubmit }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const alertRef = useRef(null);
+
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (approvalStatus === "approved") {
@@ -176,6 +180,8 @@ const useTinApproval = ({ tin, onFormSubmit }) => {
         setApprovalStatus(null);
         setLoading(false);
       }, 2000);
+
+      queryClient.invalidateQueries(["tinList", companyId]);
     } catch (error) {
       setApprovalStatus("error");
       console.error("Error approving material issue Note note:", error);
