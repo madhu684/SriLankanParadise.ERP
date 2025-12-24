@@ -1331,7 +1331,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
 
       const response = await get_Low_Stock_Items_api(
         formData.supplierId,
-        userLocation[0]?.locationId
+        // userLocation[0]?.locationId
       );
       const lowStockItems = response.data.result || [];
 
