@@ -703,7 +703,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
       setIsPRGenerated(true);
       const response = await get_Low_Stock_Items_api(
         formData.supplierId,
-        formData.expectedDeliveryLocation
+        // formData.expectedDeliveryLocation
       );
       const lowStockItems = response.data.result || [];
 
