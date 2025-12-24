@@ -403,7 +403,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         MaxStockLevel = g.Max(x => x.LocationInventory != null ? x.LocationInventory.MaxStockLevel ?? 0 : 0),
                         ItemMaster = g.First().SupplierItem.ItemMaster
                     })
-                    .Where(s => s.TotalStockInHand < s.MaxStockLevel || s.MaxStockLevel == 0)
+                    //.Where(s => s.TotalStockInHand < s.MaxStockLevel || s.MaxStockLevel == 0)
                     .ToList();
 
                 return summaryData.Any() ? summaryData : new List<LocationInventorySummary>();
@@ -562,14 +562,30 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                       from li in liGroup.DefaultIfEmpty()
                       where li == null || li.LocationId == (locationId ?? li.LocationId)
                       select new { ItemMaster = im, LocationInventory = li };
+                
+                // summaryData = inventoryQuery
+                //     .GroupBy(x => new { LocationId = x.LocationInventory != null ? x.LocationInventory.LocationId : 0, x.ItemMaster.ItemMasterId })
+                //     .Select(g => new LocationInventorySummary
+                //     {
+                //         LocationInventoryId = g.FirstOrDefault()?.LocationInventory?.LocationInventoryId ?? 0,
+                //         LocationId = g.Key.LocationId,
+                //         ItemMasterId = g.Key.ItemMasterId,
+                //         TotalStockInHand = g.Sum(x => x.LocationInventory != null ? x.LocationInventory.StockInHand ?? 0 : 0),
+                //         MinReOrderLevel = g.Min(x => x.LocationInventory != null ? x.LocationInventory.ReOrderLevel ?? 0 : 0),
+                //         MaxStockLevel = g.Max(x => x.LocationInventory != null ? x.LocationInventory.MaxStockLevel ?? 0 : 0),
+                //         ItemMaster = g.First().ItemMaster
+                //     })
+                //     .ToList();
+                // return summaryData.Any() ? summaryData : new List<LocationInventorySummary>();
+
                 // Group and aggregate
                 summaryData = inventoryQuery
-                    .GroupBy(x => new { LocationId = x.LocationInventory != null ? x.LocationInventory.LocationId : 0, x.ItemMaster.ItemMasterId })
+                    .GroupBy(x => x.ItemMaster.ItemMasterId)
                     .Select(g => new LocationInventorySummary
                     {
                         LocationInventoryId = g.FirstOrDefault()?.LocationInventory?.LocationInventoryId ?? 0,
-                        LocationId = g.Key.LocationId,
-                        ItemMasterId = g.Key.ItemMasterId,
+                        LocationId = locationId ?? 0,
+                        ItemMasterId = g.Key,
                         TotalStockInHand = g.Sum(x => x.LocationInventory != null ? x.LocationInventory.StockInHand ?? 0 : 0),
                         MinReOrderLevel = g.Min(x => x.LocationInventory != null ? x.LocationInventory.ReOrderLevel ?? 0 : 0),
                         MaxStockLevel = g.Max(x => x.LocationInventory != null ? x.LocationInventory.MaxStockLevel ?? 0 : 0),
