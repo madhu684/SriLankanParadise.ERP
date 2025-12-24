@@ -2,12 +2,15 @@ import React from "react";
 import moment from "moment";
 import "moment-timezone";
 import ayu_logo from "../../../assets/images/ayu_logo.png";
+import useFormatCurrency from "../../../utility/useFormatCurrency";
 
 const PrintableSalesReceipt = React.forwardRef(({ salesReceipt }, ref) => {
   // Collect all items from all invoices in the receipt
   const allItems = [];
   let itemCounter = 1;
   let totalItemsPrice = 0;
+
+  const formtaCurrency = useFormatCurrency({ showCurrency: false });
 
   salesReceipt?.salesReceiptSalesInvoices?.forEach((receiptInvoice) => {
     receiptInvoice.salesInvoice?.salesInvoiceDetails?.forEach((detail) => {
@@ -40,6 +43,8 @@ const PrintableSalesReceipt = React.forwardRef(({ salesReceipt }, ref) => {
       0
     ) || 0;
   const outstandingAmount = salesReceipt?.outstandingAmount || 0;
+  const amountCollect = salesReceipt?.amountCollect || 0;
+  const customerBalance = amountCollect - settledAmount;
 
   return (
     <div
@@ -139,8 +144,7 @@ const PrintableSalesReceipt = React.forwardRef(({ salesReceipt }, ref) => {
                 <td style={{ padding: "2px 0" }}>
                   <strong>Doctor</strong>
                 </td>
-                <td colSpan="3" style={{ padding: "2px 0" }}>
-                </td>
+                <td colSpan="3" style={{ padding: "2px 0" }}></td>
               </tr>
             </tbody>
           </table>
@@ -203,10 +207,10 @@ const PrintableSalesReceipt = React.forwardRef(({ salesReceipt }, ref) => {
                     : item.quantity.toFixed(2)}
                 </td>
                 <td style={{ padding: "5px 3px", textAlign: "right" }}>
-                  {item.unitPrice.toFixed(2)}
+                  {formtaCurrency(item.unitPrice.toFixed(2))}
                 </td>
                 <td style={{ padding: "5px 3px", textAlign: "right" }}>
-                  {item.netPrice.toFixed(2)}
+                  {formtaCurrency(item.netPrice.toFixed(2))}
                 </td>
               </tr>
             ))
@@ -242,7 +246,7 @@ const PrintableSalesReceipt = React.forwardRef(({ salesReceipt }, ref) => {
                   borderBottom: "1px solid #000",
                 }}
               >
-                {totalItemsPrice.toFixed(2)}
+                {formtaCurrency(totalItemsPrice.toFixed(2))}
               </td>
             </tr>
             <tr>
@@ -250,7 +254,7 @@ const PrintableSalesReceipt = React.forwardRef(({ salesReceipt }, ref) => {
                 Discount
               </td>
               <td style={{ padding: "3px 10px", textAlign: "right" }}>
-                {totalDiscount.toFixed(2)}
+                {formtaCurrency(totalDiscount.toFixed(2))}
               </td>
             </tr>
             <tr style={{ fontWeight: "bold" }}>
@@ -270,7 +274,7 @@ const PrintableSalesReceipt = React.forwardRef(({ salesReceipt }, ref) => {
                   borderTop: "1px solid #000",
                 }}
               >
-                {invoiceTotalAmount.toFixed(2)}
+                {formtaCurrency(invoiceTotalAmount.toFixed(2))}
               </td>
             </tr>
             <tr>
@@ -278,7 +282,15 @@ const PrintableSalesReceipt = React.forwardRef(({ salesReceipt }, ref) => {
                 Settled Amount
               </td>
               <td style={{ padding: "3px 10px", textAlign: "right" }}>
-                {settledAmount.toFixed(2)}
+                {formtaCurrency(settledAmount.toFixed(2))}
+              </td>
+            </tr>
+            <tr>
+              <td style={{ padding: "3px 10px", textAlign: "left" }}>
+                Customer Balance
+              </td>
+              <td style={{ padding: "3px 10px", textAlign: "right" }}>
+                {formtaCurrency(Math.abs(customerBalance.toFixed(2)))}
               </td>
             </tr>
             <tr>
@@ -292,7 +304,7 @@ const PrintableSalesReceipt = React.forwardRef(({ salesReceipt }, ref) => {
                   borderBottom: "3px double #000",
                 }}
               >
-                {outstandingAmount.toFixed(2)}
+                {formtaCurrency(outstandingAmount.toFixed(2))}
               </td>
             </tr>
           </tbody>
@@ -318,9 +330,7 @@ const PrintableSalesReceipt = React.forwardRef(({ salesReceipt }, ref) => {
             24 hour services
           </div>
           <div style={{ textAlign: "center", paddingRight: "5px" }}>
-            <div style={{ height: "30px" }}>
-              {/* Signature space */}
-            </div>
+            <div style={{ height: "30px" }}>{/* Signature space */}</div>
             <div
               style={{
                 fontSize: "12px",
@@ -351,7 +361,7 @@ const PrintableSalesReceipt = React.forwardRef(({ salesReceipt }, ref) => {
           </div>
           <div
             style={{
-              fontFamily: '"Nirmala UI", "Segoe UI", sans-serif', // Fallback for Sinhala/Tamil
+              fontFamily: '"Nirmala UI", "Segoe UI", sans-serif',
               fontSize: "10px",
               marginBottom: "5px",
             }}
