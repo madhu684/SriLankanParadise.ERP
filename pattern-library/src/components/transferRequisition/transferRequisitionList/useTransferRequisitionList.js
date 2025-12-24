@@ -87,7 +87,7 @@ const useTransferRequisitionList = () => {
     isLoading: isLoadingTrn,
     error: trnError,
   } = useQuery({
-    queryKey: ["transferRequisitions", companyId],
+    queryKey: ["transferRequisitions", companyId, userLocations, refetch],
     queryFn: async () => {
       const response = await get_requisition_masters_with_out_drafts_api(
         companyId
@@ -101,6 +101,7 @@ const useTransferRequisitionList = () => {
       );
       return filteredRequisitions || [];
     },
+    enabled: !!userLocations && userLocations.length > 0,
   });
 
   const handleShowApproveTRModal = () => {

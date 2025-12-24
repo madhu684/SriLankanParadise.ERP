@@ -387,13 +387,13 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
           </div>
         )}
 
-        {selectedTrn !== null && formData.itemDetails.length === 0 && (
+        {/* {selectedTrn !== null && formData.itemDetails.length === 0 && (
           <div className="mb-3">
             <small className="form-text  text-danger">
               Selected transfer requisition has no remaining items to issue.
             </small>
           </div>
-        )}
+        )} */}
 
         {/* Actions */}
         <div className="mb-3">
