@@ -18,42 +18,43 @@ const TransferRequisitionList = () => {
 
   const {
     transferRequisitions,
-    isLoadingData,
+    isLoadingTrn,
     isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
-    selectedRowData,
     showApproveTRModal,
     showApproveTRModalInParent,
     showDetailTRModal,
     showDetailTRModalInParent,
+    selectedRowData,
     showCreateTRForm,
     TRDetail,
     isPermissionsError,
     permissionError,
-    openTINsList,
     selectedWarehouse,
     userWarehouses,
     filter,
     filteredRequisitions,
+    openTINsList,
     refetch,
     setRefetch,
     areAnySelectedRowsPending,
     setSelectedRows,
-    handleRowSelect,
+    handleViewDetails,
     getStatusLabel,
     getStatusBadgeClass,
+    handleRowSelect,
     handleShowApproveTRModal,
     handleCloseApproveTRModal,
     handleShowDetailTRModal,
     handleCloseDetailTRModal,
     handleApproved,
-    handleViewDetails,
     setShowCreateTRForm,
     hasPermission,
     handleUpdated,
     handleClose,
+    formatDateInTimezone,
     setSelectedWarehouse,
     setFilter,
     setOpenTINsList,
@@ -82,7 +83,7 @@ const TransferRequisitionList = () => {
   }
 
   if (
-    isLoadingData ||
+    isLoadingTrn ||
     isLoadingPermissions ||
     (transferRequisitions && !(transferRequisitions.length >= 0))
   ) {

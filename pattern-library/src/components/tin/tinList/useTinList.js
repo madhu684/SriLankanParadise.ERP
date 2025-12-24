@@ -5,6 +5,8 @@ import {
   get_requisition_masters_with_out_drafts_api,
 } from "../../../services/purchaseApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useContext } from "react";
+import { UserContext } from "../../../context/userContext";
 
 const useTinList = () => {
   const [selectedRows, setSelectedRows] = useState([]);
@@ -27,6 +29,14 @@ const useTinList = () => {
 
   const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
 
+  const { userLocations } = useContext(UserContext);
+
+  const warehouseUserLocation = userLocations
+    ? userLocations
+        .filter((loc) => loc.location.locationTypeId === 2)
+        .map((l) => l.locationId)
+    : null;
+
   const {
     data: Tins = [],
     isLoading: isLoadingData,
@@ -38,7 +48,9 @@ const useTinList = () => {
         companyId
       );
       const filteredTins = TinResponse?.data?.result?.filter(
-        (rm) => rm.issueType === "TIN"
+        (rm) =>
+          rm.issueType === "TIN" &&
+          rm.issuedLocationId === warehouseUserLocation[0]
       );
       return filteredTins || [];
     },
@@ -56,7 +68,10 @@ const useTinList = () => {
         companyId
       );
       const filteredRequisitions = response?.data?.result?.filter(
-        (rm) => rm.requisitionType === "TRN" && rm.status === 2
+        (rm) =>
+          rm.requisitionType === "TRN" &&
+          rm.status === 2 &&
+          rm.requestedToLocationId === warehouseUserLocation[0]
       );
       return filteredRequisitions || [];
     },

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { get_requisition_masters_with_out_drafts_api } from "../../../services/purchaseApi";
 import {
   get_requisition_masters_by_user_id_api,
@@ -8,8 +8,6 @@ import { get_user_permissions_api } from "../../../services/userManagementApi";
 import { useQuery } from "@tanstack/react-query";
 
 const useTransferRequisitionList = () => {
-  const [transferRequisitions, setTransferRequisitions] = useState([]);
-  const [isLoadingData, setIsLoadingData] = useState(true);
   const [error, setError] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedRowData, setSelectedRowData] = useState([]);
@@ -21,7 +19,7 @@ const useTransferRequisitionList = () => {
     useState(false);
   const [showCreateTRForm, setShowCreateTRForm] = useState(false);
   const [TRDetail, setTRDetail] = useState("");
-  const [filter, setFilter] = useState("all"); // 'all', 'incoming', 'outgoing'
+  const [filter, setFilter] = useState("all");
   const [userWarehouses, setUserWarehouses] = useState([]);
   const [openTINsList, setOpenTINsList] = useState(false);
   const [selectedWarehouse, setSelectedWarehouse] = useState(
@@ -29,95 +27,7 @@ const useTransferRequisitionList = () => {
   );
   const [refetch, setRefetch] = useState(false);
 
-  const fetchUserPermissions = async () => {
-    try {
-      const response = await get_user_permissions_api(
-        sessionStorage.getItem("userId")
-      );
-      return response.data.result;
-    } catch (error) {
-      console.error("Error fetching user permissions:", error);
-    }
-  };
-
-  const {
-    data: userPermissions,
-    isLoading: isLoadingPermissions,
-    isError: isPermissionsError,
-    error: permissionError,
-  } = useQuery({
-    queryKey: ["userPermissions"],
-    queryFn: fetchUserPermissions,
-  });
-
-  const fetchData = async () => {
-    try {
-      if (!isLoadingPermissions && userPermissions) {
-        if (hasPermission("Approve Transfer Requisition Note")) {
-          const requisitionMastersWithoutDraftsResponse =
-            await get_requisition_masters_with_out_drafts_api(
-              sessionStorage.getItem("companyId")
-            );
-
-          const requisitionMastersByUserIdResponse =
-            await get_requisition_masters_by_user_id_api(
-              sessionStorage.getItem("userId")
-            );
-
-          let newTransferRequisitions = [];
-          if (
-            requisitionMastersWithoutDraftsResponse &&
-            requisitionMastersWithoutDraftsResponse.data.result
-          ) {
-            newTransferRequisitions =
-              requisitionMastersWithoutDraftsResponse.data.result?.filter(
-                (rm) => rm.requisitionType === "TRN"
-              );
-          }
-
-          let additionalRequisitions = [];
-          if (
-            requisitionMastersByUserIdResponse &&
-            requisitionMastersByUserIdResponse.data.result
-          ) {
-            additionalRequisitions =
-              requisitionMastersByUserIdResponse.data.result?.filter(
-                (rm) => rm.requisitionType === "TRN"
-              );
-          }
-
-          const uniqueNewRequisitions = additionalRequisitions.filter(
-            (requisition) =>
-              !newTransferRequisitions.some(
-                (existingRequisition) =>
-                  existingRequisition.requisitionMasterId ===
-                  requisition.requisitionMasterId
-              )
-          );
-
-          newTransferRequisitions = [
-            ...newTransferRequisitions,
-            ...uniqueNewRequisitions,
-          ];
-          setTransferRequisitions(newTransferRequisitions);
-        } else {
-          const requisitionMastersResponse =
-            await get_requisition_masters_by_user_id_api(
-              sessionStorage.getItem("userId")
-            );
-          setTransferRequisitions(
-            requisitionMastersResponse.data.result?.filter(
-              (rm) => rm.requisitionType === "TRN"
-            ) || []
-          );
-        }
-      }
-    } catch (error) {
-      setError("Error fetching data");
-    } finally {
-      setIsLoadingData(false);
-    }
-  };
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
 
   const fetchUserLocations = async () => {
     try {
@@ -143,16 +53,55 @@ const useTransferRequisitionList = () => {
   useEffect(() => {
     if (!isUserLocationsLoading && userLocations) {
       const locations = userLocations?.filter(
-        (location) => location?.location?.locationType.name === "Warehouse"
+        (location) => location?.location?.locationTypeId === 2
       );
+      console.log("locations: ", locations);
       setUserWarehouses(locations);
       setSelectedWarehouse(locations[0]?.locationId);
     }
   }, [isUserLocationsLoading, userLocations]);
 
-  useEffect(() => {
-    fetchData();
-  }, [isLoadingPermissions, userPermissions, refetch]);
+  const fetchUserPermissions = async () => {
+    try {
+      const response = await get_user_permissions_api(
+        sessionStorage.getItem("userId")
+      );
+      return response.data.result;
+    } catch (error) {
+      console.error("Error fetching user permissions:", error);
+    }
+  };
+
+  const {
+    data: userPermissions,
+    isLoading: isLoadingPermissions,
+    isError: isPermissionsError,
+    error: permissionError,
+  } = useQuery({
+    queryKey: ["userPermissions"],
+    queryFn: fetchUserPermissions,
+  });
+
+  const {
+    data: transferRequisitions = [],
+    isLoading: isLoadingTrn,
+    error: trnError,
+  } = useQuery({
+    queryKey: ["transferRequisitions", companyId],
+    queryFn: async () => {
+      const response = await get_requisition_masters_with_out_drafts_api(
+        companyId
+      );
+      const filteredRequisitions = response?.data?.result?.filter(
+        (rm) =>
+          rm.requisitionType === "TRN" &&
+          rm.requestedFromLocationId ===
+            userLocations.filter((l) => l.location.locationTypeId === 2)[0]
+              ?.locationId
+      );
+      return filteredRequisitions || [];
+    },
+  });
 
   const handleShowApproveTRModal = () => {
     setShowApproveTRModal(true);
@@ -172,7 +121,6 @@ const useTransferRequisitionList = () => {
   };
 
   const handleApproved = async () => {
-    fetchData();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -204,7 +152,6 @@ const useTransferRequisitionList = () => {
   };
 
   const handleUpdated = async () => {
-    fetchData();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -317,7 +264,7 @@ const useTransferRequisitionList = () => {
 
   return {
     transferRequisitions,
-    isLoadingData,
+    isLoadingTrn,
     isLoadingPermissions,
     error,
     isAnyRowSelected,

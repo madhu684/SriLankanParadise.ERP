@@ -414,14 +414,14 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
               "Submit"
             )}
           </button>
-          <button
+          {/* <button
             type="button"
             className="btn btn-success me-2"
             onClick={handlePrint}
             disabled={loading || loadingDraft || submissionStatus !== null}
           >
             Print
-          </button>
+          </button> */}
           <button
             type="button"
             className="btn btn-danger"

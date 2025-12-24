@@ -57,13 +57,7 @@ const TinList = () => {
     handleCloseDeleteConfirmation,
   } = useTinList();
 
-  const { hasPermission, user } = useContext(UserContext);
-
-  const nonUserTrns = useMemo(() => {
-    return transferRequisitions.filter(
-      (trn) => trn.requestedUserId !== user?.userId
-    );
-  }, [transferRequisitions, user]);
+  const { hasPermission } = useContext(UserContext);
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -94,7 +88,7 @@ const TinList = () => {
     );
   }
 
-  if (Tins?.length === 0 && nonUserTrns?.length === 0) {
+  if (Tins?.length === 0 && transferRequisitions?.length === 0) {
     return (
       <div className="container-fluid px-4 py-4">
         <div className="d-flex justify-content-between align-items-center mb-4">
@@ -187,12 +181,12 @@ const TinList = () => {
               Available Approved Transfer Requisitions
             </h5>
             <span className="badge bg-white text-dark fw-semibold px-3 py-2">
-              {nonUserTrns.length} Available
+              {transferRequisitions.length} Available
             </span>
           </div>
         </div>
         <div className="card-body p-0">
-          {nonUserTrns.length > 0 ? (
+          {transferRequisitions.length > 0 ? (
             <div
               className="table-responsive"
               style={{
@@ -215,7 +209,7 @@ const TinList = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {nonUserTrns.map((trn) => (
+                  {transferRequisitions.map((trn) => (
                     <tr key={trn.requisitionMasterId} className="border-bottom">
                       <td className="fw-semibold py-3 px-4 text-dark">
                         {trn.referenceNumber}
