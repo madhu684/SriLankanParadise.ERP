@@ -623,7 +623,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         MaxStockLevel = g.Max(li => li.MaxStockLevel ?? 0),
                         ItemMaster = g.First().ItemMaster
                     })
-                    .Where(s => s.TotalStockInHand < s.MaxStockLevel || s.MaxStockLevel == 0)
+                    //.Where(s => s.TotalStockInHand < s.MaxStockLevel || s.MaxStockLevel == 0)
                     .ToListAsync();
 
                 return summaryData.Any() ? summaryData : new List<LocationInventorySummary>();
