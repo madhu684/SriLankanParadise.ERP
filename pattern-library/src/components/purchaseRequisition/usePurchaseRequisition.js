@@ -122,8 +122,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
   const fetchItems = async (searchQuery) => {
     try {
       const response = await get_Location_Inventory_Summary_By_Item_Name_api(
-        // formData.expectedDeliveryLocation,
-        null,
+        formData.expectedDeliveryLocation,
         searchQuery
       );
 
@@ -703,7 +702,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
       setIsPRGenerated(true);
       const response = await get_Low_Stock_Items_api(
         formData.supplierId,
-        // formData.expectedDeliveryLocation
+        formData.expectedDeliveryLocation
       );
       const lowStockItems = response.data.result || [];
 
