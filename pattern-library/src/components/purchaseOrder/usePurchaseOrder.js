@@ -195,8 +195,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   const fetchItems = async (searchQuery) => {
     try {
       const response = await get_Location_Inventory_Summary_By_Item_Name_api(
-        // userLocation[0]?.locationId,
-        null,
+        userLocation[0]?.locationId,
         searchQuery
       );
 
@@ -1331,7 +1330,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
 
       const response = await get_Low_Stock_Items_api(
         formData.supplierId,
-        // userLocation[0]?.locationId
+        userLocation[0]?.locationId
       );
       const lowStockItems = response.data.result || [];
 
