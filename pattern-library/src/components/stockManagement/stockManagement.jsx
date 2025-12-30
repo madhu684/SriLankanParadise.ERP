@@ -17,6 +17,8 @@ const StockManagement = () => {
     paginate,
     handleLocationChange,
     handleDateChange,
+    searchTerm,
+    handleSearchChange,
   } = useStockManagement();
   return (
     <div className="container-sm mt-4" style={{ maxWidth: "1200px" }}>
@@ -108,8 +110,8 @@ const StockManagement = () => {
               type="text"
               className="form-control"
               placeholder="Search by item name"
-              //value={searchTerm}
-              //onChange={handleSearchChange}
+              value={searchTerm}
+              onChange={handleSearchChange}
             />
             <span className="input-group-text">
               <FaSearch />

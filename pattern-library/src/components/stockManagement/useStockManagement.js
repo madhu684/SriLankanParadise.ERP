@@ -3,7 +3,7 @@ import {
   get_company_locations_api,
   get_item_locations_inventories_by_location_id_api,
 } from "../../services/purchaseApi";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 
 const useStockManagement = () => {
   const [formData, setFormData] = useState({
@@ -19,11 +19,26 @@ const useStockManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  const filteredInventories = inventories
+    ? inventories.filter((item) => {
+        if (!searchTerm) return true;
+        const lowerTerm = searchTerm.toLowerCase();
+        return (
+          (item.itemName && item.itemName.toLowerCase().includes(lowerTerm)) ||
+          (item.itemCode && item.itemCode.toLowerCase().includes(lowerTerm))
+        );
+      })
+    : [];
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = inventories
-    ? inventories.slice(indexOfFirstItem, indexOfLastItem)
+  const currentItems = filteredInventories
+    ? filteredInventories.slice(indexOfFirstItem, indexOfLastItem)
     : [];
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
@@ -77,13 +92,14 @@ const useStockManagement = () => {
     companyLocations,
     companyLocationsLoading,
     selectedLocation,
-    inventories,
+    inventories: filteredInventories,
     currentItems,
     itemsPerPage,
     currentPage,
     loading,
     paginate,
     handleSearch,
+    searchTerm,
     handleSearchChange,
     handleLocationChange,
     handleDateChange,
