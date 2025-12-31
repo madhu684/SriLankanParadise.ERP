@@ -7,6 +7,8 @@ import Customer from "../customer";
 import CustomerUpdate from "../customerUpdate/CustomerUpdate.jsx";
 import DeleteConfirmationModal from "../../confirmationModals/deleteConfirmationModal/deleteConfirmationModal.jsx";
 import CustomerView from "../customerView/CustomerView.jsx";
+import { useContext } from "react";
+import { UserContext } from "../../../context/userContext.jsx";
 
 const CustomerList = () => {
   const {
@@ -47,6 +49,8 @@ const CustomerList = () => {
     debouncedSearchQuery,
     isFetching,
   } = useCustomerList();
+
+  const { hasPermission } = useContext(UserContext);
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -91,6 +95,7 @@ const CustomerList = () => {
             type="button"
             className="btn btn-primary"
             onClick={() => setShowCreateCustomerForm(true)}
+            disabled={!hasPermission("Create Customer")}
           >
             Create
           </button>
@@ -104,14 +109,16 @@ const CustomerList = () => {
       <h2>Customers</h2>
       <div className="mt-3 d-flex justify-content-start align-items-center">
         <div className="btn-group" role="group">
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => setShowCreateCustomerForm(true)}
-          >
-            Create
-          </button>
-          {isAnyRowSelected && (
+          {hasPermission("Create Customer") && (
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => setShowCreateCustomerForm(true)}
+            >
+              Create
+            </button>
+          )}
+          {isAnyRowSelected && hasPermission("Update Customer") && (
             <button
               className="btn btn-warning"
               onClick={() => setShowCustomerUpdateForm(true)}
@@ -128,6 +135,11 @@ const CustomerList = () => {
                   selectedRowData[0]?.status === 1 ? "danger" : "success"
                 }`}
                 onClick={() => setShowCustomerDeleteModal(true)}
+                disabled={
+                  selectedRowData[0]?.status === 1
+                    ? !hasPermission("Deactivate Customer")
+                    : !hasPermission("Activate Customer")
+                }
               >
                 {selectedRowData[0]?.status === 1 ? "Deactivate" : "Activate"}
               </button>
