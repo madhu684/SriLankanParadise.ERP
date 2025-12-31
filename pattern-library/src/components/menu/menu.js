@@ -6,6 +6,7 @@ import {
   submodules_api,
   API_BASE_URL,
 } from "../../services/userManagementApi.js";
+import toast from "react-hot-toast";
 
 class menu extends React.Component {
   constructor(props) {
@@ -118,9 +119,11 @@ class menu extends React.Component {
       sessionStorage.clear();
       console.log("Logout successfully", response);
       // Set the state to trigger the Redirect component
+      toast.success("Logout successfully");
       this.setState({ isLogout: true });
     } catch (error) {
       console.error("Error during logout:", error);
+      toast.error("Error during logout");
       // Handle error if needed
     }
   };

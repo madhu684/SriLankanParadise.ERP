@@ -396,5 +396,21 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task<ItemMaster> GetItemMasterByItemCode(string itemCode, int companyId)
+        {
+            try
+            {
+                var itemMaster = await _dbContext.ItemMasters
+                    .Where(im => im.ItemCode == itemCode && im.CompanyId == companyId && im.Status == true)
+                    .FirstOrDefaultAsync();
+
+                return itemMaster;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

@@ -19,6 +19,7 @@ const useMin = ({ onFormSubmit }) => {
     itemDetails: [],
     status: "",
     mrnId: "",
+    tokenNo: null,
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -409,6 +410,7 @@ const useMin = ({ onFormSubmit }) => {
         referenceNumber: generateReferenceNumber(),
         approvedUserId: null,
         issuedLocationId: parseInt(selectedLocationId),
+        tokenNo: parseInt(formData.tokenNo),
         permissionId: 1061,
         // toLocationId: searchByMrn
         //   ? parseInt(selectedMrn?.requestedToLocationId)

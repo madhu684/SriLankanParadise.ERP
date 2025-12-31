@@ -140,6 +140,22 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                 </div>
               )}
             </div>
+            {searchByWithoutMrn && (
+              <div className="mb-3">
+                <label htmlFor="tokenNo" className="form-label">
+                  Patient Token No
+                </label>
+                <input
+                  type="text"
+                  className={`form-control ${
+                    validFields.tokenNo ? "is-valid" : ""
+                  } ${validationErrors.tokenNo ? "is-invalid" : ""}`}
+                  id="tokenNo"
+                  value={formData.tokenNo}
+                  onChange={(e) => handleInputChange("tokenNo", e.target.value)}
+                />
+              </div>
+            )}
           </div>
 
           {/* 2. Material Requisition Details */}
@@ -315,40 +331,6 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
               )}
             </div>
           </div>
-          {/* {selectedMrn && (
-            <div className="card mb-3">
-              <div className="card-header">Selected Material Requisition</div>
-              <div className="card-body">
-                <p>
-                  Material Requisition Reference No:{" "}
-                  {selectedMrn.referenceNumber}
-                </p>
-                <p>Requested By: {selectedMrn.requestedBy}</p>
-                <p>
-                  MRN Date:{" "}
-                  {moment
-                    .utc(selectedMrn.requisitionDate)
-                    .tz("Asia/Colombo")
-                    .format("YYYY-MM-DD hh:mm:ss A")}
-                </p>
-                <p>
-                  Delivery Location:{" "}
-                  {selectedMrn.requestedToLocation.locationName}
-                </p>
-                <p>
-                  Warehouse Location:{" "}
-                  {selectedMrn.requestedFromLocation.locationName}
-                </p>
-                <button
-                  type="button"
-                  className="btn btn-outline-danger float-end"
-                  onClick={handleResetMrn}
-                >
-                  Reset Material Requisition
-                </button>
-              </div>
-            </div>
-          )} */}
         </div>
         {selectedMrn === null && searchByWithoutMrn === false && (
           <div className="mb-3">

@@ -1,9 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  get_company_locations_api,
-  get_item_locations_inventories_by_location_id_api,
-} from "../../services/purchaseApi";
-import { useCallback, useState, useEffect } from "react";
+import { get_item_locations_inventories_by_location_id_api } from "../../services/purchaseApi";
+import { useCallback, useState, useEffect, useContext } from "react";
+import { UserContext } from "../../context/userContext";
 
 const useStockManagement = () => {
   const [formData, setFormData] = useState({
@@ -18,6 +16,8 @@ const useStockManagement = () => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  const { userLocations, userLocationsLoading } = useContext(UserContext);
 
   const filteredInventories = inventories
     ? inventories.filter((item) => {
@@ -41,22 +41,6 @@ const useStockManagement = () => {
   }, [searchTerm]);
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-  const { data: companyLocations, isLoading: companyLocationsLoading } =
-    useQuery({
-      queryKey: ["companyLocations"],
-      queryFn: async () => {
-        try {
-          const response = await get_company_locations_api(
-            sessionStorage.getItem("companyId")
-          );
-          return response.data.result;
-        } catch (error) {
-          console.error("Error fetching production companyLocations:", error);
-          return [];
-        }
-      },
-    });
 
   const handleLocationChange = (e) => {
     console.log("Selected location: ", e.target.value);
@@ -89,8 +73,8 @@ const useStockManagement = () => {
   };
 
   return {
-    companyLocations,
-    companyLocationsLoading,
+    userLocations,
+    userLocationsLoading,
     selectedLocation,
     inventories: filteredInventories,
     currentItems,

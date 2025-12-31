@@ -6,7 +6,8 @@ import Pagination from "../common/Pagination/Pagination";
 
 const StockManagement = () => {
   const {
-    companyLocations,
+    userLocations,
+    userLocationsLoading,
     selectedLocation,
     inventories,
     currentItems,
@@ -36,14 +37,12 @@ const StockManagement = () => {
             <option value="" disabled selected>
               Select a Warehouse
             </option>
-            {companyLocations && companyLocations.length > 0 ? (
-              companyLocations
-                .filter((l) => l.locationTypeId === 2)
-                .map((item) => (
-                  <option key={item.id} value={item.locationId}>
-                    {item.locationName}
-                  </option>
-                ))
+            {userLocations ? (
+              userLocations.map((item) => (
+                <option key={item.locationId} value={item.locationId}>
+                  {item.location.locationName}
+                </option>
+              ))
             ) : (
               <option>No warehouses available</option>
             )}

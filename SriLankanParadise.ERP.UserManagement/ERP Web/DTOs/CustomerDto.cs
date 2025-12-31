@@ -22,5 +22,6 @@
         public bool? IsVATRegistered { get; set; }
         public string? VATRegistrationNo { get; set; }
         public string CustomerType { get; set; }
+        public DateTime? CreatedDate { get; set; }
     }
 }

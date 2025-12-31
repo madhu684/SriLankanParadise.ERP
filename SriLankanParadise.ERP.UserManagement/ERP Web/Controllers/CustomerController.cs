@@ -204,7 +204,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         }
 
         [HttpGet("GetCustomersByCustomerTypeCompanyId/{companyId}")]
-        public async Task<ApiResponseModel> GetCustomersByCustomerTypeCompanyId(int companyId, [FromQuery]string customerType)
+        public async Task<ApiResponseModel> GetCustomersByCustomerTypeCompanyId(int companyId, [FromQuery] string customerType)
         {
             try
             {
@@ -218,6 +218,52 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 {
                     _logger.LogWarning(LogMessages.CustomersNotFound);
                     AddResponseMessage(Response, LogMessages.CustomersNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("GetPaginatedCustomersByCompanyId/{companyId}")]
+        public async Task<ApiResponseModel> GetPaginatedCustomersByCompanyId(
+            int companyId, 
+            [FromQuery] string? customerType = null,
+            [FromQuery] string? searchQuery = null,
+            [FromQuery] int pageNumber = 1, 
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var result = await _customerService.GetPaginatedCustomersByCompanyId(companyId, customerType, searchQuery, pageNumber, pageSize);
+
+                if (result.Items.Any())
+                {
+                    var customerDto = _mapper.Map<IEnumerable<CustomerDto>>(result.Items);
+
+                    var responseData = new
+                    {
+                        Data = customerDto,
+                        Pagination = new
+                        {
+                            result.TotalCount,
+                            result.PageNumber,
+                            result.PageSize,
+                            result.TotalPages,
+                            result.HasPreviousPage,
+                            result.HasNextPage
+                        }
+                    };
+
+                    AddResponseMessage(Response, "Paginated customers retrieved successfully", responseData, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    AddResponseMessage(Response, "No records found", null, true, HttpStatusCode.OK);
                 }
 
             }

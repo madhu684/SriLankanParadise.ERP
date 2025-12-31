@@ -423,6 +423,10 @@ public partial class ErpSystemContext : DbContext
                 .HasMaxLength(50)
                 .HasDefaultValue("patient");
 
+            entity.Property(e => e.CreatedDate)
+                .HasColumnType("datetime")
+                .IsRequired(false);
+
             entity.ToTable("Customer");
         });
 
@@ -934,6 +938,10 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.RequestedBy).HasMaxLength(50);
             entity.Property(e => e.RequisitionDate).HasColumnType("date");
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
+
+            entity.Property(e => e.ReferenceNo)
+                .HasMaxLength(20)
+                .HasDefaultValueSql("('PR'+CONVERT([nvarchar](20),NEXT VALUE FOR [dbo].[PurchaseRequisitionReferenceNoSeq]))");
 
             entity.HasOne(d => d.DepartmentNavigation).WithMany(p => p.PurchaseRequisitionDepartmentNavigations)
                 .HasForeignKey(d => d.Department)

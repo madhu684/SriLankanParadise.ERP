@@ -431,7 +431,7 @@ const usePurchaseRequisitionUpdate = ({
           purposeOfRequest: formData.purposeOfRequest,
           expectedDeliveryDate: formData.expectedDeliveryDate,
           expectedDeliveryLocation: formData.expectedDeliveryLocation,
-          referenceNo: formData.referenceNumber,
+          // referenceNo: formData.referenceNumber,
           totalAmount: formData.totalAmount,
           status: status,
           approvedBy: null,
