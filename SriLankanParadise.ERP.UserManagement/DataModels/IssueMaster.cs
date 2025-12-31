@@ -31,6 +31,8 @@ public partial class IssueMaster
 
     public int? IssuedLocationId { get; set; }
 
+    public int? TokenNo { get; set; }
+
     public virtual ICollection<IssueDetail> IssueDetails { get; set; } = new List<IssueDetail>();
 
     public virtual RequisitionMaster? RequisitionMaster { get; set; } = null!;

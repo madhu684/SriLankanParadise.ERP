@@ -1,9 +1,13 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useQueryClient,
+  keepPreviousData,
+} from "@tanstack/react-query";
 import {
   activate_deactivate_customer_api,
-  get_customers_by_company_id_api,
+  get_paginated_customers_by_companyId_api,
 } from "../../../services/salesApi";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const useCustomerList = () => {
   const [selectedRows, setSelectedRows] = useState([]);
@@ -16,53 +20,93 @@ const useCustomerList = () => {
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [submissionMessage, setSubmissionMessage] = useState(null);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  // Add new states for pagination and filtering
+  const [customerTypeFilter, setCustomerTypeFilter] = useState(null);
+  const [paginationMeta, setPaginationMeta] = useState({
+    totalCount: 0,
+    totalPages: 0,
+    hasPreviousPage: false,
+    hasNextPage: false,
+  });
 
   const queryClient = useQueryClient();
 
   const companyId = sessionStorage.getItem("companyId");
 
+  // Customer types configuration
+  const customerTypes = [
+    {
+      value: "patient",
+      label: "Patient",
+    },
+    {
+      value: "salesCustomer",
+      label: "Sales Customer",
+    },
+  ];
+
+  // Debounce search query to avoid too many API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+      setCurrentPage(1);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const fetchCustomers = async () => {
     try {
-      const response = await get_customers_by_company_id_api(
-        sessionStorage.getItem("companyId")
-      );
-      return response.data.result || [];
+      const response = await get_paginated_customers_by_companyId_api({
+        companyId: sessionStorage.getItem("companyId"),
+        customerType: customerTypeFilter,
+        searchQuery: debouncedSearchQuery || null,
+        pageNumber: currentPage,
+        pageSize: itemsPerPage,
+      });
+
+      if (response.data.result) {
+        setPaginationMeta(response.data.result.pagination);
+        return response.data.result.data || [];
+      } else {
+        setPaginationMeta({
+          totalCount: 0,
+          totalPages: 0,
+          hasPreviousPage: false,
+          hasNextPage: false,
+        });
+        return [];
+      }
     } catch (error) {
       console.error("Error fetching customers:", error);
+      throw error;
     }
   };
 
   const {
     data: customers = [],
     isLoading: isLoadingCustomers,
+    isFetching,
     error,
   } = useQuery({
-    queryKey: ["customers", companyId],
+    queryKey: [
+      "customers",
+      companyId,
+      currentPage,
+      itemsPerPage,
+      customerTypeFilter,
+      debouncedSearchQuery,
+    ],
     queryFn: fetchCustomers,
+    placeholderData: keepPreviousData,
   });
-
-  // const handleRowSelect = (id) => {
-  //   const isSelected = selectedRows.includes(id);
-  //   const selectedRow = customers.find((im) => im.customerId === id);
-
-  //   if (isSelected) {
-  //     setSelectedRows((prevSelected) =>
-  //       prevSelected.filter((selectedId) => selectedId !== id)
-  //     );
-  //     setSelectedRowData((prevSelectedData) =>
-  //       prevSelectedData.filter((data) => data.supplierId !== id)
-  //     );
-  //   } else {
-  //     setSelectedRows((prevSelected) => [...prevSelected, id]);
-  //     setSelectedRowData((prevSelectedData) => [
-  //       ...prevSelectedData,
-  //       selectedRow,
-  //     ]);
-  //   }
-  // };
 
   const handleRowSelect = (id) => {
     const selectedRow = customers.find((cm) => cm.customerId === id);
@@ -157,6 +201,12 @@ const useCustomerList = () => {
     return statusClasses[statusCode] || "bg-secondary";
   };
 
+  // New handler for customer type filter
+  const handleCustomerTypeFilterChange = (value) => {
+    setCustomerTypeFilter(value);
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+
   console.log("Selected customer: ", selectedCustomer);
 
   return {
@@ -177,6 +227,9 @@ const useCustomerList = () => {
     submissionStatus,
     isLoading,
     showCustomerDeleteModal,
+    customerTypeFilter,
+    customerTypes,
+    paginationMeta,
     getStatusLabel,
     getStatusBadgeClass,
     setShowCustomerDeleteModal,
@@ -190,6 +243,9 @@ const useCustomerList = () => {
     handleClose,
     handleCloseCustomerViewModal,
     handleViewDetails,
+    handleCustomerTypeFilterChange,
+    debouncedSearchQuery,
+    isFetching,
   };
 };
 

@@ -1,3 +1,4 @@
+import moment from "moment";
 import React, { useState } from "react";
 import {
   Badge,
@@ -139,6 +140,16 @@ const CustomerView = ({ show, handleClose, customer }) => {
                     customer?.billingAddressLine1 &&
                     customer?.billingAddressLine2
                       ? `${customer.billingAddressLine1}, ${customer.billingAddressLine2}`
+                      : "N/A"
+                  }
+                />
+                <InfoRow
+                  label="Created Date"
+                  value={
+                    customer?.createdDate
+                      ? moment(customer?.createdDate).format(
+                          "YYYY-MM-DD HH:mm:ss"
+                        )
                       : "N/A"
                   }
                 />

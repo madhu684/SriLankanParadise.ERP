@@ -1,5 +1,6 @@
 ﻿using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Business_Service
@@ -50,6 +51,11 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         public async Task<IEnumerable<Customer>> GetCustomersByCustomerTypeCompanyId(int companyId, string customerType)
         {
             return await _customerRepository.GetCustomersByCustomerTypeCompanyId(companyId, customerType);
+        }
+
+        public async Task<PagedResult<Customer>> GetPaginatedCustomersByCompanyId(int companyId, string? customerType = null, string? searchQuery = null, int pageNumber = 1, int pageSize = 10)
+        {
+            return await _customerRepository.GetPaginatedCustomersByCompanyId(companyId, customerType, searchQuery, pageNumber, pageSize);
         }
     }
 }

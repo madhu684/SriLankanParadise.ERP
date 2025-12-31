@@ -24,8 +24,8 @@ public partial class Customer
     public string? BusinessRegistrationNo { get; set; }
     public bool? IsVATRegistered { get; set; }
     public string? VATRegistrationNo { get; set; }
-
     public string CustomerType { get; set; }
+    public DateTime? CreatedDate { get; set; }
 
     public virtual ICollection<PackingSlip> PackingSlips { get; set; } = new List<PackingSlip>();
 

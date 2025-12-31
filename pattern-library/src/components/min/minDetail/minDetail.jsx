@@ -77,7 +77,9 @@ const MinDetail = ({ show, handleClose, min }) => {
               <strong>MRN Reference No:</strong>{" "}
               <span
                 className={`p-1 badge ${
-                  min.requisitionMaster ? "text-bg-secondary" : " text-bg-danger"
+                  min.requisitionMaster
+                    ? "text-bg-secondary"
+                    : " text-bg-danger"
                 }`}
               >
                 {min.requisitionMaster
@@ -85,6 +87,12 @@ const MinDetail = ({ show, handleClose, min }) => {
                   : "MIN Without MRN"}
               </span>
             </p>
+            {min.requisitionMasterId === null && (
+              <p>
+                <strong>Patient Token No:</strong>{" "}
+                <span className="fw-semibold">{min?.tokenNo || "N/A"}</span>
+              </p>
+            )}
             {parseInt(min.status.toString().charAt(1), 10) === 2 && (
               <>
                 <p>

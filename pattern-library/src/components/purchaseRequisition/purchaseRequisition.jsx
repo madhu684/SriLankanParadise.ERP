@@ -362,7 +362,7 @@ const PurchaseRequisition = ({
                 </div>
               )}
             </div>
-            <div className="mb-3">
+            {/* <div className="mb-3">
               <label htmlFor="referenceNumber" className="form-label">
                 Reference Number
               </label>
@@ -376,7 +376,7 @@ const PurchaseRequisition = ({
                   handleInputChange("referenceNumber", e.target.value)
                 }
               />
-            </div>
+            </div> */}
           </div>
         </div>
         <div className="row g-3 mb-3 d-flex justify-content-between">

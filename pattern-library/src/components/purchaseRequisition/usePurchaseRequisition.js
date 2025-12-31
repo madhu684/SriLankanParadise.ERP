@@ -23,7 +23,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     requisitionDate: currentDate,
     purposeOfRequest: "",
     expectedDeliveryDate: "",
-    referenceNumber: "",
+    // referenceNumber: "",
     itemDetails: [],
     attachments: [],
     totalAmount: 0,
@@ -63,61 +63,6 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     queryKey: ["userLocations", sessionStorage.getItem("userId")],
     queryFn: fetchUserLocations,
   });
-
-  // const fetchItems = async (searchQuery) => {
-  //   try {
-  //     const response = await get_Location_Inventory_Summary_By_Item_Name_api(
-  //       formData.expectedDeliveryLocation,
-  //       searchQuery
-  //     );
-
-  //     const companyId = sessionStorage.getItem("companyId");
-
-  //     const items = await Promise.all(
-  //       response.data?.result?.map(async (summary) => {
-  //         const supplierItemResponse =
-  //           await get_supplier_items_by_type_category_api(
-  //             companyId,
-  //             parseInt(summary.itemMaster?.itemType?.itemTypeId),
-  //             parseInt(summary.itemMaster?.category?.categoryId),
-  //             formData.expectedDeliveryLocation
-  //           );
-
-  //         const supplierItems = supplierItemResponse.data.result
-  //           ? supplierItemResponse.data.result.filter(
-  //               (si) =>
-  //                 si.itemMasterId !== summary.itemMasterId &&
-  //                 si.supplierName !== formData?.selectedSupplier?.supplierName
-  //             )
-  //           : [];
-
-  //         return {
-  //           itemMasterId: summary.itemMasterId,
-  //           itemName: summary.itemMaster?.itemName || "",
-  //           unit: summary.itemMaster?.unit || { unitName: "" },
-  //           categoryId: summary.itemMaster?.category?.categoryId || "",
-  //           itemTypeId: summary.itemMaster?.itemType?.itemTypeId || "",
-  //           supplierId: summary.itemMaster?.supplierId || null,
-  //           totalStockInHand: summary.totalStockInHand,
-  //           minReOrderLevel: summary.minReOrderLevel,
-  //           maxStockLevel: summary.maxStockLevel,
-  //           supplierItems: supplierItems,
-  //         };
-  //       }) || []
-  //     );
-
-  //     const filterItems = formData.supplierId
-  //       ? items.filter(
-  //           (item) =>
-  //             !formData.supplierId || item.supplierId === formData.supplierId
-  //         )
-  //       : items;
-  //     return filterItems;
-  //   } catch (error) {
-  //     console.error("Error fetching items:", error);
-  //     return [];
-  //   }
-  // };
 
   const fetchItems = async (searchQuery) => {
     try {
@@ -465,7 +410,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
           purposeOfRequest: formData.purposeOfRequest,
           expectedDeliveryDate: formData.expectedDeliveryDate,
           expectedDeliveryLocation: formData.expectedDeliveryLocation,
-          referenceNo: formData.referenceNumber,
+          // referenceNo: formData.referenceNumber,
           totalAmount: formData.totalAmount,
           status: status,
           approvedBy: null,

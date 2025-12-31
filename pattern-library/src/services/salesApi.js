@@ -99,6 +99,38 @@ export const activate_deactivate_customer_api = async (
   }
 };
 
+export const get_paginated_customers_by_companyId_api = async ({
+  companyId,
+  customerType,
+  searchQuery,
+  pageNumber = 1,
+  pageSize = 10,
+}) => {
+  try {
+    const params = {
+      customerType,
+      pageNumber,
+      pageSize,
+    };
+
+    if (customerType) params.customerType = customerType;
+    if (searchQuery) params.searchQuery = searchQuery;
+
+    const response = await api.get(
+      `/customer/GetPaginatedCustomersByCompanyId/${companyId}`,
+      {
+        params,
+        withCredentials: true,
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching sales report:", error);
+    throw error;
+  }
+};
+
 //sales person apis
 export const get_sales_persons_by_company_id_api = async (companyId) => {
   try {
