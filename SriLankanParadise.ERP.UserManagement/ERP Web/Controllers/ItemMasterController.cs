@@ -44,6 +44,15 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             try
             {
                 var itemMaster = _mapper.Map<ItemMaster>(itemMasterRequest);
+                if (!string.IsNullOrEmpty(itemMaster.ItemCode) && itemMaster.CompanyId.HasValue)
+                {
+                    var existingItem = await _itemMasterService.GetItemMasterByItemCode(itemMaster.ItemCode, itemMaster.CompanyId.Value);
+
+                    if (existingItem != null)
+                    {
+                        return AddResponseMessage(Response, "Item Code already exists", null, false, HttpStatusCode.BadRequest);
+                    }
+                }
                 await _itemMasterService.AddItemMaster(itemMaster);
 
                 var subItemMasters = new List<SubItemMaster>();
