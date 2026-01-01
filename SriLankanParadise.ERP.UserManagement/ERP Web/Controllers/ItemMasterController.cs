@@ -386,5 +386,50 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpGet("GetPaginatedItemMastersByCompanyId/{companyId}")]
+        public async Task<ApiResponseModel> GetPaginatedItemMastersByCompanyId(
+            int companyId,
+            [FromQuery] string? searchQuery = null,
+            [FromQuery] int? supplierId = null,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var result = await _itemMasterService.GetPaginatedItemMastersByCompanyId(companyId, searchQuery, supplierId, pageNumber, pageSize);
+
+                if (result.Items.Any())
+                {
+                    var itemDto = _mapper.Map<IEnumerable<ItemMasterDto>>(result.Items);
+
+                    var responseData = new
+                    {
+                        Data = itemDto,
+                        Pagination = new
+                        {
+                            result.TotalCount,
+                            result.PageNumber,
+                            result.PageSize,
+                            result.TotalPages,
+                            result.HasPreviousPage,
+                            result.HasNextPage
+                        }
+                    };
+
+                    AddResponseMessage(Response, "Paginated Item masters retrieved successfully", responseData, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    AddResponseMessage(Response, "No records found", null, true, HttpStatusCode.OK);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

@@ -109,6 +109,7 @@ export const get_paginated_customers_by_companyId_api = async ({
   try {
     const params = {
       customerType,
+      searchQuery,
       pageNumber,
       pageSize,
     };

@@ -273,6 +273,39 @@ export const get_sub_item_masters_by_item_master_id_api = async (
   }
 };
 
+export const get_paginated_item_masters_by_company_id_api = async ({
+  companyId,
+  searchQuery,
+  supplierId,
+  pageNumber = 1,
+  pageSize = 10,
+}) => {
+  try {
+    const params = {
+      searchQuery,
+      supplierId,
+      pageNumber,
+      pageSize,
+    };
+
+    if (searchQuery) params.searchQuery = searchQuery;
+    if (supplierId) params.supplierId = supplierId;
+
+    const response = await api.get(
+      `/itemMaster/GetPaginatedItemMastersByCompanyId/${companyId}`,
+      {
+        params,
+        withCredentials: true,
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 //item types api
 export const get_item_types_by_company_id_api = async (companyId) => {
   try {
