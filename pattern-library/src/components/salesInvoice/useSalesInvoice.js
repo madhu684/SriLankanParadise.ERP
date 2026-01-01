@@ -606,14 +606,14 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         additionalRules
       );
 
-      isItemQuantityValid =
-        isItemQuantityValid && isValidQuantity && isReferenceNumberValid;
+      isItemQuantityValid = isItemQuantityValid && isValidQuantity;
     });
 
     return (
       isInvoiceDateValid &&
       isDueDateValid &&
       isAttachmentsValid &&
+      isReferenceNumberValid &&
       isItemQuantityValid
     );
   };
