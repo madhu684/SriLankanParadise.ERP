@@ -1,5 +1,6 @@
 ﻿using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 
 namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
 {
@@ -30,5 +31,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task<IEnumerable<ItemMaster>> SearchItemByCode(string searchTerm);
 
         Task<ItemMaster> GetItemMasterByItemCode(string itemCode, int companyId);
+
+        Task<PagedResult<ItemMaster>> GetPaginatedItemMastersByCompanyId(int companyId, string? searchQuery = null, int? supplierId = null, int pageNumber = 1, int pageSize = 10);
     }
 }

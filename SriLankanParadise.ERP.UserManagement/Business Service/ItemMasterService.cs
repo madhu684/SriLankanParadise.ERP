@@ -1,6 +1,7 @@
 ﻿using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Business_Service
@@ -76,6 +77,11 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         public async Task<ItemMaster> GetItemMasterByItemCode(string itemCode, int companyId)
         {
             return await _itemMasterRepository.GetItemMasterByItemCode(itemCode, companyId);
+        }
+
+        public async Task<PagedResult<ItemMaster>> GetPaginatedItemMastersByCompanyId(int companyId, string? searchQuery = null, int? supplierId = null, int pageNumber = 1, int pageSize = 10)
+        {
+            return await _itemMasterRepository.GetPaginatedItemMastersByCompanyId(companyId, searchQuery, supplierId, pageNumber, pageSize);
         }
     }
 }

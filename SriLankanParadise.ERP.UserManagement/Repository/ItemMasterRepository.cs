@@ -2,6 +2,7 @@
 using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 using System.ComponentModel.Design;
 
@@ -406,6 +407,73 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .FirstOrDefaultAsync();
 
                 return itemMaster;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<PagedResult<ItemMaster>> GetPaginatedItemMastersByCompanyId(
+            int companyId,
+            string? searchQuery = null,
+            int? supplierId = null,
+            int pageNumber = 1,
+            int pageSize = 10)
+        {
+            try
+            {
+                // Input validation
+                if (pageNumber < 1) pageNumber = 1;
+                if (pageSize < 1) pageSize = 10;
+                if (pageSize > 100) pageSize = 100;
+
+                var query = _dbContext.ItemMasters
+                    .AsNoTracking()
+                    .Where(im => im.CompanyId == companyId)
+                    .Include(im => im.Category)
+                    .Include(im => im.Unit)
+                    .ThenInclude(u => u.MeasurementType)
+                    .Include(im => im.ItemType)
+                    .Include(im => im.InventoryUnit)
+                    .ThenInclude(u => u.MeasurementType)
+                    .Include(im => im.Supplier)
+                    .Where(im => im.CompanyId == companyId);
+
+
+                // Apply search filter
+                if (!string.IsNullOrEmpty(searchQuery))
+                {
+                    var searchTerm = searchQuery.ToLower().Trim();
+                    query = query.Where(im =>
+                        im.ItemName.ToLower().Contains(searchTerm) ||
+                        im.ItemCode.ToLower().Contains(searchTerm)
+                    );
+                }
+
+                // Apply supplier filter
+                if (supplierId.HasValue)
+                {
+                    query = query.Where(im => im.SupplierId == supplierId.Value);
+                }
+
+                var totalCount = await query.CountAsync();
+
+                // Apply pagination and ordering
+                var items = await query
+                    .OrderBy(cu => cu.ItemName)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                return new PagedResult<ItemMaster>
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+                };
             }
             catch (Exception)
             {

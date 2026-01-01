@@ -324,18 +324,18 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
                 variant="success"
               />
             </Col>
-            {!isServiceItemType() && (
-              <>
-                <Col sm={6} lg={colSize}>
-                  <StatCard
-                    icon={FaTag}
-                    label="Selling Price"
-                    value={formatCurrency(itemMaster.sellingPrice)}
-                    variant="info"
-                  />
-                </Col>
-              </>
-            )}
+            <Col sm={6} lg={colSize}>
+              <StatCard
+                icon={FaTag}
+                label="Conversion Rate"
+                value={
+                  itemMaster.conversionRate +
+                    " " +
+                    itemMaster.inventoryUnit?.unitName ?? 1
+                }
+                variant="info"
+              />
+            </Col>
             <Col sm={6} lg={colSize}>
               <StatCard
                 icon={FaChartLine}

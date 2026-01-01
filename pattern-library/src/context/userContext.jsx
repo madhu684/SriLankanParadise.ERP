@@ -124,6 +124,7 @@ const UserProvider = ({ children }) => {
         userLoading,
         userLocationsLoading,
         activeCashierSessionLoading,
+        isLoadingPermissions,
         hasPermission,
         hasAllPermissions,
         hasAnyPermission,
