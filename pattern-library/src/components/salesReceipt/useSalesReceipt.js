@@ -27,8 +27,8 @@ const useSalesReceipt = ({ onFormSubmit }) => {
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
   const alertRef = useRef(null);
-  const [selectedsalesInvoice, setSelectedsalesInvoice] = useState(null);
-  const [referenceNo, setReferenceNo] = useState(null);
+  // const [selectedsalesInvoice, setSelectedsalesInvoice] = useState(null);
+  // const [referenceNo, setReferenceNo] = useState(null);
   const [siSearchTerm, setSiSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
@@ -182,7 +182,7 @@ const useSalesReceipt = ({ onFormSubmit }) => {
     );
 
     const isPaymentReferenceValid = validateField(
-      "paymentReference",
+      "referenceNo",
       "Payment reference",
       formData.referenceNo
     );
@@ -615,13 +615,13 @@ const useSalesReceipt = ({ onFormSubmit }) => {
     submissionStatus,
     validFields,
     validationErrors,
-    referenceNo,
+    // referenceNo,
+    // selectedsalesInvoice,
     alertRef,
     salesInvoiceOptions,
     isSalesInvoiceOptionsLoading,
     isSalesInvoiceOptionsError,
     salesInvoiceOptionsError,
-    selectedsalesInvoice,
     siSearchTerm,
     loading,
     loadingDraft,
