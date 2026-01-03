@@ -51,6 +51,8 @@
 
         public int? SupplierId { get; set; }
 
+        public int? ItemModeId { get; set; }
+
         //new properties
 
         public int PermissionId { get; set; }

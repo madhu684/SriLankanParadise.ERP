@@ -1,4 +1,5 @@
 ﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
 {
@@ -21,5 +22,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task DeleteSalesInvoice(int salesInvoiceId);
 
         Task<SalesInvoice> GetSalesInvoiceById(int salesInvoiceId);
+
+        Task<PagedResult<SalesInvoice>> GetPaginatedFilteredSalesInvoiceByCompanyIdDate(int companyId, DateTime? date = null, string? searchQuery = null, string? filter = null, int pageNumber = 1, int pageSize = 10);
     }
 }

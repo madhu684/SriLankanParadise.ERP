@@ -1083,4 +1083,10 @@
   <data name="CustomerUpdated" xml:space="preserve">
     <value>Customer updated successfully</value>
   </data>
+  <data name="ItemModesRetrived" xml:space="preserve">
+    <value>Item modes retrieved successfully</value>
+  </data>
+  <data name="ItemModesNotFound" xml:space="preserve">
+    <value>Item modes not found</value>
+  </data>
 </root>

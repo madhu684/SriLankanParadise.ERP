@@ -41,12 +41,25 @@ const useSalesReceipt = ({ onFormSubmit }) => {
         sessionStorage?.getItem("companyId")
       );
 
-      const filteredsalesInvoices = response.data.result?.filter(
-        (sr) => sr.status === 2
-      );
+      // Get today's date at midnight in local timezone
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const filteredsalesInvoices = response.data.result?.filter((sr) => {
+        if (sr.status !== 2 || !sr.invoiceDate) return false;
+
+        // Parse the invoice date and set to midnight for comparison
+        const invoiceDate = new Date(sr.invoiceDate);
+        invoiceDate.setHours(0, 0, 0, 0);
+
+        // Check if invoice date matches today
+        return invoiceDate.getTime() === today.getTime();
+      });
+
       return filteredsalesInvoices || [];
     } catch (error) {
-      console.error("Error fetching slaes invoices:", error);
+      console.error("Error fetching sales invoices:", error);
+      return [];
     }
   };
 
@@ -358,14 +371,9 @@ const useSalesReceipt = ({ onFormSubmit }) => {
           } else {
             setSubmissionStatus("successSubmitted");
           }
-
           queryClient.invalidateQueries([
-            "salesReceiptsWithoutDrafts",
+            "salesReceipts",
             sessionStorage.getItem("companyId"),
-          ]);
-          queryClient.invalidateQueries([
-            "salesReceiptsByUserId",
-            sessionStorage.getItem("userId"),
           ]);
 
           setTimeout(() => {

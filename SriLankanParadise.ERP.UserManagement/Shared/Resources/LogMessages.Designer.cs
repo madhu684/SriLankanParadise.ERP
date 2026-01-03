@@ -961,6 +961,24 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Item modes not found.
+        /// </summary>
+        public static string ItemModesNotFound {
+            get {
+                return ResourceManager.GetString("ItemModesNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item modes retrieved successfully.
+        /// </summary>
+        public static string ItemModesRetrived {
+            get {
+                return ResourceManager.GetString("ItemModesRetrived", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Item types not found.
         /// </summary>
         public static string ItemTypesNotFound {

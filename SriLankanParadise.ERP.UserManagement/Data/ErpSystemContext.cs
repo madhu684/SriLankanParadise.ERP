@@ -167,6 +167,8 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<SalesCustomer> SalesCustomers { get; set; }
 
+    public virtual DbSet<ItemMode> ItemModes { get; set; }
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:LocalSqlServerConnection");
@@ -640,6 +642,10 @@ public partial class ErpSystemContext : DbContext
                 .HasForeignKey(d => d.UnitId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__ItemMaste__UnitI__73852659");
+
+            entity.HasOne(d => d.ItemMode).WithMany(p => p.ItemMasters)
+                .HasForeignKey(d => d.ItemModeId)
+                .HasConstraintName("FK_ItemMaster_ItemMode");
         });
 
         modelBuilder.Entity<ItemType>(entity =>
@@ -1566,6 +1572,11 @@ public partial class ErpSystemContext : DbContext
         modelBuilder.Entity<SalesCustomer>(entity =>
         {
             entity.ToTable("SalesCustomer");
+        });
+
+        modelBuilder.Entity<ItemMode>(entity =>
+        {
+            entity.ToTable("ItemMode");
         });
 
 

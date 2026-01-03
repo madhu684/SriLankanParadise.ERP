@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext } from "react";
 import useSalesInvoiceList from "./useSalesInvoiceList";
 import SalesInvoiceApproval from "../salesInvoiceApproval/salesInvoiceApproval";
 import SalesInvoice from "../salesInvoice";
@@ -8,81 +8,72 @@ import SalesInvoiceRightOff from "../salesInvoiceRightOff/salesInvoiceRightOff";
 import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
 import Pagination from "../../common/Pagination/Pagination";
+import { UserContext } from "../../../context/userContext";
 import { FaSearch } from "react-icons/fa";
 import SalesInvoiceDelete from "../salesInvoiceDelete/salesInvoiceDelete";
 import useFormatCurrency from "../../../utility/useFormatCurrency";
 
 const SalesInvoiceList = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
   const {
     salesInvoices,
     isLoadingData,
-    isLoadingPermissions,
-    isPermissionsError,
     error,
     isAnyRowSelected,
     selectedRows,
-    selectedRowData,
     showApproveSIModal,
     showApproveSIModalInParent,
     showDetailSIModal,
     showDetailSIModalInParent,
-    showCreateSIForm,
-    showUpdateSIForm,
     showRightOffSIModal,
     showRightOffSIModalInParent,
+    selectedRowData,
+    showCreateSIForm,
+    showUpdateSIForm,
     SIDetail,
     showDeleteSIForm,
+    searchQuery,
+    filterType,
+    pagination,
     setShowDeleteSIForm,
     areAnySelectedRowsPending,
     areAnySelectedRowsApproved,
     setSelectedRows,
-    handleRowSelect,
+    handleViewDetails,
     getStatusLabel,
     getStatusBadgeClass,
+    handleRowSelect,
     handleShowApproveSIModal,
     handleCloseApproveSIModal,
     handleShowRightOffSIModal,
     handleCloseRightOffSIModal,
-    handleCloseDetailSIModal,
     handleApproved,
     handleRightOff,
-    handleViewDetails,
     setShowCreateSIForm,
     setShowUpdateSIForm,
-    hasPermission,
     handleUpdate,
     handleUpdated,
     handleClose,
+    handleCloseDetailSIModal,
+    handleSearch,
+    handleFilterChange,
+    handlePageChange,
   } = useSalesInvoiceList();
 
-  const handleSearch = (e) => {
-    setSearchQuery(e.target.value);
-    setCurrentPage(1);
+  const { hasPermission } = useContext(UserContext);
+
+  const handleSearchInput = (e) => {
+    handleSearch(e.target.value);
   };
 
   const formatTotals = useFormatCurrency();
 
-  const filteredSalesInvoices = salesInvoices.filter(
-    (si) =>
-      si.referenceNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      si.createdBy.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const paginate = (pageNumber) => handlePageChange(pageNumber);
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-  if (error || isPermissionsError) {
+  if (error) {
     return <ErrorComponent error={error || "Error fetching data"} />;
   }
 
-  if (
-    isLoadingData ||
-    isLoadingPermissions ||
-    (salesInvoices && !(salesInvoices.length >= 0))
-  ) {
+  if (isLoadingData && salesInvoices.length === 0) {
     return <LoadingSpinner />;
   }
 
@@ -105,7 +96,12 @@ const SalesInvoiceList = () => {
     );
   }
 
-  if (salesInvoices.length === 0) {
+  if (
+    !isLoadingData &&
+    salesInvoices.length === 0 &&
+    !searchQuery &&
+    filterType === "all"
+  ) {
     return (
       <div className="container mt-4">
         <h2>Sales Invoices</h2>
@@ -178,7 +174,7 @@ const SalesInvoiceList = () => {
             isAnyRowSelected &&
             areAnySelectedRowsApproved(selectedRows) && (
               <button
-                className="btn btn-danger"
+                className="btn btn-secondary"
                 onClick={handleShowRightOffSIModal}
               >
                 Write Off
@@ -186,20 +182,52 @@ const SalesInvoiceList = () => {
             )}
         </div>
       </div>
-      <div className="d-flex justify-content-end mb-3">
-        <div className="search-bar input-group">
+
+      {/* Filter and Search Section */}
+      <div className="d-flex justify-content-between align-items-center mb-3 mt-3">
+        <div className="btn-group" role="group">
+          <button
+            type="button"
+            className={`btn ${
+              filterType === "all" ? "btn-info" : "btn-outline-info"
+            }`}
+            onClick={() => handleFilterChange("all")}
+          >
+            All Invoices
+          </button>
+          <button
+            type="button"
+            className={`btn ${
+              filterType === "outstanding" ? "btn-danger" : "btn-outline-danger"
+            }`}
+            onClick={() => handleFilterChange("outstanding")}
+          >
+            Outstanding Invoices
+          </button>
+        </div>
+
+        <div className="input-group" style={{ maxWidth: "300px" }}>
           <input
             type="text"
             className="form-control"
-            placeholder="Search"
+            placeholder="Search by Reference No"
             value={searchQuery}
-            onChange={handleSearch}
+            onChange={handleSearchInput}
           />
           <span className="input-group-text">
             <FaSearch />
           </span>
         </div>
       </div>
+
+      {isLoadingData && (
+        <div className="text-center my-3">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      )}
+
       <div className="table-responsive">
         <table className="table mt-2">
           <thead>
@@ -216,12 +244,14 @@ const SalesInvoiceList = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredSalesInvoices
-              .slice(
-                (currentPage - 1) * itemsPerPage,
-                currentPage * itemsPerPage
-              )
-              .map((si) => (
+            {salesInvoices.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="text-center py-4">
+                  No invoices found
+                </td>
+              </tr>
+            ) : (
+              salesInvoices.map((si) => (
                 <tr key={si.salesInvoiceId}>
                   <td>
                     <input
@@ -233,7 +263,9 @@ const SalesInvoiceList = () => {
                   <td>{si.referenceNo}</td>
                   <td>{si.createdBy}</td>
                   <td>{si?.invoiceDate?.split("T")[0]}</td>
-                  <td className="text-danger fw-bold">{formatTotals(si.amountDue)}</td>
+                  <td className="text-danger fw-bold">
+                    {formatTotals(si.amountDue)}
+                  </td>
                   <td>
                     <span
                       className={`badge rounded-pill ${getStatusBadgeClass(
@@ -284,15 +316,21 @@ const SalesInvoiceList = () => {
                     )}
                   </td>
                 </tr>
-              ))}
+              ))
+            )}
           </tbody>
         </table>
-        <Pagination
-          itemsPerPage={itemsPerPage}
-          totalItems={filteredSalesInvoices.length}
-          paginate={paginate}
-          currentPage={currentPage}
-        />
+
+        {/* Updated Pagination to use server-side pagination */}
+        {pagination.totalCount > 0 && (
+          <Pagination
+            itemsPerPage={pagination.pageSize}
+            totalItems={pagination.totalCount}
+            paginate={paginate}
+            currentPage={pagination.pageNumber}
+          />
+        )}
+
         {showApproveSIModalInParent && (
           <SalesInvoiceApproval
             show={showApproveSIModal}

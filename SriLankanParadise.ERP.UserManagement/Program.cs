@@ -288,6 +288,8 @@ builder.Services.AddScoped<ISupplierItemService, SupplierItemService>();
 builder.Services.AddScoped<ISupplierItemRepository, SupplierItemRepository>();
 builder.Services.AddScoped<ISalesCustomerService, SalesCustomerService>();
 builder.Services.AddScoped<ISalesCustomerRepository, SalesCustomerRepository>();
+builder.Services.AddScoped<IItemModeService, ItemModeService>();
+builder.Services.AddScoped<IItemModeRepository, ItemModeRepository>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

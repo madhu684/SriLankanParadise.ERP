@@ -450,3 +450,16 @@ export const get_supplier_items_by_type_category_api = async (
     throw error;
   }
 };
+
+// Item Mode API
+export const get_all_item_modes_api = async () => {
+  try {
+    const response = await api.get("/itemMode/GetAll", {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

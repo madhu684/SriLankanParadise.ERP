@@ -1,5 +1,6 @@
 ﻿using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Repository;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
@@ -56,6 +57,11 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         public async Task<SalesInvoice> GetSalesInvoiceById(int salesInvoiceId)
         {
             return await _salesInvoiceRepository.GetSalesInvoiceById(salesInvoiceId);
+        }
+
+        public async Task<PagedResult<SalesInvoice>> GetPaginatedFilteredSalesInvoiceByCompanyIdDate(int companyId, DateTime? date = null, string? searchQuery = null, string? filter = null, int pageNumber = 1, int pageSize = 10)
+        {
+            return await _salesInvoiceRepository.GetPaginatedFilteredSalesInvoiceByCompanyIdDate(companyId, date, searchQuery, filter, pageNumber, pageSize);
         }
     }
 }

@@ -41,6 +41,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(im => im.Unit)
                     .ThenInclude(u => u.MeasurementType)
                     .Include(im => im.ItemType)
+                    .Include(im => im.ItemMode)
                     .ToListAsync();
             }
             catch (Exception)
@@ -63,6 +64,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(im => im.InventoryUnit)
                     .ThenInclude(u => u.MeasurementType)
                     .Include(im => im.Supplier)
+                    .Include(im => im.ItemMode)
                     .ToListAsync();
 
                 return itemMasters;
@@ -153,7 +155,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(u => u.MeasurementType)
                     .Include(im => im.ItemType)
                     .Include(im => im.InventoryUnit)
-                    .ThenInclude(u => u.MeasurementType);
+                    .ThenInclude(u => u.MeasurementType)
+                    .Include(im => im.ItemMode);
 
                 var itemMasters = await query.ToListAsync();
                 return itemMasters.Any() ? itemMasters : null;
@@ -178,6 +181,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(im => im.InventoryUnit)
                     .ThenInclude(u => u.MeasurementType)
                     .Include(im => im.Supplier)
+                    .Include(im => im.ItemMode)
                     .FirstOrDefaultAsync();
 
                 return itemMaster;
@@ -242,6 +246,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(im => im.InventoryUnit)
                     .ThenInclude(u => u.MeasurementType)
                     .Include(im => im.Supplier)
+                    .Include(im => im.ItemMode)
                     .ToListAsync();
 
                 return itemMasters.Any() ? itemMasters : null;
@@ -334,6 +339,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(im => im.Category)
                     .Include(im => im.ItemType)
                     .Include(im => im.Unit)
+                    .Include(im => im.ItemMode)
                     .Where(im => im.Status == true
                         && im.ItemTypeId == itemTypeId
                         && im.CategoryId == categoryId
@@ -387,7 +393,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(u => u.MeasurementType)
                     .Include(im => im.ItemType)
                     .Include(im => im.InventoryUnit)
-                    .ThenInclude(u => u.MeasurementType);
+                    .ThenInclude(u => u.MeasurementType)
+                    .Include(im => im.ItemMode);
 
                 var itemMasters = await query.ToListAsync();
                 return itemMasters.Any() ? itemMasters : null;
@@ -430,7 +437,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
 
                 var query = _dbContext.ItemMasters
                     .AsNoTracking()
-                    .Where(im => im.CompanyId == companyId)
                     .Include(im => im.Category)
                     .Include(im => im.Unit)
                     .ThenInclude(u => u.MeasurementType)
@@ -438,6 +444,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(im => im.InventoryUnit)
                     .ThenInclude(u => u.MeasurementType)
                     .Include(im => im.Supplier)
+                    .Include(im => im.ItemMode)
                     .Where(im => im.CompanyId == companyId);
 
 

@@ -246,7 +246,6 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   });
 
   // Effects
-
   useEffect(() => {
     if (
       !isChargesAndDeductionsAppliedLoading &&
@@ -769,8 +768,8 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
             onFormSubmit();
 
             queryClient.invalidateQueries([
-              "salesInvoicesByUserId",
-              sessionStorage.getItem("userId"),
+              "salesInvoiceOptions",
+              sessionStorage.getItem("companyId"),
             ]);
           }, 3000);
         } else {
@@ -968,164 +967,164 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     }));
 
     // Process appointment treatments and replace item details
-    if (
-      appointment.appointmentTreatments &&
-      appointment.appointmentTreatments.length > 0
-    ) {
-      try {
-        const itemDetailsPromises = appointment.appointmentTreatments.map(
-          async (treatment) => {
-            const itemCode = treatment.treatmentType.treatmentShortCode;
+    // if (
+    //   appointment.appointmentTreatments &&
+    //   appointment.appointmentTreatments.length > 0
+    // ) {
+    //   try {
+    //     const itemDetailsPromises = appointment.appointmentTreatments.map(
+    //       async (treatment) => {
+    //         const itemCode = treatment.treatmentType.treatmentShortCode;
 
-            try {
-              // Fetch inventory by item code
-              const inventoryResponse =
-                await get_sum_location_inventories_by_locationId_itemCode_api(
-                  itemCode,
-                  formData.storeLocation || salesInvoice.locationId
-                );
+    //         try {
+    //           // Fetch inventory by item code
+    //           const inventoryResponse =
+    //             await get_sum_location_inventories_by_locationId_itemCode_api(
+    //               itemCode,
+    //               formData.storeLocation || salesInvoice.locationId
+    //             );
 
-              const inventoryData = inventoryResponse?.data?.result;
+    //           const inventoryData = inventoryResponse?.data?.result;
 
-              if (!inventoryData || !inventoryData.itemMaster) {
-                console.warn(
-                  `No inventory found for treatment: ${treatment.treatmentType.name}`
-                );
-                return null;
-              }
+    //           if (!inventoryData || !inventoryData.itemMaster) {
+    //             console.warn(
+    //               `No inventory found for treatment: ${treatment.treatmentType.name}`
+    //             );
+    //             return null;
+    //           }
 
-              const itemMaster = inventoryData.itemMaster;
-              const isInventoryItem = itemMaster.isInventoryItem;
+    //           const itemMaster = inventoryData.itemMaster;
+    //           const isInventoryItem = itemMaster.isInventoryItem;
 
-              // Initialize charges and deductions
-              const initializedCharges =
-                chargesAndDeductions
-                  ?.filter((charge) => charge.isApplicableForLineItem)
-                  ?.map((charge) => ({
-                    id: charge.chargesAndDeductionId,
-                    name: charge.displayName,
-                    value: charge.amount || charge.percentage,
-                    sign: charge.sign,
-                    isPercentage: charge.percentage !== null,
-                  })) || [];
+    //           // Initialize charges and deductions
+    //           const initializedCharges =
+    //             chargesAndDeductions
+    //               ?.filter((charge) => charge.isApplicableForLineItem)
+    //               ?.map((charge) => ({
+    //                 id: charge.chargesAndDeductionId,
+    //                 name: charge.displayName,
+    //                 value: charge.amount || charge.percentage,
+    //                 sign: charge.sign,
+    //                 isPercentage: charge.percentage !== null,
+    //               })) || [];
 
-              // Handle inventory items
-              if (isInventoryItem) {
-                const availableStock = inventoryData.totalStockInHand || 0;
+    //           // Handle inventory items
+    //           if (isInventoryItem) {
+    //             const availableStock = inventoryData.totalStockInHand || 0;
 
-                if (availableStock <= 0) {
-                  console.warn(
-                    `No stock available for treatment: ${treatment.treatmentType.name}`
-                  );
-                  alert(
-                    `No stock available for treatment: ${treatment.treatmentType.name}`
-                  );
-                  return null;
-                }
+    //             if (availableStock <= 0) {
+    //               console.warn(
+    //                 `No stock available for treatment: ${treatment.treatmentType.name}`
+    //               );
+    //               alert(
+    //                 `No stock available for treatment: ${treatment.treatmentType.name}`
+    //               );
+    //               return null;
+    //             }
 
-                // Get highest selling price from available batches
-                let highestSellingPrice = 0;
-                const batchesResponse =
-                  await get_item_batches_by_item_master_id_api(
-                    itemMaster.itemMasterId,
-                    sessionStorage.getItem("companyId")
-                  );
-                highestSellingPrice =
-                  batchesResponse?.data?.result?.reduce(
-                    (maxPrice, batch) =>
-                      batch.sellingPrice > maxPrice
-                        ? batch.sellingPrice
-                        : maxPrice,
-                    0
-                  ) || 0;
+    //             // Get highest selling price from available batches
+    //             let highestSellingPrice = 0;
+    //             const batchesResponse =
+    //               await get_item_batches_by_item_master_id_api(
+    //                 itemMaster.itemMasterId,
+    //                 sessionStorage.getItem("companyId")
+    //               );
+    //             highestSellingPrice =
+    //               batchesResponse?.data?.result?.reduce(
+    //                 (maxPrice, batch) =>
+    //                   batch.sellingPrice > maxPrice
+    //                     ? batch.sellingPrice
+    //                     : maxPrice,
+    //                 0
+    //               ) || 0;
 
-                return {
-                  salesInvoiceDetailId: null,
-                  salesInvoiceId: salesInvoice.salesInvoiceId,
-                  itemMasterId: itemMaster.itemMasterId,
-                  isInventoryItem: true,
-                  name: treatment.treatmentType.name,
-                  unit: itemMaster.unit?.unitName || "Unit",
-                  stockInHand: availableStock,
-                  quantity: 1,
-                  unitPrice: highestSellingPrice,
-                  totalPrice: highestSellingPrice,
-                  chargesAndDeductions: initializedCharges,
-                };
-              }
-              // Handle non-inventory items (services)
-              else {
-                return {
-                  salesInvoiceDetailId: null,
-                  salesInvoiceId: salesInvoice.salesInvoiceId,
-                  itemMasterId: itemMaster.itemMasterId,
-                  isInventoryItem: false,
-                  name: treatment.treatmentType.name,
-                  unit: itemMaster.unit?.unitName || "Service",
-                  stockInHand: 0,
-                  quantity: 1,
-                  unitPrice:
-                    itemMaster.unitPrice || itemMaster.sellingPrice || 0,
-                  totalPrice:
-                    itemMaster.unitPrice || itemMaster.sellingPrice || 0,
-                  chargesAndDeductions: initializedCharges,
-                };
-              }
-            } catch (error) {
-              console.error(
-                `Error processing treatment ${treatment.treatmentType.name}:`,
-                error
-              );
-              return null;
-            }
-          }
-        );
+    //             return {
+    //               salesInvoiceDetailId: null,
+    //               salesInvoiceId: salesInvoice.salesInvoiceId,
+    //               itemMasterId: itemMaster.itemMasterId,
+    //               isInventoryItem: true,
+    //               name: treatment.treatmentType.name,
+    //               unit: itemMaster.unit?.unitName || "Unit",
+    //               stockInHand: availableStock,
+    //               quantity: 1,
+    //               unitPrice: highestSellingPrice,
+    //               totalPrice: highestSellingPrice,
+    //               chargesAndDeductions: initializedCharges,
+    //             };
+    //           }
+    //           // Handle non-inventory items (services)
+    //           else {
+    //             return {
+    //               salesInvoiceDetailId: null,
+    //               salesInvoiceId: salesInvoice.salesInvoiceId,
+    //               itemMasterId: itemMaster.itemMasterId,
+    //               isInventoryItem: false,
+    //               name: treatment.treatmentType.name,
+    //               unit: itemMaster.unit?.unitName || "Service",
+    //               stockInHand: 0,
+    //               quantity: 1,
+    //               unitPrice:
+    //                 itemMaster.unitPrice || itemMaster.sellingPrice || 0,
+    //               totalPrice:
+    //                 itemMaster.unitPrice || itemMaster.sellingPrice || 0,
+    //               chargesAndDeductions: initializedCharges,
+    //             };
+    //           }
+    //         } catch (error) {
+    //           console.error(
+    //             `Error processing treatment ${treatment.treatmentType.name}:`,
+    //             error
+    //           );
+    //           return null;
+    //         }
+    //       }
+    //     );
 
-        // Wait for all items to be processed
-        const itemDetails = await Promise.all(itemDetailsPromises);
+    //     // Wait for all items to be processed
+    //     const itemDetails = await Promise.all(itemDetailsPromises);
 
-        // Filter out null values (items that couldn't be processed)
-        const validItemDetails = itemDetails.filter((item) => item !== null);
+    //     // Filter out null values (items that couldn't be processed)
+    //     const validItemDetails = itemDetails.filter((item) => item !== null);
 
-        if (validItemDetails.length === 0) {
-          alert("No valid items could be added from this appointment.");
-          return;
-        }
+    //     if (validItemDetails.length === 0) {
+    //       alert("No valid items could be added from this appointment.");
+    //       return;
+    //     }
 
-        // Mark existing items for deletion
-        const existingItemsToDelete = formData.itemDetails.filter(
-          (item) => item.salesInvoiceDetailId !== null
-        );
+    //     // Mark existing items for deletion
+    //     const existingItemsToDelete = formData.itemDetails.filter(
+    //       (item) => item.salesInvoiceDetailId !== null
+    //     );
 
-        if (existingItemsToDelete.length > 0) {
-          setItemIdsToBeDeleted((prevIds) => [
-            ...prevIds,
-            ...existingItemsToDelete,
-          ]);
+    //     if (existingItemsToDelete.length > 0) {
+    //       setItemIdsToBeDeleted((prevIds) => [
+    //         ...prevIds,
+    //         ...existingItemsToDelete,
+    //       ]);
 
-          // Mark charges and deductions for deletion
-          existingItemsToDelete.forEach((item) => {
-            item.chargesAndDeductions.forEach((charge) => {
-              if (charge.chargesAndDeductionAppliedId !== null) {
-                setChargesAndDeductionsAppliedIdsToBeDeleted((prevIds) => [
-                  ...prevIds,
-                  charge.chargesAndDeductionAppliedId,
-                ]);
-              }
-            });
-          });
-        }
+    //       // Mark charges and deductions for deletion
+    //       existingItemsToDelete.forEach((item) => {
+    //         item.chargesAndDeductions.forEach((charge) => {
+    //           if (charge.chargesAndDeductionAppliedId !== null) {
+    //             setChargesAndDeductionsAppliedIdsToBeDeleted((prevIds) => [
+    //               ...prevIds,
+    //               charge.chargesAndDeductionAppliedId,
+    //             ]);
+    //           }
+    //         });
+    //       });
+    //     }
 
-        // Replace item details with new appointment items
-        setFormData((prevFormData) => ({
-          ...prevFormData,
-          itemDetails: validItemDetails,
-        }));
-      } catch (error) {
-        console.error("Error processing appointment treatments:", error);
-        alert("Error processing appointment treatments. Please try again.");
-      }
-    }
+    //     // Replace item details with new appointment items
+    //     setFormData((prevFormData) => ({
+    //       ...prevFormData,
+    //       itemDetails: validItemDetails,
+    //     }));
+    //   } catch (error) {
+    //     console.error("Error processing appointment treatments:", error);
+    //     alert("Error processing appointment treatments. Please try again.");
+    //   }
+    // }
   };
 
   // Add handler for resetting appointment

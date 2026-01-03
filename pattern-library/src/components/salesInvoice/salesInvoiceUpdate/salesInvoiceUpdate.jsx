@@ -129,7 +129,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                 onChange={(e) =>
                   handleInputChange("invoiceDate", e.target.value)
                 }
-                required
+                disabled
               />
               {validationErrors.invoiceDate && (
                 <div className="invalid-feedback">
@@ -421,6 +421,29 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                 <h4>4. Patient Details</h4>
                 <div className="mb-3 mt-3">
                   <label htmlFor="patientName" className="form-label">
+                    Token No
+                  </label>
+                  <input
+                    type="text"
+                    className={`form-control ${
+                      validFields.tokenNo ? "is-valid" : ""
+                    } ${validationErrors.patientName ? "is-invalid" : ""}`}
+                    id="patientName"
+                    placeholder="Enter Token No"
+                    value={formData.tokenNo}
+                    onChange={(e) =>
+                      handleInputChange("tokenNo", e.target.value)
+                    }
+                    required
+                  />
+                  {validationErrors.tokenNo && (
+                    <div className="invalid-feedback">
+                      {validationErrors.tokenNo}
+                    </div>
+                  )}
+                </div>
+                <div className="mb-3 mt-3">
+                  <label htmlFor="patientName" className="form-label">
                     Patient Name
                   </label>
                   <input
@@ -453,58 +476,6 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                     } ${validationErrors.patientNo ? "is-invalid" : ""}`}
                     id="patientNo"
                     placeholder="Enter Patient Contact No"
-                    value={formData.patientNo}
-                    onChange={(e) =>
-                      handleInputChange("patientNo", e.target.value)
-                    }
-                    required
-                  />
-                  {validationErrors.patientNo && (
-                    <div className="invalid-feedback">
-                      {validationErrors.patientNo}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {!useAppointment && (
-              <div className="mt-3">
-                <h4>4. Patient Details</h4>
-                <div className="mb-3 mt-3">
-                  <label htmlFor="patientName" className="form-label">
-                    Customer Name
-                  </label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      validFields.patientName ? "is-valid" : ""
-                    } ${validationErrors.patientName ? "is-invalid" : ""}`}
-                    id="patientName"
-                    placeholder="Enter Customer Name"
-                    value={formData.patientName}
-                    onChange={(e) =>
-                      handleInputChange("patientName", e.target.value)
-                    }
-                    required
-                  />
-                  {validationErrors.patientName && (
-                    <div className="invalid-feedback">
-                      {validationErrors.patientName}
-                    </div>
-                  )}
-                </div>
-                <div className="mb-3 mt-3">
-                  <label htmlFor="patientNo" className="form-label">
-                    Customer Contact No
-                  </label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      validFields.patientNo ? "is-valid" : ""
-                    } ${validationErrors.patientNo ? "is-invalid" : ""}`}
-                    id="patientNo"
-                    placeholder="Enter Customer Contact No"
                     value={formData.patientNo}
                     onChange={(e) =>
                       handleInputChange("patientNo", e.target.value)

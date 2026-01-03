@@ -2,6 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import {
   get_requisition_masters_with_out_drafts_api,
   get_user_locations_by_user_id_api,
+  patch_item_batch_api,
+  patch_location_inventory_api,
+  post_location_inventory_movement_api,
+  update_min_state_in_mrn_api,
 } from "../../services/purchaseApi";
 import {
   post_issue_master_api,
@@ -88,53 +92,6 @@ const useMin = ({ onFormSubmit }) => {
     queryFn: fetchUserLocations,
     enabled: !!sessionStorage.getItem("userId") && searchByWithoutMrn,
   });
-
-  // Handle adding an item to itemDetails
-  const handleAddDummyItem = (item) => {
-    const exists = formData.itemDetails.find(
-      (d) => d.id === (item.itemMasterId || item.id)
-    );
-    if (exists) {
-      console.log("Item already exists in the list");
-      return;
-    }
-
-    // For items added via search (without MRN), we need to get available batches from locationInventories
-    const itemBatches = locationInventories?.filter(
-      (batch) => batch.itemMasterId === (item.itemMasterId || item.id)
-    );
-
-    if (!itemBatches || itemBatches.length === 0) {
-      console.log("No batches available for this item in selected location");
-      setNoItembatchesError(true);
-      setSearchTerm("");
-      setDummySearchTerm("");
-      setTimeout(() => setNoItembatchesError(false), 3500);
-      return;
-    }
-
-    const defaultBatch = itemBatches?.[0] || { batchId: "", stockInHand: 0 };
-
-    const newItem = {
-      id: item.itemMasterId || item.id,
-      name: item.itemMaster?.itemName || item.itemName,
-      unit: item.itemMaster?.unit?.unitName || item.unit?.unitName || "Unit",
-      //quantity: defaultBatch.stockInHand || 0,
-      quantity: 0,
-      remainingQuantity: 0,
-      issuedQuantity: "",
-      //batchId: defaultBatch.batchId || "",
-      batchId: "",
-    };
-
-    setFormData((prev) => ({
-      ...prev,
-      itemDetails: [...prev.itemDetails, newItem],
-    }));
-
-    setSearchTerm("");
-    setDummySearchTerm("");
-  };
 
   // Fetch MRNs
   const fetchMrns = async () => {
@@ -379,6 +336,74 @@ const useMin = ({ onFormSubmit }) => {
     return `MIN_${formattedDate}_${randomNumber}`;
   };
 
+  // Update inventory and relavant MRN
+  const updateInventory = async (
+    min,
+    details,
+    formattedDate,
+    fromLocationId
+  ) => {
+    try {
+      const locationId = fromLocationId || 4;
+      for (const detail of details) {
+        const { id, batchId, issuedQuantity } = detail;
+
+        // Skip if batchId or quantity is invalid
+        if (!batchId || !issuedQuantity || issuedQuantity <= 0) {
+          console.warn(
+            `Skipping invalid item: itemMasterId=${id}, batchId=${batchId}, quantity=${issuedQuantity}`
+          );
+          continue;
+        }
+
+        // Patch Item Batch API
+        await patch_item_batch_api(parseInt(batchId), id, "subtract", {
+          qty: issuedQuantity,
+          permissionId: 1065,
+        });
+
+        if (min.requisitionMasterId === null) {
+          // Patch Location Inventory API
+          await patch_location_inventory_api(
+            locationId,
+            id,
+            parseInt(batchId),
+            "subtract",
+            {
+              stockInHand: issuedQuantity,
+              permissionId: 1089,
+            }
+          );
+
+          // Post Location Inventory Movement API
+          await post_location_inventory_movement_api({
+            movementTypeId: 2,
+            transactionTypeId: 5,
+            itemMasterId: id,
+            batchId,
+            locationId: locationId,
+            date: formattedDate,
+            qty: issuedQuantity,
+            permissionId: 1090,
+          });
+        }
+      }
+    } catch (error) {
+      throw new Error("Error updating inventory: " + error.message);
+    }
+  };
+
+  const updateMrnState = async (min) => {
+    try {
+      await update_min_state_in_mrn_api(min.requisitionMasterId, {
+        isMINApproved: true,
+        isMINAccepted: false,
+      });
+    } catch (error) {
+      console.error("Error updating MRN state:", error);
+    }
+  };
+
   // Handle form submission
   const handleSubmit = async (isSaveAsDraft) => {
     try {
@@ -402,7 +427,8 @@ const useMin = ({ onFormSubmit }) => {
         issueDate: currentDate,
         createdBy: sessionStorage?.getItem("username") ?? null,
         createdUserId: sessionStorage?.getItem("userId") ?? null,
-        status: combinedStatus,
+        // status: combinedStatus,
+        status: 52,
         approvedBy: null,
         approvedDate: null,
         companyId: sessionStorage?.getItem("companyId") ?? null,
@@ -418,11 +444,11 @@ const useMin = ({ onFormSubmit }) => {
       };
 
       const response = await post_issue_master_api(MinData);
-      const issueMasterId = response.data.result.issueMasterId;
+      const min = response.data.result;
 
       const itemDetailsData = formData.itemDetails.map(async (item) => {
         const detailsData = {
-          issueMasterId: issueMasterId,
+          issueMasterId: min.issueMasterId,
           itemMasterId: item.id,
           batchId: item.batchId ? parseInt(item.batchId) : null,
           quantity: parseFloat(item.issuedQuantity),
@@ -437,6 +463,19 @@ const useMin = ({ onFormSubmit }) => {
       );
 
       if (allDetailsSuccessful) {
+        const currentDate = new Date();
+        const formattedDate = currentDate.toISOString();
+        await updateInventory(
+          min,
+          formData.itemDetails,
+          formattedDate,
+          parseInt(selectedLocationId)
+        );
+
+        if (min.requisitionMasterId !== null) {
+          await updateMrnState(min);
+        }
+
         setSubmissionStatus(
           isSaveAsDraft ? "successSavedAsDraft" : "successSubmitted"
         );
@@ -576,6 +615,54 @@ const useMin = ({ onFormSubmit }) => {
     setSelectedMrn(null);
     setValidFields({});
     setValidationErrors({});
+  };
+
+  // Handle adding an item to itemDetails
+  const handleAddDummyItem = (item) => {
+    const exists = formData.itemDetails.find(
+      (d) => d.id === (item.itemMasterId || item.id)
+    );
+    if (exists) {
+      console.log("Item already exists in the list");
+      return;
+    }
+
+    // For items added via search (without MRN), we need to get available batches from locationInventories
+    const itemBatches = locationInventories?.filter(
+      (batch) => batch.itemMasterId === (item.itemMasterId || item.id)
+    );
+    console.log("itemBatches: ", itemBatches);
+
+    if (!itemBatches || itemBatches.length === 0) {
+      console.log("No batches available for this item in selected location");
+      setNoItembatchesError(true);
+      setSearchTerm("");
+      setDummySearchTerm("");
+      setTimeout(() => setNoItembatchesError(false), 3500);
+      return;
+    }
+
+    const defaultBatch = itemBatches?.[0] || { batchId: "", stockInHand: 0 };
+
+    const newItem = {
+      id: item.itemMasterId || item.id,
+      name: item.itemMaster?.itemName || item.itemName,
+      unit: item.itemMaster?.unit?.unitName || item.unit?.unitName || "Unit",
+      //quantity: defaultBatch.stockInHand || 0,
+      quantity: 0,
+      remainingQuantity: 0,
+      issuedQuantity: "",
+      //batchId: defaultBatch.batchId || "",
+      batchId: "",
+    };
+
+    setFormData((prev) => ({
+      ...prev,
+      itemDetails: [...prev.itemDetails, newItem],
+    }));
+
+    setSearchTerm("");
+    setDummySearchTerm("");
   };
 
   // Handle item selection from search
