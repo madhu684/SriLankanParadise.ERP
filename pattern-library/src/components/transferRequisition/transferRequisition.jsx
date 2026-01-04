@@ -392,7 +392,15 @@ const TransferRequisition = ({
               <tbody>
                 {formData.itemDetails.map((item, index) => (
                   <>
-                    <tr key={index}>
+                    <tr
+                      key={index}
+                      className={`${
+                        item.maxStockLevel > 0 &&
+                        item.totalStockInHand >= item.maxStockLevel
+                          ? "table-danger"
+                          : ""
+                      }`}
+                    >
                       <td>{item.name}</td>
                       <td>{item.unit}</td>
                       <td>
