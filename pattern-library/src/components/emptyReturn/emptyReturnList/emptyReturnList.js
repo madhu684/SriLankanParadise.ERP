@@ -107,38 +107,47 @@ const useEmptyReturnsLogic = () => {
     setTransferDetails((prev) => ({ ...prev, location: e.target.value }));
   };
 
-  const handleSearch = useCallback(async () => {
-    if (!selectedLocation) return;
+  const handleSearch = useCallback(
+    async (locationId = null) => {
+      // Use provided locationId if available, otherwise fall back to selectedLocation
+      const targetLocationId = locationId ?? selectedLocation;
 
-    setLoading(true);
-    try {
-      const inventory =
-        await get_Empty_Return_Item_locations_inventories_by_location_id_api(
-          selectedLocation
-        );
-      if (inventory.data && inventory.data.result) {
-        const fetchedIds = inventory.data.result.map(
-          (item) => item.locationInventoryId
-        );
-        const filteredStock = inventory.data?.result?.filter(
-          (item) => item.stockInHand > 0
-        );
-        //setInventories(inventory.data.result);
-        setInventories(filteredStock);
-      } else {
-        setInventories([]);
+      if (!targetLocationId) return;
+
+      // Update state if a specific locationId is provided and it's different
+      if (locationId && locationId !== selectedLocation) {
+        console.log(`Switching selected location to: ${locationId}`);
+        setSelectedLocation(parseInt(locationId));
+        setFormData((prev) => ({ ...prev, location: locationId }));
       }
-    } catch (error) {
-      console.error("Error fetching inventory:", error);
-      setInventories([]);
-    } finally {
-      setLoading(false);
-      console.log(
-        "Loading set to false, updated inventories length:",
-        inventories.length
-      );
-    }
-  }, [selectedLocation]);
+
+      setLoading(true);
+      try {
+        const inventory =
+          await get_Empty_Return_Item_locations_inventories_by_location_id_api(
+            targetLocationId
+          );
+        if (inventory.data && inventory.data.result) {
+          const filteredStock = inventory.data?.result?.filter(
+            (item) => item.stockInHand > 0
+          );
+          setInventories(filteredStock);
+        } else {
+          setInventories([]);
+        }
+      } catch (error) {
+        console.error("Error fetching inventory:", error);
+        setInventories([]);
+      } finally {
+        setLoading(false);
+        console.log(
+          "Loading set to false, updated inventories length:",
+          inventories.length
+        );
+      }
+    },
+    [selectedLocation, inventories]
+  );
 
   const handleSearchChange = (e) => {
     const newSearchTerm = e.target.value;

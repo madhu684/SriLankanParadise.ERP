@@ -15,7 +15,7 @@ import {
   get_added_empty_items_by_masterId_api,
 } from "../../../services/inventoryApi";
 
-export const AddEmptiesManagement = (handleClose) => {
+export const AddEmptiesManagement = (handleClose, handleSearch) => {
   const [formData, setFormData] = useState({
     warehouseLocation: null,
     itemDetails: [],
@@ -221,6 +221,8 @@ export const AddEmptiesManagement = (handleClose) => {
         }
 
         queryClient.invalidateQueries("addedEmptyItems");
+        console.log("Calling handleSearch with locationId:", locationId);
+        handleSearch(locationId);
         setFormData({ warehouseLocation: null, itemDetails: [] });
         refetchWarehouses();
         setSubmissionStatus("success");

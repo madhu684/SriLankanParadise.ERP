@@ -8,6 +8,7 @@ import ErrorComponent from "../errorComponent/errorComponent";
 const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
   const {
     formData,
+    itemModes,
     validFields,
     validationErrors,
     categoryOptions,
@@ -67,18 +68,12 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
 
   // NEW CODE: Check if selected item type is Service
   const isServiceItemType = () => {
-    const selectedItemType = itemTypes?.find(
-      (type) => type.itemTypeId === parseInt(formData.itemTypeId)
-    );
-    return selectedItemType?.name === "Treatments";
+    return formData.itemModeId === 2;
   };
 
   // Treatment type
   const isTreatmentType = () => {
-    const selectedItemType = itemTypes?.find(
-      (type) => type.name === "Treatments"
-    );
-    return selectedItemType?.itemTypeId === parseInt(formData.itemTypeId);
+    return formData.itemModeId === 2;
   };
 
   if (isLoading) {
@@ -178,6 +173,35 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
               {validationErrors.itemCode && (
                 <div className="invalid-feedback">
                   {validationErrors.itemCode}
+                </div>
+              )}
+            </div>
+
+            <div className="mb-3 mt-3">
+              <label htmlFor="itemMode" className="form-label">
+                Item Mode
+              </label>
+              <select
+                className={`form-select ${
+                  validFields.itemModeId ? "is-valid" : ""
+                } ${validationErrors.itemModeId ? "is-invalid" : ""}`}
+                id="itemMode"
+                value={formData.itemModeId}
+                onChange={(e) =>
+                  handleInputChange("itemModeId", parseInt(e.target.value))
+                }
+                required
+              >
+                <option value="">Select Item Mode</option>
+                {itemModes?.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {type.name}
+                  </option>
+                ))}
+              </select>
+              {validationErrors.itemModeId && (
+                <div className="invalid-feedback">
+                  {validationErrors.itemModeId}
                 </div>
               )}
             </div>

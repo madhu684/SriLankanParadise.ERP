@@ -134,7 +134,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                 onChange={(e) =>
                   handleInputChange("invoiceDate", e.target.value)
                 }
-                required
+                disabled
               />
               {validationErrors.invoiceDate && (
                 <div className="invalid-feedback">
@@ -443,6 +443,29 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
             {!useAppointment && (
               <div className="mt-3">
                 <h4>4. Customer Details</h4>
+                <div className="mb-3 mt-3">
+                  <label htmlFor="patientName" className="form-label">
+                    Token No
+                  </label>
+                  <input
+                    type="text"
+                    className={`form-control ${
+                      validFields.tokenNo ? "is-valid" : ""
+                    } ${validationErrors.patientName ? "is-invalid" : ""}`}
+                    id="patientName"
+                    placeholder="Enter Token No"
+                    value={formData.tokenNo}
+                    onChange={(e) =>
+                      handleInputChange("tokenNo", e.target.value)
+                    }
+                    required
+                  />
+                  {validationErrors.tokenNo && (
+                    <div className="invalid-feedback">
+                      {validationErrors.tokenNo}
+                    </div>
+                  )}
+                </div>
                 <div className="mb-3 mt-3">
                   <label htmlFor="patientName" className="form-label">
                     Customer Name

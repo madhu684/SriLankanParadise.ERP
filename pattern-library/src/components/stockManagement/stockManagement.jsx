@@ -1,13 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
 import { FaSearch } from "react-icons/fa";
 import useStockManagement from "./useStockManagement";
 import LoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 import Pagination from "../common/Pagination/Pagination";
+import { UserContext } from "../../context/userContext";
 
 const StockManagement = () => {
   const {
-    userLocations,
-    userLocationsLoading,
     selectedLocation,
     inventories,
     currentItems,
@@ -21,6 +20,12 @@ const StockManagement = () => {
     searchTerm,
     handleSearchChange,
   } = useStockManagement();
+
+  const { user, allLocations, userLocations, userLocationsLoading } =
+    useContext(UserContext);
+
+  const displayLocations = user?.userId === 1 ? allLocations : userLocations;
+
   return (
     <div className="container-sm mt-4" style={{ maxWidth: "1200px" }}>
       <h2 className="text-black fw-bold">Manage Stock</h2>
@@ -37,12 +42,27 @@ const StockManagement = () => {
             <option value="" disabled selected>
               Select a Warehouse
             </option>
-            {userLocations ? (
+            {/* {userLocations ? (
               userLocations.map((item) => (
                 <option key={item.locationId} value={item.locationId}>
                   {item.location.locationName}
                 </option>
               ))
+            ) : (
+              <option>No warehouses available</option>
+            )} */}
+            {displayLocations ? (
+              displayLocations.map((item) => {
+                const locationId = item.locationId;
+                const locationName =
+                  item.location?.locationName || item.locationName;
+
+                return (
+                  <option key={locationId} value={locationId}>
+                    {locationName}
+                  </option>
+                );
+              })
             ) : (
               <option>No warehouses available</option>
             )}

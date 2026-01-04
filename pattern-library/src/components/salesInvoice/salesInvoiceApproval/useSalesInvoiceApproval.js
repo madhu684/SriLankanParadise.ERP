@@ -67,8 +67,8 @@ const useSalesInvoiceApproval = ({ onFormSubmit, salesInvoice }) => {
         setLoading(false);
 
         queryClient.invalidateQueries([
-          "salesInvoicesByUserId",
-          sessionStorage.getItem("userId"),
+          "salesInvoiceOptions",
+          sessionStorage.getItem("companyId"),
         ]);
       }, 2000);
     } catch (error) {

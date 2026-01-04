@@ -1,13 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
 import { FaSearch } from "react-icons/fa";
 import useStockLevel from "./useStockLevel";
 import LoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 import Pagination from "../common/Pagination/Pagination";
+import { UserContext } from "../../context/userContext";
 
 const StockLevel = () => {
   const {
-    userLocations,
-    userLocationsLoading,
     selectedLocation,
     inventories,
     currentItems,
@@ -31,6 +30,11 @@ const StockLevel = () => {
     handleModalInputChange,
     handleModalSubmit,
   } = useStockLevel();
+
+  const { user, allLocations, userLocations, userLocationsLoading } =
+    useContext(UserContext);
+
+  const displayLocations = user?.userId === 1 ? allLocations : userLocations;
 
   return (
     <div className="container-sm mt-4" style={{ maxWidth: "1200px" }}>
@@ -62,12 +66,27 @@ const StockLevel = () => {
             <option value="" disabled>
               Select a Warehouse
             </option>
-            {userLocations ? (
+            {/* {userLocations ? (
               userLocations.map((item) => (
                 <option key={item.locationId} value={item.locationId}>
                   {item.location.locationName}
                 </option>
               ))
+            ) : (
+              <option>No warehouses available</option>
+            )} */}
+            {displayLocations ? (
+              displayLocations.map((item) => {
+                const locationId = item.locationId;
+                const locationName =
+                  item.location?.locationName || item.locationName;
+
+                return (
+                  <option key={locationId} value={locationId}>
+                    {locationName}
+                  </option>
+                );
+              })
             ) : (
               <option>No warehouses available</option>
             )}

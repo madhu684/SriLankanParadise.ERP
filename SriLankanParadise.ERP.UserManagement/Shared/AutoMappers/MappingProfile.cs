@@ -171,6 +171,7 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<SalesCustomerRequestModel, SalesCustomer>();
             CreateMap<SalesCustomer, SalesCustomerDto>();
             CreateMap<CustomerUpdateRequestModel, Customer>();
+            CreateMap<ItemMode, ItemModeDto>();
             // Add more mapping configurations if needed
 
         }

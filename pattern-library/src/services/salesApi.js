@@ -465,6 +465,42 @@ export const delete_sales_invoice_api = async (salesInvoiceId) => {
   }
 };
 
+export const get_paginated_sales_invoice_by_companyId = async ({
+  companyId,
+  date,
+  searchQuery,
+  filter,
+  pageNumber = 1,
+  pageSize = 10,
+}) => {
+  try {
+    const params = {
+      date,
+      searchQuery,
+      filter,
+      pageNumber,
+      pageSize,
+    };
+
+    if (date) params.date = date;
+    if (searchQuery) params.searchQuery = searchQuery;
+    if (filter) params.filter = filter;
+
+    const response = await api.get(
+      `/salesInvoice/PaginatedSalesInvoiceByCompanyId/${companyId}`,
+      {
+        params,
+        withCredentials: true,
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 //packing slips apis
 
 export const get_packing_slips_details_by_packing_slip_id = async (

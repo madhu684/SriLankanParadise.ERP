@@ -157,7 +157,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                 onChange={(e) =>
                   handleInputChange("receiptDate", e.target.value)
                 }
-                required
+                disabled
               />
               {validationErrors.receiptDate && (
                 <div className="invalid-feedback">
@@ -294,7 +294,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                               <span className="me-3">
                                 <i className="bi bi-file-earmark-text"></i>
                               </span>{" "}
-                              {si?.referenceNo}
+                              {si?.referenceNo} - {si?.inVoicedPersonName || ""}
                             </button>
                           </li>
                         ))}

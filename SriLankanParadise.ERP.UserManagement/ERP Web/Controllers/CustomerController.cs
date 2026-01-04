@@ -263,7 +263,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 }
                 else
                 {
-                    AddResponseMessage(Response, "No records found", null, true, HttpStatusCode.OK);
+                    AddResponseMessage(Response, "No records found", null, true, HttpStatusCode.NotFound);
                 }
 
             }

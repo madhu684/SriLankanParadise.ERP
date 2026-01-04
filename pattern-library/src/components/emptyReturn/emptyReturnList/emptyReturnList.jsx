@@ -550,6 +550,7 @@ const EmptyReturnList = () => {
       <AddEmpties
         show={showAddEmptiesForm}
         handleClose={() => setShowAddEmptiesForm(false)}
+        handleSearch={handleSearch}
       />
     </>
   );

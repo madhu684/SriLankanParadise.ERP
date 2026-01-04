@@ -280,6 +280,7 @@ const ItemMasterList = () => {
                   <th>Item Code</th>
                   <th>Item Name</th>
                   <th>Item Type</th>
+                  <th>Item Mode</th>
                   <th>Status</th>
                   <th>Created By</th>
                   <th>Details</th>
@@ -298,6 +299,7 @@ const ItemMasterList = () => {
                     <td>{im.itemCode}</td>
                     <td>{im.itemName}</td>
                     <td>{im.itemType?.name}</td>
+                    <td>{im.itemMode?.name || "N/A"}</td>
                     <td>
                       <span
                         className={`badge rounded-pill ${getStatusBadgeClass(

@@ -7,6 +7,7 @@ import {
   get_measurement_types_by_company_id_api,
   get_item_masters_by_company_id_with_query_api,
   put_item_master_api,
+  get_all_item_modes_api,
 } from "../../services/inventoryApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -41,6 +42,7 @@ const useItemMaster = ({ onFormSubmit }) => {
     bulkPrice: "0.00",
     supplier: {},
     supplierId: null,
+    itemModeId: null,
   });
 
   const [validFields, setValidFields] = useState({});
@@ -163,6 +165,14 @@ const useItemMaster = ({ onFormSubmit }) => {
     queryFn: () => fetchMeasurementTypes(),
   });
 
+  const { data: itemModes = [], isLoading: isItemModesLoading } = useQuery({
+    queryKey: ["itemMode"],
+    queryFn: async () => {
+      const response = await get_all_item_modes_api();
+      return response.data.result || [];
+    },
+  });
+
   const handleInputChange = (field, value) => {
     if (field === "measurementType") {
       setFormData({
@@ -247,7 +257,7 @@ const useItemMaster = ({ onFormSubmit }) => {
   }, [submissionStatus]);
 
   useEffect(() => {
-    if (formData.itemTypeName !== "Treatments") {
+    if (formData.itemModeId !== 2) {
       const costRatio = parseFloat(formData.costRatio) || 0;
       const fobInUSD = parseFloat(formData.fobInUSD) || 0;
 
@@ -264,7 +274,7 @@ const useItemMaster = ({ onFormSubmit }) => {
         mrp: mrp.toFixed(2),
       }));
     }
-  }, [formData.costRatio, formData.fobInUSD, formData.itemTypeName]);
+  }, [formData.costRatio, formData.fobInUSD, formData.itemModeId]);
 
   const validateField = (
     fieldName,
@@ -325,15 +335,21 @@ const useItemMaster = ({ onFormSubmit }) => {
       "Item code",
       formData.itemCode
     );
+    const isItemModeValid = validateField(
+      "itemModeId",
+      "Item mode",
+      formData.itemModeId
+    );
 
     // Skip validation for Service items
-    if (formData.itemTypeName === "Treatments") {
+    if (formData.itemModeId === 2) {
       console.log("Service item detected - skipping additional validations");
       return (
         isCategoryValid &&
         isItemNameValid &&
         isItemTypeValid &&
         isUnitPriceValid &&
+        isItemModeValid &&
         isItemCodeValid
       );
     }
@@ -422,7 +438,7 @@ const useItemMaster = ({ onFormSubmit }) => {
         }
 
         const itemMasterData = {
-          unitId: formData.itemTypeName === "Treatments" ? 6 : formData.unitId,
+          unitId: formData.itemModeId === 2 ? 6 : formData.unitId,
           categoryId: formData.categoryId,
           itemName: formData.itemName,
           status: status,
@@ -436,53 +452,35 @@ const useItemMaster = ({ onFormSubmit }) => {
             Quantity: parseFloat(item.quantity) || 0,
           })),
           inventoryUnitId:
-            formData.itemTypeName === "Treatments"
-              ? null
-              : formData.inventoryUnitId,
+            formData.itemModeId === 2 ? 6 : formData.inventoryUnitId,
           conversionRate:
-            formData.itemTypeName === "Treatments"
-              ? 1
-              : formData.conversionValue,
+            formData.itemModeId === 2 ? 1 : formData.conversionValue,
           itemCode: formData.itemCode,
           // reorderLevel:
-          //   formData.itemTypeName === "Treatments" ? 0 : formData.reorderLevel,
-          isInventoryItem:
-            formData.itemTypeName === "Treatments" ? false : true,
+          //   formData.itemModeId === 2 ? 0 : formData.reorderLevel,
+          isInventoryItem: formData.itemModeId === 2 ? false : true,
           permissionId: 1039,
           unitPrice: formData.unitPrice,
-          costRatio:
-            formData.itemTypeName === "Treatments" ? 0 : formData.costRatio,
-          fobInUSD:
-            formData.itemTypeName === "Treatments" ? 0 : formData.fobInUSD,
-          landedCost:
-            formData.itemTypeName === "Treatments" ? 0 : formData.landedCost,
+          costRatio: formData.itemModeId === 2 ? 0 : formData.costRatio,
+          fobInUSD: formData.itemModeId === 2 ? 0 : formData.fobInUSD,
+          landedCost: formData.itemModeId === 2 ? 0 : formData.landedCost,
           minNetSellingPrice:
-            formData.itemTypeName === "Treatments"
-              ? 0
-              : formData.minNetSellingPrice,
+            formData.itemModeId === 2 ? 0 : formData.minNetSellingPrice,
           sellingPrice:
-            formData.itemTypeName === "Treatments"
+            formData.itemModeId === 2
               ? formData.unitPrice
               : formData.sellingPrice,
-          mrp: formData.itemTypeName === "Treatments" ? 0 : formData.mrp,
+          mrp: formData.itemModeId === 2 ? 0 : formData.mrp,
           competitorPrice:
-            formData.itemTypeName === "Treatments"
-              ? 0
-              : formData.competitorPrice,
-          labelPrice:
-            formData.itemTypeName === "Treatments" ? 0 : formData.labelPrice,
+            formData.itemModeId === 2 ? 0 : formData.competitorPrice,
+          labelPrice: formData.itemModeId === 2 ? 0 : formData.labelPrice,
           averageSellingPrice:
-            formData.itemTypeName === "Treatments"
-              ? 0
-              : formData.averageSellingPrice,
+            formData.itemModeId === 2 ? 0 : formData.averageSellingPrice,
           stockClearance:
-            formData.itemTypeName === "Treatments"
-              ? 0
-              : formData.stockClearance,
-          bulkPrice:
-            formData.itemTypeName === "Treatments" ? 0 : formData.bulkPrice,
-          supplierId:
-            formData.itemTypeName === "Treatments" ? null : formData.supplierId,
+            formData.itemModeId === 2 ? 0 : formData.stockClearance,
+          bulkPrice: formData.itemModeId === 2 ? 0 : formData.bulkPrice,
+          supplierId: formData.itemModeId === 2 ? null : formData.supplierId,
+          itemModeId: formData.itemModeId,
         };
 
         console.log("sending request : ", itemMasterData);
@@ -491,8 +489,7 @@ const useItemMaster = ({ onFormSubmit }) => {
 
         if (formData.itemHierarchy === "main") {
           const itemMasterData = {
-            unitId:
-              formData.itemTypeName === "Treatments" ? 6 : formData.unitId,
+            unitId: formData.itemModeId === 2 ? 6 : formData.unitId,
             categoryId: formData.categoryId,
             itemName: formData.itemName,
             status: status,
@@ -506,55 +503,35 @@ const useItemMaster = ({ onFormSubmit }) => {
               Quantity: parseFloat(item.quantity) || 0,
             })),
             inventoryUnitId:
-              formData.itemTypeName === "Treatments"
-                ? null
-                : formData.inventoryUnitId,
+              formData.itemModeId === 2 ? 6 : formData.inventoryUnitId,
             conversionRate:
-              formData.itemTypeName === "Treatments"
-                ? 0
-                : formData.conversionValue,
+              formData.itemModeId === 2 ? 1 : formData.conversionValue,
             itemCode: formData.itemCode,
             // reorderLevel:
-            //   formData.itemTypeName === "Treatments" ? 0 : formData.reorderLevel,
-            isInventoryItem:
-              formData.itemTypeName === "Treatments" ? false : true,
+            //   formData.itemModeId === 2 ? 0 : formData.reorderLevel,
+            isInventoryItem: formData.itemModeId === 2 ? false : true,
             permissionId: 1040,
             unitPrice: formData.unitPrice,
-            costRatio:
-              formData.itemTypeName === "Treatments" ? 0 : formData.costRatio,
-            fobInUSD:
-              formData.itemTypeName === "Treatments" ? 0 : formData.fobInUSD,
-            landedCost:
-              formData.itemTypeName === "Treatments" ? 0 : formData.landedCost,
+            costRatio: formData.itemModeId === 2 ? 0 : formData.costRatio,
+            fobInUSD: formData.itemModeId === 2 ? 0 : formData.fobInUSD,
+            landedCost: formData.itemModeId === 2 ? 0 : formData.landedCost,
             minNetSellingPrice:
-              formData.itemTypeName === "Treatments"
-                ? 0
-                : formData.minNetSellingPrice,
+              formData.itemModeId === 2 ? 0 : formData.minNetSellingPrice,
             sellingPrice:
-              formData.itemTypeName === "Treatments"
+              formData.itemModeId === 2
                 ? formData.unitPrice
                 : formData.sellingPrice,
-            mrp: formData.itemTypeName === "Treatments" ? 0 : formData.mrp,
+            mrp: formData.itemModeId === 2 ? 0 : formData.mrp,
             competitorPrice:
-              formData.itemTypeName === "Treatments"
-                ? 0
-                : formData.competitorPrice,
-            labelPrice:
-              formData.itemTypeName === "Treatments" ? 0 : formData.labelPrice,
+              formData.itemModeId === 2 ? 0 : formData.competitorPrice,
+            labelPrice: formData.itemModeId === 2 ? 0 : formData.labelPrice,
             averageSellingPrice:
-              formData.itemTypeName === "Treatments"
-                ? 0
-                : formData.averageSellingPrice,
+              formData.itemModeId === 2 ? 0 : formData.averageSellingPrice,
             stockClearance:
-              formData.itemTypeName === "Treatments"
-                ? 0
-                : formData.stockClearance,
-            bulkPrice:
-              formData.itemTypeName === "Treatments" ? 0 : formData.bulkPrice,
-            supplierId:
-              formData.itemTypeName === "Treatments"
-                ? null
-                : formData.supplierId,
+              formData.itemModeId === 2 ? 0 : formData.stockClearance,
+            bulkPrice: formData.itemModeId === 2 ? 0 : formData.bulkPrice,
+            supplierId: formData.itemModeId === 2 ? null : formData.supplierId,
+            itemModeId: formData.itemModeId,
           };
 
           putResponse = await put_item_master_api(itemMasterId, itemMasterData);
@@ -661,8 +638,11 @@ const useItemMaster = ({ onFormSubmit }) => {
     setSupplierSearchTerm("");
   };
 
+  console.log(formData);
+
   return {
     formData,
+    itemModes,
     validFields,
     validationErrors,
     categoryOptions,

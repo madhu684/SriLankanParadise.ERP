@@ -4,12 +4,9 @@ import {
   put_location_inventory_by_id_api,
   update_reorderlevel_maxorder_level_api,
 } from "../../services/purchaseApi";
-import { useCallback, useState, useMemo, useContext } from "react";
-import { UserContext } from "../../context/userContext";
+import { useCallback, useState, useMemo } from "react";
 
 const useStockLevel = () => {
-  const { userLocations, userLocationsLoading } = useContext(UserContext);
-
   const [formData, setFormData] = useState({
     location: "",
     date: "",
@@ -253,8 +250,6 @@ const useStockLevel = () => {
   };
 
   return {
-    userLocations,
-    userLocationsLoading,
     selectedLocation,
     inventories,
     currentItems,

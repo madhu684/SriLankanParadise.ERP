@@ -1,8 +1,6 @@
-import { useState } from "react";
-import { get_sales_invoices_with_out_drafts_api } from "../../../services/salesApi";
-import { get_sales_invoices_by_user_id_api } from "../../../services/salesApi";
-import { get_user_permissions_api } from "../../../services/userManagementApi";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { get_paginated_sales_invoice_by_companyId } from "../../../services/salesApi";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 const useSalesInvoiceList = () => {
   const [selectedRows, setSelectedRows] = useState([]);
@@ -21,105 +19,67 @@ const useSalesInvoiceList = () => {
   const [SIDetail, setSIDetail] = useState("");
   const [showDeleteSIForm, setShowDeleteSIForm] = useState(false);
 
-  // Fetch user permissions
-  const {
-    data: userPermissions,
-    isLoading: isLoadingPermissions,
-    isError: isPermissionsError,
-    error: permissionError,
-  } = useQuery({
-    queryKey: ["userPermissions", sessionStorage.getItem("userId")],
-    queryFn: async () => {
-      const response = await get_user_permissions_api(
-        sessionStorage.getItem("userId")
-      );
-      return response.data.result;
-    },
-    enabled: !!sessionStorage.getItem("userId"),
-  });
+  // New states for pagination and filtering
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState("all");
+  const [pageNumber, setPageNumber] = useState(1);
+  const pageSize = 10;
 
-  // Helper function to check permissions
-  const hasPermission = (permissionName) => {
-    return userPermissions?.some(
-      (permission) =>
-        permission.permission.permissionName === permissionName &&
-        permission.permission.permissionStatus
-    );
-  };
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+      setPageNumber(1);
+    }, 500);
 
-  // Fetch sales invoices without drafts
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Get companyId from session storage
+  const companyId = sessionStorage.getItem("companyId") || 1;
+
+  // Calculate date based on filter
+  const currentDate =
+    filterType === "outstanding"
+      ? null
+      : new Date().toISOString().split("T")[0];
+
+  // Fetch sales invoices using React Query
   const {
-    data: salesInvoicesWithoutDrafts,
-    isLoading: isLoadingSalesInvoicesWithoutDrafts,
-    error: salesInvoicesWithoutDraftsError,
+    data,
+    isLoading: isLoadingData,
+    error,
+    refetch,
   } = useQuery({
     queryKey: [
-      "salesInvoicesWithoutDrafts",
-      sessionStorage.getItem("companyId"),
+      "salesInvoices",
+      companyId,
+      debouncedSearchQuery,
+      filterType,
+      pageNumber,
     ],
-    queryFn: async () => {
-      const response = await get_sales_invoices_with_out_drafts_api(
-        sessionStorage.getItem("companyId")
-      );
-      return response.data.result || [];
-    },
-    enabled: !isLoadingPermissions && hasPermission("Approve Sales Invoice"),
+    queryFn: () =>
+      get_paginated_sales_invoice_by_companyId({
+        companyId,
+        date: currentDate,
+        searchQuery: debouncedSearchQuery || null,
+        filter: filterType === "outstanding" ? "outstanding" : null,
+        pageNumber,
+        pageSize,
+      }),
+    placeholderData: keepPreviousData,
   });
 
-  // Fetch sales invoices by user ID
-  const {
-    data: salesInvoicesByUserId,
-    isLoading: isLoadingSalesInvoicesByUserId,
-    error: salesInvoicesByUserIdError,
-    refetch: refetchSalesInvoices,
-  } = useQuery({
-    queryKey: ["salesInvoicesByUserId", sessionStorage.getItem("userId")],
-    queryFn: async () => {
-      const response = await get_sales_invoices_by_user_id_api(
-        sessionStorage.getItem("userId")
-      );
-      return response.data.result || [];
-    },
-    enabled: !isLoadingPermissions && !!userPermissions,
-  });
-
-  // Combine and process sales invoices data
-  const salesInvoices = (() => {
-    if (isLoadingPermissions || !userPermissions) {
-      return [];
-    }
-
-    if (hasPermission("Approve Sales Invoice")) {
-      const invoicesWithoutDrafts = salesInvoicesWithoutDrafts || [];
-      const invoicesByUserId = salesInvoicesByUserId || [];
-
-      // Filter out duplicates
-      const uniqueInvoicesByUserId = invoicesByUserId.filter(
-        (invoice) =>
-          !invoicesWithoutDrafts.some(
-            (existingInvoice) =>
-              existingInvoice.salesInvoiceId === invoice.salesInvoiceId
-          )
-      );
-
-      return [...invoicesWithoutDrafts, ...uniqueInvoicesByUserId];
-    } else {
-      return salesInvoicesByUserId || [];
-    }
-  })();
-
-  // Calculate loading state
-  const isLoadingData =
-    isLoadingPermissions ||
-    (hasPermission("Approve Sales Invoice")
-      ? isLoadingSalesInvoicesWithoutDrafts || isLoadingSalesInvoicesByUserId
-      : isLoadingSalesInvoicesByUserId);
-
-  // Calculate error state
-  const error =
-    permissionError ||
-    salesInvoicesWithoutDraftsError ||
-    salesInvoicesByUserIdError;
+  // Extract sales invoices and pagination from response
+  const salesInvoices = data?.data?.result?.data || [];
+  const pagination = data?.data?.result?.pagination || {
+    totalCount: 0,
+    pageNumber: 1,
+    pageSize: 10,
+    totalPages: 1,
+    hasPreviousPage: false,
+    hasNextPage: false,
+  };
 
   const handleShowApproveSIModal = () => {
     setShowApproveSIModal(true);
@@ -156,8 +116,7 @@ const useSalesInvoiceList = () => {
   };
 
   const handleApproved = async () => {
-    // Refetch the data after approval
-    await refetchSalesInvoices();
+    await refetch();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -166,14 +125,12 @@ const useSalesInvoiceList = () => {
   };
 
   const handleRightOff = async () => {
+    await refetch();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
       setSelectedRowData([]);
     }, delay);
-
-    // Refetch data after right off operation
-    await refetchSalesInvoices();
   };
 
   const handleShowDetailSIModal = () => {
@@ -198,8 +155,7 @@ const useSalesInvoiceList = () => {
   };
 
   const handleUpdated = async () => {
-    // Refetch data after update
-    await refetchSalesInvoices();
+    await refetch();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -279,16 +235,22 @@ const useSalesInvoiceList = () => {
     );
   };
 
-  // Expose refetch function for external use
-  const refetch = () => {
-    refetchSalesInvoices();
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+  };
+
+  const handleFilterChange = (filter) => {
+    setFilterType(filter);
+    setPageNumber(1);
+  };
+
+  const handlePageChange = (newPage) => {
+    setPageNumber(newPage);
   };
 
   return {
     salesInvoices,
     isLoadingData,
-    isLoadingPermissions,
-    isPermissionsError,
     error,
     isAnyRowSelected,
     selectedRows,
@@ -301,10 +263,11 @@ const useSalesInvoiceList = () => {
     selectedRowData,
     showCreateSIForm,
     showUpdateSIForm,
-    userPermissions,
     SIDetail,
     showDeleteSIForm,
-    refetch,
+    searchQuery,
+    filterType,
+    pagination,
     setShowDeleteSIForm,
     areAnySelectedRowsPending,
     areAnySelectedRowsApproved,
@@ -321,11 +284,14 @@ const useSalesInvoiceList = () => {
     handleRightOff,
     setShowCreateSIForm,
     setShowUpdateSIForm,
-    hasPermission,
     handleUpdate,
     handleUpdated,
     handleClose,
     handleCloseDetailSIModal,
+    handleSearch,
+    handleFilterChange,
+    handlePageChange,
+    refetch,
   };
 };
 

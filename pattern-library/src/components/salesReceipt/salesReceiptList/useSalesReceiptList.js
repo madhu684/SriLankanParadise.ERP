@@ -37,18 +37,37 @@ const useSalesReceiptList = () => {
     queryKey: ["salesReceipts", companyId],
     queryFn: async () => {
       const response = await get_sales_receipts_with_out_drafts_api(companyId);
-      return response.data.result || [];
+      const allReceipts = response.data.result || [];
+
+      // Filter for today's receipts
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      return allReceipts.filter((receipt) => {
+        const receiptDate = new Date(receipt.receiptDate);
+        receiptDate.setHours(0, 0, 0, 0);
+        return receiptDate.getTime() === today.getTime();
+      });
     },
     enabled: !!companyId,
   });
 
   const { data: invoices = [], isLoading: isLoadingInvoices } = useQuery({
-    queryKey: ["SalesInvoices", companyId],
+    queryKey: ["salesInvoiceOptions", companyId],
     queryFn: async () => {
       const response = await get_sales_invoices_with_out_drafts_api(companyId);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
       const filteredInvoices = response.data.result
-        ? response.data.result.filter((si) => si.status === 2)
+        ? response.data.result.filter((si) => {
+            if (si.status !== 2 || !si.invoiceDate) return false;
+            const invoiceDate = new Date(si.invoiceDate);
+            invoiceDate.setHours(0, 0, 0, 0);
+            return invoiceDate.getTime() === today.getTime();
+          })
         : [];
+
       return filteredInvoices;
     },
   });

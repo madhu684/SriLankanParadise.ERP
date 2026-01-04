@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
@@ -209,6 +210,81 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 return salesInvoice;
             }
             catch(Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<PagedResult<SalesInvoice>> GetPaginatedFilteredSalesInvoiceByCompanyIdDate(int companyId, DateTime? date, string? searchQuery = null, string? filter = null, int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                // Input validation
+                if (pageNumber < 1) pageNumber = 1;
+                if (pageSize < 1) pageSize = 10;
+                if (pageSize > 100) pageSize = 100;
+
+                var query = _dbContext.SalesInvoices
+                    .AsNoTracking()
+                    .Include(si => si.SalesInvoiceDetails)
+                    .ThenInclude(ib => ib.Batch)
+                    .Include(si => si.SalesInvoiceDetails)
+                    .ThenInclude(ib => ib.ItemMaster)
+                    .ThenInclude(im => im.Unit)
+                    .Include(si => si.SalesOrder)
+                    .ThenInclude(so => so.SalesOrderDetails)
+                    .Where(si => si.Status != 0 && si.CompanyId == companyId);
+
+                // Apply search filter
+                if (!string.IsNullOrEmpty(searchQuery))
+                {
+                    var searchTerm = searchQuery.ToLower().Trim();
+                    query = query.Where(im =>
+                        im.ReferenceNo.ToLower().Contains(searchTerm)
+                    );
+                }
+
+                // Apply date filter
+                if (date.HasValue)
+                {
+                    var targetDate = date.Value.Date;
+                    query = query.Where(im => im.InvoiceDate.HasValue && im.InvoiceDate.Value.Date == targetDate);
+                }
+
+                // Apply additional filter
+                if (!string.IsNullOrEmpty(filter))
+                {
+                    switch (filter.ToLower())
+                    {
+                        case "outstanding":
+                            query = query.Where(im => im.AmountDue > 100);
+                            break;
+                        default:
+                            query = query;
+                            break;
+                            // Add more cases as needed
+                    }
+                }
+
+                var totalCount = await query.CountAsync();
+
+                // Apply pagination and ordering
+                var items = await query
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                return new PagedResult<SalesInvoice>
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+                };
+
+            }
+            catch (Exception)
             {
                 throw;
             }

@@ -61,11 +61,14 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public int? SupplierId { get; set; }
 
+        public int? ItemModeId { get; set; }
+
         public virtual UnitDto? Unit { get; set; }
         public virtual CategoryDto? Category { get; set; }
         public virtual UnitDto? InventoryUnit { get; set; }
         public virtual ItemTypeDto? ItemType { get; set; }
         public virtual SupplierDto? Supplier { get; set; }
+        public virtual ItemModeDto? ItemMode { get; set; }
         public ICollection<SubItemMasterDto>? SubItemMasters { get; set; }
 
 
