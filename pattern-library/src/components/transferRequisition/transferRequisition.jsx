@@ -391,48 +391,64 @@ const TransferRequisition = ({
               </thead>
               <tbody>
                 {formData.itemDetails.map((item, index) => (
-                  <tr key={index}>
-                    <td>{item.name}</td>
-                    <td>{item.unit}</td>
-                    <td>
-                      <input
-                        type="number"
-                        className={`form-control ${
-                          validFields[`quantity_${index}`] ? "is-valid" : ""
-                        } ${
-                          validationErrors[`quantity_${index}`]
-                            ? "is-invalid"
-                            : ""
-                        }`}
-                        value={item.quantity}
-                        onChange={(e) =>
-                          handleItemDetailsChange(
-                            index,
-                            "quantity",
-                            e.target.value
-                          )
-                        }
-                      />
-                      {validationErrors[`quantity_${index}`] && (
-                        <div className="invalid-feedback">
-                          {validationErrors[`quantity_${index}`]}
-                        </div>
+                  <>
+                    <tr key={index}>
+                      <td>{item.name}</td>
+                      <td>{item.unit}</td>
+                      <td>
+                        <input
+                          type="number"
+                          className={`form-control ${
+                            validFields[`quantity_${index}`] ? "is-valid" : ""
+                          } ${
+                            validationErrors[`quantity_${index}`]
+                              ? "is-invalid"
+                              : ""
+                          }`}
+                          value={item.quantity}
+                          onChange={(e) =>
+                            handleItemDetailsChange(
+                              index,
+                              "quantity",
+                              e.target.value
+                            )
+                          }
+                        />
+                        {validationErrors[`quantity_${index}`] && (
+                          <div className="invalid-feedback">
+                            {validationErrors[`quantity_${index}`]}
+                          </div>
+                        )}
+                      </td>
+                      <td>{item.totalStockInHand}</td>
+                      <td>{item.totalStockInHandTo}</td>
+                      <td>{item.reOrderLevel}</td>
+                      <td>{item.maxStockLevel}</td>
+                      <td>
+                        <button
+                          type="button"
+                          className="btn btn-outline-danger"
+                          onClick={() => handleRemoveItem(index)}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                    {item.maxStockLevel &&
+                      item.totalStockInHand >= item.maxStockLevel && (
+                        <tr key={`warning-${index}`}>
+                          <td colSpan="8">
+                            <div className="alert alert-warning" role="alert">
+                              <span className="me-3">
+                                <i className="bi bi-exclamation-triangle"></i>
+                              </span>
+                              Item have reached the maximum stock level{" "}
+                              {item.maxStockLevel}. No need to request more.
+                            </div>
+                          </td>
+                        </tr>
                       )}
-                    </td>
-                    <td>{item.totalStockInHand}</td>
-                    <td>{item.totalStockInHandTo}</td>
-                    <td>{item.reOrderLevel}</td>
-                    <td>{item.maxStockLevel}</td>
-                    <td>
-                      <button
-                        type="button"
-                        className="btn btn-outline-danger"
-                        onClick={() => handleRemoveItem(index)}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
+                  </>
                 ))}
               </tbody>
             </table>

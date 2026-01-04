@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { get_item_locations_inventories_by_location_id_api } from "../../services/purchaseApi";
-import { useCallback, useState, useEffect, useContext } from "react";
-import { UserContext } from "../../context/userContext";
+import { useCallback, useState, useEffect } from "react";
 
 const useStockManagement = () => {
   const [formData, setFormData] = useState({
@@ -16,8 +15,6 @@ const useStockManagement = () => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-
-  const { userLocations, userLocationsLoading } = useContext(UserContext);
 
   const filteredInventories = inventories
     ? inventories.filter((item) => {
@@ -73,8 +70,6 @@ const useStockManagement = () => {
   };
 
   return {
-    userLocations,
-    userLocationsLoading,
     selectedLocation,
     inventories: filteredInventories,
     currentItems,

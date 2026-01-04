@@ -12,7 +12,7 @@ const useSalesReceipt = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
     receiptDate: new Date().toISOString().split("T")[0],
     referenceNo: "",
-    paymentModeId: "",
+    paymentModeId: 1,
     attachments: [],
     salesInvoiceId: "",
     salesInvoiceIds: [],

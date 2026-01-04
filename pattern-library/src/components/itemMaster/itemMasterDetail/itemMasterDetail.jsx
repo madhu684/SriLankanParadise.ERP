@@ -175,6 +175,10 @@ const ItemMasterDetail = ({ show, handleClose, itemMaster }) => {
                         : "Main Item"
                     }
                   />
+                  <InfoRow
+                    label="Item Mode"
+                    value={itemMaster?.itemMode?.name || "N/A"}
+                  />
                 </div>
               </InfoCard>
             </Col>

@@ -17,6 +17,7 @@ import {
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useMin = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -634,7 +635,10 @@ const useMin = ({ onFormSubmit }) => {
     console.log("itemBatches: ", itemBatches);
 
     if (!itemBatches || itemBatches.length === 0) {
-      console.log("No batches available for this item in selected location");
+      console.log("No batches available for this item in this warehouse");
+      toast.error(
+        `No batches available for "${item.itemName}" in this warehouse`
+      );
       setNoItembatchesError(true);
       setSearchTerm("");
       setDummySearchTerm("");

@@ -5,7 +5,10 @@ import {
   get_user_permissions_api,
 } from "../services/userManagementApi";
 import { get_cashier_session_by_user_id_api } from "../services/salesApi";
-import { get_user_locations_by_user_id_api } from "../services/purchaseApi";
+import {
+  get_company_locations_api,
+  get_user_locations_by_user_id_api,
+} from "../services/purchaseApi";
 
 export const UserContext = createContext();
 
@@ -73,6 +76,19 @@ const UserProvider = ({ children }) => {
     enabled: !!userId,
   });
 
+  const { data: allLocations = [], isLoading: allLocationsLoading } = useQuery({
+    queryKey: ["allLocations"],
+    queryFn: async () => {
+      const response = await get_company_locations_api(user.companyId || 1);
+      const filteredLocations = response.data.result.filter(
+        (loc) => loc.locationTypeId === 2
+      );
+      return filteredLocations || [];
+    },
+    enabled: !!userId,
+  });
+
+  // Helper functions
   const permissionsMap = useMemo(() => {
     if (!userPermissions) return new Set();
     return new Set(
@@ -120,11 +136,13 @@ const UserProvider = ({ children }) => {
       value={{
         user,
         userLocations,
+        allLocations,
         activeCashierSession,
         userLoading,
         userLocationsLoading,
         activeCashierSessionLoading,
         isLoadingPermissions,
+        allLocationsLoading,
         hasPermission,
         hasAllPermissions,
         hasAnyPermission,

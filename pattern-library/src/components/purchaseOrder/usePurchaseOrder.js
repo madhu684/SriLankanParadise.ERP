@@ -200,19 +200,21 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
       );
 
       const items =
-        response.data?.result?.map((summary) => ({
-          itemMasterId: summary.itemMasterId,
-          itemName: summary.itemMaster?.itemName || "",
-          itemCode: summary.itemMaster?.itemCode || "",
-          unit: summary.itemMaster?.unit || { unitName: "" },
-          categoryId: summary.itemMaster?.category?.categoryId || "",
-          itemTypeId: summary.itemMaster?.itemType?.itemTypeId || "",
-          supplierId: summary.itemMaster?.supplierId || null,
-          totalStockInHand: summary.totalStockInHand,
-          minReOrderLevel: summary.minReOrderLevel,
-          maxStockLevel: summary.maxStockLevel,
-          supplierItems: [],
-        })) || [];
+        response.data?.result
+          ?.filter((item) => item.totalStockInHand < item.maxStockLevel)
+          .map((summary) => ({
+            itemMasterId: summary.itemMasterId,
+            itemName: summary.itemMaster?.itemName || "",
+            itemCode: summary.itemMaster?.itemCode || "",
+            unit: summary.itemMaster?.unit || { unitName: "" },
+            categoryId: summary.itemMaster?.category?.categoryId || "",
+            itemTypeId: summary.itemMaster?.itemType?.itemTypeId || "",
+            supplierId: summary.itemMaster?.supplierId || null,
+            totalStockInHand: summary.totalStockInHand,
+            minReOrderLevel: summary.minReOrderLevel,
+            maxStockLevel: summary.maxStockLevel,
+            supplierItems: [],
+          })) || [];
 
       return items.filter(
         (item) =>
@@ -1347,78 +1349,81 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
       const companyId = sessionStorage.getItem("companyId");
 
       const newItemDetails = await Promise.all(
-        lowStockItems.map(async (item) => {
-          const initializedCharges =
-            chargesAndDeductions
-              ?.filter((charge) => charge.isApplicableForLineItem)
-              .map((charge) => ({
-                id: charge.chargesAndDeductionId,
-                name: charge.displayName,
-                value: charge.amount || charge.percentage,
-                sign: charge.sign,
-                isPercentage: charge.percentage !== null,
-              })) || [];
+        lowStockItems
+          .filter((item) => item.totalStockInHand < item.maxStockLevel)
+          .map(async (item) => {
+            const initializedCharges =
+              chargesAndDeductions
+                ?.filter((charge) => charge.isApplicableForLineItem)
+                .map((charge) => ({
+                  id: charge.chargesAndDeductionId,
+                  name: charge.displayName,
+                  value: charge.amount || charge.percentage,
+                  sign: charge.sign,
+                  isPercentage: charge.percentage !== null,
+                })) || [];
 
-          const itemBatch = await get_item_batches_by_item_master_id_api(
-            item.itemMasterId,
-            companyId
-          );
-
-          const latestBatch = itemBatch.data.result
-            ? itemBatch.data.result.sort((a, b) => b.batchId - a.batchId)[0]
-            : null;
-
-          const supplierItemResponse =
-            await get_supplier_items_by_type_category_api(
-              companyId,
-              parseInt(item.itemMaster?.itemType?.itemTypeId),
-              parseInt(item.itemMaster?.category?.categoryId),
-              userLocation[0]?.locationId
+            const itemBatch = await get_item_batches_by_item_master_id_api(
+              item.itemMasterId,
+              companyId
             );
 
-          const supplierItems = supplierItemResponse.data.result
-            ? supplierItemResponse.data.result.filter(
-                (si) =>
-                  si.itemMasterId !== item.itemMasterId &&
-                  si.supplierName !== formData?.selectedSupplier?.supplierName
-              )
-            : [];
+            const latestBatch = itemBatch.data.result
+              ? itemBatch.data.result.sort((a, b) => b.batchId - a.batchId)[0]
+              : null;
 
-          // Calculate initial totalPrice with line-item charges
-          const basePrice =
-            (item.maxStockLevel - item.totalStockInHand >= 0
-              ? item.maxStockLevel - item.totalStockInHand
-              : 0) * (latestBatch?.costPrice || 0);
+            const supplierItemResponse =
+              await get_supplier_items_by_type_category_api(
+                companyId,
+                parseInt(item.itemMaster?.itemType?.itemTypeId),
+                parseInt(item.itemMaster?.category?.categoryId),
+                userLocation[0]?.locationId
+              );
 
-          let totalPrice = basePrice;
-          initializedCharges.forEach((charge) => {
-            if (charge.isPercentage) {
-              const amount = (basePrice * charge.value) / 100;
-              totalPrice += charge.sign === "+" ? amount : -amount;
-            } else {
-              totalPrice += charge.sign === "+" ? charge.value : -charge.value;
-            }
-          });
+            const supplierItems = supplierItemResponse.data.result
+              ? supplierItemResponse.data.result.filter(
+                  (si) =>
+                    si.itemMasterId !== item.itemMasterId &&
+                    si.supplierName !== formData?.selectedSupplier?.supplierName
+                )
+              : [];
 
-          return {
-            id: item.itemMasterId,
-            name: item.itemMaster.itemName,
-            unit: item.itemMaster.unit?.unitName || "",
-            categoryId: item.itemMaster?.category?.categoryId || "",
-            itemTypeId: item.itemMaster?.itemType?.itemTypeId || "",
-            quantity:
-              item.maxStockLevel - item.totalStockInHand >= 0
+            // Calculate initial totalPrice with line-item charges
+            const basePrice =
+              (item.maxStockLevel - item.totalStockInHand >= 0
                 ? item.maxStockLevel - item.totalStockInHand
-                : 0,
-            unitPrice: latestBatch?.costPrice || 0.0,
-            totalPrice: totalPrice, // Now correctly calculated
-            supplierItems,
-            totalStockInHand: item.totalStockInHand,
-            minReOrderLevel: item.minReOrderLevel,
-            maxStockLevel: item.maxStockLevel,
-            chargesAndDeductions: initializedCharges,
-          };
-        })
+                : 0) * (latestBatch?.costPrice || 0);
+
+            let totalPrice = basePrice;
+            initializedCharges.forEach((charge) => {
+              if (charge.isPercentage) {
+                const amount = (basePrice * charge.value) / 100;
+                totalPrice += charge.sign === "+" ? amount : -amount;
+              } else {
+                totalPrice +=
+                  charge.sign === "+" ? charge.value : -charge.value;
+              }
+            });
+
+            return {
+              id: item.itemMasterId,
+              name: item.itemMaster.itemName,
+              unit: item.itemMaster.unit?.unitName || "",
+              categoryId: item.itemMaster?.category?.categoryId || "",
+              itemTypeId: item.itemMaster?.itemType?.itemTypeId || "",
+              quantity:
+                item.maxStockLevel - item.totalStockInHand >= 0
+                  ? item.maxStockLevel - item.totalStockInHand
+                  : 0,
+              unitPrice: latestBatch?.costPrice || 0.0,
+              totalPrice: totalPrice, // Now correctly calculated
+              supplierItems,
+              totalStockInHand: item.totalStockInHand,
+              minReOrderLevel: item.minReOrderLevel,
+              maxStockLevel: item.maxStockLevel,
+              chargesAndDeductions: initializedCharges,
+            };
+          })
       );
 
       // Update state with correct totals using fresh data

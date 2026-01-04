@@ -380,12 +380,12 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                     </span>
                   )}
                 </div>
-                {noItembatchesError && (
+                {/* {noItembatchesError && (
                   <span className="text-danger">
                     No batches available for this item in user location,{" "}
                     {userLocations[0]?.location?.locationName}
                   </span>
-                )}
+                )} */}
                 {isItemsLoading && <LoadingSpinner />}
                 {isItemsError && (
                   <ErrorComponent error="Error fetching items" />
@@ -448,7 +448,10 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                       >
                         <option value="">Select item batch</option>
                         {locationInventories
-                          ?.filter((i) => i.itemMasterId === item.id)
+                          ?.filter(
+                            (i) =>
+                              i.itemMasterId === item.id && i.stockInHand > 0
+                          )
                           ?.map((i, batchIndex) => (
                             <option
                               key={batchIndex}
