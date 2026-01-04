@@ -434,20 +434,20 @@ const TransferRequisition = ({
                         </button>
                       </td>
                     </tr>
-                    {item.maxStockLevel &&
-                      item.totalStockInHand >= item.maxStockLevel && (
-                        <tr key={`warning-${index}`}>
-                          <td colSpan="8">
-                            <div className="alert alert-warning" role="alert">
-                              <span className="me-3">
-                                <i className="bi bi-exclamation-triangle"></i>
-                              </span>
-                              Item have reached the maximum stock level{" "}
-                              {item.maxStockLevel}. No need to request more.
-                            </div>
-                          </td>
-                        </tr>
-                      )}
+                    {item.maxStockLevel > 0 &&
+                    item.totalStockInHand >= item.maxStockLevel ? (
+                      <tr key={`warning-${index}`}>
+                        <td colSpan="8">
+                          <div className="alert alert-warning" role="alert">
+                            <span className="me-3">
+                              <i className="bi bi-exclamation-triangle"></i>
+                            </span>
+                            Item have reached the maximum stock level. No need
+                            to request more.
+                          </div>
+                        </td>
+                      </tr>
+                    ) : null}
                   </>
                 ))}
               </tbody>
