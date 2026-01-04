@@ -22,7 +22,7 @@ import toast from "react-hot-toast";
 const useMin = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
     itemDetails: [],
-    status: "",
+    status: "4",
     mrnId: "",
     tokenNo: null,
   });

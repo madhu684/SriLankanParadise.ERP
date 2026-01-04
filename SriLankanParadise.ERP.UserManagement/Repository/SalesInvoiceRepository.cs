@@ -244,25 +244,45 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     );
                 }
 
-                // Apply date filter
-                if (date.HasValue)
-                {
-                    var targetDate = date.Value.Date;
-                    query = query.Where(im => im.InvoiceDate.HasValue && im.InvoiceDate.Value.Date == targetDate);
-                }
-
-                // Apply additional filter
+                // MODIFIED SECTION - Apply date and filter logic
                 if (!string.IsNullOrEmpty(filter))
                 {
                     switch (filter.ToLower())
                     {
                         case "outstanding":
+                            // Only outstanding invoices (regardless of date)
                             query = query.Where(im => im.AmountDue > 100);
                             break;
-                        default:
-                            query = query;
+
+                        case "all":
+                            // Today's invoices + all outstanding invoices
+                            if (date.HasValue)
+                            {
+                                var targetDate = date.Value.Date;
+                                query = query.Where(im =>
+                                    (im.InvoiceDate.HasValue && im.InvoiceDate.Value.Date == targetDate) ||
+                                    im.AmountDue > 100
+                                );
+                            }
                             break;
-                            // Add more cases as needed
+
+                        default:
+                            // If date is provided but no specific filter, use date only
+                            if (date.HasValue)
+                            {
+                                var targetDate = date.Value.Date;
+                                query = query.Where(im => im.InvoiceDate.HasValue && im.InvoiceDate.Value.Date == targetDate);
+                            }
+                            break;
+                    }
+                }
+                else
+                {
+                    // No filter specified, apply date filter only if date is provided
+                    if (date.HasValue)
+                    {
+                        var targetDate = date.Value.Date;
+                        query = query.Where(im => im.InvoiceDate.HasValue && im.InvoiceDate.Value.Date == targetDate);
                     }
                 }
 
@@ -270,6 +290,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
 
                 // Apply pagination and ordering
                 var items = await query
+                    .OrderByDescending(si => si.InvoiceDate) // Added ordering for better UX
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
                     .ToListAsync();
@@ -282,7 +303,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     PageSize = pageSize,
                     TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
                 };
-
             }
             catch (Exception)
             {
