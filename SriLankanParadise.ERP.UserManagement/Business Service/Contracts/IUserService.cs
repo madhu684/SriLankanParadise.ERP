@@ -13,6 +13,6 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task UpdateUser(int UserId, User user);
         Task Deactivate(int userId);
         Task Activate(int userId);
-
+        Task<bool> ResetPasswordAsync(int userId, string password);
     }
 }

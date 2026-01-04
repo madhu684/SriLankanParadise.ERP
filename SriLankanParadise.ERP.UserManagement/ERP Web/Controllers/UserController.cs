@@ -305,5 +305,27 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
         }
+
+        [HttpPatch("reset-password-admin/{userId}/{password}")]
+        public async Task<ApiResponseModel> ResetPasswordAdmin(int userId, string password)
+        {
+            try
+            {
+                var success = await _userService.ResetPasswordAsync(userId, password);
+                if (!success)
+                {
+                    _logger.LogWarning("Invalid user");
+                    return AddResponseMessage(Response, "Invalid user", null, true, HttpStatusCode.BadRequest);
+                }
+
+                _logger.LogInformation("Password updated successfully.");
+                return AddResponseMessage(Response, "Password updated successfully", null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred during password update.");
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
     }
 }
