@@ -39,10 +39,11 @@ const useSalesInvoiceList = () => {
   const companyId = sessionStorage.getItem("companyId") || 1;
 
   // Calculate date based on filter
-  const currentDate =
-    filterType === "outstanding"
-      ? null
-      : new Date().toISOString().split("T")[0];
+  // const currentDate =
+  //   filterType === "outstanding"
+  //     ? null
+  //     : new Date().toISOString().split("T")[0];
+  const currentDate = new Date().toISOString().split("T")[0];
 
   // Fetch sales invoices using React Query
   const {
@@ -63,7 +64,7 @@ const useSalesInvoiceList = () => {
         companyId,
         date: currentDate,
         searchQuery: debouncedSearchQuery || null,
-        filter: filterType === "outstanding" ? "outstanding" : null,
+        filter: filterType === "outstanding" ? "outstanding" : "all",
         pageNumber,
         pageSize,
       }),
