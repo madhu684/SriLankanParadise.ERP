@@ -1158,7 +1158,6 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.CreatedDate).HasColumnType("datetime");
             entity.Property(e => e.ExcessAmount).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
-            entity.Property(e => e.PaymentReferenceNo).HasMaxLength(20);
             entity.Property(e => e.ReceiptDate).HasColumnType("date");
             entity.Property(e => e.ReferenceNumber).HasMaxLength(255);
             entity.Property(e => e.OutstandingAmount).HasColumnType("decimal(18, 2)");
