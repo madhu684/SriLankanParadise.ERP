@@ -566,18 +566,7 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                     <li className="dropdown-item">
                       Error: {itemsError.message}
                     </li>
-                  ) : availableItems === null ||
-                    availableItems.length === 0 ||
-                    availableItems.filter((item) => {
-                      // If batchStockType is FIFO, filter out items already present in formData.itemDetails
-                      if (company.batchStockType === "FIFO") {
-                        return !formData.itemDetails.some(
-                          (detail) => detail.id === item.itemMasterId
-                        );
-                      }
-                      // Otherwise, include all items
-                      return true;
-                    }).length === 0 ? (
+                  ) : availableItems === null || availableItems.length === 0 ? (
                     <li className="dropdown-item">
                       <span className="me-3">
                         <i className="bi bi-emoji-frown"></i>
@@ -585,31 +574,20 @@ const SalesInvoice = ({ handleClose, handleUpdated, salesOrder }) => {
                       No items found
                     </li>
                   ) : (
-                    availableItems
-                      .filter((item) => {
-                        // If batchStockType is FIFO, filter out items already present in formData.itemDetails
-                        if (company.batchStockType === "FIFO") {
-                          return !formData.itemDetails.some(
-                            (detail) => detail.id === item.itemMasterId
-                          );
-                        }
-                        // Otherwise, include all items
-                        return true;
-                      })
-                      .map((item) => (
-                        <li key={item.itemMasterId}>
-                          <button
-                            type="button"
-                            className="dropdown-item"
-                            onClick={() => handleSelectItem(item)}
-                          >
-                            <span className="me-3">
-                              <i className="bi bi-cart4"></i>
-                            </span>
-                            {item?.itemCode} - {item?.itemName}
-                          </button>
-                        </li>
-                      ))
+                    availableItems.map((item) => (
+                      <li key={item.itemMasterId}>
+                        <button
+                          type="button"
+                          className="dropdown-item"
+                          onClick={() => handleSelectItem(item)}
+                        >
+                          <span className="me-3">
+                            <i className="bi bi-cart4"></i>
+                          </span>
+                          {item?.itemCode} - {item?.itemName}
+                        </button>
+                      </li>
+                    ))
                   )}
                 </ul>
               </div>

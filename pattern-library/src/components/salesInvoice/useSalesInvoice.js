@@ -18,6 +18,7 @@ import {
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { get_appointment_tokens_by_date_api } from "../../services/ayuOMSApi";
 import { useQuery } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   const [useAppointment, setUseAppointment] = useState(false);
@@ -1178,7 +1179,6 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         })) || [];
 
     let availableStock = 0;
-    let highestSellingPrice = 0;
 
     try {
       if (item.isInventoryItem === true) {
@@ -1191,21 +1191,9 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
 
         if (availableStock <= 0) {
           console.warn("No stock available for this item");
-          alert("No stock available for this item");
+          toast.error(`No stock available for ${item.itemName}`);
           return;
         }
-
-        // Get highest selling price from available batches
-        const batchesResponse = await get_item_batches_by_item_master_id_api(
-          item.itemMasterId,
-          sessionStorage.getItem("companyId")
-        );
-        highestSellingPrice =
-          batchesResponse?.data?.result?.reduce(
-            (maxPrice, batch) =>
-              batch.sellingPrice > maxPrice ? batch.sellingPrice : maxPrice,
-            0
-          ) || 0;
       }
 
       // Update form data
@@ -1220,10 +1208,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
             batchId: null,
             stockInHand: availableStock,
             quantity: item.isInventoryItem === false ? 1 : 0,
-            unitPrice:
-              item.isInventoryItem === true
-                ? highestSellingPrice
-                : item.unitPrice,
+            unitPrice: item.unitPrice,
             totalPrice: item.isInventoryItem === false ? item.unitPrice : 0.0,
             isInventoryItem: item?.isInventoryItem,
             chargesAndDeductions: initializedCharges,

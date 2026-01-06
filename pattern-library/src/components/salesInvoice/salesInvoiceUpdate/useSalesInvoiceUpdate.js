@@ -25,6 +25,7 @@ import {
   get_appointment_by_id_api,
   get_appointment_tokens_by_date_api,
 } from "../../../services/ayuOMSApi";
+import toast from "react-hot-toast";
 
 const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   const [useAppointment, setUseAppointment] = useState(
@@ -1223,7 +1224,6 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
         })) || [];
 
     let availableStock = 0;
-    let highestSellingPrice = 0;
 
     try {
       if (item.isInventoryItem === true) {
@@ -1236,21 +1236,9 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
 
         if (availableStock <= 0) {
           console.warn("No stock available for this item");
-          alert("No stock available for this item");
+          toast.error(`No stock available for ${item.itemName}`);
           return;
         }
-
-        // Get highest selling price from available batches
-        const batchesResponse = await get_item_batches_by_item_master_id_api(
-          item.itemMasterId,
-          sessionStorage.getItem("companyId")
-        );
-        highestSellingPrice =
-          batchesResponse?.data?.result?.reduce(
-            (maxPrice, batch) =>
-              batch.sellingPrice > maxPrice ? batch.sellingPrice : maxPrice,
-            0
-          ) || 0;
       }
 
       setFormData((prevFormData) => ({
@@ -1266,10 +1254,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
             unit: item?.unit?.unitName,
             stockInHand: item.isInventoryItem === true ? availableStock : 0,
             quantity: item.isInventoryItem === false ? 1 : 0,
-            unitPrice:
-              item.isInventoryItem === false
-                ? item.unitPrice
-                : highestSellingPrice,
+            unitPrice: item.unitPrice,
             totalPrice:
               item.isInventoryItem === false ? item.unitPrice : item.unitPrice,
             chargesAndDeductions: initializedCharges,
