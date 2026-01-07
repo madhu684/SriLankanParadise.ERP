@@ -422,7 +422,7 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                   <th>Unit</th>
                   {searchByMrn && formData.mrnId && <th>Requested Quantity</th>}
                   <th>Stock In Hand</th>
-                  <th>Item Batch</th>
+                  {/* <th>Item Batch</th> */}
                   <th>Dispatched Quantity</th>
                   <th>Action</th>
                 </tr>
@@ -434,7 +434,7 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                     <td>{item.unit}</td>
                     {searchByMrn && formData.mrnId && <td>{item.quantity}</td>}
                     <td>{item.remainingQuantity}</td>
-                    <td>
+                    {/* <td>
                       <select
                         className="form-select"
                         value={item.batchId}
@@ -462,7 +462,7 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                             </option>
                           ))}
                       </select>
-                    </td>
+                    </td> */}
                     <td>
                       <input
                         type="number"

@@ -70,16 +70,20 @@ const MinApproval = ({ show, handleClose, handleApproved, min }) => {
             </p>
             {parseInt(min.status.toString().charAt(1), 10) === 2 && (
               <>
-                <p>
-                  <strong>Approved By:</strong> {min.approvedBy}
-                </p>
-                <p>
-                  <strong>Approved Date:</strong>{" "}
-                  {moment
-                    .utc(min?.approvedDate)
-                    .tz("Asia/Colombo")
-                    .format("YYYY-MM-DD hh:mm:ss A")}
-                </p>
+                {min?.approvedBy && (
+                  <p>
+                    <strong>Approved By:</strong> {min.approvedBy}
+                  </p>
+                )}
+                {min?.approvedDate && (
+                  <p>
+                    <strong>Approved Date:</strong>{" "}
+                    {moment
+                      .utc(min?.approvedDate)
+                      .tz("Asia/Colombo")
+                      .format("YYYY-MM-DD hh:mm:ss A")}
+                  </p>
+                )}
               </>
             )}
           </div>
@@ -99,7 +103,6 @@ const MinApproval = ({ show, handleClose, handleApproved, min }) => {
             <tr>
               <th>Item Name</th>
               <th>Unit</th>
-              <th>Item Batch</th>
               <th>Dispatched Quantity</th>
             </tr>
           </thead>
@@ -108,7 +111,6 @@ const MinApproval = ({ show, handleClose, handleApproved, min }) => {
               <tr key={index}>
                 <td>{item.itemMaster?.itemName}</td>
                 <td>{item.itemMaster?.unit.unitName}</td>
-                <td>{item.batch?.batchRef}</td>
                 <td>{item.quantity}</td>
               </tr>
             ))}

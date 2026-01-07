@@ -201,7 +201,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
 
       const items =
         response.data?.result
-          ?.filter((item) => item.totalStockInHand < item.maxStockLevel)
+          ?.filter((item) => item.totalStockInHand <= item.maxStockLevel)
           .map((summary) => ({
             itemMasterId: summary.itemMasterId,
             itemName: summary.itemMaster?.itemName || "",
@@ -1350,7 +1350,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
 
       const newItemDetails = await Promise.all(
         lowStockItems
-          .filter((item) => item.totalStockInHand < item.maxStockLevel)
+          .filter((item) => item.totalStockInHand <= item.maxStockLevel)
           .map(async (item) => {
             const initializedCharges =
               chargesAndDeductions

@@ -252,9 +252,9 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
               >
                 <option value="">Select Category</option>
                 {categoryOptions
-                  ?.filter((category) =>
-                    isTreatmentType() ? category.isTreatment === true : true
-                  )
+                  // ?.filter((category) =>
+                  //   isTreatmentType() ? category.isTreatment === true : true
+                  // )
                   .map((category) => (
                     <option
                       key={category.categoryId}

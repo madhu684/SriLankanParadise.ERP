@@ -11,7 +11,7 @@ public partial class IssueDetail
 
     public int ItemMasterId { get; set; }
 
-    public int BatchId { get; set; }
+    public int? BatchId { get; set; }
 
     public decimal? Quantity { get; set; }
 

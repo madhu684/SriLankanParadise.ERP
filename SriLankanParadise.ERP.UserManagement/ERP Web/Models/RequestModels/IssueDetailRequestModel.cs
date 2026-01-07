@@ -9,7 +9,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels
 
         public int ItemMasterId { get; set; }
 
-        public int BatchId { get; set; }
+        public int? BatchId { get; set; }
 
         public int? Quantity { get; set; }
 

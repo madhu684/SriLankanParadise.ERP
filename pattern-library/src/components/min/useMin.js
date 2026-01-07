@@ -2,18 +2,15 @@ import { useState, useEffect, useRef } from "react";
 import {
   get_requisition_masters_with_out_drafts_api,
   get_user_locations_by_user_id_api,
-  patch_item_batch_api,
-  patch_location_inventory_api,
-  post_location_inventory_movement_api,
   update_min_state_in_mrn_api,
+  get_Location_Inventory_Summary_By_Item_Name_api,
+  post_reduce_inventory_fifo_api,
 } from "../../services/purchaseApi";
 import {
   post_issue_master_api,
   post_issue_detail_api,
-  get_issue_masters_by_requisition_master_id_api,
   get_item_batches_api,
   get_locations_inventories_by_location_id_api,
-  post_location_inventory_goods_in_transit_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
@@ -273,7 +270,6 @@ const useMin = ({ onFormSubmit }) => {
     }
 
     let isItemQuantityValid = true;
-    let isBatchValid = true;
 
     formData.itemDetails.forEach((item, index) => {
       // Validate issued quantity
@@ -297,16 +293,6 @@ const useMin = ({ onFormSubmit }) => {
         quantityAdditionalRules
       );
       isItemQuantityValid = isItemQuantityValid && isValidQuantity;
-
-      // Validate batch selection
-      const batchFieldName = `batchId_${index}`;
-      const batchFieldDisplayName = `Item Batch for ${item.name}`;
-      const isValidBatch = validateField(
-        batchFieldName,
-        batchFieldDisplayName,
-        item.batchId
-      );
-      isBatchValid = isBatchValid && isValidBatch;
     });
 
     const isItemsPresent = formData.itemDetails.length > 0;
@@ -318,11 +304,7 @@ const useMin = ({ onFormSubmit }) => {
     }
 
     return (
-      isStatusValid &&
-      isMrnIdValid &&
-      isItemQuantityValid &&
-      isBatchValid &&
-      isItemsPresent
+      isStatusValid && isMrnIdValid && isItemQuantityValid && isItemsPresent
     );
   };
 
@@ -338,55 +320,20 @@ const useMin = ({ onFormSubmit }) => {
   };
 
   // Update inventory and relavant MRN
-  const updateInventory = async (
-    min,
-    details,
-    formattedDate,
-    fromLocationId
-  ) => {
+  const updateInventoryFIFO = async (details, fromLocationId) => {
+    let detailFifo = [];
     try {
       const locationId = fromLocationId || 4;
       for (const detail of details) {
-        const { id, batchId, issuedQuantity } = detail;
-
-        // Skip if batchId or quantity is invalid
-        if (!batchId || !issuedQuantity || issuedQuantity <= 0) {
-          console.warn(
-            `Skipping invalid item: itemMasterId=${id}, batchId=${batchId}, quantity=${issuedQuantity}`
-          );
-          continue;
-        }
-
-        // Patch Item Batch API
-        await patch_item_batch_api(parseInt(batchId), id, "subtract", {
-          qty: issuedQuantity,
-          permissionId: 1065,
+        const fifoResponse = await post_reduce_inventory_fifo_api({
+          locationId: locationId,
+          itemMasterId: detail.id,
+          transactionTypeId: 5,
+          quantity: detail?.issuedQuantity,
         });
-
-        if (min.requisitionMasterId === null) {
-          // Patch Location Inventory API
-          await patch_location_inventory_api(
-            locationId,
-            id,
-            parseInt(batchId),
-            "subtract",
-            {
-              stockInHand: issuedQuantity,
-              permissionId: 1089,
-            }
-          );
-
-          // Post Location Inventory Movement API
-          await post_location_inventory_movement_api({
-            movementTypeId: 2,
-            transactionTypeId: 5,
-            itemMasterId: id,
-            batchId,
-            locationId: locationId,
-            date: formattedDate,
-            qty: issuedQuantity,
-            permissionId: 1090,
-          });
+        detailFifo.push(fifoResponse.data);
+        if (detailFifo.every((item) => item.status === 200)) {
+          console.log("Post Reduce FIFO without error");
         }
       }
     } catch (error) {
@@ -464,12 +411,8 @@ const useMin = ({ onFormSubmit }) => {
       );
 
       if (allDetailsSuccessful) {
-        const currentDate = new Date();
-        const formattedDate = currentDate.toISOString();
-        await updateInventory(
-          min,
+        await updateInventoryFIFO(
           formData.itemDetails,
-          formattedDate,
           parseInt(selectedLocationId)
         );
 
@@ -625,6 +568,7 @@ const useMin = ({ onFormSubmit }) => {
     );
     if (exists) {
       console.log("Item already exists in the list");
+      toast.error(`Item "${item.itemName}" already exists in the list`);
       return;
     }
 
@@ -634,39 +578,45 @@ const useMin = ({ onFormSubmit }) => {
     );
     console.log("itemBatches: ", itemBatches);
 
-    if (!itemBatches || itemBatches.length === 0) {
-      console.log("No batches available for this item in this warehouse");
-      toast.error(
-        `No batches available for "${item.itemName}" in this warehouse`
-      );
-      setNoItembatchesError(true);
-      setSearchTerm("");
-      setDummySearchTerm("");
-      setTimeout(() => setNoItembatchesError(false), 3500);
-      return;
-    }
+    // Call the API to get total stock
+    const fetchTotalStock = async () => {
+      try {
+        const response = await get_Location_Inventory_Summary_By_Item_Name_api(
+          selectedLocationId,
+          item.itemMaster?.itemName || item.itemName
+        );
+        const result = response.data.result;
+        const currentItemSummary = result.find(
+          (summary) => summary.itemMasterId === (item.itemMasterId || item.id)
+        );
 
-    const defaultBatch = itemBatches?.[0] || { batchId: "", stockInHand: 0 };
+        const totalStock = currentItemSummary?.totalStockInHand || 0;
 
-    const newItem = {
-      id: item.itemMasterId || item.id,
-      name: item.itemMaster?.itemName || item.itemName,
-      unit: item.itemMaster?.unit?.unitName || item.unit?.unitName || "Unit",
-      //quantity: defaultBatch.stockInHand || 0,
-      quantity: 0,
-      remainingQuantity: 0,
-      issuedQuantity: "",
-      //batchId: defaultBatch.batchId || "",
-      batchId: "",
+        const newItem = {
+          id: item.itemMasterId || item.id,
+          name: item.itemMaster?.itemName || item.itemName,
+          unit:
+            item.itemMaster?.unit?.unitName || item.unit?.unitName || "Unit",
+          quantity: 0,
+          remainingQuantity: totalStock,
+          issuedQuantity: "",
+          batchId: "",
+        };
+
+        setFormData((prev) => ({
+          ...prev,
+          itemDetails: [...prev.itemDetails, newItem],
+        }));
+
+        setSearchTerm("");
+        setDummySearchTerm("");
+      } catch (error) {
+        console.error("Error fetching total stock:", error);
+        toast.error("Error fetching total stock detail");
+      }
     };
 
-    setFormData((prev) => ({
-      ...prev,
-      itemDetails: [...prev.itemDetails, newItem],
-    }));
-
-    setSearchTerm("");
-    setDummySearchTerm("");
+    fetchTotalStock();
   };
 
   // Handle item selection from search

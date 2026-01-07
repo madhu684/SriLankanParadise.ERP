@@ -308,20 +308,20 @@ const useTransferRequisition = ({ onFormSubmit }) => {
       const fieldName = `quantity_${index}`;
       const fieldDisplayName = `Quantity for ${item.name}`;
 
-      const additionalRules = {
-        validationFunction: (value) =>
-          parseFloat(value) > 0 &&
-          parseFloat(value) <= (item.totalStockInHandTo || Infinity),
-        errorMessage: `${fieldDisplayName} must be greater than 0 and not exceed available stock (${
-          item.totalStockInHandTo || 0
-        })`,
-      };
+      // const additionalRules = {
+      //   validationFunction: (value) =>
+      //     parseFloat(value) > 0 &&
+      //     parseFloat(value) <= (item.totalStockInHandTo || Infinity),
+      //   errorMessage: `${fieldDisplayName} must be greater than 0 and not exceed available stock (${
+      //     item.totalStockInHandTo || 0
+      //   })`,
+      // };
 
       const isValidQuantity = validateField(
         fieldName,
         fieldDisplayName,
-        item.quantity,
-        additionalRules
+        item.quantity
+        // additionalRules
       );
 
       isItemQuantityValid = isItemQuantityValid && isValidQuantity;

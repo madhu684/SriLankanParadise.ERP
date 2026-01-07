@@ -11,7 +11,7 @@
 
         public virtual ItemMasterDto? ItemMaster { get; set; }
 
-        public int BatchId { get; set; }
+        public int? BatchId { get; set; }
 
         public virtual BatchDto? Batch { get; set; }
 

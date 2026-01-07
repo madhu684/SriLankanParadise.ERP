@@ -16,25 +16,73 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             _dbContext = dbContext;
         }
+        //public async Task AddLocationInventory(LocationInventory locationInventory, int m)
+        //{
+        //    try
+        //    {
+        //        // Check if a record with the same ItemMasterId, BatchId, and LocationId exists
+        //        var existingInventory = await _dbContext.LocationInventories
+        //            .FirstOrDefaultAsync(li => li.ItemMasterId == locationInventory.ItemMasterId
+        //                                    && li.BatchId == locationInventory.BatchId
+        //                                    && li.LocationId == locationInventory.LocationId);
+
+        //        if (existingInventory != null)
+        //        {
+        //            // Update the StockInHand
+        //            if (m == 1)
+        //            {
+        //                existingInventory.StockInHand = existingInventory.StockInHand + locationInventory.StockInHand;
+        //            } else if (m == 2)
+        //            {
+        //                existingInventory.StockInHand = existingInventory.StockInHand - locationInventory.StockInHand;
+        //            }
+        //        }
+        //        else
+        //        {
+        //            _dbContext.LocationInventories.Add(locationInventory);
+        //        }
+
+        //        await _dbContext.SaveChangesAsync();
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
+
         public async Task AddLocationInventory(LocationInventory locationInventory, int m)
         {
             try
             {
-                // Check if a record with the same ItemMasterId, BatchId, and LocationId exists
-                var existingInventory = await _dbContext.LocationInventories
-                    .FirstOrDefaultAsync(li => li.ItemMasterId == locationInventory.ItemMasterId
-                                            && li.BatchId == locationInventory.BatchId
-                                            && li.LocationId == locationInventory.LocationId);
+                // Build query based on whether BatchId is null or not
+                LocationInventory? existingInventory;
+
+                if (locationInventory.BatchId == null)
+                {
+                    // When BatchId is null, check only ItemMasterId and LocationId
+                    existingInventory = await _dbContext.LocationInventories
+                        .FirstOrDefaultAsync(li => li.ItemMasterId == locationInventory.ItemMasterId
+                                                && li.LocationId == locationInventory.LocationId);
+                }
+                else
+                {
+                    // When BatchId has a value, check all three fields
+                    existingInventory = await _dbContext.LocationInventories
+                        .FirstOrDefaultAsync(li => li.ItemMasterId == locationInventory.ItemMasterId
+                                                && li.LocationId == locationInventory.LocationId
+                                                && li.BatchId == locationInventory.BatchId);
+                }
 
                 if (existingInventory != null)
                 {
                     // Update the StockInHand
                     if (m == 1)
                     {
-                        existingInventory.StockInHand = existingInventory.StockInHand + locationInventory.StockInHand;
-                    } else if (m == 2)
+                        existingInventory.StockInHand += locationInventory.StockInHand;
+                    }
+                    else if (m == 2)
                     {
-                        existingInventory.StockInHand = existingInventory.StockInHand - locationInventory.StockInHand;
+                        existingInventory.StockInHand -= locationInventory.StockInHand;
                     }
                 }
                 else
