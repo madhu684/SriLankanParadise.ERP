@@ -399,6 +399,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                         type="number"
                         className="form-control"
                         value={item.excessAmount.toFixed(2)}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) => {
                           const value = parseFloat(e.target.value);
                           const positiveValue = isNaN(value)
@@ -418,6 +419,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                         type="number"
                         className="form-control"
                         value={item.outstandingAmount.toFixed(2)}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) => {
                           const value = parseFloat(e.target.value);
                           const positiveValue = isNaN(value)
@@ -443,6 +445,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                             : ""
                         }`}
                         value={item.payment}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) => {
                           const value = parseFloat(e.target.value);
                           const positiveValue = isNaN(value)

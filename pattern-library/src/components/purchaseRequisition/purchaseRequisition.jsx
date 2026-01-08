@@ -664,6 +664,7 @@ const PurchaseRequisition = ({
                             : ""
                         }`}
                         value={item.quantity}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
@@ -683,6 +684,7 @@ const PurchaseRequisition = ({
                         type="number"
                         className="form-control"
                         value={item.unitPrice}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,

@@ -528,6 +528,7 @@ const PackingSlip = ({ handleRefetchSlip, handleClose }) => {
                             : ""
                         }`}
                         value={item.quantity}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
@@ -551,6 +552,7 @@ const PackingSlip = ({ handleRefetchSlip, handleClose }) => {
                           className="form-control"
                           type="number"
                           value={charge.value}
+                          onWheel={(e) => e.target.blur()}
                           onChange={(e) => {
                             let newValue = parseFloat(e.target.value);
 

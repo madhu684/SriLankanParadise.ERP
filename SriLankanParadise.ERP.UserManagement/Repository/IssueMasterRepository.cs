@@ -38,7 +38,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(id => id.ItemMaster )
                     .ThenInclude(im => im.Unit)
                     .Include(rm => rm.IssueDetails)
-                    .ThenInclude(id => id.Batch)
+                    //.ThenInclude(id => id.Batch)
                     .ToListAsync();
             }
             catch (Exception)
@@ -61,7 +61,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(rd => rd.ItemMaster)
                     .ThenInclude(im => im.Unit)
                     .Include(rm => rm.IssueDetails)
-                    .ThenInclude(id => id.Batch)
+                    //.ThenInclude(id => id.Batch)
                     .ToListAsync();
 
                 if (issueMasters.Any())
@@ -112,7 +112,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(rd => rd.ItemMaster)
                     .ThenInclude(im => im.Unit)
                     .Include(rm => rm.IssueDetails)
-                    .ThenInclude(id => id.Batch)
+                    //.ThenInclude(id => id.Batch)
                     .FirstOrDefaultAsync();
 
                 return requisitionMaster;
@@ -134,7 +134,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(id => id.ItemMaster)
                     .ThenInclude(im => im.Unit)
                     .Include(im => im.IssueDetails)
-                    .ThenInclude(id => id.Batch)
+                    //.ThenInclude(id => id.Batch)
                     .ToListAsync();
 
                 if (issueMasters.Any())
@@ -160,7 +160,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(id=>id.ItemMaster)
                     .ThenInclude(im => im.Unit)
                     .Include(im=> im.IssueDetails)
-                    .ThenInclude(id => id.Batch)
+                    //.ThenInclude(id => id.Batch)
                     .ToListAsync();
 
                 return issueMasters.Any() ? issueMasters : null;
@@ -182,7 +182,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(id => id.ItemMaster)
                     .ThenInclude(im => im.Unit)
                     .Include(im => im.IssueDetails)
-                    .ThenInclude(id => id.Batch)
+                    //.ThenInclude(id => id.Batch)
                     .ToListAsync();
 
                 return issueMasters.Any() ? issueMasters : null;

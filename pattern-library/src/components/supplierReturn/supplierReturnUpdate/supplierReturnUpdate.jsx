@@ -392,6 +392,7 @@ const SupplierReturnUpdate = ({
                             : ""
                         }`}
                         value={item.returnQuantity}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,

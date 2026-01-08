@@ -254,17 +254,17 @@ const useSalesReceipt = ({ onFormSubmit }) => {
       const paymentDisplayName = `Payment for ${invoice.referenceNo}`;
 
       // Define additional rules for payment validation
-      const additionalRules = {
-        validationFunction: (value) => parseFloat(value) > 0, // Check if payment is greater than 0
-        errorMessage: `Payment for ${invoice.referenceNo} must be greater than 0`,
-      };
+      // const additionalRules = {
+      //   validationFunction: (value) => parseFloat(value) > 0, // Check if payment is greater than 0
+      //   errorMessage: `Payment for ${invoice.referenceNo} must be greater than 0`,
+      // };
 
       // Call validateField for each payment value
       const isValidPayment = validateField(
         paymentFieldName,
         paymentDisplayName,
-        invoice.payment,
-        additionalRules
+        invoice.payment
+        // additionalRules
       );
 
       // Update isPaymentValid based on the validation result

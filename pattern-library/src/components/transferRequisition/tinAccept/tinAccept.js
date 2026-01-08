@@ -6,6 +6,7 @@ import {
   get_locations_inventories_by_location_id_item_master_id_api,
   patch_issue_detail_api,
   patch_location_inventory_api,
+  post_increase_inventory_fifo_api,
   post_location_inventory_api,
   post_location_inventory_movement_api,
   update_min_state_in_mrn_api,
@@ -109,20 +110,167 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
     },
   });
 
-  const updateInventory = async (
+  // const updateInventory = async (
+  //   details,
+  //   formattedDate,
+  //   toLocationId,
+  //   fromLocationId
+  // ) => {
+  //   try {
+  //     const locationId = parseInt(toLocationId, 10);
+  //     const fromLocId = parseInt(fromLocationId, 10);
+
+  //     for (const detail of details) {
+  //       const { itemMasterId, batchId, issueDetailId } = detail;
+
+  //       // Get the received and returned quantities for this detail
+  //       const receivedQty = parseFloat(receivedQuantities[issueDetailId] || 0);
+  //       const returnedQty = parseFloat(returnedQuantities[issueDetailId] || 0);
+
+  //       console.log(
+  //         `Item ${itemMasterId}: Received=${receivedQty}, Returned=${returnedQty}`
+  //       );
+
+  //       // Skip if batchId is invalid
+  //       if (!batchId) {
+  //         console.warn(
+  //           `Skipping item: itemMasterId=${itemMasterId}, batchId=${batchId}`
+  //         );
+  //         continue;
+  //       }
+
+  //       // Handle received quantity - ADD to TO location (Location B)
+  //       if (receivedQty > 0) {
+  //         try {
+  //           // Use patch instead of post to update existing inventory
+  //           const patchResponse = await patch_location_inventory_api(
+  //             fromLocId, // To Location (Location B)
+  //             itemMasterId,
+  //             batchId,
+  //             "add", // Add the received quantity
+  //             {
+  //               stockInHand: receivedQty,
+  //               permissionId: 1088,
+  //             }
+  //           );
+  //           if (patchResponse && patchResponse.status === 404) {
+  //             const existingItemDetails =
+  //               await get_locations_inventories_by_location_id_item_master_id_api(
+  //                 tin?.requisitionMaster?.requestedFromLocationId,
+  //                 itemMasterId
+  //               );
+  //             const reOrderMaxOrderDetails =
+  //               existingItemDetails?.data?.result?.[0] || {};
+  //             const payload = {
+  //               itemMasterId,
+  //               batchId,
+  //               locationId: fromLocId,
+  //               stockInHand: receivedQty,
+  //               permissionId: 1088,
+  //               reOrderLevel: reOrderMaxOrderDetails?.reOrderLevel || 0,
+  //               maxStockLevel: reOrderMaxOrderDetails?.maxStockLevel || 0,
+  //             };
+  //             await post_location_inventory_api(payload);
+  //           }
+
+  //           console.log(
+  //             `Added ${receivedQty} to location ${locationId} for item ${itemMasterId}`
+  //           );
+  //         } catch (error) {
+  //           console.error(
+  //             `Failed to update location inventory for item ${itemMasterId}:`,
+  //             error
+  //           );
+  //           throw new Error(
+  //             `Failed to update inventory for item ${itemMasterId}`
+  //           );
+  //         }
+
+  //         // Post Location Inventory Movement API for received quantity
+  //         await post_location_inventory_movement_api({
+  //           movementTypeId: 1,
+  //           transactionTypeId: 5,
+  //           itemMasterId,
+  //           batchId,
+  //           locationId: fromLocId, // To Location
+  //           date: formattedDate,
+  //           qty: receivedQty,
+  //           permissionId: 1090,
+  //         });
+  //       }
+
+  //       // Handle returned quantity - ADD back to FROM location (Location A)
+  //       if (returnedQty > 0) {
+  //         try {
+  //           await patch_location_inventory_api(
+  //             locationId, // From Location (Location A)
+  //             itemMasterId,
+  //             batchId,
+  //             "add", // Add the returned quantity back
+  //             {
+  //               stockInHand: returnedQty,
+  //               permissionId: 1089,
+  //             }
+  //           );
+
+  //           console.log(
+  //             `Added ${returnedQty} back to location ${fromLocId} for item ${itemMasterId}`
+  //           );
+  //         } catch (error) {
+  //           console.error(
+  //             `Failed to update return inventory for item ${itemMasterId}:`,
+  //             error
+  //           );
+  //           throw new Error(
+  //             `Failed to update return inventory for item ${itemMasterId}`
+  //           );
+  //         }
+
+  //         // Post Location Inventory Movement API for returned quantity
+  //         await post_location_inventory_movement_api({
+  //           movementTypeId: 1,
+  //           transactionTypeId: 5,
+  //           itemMasterId,
+  //           batchId,
+  //           locationId: locationId, // From Location
+  //           date: formattedDate,
+  //           qty: returnedQty,
+  //           permissionId: 1090,
+  //         });
+  //       }
+  //     }
+  //   } catch (error) {
+  //     throw new Error("Error updating inventory: " + error.message);
+  //   }
+  // };
+
+  const increaseInventoryFifo = async (
     details,
-    formattedDate,
-    toLocationId,
-    fromLocationId
+    locationId,
+    sourceLocationId
   ) => {
+    console.log("=== increaseInventoryFifo STARTED ===");
+    console.log("Details:", details);
+    console.log("locationId:", locationId);
+    console.log("sourceLocationId:", sourceLocationId);
+
     try {
-      const locationId = parseInt(toLocationId, 10);
-      const fromLocId = parseInt(fromLocationId, 10);
+      console.log("Details length:", details?.length);
+
+      if (!details || details.length === 0) {
+        console.log("No details to process!");
+        return;
+      }
 
       for (const detail of details) {
-        const { itemMasterId, batchId, issueDetailId } = detail;
+        console.log("Processing detail:", detail);
 
-        // Get the received and returned quantities for this detail
+        const itemMasterId =
+          detail.itemMaster?.itemMasterId || detail.itemMasterId;
+        const issueDetailId = detail.issueDetailId;
+
+        console.log("Extracted values:", { itemMasterId, issueDetailId });
+
         const receivedQty = parseFloat(receivedQuantities[issueDetailId] || 0);
         const returnedQty = parseFloat(returnedQuantities[issueDetailId] || 0);
 
@@ -130,116 +278,56 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
           `Item ${itemMasterId}: Received=${receivedQty}, Returned=${returnedQty}`
         );
 
-        // Skip if batchId is invalid
-        if (!batchId) {
-          console.warn(
-            `Skipping item: itemMasterId=${itemMasterId}, batchId=${batchId}`
-          );
-          continue;
-        }
-
-        // Handle received quantity - ADD to TO location (Location B)
+        // Handle received quantity
         if (receivedQty > 0) {
-          try {
-            // Use patch instead of post to update existing inventory
-            const patchResponse = await patch_location_inventory_api(
-              fromLocId, // To Location (Location B)
-              itemMasterId,
-              batchId,
-              "add", // Add the received quantity
-              {
-                stockInHand: receivedQty,
-                permissionId: 1088,
-              }
-            );
-            if (patchResponse && patchResponse.status === 404) {
-              const existingItemDetails =
-                await get_locations_inventories_by_location_id_item_master_id_api(
-                  tin?.requisitionMaster?.requestedFromLocationId,
-                  itemMasterId
-                );
-              const reOrderMaxOrderDetails =
-                existingItemDetails?.data?.result?.[0] || {};
-              const payload = {
-                itemMasterId,
-                batchId,
-                locationId: fromLocId,
-                stockInHand: receivedQty,
-                permissionId: 1088,
-                reOrderLevel: reOrderMaxOrderDetails?.reOrderLevel || 0,
-                maxStockLevel: reOrderMaxOrderDetails?.maxStockLevel || 0,
-              };
-              await post_location_inventory_api(payload);
-            }
-
-            console.log(
-              `Added ${receivedQty} to location ${locationId} for item ${itemMasterId}`
-            );
-          } catch (error) {
-            console.error(
-              `Failed to update location inventory for item ${itemMasterId}:`,
-              error
-            );
-            throw new Error(
-              `Failed to update inventory for item ${itemMasterId}`
-            );
-          }
-
-          // Post Location Inventory Movement API for received quantity
-          await post_location_inventory_movement_api({
-            movementTypeId: 1,
+          console.log("ABOUT TO CALL API for received quantity");
+          const payload = {
+            locationId: parseInt(locationId, 10),
+            itemMasterId: parseInt(itemMasterId, 10),
             transactionTypeId: 5,
-            itemMasterId,
-            batchId,
-            locationId: fromLocId, // To Location
-            date: formattedDate,
-            qty: receivedQty,
-            permissionId: 1090,
-          });
+            quantity: receivedQty,
+            sourceLocationId: parseInt(sourceLocationId, 10),
+          };
+          console.log("Payload:", payload);
+
+          try {
+            const fifoResponse = await post_increase_inventory_fifo_api(
+              payload
+            );
+            console.log("API Response:", fifoResponse);
+          } catch (apiError) {
+            console.error("API call failed:", apiError);
+            throw apiError;
+          }
         }
 
-        // Handle returned quantity - ADD back to FROM location (Location A)
+        // Handle returned quantity
         if (returnedQty > 0) {
-          try {
-            await patch_location_inventory_api(
-              locationId, // From Location (Location A)
-              itemMasterId,
-              batchId,
-              "add", // Add the returned quantity back
-              {
-                stockInHand: returnedQty,
-                permissionId: 1089,
-              }
-            );
-
-            console.log(
-              `Added ${returnedQty} back to location ${fromLocId} for item ${itemMasterId}`
-            );
-          } catch (error) {
-            console.error(
-              `Failed to update return inventory for item ${itemMasterId}:`,
-              error
-            );
-            throw new Error(
-              `Failed to update return inventory for item ${itemMasterId}`
-            );
-          }
-
-          // Post Location Inventory Movement API for returned quantity
-          await post_location_inventory_movement_api({
-            movementTypeId: 1,
+          console.log("ABOUT TO CALL API for returned quantity");
+          const payload = {
+            locationId: parseInt(sourceLocationId, 10),
+            itemMasterId: parseInt(itemMasterId, 10),
             transactionTypeId: 5,
-            itemMasterId,
-            batchId,
-            locationId: locationId, // From Location
-            date: formattedDate,
-            qty: returnedQty,
-            permissionId: 1090,
-          });
+            quantity: returnedQty,
+            sourceLocationId: null,
+          };
+          console.log("Payload:", payload);
+
+          try {
+            const fifoResponse = await post_increase_inventory_fifo_api(
+              payload
+            );
+            console.log("API Response:", fifoResponse);
+          } catch (apiError) {
+            console.error("API call failed:", apiError);
+            throw apiError;
+          }
         }
       }
+      console.log("=== increaseInventoryFifo COMPLETED ===");
     } catch (error) {
-      throw new Error("Error updating inventory: " + error.message);
+      console.error("=== increaseInventoryFifo ERROR ===", error);
+      throw error;
     }
   };
 
@@ -328,8 +416,8 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
         return;
       }
 
-      const currentDate = new Date();
-      const formattedDate = currentDate.toISOString();
+      // const currentDate = new Date();
+      // const formattedDate = currentDate.toISOString();
       const toLocationId = tin?.requisitionMaster?.requestedToLocationId;
       const fromLocationId = tin?.requisitionMaster?.requestedFromLocationId;
 
@@ -342,13 +430,24 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
       // Update the issue details with received and returned quantities
       mutation.mutate({ issuemasterid: tin.issueMasterId, updatedDetails });
 
-      await updateInventory(
-        tin.issueDetails,
-        formattedDate,
+      // Add logging before the call
+      console.log("Calling increaseInventoryFifo with:", {
+        details: tin.issueDetails,
         toLocationId,
-        fromLocationId
+        fromLocationId,
+      });
+
+      // Ensure this completes before moving on
+      await increaseInventoryFifo(
+        tin.issueDetails,
+        fromLocationId,
+        toLocationId
       );
+
+      console.log("increaseInventoryFifo completed successfully");
+
       await updateMrnState();
+
       queryClient.invalidateQueries(["tins", tinId]);
       queryClient.invalidateQueries(["locationInventories", toLocationId]);
       queryClient.invalidateQueries(["locationInventories", fromLocationId]);
@@ -358,6 +457,7 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
     } catch (error) {
       setApprovalStatus("error");
       console.error("Error accepting transfer issue note:", error);
+      console.error("Error stack:", error.stack); // Add stack trace
       setTimeout(() => {
         setApprovalStatus(null);
         setLoading(false);
@@ -366,6 +466,10 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
       setLoading(false);
     }
   };
+
+  console.log("TIN: ", tin);
+  console.log("Received Qtys =", JSON.stringify(receivedQuantities));
+  console.log("Returned Qtys =", JSON.stringify(returnedQuantities));
 
   return {
     approvalStatus,

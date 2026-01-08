@@ -49,6 +49,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     referenceNo: "",
     subTotal: 0,
     commonChargesAndDeductions: [],
+    deductionAmount: 0,
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -370,6 +371,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           commonChargesAndDeductions: initializedCommonCharges,
           salesOrderId: deepCopySalesInvoice?.salesOrderId ?? null,
           storeLocation: deepCopySalesInvoice?.locationId ?? null,
+          deductionAmount: deepCopySalesInvoice?.discountAmount ?? 0,
         });
       };
 
@@ -526,7 +528,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
       subTotal: calculateSubTotal(),
       totalAmount: calculateTotalAmount(),
     }));
-  }, [formData.itemDetails, formData.commonChargesAndDeductions]);
+  }, [formData.itemDetails, formData.commonChargesAndDeductions, formData.deductionAmount]);
 
   const validateField = (
     fieldName,
@@ -683,6 +685,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           inVoicedPersonMobileNo: formData.patientNo,
           appointmentId: formData.appointmentId,
           tokenNo: formData.tokenNo,
+          discountAmount: formData.deductionAmount,
         };
 
         const response = await put_sales_invoice_api(
@@ -1206,6 +1209,9 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
         }
       }
     });
+
+    // Subtract deduction amount from total
+    totalAmount -= parseFloat(formData.deductionAmount) || 0;
 
     return totalAmount;
   };

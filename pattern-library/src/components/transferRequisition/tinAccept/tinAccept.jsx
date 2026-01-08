@@ -117,7 +117,7 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
             <tr>
               <th>Item Name</th>
               <th>Unit</th>
-              <th>Item Batch</th>
+              {/* <th>Item Batch</th> */}
               <th>Issued Quantity</th>
               <th>Received Quantity</th>
               <th>Returned Quantity</th>
@@ -135,7 +135,7 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
                   <tr className={itemError ? "table-warning" : ""}>
                     <td>{item.itemMaster?.itemName}</td>
                     <td>{item.itemMaster?.unit.unitName}</td>
-                    <td className="text-nowrap">{item.batch?.batchRef}</td>
+                    {/* <td className="text-nowrap">{item.batch?.batchRef}</td> */}
                     <td>
                       <span className="fw-bold">{item.quantity}</span>
                     </td>
@@ -150,6 +150,7 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
                             ? receivedQuantities[item.issueDetailId]
                             : item.quantity ?? 0
                         }
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleReceivedQuantityChange(
                             item.issueDetailId,
@@ -180,6 +181,7 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
                             ? returnedQuantities[item.issueDetailId]
                             : item.returnedQuantity ?? 0
                         }
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleReturnedQuantityChange(
                             item.issueDetailId,

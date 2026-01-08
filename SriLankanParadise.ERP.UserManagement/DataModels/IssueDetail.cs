@@ -11,7 +11,7 @@ public partial class IssueDetail
 
     public int ItemMasterId { get; set; }
 
-    public int BatchId { get; set; }
+    public int? BatchId { get; set; }
 
     public decimal? Quantity { get; set; }
 
@@ -19,7 +19,7 @@ public partial class IssueDetail
 
     public decimal? ReturnedQuantity { get; set; }
 
-    public virtual Batch Batch { get; set; } = null!;
+    public virtual Batch? Batch { get; set; } = null!;
 
     public virtual IssueMaster IssueMaster { get; set; } = null!;
 

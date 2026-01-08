@@ -217,6 +217,7 @@ const AddEmpties = ({ show, handleClose, handleSearch }) => {
                                   : ""
                               }`}
                               value={item.quantity}
+                              onWheel={(e) => e.target.blur()}
                               onChange={(e) =>
                                 handleItemDetailsChange(
                                   index,

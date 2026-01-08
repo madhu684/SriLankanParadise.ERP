@@ -31,13 +31,15 @@ const GrnDetail = ({ show, handleClose, grn }) => {
         <div className="row mb-3">
           <div className="col-md-6">
             <p>
-              <strong>GRN Date:</strong> {grn?.grnDate?.split("T")[0]}
+              <strong>GRN Date:</strong>{" "}
+              {grn?.grnDate ? grn?.grnDate?.split("T")[0] : "N/A"}
             </p>
             <p>
               <strong>Received By:</strong> {grn.receivedBy}
             </p>
             <p>
-              <strong>Received Date:</strong> {grn?.receivedDate?.split("T")[0]}
+              <strong>Received Date:</strong>{" "}
+              {grn?.receivedDate ? grn?.receivedDate?.split("T")[0] : "N/A"}
             </p>
             <p>
               <strong>GRN Type:</strong> {grnTypeDisplayMap[grn?.grnType]}
@@ -124,7 +126,9 @@ const GrnDetail = ({ show, handleClose, grn }) => {
                   <td>{item.rejectedQuantity}</td>
                   <td>{item.freeQuantity}</td>
                   {/* <td>{item.itemBarcode}</td> */}
-                  <td>{item.expiryDate.split("T")[0]}</td>
+                  <td>
+                    {item.expiryDate ? item.expiryDate.split("T")[0] : "N/A"}
+                  </td>
                   <td>{item.unitPrice.toFixed(2)}</td>
                 </tr>
               ))}

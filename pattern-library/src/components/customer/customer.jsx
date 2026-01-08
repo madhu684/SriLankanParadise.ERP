@@ -346,6 +346,7 @@ const Customer = ({ handleClose }) => {
                     } ${validationErrors.creditLimit ? "is-invalid" : ""}`}
                     placeholder="0.00"
                     value={formData.creditLimit}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) =>
                       handleInputChange("creditLimit", e.target.value)
                     }
@@ -368,6 +369,7 @@ const Customer = ({ handleClose }) => {
                     } ${validationErrors.creditDuration ? "is-invalid" : ""}`}
                     placeholder="0"
                     value={formData.creditDuration}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) =>
                       handleInputChange("creditDuration", e.target.value)
                     }
