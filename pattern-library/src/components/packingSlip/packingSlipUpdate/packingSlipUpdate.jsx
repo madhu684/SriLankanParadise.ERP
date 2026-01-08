@@ -540,6 +540,7 @@ const PackingSlipUpdate = ({
                             : ""
                         }`}
                         value={item.quantity}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
@@ -563,6 +564,7 @@ const PackingSlipUpdate = ({
                           className="form-control"
                           type="number"
                           value={charge.value}
+                          onWheel={(e) => e.target.blur()}
                           onChange={(e) => {
                             let newValue = parseFloat(e.target.value);
 

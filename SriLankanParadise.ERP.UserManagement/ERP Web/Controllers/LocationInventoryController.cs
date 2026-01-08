@@ -546,5 +546,29 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpPost("increase-inventory-fifo")]
+        public async Task<ApiResponseModel> IncreaseInventoryByFIFO(IncreaseInventoryRequestModel request)
+        {
+            try
+            {
+                _logger.LogInformation("++++++++++++++++ Increase-inventory-fifo calling +++++++++++++++++++");
+                await _locationInventoryService.IncreaseInventoryByFIFO(request.LocationId, request.ItemMasterId, request.TransactionTypeId, request.Quantity, request.sourceLocationId);
+
+                _logger.LogInformation("Inventory increase successfully using FIFO method");
+                AddResponseMessage(Response, "Inventory increase successfully", null, true, HttpStatusCode.OK);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex.Message);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.BadRequest);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

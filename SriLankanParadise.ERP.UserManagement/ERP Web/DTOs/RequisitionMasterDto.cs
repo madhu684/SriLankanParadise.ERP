@@ -26,18 +26,17 @@
 
         public int? RequestedFromLocationId { get; set; }
 
-        public virtual LocationDto? RequestedFromLocation { get; set; }
-
         public int? RequestedToLocationId { get; set; }
-
-        public virtual LocationDto? RequestedToLocation { get; set; }
-
-        public virtual IEnumerable<RequisitionDetailDto>? RequisitionDetails { get; set; }
 
         public string? ReferenceNumber { get; set; }
 
         public bool IsMINApproved { get; set; }
 
         public bool IsMINAccepted { get; set; }
+        public virtual LocationDto? RequestedFromLocation { get; set; }
+
+        public virtual LocationDto? RequestedToLocation { get; set; }
+
+        public virtual IEnumerable<RequisitionDetailDto>? RequisitionDetails { get; set; }
     }
 }

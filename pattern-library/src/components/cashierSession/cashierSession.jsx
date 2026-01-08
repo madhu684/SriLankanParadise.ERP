@@ -70,6 +70,7 @@ const CashierSession = ({ show, handleClose, handleAddCashierSession }) => {
                     id="openingBalance"
                     placeholder="0.00"
                     value={formData.openingBalance}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) => {
                       const value = parseFloat(e.target.value);
                       const positiveValue = isNaN(value)

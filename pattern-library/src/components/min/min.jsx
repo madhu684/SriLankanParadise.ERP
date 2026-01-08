@@ -478,6 +478,7 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                             : ""
                         }`}
                         value={item.issuedQuantity}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,

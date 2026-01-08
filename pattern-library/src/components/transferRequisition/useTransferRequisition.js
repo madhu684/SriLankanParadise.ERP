@@ -539,7 +539,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
       id: item.itemMasterId,
       name: item.itemName,
       unit: item.unit.unitName,
-      quantity: 0,
+      quantity: null,
       totalStockInHand: currentStockDetails?.totalStockInHand || 0,
       totalStockInHandTo: toStockDetails?.totalStockInHand || 0,
       reOrderLevel: currentStockDetails?.minReOrderLevel || 0,
@@ -595,7 +595,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
                     ? item.totalStockInHand
                     : fromStockDetails?.maxStockLevel -
                       fromStockDetails?.totalStockInHand
-                  : 0,
+                  : null,
               maxStockLevel: item.maxStockLevel || 0,
               minReOrderLevel: item.minReOrderLevel || 0,
               totalStockInHand: fromStockDetails?.totalStockInHand || 0,

@@ -43,5 +43,7 @@
         public int? AppointmentId { get; set; }
 
         public int? TokenNo { get; set; }
+
+        public decimal? DiscountAmount { get; set; }
     }
 }

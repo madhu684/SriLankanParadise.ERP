@@ -319,6 +319,7 @@ const CreateEmptyReturn = ({ selectedItems, handleClose }) => {
                               className="form-control form-control-sm"
                               placeholder="Enter quantity"
                               //value={returnQuantity || ""}
+                              onWheel={(e) => e.target.blur()}
                               onChange={(e) =>
                                 handleQuantityChange(index, e.target.value)
                               }

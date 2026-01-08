@@ -289,6 +289,7 @@ const CashierSessionUpdate = ({
                                 }`}
                                 id="actualCashInHand"
                                 value={actualCashInHand}
+                                onWheel={(e) => e.target.blur()}
                                 onChange={(e) => {
                                   const value = parseFloat(e.target.value);
                                   if (!isNaN(value) && value >= 0) {
@@ -395,6 +396,7 @@ const CashierSessionUpdate = ({
                                 }`}
                                 id="actualChequesInHand"
                                 value={actualChequesInHand}
+                                onWheel={(e) => e.target.blur()}
                                 onChange={(e) => {
                                   const value = parseFloat(e.target.value);
                                   if (!isNaN(value) && value >= 0) {

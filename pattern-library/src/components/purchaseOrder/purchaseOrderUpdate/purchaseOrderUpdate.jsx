@@ -429,6 +429,7 @@ const PurchaseOrderUpdate = ({ handleClose, purchaseOrder, handleUpdated }) => {
                             : ""
                         }`}
                         value={item.quantity}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
@@ -454,6 +455,7 @@ const PurchaseOrderUpdate = ({ handleClose, purchaseOrder, handleUpdated }) => {
                             : ""
                         }`}
                         value={item.unitPrice}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
@@ -474,6 +476,7 @@ const PurchaseOrderUpdate = ({ handleClose, purchaseOrder, handleUpdated }) => {
                           className="form-control"
                           type="number"
                           value={charge.value}
+                          onWheel={(e) => e.target.blur()}
                           onChange={(e) => {
                             let newValue = parseFloat(e.target.value);
 

@@ -234,6 +234,7 @@ const ItemBatchUpdate = ({ handleClose, handleUpdated }) => {
                         validFields.sellingPrice ? "is-valid" : ""
                       } ${validationErrors.sellingPrice ? "is-invalid" : ""}`}
                       value={formData.sellingPrice}
+                      onWheel={(e) => e.target.blur()}
                       onChange={(e) =>
                         handleInputChange("sellingPrice", e.target.value)
                       }

@@ -348,6 +348,7 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
                             : ""
                         }`}
                         value={item.issuedQuantity}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,

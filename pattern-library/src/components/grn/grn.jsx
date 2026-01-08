@@ -1080,6 +1080,7 @@ const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
                             : ""
                         }`}
                         value={item.receivedQuantity}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
@@ -1107,6 +1108,7 @@ const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
                             : ""
                         }`}
                         value={item.rejectedQuantity}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
@@ -1126,6 +1128,7 @@ const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
                         type="number"
                         className="form-control"
                         value={item.freeQuantity}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
@@ -1179,6 +1182,7 @@ const Grn = ({ handleClose, handleUpdated, setShowCreateGrnForm }) => {
                             : ""
                         }`}
                         value={item.unitPrice}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,

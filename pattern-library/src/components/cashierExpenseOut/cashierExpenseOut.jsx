@@ -74,6 +74,7 @@ const CashierExpenseOut = () => {
                 id="amount"
                 placeholder="Enter Amount"
                 value={formData.amount}
+                onWheel={(e) => e.target.blur()}
                 onChange={(e) => {
                   const value = parseFloat(e.target.value);
                   const positiveValue = isNaN(value) ? 0 : Math.max(0, value);

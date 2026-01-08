@@ -477,6 +477,7 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
                       }`}
                       id="conversionValue"
                       value={formData.conversionValue}
+                      onWheel={(e) => e.target.blur()}
                       onChange={(e) => {
                         const value = parseFloat(e.target.value);
                         const positiveValue = isNaN(value)
@@ -506,6 +507,7 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
                     id="reorderLevel"
                     placeholder="Enter Reorder Level"
                     value={formData.reorderLevel}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) => {
                       const value = parseFloat(e.target.value);
                       const positiveValue = isNaN(value)
@@ -1124,6 +1126,7 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
                             className="form-control rounded-4"
                             placeholder="Quantity"
                             value={item.quantity}
+                            onWheel={(e) => e.target.blur()}
                             onChange={(e) =>
                               handleChildItemQuantityChange(
                                 item.itemMasterId,

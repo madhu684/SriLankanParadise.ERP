@@ -241,6 +241,21 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                       {calculateSubTotal().toFixed(2)}
                     </td>
                   </tr>
+                  <tr>
+                    <td
+                      colSpan={
+                        4 +
+                        uniqueLineItemDisplayNames.length -
+                        (company.batchStockType === "FIFO" ? 1 : 0)
+                      }
+                    ></td>
+                    <th>Deduction Amount</th>
+                    <td className="text-end text-danger fw-semibold">
+                      {salesInvoice?.discountAmount !== null
+                        ? salesInvoice?.discountAmount.toFixed(2)
+                        : 0}
+                    </td>
+                  </tr>
                   {/* Rendering common charges/deductions */}
                   {uniqueCommonDisplayNames.map((displayName, index) => {
                     // Filter charges/deductions that match the current display name and are not associated with a line item

@@ -151,6 +151,7 @@ const MinAccept = ({ refetch, setRefetch, show, handleClose, min }) => {
                               ? receivedQuantities[item.issueDetailId]
                               : item.quantity ?? 0
                           }
+                          onWheel={(e) => e.target.blur()}
                           onChange={(e) =>
                             handleReceivedQuantityChange(
                               item.issueDetailId,
@@ -181,6 +182,7 @@ const MinAccept = ({ refetch, setRefetch, show, handleClose, min }) => {
                               ? returnedQuantities[item.issueDetailId]
                               : item.returnedQuantity ?? 0
                           }
+                          onWheel={(e) => e.target.blur()}
                           onChange={(e) =>
                             handleReturnedQuantityChange(
                               item.issueDetailId,

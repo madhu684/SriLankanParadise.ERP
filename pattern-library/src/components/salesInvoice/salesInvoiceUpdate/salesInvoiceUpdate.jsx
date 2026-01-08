@@ -658,6 +658,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                             : ""
                         }`}
                         value={item.quantity}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
@@ -680,6 +681,7 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                           className="form-control"
                           type="number"
                           value={charge?.value}
+                          onWheel={(e) => e.target.blur()}
                           onChange={(e) => {
                             let newValue = parseFloat(e.target.value);
 
@@ -735,6 +737,34 @@ const SalesInvoiceUpdate = ({ handleClose, salesInvoice, handleUpdated }) => {
                   ></td>
                   <th>Sub Total</th>
                   <td className="text-end">{calculateSubTotal().toFixed(2)}</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td
+                    colSpan={
+                      5 +
+                      formData.itemDetails[0].chargesAndDeductions.length -
+                      (company.batchStockType === "FIFO" ? 1 : 0)
+                    }
+                  ></td>
+                  <th>Deduction Amount</th>
+                  <td className="text-end">
+                    <input
+                      type="number"
+                      className="form-control text-end"
+                      value={formData.deductionAmount}
+                      onWheel={(e) => e.target.blur()}
+                      onChange={(e) =>
+                        handleInputChange(
+                          "deductionAmount",
+                          parseFloat(e.target.value) || 0
+                        )
+                      }
+                      min="0"
+                      step="0.01"
+                      style={{ width: "120px", marginLeft: "auto" }}
+                    />
+                  </td>
                   <td></td>
                 </tr>
                 {renderSubColumns()}

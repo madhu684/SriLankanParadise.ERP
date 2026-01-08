@@ -19,7 +19,7 @@ public partial class IssueDetail
 
     public decimal? ReturnedQuantity { get; set; }
 
-    public virtual Batch Batch { get; set; } = null!;
+    public virtual Batch? Batch { get; set; } = null!;
 
     public virtual IssueMaster IssueMaster { get; set; } = null!;
 
