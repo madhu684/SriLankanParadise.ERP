@@ -48,6 +48,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public int? TokenNo { get; set; }
 
+        public decimal? DiscountAmount { get; set; }
+
         public virtual SalesOrderDto? SalesOrder { get; set; }
 
         public virtual IEnumerable<SalesInvoiceDetailDto>? SalesInvoiceDetails { get; set; }

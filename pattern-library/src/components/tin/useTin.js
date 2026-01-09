@@ -6,6 +6,7 @@ import {
   get_issue_masters_by_requisition_master_id_api,
   get_item_batches_api,
   get_locations_inventories_by_location_id_api,
+  get_sum_of_item_inventory_by_location_id_api,
 } from "../../services/purchaseApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { UserContext } from "../../context/userContext";
@@ -159,59 +160,83 @@ const useTin = ({ onFormSubmit }) => {
 
   // Update itemDetails when selectedTrn or tins change
   useEffect(() => {
-    if (selectedTrn) {
-      refetchLocationInventories();
-      if (tins) {
-        const updatedItemDetails = selectedTrn.requisitionDetails
-          .map((requestItem) => {
-            const issuedQuantity = tins.reduce((total, tin) => {
-              const tinDetail = tin.issueDetails.find(
-                (detail) =>
-                  detail.itemMasterId === requestItem.itemMaster?.itemMasterId
-              );
-              return total + (tinDetail ? tinDetail.quantity : 0);
-            }, 0);
+    const processItems = async () => {
+      if (selectedTrn) {
+        refetchLocationInventories();
+        let itemsToProcess = [];
 
-            const remainingQuantity = requestItem.quantity - issuedQuantity;
+        if (tins) {
+          itemsToProcess = selectedTrn.requisitionDetails
+            .map((requestItem) => {
+              const issuedQuantity = tins.reduce((total, tin) => {
+                const tinDetail = tin.issueDetails.find(
+                  (detail) =>
+                    detail.itemMasterId === requestItem.itemMaster?.itemMasterId
+                );
+                return total + (tinDetail ? tinDetail.quantity : 0);
+              }, 0);
+
+              const pendingRequestQuantity =
+                requestItem.quantity - issuedQuantity;
+
+              return {
+                requestItem,
+                pendingRequestQuantity,
+              };
+            })
+            .filter((item) => item.pendingRequestQuantity > 0);
+        } else {
+          itemsToProcess = selectedTrn.requisitionDetails.map(
+            (requestItem) => ({
+              requestItem,
+              pendingRequestQuantity: requestItem.quantity,
+            })
+          );
+        }
+
+        // Fetch total stock inventory for the location once
+        let locationInventoryMap = {};
+        try {
+          const inventoryResponse =
+            await get_sum_of_item_inventory_by_location_id_api(
+              selectedTrn.requestedToLocationId
+            );
+          const inventoryResult = inventoryResponse.data.result || [];
+          // Create a map for quick lookup: itemMasterId -> totalStockInHand
+          inventoryResult.forEach((item) => {
+            locationInventoryMap[item.itemMasterId] = item.totalStockInHand;
+          });
+        } catch (error) {
+          console.error("Error fetching location inventory summary:", error);
+        }
+
+        const updatedItemDetails = itemsToProcess.map(
+          ({ requestItem, pendingRequestQuantity }) => {
+            const totalStock =
+              locationInventoryMap[requestItem.itemMaster?.itemMasterId] || 0;
 
             return {
               id: requestItem.itemMaster?.itemMasterId,
               name: requestItem.itemMaster?.itemName,
               unit: requestItem.itemMaster?.unit.unitName || "Unit",
               quantity: requestItem.quantity,
-              remainingQuantity: Math.max(0, remainingQuantity),
+              remainingQuantity: totalStock, // Set Remaining Quantity to Total Stock
+              pendingRequestQuantity: pendingRequestQuantity, // Keep track of pending request separately if needed for validation
               issuedQuantity: "",
               batchId: "",
             };
-          })
-          .filter((item) => item.remainingQuantity > 0);
+          }
+        );
 
         setFormData((prevFormData) => ({
           ...prevFormData,
           itemDetails: updatedItemDetails,
           trnId: selectedTrn?.requisitionMasterId ?? "",
         }));
-      } else {
-        const allItemDetails = selectedTrn.requisitionDetails.map(
-          (requestItem) => ({
-            id: requestItem.itemMaster?.itemMasterId,
-            name: requestItem.itemMaster?.itemName,
-            unit: requestItem.itemMaster?.unit.unitName || "Unit",
-            quantity: requestItem.quantity,
-            //remainingQuantity: requestItem.quantity,
-            remainingQuantity: 0,
-            issuedQuantity: "",
-            batchId: "",
-          })
-        );
-
-        setFormData((prevFormData) => ({
-          ...prevFormData,
-          itemDetails: allItemDetails,
-          trnId: selectedTrn?.requisitionMasterId ?? "",
-        }));
       }
-    }
+    };
+
+    processItems();
   }, [selectedTrn, tins, refetchLocationInventories]);
 
   // Scroll to alert on submission status change
@@ -264,7 +289,6 @@ const useTin = ({ onFormSubmit }) => {
     );
 
     let isItemQuantityValid = true;
-    let isBatchValid = true;
 
     formData.itemDetails.forEach((item, index) => {
       // Validate issued quantity
@@ -282,17 +306,7 @@ const useTin = ({ onFormSubmit }) => {
         quantityRules
       );
 
-      // Validate batch selection
-      const batchFieldName = `batchId_${index}`;
-      const batchFieldDisplayName = `Batch for ${item.name}`;
-      const isValidBatch = validateField(
-        batchFieldName,
-        batchFieldDisplayName,
-        item.batchId
-      );
-
       isItemQuantityValid = isItemQuantityValid && isValidQuantity;
-      isBatchValid = isBatchValid && isValidBatch;
     });
 
     const isItemsPresent = formData.itemDetails.length > 0;
@@ -304,11 +318,7 @@ const useTin = ({ onFormSubmit }) => {
     }
 
     return (
-      isStatusValid &&
-      isTrnIdValid &&
-      isItemQuantityValid &&
-      isBatchValid &&
-      isItemsPresent
+      isStatusValid && isTrnIdValid && isItemQuantityValid && isItemsPresent
     );
   };
 
@@ -531,16 +541,8 @@ const useTin = ({ onFormSubmit }) => {
     statusOptions,
     submissionStatus,
     alertRef,
-    isLoading:
-      isLoading ||
-      isTinsLoading ||
-      isItemBatchesLoading ||
-      isLocationInventoriesLoading,
-    isError:
-      isError ||
-      isTinsError ||
-      isItemBatchesError ||
-      isLocationInventoriesError,
+    isLoading: isLoading || isTinsLoading || isLocationInventoriesLoading,
+    isError,
     trnSearchTerm,
     loading,
     loadingDraft,

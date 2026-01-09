@@ -121,6 +121,7 @@ const TinDetail = ({ show, handleClose, tin }) => {
                           ? receivedQuantities[item.issueDetailId]
                           : item.receivedQuantity ?? 0
                       }
+                      onWheel={(e) => e.target.blur()}
                       onChange={(e) =>
                         handleReceivedQuantityChange(
                           item.issueDetailId,
@@ -145,6 +146,7 @@ const TinDetail = ({ show, handleClose, tin }) => {
                           ? returnedQuantities[item.issueDetailId]
                           : item.returnedQuantity ?? ""
                       }
+                      onWheel={(e) => e.target.blur()}
                       onChange={(e) =>
                         handleReturnedQuantityChange(
                           item.issueDetailId,

@@ -308,20 +308,20 @@ const useTransferRequisition = ({ onFormSubmit }) => {
       const fieldName = `quantity_${index}`;
       const fieldDisplayName = `Quantity for ${item.name}`;
 
-      const additionalRules = {
-        validationFunction: (value) =>
-          parseFloat(value) > 0 &&
-          parseFloat(value) <= (item.totalStockInHandTo || Infinity),
-        errorMessage: `${fieldDisplayName} must be greater than 0 and not exceed available stock (${
-          item.totalStockInHandTo || 0
-        })`,
-      };
+      // const additionalRules = {
+      //   validationFunction: (value) =>
+      //     parseFloat(value) > 0 &&
+      //     parseFloat(value) <= (item.totalStockInHandTo || Infinity),
+      //   errorMessage: `${fieldDisplayName} must be greater than 0 and not exceed available stock (${
+      //     item.totalStockInHandTo || 0
+      //   })`,
+      // };
 
       const isValidQuantity = validateField(
         fieldName,
         fieldDisplayName,
-        item.quantity,
-        additionalRules
+        item.quantity
+        // additionalRules
       );
 
       isItemQuantityValid = isItemQuantityValid && isValidQuantity;
@@ -539,7 +539,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
       id: item.itemMasterId,
       name: item.itemName,
       unit: item.unit.unitName,
-      quantity: 0,
+      quantity: null,
       totalStockInHand: currentStockDetails?.totalStockInHand || 0,
       totalStockInHandTo: toStockDetails?.totalStockInHand || 0,
       reOrderLevel: currentStockDetails?.minReOrderLevel || 0,
@@ -595,7 +595,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
                     ? item.totalStockInHand
                     : fromStockDetails?.maxStockLevel -
                       fromStockDetails?.totalStockInHand
-                  : 0,
+                  : null,
               maxStockLevel: item.maxStockLevel || 0,
               minReOrderLevel: item.minReOrderLevel || 0,
               totalStockInHand: fromStockDetails?.totalStockInHand || 0,

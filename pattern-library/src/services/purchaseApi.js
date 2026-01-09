@@ -1548,8 +1548,21 @@ export const get_Low_Stock_Items_api = async (
 
 export const post_reduce_inventory_fifo_api = async (requestData) => {
   try {
-    const response = await axios.post(
-      `${API_BASE_URL}/locationInventory/reduce-inventory-fifo`,
+    const response = await api.post(
+      `/locationInventory/reduce-inventory-fifo`,
+      requestData
+    );
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const post_increase_inventory_fifo_api = async (requestData) => {
+  try {
+    console.log("API called with:", requestData);
+    const response = await api.post(
+      `/locationInventory/increase-inventory-fifo`,
       requestData
     );
     return response;

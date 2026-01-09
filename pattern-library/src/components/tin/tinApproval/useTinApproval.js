@@ -6,6 +6,7 @@ import {
   post_location_inventory_movement_api,
   post_location_inventory_goods_in_transit_api,
   update_min_state_in_mrn_api,
+  post_reduce_inventory_fifo_api,
 } from "../../../services/purchaseApi";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -25,7 +26,7 @@ const useTinApproval = ({ tin, onFormSubmit }) => {
     }
   }, [approvalStatus, onFormSubmit]);
 
-  console.log(tin);
+  console.log("tin", tin);
   useEffect(() => {
     if (approvalStatus != null) {
       // Scroll to the success alert when it becomes visible
@@ -40,71 +41,20 @@ const useTinApproval = ({ tin, onFormSubmit }) => {
     toLocationId
   ) => {
     try {
+      let detailFifo = [];
       for (const detail of details) {
         const { itemMasterId, batchId, quantity } = detail;
 
-        // Patch Location Inventory API
-        await patch_location_inventory_api(
-          toLocationId,
-          itemMasterId,
-          batchId,
-          "subtract",
-          {
-            stockInHand: quantity,
-            permissionId: 1089,
-          }
-        );
-
-        // Patch Location Inventory API (add stock to toLocation)
-
-        // const patchLocationInventoryResponse =
-        //   await patch_location_inventory_api(
-        //     toLocationId,
-        //     itemMasterId,
-        //     batchId,
-        //     "add",
-        //     {
-        //       stockInHand: quantity,
-        //       permissionId: 1089,
-        //     }
-        //   );
-
-        // if (
-        //   patchLocationInventoryResponse &&
-        //   patchLocationInventoryResponse.status === 404
-        // ) {
-        //   // Location inventory not found, create it
-        //   await post_location_inventory_api({
-        //     itemMasterId,
-        //     batchId,
-        //     locationId: toLocationId,
-        //     stockInHand: quantity,
-        //     permissionId: 1088,
-        //   });
-        // }
-
-        // Post Location Inventory Movement API
-        await post_location_inventory_movement_api({
-          movementTypeId: 2,
-          transactionTypeId: 6,
-          itemMasterId,
-          batchId,
+        const fifoResponse = await post_reduce_inventory_fifo_api({
           locationId: toLocationId,
-          date: formattedDate,
-          qty: quantity,
-          permissionId: 1090,
+          itemMasterId: itemMasterId,
+          transactionTypeId: 6,
+          quantity: quantity,
         });
-
-        // await post_location_inventory_movement_api({
-        //   movementTypeId: 1,
-        //   transactionTypeId: 6,
-        //   itemMasterId,
-        //   batchId,
-        //   locationId: toLocationId,
-        //   date: formattedDate,
-        //   qty: quantity,
-        //   permissionId: 1090,
-        // });
+        detailFifo.push(fifoResponse.data);
+        if (detailFifo.every((item) => item.status === 200)) {
+          console.log("Post Reduce FIFO without error");
+        }
 
         // Prepare the data for post_location_inventory_goods_in_transit_api
         const transitData = {
@@ -117,8 +67,6 @@ const useTinApproval = ({ tin, onFormSubmit }) => {
           qty: quantity,
           permissionId: 1092,
         };
-
-        //post_location_inventory_goods_in_transit_api for each item
         await post_location_inventory_goods_in_transit_api(transitData);
       }
     } catch (error) {

@@ -541,6 +541,7 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                             : ""
                         }`}
                         value={item.receivedQuantity}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
@@ -568,6 +569,7 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                             : ""
                         }`}
                         value={item.rejectedQuantity}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
@@ -587,6 +589,7 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                         type="number"
                         className="form-control"
                         value={item.freeQuantity}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
@@ -640,6 +643,7 @@ const GrnUpdate = ({ handleClose, grn, handleUpdated }) => {
                             : ""
                         }`}
                         value={item.unitPrice}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,

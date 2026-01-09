@@ -1,5 +1,5 @@
 /* styles.css */
-@import '../src/assets/styles/variable.css';
+@import "../src/assets/styles/variable.css";
 
 body {
   background-color: var(--background-color); /* Use background color variable */
@@ -16,9 +16,20 @@ body {
 
 .btn-primary {
   background-color: var(--primary-color);
-}  
+}
 
-a{
+a {
   text-decoration: none;
   color: var(--primary-color);
+}
+
+/* Disable mouse wheel on all number inputs */
+input[type="number"] {
+  -moz-appearance: textfield; /* Firefox */
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }

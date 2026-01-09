@@ -39,6 +39,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     salesOrderId: "",
     subTotal: 0,
     commonChargesAndDeductions: [],
+    deductionAmount: 0,
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -258,7 +259,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
       subTotal: calculateSubTotal(),
       totalAmount: calculateTotalAmount(),
     }));
-  }, [formData.itemDetails, formData.commonChargesAndDeductions]);
+  }, [formData.itemDetails, formData.commonChargesAndDeductions, formData.deductionAmount]);
 
   useEffect(() => {
     const today = new Date().toISOString().split("T")[0]; // Get YYYY-MM-DD format
@@ -762,6 +763,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
           inVoicedPersonMobileNo: formData.patientNo,
           appointmentId: formData.appointmentId,
           tokenNo: formData.tokenNo,
+          discountAmount: formData.deductionAmount,
         };
 
         const response = await post_sales_invoice_api(salesInvoiceData);
@@ -1160,6 +1162,9 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         }
       }
     });
+
+    // Subtract deduction amount from total
+    totalAmount -= parseFloat(formData.deductionAmount) || 0;
 
     return totalAmount;
   };

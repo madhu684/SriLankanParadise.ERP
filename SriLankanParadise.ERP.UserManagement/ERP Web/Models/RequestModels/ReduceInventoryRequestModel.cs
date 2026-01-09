@@ -7,4 +7,9 @@
         public int TransactionTypeId { get; set; }
         public decimal Quantity { get; set; }
     }
+
+    public class IncreaseInventoryRequestModel : ReduceInventoryRequestModel
+    {
+        public int? sourceLocationId { get; set; }
+    }
 }

@@ -278,6 +278,7 @@ const StockLevel = () => {
                           id="reorderLevel"
                           placeholder="Enter reorder level"
                           value={modalAdjustedVolumes.reOrderLevel ?? ""}
+                          onWheel={(e) => e.target.blur()}
                           onChange={(e) =>
                             handleModalInputChange(
                               "reOrderLevel",
@@ -297,6 +298,7 @@ const StockLevel = () => {
                           id="maxStockLevel"
                           placeholder="Enter max stock level"
                           value={modalAdjustedVolumes.maxStockLevel ?? ""}
+                          onWheel={(e) => e.target.blur()}
                           onChange={(e) =>
                             handleModalInputChange(
                               "maxStockLevel",

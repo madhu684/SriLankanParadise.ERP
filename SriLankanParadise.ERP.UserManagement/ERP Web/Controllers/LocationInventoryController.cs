@@ -49,16 +49,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 var locationInventory = _mapper.Map<LocationInventory>(locationInventoryRequest);
                 await _locationInventoryService.AddLocationInventory(locationInventory, locationInventoryRequest.MovementTypeId);
 
-                // Create action log
-                //var actionLog = new ActionLogModel()
-                //{
-                //    ActionId = locationInventoryRequest.PermissionId,
-                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                //    Timestamp = DateTime.UtcNow
-                //};
-                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
-
                 // send response
                 var locationInventoryDto = _mapper.Map<LocationInventoryDto>(locationInventory);
                 _logger.LogInformation(LogMessages.LocationInventoryCreated);
@@ -548,6 +538,30 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     _logger.LogWarning(LogMessages.LocationInventoriesNotFound);
                     AddResponseMessage(Response, LogMessages.LocationInventoriesNotFound, null, true, HttpStatusCode.NotFound);
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpPost("increase-inventory-fifo")]
+        public async Task<ApiResponseModel> IncreaseInventoryByFIFO(IncreaseInventoryRequestModel request)
+        {
+            try
+            {
+                _logger.LogInformation("++++++++++++++++ Increase-inventory-fifo calling +++++++++++++++++++");
+                await _locationInventoryService.IncreaseInventoryByFIFO(request.LocationId, request.ItemMasterId, request.TransactionTypeId, request.Quantity, request.sourceLocationId);
+
+                _logger.LogInformation("Inventory increase successfully using FIFO method");
+                AddResponseMessage(Response, "Inventory increase successfully", null, true, HttpStatusCode.OK);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex.Message);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.BadRequest);
             }
             catch (Exception ex)
             {

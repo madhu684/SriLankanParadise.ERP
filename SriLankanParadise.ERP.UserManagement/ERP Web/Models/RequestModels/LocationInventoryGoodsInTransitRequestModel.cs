@@ -8,7 +8,7 @@
 
         public int ItemMasterId { get; set; }
 
-        public int BatchId { get; set; }
+        public int? BatchId { get; set; }
 
         public DateTime? Date { get; set; }
 

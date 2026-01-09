@@ -73,7 +73,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
 
       const items =
         response.data?.result
-          ?.filter((item) => item.totalStockInHand < item.maxStockLevel)
+          ?.filter((item) => item.totalStockInHand <= item.maxStockLevel)
           .map((summary) => ({
             itemMasterId: summary.itemMasterId,
             itemName: summary.itemMaster?.itemName || "",
@@ -652,6 +652,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
         formData.expectedDeliveryLocation
       );
       const lowStockItems = response.data.result || [];
+      console.log("lowStockItems: ", lowStockItems);
 
       if (lowStockItems.length === 0) {
         setShowToast(true);
@@ -669,7 +670,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
         // Transform low-stock items into itemDetails format with API calls
         const newItemDetails = await Promise.all(
           lowStockItems
-            .filter((item) => item.totalStockInHand < item.maxStockLevel)
+            .filter((item) => item.totalStockInHand <= item.maxStockLevel)
             .map(async (item) => {
               const supplierItemResponse =
                 await get_supplier_items_by_type_category_api(

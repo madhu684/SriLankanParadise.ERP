@@ -65,9 +65,7 @@ const ManageItem = ({ show, handleClose, item }) => {
                     <div className="col-6">
                       <strong>Item Barcode:</strong>
                     </div>
-                    <div className="col-6">
-                      {item?.itemBarcode}
-                    </div>
+                    <div className="col-6">{item?.itemBarcode}</div>
                   </div>
                   <div className="row mb-2">
                     <div className="col-6">
@@ -180,6 +178,7 @@ const ManageItem = ({ show, handleClose, item }) => {
                     } ${validationErrors.conversionValue ? "is-invalid" : ""}`}
                     id="conversionValue"
                     value={formData.conversionValue}
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) =>
                       handleInputChange("conversionValue", e.target.value)
                     }
@@ -238,6 +237,7 @@ const ManageItem = ({ show, handleClose, item }) => {
                       value={
                         formData[`conversionValue-${subItem.itemMasterId}`]
                       }
+                      onWheel={(e) => e.target.blur()}
                       onChange={(e) =>
                         handleInputChange(
                           `conversionValue-${subItem.itemMasterId}`,
