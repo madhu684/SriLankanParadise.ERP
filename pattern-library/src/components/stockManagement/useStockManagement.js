@@ -130,7 +130,7 @@ const useStockManagement = () => {
           / /g,
           "_"
         )}_for_${selectedLocationName} .xlsx`,
-        sheetName: `Stock Report for ${selectedLocationName}`,
+        sheetName: `Stock Report`,
         topic: `Stock Report for ${selectedLocationName} on ${today} - ${filterLabel}`,
       });
     },
