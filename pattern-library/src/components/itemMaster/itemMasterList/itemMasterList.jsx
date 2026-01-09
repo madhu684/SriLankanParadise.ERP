@@ -191,7 +191,7 @@ const ItemMasterList = () => {
               }
             >
               <option value="">All Suppliers</option>
-              {suppliers.map((supplier) => (
+              {suppliers?.map((supplier) => (
                 <option key={supplier.supplierId} value={supplier.supplierId}>
                   {supplier.supplierName}
                 </option>

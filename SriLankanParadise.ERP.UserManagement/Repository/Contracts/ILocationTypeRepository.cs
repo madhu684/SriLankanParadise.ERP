@@ -4,6 +4,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
 {
     public interface ILocationTypeRepository
     {
-        Task<IEnumerable<LocationType>> GetLocationTypesByCompanyId(int companyId);
+        Task<IEnumerable<LocationType>> GetLocationTypesByCompanyId();
     }
 }

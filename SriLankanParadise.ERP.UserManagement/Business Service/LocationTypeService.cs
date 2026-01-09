@@ -12,9 +12,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             _locationTypeRepository = locationTypeRepository;
         }
 
-        public async Task<IEnumerable<LocationType>> GetLocationTypesByCompanyId(int companyId)
+        public async Task<IEnumerable<LocationType>> GetLocationTypesByCompanyId()
         {
-            return await _locationTypeRepository.GetLocationTypesByCompanyId(companyId);
+            return await _locationTypeRepository.GetLocationTypesByCompanyId();
         }
     }
 }
