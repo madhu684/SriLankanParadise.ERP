@@ -135,5 +135,36 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task<IEnumerable<SalesReceipt>> GetSalesReceiptsByUserIdAndDate(int userId, DateTime? date)
+        {
+            try
+            {
+                var query = _dbContext.SalesReceipts
+                    .AsNoTracking()
+                    .Include(sr => sr.PaymentMode)
+                    .Include(sr => sr.SalesReceiptSalesInvoices)
+                        .ThenInclude(srsi => srsi.SalesInvoice)
+                            .ThenInclude(si => si.SalesInvoiceDetails)
+                                .ThenInclude(sid => sid.ItemMaster)
+                    .Where(sr => sr.CreatedUserId == userId);
+
+                if (date.HasValue)
+                {
+                    var targetDate = date.Value.Date;
+                    query = query.Where(im => im.ReceiptDate.HasValue && im.ReceiptDate.Value.Date == targetDate);
+                }
+
+                var receipts = await query
+                    .OrderBy(sr => sr.SalesReceiptId)
+                    .ToListAsync();
+
+                return receipts;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
