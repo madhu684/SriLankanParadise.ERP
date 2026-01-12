@@ -64,6 +64,25 @@ const TinList = () => {
     setCurrentPage(1);
   };
 
+  const formatDateTime = (dateString) => {
+    if (!dateString) return "-";
+    // Ensure the date is treated as UTC if it doesn't have timezone info
+    let normalizedDateStr = dateString.replace(" ", "T");
+    if (!normalizedDateStr.endsWith("Z")) {
+      normalizedDateStr += "Z";
+    }
+    const date = new Date(normalizedDateStr);
+    return date.toLocaleString("en-GB", {
+      timeZone: "Asia/Colombo",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
   const filteredTins = Tins?.filter((tin) =>
     tin.referenceNumber.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -204,6 +223,9 @@ const TinList = () => {
                       Requested By
                     </th>
                     <th className="text-nowrap py-3 px-4 border-bottom">
+                      Requested Location
+                    </th>
+                    <th className="text-nowrap py-3 px-4 border-bottom">
                       TRN Date
                     </th>
                   </tr>
@@ -215,11 +237,11 @@ const TinList = () => {
                         {trn.referenceNumber}
                       </td>
                       <td className="py-3 px-4">{trn.requestedBy}</td>
+                      <td className="py-3 px-4">
+                        {trn?.requestedFromLocation?.locationName || "N/A"}
+                      </td>
                       <td className="py-3 px-4 text-muted">
-                        {moment
-                          .utc(trn.requisitionDate)
-                          .tz("Asia/Colombo")
-                          .format("YYYY-MM-DD hh:mm:ss A")}
+                        {formatDateTime(trn.requisitionDate)}
                       </td>
                     </tr>
                   ))}
@@ -275,6 +297,7 @@ const TinList = () => {
                   </th>
                   <th className="py-3 px-4 text-nowrap">Reference Number</th>
                   <th className="py-3 px-4 text-nowrap">Issued By</th>
+                  <th className="py-3 px-4 text-nowrap">Dispatched To</th>
                   <th className="py-3 px-4 text-nowrap">TIN Date</th>
                   <th className="py-3 px-4 text-nowrap">Status</th>
                   <th className="py-3 px-4 text-nowrap text-center">Actions</th>
@@ -302,11 +325,12 @@ const TinList = () => {
                           {Tin.referenceNumber}
                         </td>
                         <td className="py-3 px-4">{Tin.createdBy}</td>
+                        <td className="py-3 px-4">
+                          {Tin?.requisitionMaster?.requestedFromLocation
+                            ?.locationName || "N/A"}
+                        </td>
                         <td className="py-3 px-4 text-muted">
-                          {moment
-                            .utc(Tin?.issueDate)
-                            .tz("Asia/Colombo")
-                            .format("YYYY-MM-DD hh:mm:ss A")}
+                          {formatDateTime(Tin?.issueDate)}
                         </td>
                         <td className="py-3 px-4">
                           <span

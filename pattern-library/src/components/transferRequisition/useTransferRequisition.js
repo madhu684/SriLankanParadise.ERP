@@ -9,7 +9,6 @@ import {
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { use } from "react";
 
 const useTransferRequisition = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -548,7 +547,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
 
     setFormData((prevFormData) => ({
       ...prevFormData,
-      itemDetails: [...prevFormData.itemDetails, newItem],
+      itemDetails: [newItem, ...prevFormData.itemDetails],
     }));
 
     setSearchTerm("");

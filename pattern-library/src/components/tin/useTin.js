@@ -520,14 +520,12 @@ const useTin = ({ onFormSubmit }) => {
     setSelectedTrn(null);
     setValidFields({});
     setValidationErrors({});
-    // Reset query states to clear errors
-    refetchTrns();
-    refetchTins();
-    refetchItemBatches();
-    refetchLocationInventories();
-    // Explicitly reset selectedTrn to null to disable dependent queries
-    queryClient.resetQueries(["tins", null]);
-    queryClient.resetQueries(["locationInventories", null]);
+    // refetchTrns();
+    // refetchTins();
+    // refetchItemBatches();
+    // refetchLocationInventories();
+    // queryClient.resetQueries(["tins", null]);
+    // queryClient.resetQueries(["locationInventories", null]);
   };
 
   console.log("formData", formData);
@@ -541,7 +539,7 @@ const useTin = ({ onFormSubmit }) => {
     statusOptions,
     submissionStatus,
     alertRef,
-    isLoading: isLoading || isTinsLoading || isLocationInventoriesLoading,
+    isLoading: isLoading || isItemBatchesLoading,
     isError,
     trnSearchTerm,
     loading,

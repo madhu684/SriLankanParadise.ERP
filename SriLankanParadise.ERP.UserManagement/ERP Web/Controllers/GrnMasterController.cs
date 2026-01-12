@@ -259,5 +259,48 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpGet("GetPaginatedGrnMastersByUserCompany/{companyId}")]
+        public async Task<ApiResponseModel> GetPaginatedGrnMastersByUserCompany(
+            int companyId,
+            [FromQuery] string? filter = null,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var result = await _grnMasterService.GetPaginatedGrnMastersByUserCompany(companyId, filter, pageNumber, pageSize);
+
+                if (result.Items.Any())
+                {
+                    var grnDto = _mapper.Map<IEnumerable<GrnMaster>>(result.Items);
+
+                    var responseData = new
+                    {
+                        Data = grnDto,
+                        Pagination = new
+                        {
+                            result.TotalCount,
+                            result.PageNumber,
+                            result.PageSize,
+                            result.TotalPages,
+                            result.HasPreviousPage,
+                            result.HasNextPage
+                        }
+                    };
+
+                    AddResponseMessage(Response, "Paginated GRNs retrieved successfully", responseData, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    AddResponseMessage(Response, "No invoices found", null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }
