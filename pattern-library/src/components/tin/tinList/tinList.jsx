@@ -204,6 +204,9 @@ const TinList = () => {
                       Requested By
                     </th>
                     <th className="text-nowrap py-3 px-4 border-bottom">
+                      Requested Location
+                    </th>
+                    <th className="text-nowrap py-3 px-4 border-bottom">
                       TRN Date
                     </th>
                   </tr>
@@ -215,6 +218,9 @@ const TinList = () => {
                         {trn.referenceNumber}
                       </td>
                       <td className="py-3 px-4">{trn.requestedBy}</td>
+                      <td className="py-3 px-4">
+                        {trn?.requestedFromLocation?.locationName || "N/A"}
+                      </td>
                       <td className="py-3 px-4 text-muted">
                         {moment
                           .utc(trn.requisitionDate)
@@ -275,6 +281,7 @@ const TinList = () => {
                   </th>
                   <th className="py-3 px-4 text-nowrap">Reference Number</th>
                   <th className="py-3 px-4 text-nowrap">Issued By</th>
+                  <th className="py-3 px-4 text-nowrap">Issued To</th>
                   <th className="py-3 px-4 text-nowrap">TIN Date</th>
                   <th className="py-3 px-4 text-nowrap">Status</th>
                   <th className="py-3 px-4 text-nowrap text-center">Actions</th>
@@ -302,6 +309,10 @@ const TinList = () => {
                           {Tin.referenceNumber}
                         </td>
                         <td className="py-3 px-4">{Tin.createdBy}</td>
+                        <td className="py-3 px-4">
+                          {Tin?.requisitionMaster?.requestedFromLocation
+                            ?.locationName || "N/A"}
+                        </td>
                         <td className="py-3 px-4 text-muted">
                           {moment
                             .utc(Tin?.issueDate)

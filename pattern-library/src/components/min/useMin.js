@@ -605,7 +605,7 @@ const useMin = ({ onFormSubmit }) => {
 
         setFormData((prev) => ({
           ...prev,
-          itemDetails: [...prev.itemDetails, newItem],
+          itemDetails: [newItem, ...prev.itemDetails],
         }));
 
         setSearchTerm("");

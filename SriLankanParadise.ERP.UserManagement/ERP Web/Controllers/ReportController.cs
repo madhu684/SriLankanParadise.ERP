@@ -208,7 +208,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                                 var item = new CollectionReportItemDto
                                 {
                                     Date = receipt.ReceiptDate,
-                                    BillNo = salesReceiptInvoice.SalesInvoice?.ReferenceNo,
+                                    BillNo = receipt.ReferenceNumber,
                                     ChannelNo = salesReceiptInvoice.SalesInvoice?.TokenNo,
                                     PatientName = salesReceiptInvoice.SalesInvoice?.InVoicedPersonName,
                                     Amount = salesReceiptInvoice.SettledAmount ?? 0,

@@ -88,6 +88,11 @@ const TinApproval = ({ show, handleClose, handleApproved, tin }) => {
               <strong>Transfer Requisition Reference No:</strong>{" "}
               {tin.requisitionMaster.referenceNumber}
             </p>
+            <p>
+              <strong>Dispatched Location:</strong>{" "}
+              {tin?.requisitionMaster?.requestedFromLocation?.locationName ||
+                "-"}
+            </p>
           </div>
         </div>
 
