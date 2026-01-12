@@ -195,6 +195,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   const fetchItems = async (searchQuery) => {
     try {
       const response = await get_Location_Inventory_Summary_By_Item_Name_api(
+        sessionStorage.getItem("companyId"),
         userLocation[0]?.locationId,
         searchQuery
       );
@@ -1125,7 +1126,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   };
 
   const renderColumns = () => {
-    return chargesAndDeductions.map((charge) => {
+    return chargesAndDeductions?.map((charge) => {
       if (charge.isApplicableForLineItem) {
         // Render columns for charges/deductions applicable for line items
         return (

@@ -32,9 +32,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             return await _locationInventoryRepository.GetLocationInventoriesByLocationId(locationId);
         }
-        public async Task<IEnumerable<LocationInventory>> GetEmptyReturnItemLocationInventoriesByLocationId(int locationId)
+        public async Task<IEnumerable<LocationInventory>> GetEmptyReturnItemLocationInventoriesByLocationId(int companyId, int locationId)
         {
-            return await _locationInventoryRepository.GetEmptyReturnItemLocationInventoriesByLocationId(locationId);
+            return await _locationInventoryRepository.GetEmptyReturnItemLocationInventoriesByLocationId(companyId, locationId);
         }
 
         public async Task<IEnumerable<LocationInventory>> GetLocationInventoriesByLocationIdItemMasterId(int locationId, int itemMasrerId)
@@ -83,9 +83,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             return await _locationInventoryRepository.GetLowStockItems(supplierId, locationId);
         }
 
-        public async Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByItemName(int? locationId, string itemName)
+        public async Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByItemName(int companyId, int? locationId, string itemName)
         {
-            return await _locationInventoryRepository.GetSumLocationInventoriesByItemName(locationId, itemName);
+            return await _locationInventoryRepository.GetSumLocationInventoriesByItemName(companyId, locationId, itemName);
         }
 
         public async Task<IEnumerable<LocationInventorySummary>> GetLowStockItemsByLocationOnly(int locationId)

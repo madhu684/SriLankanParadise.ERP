@@ -231,6 +231,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     queryKey: ["appointments", formData.invoiceDate],
     queryFn: async () => {
       const response = await get_appointment_tokens_by_date_api(
+        sessionStorage.getItem("companyId"),
         formData.invoiceDate
       );
       return response.data.result || [];
@@ -259,7 +260,11 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
       subTotal: calculateSubTotal(),
       totalAmount: calculateTotalAmount(),
     }));
-  }, [formData.itemDetails, formData.commonChargesAndDeductions, formData.deductionAmount]);
+  }, [
+    formData.itemDetails,
+    formData.commonChargesAndDeductions,
+    formData.deductionAmount,
+  ]);
 
   useEffect(() => {
     const today = new Date().toISOString().split("T")[0]; // Get YYYY-MM-DD format

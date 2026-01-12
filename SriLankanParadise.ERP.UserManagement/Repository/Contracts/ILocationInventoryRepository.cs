@@ -9,7 +9,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task<IEnumerable<LocationInventory>> GetAll();
         Task<LocationInventory> GetLocationInventoryByLocationInventoryId(int locationInventoryId);
         Task<IEnumerable<LocationInventory>> GetLocationInventoriesByLocationId(int locationId);
-        Task<IEnumerable<LocationInventory>> GetEmptyReturnItemLocationInventoriesByLocationId(int locationId);
+        Task<IEnumerable<LocationInventory>> GetEmptyReturnItemLocationInventoriesByLocationId(int companyId, int locationId);
         Task<IEnumerable<LocationInventory>> GetItemLocationInventoriesByLocationId(int locationId);
         Task<IEnumerable<LocationInventory>> GetLocationInventoriesByLocationIdItemMasterId(int locationId, int itemMasterId);
         Task<IEnumerable<LocationInventory>> GetLocationInventoryByBatchId(int batchId);
@@ -21,7 +21,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task UpdateEmptyLocationInventoryStockInHand(int locationId, int itemMasterId,LocationInventory locationInventory, string operation);
         Task<IEnumerable<LocationInventorySummary>> GetLowStockItems(int? supplierId = null, int? locationId = null);
         Task<IEnumerable<LocationInventorySummary>> GetLowStockItemsByLocationOnly(int locationId);
-        Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByItemName(int? locationId, string itemName);
+        Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByItemName(int companyId, int? locationId, string itemName);
         Task ReduceInventoryByFIFO(int locationId, int itemMasterId, int transactionTypeId, decimal quantity);
         Task IncreaseInventoryByFIFO(int locationId, int itemMasterId, int transactionTypeId, decimal quantity, int? sourceLocationId = null);
         Task<IEnumerable<LocationInventorySummary>> GetSumOfItemInventoryByLocationId(int locationId);

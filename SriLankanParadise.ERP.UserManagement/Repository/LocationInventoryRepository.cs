@@ -151,11 +151,11 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<LocationInventory>> GetEmptyReturnItemLocationInventoriesByLocationId(int locationId)
+        public async Task<IEnumerable<LocationInventory>> GetEmptyReturnItemLocationInventoriesByLocationId(int companyId, int locationId)
         {
             try
             {
-                var emptyItemType = await _dbContext.ItemTypes.FirstOrDefaultAsync(x => x.Name == "Empty");
+                var emptyItemType = await _dbContext.ItemTypes.FirstOrDefaultAsync(x => x.Name == "Empty" && x.CompanyId == companyId);
 
                 if (emptyItemType != null)
                 {
@@ -549,7 +549,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         //        throw;
         //    }
         //}
-        public async Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByItemName(int? locationId, string itemName)
+        public async Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByItemName(int companyId, int? locationId, string itemName)
         {
             try
             {
@@ -564,7 +564,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(si => si.ItemMaster)
                     .ThenInclude(im => im.ItemType)
                     .Where(si => !string.IsNullOrEmpty(itemName) &&
-                                (si.ItemMaster.ItemName.Contains(itemName) || si.ItemMaster.ItemCode.Contains(itemName)))
+                                (si.ItemMaster.ItemName.Contains(itemName) || si.ItemMaster.ItemCode.Contains(itemName)) &&
+                                si.ItemMaster.CompanyId == companyId)
                     .AsQueryable();
                 var supplierItems = await supplierItemsQuery.ToListAsync();
                 // Dynamic inventoryQuery to handle both cases
@@ -581,7 +582,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                           .Include(im => im.ItemType)
                           .Where(im => (!string.IsNullOrEmpty(itemName) &&
                                       (im.ItemName.Contains(itemName) || im.ItemCode.Contains(itemName))) &&
-                                      im.IsInventoryItem == true)
+                                      im.IsInventoryItem == true && im.CompanyId == companyId)
                       join li in _dbContext.LocationInventories
                           on im.ItemMasterId equals li.ItemMasterId into liGroup
                       from li in liGroup.DefaultIfEmpty()
