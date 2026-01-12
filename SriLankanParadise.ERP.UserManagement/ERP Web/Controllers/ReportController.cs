@@ -20,6 +20,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         private readonly IDailyLocationInventoryService _dailyLocationInventoryService;
         private readonly IItemMasterService _itemMasterService;
         private readonly ILocationService _locationService;
+        private readonly ISalesReceiptService _salesReceiptService;
         private readonly ILogger<ReportController> _logger;
 
         public ReportController
@@ -29,6 +30,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 IDailyLocationInventoryService dailyLocationInventoryService,
                 IItemMasterService itemMasterService,
                 ILocationService locationService,
+                ISalesReceiptService salesReceiptService,
                 ILogger<ReportController> logger
             )
         {
@@ -37,6 +39,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             _dailyLocationInventoryService = dailyLocationInventoryService;
             _itemMasterService = itemMasterService;
             _locationService = locationService;
+            _salesReceiptService = salesReceiptService;
             _logger = logger;
         }
 
@@ -178,5 +181,87 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+
+        [HttpGet("CollectionReport/{userId}")]
+        public async Task<ApiResponseModel> CollectionReport(int userId, [FromQuery] DateTime date)
+        {
+            try
+            {
+                var receiptData = await _salesReceiptService.GetSalesReceiptsByUserIdAndDate(userId, date);
+
+                var reportItems = new List<CollectionReportItemDto>();
+                decimal totalAmount = 0;
+                decimal totalShortAmount = 0;
+                decimal totalExcessAmount = 0;
+                decimal totalCashAmount = 0;
+                decimal totalBankTransferAmount = 0;
+
+                if (receiptData != null && receiptData.Any())
+                {
+                    foreach (var receipt in receiptData)
+                    {
+                        if (receipt.SalesReceiptSalesInvoices != null && receipt.SalesReceiptSalesInvoices.Any())
+                        {
+                            foreach (var salesReceiptInvoice in receipt.SalesReceiptSalesInvoices)
+                            {
+                                var item = new CollectionReportItemDto
+                                {
+                                    Date = receipt.ReceiptDate,
+                                    BillNo = receipt.ReferenceNumber,
+                                    ChannelNo = salesReceiptInvoice.SalesInvoice?.TokenNo,
+                                    PatientName = salesReceiptInvoice.SalesInvoice?.InVoicedPersonName,
+                                    Amount = salesReceiptInvoice.SettledAmount ?? 0,
+                                    ShortAmount = salesReceiptInvoice.OutstandingAmount ?? 0,
+                                    ExcessAmount = salesReceiptInvoice.ExcessAmount ?? 0,
+                                    TelephoneNo = salesReceiptInvoice.SalesInvoice?.InVoicedPersonMobileNo,
+                                    User = receipt.CreatedBy,
+                                    EnteredTime = receipt.CreatedDate,
+                                    ModeOfPayment = receipt.PaymentMode?.Mode
+                                };
+
+                                reportItems.Add(item);
+
+                                totalAmount += salesReceiptInvoice.SettledAmount ?? 0;
+                                totalShortAmount += salesReceiptInvoice.OutstandingAmount ?? 0;
+                                totalExcessAmount += salesReceiptInvoice.ExcessAmount ?? 0;
+
+                                // Sum cash payments
+                                if (receipt.PaymentMode?.Mode?.ToLower() == "cash")
+                                {
+                                    totalCashAmount += salesReceiptInvoice.SettledAmount ?? 0;
+                                }
+
+                                // Sum bank transfers
+                                if (receipt.PaymentMode?.Mode?.ToLower() == "bank transfer")
+                                {
+                                    totalBankTransferAmount += salesReceiptInvoice.SettledAmount ?? 0;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                var reportData = new CollectionReportDto
+                {
+                    Items = reportItems,
+                    TotalAmount = totalAmount,
+                    TotalShortAmount = totalShortAmount,
+                    TotalExcessAmount = totalExcessAmount,
+                    TotalCashCollection = totalCashAmount,
+                    TotalBankTransferAmount = totalBankTransferAmount,
+                    TotalCashInHand = totalCashAmount
+                };
+
+                AddResponseMessage(Response, "Collection report retrived", reportData, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
     }
 }

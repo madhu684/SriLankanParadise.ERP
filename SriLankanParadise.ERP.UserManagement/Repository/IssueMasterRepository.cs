@@ -55,8 +55,10 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var issueMasters = await _dbContext.IssueMasters
                     .Where(rm => rm.Status != 0 && rm.CompanyId == companyId)
                     .Include(im => im.RequisitionMaster)
-                          .ThenInclude(rm => rm.RequisitionDetails)
+                        .ThenInclude(rm => rm.RequisitionDetails)
                         .ThenInclude(rd => rd.ItemMaster)
+                    .Include(im => im.RequisitionMaster)
+                        .ThenInclude(rm => rm.RequestedFromLocation)
                     .Include(rm => rm.IssueDetails)
                     .ThenInclude(rd => rd.ItemMaster)
                     .ThenInclude(im => im.Unit)

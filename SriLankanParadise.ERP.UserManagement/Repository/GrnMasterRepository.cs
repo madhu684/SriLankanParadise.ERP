@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
@@ -170,5 +171,53 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                  throw;
              }
          }
+
+        public async Task<PagedResult<GrnMaster>> GetPaginatedGrnMastersByUserCompany(int CompanyId, string? filter = null, int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                // Input validation
+                if (pageNumber < 1) pageNumber = 1;
+                if (pageSize < 1) pageSize = 10;
+                if (pageSize > 100) pageSize = 100;
+
+                var query = _dbContext.GrnMasters
+                    .AsNoTracking()
+                    .Include(gm => gm.PurchaseOrder)
+                    .Include(gm => gm.GrnDetails)
+                        .ThenInclude(gd => gd.Item)
+                        .ThenInclude(im => im.Unit)
+                    .Include(gm => gm.WarehouseLocation)
+                    .Where(gm => gm.CompanyId == CompanyId);
+
+                // Apply filter if provided
+                if (!string.IsNullOrWhiteSpace(filter))
+                {
+                    query = query.Where(gm => EF.Functions.Like(gm.GrnType.ToLower(), filter.ToLower()));
+                }
+
+                var totalCount = await query.CountAsync();
+
+                // Apply pagination and ordering
+                var items = await query
+                    .OrderByDescending(si => si.CreatedDate)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                return new PagedResult<GrnMaster>
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+                };
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

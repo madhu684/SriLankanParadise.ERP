@@ -1,13 +1,16 @@
-import { useState, useEffect } from "react";
-import { get_grn_masters_with_out_drafts_api } from "../../../services/purchaseApi";
-import { get_grn_masters_by_user_id_api } from "../../../services/purchaseApi";
-import { get_user_permissions_api } from "../../../services/userManagementApi";
-import { useQuery } from "@tanstack/react-query";
+import { useContext, useState, useEffect } from "react";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { get_paginated_grn_masters_api } from "../../../services/purchaseApi";
+import { UserContext } from "../../../context/userContext";
 
 const useGrnList = () => {
-  const [Grns, setGrns] = useState([]);
-  const [isLoadingData, setIsLoadingData] = useState(true);
-  const [error, setError] = useState(null);
+  const { user, hasPermission, isLoadingPermissions, isPermissionsError } =
+    useContext(UserContext);
+
+  const pageSize = 10;
+  const [page, setPage] = useState(1);
+  const [grnType, setGrnType] = useState("");
+
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedRowData, setSelectedRowData] = useState([]);
   const [showApproveGrnModal, setShowApproveGrnModal] = useState(false);
@@ -20,79 +23,34 @@ const useGrnList = () => {
   const [showUpdateGrnForm, setShowUpdateGrnForm] = useState(false);
   const [GRNDetail, setGRNDetail] = useState("");
 
-  const fetchUserPermissions = async () => {
-    try {
-      const response = await get_user_permissions_api(
-        sessionStorage.getItem("userId")
-      );
-      return response.data.result;
-    } catch (error) {
-      console.error("Error fetching user permissions:", error);
-    }
-  };
-
   const {
-    data: userPermissions,
-    isLoading: isLoadingPermissions,
-    isError: isPermissionsError,
-    error: permissionError,
+    data: grnData,
+    isLoading: isLoadingData,
+    error,
   } = useQuery({
-    queryKey: ["userPermissions"],
-    queryFn: fetchUserPermissions,
+    queryKey: ["grnList", user?.companyId, page, pageSize, grnType],
+    queryFn: () =>
+      get_paginated_grn_masters_api({
+        companyId:
+          user?.companyId || parseInt(sessionStorage.getItem("companyId")),
+        filter: grnType || null,
+        pageNumber: page,
+        pageSize: pageSize,
+      }),
+    enabled: !!user?.companyId,
+    placeholderData: keepPreviousData,
   });
 
-  const fetchData = async () => {
-    try {
-      if (!isLoadingPermissions && userPermissions) {
-        if (hasPermission("Approve Goods Received Note")) {
-          const GrnWithoutDraftsResponse =
-            await get_grn_masters_with_out_drafts_api(
-              sessionStorage.getItem("companyId")
-            );
-
-          const GrnByUserIdResponse = await get_grn_masters_by_user_id_api(
-            sessionStorage.getItem("userId")
-          );
-
-          let newGrns = [];
-          if (
-            GrnWithoutDraftsResponse &&
-            GrnWithoutDraftsResponse.data.result
-          ) {
-            newGrns = GrnWithoutDraftsResponse.data.result;
-          }
-
-          let additionalGrns = [];
-          if (GrnByUserIdResponse && GrnByUserIdResponse.data.result) {
-            additionalGrns = GrnByUserIdResponse.data.result;
-          }
-
-          const uniqueNewGrns = additionalGrns.filter(
-            (grn) =>
-              !newGrns.some(
-                (existingGrn) => existingGrn.grnMasterId === grn.grnMasterId
-              )
-          );
-
-          newGrns = [...newGrns, ...uniqueNewGrns];
-          setGrns(newGrns);
-        } else {
-          const GrnResponse = await get_grn_masters_by_user_id_api(
-            sessionStorage.getItem("userId")
-          );
-          setGrns(GrnResponse.data.result || []);
-        }
-      }
-    } catch (error) {
-      setError("Error fetching data");
-    } finally {
-      setIsLoadingData(false);
-    }
+  // Extract sales invoices and pagination from response
+  const grns = grnData?.data?.result?.data || [];
+  const pagination = grnData?.data?.result?.pagination || {
+    totalCount: 0,
+    pageNumber: 1,
+    pageSize: 10,
+    totalPages: 1,
+    hasPreviousPage: false,
+    hasNextPage: false,
   };
-
-  useEffect(() => {
-    fetchData();
-  }, [isLoadingPermissions, userPermissions]);
 
   const handleShowApproveGrnModal = () => {
     setShowApproveGrnModal(true);
@@ -112,7 +70,6 @@ const useGrnList = () => {
   };
 
   const handleApproved = async () => {
-    fetchData();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -149,7 +106,6 @@ const useGrnList = () => {
   };
 
   const handleUpdated = async () => {
-    fetchData();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -165,7 +121,7 @@ const useGrnList = () => {
 
   const handleRowSelect = (id) => {
     const isSelected = selectedRows.includes(id);
-    const selectedRow = Grns.find((pr) => pr.grnMasterId === id);
+    const selectedRow = grns.find((pr) => pr.grnMasterId === id);
 
     if (isSelected) {
       setSelectedRows((prevSelected) =>
@@ -229,24 +185,17 @@ const useGrnList = () => {
 
   const areAnySelectedRowsPending = (selectedRows) => {
     return selectedRows.some((id) => {
-      const grn = Grns.find((grn) => grn.grnMasterId === id);
+      const grn = grns.find((grn) => grn.grnMasterId === id);
       return grn && grn.status && grn.status.toString().charAt(1) === "1";
     });
   };
 
-  const hasPermission = (permissionName) => {
-    return userPermissions?.some(
-      (permission) =>
-        permission.permission.permissionName === permissionName &&
-        permission.permission.permissionStatus
-    );
-  };
-
   return {
-    Grns,
+    grns,
     isLoadingData,
     isLoadingPermissions,
     error,
+    isPermissionsError,
     isAnyRowSelected,
     selectedRows,
     showApproveGrnModal,
@@ -256,11 +205,10 @@ const useGrnList = () => {
     selectedRowData,
     showCreateGrnForm,
     showUpdateGrnForm,
-    userPermissions,
     GRNDetail,
-    isLoadingPermissions,
-    isPermissionsError,
-    permissionError,
+    pagination,
+    grnType,
+    page,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleViewDetails,
@@ -274,10 +222,12 @@ const useGrnList = () => {
     handleApproved,
     setShowCreateGrnForm,
     setShowUpdateGrnForm,
-    hasPermission,
     handleUpdate,
     handleUpdated,
     handleClose,
+    hasPermission,
+    setPage,
+    setGrnType,
   };
 };
 

@@ -470,6 +470,37 @@ export const delete_grn_detail_api = async (grnDetailId) => {
   }
 };
 
+export const get_paginated_grn_masters_api = async ({
+  companyId,
+  filter,
+  pageNumber = 1,
+  pageSize = 10,
+}) => {
+  try {
+    const params = {
+      pageNumber,
+      pageSize,
+    };
+
+    if (filter && filter.trim() !== "") {
+      params.filter = filter;
+    }
+
+    const response = await api.get(
+      `/grnMaster/GetPaginatedGrnMastersByUserCompany/${companyId}`,
+      {
+        params,
+        withCredentials: true,
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching GRN masters:", error);
+    throw error;
+  }
+};
+
 //company locations api
 export const get_company_locations_api = async (companyId) => {
   try {

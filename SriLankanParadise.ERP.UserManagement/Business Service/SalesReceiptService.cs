@@ -43,5 +43,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             await _salesReceiptRepository.UpdateSalesReceipt(salesReceiptId, salesReceipt);
         }
+
+        public async Task<IEnumerable<SalesReceipt>> GetSalesReceiptsByUserIdAndDate(int userId, DateTime? date)
+        {
+            return await _salesReceiptRepository.GetSalesReceiptsByUserIdAndDate(userId, date);
+        }
     }
 }
