@@ -1618,6 +1618,7 @@ export const get_Low_Stock_Items_for_location_api = async (locationId) => {
 };
 
 export const get_Location_Inventory_Summary_By_Item_Name_api = async (
+  companyId,
   locationId = null,
   itemName = ""
 ) => {
@@ -1625,7 +1626,7 @@ export const get_Location_Inventory_Summary_By_Item_Name_api = async (
     const response = await api.get(
       `/locationInventory/GetLocationInventorySummaryByItemName`,
       {
-        params: { locationId, itemName },
+        params: { companyId, locationId, itemName },
         withCredentials: true,
       }
     );

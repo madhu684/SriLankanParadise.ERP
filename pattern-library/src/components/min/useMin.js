@@ -582,6 +582,7 @@ const useMin = ({ onFormSubmit }) => {
     const fetchTotalStock = async () => {
       try {
         const response = await get_Location_Inventory_Summary_By_Item_Name_api(
+          sessionStorage.getItem("companyId"),
           selectedLocationId,
           item.itemMaster?.itemName || item.itemName
         );

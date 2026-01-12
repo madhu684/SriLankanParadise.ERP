@@ -124,11 +124,11 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         }
 
         [HttpGet("GetEmptyReturnItemLocationInventoriesByLocationId/{locationId}")]
-        public async Task<ApiResponseModel> GetEmptyReturnItemLocationInventoriesByLocationId(int locationId)
+        public async Task<ApiResponseModel> GetEmptyReturnItemLocationInventoriesByLocationId([FromQuery] int companyId, int locationId)
         {
             try
             {
-                var locationInventories = await _locationInventoryService.GetEmptyReturnItemLocationInventoriesByLocationId(locationId);
+                var locationInventories = await _locationInventoryService.GetEmptyReturnItemLocationInventoriesByLocationId(companyId, locationId);
                 if (locationInventories != null)
                 {
                     var locationInventoryDtos = _mapper.Map<IEnumerable<EmptyReturnItemLocationInventoryDto>>(locationInventories);
@@ -454,11 +454,11 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         }
 
         [HttpGet("GetLocationInventorySummaryByItemName")]
-        public async Task<ApiResponseModel> GetLocationInventorySummaryByItemName([FromQuery] int? locationId, [FromQuery] string itemName)
+        public async Task<ApiResponseModel> GetLocationInventorySummaryByItemName([FromQuery] int companyId, [FromQuery] int? locationId, [FromQuery] string itemName)
         {
             try
             {
-                var summary = await _locationInventoryService.GetSumLocationInventoriesByItemName(locationId, itemName);
+                var summary = await _locationInventoryService.GetSumLocationInventoriesByItemName(companyId, locationId, itemName);
 
                 if (summary != null)
                 {

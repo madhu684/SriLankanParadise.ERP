@@ -10,9 +10,11 @@ const api = axios.create({
   baseURL: API_BASE_URL,
 });
 
-export const get_appointment_tokens_by_date_api = async (date) => {
+export const get_appointment_tokens_by_date_api = async (companyId, date) => {
   try {
-    var response = await api.get(`/ayuOMS/GetTokensByDate?date=${date}`);
+    var response = await api.get(
+      `/ayuOMS/GetTokensByDate?companyId=${companyId}&date=${date}`
+    );
     return response.data;
   } catch (error) {
     console.log(error);
@@ -20,9 +22,11 @@ export const get_appointment_tokens_by_date_api = async (date) => {
   }
 };
 
-export const get_appointment_by_id_api = async (id) => {
+export const get_appointment_by_id_api = async (companyId, id) => {
   try {
-    var response = await api.get(`/ayuOMS/GetAppointmentById/${id}`);
+    var response = await api.get(
+      `/ayuOMS/GetAppointmentById/${id}?companyId=${companyId}`
+    );
     return response.data;
   } catch (error) {
     console.log(error);

@@ -77,6 +77,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     queryFn: async () => {
       if (!salesInvoice?.appointmentId) return null;
       const response = await get_appointment_by_id_api(
+        sessionStorage.getItem("companyId"),
         salesInvoice.appointmentId
       );
       return response.data.result;
@@ -93,6 +94,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     queryKey: ["appointments", formData.invoiceDate],
     queryFn: async () => {
       const response = await get_appointment_tokens_by_date_api(
+        sessionStorage.getItem("companyId"),
         formData.invoiceDate
       );
       return response.data.result || [];
@@ -528,7 +530,11 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
       subTotal: calculateSubTotal(),
       totalAmount: calculateTotalAmount(),
     }));
-  }, [formData.itemDetails, formData.commonChargesAndDeductions, formData.deductionAmount]);
+  }, [
+    formData.itemDetails,
+    formData.commonChargesAndDeductions,
+    formData.deductionAmount,
+  ]);
 
   const validateField = (
     fieldName,
