@@ -238,6 +238,28 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
         }
 
+        [HttpDelete("ForceDelete/{itemMasterId}")]
+        public async Task<ApiResponseModel> ForceDeleteItemMaster(int itemMasterId)
+        {
+            try
+            {
+                var existingItemMaster = await _itemMasterService.GetItemMasterByItemMasterId(itemMasterId);
+                if (existingItemMaster == null)
+                {
+                    _logger.LogWarning(LogMessages.ItemMasterNotFound);
+                    return AddResponseMessage(Response, LogMessages.ItemMasterNotFound, null, true, HttpStatusCode.NotFound);
+                }
+                await _itemMasterService.ForceDeleteItemMaster(itemMasterId);
+                _logger.LogInformation("Item deleted using force delete");
+                return AddResponseMessage(Response, "Item deleted using force delete", null, true, HttpStatusCode.NoContent);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
+
         [HttpGet("GetItemMastersByUserId/{userId}")]
         public async Task<ApiResponseModel> GetItemMastersByUserId(int userId)
         {

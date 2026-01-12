@@ -487,5 +487,61 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task ForceDeleteItemMaster(int itemMasterId)
+        {
+            using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                // 1. Delete LocationInventoryMovement entries with that itemMasterId
+                var inventoryMovements = await _dbContext.LocationInventoryMovements
+                    .Where(lim => lim.ItemMasterId == itemMasterId)
+                    .ToListAsync();
+
+                if (inventoryMovements.Any())
+                {
+                    _dbContext.LocationInventoryMovements.RemoveRange(inventoryMovements);
+                    await _dbContext.SaveChangesAsync();
+                }
+
+                // 2. Delete LocationInventory entries with that ItemMasterId
+                var locationInventories = await _dbContext.LocationInventories
+                    .Where(li => li.ItemMasterId == itemMasterId)
+                    .ToListAsync();
+
+                if (locationInventories.Any())
+                {
+                    _dbContext.LocationInventories.RemoveRange(locationInventories);
+                    await _dbContext.SaveChangesAsync();
+                }
+
+                // 3. Delete ItemBatch entry with that ItemMasterId
+                var itemBatches = await _dbContext.ItemBatches
+                    .Where(ib => ib.ItemMasterId == itemMasterId)
+                    .ToListAsync();
+
+                if (itemBatches.Any())
+                {
+                    _dbContext.ItemBatches.RemoveRange(itemBatches);
+                    await _dbContext.SaveChangesAsync();
+                }
+
+                // 4. Finally ItemMaster entry
+                var itemMaster = await _dbContext.ItemMasters.FindAsync(itemMasterId);
+
+                if (itemMaster != null)
+                {
+                    _dbContext.ItemMasters.Remove(itemMaster);
+                    await _dbContext.SaveChangesAsync();
+                }
+
+                await transaction.CommitAsync();
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
     }
 }
