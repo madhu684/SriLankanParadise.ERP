@@ -34,12 +34,12 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         }
 
 
-        [HttpGet("GetLocationTypesByCompanyId/{companyId}")]
-        public async Task<ApiResponseModel> GetLocationTypesByCompanyId(int companyId)
+        [HttpGet("GetLocationTypesByCompanyId")]
+        public async Task<ApiResponseModel> GetLocationTypesByCompanyId()
         {
             try
             {
-                var locationTypes = await _locationTypeService.GetLocationTypesByCompanyId(companyId);
+                var locationTypes = await _locationTypeService.GetLocationTypesByCompanyId();
                 if (locationTypes != null)
                 {
                     var locationTypeDtos = _mapper.Map<IEnumerable<LocationTypeDto>>(locationTypes);

@@ -1444,10 +1444,10 @@ export const get_location_inventory_by_batch_id_api = async (batchId) => {
   }
 };
 
-export const get_location_types_by_company_id_api = async (companyId) => {
+export const get_location_types_by_company_id_api = async () => {
   try {
     const response = await api.get(
-      `/locationType/GetLocationTypesByCompanyId/${companyId}`,
+      `/locationType/GetLocationTypesByCompanyId`,
       {
         withCredentials: true,
       }

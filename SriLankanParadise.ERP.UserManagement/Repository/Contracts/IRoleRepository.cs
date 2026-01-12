@@ -4,7 +4,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
 {
     public interface IRoleRepository
     {
-        Task<Dictionary<int, List<Role>>> GetRolesByModuleIds(int[] moduleIds);
+        Task<Dictionary<int, List<Role>>> GetRolesByModuleIds(int companyId, int[] moduleIds);
 
         Task AddRole(Role role);
 

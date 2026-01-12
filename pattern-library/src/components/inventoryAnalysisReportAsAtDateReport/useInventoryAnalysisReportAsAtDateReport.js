@@ -231,9 +231,7 @@ const useInventoryAsAtDateReport = () => {
     queryKey: ["locationTypes"],
     queryFn: async () => {
       try {
-        const response = await get_location_types_by_company_id_api(
-          sessionStorage.getItem("companyId")
-        );
+        const response = await get_location_types_by_company_id_api();
         const filteredRes = response.data.result.filter(
           (loc) => loc.locationTypeId !== 3
         );

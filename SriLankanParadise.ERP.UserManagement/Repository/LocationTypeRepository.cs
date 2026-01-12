@@ -14,12 +14,11 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             _dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<LocationType>> GetLocationTypesByCompanyId(int companyId)
+        public async Task<IEnumerable<LocationType>> GetLocationTypesByCompanyId()
         {
             try
             {
                 var locationTypes = await _dbContext.LocationTypes
-                    .Where(lt => lt.CompanyId == companyId)
                     .ToListAsync();
 
                 return locationTypes.Any() ? locationTypes : null;

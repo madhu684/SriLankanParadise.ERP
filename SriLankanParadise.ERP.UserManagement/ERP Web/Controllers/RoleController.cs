@@ -36,11 +36,11 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         }
 
         [HttpGet("GetRolesByModuleIds")]
-        public async Task<ApiResponseModel> GetRolesByModuleIds([FromQuery] int[] moduleIds)
+        public async Task<ApiResponseModel> GetRolesByModuleIds(int companyId, [FromQuery] int[] moduleIds)
         {
             try
             {
-                var rolesByModule = await _roleService.GetRolesByModuleIds(moduleIds);
+                var rolesByModule = await _roleService.GetRolesByModuleIds(companyId, moduleIds);
 
                 if (rolesByModule != null && rolesByModule.Count > 0)
                 {
