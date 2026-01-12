@@ -156,7 +156,12 @@ const CollectionReport = () => {
                   <div className="d-flex justify-content-between align-items-center">
                     <div>
                       <p className="text-muted mb-1 small">Total Receipts</p>
-                      <h4 className="mb-0">{reportData.items?.length || 0}</h4>
+                      <h4 className="mb-0">
+                        {reportData.items && reportData.items.length > 0
+                          ? new Set(reportData.items.map((item) => item.billNo))
+                              .size
+                          : 0}
+                      </h4>
                     </div>
                     <div className="text-secondary">
                       <FiFileText size={32} />

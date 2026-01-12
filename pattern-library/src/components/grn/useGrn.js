@@ -13,7 +13,7 @@ import {
   get_company_locations_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const EMPTY_ARRAY = [];
 
@@ -60,6 +60,8 @@ const useGrn = ({ onFormSubmit }) => {
   const [searchByPR, setSearchByPR] = useState(false);
   const [searchBySR, setSearchBySR] = useState(false);
   const [supplierSearchTerm, setSupplierSearchTerm] = useState("");
+
+  const queryClient = useQueryClient();
 
   const fetchLocations = async () => {
     try {
@@ -737,6 +739,7 @@ const useGrn = ({ onFormSubmit }) => {
         if (allDetailsSuccessful && updateSupplyReturnSuccessfull) {
           if (isSaveAsDraft) {
             setSubmissionStatus("successSavedAsDraft");
+            queryClient.invalidateQueries(["grnList"]);
             console.log("GRN saved as draft!", formData);
           } else {
             setSubmissionStatus("successSubmitted");

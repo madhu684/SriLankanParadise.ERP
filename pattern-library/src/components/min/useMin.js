@@ -672,7 +672,7 @@ const useMin = ({ onFormSubmit }) => {
     submissionStatus,
     alertRef,
     isLoading:
-      isLoading || isItemBatchesLoading || isLocationInventoriesLoading,
+      isLoading || isItemBatchesLoading,
     isError,
     mrnSearchTerm,
     loading,
