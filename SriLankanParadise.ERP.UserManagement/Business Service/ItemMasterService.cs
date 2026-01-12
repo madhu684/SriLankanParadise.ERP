@@ -83,5 +83,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             return await _itemMasterRepository.GetPaginatedItemMastersByCompanyId(companyId, searchQuery, supplierId, pageNumber, pageSize);
         }
+
+        public async Task ForceDeleteItemMaster(int itemMasterId)
+        {
+            await _itemMasterRepository.ForceDeleteItemMaster(itemMasterId);
+        }
     }
 }
