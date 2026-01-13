@@ -21,5 +21,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             return await _cashierExpenseOutRepository.GetCashierExpenseOutsByUserId(userId);
         }
+
+        public async Task<IEnumerable<CashierExpenseOut>> GetCashierExpenseOutsByUserIdDate(int userId, DateTime date)
+        {
+            return await _cashierExpenseOutRepository.GetCashierExpenseOutsByUserIdDate(userId, date);
+        }
     }
 }

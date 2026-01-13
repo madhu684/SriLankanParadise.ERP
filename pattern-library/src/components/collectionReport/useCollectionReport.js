@@ -142,6 +142,11 @@ const useCollectionReport = () => {
         amount: reportData.totalBankTransferAmount || 0,
         isSummary: true,
       },
+      {
+        billNo: "Cashier Expenses",
+        amount: reportData.totalCashierExpenseOutAmount || 0,
+        isSummary: true,
+      },
     ];
 
     const dataWithSummary = [...reportData.items, ...summaryRows];

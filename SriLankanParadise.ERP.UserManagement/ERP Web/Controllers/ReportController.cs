@@ -21,6 +21,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         private readonly IItemMasterService _itemMasterService;
         private readonly ILocationService _locationService;
         private readonly ISalesReceiptService _salesReceiptService;
+        private readonly ICashierExpenseOutService _cashierExpenseOutService;
         private readonly ILogger<ReportController> _logger;
 
         public ReportController
@@ -31,6 +32,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 IItemMasterService itemMasterService,
                 ILocationService locationService,
                 ISalesReceiptService salesReceiptService,
+                ICashierExpenseOutService cashierExpenseOutService,
                 ILogger<ReportController> logger
             )
         {
@@ -40,6 +42,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             _itemMasterService = itemMasterService;
             _locationService = locationService;
             _salesReceiptService = salesReceiptService;
+            _cashierExpenseOutService = cashierExpenseOutService;
             _logger = logger;
         }
 
@@ -189,6 +192,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             try
             {
                 var receiptData = await _salesReceiptService.GetSalesReceiptsByUserIdAndDate(userId, date);
+                var cashierExpenses = await _cashierExpenseOutService.GetCashierExpenseOutsByUserIdDate(userId, date);
 
                 var reportItems = new List<CollectionReportItemDto>();
                 decimal totalAmount = 0;
@@ -196,6 +200,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 decimal totalExcessAmount = 0;
                 decimal totalCashAmount = 0;
                 decimal totalBankTransferAmount = 0;
+                decimal totalCashierExpenses = 0;
 
                 if (receiptData != null && receiptData.Any())
                 {
@@ -211,7 +216,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                                     BillNo = receipt.ReferenceNumber,
                                     ChannelNo = salesReceiptInvoice.SalesInvoice?.TokenNo,
                                     PatientName = salesReceiptInvoice.SalesInvoice?.InVoicedPersonName,
-                                    Amount = salesReceiptInvoice.SettledAmount ?? 0,
+                                    Amount = salesReceiptInvoice.AmountCollect ?? 0,
                                     ShortAmount = salesReceiptInvoice.OutstandingAmount ?? 0,
                                     ExcessAmount = salesReceiptInvoice.ExcessAmount ?? 0,
                                     TelephoneNo = salesReceiptInvoice.SalesInvoice?.InVoicedPersonMobileNo,
@@ -222,23 +227,32 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                                 reportItems.Add(item);
 
-                                totalAmount += salesReceiptInvoice.SettledAmount ?? 0;
+                                totalAmount += salesReceiptInvoice.AmountCollect ?? 0;
                                 totalShortAmount += salesReceiptInvoice.OutstandingAmount ?? 0;
                                 totalExcessAmount += salesReceiptInvoice.ExcessAmount ?? 0;
 
                                 // Sum cash payments
                                 if (receipt.PaymentMode?.Mode?.ToLower() == "cash")
                                 {
-                                    totalCashAmount += salesReceiptInvoice.SettledAmount ?? 0;
+                                    totalCashAmount += salesReceiptInvoice.AmountCollect ?? 0;
                                 }
 
                                 // Sum bank transfers
                                 if (receipt.PaymentMode?.Mode?.ToLower() == "bank transfer")
                                 {
-                                    totalBankTransferAmount += salesReceiptInvoice.SettledAmount ?? 0;
+                                    totalBankTransferAmount += salesReceiptInvoice.AmountCollect ?? 0;
                                 }
                             }
                         }
+                    }
+                }
+
+
+                if (cashierExpenses != null && cashierExpenses.Any())
+                {
+                    foreach (var expense in cashierExpenses)
+                    {
+                        totalCashierExpenses += expense.Amount ?? 0;
                     }
                 }
 
@@ -250,7 +264,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     TotalExcessAmount = totalExcessAmount,
                     TotalCashCollection = totalCashAmount,
                     TotalBankTransferAmount = totalBankTransferAmount,
-                    TotalCashInHand = totalCashAmount
+                    TotalCashInHand = totalCashAmount,
+                    TotalCashierExpenseOutAmount = totalCashierExpenses
                 };
 
                 AddResponseMessage(Response, "Collection report retrived", reportData, true, HttpStatusCode.OK);

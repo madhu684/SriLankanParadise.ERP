@@ -7,6 +7,7 @@ import {
   FiUser,
   FiRefreshCw,
 } from "react-icons/fi";
+import { RiCurrencyLine } from "react-icons/ri";
 import { BsFileEarmarkExcel } from "react-icons/bs";
 import CurrentDateTime from "../../components/currentDateTime/currentDateTime";
 import useCollectionReport from "./useCollectionReport";
@@ -210,6 +211,31 @@ const CollectionReport = () => {
                   </div>
                 </div>
               </>
+            )}
+
+            {reportData.totalCashierExpenseOutAmount > 0 && (
+              <div className="col-md-3">
+                <div className="card shadow-sm border-dark">
+                  <div className="card-body">
+                    <div className="d-flex justify-content-between align-items-center">
+                      <div>
+                        <p className="text-muted mb-1 small">
+                          Cashier Expenses
+                        </p>
+                        <h4 className="mb-0">
+                          Rs.{" "}
+                          {formatCurrency(
+                            reportData.totalCashierExpenseOutAmount
+                          )}
+                        </h4>
+                      </div>
+                      <div className="text-dark">
+                        <RiCurrencyLine size={32} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
 
