@@ -34,6 +34,7 @@ import AddEmpties from "../emptyReturn/addEmpties/addEmpties.jsx";
 import RolePermissionMapping from "../rolePermissionMapping/RolePermissionMapping.jsx";
 import CustomerList from "../customer/customerList/CustomerList.jsx";
 import CollectionReport from "../collectionReport/CollectionReport.jsx";
+import ManagerCollectionReport from "../ManagerCollectionReport/ManagerCollectionReport.jsx";
 
 const useMain = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
@@ -156,8 +157,10 @@ const useMain = () => {
         return <RolePermissionMapping />;
       case "Customers":
         return <CustomerList />;
-      case "Collection Report":
+      case "User Collection Report":
         return <CollectionReport />;
+      case "Collection Report":
+        return <ManagerCollectionReport />;
       default:
         return null;
     }

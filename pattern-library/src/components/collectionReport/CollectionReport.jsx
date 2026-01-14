@@ -39,7 +39,7 @@ const CollectionReport = () => {
       {/* Header */}
       <div className="mb-3">
         <div className="d-flex justify-content-between align-items-center">
-          <h1 className="h2 mb-0">Collection Report</h1>
+          <h1 className="h2 mb-0">User Collection Report</h1>
           <div className="text-muted small">
             <CurrentDateTime />
           </div>
@@ -458,7 +458,9 @@ const CollectionReport = () => {
           {/* Daily Summary Section */}
           <div className="card shadow-sm mt-4">
             <div className="card-header bg-light">
-              <h5 className="mb-0">Daily Summary (Full Day)</h5>
+              <h5 className="mb-0">
+                Daily Summary of {user.username} (Full Day)
+              </h5>
             </div>
             <div className="card-body">
               <div className="row g-3">

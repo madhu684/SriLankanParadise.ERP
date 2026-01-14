@@ -853,6 +853,25 @@ export const post_cashier_expense_out_api = async (formData) => {
   }
 };
 
+export const get_cashier_expense_outs_by_userId_date_api = async (
+  userId,
+  date,
+  cashierSessionId
+) => {
+  try {
+    const response = await api.get(
+      `/cashierExpenseOut/GetCashierExpenseOutsByUserIdDate/${userId}/${date}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const get_company_api = async (companyId) => {
   try {
     const response = await api.get(`/company/${companyId}`, {

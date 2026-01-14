@@ -2,8 +2,8 @@ import { useContext, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { UserContext } from "../../context/userContext";
 import { get_collection_report_by_date_user_api } from "../../services/reportsApi";
-import { useExcelExport } from "../common/excelSheetGenerator/excelSheetGenerator";
 import { get_cashier_session_by_user_date_api } from "../../services/salesApi";
+import { useExcelExport } from "../common/excelSheetGenerator/excelSheetGenerator";
 
 const useCollectionReport = () => {
   const { user, activeCashierSession } = useContext(UserContext);
@@ -253,6 +253,10 @@ const useCollectionReport = () => {
       });
     }
 
+    const selectedSession = userCashierSessions.find(
+      (session) => session.cashierSessionId === selectedSessionId
+    );
+
     exportToExcel({
       fileName: `Collection_Report_${date}.xlsx`,
       sheets: [
@@ -262,7 +266,7 @@ const useCollectionReport = () => {
           sheetName: "Session Details",
           topic: `Collection Report of ${
             user?.username || ""
-          } for Session ${formatDateTime(activeCashierSession?.sessionIn)}`,
+          } for Session ${formatDateTime(selectedSession?.sessionIn)}`,
         },
         {
           data: dailySummaryData,

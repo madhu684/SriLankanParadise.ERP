@@ -26,7 +26,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
         public ReportController
             (
-                ILocationInventoryService locationInventoryService, 
+                ILocationInventoryService locationInventoryService,
                 ILocationInventoryMovementService locationInventoryMovementService,
                 IDailyLocationInventoryService dailyLocationInventoryService,
                 IItemMasterService itemMasterService,
@@ -90,7 +90,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 {
                     foreach (var in_Item in in_ItemsLocInv)
                     {
-                        if(inventoryItems.Any(i => i.itemId == in_Item.ItemMasterId && in_Item.BatchId == i.batchId))
+                        if (inventoryItems.Any(i => i.itemId == in_Item.ItemMasterId && in_Item.BatchId == i.batchId))
                         {
                             var index = inventoryItems.FindIndex(i => i.itemId == in_Item.ItemMasterId && in_Item.BatchId == i.batchId);
                             inventoryItems[index].totalIn += in_Item.Qty ?? 0;
@@ -347,5 +347,112 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpGet("ManagerCollectionReport")]
+        public async Task<ApiResponseModel> ManagerCollectionReport([FromQuery] DateTime date)
+        {
+            try
+            {
+                var allReceipts = await _salesReceiptService.GetSalesReceiptsByDate(date);
+                var users = allReceipts.Select(r => new { r.CreatedUserId, r.CreatedBy }).DistinctBy(u => u.CreatedUserId).ToList();
+
+                var reportDto = new ManagerCollectionReportDto
+                {
+                    Date = date
+                };
+
+                foreach (var user in users)
+                {
+                    if (user.CreatedUserId == null) continue;
+
+                    int userId = user.CreatedUserId.Value;
+                    var userReceipts = allReceipts.Where(r => r.CreatedUserId == userId).ToList();
+                    var userExpenses = await _cashierExpenseOutService.GetCashierExpenseOutsByUserIdDate(userId, date);
+
+                    var userDto = new ManagerCollectionReportUserDto
+                    {
+                        UserId = userId,
+                        UserName = user.CreatedBy
+                    };
+
+                    // distinct sessions from both receipts and expenses
+                    var receiptSessionIds = userReceipts.Select(r => r.CashierSessionId).Distinct();
+                    var expenseSessionIds = userExpenses?.Select(e => e.CashierSessionId).Distinct() ?? Enumerable.Empty<int?>();
+                    var allSessionIds = receiptSessionIds.Union(expenseSessionIds).Distinct().OrderBy(id => id).ToList();
+
+                    foreach (var sessionId in allSessionIds)
+                    {
+                        var sessionReceipts = userReceipts.Where(r => r.CashierSessionId == sessionId).ToList();
+                        var sessionExpenses = userExpenses?.Where(e => e.CashierSessionId == sessionId).ToList();
+
+                        var sessionDto = new ManagerCollectionReportSessionDto { SessionId = sessionId };
+
+                        // Calculate receipt totals
+                        foreach (var receipt in sessionReceipts)
+                        {
+                            if (receipt.SalesReceiptSalesInvoices != null)
+                            {
+                                foreach (var inv in receipt.SalesReceiptSalesInvoices)
+                                {
+                                    sessionDto.SessionTotalAmount += inv.AmountCollect ?? 0;
+                                    sessionDto.SessionTotalShort += inv.OutstandingAmount ?? 0;
+                                    sessionDto.SessionTotalExcess += inv.ExcessAmount ?? 0;
+
+                                    if (receipt.PaymentMode?.Mode?.ToLower() == "cash")
+                                    {
+                                        sessionDto.SessionTotalCash += inv.AmountCollect ?? 0;
+                                    }
+
+                                    if (receipt.PaymentMode?.Mode?.ToLower() == "bank transfer")
+                                    {
+                                        sessionDto.SessionTotalBankTransfer += inv.AmountCollect ?? 0;
+                                    }
+                                }
+                            }
+                        }
+
+                        // Calculate expense totals
+                        if (sessionExpenses != null)
+                        {
+                            sessionDto.SessionTotalExpenses = sessionExpenses.Sum(e => e.Amount ?? 0);
+                        }
+
+                        sessionDto.SessionTotalCashInHand = sessionDto.SessionTotalCash - sessionDto.SessionTotalExpenses;
+
+                        userDto.Sessions.Add(sessionDto);
+
+                        // Add to user totals
+                        userDto.UserTotalAmount += sessionDto.SessionTotalAmount;
+                        userDto.UserTotalShort += sessionDto.SessionTotalShort;
+                        userDto.UserTotalExcess += sessionDto.SessionTotalExcess;
+                        userDto.UserTotalCash += sessionDto.SessionTotalCash;
+                        userDto.UserTotalBankTransfer += sessionDto.SessionTotalBankTransfer;
+                        userDto.UserTotalExpenses += sessionDto.SessionTotalExpenses;
+                        userDto.UserTotalCashInHand += sessionDto.SessionTotalCashInHand;
+                    }
+
+                    if (userDto.Sessions.Any())
+                    {
+                        reportDto.UserReports.Add(userDto);
+
+                        // Add to grand totals
+                        reportDto.TotalAmount += userDto.UserTotalAmount;
+                        reportDto.TotalShort += userDto.UserTotalShort;
+                        reportDto.TotalExcess += userDto.UserTotalExcess;
+                        reportDto.TotalCash += userDto.UserTotalCash;
+                        reportDto.TotalBankTransfer += userDto.UserTotalBankTransfer;
+                        reportDto.TotalExpenses += userDto.UserTotalExpenses;
+                        reportDto.TotalCashInHand += userDto.UserTotalCashInHand;
+                    }
+                }
+
+                AddResponseMessage(Response, "Manager Collection Report Retrieved", reportDto, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

@@ -33,3 +33,16 @@ export const get_collection_report_by_date_user_api = async (
     throw error;
   }
 };
+
+export const get_manager_collection_report_api = async (date) => {
+  try {
+    const response = await api.get(`/report/ManagerCollectionReport`, {
+      params: { date },
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

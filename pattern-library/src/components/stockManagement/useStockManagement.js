@@ -99,6 +99,24 @@ const useStockManagement = () => {
     (selectedLocationName) => {
       const filterLabel = getStockFilterLabel();
       const today = new Date().toLocaleDateString("en-GB");
+      
+      // Aggregate items by item name to sum stock and remove duplicates
+      const aggregatedItemsMap = new Map();
+
+      filteredInventories.forEach((item) => {
+        if (aggregatedItemsMap.has(item.itemName)) {
+          const existingItem = aggregatedItemsMap.get(item.itemName);
+          existingItem.stockInHand += item.stockInHand || 0;
+        } else {
+          aggregatedItemsMap.set(item.itemName, {
+            ...item,
+            stockInHand: item.stockInHand || 0,
+          });
+        }
+      });
+
+      const aggregatedItems = Array.from(aggregatedItemsMap.values());
+
       const columns = [
         {
           header: "Item Code",
@@ -116,15 +134,10 @@ const useStockManagement = () => {
           accessor: (item) => item.stockInHand || 0,
           width: 15,
         },
-        {
-          header: "Batch No",
-          accessor: (item) => item.batchNo || "N/A",
-          width: 15,
-        },
       ];
 
       exportToExcel({
-        data: filteredInventories,
+        data: aggregatedItems,
         columns,
         fileName: `Stock_Report_${filterLabel.replace(
           / /g,
