@@ -10,15 +10,34 @@ const api = axios.create({
   baseURL: API_BASE_URL,
 });
 
-export const get_collection_report_by_date_user_api = async (userId, date) => {
+export const get_collection_report_by_date_user_api = async (
+  userId,
+  date,
+  cashierSessionId
+) => {
   const params = {
     date,
+    cashierSessionId,
   };
   if (date) params.date = date;
+  if (cashierSessionId) params.cashierSessionId = cashierSessionId;
 
   try {
     const response = await api.get(`/report/CollectionReport/${userId}`, {
       params,
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_manager_collection_report_api = async (date) => {
+  try {
+    const response = await api.get(`/report/ManagerCollectionReport`, {
+      params: { date },
       withCredentials: true,
     });
     return response.data;

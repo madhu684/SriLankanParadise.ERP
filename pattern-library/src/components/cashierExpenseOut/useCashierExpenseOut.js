@@ -1,7 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import { post_cashier_expense_out_api } from "../../services/salesApi";
+import { UserContext } from "../../context/userContext";
 
 const useCashierExpenseOut = ({ onFormSubmit }) => {
+  const { activeCashierSession } = useContext(UserContext);
   const [formData, setFormData] = useState({
     reason: "",
     amount: "",
@@ -78,6 +80,7 @@ const useCashierExpenseOut = ({ onFormSubmit }) => {
           amount: formData.amount,
           createdDate: currentDate,
           companyId: sessionStorage.getItem("companyId"),
+          cashierSessionId: activeCashierSession?.cashierSessionId,
           permissionId: 1069,
         };
 

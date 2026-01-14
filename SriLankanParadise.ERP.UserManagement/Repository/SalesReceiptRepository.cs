@@ -136,7 +136,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<SalesReceipt>> GetSalesReceiptsByUserIdAndDate(int userId, DateTime? date)
+        public async Task<IEnumerable<SalesReceipt>> GetSalesReceiptsByUserIdAndDate(int userId, DateTime? date, int? cashierSessionId = null)
         {
             try
             {
@@ -155,8 +155,40 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     query = query.Where(im => im.ReceiptDate.HasValue && im.ReceiptDate.Value.Date == targetDate);
                 }
 
+                if (cashierSessionId.HasValue)
+                {
+                    query = query.Where(sr => sr.CashierSessionId == cashierSessionId.Value);
+                }
+
                 var receipts = await query
                     .OrderBy(sr => sr.SalesReceiptId)
+                    .ToListAsync();
+
+                return receipts;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<SalesReceipt>> GetSalesReceiptsByDate(DateTime date)
+        {
+            try
+            {
+                var query = _dbContext.SalesReceipts
+                    .AsNoTracking()
+                    .Include(sr => sr.PaymentMode)
+                    .Include(sr => sr.SalesReceiptSalesInvoices)
+                        .ThenInclude(srsi => srsi.SalesInvoice)
+                            .ThenInclude(si => si.SalesInvoiceDetails)
+                                .ThenInclude(sid => sid.ItemMaster)
+                    .Where(sr => sr.ReceiptDate.HasValue && sr.ReceiptDate.Value.Date == date.Date);
+
+                var receipts = await query
+                    .OrderBy(sr => sr.CreatedUserId)
+                    .ThenBy(sr => sr.CashierSessionId)
+                    .ThenBy(sr => sr.SalesReceiptId)
                     .ToListAsync();
 
                 return receipts;

@@ -141,5 +141,22 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpGet("GetCashierSessionsByUserIdAndDate/{userId}/{date}")]
+        public async Task<ApiResponseModel> GetCashierSessionsByUserIdAndDate(int userId, DateTime date)
+        {
+            try
+            {
+                var cashierSessions = await _cashierSessionService.GetCashierSessionsByUserIdAndDate(userId, date);
+                var cashierSessionDtos = _mapper.Map<IEnumerable<CashierSessionDto>>(cashierSessions);
+                AddResponseMessage(Response, LogMessages.CashierSessionsRetrieved, cashierSessionDtos, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

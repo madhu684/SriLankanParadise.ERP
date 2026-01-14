@@ -44,13 +44,19 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<CashierExpenseOut>> GetCashierExpenseOutsByUserIdDate(int userId, DateTime date)
+        public async Task<IEnumerable<CashierExpenseOut>> GetCashierExpenseOutsByUserIdDate(int userId, DateTime date, int? cashierSessionId = null)
         {
             try
             {
-                var cashierExpenseOuts = await _dbContext.CashierExpenseOuts
-                    .Where(eo => eo.UserId == userId && eo.CreatedDate.HasValue && eo.CreatedDate.Value.Date == date.Date)
-                    .ToListAsync();
+                var query = _dbContext.CashierExpenseOuts
+                    .Where(eo => eo.UserId == userId && eo.CreatedDate.HasValue && eo.CreatedDate.Value.Date == date.Date);
+
+                if (cashierSessionId.HasValue)
+                {
+                    query = query.Where(eo => eo.CashierSessionId == cashierSessionId.Value);
+                }
+
+                var cashierExpenseOuts = await query.ToListAsync();
 
                 return cashierExpenseOuts.Any() ? cashierExpenseOuts : null;
             }

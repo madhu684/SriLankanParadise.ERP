@@ -34,6 +34,8 @@ public partial class SalesReceipt
 
     public string? ReferenceNumber { get; set; }
 
+    public int? CashierSessionId { get; set; }
+
     public virtual PaymentMode? PaymentMode { get; set; }
 
     public virtual ICollection<SalesReceiptSalesInvoice> SalesReceiptSalesInvoices { get; set; } = new List<SalesReceiptSalesInvoice>();

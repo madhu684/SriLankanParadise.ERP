@@ -13,5 +13,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task UpdateCashierSession(int cashierSessionId, CashierSession cashierSession);
 
         Task<CashierSession> GetActiveSessionByUserId(int userId);
+
+        Task<IEnumerable<CashierSession>> GetCashierSessionsByUserIdAndDate(int userId, DateTime date);
     }
 }

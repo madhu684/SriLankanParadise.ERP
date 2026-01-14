@@ -94,5 +94,19 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task<IEnumerable<CashierSession>> GetCashierSessionsByUserIdAndDate(int userId, DateTime date)
+        {
+            try
+            {
+                return await _dbContext.CashierSessions
+                    .Where(cs => cs.UserId == userId && cs.SessionIn.Value.Date == date.Date)
+                    .ToListAsync();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

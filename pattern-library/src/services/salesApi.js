@@ -826,11 +826,45 @@ export const get_cashier_session_by_user_id_api = async (userId) => {
   }
 };
 
+export const get_cashier_session_by_user_date_api = async (userId, date) => {
+  try {
+    const response = await api.get(
+      `/cashierSession/GetCashierSessionsByUserIdAndDate/${userId}/${date}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const post_cashier_expense_out_api = async (formData) => {
   try {
     const response = await api.post("/cashierExpenseOut", formData, {
       withCredentials: true,
     });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_cashier_expense_outs_by_userId_date_api = async (
+  userId,
+  date,
+  cashierSessionId
+) => {
+  try {
+    const response = await api.get(
+      `/cashierExpenseOut/GetCashierExpenseOutsByUserIdDate/${userId}/${date}`,
+      {
+        withCredentials: true,
+      }
+    );
     return response.data;
   } catch (error) {
     console.log(error);

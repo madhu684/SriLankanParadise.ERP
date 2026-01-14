@@ -26,7 +26,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
         public ReportController
             (
-                ILocationInventoryService locationInventoryService, 
+                ILocationInventoryService locationInventoryService,
                 ILocationInventoryMovementService locationInventoryMovementService,
                 IDailyLocationInventoryService dailyLocationInventoryService,
                 IItemMasterService itemMasterService,
@@ -90,7 +90,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 {
                     foreach (var in_Item in in_ItemsLocInv)
                     {
-                        if(inventoryItems.Any(i => i.itemId == in_Item.ItemMasterId && in_Item.BatchId == i.batchId))
+                        if (inventoryItems.Any(i => i.itemId == in_Item.ItemMasterId && in_Item.BatchId == i.batchId))
                         {
                             var index = inventoryItems.FindIndex(i => i.itemId == in_Item.ItemMasterId && in_Item.BatchId == i.batchId);
                             inventoryItems[index].totalIn += in_Item.Qty ?? 0;
@@ -187,12 +187,12 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
 
         [HttpGet("CollectionReport/{userId}")]
-        public async Task<ApiResponseModel> CollectionReport(int userId, [FromQuery] DateTime date)
+        public async Task<ApiResponseModel> CollectionReport(int userId, [FromQuery] DateTime date, [FromQuery] int? cashierSessionId = null)
         {
             try
             {
-                var receiptData = await _salesReceiptService.GetSalesReceiptsByUserIdAndDate(userId, date);
-                var cashierExpenses = await _cashierExpenseOutService.GetCashierExpenseOutsByUserIdDate(userId, date);
+                var receiptData = await _salesReceiptService.GetSalesReceiptsByUserIdAndDate(userId, date, cashierSessionId);
+                var cashierExpenses = await _cashierExpenseOutService.GetCashierExpenseOutsByUserIdDate(userId, date, cashierSessionId);
 
                 var reportItems = new List<CollectionReportItemDto>();
                 decimal totalAmount = 0;
@@ -256,6 +256,65 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     }
                 }
 
+                // Calculate Daily Totals
+                decimal dailyTotalAmount = 0;
+                decimal dailyTotalShortAmount = 0;
+                decimal dailyTotalExcessAmount = 0;
+                decimal dailyTotalCashAmount = 0;
+                decimal dailyTotalBankTransferAmount = 0;
+                decimal dailyTotalCashierExpenses = 0;
+
+                if (cashierSessionId.HasValue)
+                {
+                    // Fetch full day data if filtered by session
+                    var dailyReceiptData = await _salesReceiptService.GetSalesReceiptsByUserIdAndDate(userId, date, null);
+                    var dailyCashierExpenses = await _cashierExpenseOutService.GetCashierExpenseOutsByUserIdDate(userId, date, null);
+
+                    if (dailyReceiptData != null && dailyReceiptData.Any())
+                    {
+                        foreach (var receipt in dailyReceiptData)
+                        {
+                            if (receipt.SalesReceiptSalesInvoices != null && receipt.SalesReceiptSalesInvoices.Any())
+                            {
+                                foreach (var salesReceiptInvoice in receipt.SalesReceiptSalesInvoices)
+                                {
+                                    dailyTotalAmount += salesReceiptInvoice.AmountCollect ?? 0;
+                                    dailyTotalShortAmount += salesReceiptInvoice.OutstandingAmount ?? 0;
+                                    dailyTotalExcessAmount += salesReceiptInvoice.ExcessAmount ?? 0;
+
+                                    if (receipt.PaymentMode?.Mode?.ToLower() == "cash")
+                                    {
+                                        dailyTotalCashAmount += salesReceiptInvoice.AmountCollect ?? 0;
+                                    }
+
+                                    if (receipt.PaymentMode?.Mode?.ToLower() == "bank transfer")
+                                    {
+                                        dailyTotalBankTransferAmount += salesReceiptInvoice.AmountCollect ?? 0;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (dailyCashierExpenses != null && dailyCashierExpenses.Any())
+                    {
+                        foreach (var expense in dailyCashierExpenses)
+                        {
+                            dailyTotalCashierExpenses += expense.Amount ?? 0;
+                        }
+                    }
+                }
+                else
+                {
+                    // If no session filter, daily totals equal session totals
+                    dailyTotalAmount = totalAmount;
+                    dailyTotalShortAmount = totalShortAmount;
+                    dailyTotalExcessAmount = totalExcessAmount;
+                    dailyTotalCashAmount = totalCashAmount;
+                    dailyTotalBankTransferAmount = totalBankTransferAmount;
+                    dailyTotalCashierExpenses = totalCashierExpenses;
+                }
+
                 var reportData = new CollectionReportDto
                 {
                     Items = reportItems,
@@ -265,7 +324,17 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     TotalCashCollection = totalCashAmount,
                     TotalBankTransferAmount = totalBankTransferAmount,
                     TotalCashInHand = totalCashAmount,
-                    TotalCashierExpenseOutAmount = totalCashierExpenses
+                    TotalCashierExpenseOutAmount = totalCashierExpenses,
+                    TotalCashInHandAmount = totalCashAmount - totalCashierExpenses,
+
+                    DailyTotalAmount = dailyTotalAmount,
+                    DailyTotalShortAmount = dailyTotalShortAmount,
+                    DailyTotalExcessAmount = dailyTotalExcessAmount,
+                    DailyTotalCashCollection = dailyTotalCashAmount,
+                    DailyTotalCashInHand = dailyTotalCashAmount,
+                    DailyTotalBankTransferAmount = dailyTotalBankTransferAmount,
+                    DailyTotalCashierExpenseOutAmount = dailyTotalCashierExpenses,
+                    DailyTotalCashInHandAmount = dailyTotalCashAmount - dailyTotalCashierExpenses
                 };
 
                 AddResponseMessage(Response, "Collection report retrived", reportData, true, HttpStatusCode.OK);
@@ -278,5 +347,112 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpGet("ManagerCollectionReport")]
+        public async Task<ApiResponseModel> ManagerCollectionReport([FromQuery] DateTime date)
+        {
+            try
+            {
+                var allReceipts = await _salesReceiptService.GetSalesReceiptsByDate(date);
+                var users = allReceipts.Select(r => new { r.CreatedUserId, r.CreatedBy }).DistinctBy(u => u.CreatedUserId).ToList();
+
+                var reportDto = new ManagerCollectionReportDto
+                {
+                    Date = date
+                };
+
+                foreach (var user in users)
+                {
+                    if (user.CreatedUserId == null) continue;
+
+                    int userId = user.CreatedUserId.Value;
+                    var userReceipts = allReceipts.Where(r => r.CreatedUserId == userId).ToList();
+                    var userExpenses = await _cashierExpenseOutService.GetCashierExpenseOutsByUserIdDate(userId, date);
+
+                    var userDto = new ManagerCollectionReportUserDto
+                    {
+                        UserId = userId,
+                        UserName = user.CreatedBy
+                    };
+
+                    // distinct sessions from both receipts and expenses
+                    var receiptSessionIds = userReceipts.Select(r => r.CashierSessionId).Distinct();
+                    var expenseSessionIds = userExpenses?.Select(e => e.CashierSessionId).Distinct() ?? Enumerable.Empty<int?>();
+                    var allSessionIds = receiptSessionIds.Union(expenseSessionIds).Distinct().OrderBy(id => id).ToList();
+
+                    foreach (var sessionId in allSessionIds)
+                    {
+                        var sessionReceipts = userReceipts.Where(r => r.CashierSessionId == sessionId).ToList();
+                        var sessionExpenses = userExpenses?.Where(e => e.CashierSessionId == sessionId).ToList();
+
+                        var sessionDto = new ManagerCollectionReportSessionDto { SessionId = sessionId };
+
+                        // Calculate receipt totals
+                        foreach (var receipt in sessionReceipts)
+                        {
+                            if (receipt.SalesReceiptSalesInvoices != null)
+                            {
+                                foreach (var inv in receipt.SalesReceiptSalesInvoices)
+                                {
+                                    sessionDto.SessionTotalAmount += inv.AmountCollect ?? 0;
+                                    sessionDto.SessionTotalShort += inv.OutstandingAmount ?? 0;
+                                    sessionDto.SessionTotalExcess += inv.ExcessAmount ?? 0;
+
+                                    if (receipt.PaymentMode?.Mode?.ToLower() == "cash")
+                                    {
+                                        sessionDto.SessionTotalCash += inv.AmountCollect ?? 0;
+                                    }
+
+                                    if (receipt.PaymentMode?.Mode?.ToLower() == "bank transfer")
+                                    {
+                                        sessionDto.SessionTotalBankTransfer += inv.AmountCollect ?? 0;
+                                    }
+                                }
+                            }
+                        }
+
+                        // Calculate expense totals
+                        if (sessionExpenses != null)
+                        {
+                            sessionDto.SessionTotalExpenses = sessionExpenses.Sum(e => e.Amount ?? 0);
+                        }
+
+                        sessionDto.SessionTotalCashInHand = sessionDto.SessionTotalCash - sessionDto.SessionTotalExpenses;
+
+                        userDto.Sessions.Add(sessionDto);
+
+                        // Add to user totals
+                        userDto.UserTotalAmount += sessionDto.SessionTotalAmount;
+                        userDto.UserTotalShort += sessionDto.SessionTotalShort;
+                        userDto.UserTotalExcess += sessionDto.SessionTotalExcess;
+                        userDto.UserTotalCash += sessionDto.SessionTotalCash;
+                        userDto.UserTotalBankTransfer += sessionDto.SessionTotalBankTransfer;
+                        userDto.UserTotalExpenses += sessionDto.SessionTotalExpenses;
+                        userDto.UserTotalCashInHand += sessionDto.SessionTotalCashInHand;
+                    }
+
+                    if (userDto.Sessions.Any())
+                    {
+                        reportDto.UserReports.Add(userDto);
+
+                        // Add to grand totals
+                        reportDto.TotalAmount += userDto.UserTotalAmount;
+                        reportDto.TotalShort += userDto.UserTotalShort;
+                        reportDto.TotalExcess += userDto.UserTotalExcess;
+                        reportDto.TotalCash += userDto.UserTotalCash;
+                        reportDto.TotalBankTransfer += userDto.UserTotalBankTransfer;
+                        reportDto.TotalExpenses += userDto.UserTotalExpenses;
+                        reportDto.TotalCashInHand += userDto.UserTotalCashInHand;
+                    }
+                }
+
+                AddResponseMessage(Response, "Manager Collection Report Retrieved", reportDto, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

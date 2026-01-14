@@ -15,5 +15,7 @@
         public int? CompanyId { get; set; }
 
         public int? ExpenseOutRequisitionId { get; set; }
+
+        public int? CashierSessionId { get; set; }
     }
 }

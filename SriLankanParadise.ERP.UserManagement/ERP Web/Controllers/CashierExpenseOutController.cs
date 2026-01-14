@@ -90,5 +90,30 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpGet("GetCashierExpenseOutsByUserIdDate/{userId}/{date}")]
+        public async Task<ApiResponseModel> GetCashierExpenseOutsByUserIdDate(int userId, DateTime date, [FromQuery] int? cashierSessionId = null)
+        {
+            try
+            {
+                var cashierExpenseOuts = await _cashierExpenseOutService.GetCashierExpenseOutsByUserIdDate(userId, date, cashierSessionId);
+                if (cashierExpenseOuts != null)
+                {
+                    var cashierExpenseOutsDtos = _mapper.Map<IEnumerable<CashierExpenseOutDto>>(cashierExpenseOuts);
+                    AddResponseMessage(Response, LogMessages.CashierExpenseOutsRetrieved, cashierExpenseOutsDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.CashierExpenseOutsNotFound);
+                    AddResponseMessage(Response, LogMessages.CashierExpenseOutsNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

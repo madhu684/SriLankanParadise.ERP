@@ -1,13 +1,57 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { UserContext } from "../../context/userContext";
 import { get_collection_report_by_date_user_api } from "../../services/reportsApi";
+import { get_cashier_session_by_user_date_api } from "../../services/salesApi";
 import { useExcelExport } from "../common/excelSheetGenerator/excelSheetGenerator";
 
 const useCollectionReport = () => {
-  const { user } = useContext(UserContext);
+  const { user, activeCashierSession } = useContext(UserContext);
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [selectedSessionId, setSelectedSessionId] = useState(
+    activeCashierSession?.cashierSessionId
+  );
   const exportToExcel = useExcelExport();
+
+  const { data: userCashierSessions = [] } = useQuery({
+    queryKey: ["userCashierSessions", user?.userId, date],
+    queryFn: async () => {
+      const response = await get_cashier_session_by_user_date_api(
+        user.userId,
+        date
+      );
+      return response.data.result;
+    },
+    enabled: !!user?.userId && !!date,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
+    retry: 2,
+  });
+
+  // Effect to update selectedSessionId when userCashierSessions changes or activeCashierSession changes
+  useEffect(() => {
+    if (userCashierSessions && userCashierSessions.length > 0) {
+      // Check if active session is in the list (for the selected date)
+      const activeSessionInList = userCashierSessions.find(
+        (session) =>
+          session.cashierSessionId === activeCashierSession?.cashierSessionId
+      );
+
+      if (activeSessionInList) {
+        setSelectedSessionId(activeSessionInList.cashierSessionId);
+      } else {
+        // If active session is not in list (e.g., date changed to past), select the last one (assuming latest)
+        // Or the first one? Let's pick the last one as it likely represents the latest session for that day.
+        // Assuming the API returns sorted or we just pick one.
+        // Let's pick the last one.
+        setSelectedSessionId(
+          userCashierSessions[userCashierSessions.length - 1].cashierSessionId
+        );
+      }
+    } else {
+      setSelectedSessionId(null);
+    }
+  }, [userCashierSessions, activeCashierSession]);
 
   const {
     data: reportData,
@@ -15,11 +59,12 @@ const useCollectionReport = () => {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["collectionReport", user?.userId, date],
+    queryKey: ["collectionReport", user?.userId, date, selectedSessionId],
     queryFn: async () => {
       const response = await get_collection_report_by_date_user_api(
         user.userId,
-        date
+        date,
+        selectedSessionId // Use selected session ID
       );
 
       if (response.data?.handShake && response.data?.result) {
@@ -28,7 +73,7 @@ const useCollectionReport = () => {
         throw new Error("Invalid response format from server");
       }
     },
-    enabled: !!user?.userId,
+    enabled: !!user?.userId && !!selectedSessionId, // Only fetch if session selected
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
     retry: 2,
@@ -147,21 +192,95 @@ const useCollectionReport = () => {
         amount: reportData.totalCashierExpenseOutAmount || 0,
         isSummary: true,
       },
+      {
+        billNo: "Cash In Hand",
+        amount: reportData.totalCashInHandAmount || 0,
+        isSummary: true,
+      },
     ];
 
     const dataWithSummary = [...reportData.items, ...summaryRows];
 
+    // Daily Summary Sheet Configuration
+    const dailySummaryColumns = [
+      {
+        header: "Description",
+        accessor: (item) => item.description,
+        width: 30,
+      },
+      {
+        header: "Amount",
+        accessor: (item) => formatCurrency(item.amount),
+        width: 20,
+      },
+    ];
+
+    const dailySummaryData = [
+      {
+        description: "Total Amount",
+        amount: reportData.dailyTotalAmount || 0,
+      },
+      {
+        description: "Cash Collection",
+        amount: reportData.dailyTotalCashCollection || 0,
+      },
+      {
+        description: "Bank Transfers",
+        amount: reportData.dailyTotalBankTransferAmount || 0,
+      },
+      {
+        description: "Cashier Expenses",
+        amount: reportData.dailyTotalCashierExpenseOutAmount || 0,
+      },
+      {
+        description: "Total Cash In Hand",
+        amount: reportData.dailyTotalCashInHandAmount || 0,
+      },
+    ];
+
+    // Add conditional rows if they have values > 0 to match UI logic, or just include them
+    if (reportData.dailyTotalShortAmount > 0) {
+      dailySummaryData.push({
+        description: "Short Amount",
+        amount: reportData.dailyTotalShortAmount,
+      });
+    }
+
+    if (reportData.dailyTotalExcessAmount > 0) {
+      dailySummaryData.push({
+        description: "Excess Amount",
+        amount: reportData.dailyTotalExcessAmount,
+      });
+    }
+
+    const selectedSession = userCashierSessions.find(
+      (session) => session.cashierSessionId === selectedSessionId
+    );
+
     exportToExcel({
-      data: dataWithSummary,
-      columns,
       fileName: `Collection_Report_${date}.xlsx`,
-      sheetName: "Collection Report",
-      topic: `Collection Report - ${date} - ${user?.username || ""}`,
+      sheets: [
+        {
+          data: dataWithSummary,
+          columns,
+          sheetName: "Session Details",
+          topic: `Collection Report of ${
+            user?.username || ""
+          } for Session ${formatDateTime(selectedSession?.sessionIn)}`,
+        },
+        {
+          data: dailySummaryData,
+          columns: dailySummaryColumns,
+          sheetName: "Daily Summary",
+          topic: `Daily Summary of ${user?.username || ""} on ${date}`,
+        },
+      ],
     });
   };
 
   return {
     user,
+    activeCashierSession,
     date,
     reportData,
     loading,
@@ -171,6 +290,9 @@ const useCollectionReport = () => {
     handleExport,
     formatDateTime,
     formatCurrency,
+    selectedSessionId,
+    setSelectedSessionId,
+    userCashierSessions,
   };
 };
 

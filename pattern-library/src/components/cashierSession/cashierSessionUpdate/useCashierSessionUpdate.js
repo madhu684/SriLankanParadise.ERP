@@ -76,10 +76,6 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
     if (!isLoadingSalesReceipts && userSalesReceipts) {
       // Filter sales receipts based on the session opening datetime and current datetime
       const filteredSalesReceipts = userSalesReceipts.filter((receipt) => {
-        // return (
-        //   receipt.createdDate >= cashierSession.sessionIn &&
-        //   receipt.createdDate <= new Date().toISOString()
-        // );
         const createdDate = moment.utc(receipt.createdDate);
         const sessionIn = moment.utc(cashierSession.sessionIn);
         const currentDate = moment.utc();
@@ -92,7 +88,7 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
 
       // Calculate the total amount received from the filtered sales receipts
       const total = filteredSalesReceipts.reduce(
-        (acc, curr) => acc + curr.amountReceived,
+        (acc, curr) => acc + curr.amountCollect,
         0
       );
       setCollectionTotal(total);
