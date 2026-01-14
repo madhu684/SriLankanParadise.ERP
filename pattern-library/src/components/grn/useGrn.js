@@ -957,6 +957,7 @@ const useGrn = ({ onFormSubmit }) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
       itemDetails: [
+        ...prevFormData.itemDetails,
         {
           id: item.itemMasterId,
           name: item.itemName,
@@ -970,7 +971,7 @@ const useGrn = ({ onFormSubmit }) => {
           itemBarcode: "",
           unitPrice: 0.0,
         },
-        ...prevFormData.itemDetails,
+        // ...prevFormData.itemDetails,
       ],
     }));
     setSearchTerm("");
