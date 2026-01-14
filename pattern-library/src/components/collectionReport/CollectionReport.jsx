@@ -8,6 +8,7 @@ import {
   FiRefreshCw,
   FiTrendingUp,
   FiTrendingDown,
+  FiClock,
 } from "react-icons/fi";
 import { RiCurrencyLine, RiBankLine } from "react-icons/ri";
 import { BsFileEarmarkExcel, BsCashStack, BsWallet2 } from "react-icons/bs";
@@ -18,6 +19,7 @@ import useCollectionReport from "./useCollectionReport";
 const CollectionReport = () => {
   const {
     user,
+    activeCashierSession,
     date,
     reportData,
     loading,
@@ -27,6 +29,9 @@ const CollectionReport = () => {
     handleExport,
     formatDateTime,
     formatCurrency,
+    selectedSessionId,
+    setSelectedSessionId,
+    userCashierSessions,
   } = useCollectionReport();
 
   return (
@@ -71,6 +76,33 @@ const CollectionReport = () => {
                 onChange={(e) => setDate(e.target.value)}
                 max={new Date().toISOString().split("T")[0]}
               />
+            </div>
+            <div className="col-md-3">
+              <label className="form-label fw-semibold">
+                <FiClock className="me-1" />
+                Session
+              </label>
+              <select
+                className="form-select"
+                value={selectedSessionId || ""}
+                onChange={(e) => setSelectedSessionId(Number(e.target.value))}
+                disabled={
+                  !userCashierSessions || userCashierSessions.length === 0
+                }
+              >
+                {userCashierSessions && userCashierSessions.length > 0 ? (
+                  userCashierSessions.map((session) => (
+                    <option
+                      key={session.cashierSessionId}
+                      value={session.cashierSessionId}
+                    >
+                      {formatDateTime(session.sessionIn)}
+                    </option>
+                  ))
+                ) : (
+                  <option value="">No Sessions Found</option>
+                )}
+              </select>
             </div>
           </div>
         </div>
@@ -329,7 +361,7 @@ const CollectionReport = () => {
                       <tr>
                         <th className="text-center"></th>
                         <th>Bill No</th>
-                        <th className="text-center">Channel No</th>
+                        <th className="text-center">Token No</th>
                         <th>Patient Name</th>
                         <th>Telephone</th>
                         <th className="text-end">Amount</th>
@@ -420,6 +452,98 @@ const CollectionReport = () => {
                   </p>
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Daily Summary Section */}
+          <div className="card shadow-sm mt-4">
+            <div className="card-header bg-light">
+              <h5 className="mb-0">Daily Summary (Full Day)</h5>
+            </div>
+            <div className="card-body">
+              <div className="row g-3">
+                <div className="col-md-3">
+                  <div className="p-3 border rounded bg-light">
+                    <p className="text-muted mb-1 small">Total Amount</p>
+                    <h5 className="mb-0 text-primary">
+                      Rs. {formatCurrency(reportData.dailyTotalAmount)}
+                    </h5>
+                  </div>
+                </div>
+                <div className="col-md-3">
+                  <div className="p-3 border rounded bg-light">
+                    <p className="text-muted mb-1 small">Cash Collection</p>
+                    <h5 className="mb-0 text-success">
+                      Rs. {formatCurrency(reportData.dailyTotalCashCollection)}
+                    </h5>
+                  </div>
+                </div>
+                <div className="col-md-3">
+                  <div className="p-3 border rounded bg-light">
+                    <p className="text-muted mb-1 small">Bank Transfer</p>
+                    <h5 className="mb-0 text-info">
+                      Rs.{" "}
+                      {formatCurrency(reportData.dailyTotalBankTransferAmount)}
+                    </h5>
+                  </div>
+                </div>
+                <div className="col-md-3">
+                  <div className="p-3 border rounded bg-light">
+                    <p className="text-muted mb-1 small">Cash In Hand</p>
+                    <h5 className="mb-0">
+                      Rs.{" "}
+                      {formatCurrency(reportData.dailyTotalCashInHandAmount)}
+                    </h5>
+                  </div>
+                </div>
+
+                {(reportData.dailyTotalShortAmount > 0 ||
+                  reportData.dailyTotalExcessAmount > 0 ||
+                  reportData.dailyTotalCashierExpenseOutAmount > 0) && (
+                  <>
+                    <div className="col-12">
+                      <hr className="my-1" />
+                    </div>
+                    {reportData.dailyTotalShortAmount > 0 && (
+                      <div className="col-md-3">
+                        <div className="p-3 border rounded bg-light">
+                          <p className="text-muted mb-1 small">Short Amount</p>
+                          <h5 className="mb-0 text-danger">
+                            Rs.{" "}
+                            {formatCurrency(reportData.dailyTotalShortAmount)}
+                          </h5>
+                        </div>
+                      </div>
+                    )}
+                    {reportData.dailyTotalExcessAmount > 0 && (
+                      <div className="col-md-3">
+                        <div className="p-3 border rounded bg-light">
+                          <p className="text-muted mb-1 small">Excess Amount</p>
+                          <h5 className="mb-0 text-warning">
+                            Rs.{" "}
+                            {formatCurrency(reportData.dailyTotalExcessAmount)}
+                          </h5>
+                        </div>
+                      </div>
+                    )}
+                    {reportData.dailyTotalCashierExpenseOutAmount > 0 && (
+                      <div className="col-md-3">
+                        <div className="p-3 border rounded bg-light">
+                          <p className="text-muted mb-1 small">
+                            Cashier Expenses
+                          </p>
+                          <h5 className="mb-0 text-secondary">
+                            Rs.{" "}
+                            {formatCurrency(
+                              reportData.dailyTotalCashierExpenseOutAmount
+                            )}
+                          </h5>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </>

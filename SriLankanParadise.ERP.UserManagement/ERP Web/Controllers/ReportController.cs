@@ -256,6 +256,65 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     }
                 }
 
+                // Calculate Daily Totals
+                decimal dailyTotalAmount = 0;
+                decimal dailyTotalShortAmount = 0;
+                decimal dailyTotalExcessAmount = 0;
+                decimal dailyTotalCashAmount = 0;
+                decimal dailyTotalBankTransferAmount = 0;
+                decimal dailyTotalCashierExpenses = 0;
+
+                if (cashierSessionId.HasValue)
+                {
+                    // Fetch full day data if filtered by session
+                    var dailyReceiptData = await _salesReceiptService.GetSalesReceiptsByUserIdAndDate(userId, date, null);
+                    var dailyCashierExpenses = await _cashierExpenseOutService.GetCashierExpenseOutsByUserIdDate(userId, date, null);
+
+                    if (dailyReceiptData != null && dailyReceiptData.Any())
+                    {
+                        foreach (var receipt in dailyReceiptData)
+                        {
+                            if (receipt.SalesReceiptSalesInvoices != null && receipt.SalesReceiptSalesInvoices.Any())
+                            {
+                                foreach (var salesReceiptInvoice in receipt.SalesReceiptSalesInvoices)
+                                {
+                                    dailyTotalAmount += salesReceiptInvoice.AmountCollect ?? 0;
+                                    dailyTotalShortAmount += salesReceiptInvoice.OutstandingAmount ?? 0;
+                                    dailyTotalExcessAmount += salesReceiptInvoice.ExcessAmount ?? 0;
+
+                                    if (receipt.PaymentMode?.Mode?.ToLower() == "cash")
+                                    {
+                                        dailyTotalCashAmount += salesReceiptInvoice.AmountCollect ?? 0;
+                                    }
+
+                                    if (receipt.PaymentMode?.Mode?.ToLower() == "bank transfer")
+                                    {
+                                        dailyTotalBankTransferAmount += salesReceiptInvoice.AmountCollect ?? 0;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (dailyCashierExpenses != null && dailyCashierExpenses.Any())
+                    {
+                        foreach (var expense in dailyCashierExpenses)
+                        {
+                            dailyTotalCashierExpenses += expense.Amount ?? 0;
+                        }
+                    }
+                }
+                else
+                {
+                    // If no session filter, daily totals equal session totals
+                    dailyTotalAmount = totalAmount;
+                    dailyTotalShortAmount = totalShortAmount;
+                    dailyTotalExcessAmount = totalExcessAmount;
+                    dailyTotalCashAmount = totalCashAmount;
+                    dailyTotalBankTransferAmount = totalBankTransferAmount;
+                    dailyTotalCashierExpenses = totalCashierExpenses;
+                }
+
                 var reportData = new CollectionReportDto
                 {
                     Items = reportItems,
@@ -266,7 +325,16 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     TotalBankTransferAmount = totalBankTransferAmount,
                     TotalCashInHand = totalCashAmount,
                     TotalCashierExpenseOutAmount = totalCashierExpenses,
-                    TotalCashInHandAmount = totalCashAmount - totalCashierExpenses
+                    TotalCashInHandAmount = totalCashAmount - totalCashierExpenses,
+
+                    DailyTotalAmount = dailyTotalAmount,
+                    DailyTotalShortAmount = dailyTotalShortAmount,
+                    DailyTotalExcessAmount = dailyTotalExcessAmount,
+                    DailyTotalCashCollection = dailyTotalCashAmount,
+                    DailyTotalCashInHand = dailyTotalCashAmount,
+                    DailyTotalBankTransferAmount = dailyTotalBankTransferAmount,
+                    DailyTotalCashierExpenseOutAmount = dailyTotalCashierExpenses,
+                    DailyTotalCashInHandAmount = dailyTotalCashAmount - dailyTotalCashierExpenses
                 };
 
                 AddResponseMessage(Response, "Collection report retrived", reportData, true, HttpStatusCode.OK);
