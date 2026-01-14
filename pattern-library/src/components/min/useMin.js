@@ -606,7 +606,8 @@ const useMin = ({ onFormSubmit }) => {
 
         setFormData((prev) => ({
           ...prev,
-          itemDetails: [newItem, ...prev.itemDetails],
+          itemDetails: [...prev.itemDetails, newItem],
+          // itemDetails: [newItem, ...prev.itemDetails],
         }));
 
         setSearchTerm("");
@@ -672,8 +673,7 @@ const useMin = ({ onFormSubmit }) => {
     statusOptions,
     submissionStatus,
     alertRef,
-    isLoading:
-      isLoading || isItemBatchesLoading,
+    isLoading: isLoading || isItemBatchesLoading,
     isError,
     mrnSearchTerm,
     loading,

@@ -547,7 +547,8 @@ const useTransferRequisition = ({ onFormSubmit }) => {
 
     setFormData((prevFormData) => ({
       ...prevFormData,
-      itemDetails: [newItem, ...prevFormData.itemDetails],
+      itemDetails: [...prevFormData.itemDetails, newItem],
+      // itemDetails: [newItem, ...prevFormData.itemDetails],
     }));
 
     setSearchTerm("");
