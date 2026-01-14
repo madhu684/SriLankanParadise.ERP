@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import {
   get_sales_invoices_with_out_drafts_api,
   get_payment_modes_api,
@@ -7,6 +7,7 @@ import {
   put_sales_invoice_api,
 } from "../../services/salesApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { UserContext } from "../../context/userContext";
 
 const useSalesReceipt = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -33,45 +34,9 @@ const useSalesReceipt = ({ onFormSubmit }) => {
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
 
+  const { activeCashierSession } = useContext(UserContext);
+
   const queryClient = useQueryClient();
-
-  // const fetchsalesInvoices = async () => {
-  //   try {
-  //     const response = await get_sales_invoices_with_out_drafts_api(
-  //       sessionStorage?.getItem("companyId")
-  //     );
-
-  //     // Get today's date at midnight in local timezone
-  //     const today = new Date();
-  //     today.setHours(0, 0, 0, 0);
-
-  //     const filteredsalesInvoices = response.data.result?.filter((sr) => {
-  //       if (sr.status !== 2 || !sr.invoiceDate) return false;
-
-  //       // Parse the invoice date and set to midnight for comparison
-  //       const invoiceDate = new Date(sr.invoiceDate);
-  //       invoiceDate.setHours(0, 0, 0, 0);
-
-  //       // Check if invoice date matches today
-  //       return invoiceDate.getTime() === today.getTime();
-  //     });
-
-  //     return filteredsalesInvoices || [];
-  //   } catch (error) {
-  //     console.error("Error fetching sales invoices:", error);
-  //     return [];
-  //   }
-  // };
-
-  // const {
-  //   data: salesInvoiceOptions,
-  //   isLoading: isSalesInvoiceOptionsLoading,
-  //   isError: isSalesInvoiceOptionsError,
-  //   error: salesInvoiceOptionsError,
-  // } = useQuery({
-  //   queryKey: ["salesInvoiceOptions"],
-  //   queryFn: fetchsalesInvoices,
-  // });
 
   const fetchsalesInvoices = async () => {
     try {
@@ -327,6 +292,7 @@ const useSalesReceipt = ({ onFormSubmit }) => {
           createdDate: currentDate,
           lastUpdatedDate: currentDate,
           referenceNumber: generateReferenceNumber(),
+          cashierSessionId: activeCashierSession?.cashierSessionId,
           permissionId: 34,
         };
 

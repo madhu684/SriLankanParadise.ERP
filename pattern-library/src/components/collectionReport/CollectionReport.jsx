@@ -6,9 +6,12 @@ import {
   FiFileText,
   FiUser,
   FiRefreshCw,
+  FiTrendingUp,
+  FiTrendingDown,
 } from "react-icons/fi";
-import { RiCurrencyLine } from "react-icons/ri";
-import { BsFileEarmarkExcel } from "react-icons/bs";
+import { RiCurrencyLine, RiBankLine } from "react-icons/ri";
+import { BsFileEarmarkExcel, BsCashStack, BsWallet2 } from "react-icons/bs";
+import { BiReceipt } from "react-icons/bi";
 import CurrentDateTime from "../../components/currentDateTime/currentDateTime";
 import useCollectionReport from "./useCollectionReport";
 
@@ -97,140 +100,198 @@ const CollectionReport = () => {
       {!loading && reportData && (
         <>
           <div className="row g-3 mb-3">
-            <div className="col-md-3">
-              <div className="card shadow-sm border-primary">
-                <div className="card-body">
-                  <div className="d-flex justify-content-between align-items-center">
-                    <div>
-                      <p className="text-muted mb-1 small">Total Amount</p>
-                      <h4 className="mb-0">
-                        Rs. {formatCurrency(reportData.totalAmount)}
-                      </h4>
-                    </div>
-                    <div className="text-primary">
-                      <FiDollarSign size={32} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-md-3">
-              <div className="card shadow-sm border-success">
-                <div className="card-body">
-                  <div className="d-flex justify-content-between align-items-center">
-                    <div>
-                      <p className="text-muted mb-1 small">Cash Collection</p>
-                      <h4 className="mb-0">
-                        Rs. {formatCurrency(reportData.totalCashCollection)}
-                      </h4>
-                    </div>
-                    <div className="text-success">
-                      <FiDollarSign size={32} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-md-3">
-              <div className="card shadow-sm border-info">
-                <div className="card-body">
-                  <div className="d-flex justify-content-between align-items-center">
-                    <div>
-                      <p className="text-muted mb-1 small">Bank Transfer</p>
-                      <h4 className="mb-0">
-                        Rs. {formatCurrency(reportData.totalBankTransferAmount)}
-                      </h4>
-                    </div>
-                    <div className="text-info">
-                      <FiDollarSign size={32} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="col-md-3">
-              <div className="card shadow-sm border-secondary">
+            {/* Total Receipts */}
+            <div className="col-lg-3 col-md-4 col-sm-6">
+              <div
+                className="card shadow-sm border-0"
+                style={{ borderLeft: "4px solid #6c757d" }}
+              >
                 <div className="card-body">
                   <div className="d-flex justify-content-between align-items-center">
                     <div>
                       <p className="text-muted mb-1 small">Total Receipts</p>
-                      <h4 className="mb-0">
+                      <h4 className="mb-0 text-secondary">
                         {reportData.items && reportData.items.length > 0
                           ? new Set(reportData.items.map((item) => item.billNo))
                               .size
                           : 0}
                       </h4>
                     </div>
-                    <div className="text-secondary">
-                      <FiFileText size={32} />
+                    <div className="bg-secondary bg-opacity-10 p-3 rounded-circle">
+                      <BiReceipt size={28} className="text-secondary" />
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {(reportData.totalShortAmount > 0 ||
-              reportData.totalExcessAmount > 0) && (
-              <>
-                <div className="col-md-3">
-                  <div className="card shadow-sm border-danger">
-                    <div className="card-body">
-                      <div className="d-flex justify-content-between align-items-center">
-                        <div>
-                          <p className="text-muted mb-1 small">Short Amount</p>
-                          <h4 className="mb-0">
-                            Rs. {formatCurrency(reportData.totalShortAmount)}
-                          </h4>
-                        </div>
-                        <div className="text-danger">
-                          <FiAlertCircle size={32} />
-                        </div>
-                      </div>
+            {/* Total Amount */}
+            <div className="col-lg-3 col-md-4 col-sm-6">
+              <div
+                className="card shadow-sm border-0"
+                style={{ borderLeft: "4px solid #0d6efd" }}
+              >
+                <div className="card-body">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                      <p className="text-muted mb-1 small">Total Amount</p>
+                      <h4 className="mb-0 text-primary">
+                        Rs. {formatCurrency(reportData.totalAmount)}
+                      </h4>
+                    </div>
+                    <div className="bg-primary bg-opacity-10 p-3 rounded-circle">
+                      <FiDollarSign size={28} className="text-primary" />
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
 
-                <div className="col-md-3">
-                  <div className="card shadow-sm border-warning">
-                    <div className="card-body">
-                      <div className="d-flex justify-content-between align-items-center">
-                        <div>
-                          <p className="text-muted mb-1 small">Excess Amount</p>
-                          <h4 className="mb-0">
-                            Rs. {formatCurrency(reportData.totalExcessAmount)}
-                          </h4>
-                        </div>
-                        <div className="text-warning">
-                          <FiAlertCircle size={32} />
-                        </div>
+            {/* Cash Collection */}
+            <div className="col-lg-3 col-md-4 col-sm-6">
+              <div
+                className="card shadow-sm border-0"
+                style={{ borderLeft: "4px solid #198754" }}
+              >
+                <div className="card-body">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                      <p className="text-muted mb-1 small">Cash Collection</p>
+                      <h4 className="mb-0 text-success">
+                        Rs. {formatCurrency(reportData.totalCashCollection)}
+                      </h4>
+                    </div>
+                    <div className="bg-success bg-opacity-10 p-3 rounded-circle">
+                      <BsCashStack size={28} className="text-success" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bank Transfer */}
+            <div className="col-lg-3 col-md-4 col-sm-6">
+              <div
+                className="card shadow-sm border-0"
+                style={{ borderLeft: "4px solid #0dcaf0" }}
+              >
+                <div className="card-body">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                      <p className="text-muted mb-1 small">Bank Transfer</p>
+                      <h4 className="mb-0 text-info">
+                        Rs. {formatCurrency(reportData.totalBankTransferAmount)}
+                      </h4>
+                    </div>
+                    <div className="bg-info bg-opacity-10 p-3 rounded-circle">
+                      <RiBankLine size={28} className="text-info" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Cash in Hand */}
+            <div className="col-lg-3 col-md-4 col-sm-6">
+              <div
+                className="card shadow-sm border-0"
+                style={{ borderLeft: "4px solid #20c997" }}
+              >
+                <div className="card-body">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                      <p className="text-muted mb-1 small">Cash in Hand</p>
+                      <h4 className="mb-0" style={{ color: "#20c997" }}>
+                        Rs. {formatCurrency(reportData.totalCashInHandAmount)}
+                      </h4>
+                    </div>
+                    <div
+                      className="p-3 rounded-circle"
+                      style={{ backgroundColor: "rgba(32, 201, 151, 0.1)" }}
+                    >
+                      <BsWallet2 size={28} style={{ color: "#20c997" }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Short Amount */}
+            {reportData.totalShortAmount > 0 && (
+              <div className="col-lg-3 col-md-4 col-sm-6">
+                <div
+                  className="card shadow-sm border-0"
+                  style={{ borderLeft: "4px solid #dc3545" }}
+                >
+                  <div className="card-body">
+                    <div className="d-flex justify-content-between align-items-center">
+                      <div>
+                        <p className="text-muted mb-1 small">Short Amount</p>
+                        <h4 className="mb-0 text-danger">
+                          Rs. {formatCurrency(reportData.totalShortAmount)}
+                        </h4>
+                      </div>
+                      <div className="bg-danger bg-opacity-10 p-3 rounded-circle">
+                        <FiTrendingDown size={28} className="text-danger" />
                       </div>
                     </div>
                   </div>
                 </div>
-              </>
+              </div>
             )}
 
+            {/* Excess Amount */}
+            {reportData.totalExcessAmount > 0 && (
+              <div className="col-lg-3 col-md-4 col-sm-6">
+                <div
+                  className="card shadow-sm border-0"
+                  style={{ borderLeft: "4px solid #ffc107" }}
+                >
+                  <div className="card-body">
+                    <div className="d-flex justify-content-between align-items-center">
+                      <div>
+                        <p className="text-muted mb-1 small">Excess Amount</p>
+                        <h4 className="mb-0 text-warning">
+                          Rs. {formatCurrency(reportData.totalExcessAmount)}
+                        </h4>
+                      </div>
+                      <div className="bg-warning bg-opacity-10 p-3 rounded-circle">
+                        <FiTrendingUp size={28} className="text-warning" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Cashier Expenses */}
             {reportData.totalCashierExpenseOutAmount > 0 && (
-              <div className="col-md-3">
-                <div className="card shadow-sm border-dark">
+              <div className="col-lg-3 col-md-4 col-sm-6">
+                <div
+                  className="card shadow-sm border-0"
+                  style={{ borderLeft: "4px solid #6f42c1" }}
+                >
                   <div className="card-body">
                     <div className="d-flex justify-content-between align-items-center">
                       <div>
                         <p className="text-muted mb-1 small">
                           Cashier Expenses
                         </p>
-                        <h4 className="mb-0">
+                        <h4 className="mb-0" style={{ color: "#6f42c1" }}>
                           Rs.{" "}
                           {formatCurrency(
                             reportData.totalCashierExpenseOutAmount
                           )}
                         </h4>
                       </div>
-                      <div className="text-dark">
-                        <RiCurrencyLine size={32} />
+                      <div
+                        className="p-3 rounded-circle"
+                        style={{ backgroundColor: "rgba(111, 66, 193, 0.1)" }}
+                      >
+                        <RiCurrencyLine
+                          size={28}
+                          style={{ color: "#6f42c1" }}
+                        />
                       </div>
                     </div>
                   </div>

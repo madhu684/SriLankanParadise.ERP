@@ -187,12 +187,12 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
 
         [HttpGet("CollectionReport/{userId}")]
-        public async Task<ApiResponseModel> CollectionReport(int userId, [FromQuery] DateTime date)
+        public async Task<ApiResponseModel> CollectionReport(int userId, [FromQuery] DateTime date, [FromQuery] int? cashierSessionId = null)
         {
             try
             {
-                var receiptData = await _salesReceiptService.GetSalesReceiptsByUserIdAndDate(userId, date);
-                var cashierExpenses = await _cashierExpenseOutService.GetCashierExpenseOutsByUserIdDate(userId, date);
+                var receiptData = await _salesReceiptService.GetSalesReceiptsByUserIdAndDate(userId, date, cashierSessionId);
+                var cashierExpenses = await _cashierExpenseOutService.GetCashierExpenseOutsByUserIdDate(userId, date, cashierSessionId);
 
                 var reportItems = new List<CollectionReportItemDto>();
                 decimal totalAmount = 0;
@@ -265,7 +265,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     TotalCashCollection = totalCashAmount,
                     TotalBankTransferAmount = totalBankTransferAmount,
                     TotalCashInHand = totalCashAmount,
-                    TotalCashierExpenseOutAmount = totalCashierExpenses
+                    TotalCashierExpenseOutAmount = totalCashierExpenses,
+                    TotalCashInHandAmount = totalCashAmount - totalCashierExpenses
                 };
 
                 AddResponseMessage(Response, "Collection report retrived", reportData, true, HttpStatusCode.OK);

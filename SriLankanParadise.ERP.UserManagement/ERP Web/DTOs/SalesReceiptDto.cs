@@ -35,6 +35,8 @@
 
         public string? ReferenceNumber { get; set; }
 
+        public int? CashierSessionId { get; set; }
+
         public virtual IEnumerable<SalesReceiptSalesInvoiceDto>? SalesReceiptSalesInvoices { get; set; }
     }
 }

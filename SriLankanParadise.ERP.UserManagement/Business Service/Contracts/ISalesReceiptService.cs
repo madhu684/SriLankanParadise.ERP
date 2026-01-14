@@ -16,6 +16,6 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
 
         Task UpdateSalesReceipt(int salesReceiptId, SalesReceipt salesReceipt);
 
-        Task<IEnumerable<SalesReceipt>> GetSalesReceiptsByUserIdAndDate(int userId, DateTime? date);
+        Task<IEnumerable<SalesReceipt>> GetSalesReceiptsByUserIdAndDate(int userId, DateTime? date, int? cashierSessionId = null);
     }
 }

@@ -5,7 +5,7 @@ import { get_collection_report_by_date_user_api } from "../../services/reportsAp
 import { useExcelExport } from "../common/excelSheetGenerator/excelSheetGenerator";
 
 const useCollectionReport = () => {
-  const { user } = useContext(UserContext);
+  const { user, activeCashierSession } = useContext(UserContext);
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const exportToExcel = useExcelExport();
 
@@ -19,7 +19,8 @@ const useCollectionReport = () => {
     queryFn: async () => {
       const response = await get_collection_report_by_date_user_api(
         user.userId,
-        date
+        date,
+        activeCashierSession?.cashierSessionId
       );
 
       if (response.data?.handShake && response.data?.result) {
@@ -145,6 +146,11 @@ const useCollectionReport = () => {
       {
         billNo: "Cashier Expenses",
         amount: reportData.totalCashierExpenseOutAmount || 0,
+        isSummary: true,
+      },
+      {
+        billNo: "Cash In Hand",
+        amount: reportData.totalCashInHandAmount || 0,
         isSummary: true,
       },
     ];

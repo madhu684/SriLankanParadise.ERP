@@ -10,5 +10,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
         public decimal TotalCashInHand { get; set; }
         public decimal TotalBankTransferAmount { get; set; }
         public decimal TotalCashierExpenseOutAmount { get; set; }
+
+        public decimal TotalCashInHandAmount { get; set; }
     }
 }

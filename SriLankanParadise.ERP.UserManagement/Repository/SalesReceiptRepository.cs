@@ -136,7 +136,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<SalesReceipt>> GetSalesReceiptsByUserIdAndDate(int userId, DateTime? date)
+        public async Task<IEnumerable<SalesReceipt>> GetSalesReceiptsByUserIdAndDate(int userId, DateTime? date, int? cashierSessionId = null)
         {
             try
             {
@@ -153,6 +153,11 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 {
                     var targetDate = date.Value.Date;
                     query = query.Where(im => im.ReceiptDate.HasValue && im.ReceiptDate.Value.Date == targetDate);
+                }
+
+                if (cashierSessionId.HasValue)
+                {
+                    query = query.Where(sr => sr.CashierSessionId == cashierSessionId.Value);
                 }
 
                 var receipts = await query
