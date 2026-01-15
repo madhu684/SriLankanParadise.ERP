@@ -56,6 +56,10 @@ const CashierSessionUpdate = ({
 
   const formatTotals = useFormatCurrency({ showCurrency: false });
 
+  if (!cashierSession) {
+    return null;
+  }
+
   return (
     <>
       {!(selectedMode !== null) && !showExpenseOutDetailModal && (
