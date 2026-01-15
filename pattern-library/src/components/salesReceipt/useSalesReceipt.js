@@ -265,6 +265,9 @@ const useSalesReceipt = ({ onFormSubmit }) => {
   };
 
   const handleSubmit = async (isSaveAsDraft) => {
+    // Prevent double submission if already loading
+    if (loading || loadingDraft) return;
+
     try {
       const status = isSaveAsDraft ? 0 : 1;
       const isFormValid = validateForm();

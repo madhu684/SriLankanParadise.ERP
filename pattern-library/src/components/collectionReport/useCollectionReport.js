@@ -188,6 +188,11 @@ const useCollectionReport = () => {
         isSummary: true,
       },
       {
+        billNo: "Gift Vouchers",
+        amount: reportData.totalGiftVoucherAmount || 0,
+        isSummary: true,
+      },
+      {
         billNo: "Cashier Expenses",
         amount: reportData.totalCashierExpenseOutAmount || 0,
         isSummary: true,
@@ -227,6 +232,10 @@ const useCollectionReport = () => {
       {
         description: "Bank Transfers",
         amount: reportData.dailyTotalBankTransferAmount || 0,
+      },
+      {
+        description: "Gift Vouchers",
+        amount: reportData.dailyTotalGiftVoucherAmount || 0,
       },
       {
         description: "Cashier Expenses",

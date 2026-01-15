@@ -196,11 +196,13 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                 var reportItems = new List<CollectionReportItemDto>();
                 decimal totalAmount = 0;
-                decimal totalShortAmount = 0;
-                decimal totalExcessAmount = 0;
                 decimal totalCashAmount = 0;
                 decimal totalBankTransferAmount = 0;
+                decimal totalGiftVoucherAmount = 0;
                 decimal totalCashierExpenses = 0;
+
+                var invoiceShortAmounts = new Dictionary<int, decimal>();
+                var invoiceExcessAmounts = new Dictionary<int, decimal>();
 
                 if (receiptData != null && receiptData.Any())
                 {
@@ -228,8 +230,12 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                                 reportItems.Add(item);
 
                                 totalAmount += salesReceiptInvoice.AmountCollect ?? 0;
-                                totalShortAmount += salesReceiptInvoice.OutstandingAmount ?? 0;
-                                totalExcessAmount += salesReceiptInvoice.ExcessAmount ?? 0;
+
+                                if (salesReceiptInvoice.SalesInvoiceId.HasValue)
+                                {
+                                    invoiceShortAmounts[salesReceiptInvoice.SalesInvoiceId.Value] = salesReceiptInvoice.OutstandingAmount ?? 0;
+                                    invoiceExcessAmounts[salesReceiptInvoice.SalesInvoiceId.Value] = salesReceiptInvoice.ExcessAmount ?? 0;
+                                }
 
                                 // Sum cash payments
                                 if (receipt.PaymentMode?.Mode?.ToLower() == "cash")
@@ -242,10 +248,19 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                                 {
                                     totalBankTransferAmount += salesReceiptInvoice.AmountCollect ?? 0;
                                 }
+
+                                // Sum gift vouchers
+                                if (receipt.PaymentMode?.Mode?.ToLower() == "gift voucher")
+                                {
+                                    totalGiftVoucherAmount += salesReceiptInvoice.AmountCollect ?? 0;
+                                }
                             }
                         }
                     }
                 }
+
+                decimal totalShortAmount = invoiceShortAmounts.Values.Sum();
+                decimal totalExcessAmount = invoiceExcessAmounts.Values.Sum();
 
 
                 if (cashierExpenses != null && cashierExpenses.Any())
@@ -258,11 +273,16 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                 // Calculate Daily Totals
                 decimal dailyTotalAmount = 0;
-                decimal dailyTotalShortAmount = 0;
-                decimal dailyTotalExcessAmount = 0;
                 decimal dailyTotalCashAmount = 0;
                 decimal dailyTotalBankTransferAmount = 0;
+                decimal dailyTotalGiftVoucherAmount = 0;
                 decimal dailyTotalCashierExpenses = 0;
+
+                var dailyInvoiceShortAmounts = new Dictionary<int, decimal>();
+                var dailyInvoiceExcessAmounts = new Dictionary<int, decimal>();
+
+                decimal dailyTotalShortAmount = 0;
+                decimal dailyTotalExcessAmount = 0;
 
                 if (cashierSessionId.HasValue)
                 {
@@ -279,8 +299,12 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                                 foreach (var salesReceiptInvoice in receipt.SalesReceiptSalesInvoices)
                                 {
                                     dailyTotalAmount += salesReceiptInvoice.AmountCollect ?? 0;
-                                    dailyTotalShortAmount += salesReceiptInvoice.OutstandingAmount ?? 0;
-                                    dailyTotalExcessAmount += salesReceiptInvoice.ExcessAmount ?? 0;
+
+                                    if (salesReceiptInvoice.SalesInvoiceId.HasValue)
+                                    {
+                                        dailyInvoiceShortAmounts[salesReceiptInvoice.SalesInvoiceId.Value] = salesReceiptInvoice.OutstandingAmount ?? 0;
+                                        dailyInvoiceExcessAmounts[salesReceiptInvoice.SalesInvoiceId.Value] = salesReceiptInvoice.ExcessAmount ?? 0;
+                                    }
 
                                     if (receipt.PaymentMode?.Mode?.ToLower() == "cash")
                                     {
@@ -291,10 +315,19 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                                     {
                                         dailyTotalBankTransferAmount += salesReceiptInvoice.AmountCollect ?? 0;
                                     }
+
+                                    if (receipt.PaymentMode?.Mode?.ToLower() == "gift voucher")
+                                    {
+                                        dailyTotalGiftVoucherAmount += salesReceiptInvoice.AmountCollect ?? 0;
+                                    }
+
                                 }
                             }
                         }
                     }
+
+                    dailyTotalShortAmount = dailyInvoiceShortAmounts.Values.Sum();
+                    dailyTotalExcessAmount = dailyInvoiceExcessAmounts.Values.Sum();
 
                     if (dailyCashierExpenses != null && dailyCashierExpenses.Any())
                     {
@@ -304,16 +337,17 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                         }
                     }
                 }
-                else
-                {
-                    // If no session filter, daily totals equal session totals
-                    dailyTotalAmount = totalAmount;
-                    dailyTotalShortAmount = totalShortAmount;
-                    dailyTotalExcessAmount = totalExcessAmount;
-                    dailyTotalCashAmount = totalCashAmount;
-                    dailyTotalBankTransferAmount = totalBankTransferAmount;
-                    dailyTotalCashierExpenses = totalCashierExpenses;
-                }
+            else
+            {
+                // If no session filter, daily totals equal session totals
+                dailyTotalAmount = totalAmount;
+                dailyTotalShortAmount = totalShortAmount;
+                dailyTotalExcessAmount = totalExcessAmount;
+                dailyTotalCashAmount = totalCashAmount;
+                dailyTotalBankTransferAmount = totalBankTransferAmount;
+                dailyTotalGiftVoucherAmount = totalGiftVoucherAmount;
+                dailyTotalCashierExpenses = totalCashierExpenses;
+            }
 
                 var reportData = new CollectionReportDto
                 {
@@ -323,6 +357,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     TotalExcessAmount = totalExcessAmount,
                     TotalCashCollection = totalCashAmount,
                     TotalBankTransferAmount = totalBankTransferAmount,
+                    TotalGiftVoucherAmount = totalGiftVoucherAmount,
                     TotalCashInHand = totalCashAmount,
                     TotalCashierExpenseOutAmount = totalCashierExpenses,
                     TotalCashInHandAmount = totalCashAmount - totalCashierExpenses,
@@ -333,6 +368,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     DailyTotalCashCollection = dailyTotalCashAmount,
                     DailyTotalCashInHand = dailyTotalCashAmount,
                     DailyTotalBankTransferAmount = dailyTotalBankTransferAmount,
+                    DailyTotalGiftVoucherAmount = dailyTotalGiftVoucherAmount,
                     DailyTotalCashierExpenseOutAmount = dailyTotalCashierExpenses,
                     DailyTotalCashInHandAmount = dailyTotalCashAmount - dailyTotalCashierExpenses
                 };
@@ -379,12 +415,18 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     var expenseSessionIds = userExpenses?.Select(e => e.CashierSessionId).Distinct() ?? Enumerable.Empty<int?>();
                     var allSessionIds = receiptSessionIds.Union(expenseSessionIds).Distinct().OrderBy(id => id).ToList();
 
+                    var userInvoiceShortAmounts = new Dictionary<int, decimal>();
+                    var userInvoiceExcessAmounts = new Dictionary<int, decimal>();
+
                     foreach (var sessionId in allSessionIds)
                     {
                         var sessionReceipts = userReceipts.Where(r => r.CashierSessionId == sessionId).ToList();
                         var sessionExpenses = userExpenses?.Where(e => e.CashierSessionId == sessionId).ToList();
 
                         var sessionDto = new ManagerCollectionReportSessionDto { SessionId = sessionId };
+
+                        var sessionInvoiceShortAmounts = new Dictionary<int, decimal>();
+                        var sessionInvoiceExcessAmounts = new Dictionary<int, decimal>();
 
                         // Calculate receipt totals
                         foreach (var receipt in sessionReceipts)
@@ -394,8 +436,16 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                                 foreach (var inv in receipt.SalesReceiptSalesInvoices)
                                 {
                                     sessionDto.SessionTotalAmount += inv.AmountCollect ?? 0;
-                                    sessionDto.SessionTotalShort += inv.OutstandingAmount ?? 0;
-                                    sessionDto.SessionTotalExcess += inv.ExcessAmount ?? 0;
+
+                                    if (inv.SalesInvoiceId.HasValue)
+                                    {
+                                        sessionInvoiceShortAmounts[inv.SalesInvoiceId.Value] = inv.OutstandingAmount ?? 0;
+                                        sessionInvoiceExcessAmounts[inv.SalesInvoiceId.Value] = inv.ExcessAmount ?? 0;
+
+                                        // Also track for user total (latest across all sessions of this user)
+                                        userInvoiceShortAmounts[inv.SalesInvoiceId.Value] = inv.OutstandingAmount ?? 0;
+                                        userInvoiceExcessAmounts[inv.SalesInvoiceId.Value] = inv.ExcessAmount ?? 0;
+                                    }
 
                                     if (receipt.PaymentMode?.Mode?.ToLower() == "cash")
                                     {
@@ -406,9 +456,17 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                                     {
                                         sessionDto.SessionTotalBankTransfer += inv.AmountCollect ?? 0;
                                     }
+
+                                    if (receipt.PaymentMode?.Mode?.ToLower() == "gift voucher")
+                                    {
+                                        sessionDto.SessionTotalGiftVoucher += inv.AmountCollect ?? 0;
+                                    }
                                 }
                             }
                         }
+
+                        sessionDto.SessionTotalShort = sessionInvoiceShortAmounts.Values.Sum();
+                        sessionDto.SessionTotalExcess = sessionInvoiceExcessAmounts.Values.Sum();
 
                         // Calculate expense totals
                         if (sessionExpenses != null)
@@ -422,13 +480,15 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                         // Add to user totals
                         userDto.UserTotalAmount += sessionDto.SessionTotalAmount;
-                        userDto.UserTotalShort += sessionDto.SessionTotalShort;
-                        userDto.UserTotalExcess += sessionDto.SessionTotalExcess;
                         userDto.UserTotalCash += sessionDto.SessionTotalCash;
                         userDto.UserTotalBankTransfer += sessionDto.SessionTotalBankTransfer;
+                        userDto.UserTotalGiftVoucher += sessionDto.SessionTotalGiftVoucher;
                         userDto.UserTotalExpenses += sessionDto.SessionTotalExpenses;
                         userDto.UserTotalCashInHand += sessionDto.SessionTotalCashInHand;
                     }
+
+                    userDto.UserTotalShort = userInvoiceShortAmounts.Values.Sum();
+                    userDto.UserTotalExcess = userInvoiceExcessAmounts.Values.Sum();
 
                     if (userDto.Sessions.Any())
                     {
@@ -436,14 +496,35 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                         // Add to grand totals
                         reportDto.TotalAmount += userDto.UserTotalAmount;
-                        reportDto.TotalShort += userDto.UserTotalShort;
-                        reportDto.TotalExcess += userDto.UserTotalExcess;
                         reportDto.TotalCash += userDto.UserTotalCash;
                         reportDto.TotalBankTransfer += userDto.UserTotalBankTransfer;
+                        reportDto.TotalGiftVoucher += userDto.UserTotalGiftVoucher;
                         reportDto.TotalExpenses += userDto.UserTotalExpenses;
                         reportDto.TotalCashInHand += userDto.UserTotalCashInHand;
                     }
                 }
+
+                // Calculate Grand Totals for Short/Excess across all users for the day
+                var grandInvoiceShortAmounts = new Dictionary<int, decimal>();
+                var grandInvoiceExcessAmounts = new Dictionary<int, decimal>();
+
+                foreach (var receipt in allReceipts)
+                {
+                    if (receipt.SalesReceiptSalesInvoices != null)
+                    {
+                        foreach (var inv in receipt.SalesReceiptSalesInvoices)
+                        {
+                            if (inv.SalesInvoiceId.HasValue)
+                            {
+                                grandInvoiceShortAmounts[inv.SalesInvoiceId.Value] = inv.OutstandingAmount ?? 0;
+                                grandInvoiceExcessAmounts[inv.SalesInvoiceId.Value] = inv.ExcessAmount ?? 0;
+                            }
+                        }
+                    }
+                }
+
+                reportDto.TotalShort = grandInvoiceShortAmounts.Values.Sum();
+                reportDto.TotalExcess = grandInvoiceExcessAmounts.Values.Sum();
 
                 AddResponseMessage(Response, "Manager Collection Report Retrieved", reportDto, true, HttpStatusCode.OK);
             }

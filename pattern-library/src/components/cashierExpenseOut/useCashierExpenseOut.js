@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useContext } from "react";
 import { post_cashier_expense_out_api } from "../../services/salesApi";
 import { UserContext } from "../../context/userContext";
 
-const useCashierExpenseOut = ({ onFormSubmit }) => {
+const useCashierExpenseOut = ({ onFormSubmit, onClose }) => {
   const { activeCashierSession } = useContext(UserContext);
   const [formData, setFormData] = useState({
     reason: "",
@@ -76,7 +76,7 @@ const useCashierExpenseOut = ({ onFormSubmit }) => {
 
         const cashierExpenseOutData = {
           userId: sessionStorage.getItem("userId"),
-          reason: formData.reason,
+          description: formData.reason,
           amount: formData.amount,
           createdDate: currentDate,
           companyId: sessionStorage.getItem("companyId"),
@@ -118,7 +118,12 @@ const useCashierExpenseOut = ({ onFormSubmit }) => {
     });
     setValidFields({});
     setValidationErrors({});
+    if (onClose) {
+      onClose();
+    }
   };
+
+  console.log("formData: ", formData);
 
   return {
     formData,

@@ -198,5 +198,27 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task<IEnumerable<SalesReceipt>> GetSalesReceiptsBySessionId(int sessionId)
+        {
+            try
+            {
+                var salesReceipts = await _dbContext.SalesReceipts
+                    .Where(sr => sr.CashierSessionId == sessionId)
+                    .Include(sr => sr.PaymentMode)
+                    .Include(sr => sr.SalesReceiptSalesInvoices)
+                        .ThenInclude(srsi => srsi.SalesInvoice)
+                            .ThenInclude(si => si.SalesInvoiceDetails)
+                                .ThenInclude(sid => sid.ItemMaster)
+                    .ToListAsync();
+
+
+                return salesReceipts.Any() ? salesReceipts : null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

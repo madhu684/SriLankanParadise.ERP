@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { put_cashier_session_api } from "../../../services/salesApi";
 import {
-  get_sales_receipts_by_user_id_api,
+  get_sales_receipts_by_cashier_session_id_api,
   get_cashier_expense_outs_by_user_id_api,
 } from "../../../services/salesApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -30,25 +30,26 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
 
   const queryClient = useQueryClient();
 
-  const fetchUserSalesReceipts = async () => {
+  const fetchSessionSalesReceipts = async () => {
     try {
-      const response = await get_sales_receipts_by_user_id_api(
-        sessionStorage.getItem("userId")
+      const response = await get_sales_receipts_by_cashier_session_id_api(
+        cashierSession.cashierSessionId
       );
       return response.data.result;
     } catch (error) {
-      console.error("Error fetching user sales receipts:", error);
+      console.error("Error fetching session sales receipts:", error);
     }
   };
 
   const {
-    data: userSalesReceipts,
+    data: sessionSalesReceipts,
     isLoading: isLoadingSalesReceipts,
     isError: isSalesReceiptsError,
     error: SalesReceiptError,
   } = useQuery({
-    queryKey: ["userSalesReceipts"],
-    queryFn: fetchUserSalesReceipts,
+    queryKey: ["sessionSalesReceipts", cashierSession.cashierSessionId],
+    queryFn: fetchSessionSalesReceipts,
+    enabled: !!cashierSession.cashierSessionId,
   });
 
   const fetchCashierExpenseOuts = async () => {
@@ -73,21 +74,12 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
   });
 
   useEffect(() => {
-    if (!isLoadingSalesReceipts && userSalesReceipts) {
-      // Filter sales receipts based on the session opening datetime and current datetime
-      const filteredSalesReceipts = userSalesReceipts.filter((receipt) => {
-        const createdDate = moment.utc(receipt.createdDate);
-        const sessionIn = moment.utc(cashierSession.sessionIn);
-        const currentDate = moment.utc();
+    if (!isLoadingSalesReceipts && sessionSalesReceipts) {
+      // Set the session sales receipts
+      setSalesReceipts(sessionSalesReceipts);
 
-        return createdDate.isBetween(sessionIn, currentDate);
-      });
-
-      // Set the filtered sales receipts
-      setSalesReceipts(filteredSalesReceipts);
-
-      // Calculate the total amount received from the filtered sales receipts
-      const total = filteredSalesReceipts.reduce(
+      // Calculate the total amount received from the session sales receipts
+      const total = sessionSalesReceipts.reduce(
         (acc, curr) => acc + curr.amountCollect,
         0
       );
@@ -118,7 +110,7 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
     }
   }, [
     isLoadingSalesReceipts,
-    userSalesReceipts,
+    sessionSalesReceipts,
     isLoadingCashierExpenseOuts,
     cashierExpenseOuts,
   ]);

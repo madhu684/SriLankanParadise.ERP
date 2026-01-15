@@ -715,6 +715,23 @@ export const get_sales_receipts_by_user_id_api = async (userId) => {
   }
 };
 
+export const get_sales_receipts_by_cashier_session_id_api = async (
+  sessionId
+) => {
+  try {
+    const response = await api.get(
+      `/salesReceipt/GetSalesReceiptsBySessionId/${sessionId}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const put_sales_receipt_api = async (
   salesReceiptId,
   salesReceiptData
@@ -858,10 +875,16 @@ export const get_cashier_expense_outs_by_userId_date_api = async (
   date,
   cashierSessionId
 ) => {
+  const params = {
+    cashierSessionId,
+  };
+
+  if (cashierSessionId) params.cashierSessionId = cashierSessionId;
   try {
     const response = await api.get(
       `/cashierExpenseOut/GetCashierExpenseOutsByUserIdDate/${userId}/${date}`,
       {
+        params,
         withCredentials: true,
       }
     );

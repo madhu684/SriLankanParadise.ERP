@@ -13,6 +13,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
 
         Task<IEnumerable<SalesReceipt>> GetSalesReceiptsByUserId(int userId);
 
+        Task<IEnumerable<SalesReceipt>> GetSalesReceiptsBySessionId(int sessionId);
+
         Task<SalesReceipt> GetSalesReceiptBySalesReceiptId(int salesReceiptId);
 
         Task UpdateSalesReceipt(int salesReceiptId, SalesReceipt salesReceipt);

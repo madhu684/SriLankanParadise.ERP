@@ -2,9 +2,8 @@ import React from "react";
 import useCashierExpenseOut from "./useCashierExpenseOut";
 import CurrentDateTime from "../currentDateTime/currentDateTime";
 import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
-import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
 
-const CashierExpenseOut = () => {
+const CashierExpenseOut = ({ onFormSubmit, onClose }) => {
   const {
     formData,
     validFields,
@@ -18,10 +17,12 @@ const CashierExpenseOut = () => {
   } = useCashierExpenseOut({
     onFormSubmit: () => {
       handleClose();
+      if (onFormSubmit) {
+        onFormSubmit();
+      }
     },
+    onClose,
   });
-
-  const companyLogoUrl = useCompanyLogoUrl();
 
   return (
     <div className="container mt-4">
@@ -29,30 +30,35 @@ const CashierExpenseOut = () => {
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <img src={companyLogoUrl} alt="Company Logo" height={30} />
+          <i
+            class="bi bi-arrow-left"
+            onClick={handleClose}
+            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+          ></i>
           <p>
             {" "}
             <CurrentDateTime />
           </p>
         </div>
-        <h1 className="mt-2 text-center">Expense Out Request</h1>
+        <h1 className="mt-2 text-center">Cashier Expense Out</h1>
         <hr />
       </div>
 
       {/* Display success or error messages */}
       {submissionStatus === "successSubmitted" && (
         <div className="alert alert-success mb-3" role="alert">
-          Expense out request added successfully!
+          Cashier expense out request added successfully!
         </div>
       )}
       {submissionStatus === "successSavedAsDraft" && (
         <div className="alert alert-success mb-3" role="alert">
-          Expense out request added as draft, you can edit and submit it later!
+          Cashier expense out request added as draft, you can edit and submit it
+          later!
         </div>
       )}
       {submissionStatus === "error" && (
         <div className="alert alert-danger mb-3" role="alert">
-          Error adding expense out request. Please try again.
+          Error adding cashier expense out request. Please try again.
         </div>
       )}
 
@@ -60,7 +66,7 @@ const CashierExpenseOut = () => {
         {/* Cashier Expense Out Information */}
         <div className="row mb-3">
           <div className="col-md-6">
-            <h4>Expense Out Request Information</h4>
+            <h4>Cashier Expense Out Information</h4>
 
             <div className="mb-3 mt-3">
               <label htmlFor="status" className="form-label">
@@ -123,9 +129,9 @@ const CashierExpenseOut = () => {
             disabled={loading || submissionStatus !== null}
           >
             {loading && submissionStatus === null ? (
-              <ButtonLoadingSpinner text="Requesting..." />
+              <ButtonLoadingSpinner text="Creating..." />
             ) : (
-              "Request"
+              "Create"
             )}
           </button>
           <button

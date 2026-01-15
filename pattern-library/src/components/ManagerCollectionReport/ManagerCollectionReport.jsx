@@ -12,7 +12,7 @@ import {
   FiChevronUp,
   FiDownload,
 } from "react-icons/fi";
-import { RiBankLine, RiCurrencyLine } from "react-icons/ri";
+import { RiBankLine, RiCurrencyLine, RiCoupon2Line } from "react-icons/ri";
 import { BsCashStack, BsWallet2 } from "react-icons/bs";
 import CurrentDateTime from "../currentDateTime/currentDateTime";
 import useManagerCollectionReport from "./useManagerCollectionReport";
@@ -181,6 +181,31 @@ const ManagerCollectionReport = () => {
               </div>
             </div>
 
+            {/* Total Gift Voucher */}
+            <div className="col-lg-3 col-md-4 col-sm-6">
+              <div
+                className="card shadow-sm border-0 h-100"
+                style={{ borderLeft: "4px solid #fd7e14" }}
+              >
+                <div className="card-body">
+                  <p className="text-muted mb-1 small uppercase fw-bold">
+                    Overall Gift Voucher
+                  </p>
+                  <div className="d-flex justify-content-between align-items-center">
+                    <h4 className="mb-0" style={{ color: "#fd7e14" }}>
+                      Rs. {formatCurrency(reportData.totalGiftVoucher)}
+                    </h4>
+                    <div
+                      className="bg-opacity-10 p-2 rounded-circle"
+                      style={{ backgroundColor: "rgba(253, 126, 20, 0.1)" }}
+                    >
+                      <RiCoupon2Line size={24} style={{ color: "#fd7e14" }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Total Expenses */}
             <div className="col-lg-3 col-md-4 col-sm-6">
               <div
@@ -270,6 +295,9 @@ const ManagerCollectionReport = () => {
                               <th className="text-end text-info">
                                 Bank Transfer
                               </th>
+                              <th className="text-end" style={{ color: "#fd7e14" }}>
+                                Gift Voucher
+                              </th>
                               <th className="text-end text-secondary">
                                 Expenses
                               </th>
@@ -305,6 +333,11 @@ const ManagerCollectionReport = () => {
                                     session.sessionTotalBankTransfer
                                   )}
                                 </td>
+                                <td className="text-end" style={{ color: "#fd7e14" }}>
+                                  {formatCurrency(
+                                    session.sessionTotalGiftVoucher
+                                  )}
+                                </td>
                                 <td className="text-end text-secondary">
                                   {formatCurrency(session.sessionTotalExpenses)}
                                 </td>
@@ -335,6 +368,9 @@ const ManagerCollectionReport = () => {
                                 {formatCurrency(
                                   userReport.userTotalBankTransfer
                                 )}
+                              </td>
+                              <td className="text-end" style={{ color: "#fd7e14" }}>
+                                {formatCurrency(userReport.userTotalGiftVoucher)}
                               </td>
                               <td className="text-end text-secondary">
                                 {formatCurrency(userReport.userTotalExpenses)}
