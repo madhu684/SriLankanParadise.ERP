@@ -10,7 +10,7 @@ import {
   FiTrendingDown,
   FiClock,
 } from "react-icons/fi";
-import { RiCurrencyLine, RiBankLine } from "react-icons/ri";
+import { RiCurrencyLine, RiBankLine, RiCoupon2Line } from "react-icons/ri";
 import { BsFileEarmarkExcel, BsCashStack, BsWallet2 } from "react-icons/bs";
 import { BiReceipt } from "react-icons/bi";
 import CurrentDateTime from "../../components/currentDateTime/currentDateTime";
@@ -223,6 +223,34 @@ const CollectionReport = () => {
               </div>
             </div>
 
+            {/* Gift Voucher */}
+            <div className="col-lg-3 col-md-4 col-sm-6">
+              <div
+                className="card shadow-sm border-0"
+                style={{ borderLeft: "4px solid #fd7e14" }}
+              >
+                <div className="card-body">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                      <p className="text-muted mb-1 small">Gift Vouchers</p>
+                      <h4
+                        className="mb-0 text-orange"
+                        style={{ color: "#fd7e14" }}
+                      >
+                        Rs. {formatCurrency(reportData.totalGiftVoucherAmount)}
+                      </h4>
+                    </div>
+                    <div
+                      className="p-3 rounded-circle"
+                      style={{ backgroundColor: "rgba(253, 126, 20, 0.1)" }}
+                    >
+                      <RiCoupon2Line size={28} style={{ color: "#fd7e14" }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Cash in Hand */}
             <div className="col-lg-3 col-md-4 col-sm-6">
               <div
@@ -409,7 +437,11 @@ const CollectionReport = () => {
                               className={`badge ${
                                 item.modeOfPayment === "Cash"
                                   ? "bg-success"
-                                  : "bg-info"
+                                  : item.modeOfPayment === "Bank Transfer"
+                                  ? "bg-info"
+                                  : item.modeOfPayment === "Gift Voucher"
+                                  ? "bg-warning"
+                                  : "bg-secondary"
                               }`}
                             >
                               {item.modeOfPayment}
@@ -486,6 +518,15 @@ const CollectionReport = () => {
                     <h5 className="mb-0 text-info">
                       Rs.{" "}
                       {formatCurrency(reportData.dailyTotalBankTransferAmount)}
+                    </h5>
+                  </div>
+                </div>
+                <div className="col-md-3">
+                  <div className="p-3 border rounded bg-light">
+                    <p className="text-muted mb-1 small">Gift Vouchers</p>
+                    <h5 className="mb-0" style={{ color: "#fd7e14" }}>
+                      Rs.{" "}
+                      {formatCurrency(reportData.dailyTotalGiftVoucherAmount)}
                     </h5>
                   </div>
                 </div>

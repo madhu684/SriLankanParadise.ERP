@@ -12,6 +12,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
         public decimal TotalExcess { get; set; }
         public decimal TotalCash { get; set; }
         public decimal TotalBankTransfer { get; set; }
+        public decimal TotalGiftVoucher { get; set; }
         public decimal TotalExpenses { get; set; }
         public decimal TotalCashInHand { get; set; }
     }
@@ -26,6 +27,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
         public decimal UserTotalExcess { get; set; }
         public decimal UserTotalCash { get; set; }
         public decimal UserTotalBankTransfer { get; set; }
+        public decimal UserTotalGiftVoucher { get; set; }
         public decimal UserTotalExpenses { get; set; }
         public decimal UserTotalCashInHand { get; set; }
     }
@@ -38,6 +40,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
         public decimal SessionTotalExcess { get; set; }
         public decimal SessionTotalCash { get; set; }
         public decimal SessionTotalBankTransfer { get; set; }
+        public decimal SessionTotalGiftVoucher { get; set; }
         public decimal SessionTotalExpenses { get; set; }
         public decimal SessionTotalCashInHand { get; set; }
     }

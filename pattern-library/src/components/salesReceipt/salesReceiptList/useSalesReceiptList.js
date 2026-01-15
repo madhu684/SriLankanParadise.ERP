@@ -23,7 +23,7 @@ const useSalesReceiptList = () => {
 
   const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
 
-  const { activeCashierSession } = useContext(UserContext);
+  const { activeCashierSession, user } = useContext(UserContext);
 
   // Retrieve the cashier session
   const isCashierSessionOpen = !!activeCashierSession;
@@ -46,7 +46,11 @@ const useSalesReceiptList = () => {
       return allReceipts.filter((receipt) => {
         const receiptDate = new Date(receipt.receiptDate);
         receiptDate.setHours(0, 0, 0, 0);
-        return receiptDate.getTime() === today.getTime();
+
+        const isToday = receiptDate.getTime() === today.getTime();
+        const isCreatedByCurrentUser = receipt.createdUserId === user?.userId;
+
+        return isToday && isCreatedByCurrentUser;
       });
     },
     enabled: !!companyId,
@@ -82,10 +86,10 @@ const useSalesReceiptList = () => {
         ? response.data.result.filter((si) => {
             // Must have status 2
             if (si.status !== 2) return false;
-            
+
             // Include if amountDue is greater than 100
             if (si.amountDue > 100) return true;
-            
+
             // Otherwise, check if invoice date is today
             if (!si.invoiceDate) return false;
             const invoiceDate = new Date(si.invoiceDate);

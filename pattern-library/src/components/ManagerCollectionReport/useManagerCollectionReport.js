@@ -46,6 +46,7 @@ const useManagerCollectionReport = () => {
       { description: "Overall Total Amount", amount: reportData.totalAmount },
       { description: "Overall Cash Collection", amount: reportData.totalCash },
       { description: "Overall Bank Transfer", amount: reportData.totalBankTransfer },
+      { description: "Overall Gift Voucher", amount: reportData.totalGiftVoucher },
       { description: "Overall Cashier Expenses", amount: reportData.totalExpenses },
       { description: "Overall Cash In Hand", amount: reportData.totalCashInHand },
     ];
@@ -59,6 +60,7 @@ const useManagerCollectionReport = () => {
       { header: "Excess", accessor: (item) => formatCurrency(item.excess), width: 15 },
       { header: "Cash", accessor: (item) => formatCurrency(item.cash), width: 15 },
       { header: "Bank Transfer", accessor: (item) => formatCurrency(item.bankTransfer), width: 15 },
+      { header: "Gift Voucher", accessor: (item) => formatCurrency(item.giftVoucher), width: 15 },
       { header: "Expenses", accessor: (item) => formatCurrency(item.expenses), width: 15 },
       { header: "Cash In Hand", accessor: (item) => formatCurrency(item.cashInHand), width: 15 },
     ];
@@ -75,6 +77,7 @@ const useManagerCollectionReport = () => {
           excess: session.sessionTotalExcess,
           cash: session.sessionTotalCash,
           bankTransfer: session.sessionTotalBankTransfer,
+          giftVoucher: session.sessionTotalGiftVoucher,
           expenses: session.sessionTotalExpenses,
           cashInHand: session.sessionTotalCashInHand,
         });
@@ -89,6 +92,7 @@ const useManagerCollectionReport = () => {
         excess: userReport.userTotalExcess,
         cash: userReport.userTotalCash,
         bankTransfer: userReport.userTotalBankTransfer,
+        giftVoucher: userReport.userTotalGiftVoucher,
         expenses: userReport.userTotalExpenses,
         cashInHand: userReport.userTotalCashInHand,
       });

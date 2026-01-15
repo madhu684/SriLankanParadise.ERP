@@ -745,15 +745,28 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                       isDraftSubmission ? "btn-secondary" : "btn-primary"
                     } px-4`}
                     onClick={handleConfirmSubmit}
+                    disabled={loading || loadingDraft}
                   >
-                    <i
-                      className={`bi ${
-                        isDraftSubmission ? "bi-save" : "bi-check-circle"
-                      } me-2`}
-                    ></i>
-                    {isDraftSubmission
-                      ? "Confirm & Save Draft"
-                      : "Confirm & Submit"}
+                    {loading || loadingDraft ? (
+                      <ButtonLoadingSpinner
+                        text={
+                          isDraftSubmission
+                            ? "Saving Draft..."
+                            : "Submitting..."
+                        }
+                      />
+                    ) : (
+                      <>
+                        <i
+                          className={`bi ${
+                            isDraftSubmission ? "bi-save" : "bi-check-circle"
+                          } me-2`}
+                        ></i>
+                        {isDraftSubmission
+                          ? "Confirm & Save Draft"
+                          : "Confirm & Submit"}
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
