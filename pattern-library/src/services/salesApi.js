@@ -858,10 +858,16 @@ export const get_cashier_expense_outs_by_userId_date_api = async (
   date,
   cashierSessionId
 ) => {
+  const params = {
+    cashierSessionId,
+  };
+
+  if (cashierSessionId) params.cashierSessionId = cashierSessionId;
   try {
     const response = await api.get(
       `/cashierExpenseOut/GetCashierExpenseOutsByUserIdDate/${userId}/${date}`,
       {
+        params,
         withCredentials: true,
       }
     );

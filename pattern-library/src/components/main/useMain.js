@@ -15,7 +15,7 @@ import MinList from "../min/minList/minList.jsx";
 import TinList from "../tin/tinList/tinList.jsx";
 import ItemBatchUpdate from "../itemBatch/itemBatchUpdate/itemBatchUpdate.jsx";
 import ExpenseOutRequisitionList from "../expenseOutRequisition/expenseOutRequisitionList/expenseOutRequisitionList.jsx";
-import CashierExpenseOut from "../cashierExpenseOut/cashierExpenseOut.jsx";
+import CashierExpenseOutList from "../cashierExpenseOut/cashierExpenseOutList/CashierExpenseOutList.jsx";
 import SupplierList from "../supplier/supplierMain/supplierList/supplierList.jsx";
 import StockReport from "../stockReport/stockReport.jsx";
 import SalesOrderReport from "../salesOrderReport/salesOrderReport.jsx";
@@ -124,7 +124,7 @@ const useMain = () => {
       case "Expense Out Requisitions":
         return <ExpenseOutRequisitionList />;
       case "Cashier Expense Out":
-        return <CashierExpenseOut />;
+        return <CashierExpenseOutList />;
       case "Suppliers":
         return <SupplierList />;
       case "Stock Report":
