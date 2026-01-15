@@ -33,9 +33,9 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
   const fetchSessionSalesReceipts = async () => {
     try {
       const response = await get_sales_receipts_by_cashier_session_id_api(
-        cashierSession.cashierSessionId
+        cashierSession?.cashierSessionId
       );
-      return response.data.result;
+      return response?.data?.result;
     } catch (error) {
       console.error("Error fetching session sales receipts:", error);
     }
@@ -47,9 +47,9 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
     isError: isSalesReceiptsError,
     error: SalesReceiptError,
   } = useQuery({
-    queryKey: ["sessionSalesReceipts", cashierSession.cashierSessionId],
+    queryKey: ["sessionSalesReceipts", cashierSession?.cashierSessionId],
     queryFn: fetchSessionSalesReceipts,
-    enabled: !!cashierSession.cashierSessionId,
+    enabled: !!cashierSession?.cashierSessionId,
   });
 
   const fetchCashierExpenseOuts = async () => {
@@ -91,7 +91,7 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
       const filteredcashierExpenseOuts = cashierExpenseOuts.filter(
         (expenseOut) => {
           const createdDate = moment.utc(expenseOut.createdDate);
-          const sessionIn = moment.utc(cashierSession.sessionIn);
+          const sessionIn = moment.utc(cashierSession?.sessionIn);
           const currentDate = moment.utc();
 
           return createdDate.isBetween(sessionIn, currentDate);
@@ -228,9 +228,9 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
         setLoading(true);
         const cashierSessionData = {
           userId: sessionStorage.getItem("userId"),
-          sessionIn: cashierSession.sessionIn,
+          sessionIn: cashierSession?.sessionIn,
           sessionOut: currentDate,
-          openingBalance: cashierSession.openingBalance,
+          openingBalance: cashierSession?.openingBalance,
           companyId: sessionStorage.getItem("companyId"),
           actualCashInHand: actualCashInHand,
           actualChequesInHand: actualChequesInHand,
@@ -241,7 +241,7 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
         };
 
         const response = await put_cashier_session_api(
-          cashierSession.cashierSessionId,
+          cashierSession?.cashierSessionId,
           cashierSessionData
         );
 
