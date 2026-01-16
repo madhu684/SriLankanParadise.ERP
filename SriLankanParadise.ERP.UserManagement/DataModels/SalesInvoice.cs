@@ -54,6 +54,7 @@ public partial class SalesInvoice
     public virtual SalesOrder? SalesOrder { get; set; }
 
     public virtual Customer? Customer { get; set; }
+
     public virtual CustomerDeliveryAddress? CustomerDeliveryAddress { get; set; }
 
     public virtual ICollection<SalesInvoiceDetail> SalesInvoiceDetails { get; set; } = new List<SalesInvoiceDetail>();

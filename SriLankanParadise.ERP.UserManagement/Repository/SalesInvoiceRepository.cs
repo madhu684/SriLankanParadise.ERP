@@ -167,6 +167,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 if (existsSalesInvoice != null)
                 {
                     _dbContext.Entry(existsSalesInvoice).CurrentValues.SetValues(salesInvoice);
+                    _dbContext.Entry(existsSalesInvoice).Property(x => x.ReferenceNo).IsModified = false;
                     await _dbContext.SaveChangesAsync();
                 }
             }
@@ -534,6 +535,25 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
 
             // If no slab found, return the last slab (fallback)
             return slabs.Last();
+        }
+
+        public async Task<string> GenerateReferenceNo()
+        {
+            var year = DateTime.Now.ToString("yy");
+            var month = DateTime.Now.ToString("MMM").ToUpper();
+            var shortName = "ABDL";
+            var random = new Random();
+            string referenceNo;
+            bool exists;
+
+            do
+            {
+                var randomNumber = random.Next(1, 100000).ToString("D5");
+                referenceNo = $"{year}{month}{shortName}{randomNumber}";
+                exists = await _dbContext.SalesInvoices.AnyAsync(si => si.ReferenceNo == referenceNo);
+            } while (exists);
+
+            return referenceNo;
         }
     }
 }

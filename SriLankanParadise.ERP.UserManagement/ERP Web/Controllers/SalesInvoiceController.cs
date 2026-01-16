@@ -46,6 +46,10 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             try
             {
                 var salesInvoice = _mapper.Map<SalesInvoice>(salesInvoiceRequest);
+                if (string.IsNullOrEmpty(salesInvoice.ReferenceNo))
+                {
+                    salesInvoice.ReferenceNo = await _salesInvoiceService.GenerateReferenceNo();
+                }
                 await _salesInvoiceService.AddSalesInvoice(salesInvoice);
 
                 // Create action log
