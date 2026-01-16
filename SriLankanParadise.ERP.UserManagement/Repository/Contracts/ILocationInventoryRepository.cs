@@ -9,7 +9,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task<IEnumerable<LocationInventory>> GetAll();
         Task<LocationInventory> GetLocationInventoryByLocationInventoryId(int locationInventoryId);
         Task<IEnumerable<LocationInventory>> GetLocationInventoriesByLocationId(int locationId);
-        Task<IEnumerable<LocationInventory>> GetEmptyReturnItemLocationInventoriesByLocationId(int locationId);
+        Task<IEnumerable<LocationInventory>> GetEmptyReturnItemLocationInventoriesByLocationId(int companyId, int locationId);
         Task<IEnumerable<LocationInventory>> GetItemLocationInventoriesByLocationId(int locationId);
         Task<IEnumerable<LocationInventory>> GetLocationInventoriesByLocationIdItemMasterId(int locationId, int itemMasterId);
         Task<IEnumerable<LocationInventory>> GetLocationInventoryByBatchId(int batchId);

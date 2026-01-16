@@ -15,38 +15,71 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             _dbContext = dbContext;
         }
 
-        public async Task<Dictionary<int, List<Role>>> GetRolesByModuleIds(int[] moduleIds)
+        //public async Task<Dictionary<int, List<Role>>> GetRolesByModuleIds(int[] moduleIds)
+        //{
+        //    try
+        //    {
+        //        if (moduleIds == null || moduleIds.Length == 0)
+        //        {
+        //            throw new ArgumentException("ModuleIds cannot be null or empty.");
+        //        }
+
+        //        var rolesByModule = new Dictionary<int, List<Role>>();
+
+        //        foreach (var moduleId in moduleIds)
+        //        {
+        //            var rolesForModule = await _dbContext.Roles
+        //                .Where(r => r.ModuleId == moduleId)
+        //                .ToListAsync();
+
+        //            rolesByModule[moduleId] = rolesForModule;
+        //        }
+
+        //        if (rolesByModule.Any())
+        //        {
+        //            return rolesByModule;
+        //        }
+        //        return null;
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
+
+        public async Task<Dictionary<int, List<Role>>> GetRolesByModuleIds(int companyId, int[] moduleIds)
         {
             try
             {
+                if (companyId <= 0)
+                {
+                    throw new ArgumentException("CompanyId must be greater than zero.");
+                }
+
                 if (moduleIds == null || moduleIds.Length == 0)
                 {
                     throw new ArgumentException("ModuleIds cannot be null or empty.");
                 }
 
-                var rolesByModule = new Dictionary<int, List<Role>>();
+                // Single efficient query: get all roles for the given moduleIds AND companyId
+                var roles = await _dbContext.Roles
+                    .Where(r => r.CompanyId == companyId && moduleIds.Contains(r.ModuleId))
+                    .ToListAsync();
 
-                foreach (var moduleId in moduleIds)
-                {
-                    var rolesForModule = await _dbContext.Roles
-                        .Where(r => r.ModuleId == moduleId)
-                        .ToListAsync();
+                // Group by ModuleId into dictionary
+                var rolesByModule = roles
+                    .GroupBy(r => r.ModuleId)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.ToList());
 
-                    rolesByModule[moduleId] = rolesForModule;
-                }
-
-                if (rolesByModule.Any())
-                {
-                    return rolesByModule;
-                }
-                return null;
+                return rolesByModule; // Returns empty dictionary if no roles found
             }
             catch (Exception)
             {
-                throw;
+                throw; // Let upper layers handle logging/response
             }
         }
-
         public async Task AddRole(Role role)
         {
             try

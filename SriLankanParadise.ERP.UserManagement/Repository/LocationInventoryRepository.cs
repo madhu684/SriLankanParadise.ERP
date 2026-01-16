@@ -151,11 +151,11 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<LocationInventory>> GetEmptyReturnItemLocationInventoriesByLocationId(int locationId)
+        public async Task<IEnumerable<LocationInventory>> GetEmptyReturnItemLocationInventoriesByLocationId(int companyId, int locationId)
         {
             try
             {
-                var emptyItemType = await _dbContext.ItemTypes.FirstOrDefaultAsync(x => x.Name == "Empty");
+                var emptyItemType = await _dbContext.ItemTypes.FirstOrDefaultAsync(x => x.Name == "Empty" && x.CompanyId == companyId);
 
                 if (emptyItemType != null)
                 {

@@ -593,6 +593,8 @@ class Registration extends React.Component {
    * Fetches Roles for the assigned Modules
    */
   async fetchModuleRoles() {
+    const companyId = sessionStorage.getItem("companyId");
+
     let isFetchRequired = false;
     this.state.formData["user-module"].assignedModules.forEach((module) => {
       if (module.roles.availableRoles.length === 0) {
@@ -610,7 +612,7 @@ class Registration extends React.Component {
 
     if (assignedModuleIds.length > 0) {
       try {
-        const rolesData = await module_roles_api(assignedModuleIds);
+        const rolesData = await module_roles_api(companyId, assignedModuleIds);
 
         this.setState((prevState) => ({
           formData: {

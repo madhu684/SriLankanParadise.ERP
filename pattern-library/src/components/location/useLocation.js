@@ -57,9 +57,7 @@ const useLocation = ({ onFormSubmit }) => {
 
   const fetchLocationTypes = async () => {
     try {
-      const response = await get_location_types_by_company_id_api(
-        sessionStorage.getItem("companyId")
-      );
+      const response = await get_location_types_by_company_id_api();
       return response.data.result || [];
     } catch (error) {
       console.error("Error fetching location types:", error);
@@ -163,11 +161,11 @@ const useLocation = ({ onFormSubmit }) => {
     try {
       const status = formData.status === "1" ? true : false;
       let putResponse = { status: 200 };
-  
+
       const isFormValid = validateForm();
       if (isFormValid) {
         setLoading(true);
-  
+
         const locationData = {
           companyId: sessionStorage.getItem("companyId"),
           locationName: formData.locationName,
@@ -176,14 +174,14 @@ const useLocation = ({ onFormSubmit }) => {
           parentId: selectedParentLocation?.locationId || null,
           permissionId: 1104,
         };
-  
+
         const response = await post_comapny_location_api(locationData);
         console.log("Response from post_comapny_location_api:", response);
-  
+
         if (response.status === 201 && response.data && response.data.result) {
           const locationId = response.data.result.locationId;
           console.log("Location ID from response:", locationId);
-  
+
           if (formData.locationHierarchy === "main") {
             const locationData = {
               companyId: sessionStorage.getItem("companyId"),
@@ -193,15 +191,18 @@ const useLocation = ({ onFormSubmit }) => {
               parentId: locationId,
               permissionId: 1105,
             };
-  
-            putResponse = await put_company_location_api(locationId, locationData);
+
+            putResponse = await put_company_location_api(
+              locationId,
+              locationData
+            );
             console.log("Response from put_company_location_api:", putResponse);
           }
-  
+
           if (putResponse.status === 200) {
             setSubmissionStatus("successSubmitted");
             console.log("Location created successfully!", formData);
-  
+
             setTimeout(() => {
               setSubmissionStatus(null);
               onFormSubmit();
@@ -223,7 +224,6 @@ const useLocation = ({ onFormSubmit }) => {
       }, 3000);
     }
   };
-  
 
   const handleSelectLocation = (Location) => {
     setSelectedParentLocation(Location);

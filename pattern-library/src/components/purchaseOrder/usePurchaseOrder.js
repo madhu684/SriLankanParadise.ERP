@@ -1127,7 +1127,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   };
 
   const renderColumns = () => {
-    return chargesAndDeductions.map((charge) => {
+    return chargesAndDeductions?.map((charge) => {
       if (charge.isApplicableForLineItem) {
         // Render columns for charges/deductions applicable for line items
         return (

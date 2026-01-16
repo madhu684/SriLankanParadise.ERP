@@ -8,7 +8,6 @@ import { useQuery } from "@tanstack/react-query";
 
 const useLocationUpdate = ({ location, onFormSubmit }) => {
   const [formData, setFormData] = useState({
-    
     locationName: "",
     status: "",
     locationType: "",
@@ -57,9 +56,7 @@ const useLocationUpdate = ({ location, onFormSubmit }) => {
 
   const fetchLocationTypes = async () => {
     try {
-      const response = await get_location_types_by_company_id_api(
-        sessionStorage.getItem("companyId")
-      );
+      const response = await get_location_types_by_company_id_api();
       return response.data.result || [];
     } catch (error) {
       console.error("Error fetching location types:", error);
@@ -89,7 +86,7 @@ const useLocationUpdate = ({ location, onFormSubmit }) => {
       locationType: deepCopyLocation?.locationTypeId ?? "",
       locationHierarchy: locationHierarchy,
     });
-   
+
     if (
       !isLocationsLoading &&
       availableFetchedLocations &&
@@ -184,10 +181,10 @@ const useLocationUpdate = ({ location, onFormSubmit }) => {
     try {
       const status = formData.status === "1" ? true : false;
       const isFormValid = validateForm();
-  
+
       if (isFormValid) {
         setLoading(true);
-  
+
         const locationData = {
           companyId: sessionStorage.getItem("companyId"),
           locationName: formData.locationName,
@@ -199,9 +196,9 @@ const useLocationUpdate = ({ location, onFormSubmit }) => {
               : location.locationId,
           permissionId: 1105,
         };
-  
+
         console.log("Payload data:", locationData);
-  
+
         const putResponse = await put_company_location_api(
           location?.locationId,
           locationData
@@ -211,14 +208,17 @@ const useLocationUpdate = ({ location, onFormSubmit }) => {
         if (putResponse.status === 200) {
           setSubmissionStatus("successSubmitted");
           console.log("Location updated successfully!", formData);
-  
+
           setTimeout(() => {
             setSubmissionStatus(null);
             onFormSubmit();
             setLoading(false);
           }, 2000);
         } else {
-          console.error("Unexpected response status:", putResponse.status || putResponse);
+          console.error(
+            "Unexpected response status:",
+            putResponse.status || putResponse
+          );
           setSubmissionStatus("error");
           setTimeout(() => {
             setSubmissionStatus(null);
@@ -235,9 +235,6 @@ const useLocationUpdate = ({ location, onFormSubmit }) => {
       }, 2000);
     }
   };
-  
-
-  
 
   const handleInputChange = (field, value) => {
     setFormData((prevFormData) => ({

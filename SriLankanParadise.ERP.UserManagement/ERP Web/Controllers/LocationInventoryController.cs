@@ -124,11 +124,11 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         }
 
         [HttpGet("GetEmptyReturnItemLocationInventoriesByLocationId/{locationId}")]
-        public async Task<ApiResponseModel> GetEmptyReturnItemLocationInventoriesByLocationId(int locationId)
+        public async Task<ApiResponseModel> GetEmptyReturnItemLocationInventoriesByLocationId([FromQuery] int companyId, int locationId)
         {
             try
             {
-                var locationInventories = await _locationInventoryService.GetEmptyReturnItemLocationInventoriesByLocationId(locationId);
+                var locationInventories = await _locationInventoryService.GetEmptyReturnItemLocationInventoriesByLocationId(companyId, locationId);
                 if (locationInventories != null)
                 {
                     var locationInventoryDtos = _mapper.Map<IEnumerable<EmptyReturnItemLocationInventoryDto>>(locationInventories);

@@ -125,6 +125,7 @@ const useEmptyReturnsLogic = () => {
       try {
         const inventory =
           await get_Empty_Return_Item_locations_inventories_by_location_id_api(
+            sessionStorage.getItem("companyId"),
             targetLocationId
           );
         if (inventory.data && inventory.data.result) {

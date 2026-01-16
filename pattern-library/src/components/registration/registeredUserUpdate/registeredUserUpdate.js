@@ -63,7 +63,7 @@ class UpdateRegistration extends React.Component {
       isAssignedModulesFetched: false,
       isAssignedRolesFetched: false,
       isAssignedPermissionsFetched: false,
-      loading: false
+      loading: false,
     };
   }
 
@@ -298,34 +298,33 @@ class UpdateRegistration extends React.Component {
   //   }
   // };
 
- handleSelectModule = (moduleId) => {
-  const selectedModule = this.state.formData["user-module"].availableModules.find(
-    (module) => module.id === parseInt(moduleId, 10)
-  );
+  handleSelectModule = (moduleId) => {
+    const selectedModule = this.state.formData[
+      "user-module"
+    ].availableModules.find((module) => module.id === parseInt(moduleId, 10));
 
-  if (selectedModule) {
-    const updatedAssignedModules = [
-      ...this.state.formData["user-module"].assignedModules,
-      selectedModule,
-    ];
+    if (selectedModule) {
+      const updatedAssignedModules = [
+        ...this.state.formData["user-module"].assignedModules,
+        selectedModule,
+      ];
 
-    const updatedAvailableModules = this.state.formData["user-module"].availableModules.filter(
-      (module) => module.id !== selectedModule.id
-    );
+      const updatedAvailableModules = this.state.formData[
+        "user-module"
+      ].availableModules.filter((module) => module.id !== selectedModule.id);
 
-    this.setState((prevState) => ({
-      formData: {
-        ...prevState.formData,
-        "user-module": {
-          ...prevState.formData["user-module"],
-          assignedModules: updatedAssignedModules,
-          availableModules: updatedAvailableModules,
+      this.setState((prevState) => ({
+        formData: {
+          ...prevState.formData,
+          "user-module": {
+            ...prevState.formData["user-module"],
+            assignedModules: updatedAssignedModules,
+            availableModules: updatedAvailableModules,
+          },
         },
-      },
-    }));
-  }
-};
-
+      }));
+    }
+  };
 
   /**
    * Handles the removal of a Module.
@@ -347,31 +346,30 @@ class UpdateRegistration extends React.Component {
   // };
 
   handleRemoveModule = (moduleId) => {
-  const moduleToRemove = this.state.formData["user-module"].assignedModules.find(
-    (module) => module.id === moduleId
-  );
+    const moduleToRemove = this.state.formData[
+      "user-module"
+    ].assignedModules.find((module) => module.id === moduleId);
 
-  const updatedAssignedModules = this.state.formData[
-    "user-module"
-  ].assignedModules.filter((module) => module.id !== moduleId);
+    const updatedAssignedModules = this.state.formData[
+      "user-module"
+    ].assignedModules.filter((module) => module.id !== moduleId);
 
-  const updatedAvailableModules = [
-    ...this.state.formData["user-module"].availableModules,
-    moduleToRemove,
-  ];
+    const updatedAvailableModules = [
+      ...this.state.formData["user-module"].availableModules,
+      moduleToRemove,
+    ];
 
-  this.setState((prevState) => ({
-    formData: {
-      ...prevState.formData,
-      "user-module": {
-        ...prevState.formData["user-module"],
-        assignedModules: updatedAssignedModules,
-        availableModules: updatedAvailableModules,
+    this.setState((prevState) => ({
+      formData: {
+        ...prevState.formData,
+        "user-module": {
+          ...prevState.formData["user-module"],
+          assignedModules: updatedAssignedModules,
+          availableModules: updatedAvailableModules,
+        },
       },
-    },
-  }));
-};
-
+    }));
+  };
 
   /**
    * Handles the selection of a Role.
@@ -416,44 +414,48 @@ class UpdateRegistration extends React.Component {
   // };
 
   handleSelectRole = (roleId, moduleId) => {
-  const selectedModule = this.state.formData["user-module"].assignedModules.find(
-    (module) => module.id === moduleId
-  );
-  if (!selectedModule) return;
+    const selectedModule = this.state.formData[
+      "user-module"
+    ].assignedModules.find((module) => module.id === moduleId);
+    if (!selectedModule) return;
 
-  const selectedRole = selectedModule.roles.availableRoles.find(
-    (role) => role.id === parseInt(roleId, 10)
-  );
-  if (!selectedRole) return;
+    const selectedRole = selectedModule.roles.availableRoles.find(
+      (role) => role.id === parseInt(roleId, 10)
+    );
+    if (!selectedRole) return;
 
-  const existingRole = selectedModule.roles.assignedRoles.find(
-    (role) => role.id === selectedRole.id
-  );
-  if (existingRole) return;
+    const existingRole = selectedModule.roles.assignedRoles.find(
+      (role) => role.id === selectedRole.id
+    );
+    if (existingRole) return;
 
-  const updatedModules = this.state.formData["user-module"].assignedModules.map((module) => {
-    if (module.id === moduleId) {
-      return {
-        ...module,
-        roles: {
-          assignedRoles: [...module.roles.assignedRoles, selectedRole],
-          availableRoles: module.roles.availableRoles.filter(role => role.id !== selectedRole.id), // ✅ FIX
+    const updatedModules = this.state.formData[
+      "user-module"
+    ].assignedModules.map((module) => {
+      if (module.id === moduleId) {
+        return {
+          ...module,
+          roles: {
+            assignedRoles: [...module.roles.assignedRoles, selectedRole],
+            availableRoles: module.roles.availableRoles.filter(
+              (role) => role.id !== selectedRole.id
+            ), // ✅ FIX
+          },
+        };
+      }
+      return module;
+    });
+
+    this.setState((prevState) => ({
+      formData: {
+        ...prevState.formData,
+        "user-module": {
+          ...prevState.formData["user-module"],
+          assignedModules: updatedModules,
         },
-      };
-    }
-    return module;
-  });
-
-  this.setState((prevState) => ({
-    formData: {
-      ...prevState.formData,
-      "user-module": {
-        ...prevState.formData["user-module"],
-        assignedModules: updatedModules,
       },
-    },
-  }));
-};
+    }));
+  };
 
   /**
    * Handles the removal of a Role.
@@ -481,31 +483,37 @@ class UpdateRegistration extends React.Component {
   // };
 
   handleRemoveRole = (roleId, moduleId) => {
-  const updatedModules = this.state.formData["user-module"].assignedModules.map((module) => {
-    if (module.id === moduleId) {
-      const removedRole = module.roles.assignedRoles.find(role => role.id === roleId);
+    const updatedModules = this.state.formData[
+      "user-module"
+    ].assignedModules.map((module) => {
+      if (module.id === moduleId) {
+        const removedRole = module.roles.assignedRoles.find(
+          (role) => role.id === roleId
+        );
 
-      return {
-        ...module,
-        roles: {
-          assignedRoles: module.roles.assignedRoles.filter((role) => role.id !== roleId),
-          availableRoles: [...module.roles.availableRoles, removedRole], // ✅ FIX: return it to available
+        return {
+          ...module,
+          roles: {
+            assignedRoles: module.roles.assignedRoles.filter(
+              (role) => role.id !== roleId
+            ),
+            availableRoles: [...module.roles.availableRoles, removedRole], // ✅ FIX: return it to available
+          },
+        };
+      }
+      return module;
+    });
+
+    this.setState((prevState) => ({
+      formData: {
+        ...prevState.formData,
+        "user-module": {
+          ...prevState.formData["user-module"],
+          assignedModules: updatedModules,
         },
-      };
-    }
-    return module;
-  });
-
-  this.setState((prevState) => ({
-    formData: {
-      ...prevState.formData,
-      "user-module": {
-        ...prevState.formData["user-module"],
-        assignedModules: updatedModules,
       },
-    },
-  }));
-};
+    }));
+  };
 
   /**
    * Handles the selection of a Permission.
@@ -569,111 +577,127 @@ class UpdateRegistration extends React.Component {
   //   }));
   // };
 
+  // handleSelectPermission = (moduleId, roleId, permissionId) => {
+  //   permissionId = parseInt(permissionId, 10);
+  //   console.log(`[SELECT] Selecting permission ${permissionId} for role ${roleId} in module ${moduleId}`);
 
-// handleSelectPermission = (moduleId, roleId, permissionId) => {
-//   permissionId = parseInt(permissionId, 10);
-//   console.log(`[SELECT] Selecting permission ${permissionId} for role ${roleId} in module ${moduleId}`);
+  //   const updatedModules = this.state.formData["user-module"].assignedModules.map((module) => {
+  //     if (module.id === moduleId) {
+  //       return {
+  //         ...module,
+  //         roles: {
+  //           ...module.roles,
+  //           assignedRoles: module.roles.assignedRoles.map((role) => {
+  //             if (role.id === roleId) {
+  //               const permission = role.permissions.availablePermissions.find(p => p.id === permissionId);
 
-//   const updatedModules = this.state.formData["user-module"].assignedModules.map((module) => {
-//     if (module.id === moduleId) {
-//       return {
-//         ...module,
-//         roles: {
-//           ...module.roles,
-//           assignedRoles: module.roles.assignedRoles.map((role) => {
-//             if (role.id === roleId) {
-//               const permission = role.permissions.availablePermissions.find(p => p.id === permissionId);
+  //               if (!permission) {
+  //                 console.warn(`[SELECT] Permission ID ${permissionId} not found in availablePermissions.`);
+  //                 return role;
+  //               }
 
-//               if (!permission) {
-//                 console.warn(`[SELECT] Permission ID ${permissionId} not found in availablePermissions.`);
-//                 return role;
-//               }
+  //               return {
+  //                 ...role,
+  //                 permissions: {
+  //                   assignedPermissions: [...role.permissions.assignedPermissions, permission],
+  //                   availablePermissions: role.permissions.availablePermissions.filter(p => p.id !== permissionId),
+  //                 },
+  //               };
+  //             }
+  //             return role;
+  //           }),
+  //         },
+  //       };
+  //     }
+  //     return module;
+  //   });
 
-//               return {
-//                 ...role,
-//                 permissions: {
-//                   assignedPermissions: [...role.permissions.assignedPermissions, permission],
-//                   availablePermissions: role.permissions.availablePermissions.filter(p => p.id !== permissionId),
-//                 },
-//               };
-//             }
-//             return role;
-//           }),
-//         },
-//       };
-//     }
-//     return module;
-//   });
+  //   this.setState((prevState) => ({
+  //     formData: {
+  //       ...prevState.formData,
+  //       "user-module": {
+  //         ...prevState.formData["user-module"],
+  //         assignedModules: updatedModules,
+  //       },
+  //     },
+  //   }));
+  // };
 
-//   this.setState((prevState) => ({
-//     formData: {
-//       ...prevState.formData,
-//       "user-module": {
-//         ...prevState.formData["user-module"],
-//         assignedModules: updatedModules,
-//       },
-//     },
-//   }));
-// };
+  handleSelectPermission = (moduleId, roleId, permissionId) => {
+    permissionId = parseInt(permissionId, 10);
+    console.log(
+      `[SELECT] Selecting permission ${permissionId} for role ${roleId} in module ${moduleId}`
+    );
 
-handleSelectPermission = (moduleId, roleId, permissionId) => {
-  permissionId = parseInt(permissionId, 10);
-  console.log(`[SELECT] Selecting permission ${permissionId} for role ${roleId} in module ${moduleId}`);
+    const updatedModules = this.state.formData[
+      "user-module"
+    ].assignedModules.map((module) => {
+      if (module.id === moduleId) {
+        return {
+          ...module,
+          roles: {
+            ...module.roles,
+            assignedRoles: module.roles.assignedRoles.map((role) => {
+              if (role.id === roleId) {
+                const { assignedPermissions, availablePermissions } =
+                  role.permissions;
 
-  const updatedModules = this.state.formData["user-module"].assignedModules.map((module) => {
-    if (module.id === moduleId) {
-      return {
-        ...module,
-        roles: {
-          ...module.roles,
-          assignedRoles: module.roles.assignedRoles.map((role) => {
-            if (role.id === roleId) {
-              const { assignedPermissions, availablePermissions } = role.permissions;
+                // Filter out from availablePermissions
+                const updatedAvailable = availablePermissions.filter(
+                  (p) => p.id !== permissionId
+                );
 
-              // Filter out from availablePermissions
-              const updatedAvailable = availablePermissions.filter(p => p.id !== permissionId);
+                // Prevent duplicates in assignedPermissions
+                const alreadyAssigned = assignedPermissions.some(
+                  (p) => p.id === permissionId
+                );
+                if (alreadyAssigned) {
+                  console.warn(
+                    `[SELECT] Permission ${permissionId} already assigned, skipping.`
+                  );
+                  return role;
+                }
 
-              // Prevent duplicates in assignedPermissions
-              const alreadyAssigned = assignedPermissions.some(p => p.id === permissionId);
-              if (alreadyAssigned) {
-                console.warn(`[SELECT] Permission ${permissionId} already assigned, skipping.`);
-                return role;
+                // Find the permission to add
+                const permissionToAdd = availablePermissions.find(
+                  (p) => p.id === permissionId
+                );
+                if (!permissionToAdd) {
+                  console.warn(
+                    `[SELECT] Permission ${permissionId} not found in availablePermissions.`
+                  );
+                  return role;
+                }
+
+                return {
+                  ...role,
+                  permissions: {
+                    assignedPermissions: [
+                      ...assignedPermissions,
+                      permissionToAdd,
+                    ],
+                    availablePermissions: updatedAvailable,
+                  },
+                };
               }
+              return role;
+            }),
+          },
+        };
+      }
+      return module;
+    });
 
-              // Find the permission to add
-              const permissionToAdd = availablePermissions.find(p => p.id === permissionId);
-              if (!permissionToAdd) {
-                console.warn(`[SELECT] Permission ${permissionId} not found in availablePermissions.`);
-                return role;
-              }
-
-              return {
-                ...role,
-                permissions: {
-                  assignedPermissions: [...assignedPermissions, permissionToAdd],
-                  availablePermissions: updatedAvailable,
-                },
-              };
-            }
-            return role;
-          }),
+    this.setState((prevState) => ({
+      formData: {
+        ...prevState.formData,
+        "user-module": {
+          ...prevState.formData["user-module"],
+          assignedModules: updatedModules,
         },
-      };
-    }
-    return module;
-  });
-
-  this.setState((prevState) => ({
-    formData: {
-      ...prevState.formData,
-      "user-module": {
-        ...prevState.formData["user-module"],
-        assignedModules: updatedModules,
       },
-    },
-  }));
-};
-
+    }));
+  };
 
   // handleRemovePermission = (moduleId, roleId, permissionId) => {
   //   permissionId = parseInt(permissionId, 10);
@@ -726,113 +750,127 @@ handleSelectPermission = (moduleId, roleId, permissionId) => {
   //   }));
   // };
 
+  // handleRemovePermission = (moduleId, roleId, permissionId) => {
+  //   permissionId = parseInt(permissionId, 10);
+  //   console.log(`[REMOVE] Removing permission ${permissionId} from role ${roleId} in module ${moduleId}`);
 
+  //   const updatedModules = this.state.formData["user-module"].assignedModules.map((module) => {
+  //     if (module.id === moduleId) {
+  //       return {
+  //         ...module,
+  //         roles: {
+  //           ...module.roles,
+  //           assignedRoles: module.roles.assignedRoles.map((role) => {
+  //             if (role.id === roleId) {
+  //               const permission = role.permissions.assignedPermissions.find(p => p.id === permissionId);
 
+  //               if (!permission) {
+  //                 console.warn(`[REMOVE] Permission ID ${permissionId} not found in assignedPermissions.`);
+  //                 return role;
+  //               }
 
-// handleRemovePermission = (moduleId, roleId, permissionId) => {
-//   permissionId = parseInt(permissionId, 10);
-//   console.log(`[REMOVE] Removing permission ${permissionId} from role ${roleId} in module ${moduleId}`);
+  //               return {
+  //                 ...role,
+  //                 permissions: {
+  //                   assignedPermissions: role.permissions.assignedPermissions.filter(p => p.id !== permissionId),
+  //                   availablePermissions: [...role.permissions.availablePermissions, permission],
+  //                 },
+  //               };
+  //             }
+  //             return role;
+  //           }),
+  //         },
+  //       };
+  //     }
+  //     return module;
+  //   });
 
-//   const updatedModules = this.state.formData["user-module"].assignedModules.map((module) => {
-//     if (module.id === moduleId) {
-//       return {
-//         ...module,
-//         roles: {
-//           ...module.roles,
-//           assignedRoles: module.roles.assignedRoles.map((role) => {
-//             if (role.id === roleId) {
-//               const permission = role.permissions.assignedPermissions.find(p => p.id === permissionId);
+  //   this.setState((prevState) => ({
+  //     formData: {
+  //       ...prevState.formData,
+  //       "user-module": {
+  //         ...prevState.formData["user-module"],
+  //         assignedModules: updatedModules,
+  //       },
+  //     },
+  //   }));
+  // };
 
-//               if (!permission) {
-//                 console.warn(`[REMOVE] Permission ID ${permissionId} not found in assignedPermissions.`);
-//                 return role;
-//               }
+  handleRemovePermission = (moduleId, roleId, permissionId) => {
+    permissionId = parseInt(permissionId, 10);
+    console.log(
+      `[REMOVE] Removing permission ${permissionId} from role ${roleId} in module ${moduleId}`
+    );
 
-//               return {
-//                 ...role,
-//                 permissions: {
-//                   assignedPermissions: role.permissions.assignedPermissions.filter(p => p.id !== permissionId),
-//                   availablePermissions: [...role.permissions.availablePermissions, permission],
-//                 },
-//               };
-//             }
-//             return role;
-//           }),
-//         },
-//       };
-//     }
-//     return module;
-//   });
+    const updatedModules = this.state.formData[
+      "user-module"
+    ].assignedModules.map((module) => {
+      if (module.id === moduleId) {
+        return {
+          ...module,
+          roles: {
+            ...module.roles,
+            assignedRoles: module.roles.assignedRoles.map((role) => {
+              if (role.id === roleId) {
+                const { assignedPermissions, availablePermissions } =
+                  role.permissions;
 
-//   this.setState((prevState) => ({
-//     formData: {
-//       ...prevState.formData,
-//       "user-module": {
-//         ...prevState.formData["user-module"],
-//         assignedModules: updatedModules,
-//       },
-//     },
-//   }));
-// };
+                // Filter out from assignedPermissions
+                const updatedAssigned = assignedPermissions.filter(
+                  (p) => p.id !== permissionId
+                );
 
-handleRemovePermission = (moduleId, roleId, permissionId) => {
-  permissionId = parseInt(permissionId, 10);
-  console.log(`[REMOVE] Removing permission ${permissionId} from role ${roleId} in module ${moduleId}`);
+                // Prevent duplicates in availablePermissions
+                const alreadyAvailable = availablePermissions.some(
+                  (p) => p.id === permissionId
+                );
+                if (alreadyAvailable) {
+                  console.warn(
+                    `[REMOVE] Permission ${permissionId} already available, skipping.`
+                  );
+                  return role;
+                }
 
-  const updatedModules = this.state.formData["user-module"].assignedModules.map((module) => {
-    if (module.id === moduleId) {
-      return {
-        ...module,
-        roles: {
-          ...module.roles,
-          assignedRoles: module.roles.assignedRoles.map((role) => {
-            if (role.id === roleId) {
-              const { assignedPermissions, availablePermissions } = role.permissions;
+                // Find the permission to move back
+                const permissionToMove = assignedPermissions.find(
+                  (p) => p.id === permissionId
+                );
+                if (!permissionToMove) {
+                  console.warn(
+                    `[REMOVE] Permission ${permissionId} not found in assignedPermissions.`
+                  );
+                  return role;
+                }
 
-              // Filter out from assignedPermissions
-              const updatedAssigned = assignedPermissions.filter(p => p.id !== permissionId);
-
-              // Prevent duplicates in availablePermissions
-              const alreadyAvailable = availablePermissions.some(p => p.id === permissionId);
-              if (alreadyAvailable) {
-                console.warn(`[REMOVE] Permission ${permissionId} already available, skipping.`);
-                return role;
+                return {
+                  ...role,
+                  permissions: {
+                    assignedPermissions: updatedAssigned,
+                    availablePermissions: [
+                      ...availablePermissions,
+                      permissionToMove,
+                    ],
+                  },
+                };
               }
+              return role;
+            }),
+          },
+        };
+      }
+      return module;
+    });
 
-              // Find the permission to move back
-              const permissionToMove = assignedPermissions.find(p => p.id === permissionId);
-              if (!permissionToMove) {
-                console.warn(`[REMOVE] Permission ${permissionId} not found in assignedPermissions.`);
-                return role;
-              }
-
-              return {
-                ...role,
-                permissions: {
-                  assignedPermissions: updatedAssigned,
-                  availablePermissions: [...availablePermissions, permissionToMove],
-                },
-              };
-            }
-            return role;
-          }),
+    this.setState((prevState) => ({
+      formData: {
+        ...prevState.formData,
+        "user-module": {
+          ...prevState.formData["user-module"],
+          assignedModules: updatedModules,
         },
-      };
-    }
-    return module;
-  });
-
-  this.setState((prevState) => ({
-    formData: {
-      ...prevState.formData,
-      "user-module": {
-        ...prevState.formData["user-module"],
-        assignedModules: updatedModules,
       },
-    },
-  }));
-};
-
+    }));
+  };
 
   /**
    * Validates the User Information tab of the registration form.
@@ -1058,53 +1096,59 @@ handleRemovePermission = (moduleId, roleId, permissionId) => {
   // }
 
   async fetchAssignedModules() {
-  const assignedModulesData = await get_user_modules_by_user_id_api(this.props.userId);
-  const assignedModules = assignedModulesData.data.result;
+    const assignedModulesData = await get_user_modules_by_user_id_api(
+      this.props.userId
+    );
+    const assignedModules = assignedModulesData.data.result;
 
-  const availableModules = this.state.formData["user-module"].availableModules;
+    const availableModules =
+      this.state.formData["user-module"].availableModules;
 
-  const detailedAssignedModules = assignedModules.map((module) => {
-    const alreadyAvailableModule = availableModules.find(
-      (availableModule) => availableModule.id === module.moduleId
+    const detailedAssignedModules = assignedModules.map((module) => {
+      const alreadyAvailableModule = availableModules.find(
+        (availableModule) => availableModule.id === module.moduleId
+      );
+
+      return {
+        id: module.moduleId,
+        name: module.moduleName,
+        status: module.status,
+        subscriptionModuleId:
+          alreadyAvailableModule?.subscriptionModuleId || null,
+        subModules: module.subModules,
+        handShake: module.handShake,
+        roles: {
+          assignedRoles: [],
+          availableRoles: [],
+        },
+      };
+    });
+
+    const assignedIds = detailedAssignedModules.map((m) => m.id);
+
+    const filteredAvailableModules = availableModules.filter(
+      (module) => !assignedIds.includes(module.id)
     );
 
-    return {
-      id: module.moduleId,
-      name: module.moduleName,
-      status: module.status,
-      subscriptionModuleId: alreadyAvailableModule?.subscriptionModuleId || null,
-      subModules: module.subModules,
-      handShake: module.handShake,
-      roles: {
-        assignedRoles: [],
-        availableRoles: [],
+    this.setState((prevState) => ({
+      formData: {
+        ...prevState.formData,
+        "user-module": {
+          ...prevState.formData["user-module"],
+          assignedModules: detailedAssignedModules,
+          availableModules: filteredAvailableModules,
+        },
       },
-    };
-  });
-
-  const assignedIds = detailedAssignedModules.map((m) => m.id);
-
-  const filteredAvailableModules = availableModules.filter(
-    (module) => !assignedIds.includes(module.id)
-  );
-
-  this.setState((prevState) => ({
-    formData: {
-      ...prevState.formData,
-      "user-module": {
-        ...prevState.formData["user-module"],
-        assignedModules: detailedAssignedModules,
-        availableModules: filteredAvailableModules,
-      },
-    },
-    isAssignedModulesFetched: true,
-  }));
-}
+      isAssignedModulesFetched: true,
+    }));
+  }
 
   /**
    * Fetches Roles for the assigned Modules
    */
   async fetchModuleRoles() {
+    const companyId = sessionStorage.getItem("companyId");
+
     let isFetchRequired = false;
     this.state.formData["user-module"].assignedModules.forEach((module) => {
       if (module.roles.availableRoles.length === 0) {
@@ -1122,7 +1166,7 @@ handleRemovePermission = (moduleId, roleId, permissionId) => {
 
     if (assignedModuleIds.length > 0) {
       try {
-        const rolesData = await module_roles_api(assignedModuleIds);
+        const rolesData = await module_roles_api(companyId, assignedModuleIds);
 
         this.setState((prevState) => ({
           formData: {
@@ -1211,51 +1255,57 @@ handleRemovePermission = (moduleId, roleId, permissionId) => {
   // }
 
   async fetchAssignedRoles() {
-  const assignedRolesData = await get_user_roles_by_user_id_api(this.props.userId);
-  const assignedRoles = assignedRolesData.data.result;
-
-  const detailedAssignedRoles = assignedRoles.map((role) => ({
-    id: role.roleId,
-    name: role.roleName,
-    moduleId: role.moduleId,
-    moduleName: role.module.moduleName,
-    status: role.status,
-    companyId: role.companyId,
-    handShake: role.handShake,
-    permissions: {
-      assignedPermissions: [],
-      availablePermissions: [],
-    },
-  }));
-
-  const updatedModules = this.state.formData["user-module"].assignedModules.map((module) => {
-    const assigned = detailedAssignedRoles.filter(role => role.moduleId === module.id);
-    const assignedRoleIds = assigned.map(r => r.id);
-
-    const available = (module.roles.availableRoles || []).filter(
-      role => !assignedRoleIds.includes(role.id)
+    const assignedRolesData = await get_user_roles_by_user_id_api(
+      this.props.userId
     );
+    const assignedRoles = assignedRolesData.data.result;
 
-    return {
-      ...module,
-      roles: {
-        assignedRoles: assigned,
-        availableRoles: available, // ✅ FIX: now filtered
+    const detailedAssignedRoles = assignedRoles.map((role) => ({
+      id: role.roleId,
+      name: role.roleName,
+      moduleId: role.moduleId,
+      moduleName: role.module.moduleName,
+      status: role.status,
+      companyId: role.companyId,
+      handShake: role.handShake,
+      permissions: {
+        assignedPermissions: [],
+        availablePermissions: [],
       },
-    };
-  });
+    }));
 
-  this.setState((prevState) => ({
-    formData: {
-      ...prevState.formData,
-      "user-module": {
-        ...prevState.formData["user-module"],
-        assignedModules: updatedModules,
+    const updatedModules = this.state.formData[
+      "user-module"
+    ].assignedModules.map((module) => {
+      const assigned = detailedAssignedRoles.filter(
+        (role) => role.moduleId === module.id
+      );
+      const assignedRoleIds = assigned.map((r) => r.id);
+
+      const available = (module.roles.availableRoles || []).filter(
+        (role) => !assignedRoleIds.includes(role.id)
+      );
+
+      return {
+        ...module,
+        roles: {
+          assignedRoles: assigned,
+          availableRoles: available, // ✅ FIX: now filtered
+        },
+      };
+    });
+
+    this.setState((prevState) => ({
+      formData: {
+        ...prevState.formData,
+        "user-module": {
+          ...prevState.formData["user-module"],
+          assignedModules: updatedModules,
+        },
       },
-    },
-    isAssignedRolesFetched: true,
-  }));
-}
+      isAssignedRolesFetched: true,
+    }));
+  }
 
   /**
    * Fetches already assigned Permissions
@@ -1317,153 +1367,164 @@ handleRemovePermission = (moduleId, roleId, permissionId) => {
   //   }));
   // }
 
+  // async fetchAssignedPermissions() {
+  //   const assignedPermissionsData = await get_user_permissions_by_user_id_api(this.props.userId);
+  //   const assignedPermissions = assignedPermissionsData.data.result;
 
-// async fetchAssignedPermissions() {
-//   const assignedPermissionsData = await get_user_permissions_by_user_id_api(this.props.userId);
-//   const assignedPermissions = assignedPermissionsData.data.result;
+  //   console.log("=====>assignedPermissions dinusha", assignedPermissions);
 
-//   console.log("=====>assignedPermissions dinusha", assignedPermissions);
+  //   const detailedAssignedPermissions = assignedPermissions.map((permission) => ({
+  //     id: permission.permission.permissionId,
+  //     name: permission.permission.permissionName,
+  //     moduleId: permission.permission.moduleId,
+  //   }));
 
-//   const detailedAssignedPermissions = assignedPermissions.map((permission) => ({
-//     id: permission.permission.permissionId,
-//     name: permission.permission.permissionName,
-//     moduleId: permission.permission.moduleId,
-//   }));
+  //   const updatedModules = this.state.formData["user-module"].assignedModules.map((module) => {
+  //     return {
+  //        ...module,
+  //       roles: {
+  //         ...module.roles,
+  //         assignedRoles: module.roles.assignedRoles.map((assignedRole) => {
+  //           const availablePermissionIds = assignedRole.permissions.availablePermissions.map(
+  //             (permission) => permission.id
+  //           );
 
-//   const updatedModules = this.state.formData["user-module"].assignedModules.map((module) => {
-//     return {
-//        ...module,
-//       roles: {
-//         ...module.roles,
-//         assignedRoles: module.roles.assignedRoles.map((assignedRole) => {
-//           const availablePermissionIds = assignedRole.permissions.availablePermissions.map(
-//             (permission) => permission.id
-//           );
+  //           const relatedPermissions = detailedAssignedPermissions.filter(
+  //             (assignedPermission) =>
+  //               assignedPermission.moduleId === module.id
+  //           );
 
-//           const relatedPermissions = detailedAssignedPermissions.filter(
-//             (assignedPermission) =>
-//               assignedPermission.moduleId === module.id
-//           );
+  //           const assignedPermissionsForRole = relatedPermissions.filter((permission) =>
+  //             availablePermissionIds.includes(permission.id)
+  //           );
 
-//           const assignedPermissionsForRole = relatedPermissions.filter((permission) =>
-//             availablePermissionIds.includes(permission.id)
-//           );
+  //           // Log Assigned Permissions
+  //           console.log(`\n🔐 Role:${assignedRole.id} - ${assignedRole.name} - ASSIGNED Permissions:`);
+  //           assignedPermissionsForRole.forEach((p) =>
+  //             console.log(`✔️[RoleID: ${assignedRole.id}] [PID: ${p.id}] ${p.name}`)
+  //           );
 
-//           // Log Assigned Permissions
-//           console.log(`\n🔐 Role:${assignedRole.id} - ${assignedRole.name} - ASSIGNED Permissions:`);
-//           assignedPermissionsForRole.forEach((p) =>
-//             console.log(`✔️[RoleID: ${assignedRole.id}] [PID: ${p.id}] ${p.name}`)
-//           );
+  //           // Filter out assigned ones from available list
+  //           const availablePermissionsForRole = assignedRole.permissions.availablePermissions.filter(
+  //             (permission) => !assignedPermissionsForRole.find((p) => p.id === permission.id)
+  //           );
 
-//           // Filter out assigned ones from available list
-//           const availablePermissionsForRole = assignedRole.permissions.availablePermissions.filter(
-//             (permission) => !assignedPermissionsForRole.find((p) => p.id === permission.id)
-//           );
+  //           // Log Available Permissions
+  //           console.log(`\n🟢 Role:${assignedRole.id} - ${assignedRole.name} - AVAILABLE Permissions:`);
+  //           availablePermissionsForRole.forEach((p) =>
+  //             console.log(`➕[RoleID: ${assignedRole.id}] [PID: ${p.id}] ${p.name}`)
+  //           );
 
-//           // Log Available Permissions
-//           console.log(`\n🟢 Role:${assignedRole.id} - ${assignedRole.name} - AVAILABLE Permissions:`);
-//           availablePermissionsForRole.forEach((p) =>
-//             console.log(`➕[RoleID: ${assignedRole.id}] [PID: ${p.id}] ${p.name}`)
-//           );
+  //           return {
+  //             ...assignedRole,
+  //             permissions: {
+  //               ...assignedRole.permissions,
+  //               availablePermissions: availablePermissionsForRole,
+  //               assignedPermissions: assignedPermissionsForRole,
+  //             },
+  //           };
+  //         }),
+  //       },
+  //     };
+  //   });
 
-//           return {
-//             ...assignedRole,
-//             permissions: {
-//               ...assignedRole.permissions,
-//               availablePermissions: availablePermissionsForRole,
-//               assignedPermissions: assignedPermissionsForRole,
-//             },
-//           };
-//         }),
-//       },
-//     };
-//   });
+  //   this.setState((prevState) => ({
+  //     formData: {
+  //       ...prevState.formData,
+  //       "user-module": {
+  //         ...prevState.formData["user-module"],
+  //         assignedModules: updatedModules,
+  //       },
+  //     },
+  //     isAssignedRolesFetched: true,
+  //   }));
+  // }
 
-//   this.setState((prevState) => ({
-//     formData: {
-//       ...prevState.formData,
-//       "user-module": {
-//         ...prevState.formData["user-module"],
-//         assignedModules: updatedModules,
-//       },
-//     },
-//     isAssignedRolesFetched: true,
-//   }));
-// }
+  async fetchAssignedPermissions() {
+    const assignedPermissionsData = await get_user_permissions_by_user_id_api(
+      this.props.userId
+    );
+    const assignedPermissions = assignedPermissionsData.data.result;
 
-async fetchAssignedPermissions() {
-  const assignedPermissionsData = await get_user_permissions_by_user_id_api(this.props.userId);
-  const assignedPermissions = assignedPermissionsData.data.result;
+    console.log("=====> Assigned Permissions (Dinusha)", assignedPermissions);
 
-  console.log("=====> Assigned Permissions (Dinusha)", assignedPermissions);
+    const detailedAssignedPermissions = assignedPermissions.map(
+      (permission) => ({
+        id: permission.permission.permissionId,
+        name: permission.permission.permissionName,
+        moduleId: permission.permission.moduleId,
+      })
+    );
 
-  const detailedAssignedPermissions = assignedPermissions.map((permission) => ({
-    id: permission.permission.permissionId,
-    name: permission.permission.permissionName,
-    moduleId: permission.permission.moduleId,
-  }));
+    const updatedModules = this.state.formData[
+      "user-module"
+    ].assignedModules.map((module) => {
+      return {
+        ...module,
+        roles: {
+          ...module.roles,
+          assignedRoles: module.roles.assignedRoles.map((assignedRole) => {
+            const allAvailable =
+              assignedRole.permissions.availablePermissions || [];
 
-  const updatedModules = this.state.formData["user-module"].assignedModules.map((module) => {
-    return {
-      ...module,
-      roles: {
-        ...module.roles,
-        assignedRoles: module.roles.assignedRoles.map((assignedRole) => {
-          const allAvailable = assignedRole.permissions.availablePermissions || [];
+            // Match assigned permissions for this module
+            const relatedPermissions = detailedAssignedPermissions.filter(
+              (assignedPermission) => assignedPermission.moduleId === module.id
+            );
 
-          // Match assigned permissions for this module
-          const relatedPermissions = detailedAssignedPermissions.filter(
-            (assignedPermission) => assignedPermission.moduleId === module.id
-          );
+            // Assigned permissions that exist in available list
+            const assignedPermissionsForRole = relatedPermissions.filter(
+              (assignedPermission) =>
+                allAvailable.some((p) => p.id === assignedPermission.id)
+            );
 
-          // Assigned permissions that exist in available list
-          const assignedPermissionsForRole = relatedPermissions.filter((assignedPermission) =>
-            allAvailable.some((p) => p.id === assignedPermission.id)
-          );
+            // Filter out assigned from available
+            const availablePermissionsForRole = allAvailable.filter(
+              (p) => !assignedPermissionsForRole.find((ap) => ap.id === p.id)
+            );
 
-          // Filter out assigned from available
-          const availablePermissionsForRole = allAvailable.filter(
-            (p) => !assignedPermissionsForRole.find((ap) => ap.id === p.id)
-          );
+            // LOGGING
+            console.log(
+              `\n🔐 Role: ${assignedRole.id} - ${assignedRole.name} - ASSIGNED Permissions:`
+            );
+            assignedPermissionsForRole.forEach((p) =>
+              console.log(
+                `✔️ [RoleID: ${assignedRole.id}] [PID: ${p.id}] ${p.name}`
+              )
+            );
 
-          // LOGGING
-          console.log(`\n🔐 Role: ${assignedRole.id} - ${assignedRole.name} - ASSIGNED Permissions:`);
-          assignedPermissionsForRole.forEach((p) =>
-            console.log(`✔️ [RoleID: ${assignedRole.id}] [PID: ${p.id}] ${p.name}`)
-          );
+            console.log(
+              `\n🟢 Role: ${assignedRole.id} - ${assignedRole.name} - AVAILABLE Permissions:`
+            );
+            availablePermissionsForRole.forEach((p) =>
+              console.log(
+                `➕ [RoleID: ${assignedRole.id}] [PID: ${p.id}] ${p.name}`
+              )
+            );
 
-          console.log(`\n🟢 Role: ${assignedRole.id} - ${assignedRole.name} - AVAILABLE Permissions:`);
-          availablePermissionsForRole.forEach((p) =>
-            console.log(`➕ [RoleID: ${assignedRole.id}] [PID: ${p.id}] ${p.name}`)
-          );
+            return {
+              ...assignedRole,
+              permissions: {
+                assignedPermissions: assignedPermissionsForRole,
+                availablePermissions: availablePermissionsForRole,
+              },
+            };
+          }),
+        },
+      };
+    });
 
-          return {
-            ...assignedRole,
-            permissions: {
-              assignedPermissions: assignedPermissionsForRole,
-              availablePermissions: availablePermissionsForRole,
-            },
-          };
-        }),
+    this.setState((prevState) => ({
+      formData: {
+        ...prevState.formData,
+        "user-module": {
+          ...prevState.formData["user-module"],
+          assignedModules: updatedModules,
+        },
       },
-    };
-  });
-
-  this.setState((prevState) => ({
-    formData: {
-      ...prevState.formData,
-      "user-module": {
-        ...prevState.formData["user-module"],
-        assignedModules: updatedModules,
-      },
-    },
-    isAssignedRolesFetched: true,
-  }));
-}
-
-
-
-
+      isAssignedRolesFetched: true,
+    }));
+  }
 
   /**
    * Fetches Permissions for the assigned Roles
@@ -1571,7 +1632,6 @@ async fetchAssignedPermissions() {
           this.props.handleClose();
           this.props.handleRefetchTrue();
         }, 3000);
-
       } else {
         this.setState({ showFailureAlert: true });
 

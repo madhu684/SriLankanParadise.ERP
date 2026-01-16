@@ -354,10 +354,10 @@ export const get_stock_report_api = async (fromDate, toDate, locationId) => {
 };
 
 export const get_Empty_Return_Item_locations_inventories_by_location_id_api =
-  async (locationId) => {
+  async (companyId, locationId) => {
     try {
       const response = await api.get(
-        `/locationInventory/GetEmptyReturnItemLocationInventoriesByLocationId/${locationId}`,
+        `/locationInventory/GetEmptyReturnItemLocationInventoriesByLocationId/${locationId}?companyId=${companyId}`,
         {
           withCredentials: true,
         }

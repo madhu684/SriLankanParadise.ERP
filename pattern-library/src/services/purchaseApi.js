@@ -1475,10 +1475,10 @@ export const get_location_inventory_by_batch_id_api = async (batchId) => {
   }
 };
 
-export const get_location_types_by_company_id_api = async (companyId) => {
+export const get_location_types_by_company_id_api = async () => {
   try {
     const response = await api.get(
-      `/locationType/GetLocationTypesByCompanyId/${companyId}`,
+      `/locationType/GetLocationTypesByCompanyId`,
       {
         withCredentials: true,
       }
@@ -1618,6 +1618,7 @@ export const get_Low_Stock_Items_for_location_api = async (locationId) => {
 };
 
 export const get_Location_Inventory_Summary_By_Item_Name_api = async (
+  companyId,
   locationId = null,
   itemName = "",
   supplierId = null
