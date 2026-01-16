@@ -91,12 +91,12 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
-        [HttpGet("GetCashierExpenseOutsByUserIdDate/{userId}/{date}")]
-        public async Task<ApiResponseModel> GetCashierExpenseOutsByUserIdDate(int userId, DateTime date, [FromQuery] int? cashierSessionId = null)
+        [HttpGet("GetCashierExpenseOutsByUserIdDate/{date}")]
+        public async Task<ApiResponseModel> GetCashierExpenseOutsByUserIdDate(DateTime date, [FromQuery] int? userId = null, [FromQuery] int? cashierSessionId = null)
         {
             try
             {
-                var cashierExpenseOuts = await _cashierExpenseOutService.GetCashierExpenseOutsByUserIdDate(userId, date, cashierSessionId);
+                var cashierExpenseOuts = await _cashierExpenseOutService.GetCashierExpenseOutsByUserIdDate(date, userId, cashierSessionId);
                 if (cashierExpenseOuts != null)
                 {
                     var cashierExpenseOutsDtos = _mapper.Map<IEnumerable<CashierExpenseOutDto>>(cashierExpenseOuts);

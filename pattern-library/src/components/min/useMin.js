@@ -584,7 +584,8 @@ const useMin = ({ onFormSubmit }) => {
         const response = await get_Location_Inventory_Summary_By_Item_Name_api(
           sessionStorage.getItem("companyId"),
           selectedLocationId,
-          item.itemMaster?.itemName || item.itemName
+          item.itemMaster?.itemName || item.itemName,
+          null
         );
         const result = response.data.result;
         const currentItemSummary = result.find(

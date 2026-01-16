@@ -22,9 +22,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             return await _cashierExpenseOutRepository.GetCashierExpenseOutsByUserId(userId);
         }
 
-        public async Task<IEnumerable<CashierExpenseOut>> GetCashierExpenseOutsByUserIdDate(int userId, DateTime date, int? cashierSessionId = null)
+        public async Task<IEnumerable<CashierExpenseOut>> GetCashierExpenseOutsByUserIdDate(DateTime date, int? userId = null, int? cashierSessionId = null)
         {
-            return await _cashierExpenseOutRepository.GetCashierExpenseOutsByUserIdDate(userId, date, cashierSessionId);
+            return await _cashierExpenseOutRepository.GetCashierExpenseOutsByUserIdDate(date, userId, cashierSessionId);
         }
     }
 }

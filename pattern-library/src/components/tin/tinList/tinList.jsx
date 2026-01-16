@@ -296,6 +296,7 @@ const TinList = () => {
                     />
                   </th>
                   <th className="py-3 px-4 text-nowrap">Reference Number</th>
+                  <th className="py-3 px-4 text-nowrap">TRN Reference</th>
                   <th className="py-3 px-4 text-nowrap">Issued By</th>
                   <th className="py-3 px-4 text-nowrap">Dispatched To</th>
                   <th className="py-3 px-4 text-nowrap">TIN Date</th>
@@ -324,6 +325,9 @@ const TinList = () => {
                         <td className="py-3 px-4 fw-semibold text-dark">
                           {Tin.referenceNumber}
                         </td>
+                        <td className="py-3 px-4 fw-semibold text-dark">
+                          {Tin?.requisitionMaster?.referenceNumber || "N/A"}
+                        </td>
                         <td className="py-3 px-4">{Tin.createdBy}</td>
                         <td className="py-3 px-4">
                           {Tin?.requisitionMaster?.requestedFromLocation
@@ -347,7 +351,7 @@ const TinList = () => {
                             onClick={() => handleViewDetails(Tin)}
                           >
                             <FaEye size={14} />
-                            View Details
+                            View
                           </button>
                         </td>
                       </tr>

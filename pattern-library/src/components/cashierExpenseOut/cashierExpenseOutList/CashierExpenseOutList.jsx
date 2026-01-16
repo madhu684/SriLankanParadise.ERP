@@ -68,7 +68,7 @@ const CashierExpenseOutList = () => {
                 cashierExpenseOutList.map((item, index) => (
                   <tr key={item.cashierExpenseOutId}>
                     <td>{index + 1}</td>
-                    <td>{item.reason}</td>
+                    <td>{item.description}</td>
                     <td>
                       {item.amount.toLocaleString(undefined, {
                         minimumFractionDigits: 2,

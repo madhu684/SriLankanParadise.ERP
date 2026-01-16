@@ -192,7 +192,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             try
             {
                 var receiptData = await _salesReceiptService.GetSalesReceiptsByUserIdAndDate(userId, date, cashierSessionId);
-                var cashierExpenses = await _cashierExpenseOutService.GetCashierExpenseOutsByUserIdDate(userId, date, cashierSessionId);
+                var cashierExpenses = await _cashierExpenseOutService.GetCashierExpenseOutsByUserIdDate(date, userId, cashierSessionId);
 
                 var reportItems = new List<CollectionReportItemDto>();
                 decimal totalAmount = 0;
@@ -288,7 +288,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 {
                     // Fetch full day data if filtered by session
                     var dailyReceiptData = await _salesReceiptService.GetSalesReceiptsByUserIdAndDate(userId, date, null);
-                    var dailyCashierExpenses = await _cashierExpenseOutService.GetCashierExpenseOutsByUserIdDate(userId, date, null);
+                    var dailyCashierExpenses = await _cashierExpenseOutService.GetCashierExpenseOutsByUserIdDate(date, userId, null);
 
                     if (dailyReceiptData != null && dailyReceiptData.Any())
                     {
@@ -402,7 +402,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                     int userId = user.CreatedUserId.Value;
                     var userReceipts = allReceipts.Where(r => r.CreatedUserId == userId).ToList();
-                    var userExpenses = await _cashierExpenseOutService.GetCashierExpenseOutsByUserIdDate(userId, date);
+                    var userExpenses = await _cashierExpenseOutService.GetCashierExpenseOutsByUserIdDate(date, userId);
 
                     var userDto = new ManagerCollectionReportUserDto
                     {
