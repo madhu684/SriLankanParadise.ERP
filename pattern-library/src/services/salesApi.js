@@ -871,18 +871,21 @@ export const post_cashier_expense_out_api = async (formData) => {
 };
 
 export const get_cashier_expense_outs_by_userId_date_api = async (
-  userId,
   date,
+  userId,
   cashierSessionId
 ) => {
   const params = {
+    userId,
     cashierSessionId,
   };
 
+  if (userId) params.userId = userId;
   if (cashierSessionId) params.cashierSessionId = cashierSessionId;
+
   try {
     const response = await api.get(
-      `/cashierExpenseOut/GetCashierExpenseOutsByUserIdDate/${userId}/${date}`,
+      `/cashierExpenseOut/GetCashierExpenseOutsByUserIdDate/${date}`,
       {
         params,
         withCredentials: true,

@@ -583,7 +583,8 @@ const useMin = ({ onFormSubmit }) => {
       try {
         const response = await get_Location_Inventory_Summary_By_Item_Name_api(
           selectedLocationId,
-          item.itemMaster?.itemName || item.itemName
+          item.itemMaster?.itemName || item.itemName,
+          null
         );
         const result = response.data.result;
         const currentItemSummary = result.find(

@@ -454,11 +454,11 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         }
 
         [HttpGet("GetLocationInventorySummaryByItemName")]
-        public async Task<ApiResponseModel> GetLocationInventorySummaryByItemName([FromQuery] int? locationId, [FromQuery] string itemName)
+        public async Task<ApiResponseModel> GetLocationInventorySummaryByItemName([FromQuery] int? locationId, [FromQuery] string itemName, [FromQuery] int? supplierId = null)
         {
             try
             {
-                var summary = await _locationInventoryService.GetSumLocationInventoriesByItemName(locationId, itemName);
+                var summary = await _locationInventoryService.GetSumLocationInventoriesByItemName(locationId, itemName, supplierId);
 
                 if (summary != null)
                 {

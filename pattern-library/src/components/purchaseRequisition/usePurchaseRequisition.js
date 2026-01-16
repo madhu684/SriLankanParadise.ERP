@@ -67,13 +67,15 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
   const fetchItems = async (searchQuery) => {
     try {
       const response = await get_Location_Inventory_Summary_By_Item_Name_api(
-        formData.expectedDeliveryLocation,
-        searchQuery
+        //formData.expectedDeliveryLocation,
+        null,
+        searchQuery,
+        null
       );
 
       const items =
         response.data?.result
-          ?.filter((item) => item.totalStockInHand <= item.maxStockLevel)
+          // ?.filter((item) => item.totalStockInHand <= item.maxStockLevel)
           .map((summary) => ({
             itemMasterId: summary.itemMasterId,
             itemName: summary.itemMaster?.itemName || "",
@@ -87,6 +89,8 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
             maxStockLevel: summary.maxStockLevel,
             supplierItems: [],
           })) || [];
+
+      console.log("Filter items: ", items);
 
       const filterItems = formData.supplierId
         ? items.filter(
@@ -648,8 +652,8 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
       setPRGenerating(true);
       setIsPRGenerated(true);
       const response = await get_Low_Stock_Items_api(
-        formData.supplierId,
-        formData.expectedDeliveryLocation
+        formData.supplierId
+        //formData.expectedDeliveryLocation
       );
       const lowStockItems = response.data.result || [];
       console.log("lowStockItems: ", lowStockItems);
@@ -670,7 +674,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
         // Transform low-stock items into itemDetails format with API calls
         const newItemDetails = await Promise.all(
           lowStockItems
-            .filter((item) => item.totalStockInHand <= item.maxStockLevel)
+            // .filter((item) => item.totalStockInHand <= item.maxStockLevel)
             .map(async (item) => {
               const supplierItemResponse =
                 await get_supplier_items_by_type_category_api(

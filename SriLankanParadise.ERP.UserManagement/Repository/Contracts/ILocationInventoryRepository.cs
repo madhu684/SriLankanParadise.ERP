@@ -21,7 +21,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task UpdateEmptyLocationInventoryStockInHand(int locationId, int itemMasterId,LocationInventory locationInventory, string operation);
         Task<IEnumerable<LocationInventorySummary>> GetLowStockItems(int? supplierId = null, int? locationId = null);
         Task<IEnumerable<LocationInventorySummary>> GetLowStockItemsByLocationOnly(int locationId);
-        Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByItemName(int? locationId, string itemName);
+        Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByItemName(int? locationId, string itemName, int? supplierId = null);
         Task ReduceInventoryByFIFO(int locationId, int itemMasterId, int transactionTypeId, decimal quantity);
         Task IncreaseInventoryByFIFO(int locationId, int itemMasterId, int transactionTypeId, decimal quantity, int? sourceLocationId = null);
         Task<IEnumerable<LocationInventorySummary>> GetSumOfItemInventoryByLocationId(int locationId);

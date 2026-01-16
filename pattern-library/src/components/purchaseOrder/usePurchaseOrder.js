@@ -195,13 +195,15 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   const fetchItems = async (searchQuery) => {
     try {
       const response = await get_Location_Inventory_Summary_By_Item_Name_api(
-        userLocation[0]?.locationId,
-        searchQuery
+        // userLocation[0]?.locationId,
+        null,
+        searchQuery,
+        null
       );
 
       const items =
         response.data?.result
-          ?.filter((item) => item.totalStockInHand <= item.maxStockLevel)
+          // ?.filter((item) => item.totalStockInHand <= item.maxStockLevel)
           .map((summary) => ({
             itemMasterId: summary.itemMasterId,
             itemName: summary.itemMaster?.itemName || "",
@@ -1350,7 +1352,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
 
       const newItemDetails = await Promise.all(
         lowStockItems
-          .filter((item) => item.totalStockInHand <= item.maxStockLevel)
+          // .filter((item) => item.totalStockInHand <= item.maxStockLevel)
           .map(async (item) => {
             const initializedCharges =
               chargesAndDeductions

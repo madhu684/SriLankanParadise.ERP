@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { get_item_locations_inventories_by_location_id_api } from "../../services/purchaseApi";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useMemo } from "react";
 import { useExcelExport } from "../common/excelSheetGenerator/excelSheetGenerator";
 
 const useStockManagement = () => {
@@ -12,6 +12,19 @@ const useStockManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [stockFilter, setStockFilter] = useState("all");
   const itemsPerPage = 10;
+
+  const itemTotals = useMemo(() => {
+    const totals = {};
+    if (inventories) {
+      inventories.forEach((item) => {
+        const key = item.itemCode;
+        if (key) {
+          totals[key] = (totals[key] || 0) + (item.stockInHand || 0);
+        }
+      });
+    }
+    return totals;
+  }, [inventories]);
 
   const filteredInventories = inventories
     ? inventories.filter((item) => {
@@ -27,10 +40,12 @@ const useStockManagement = () => {
 
         // Filter by stock level
         const stockInHand = item.stockInHand || 0;
+        const totalStock = itemTotals[item.itemCode] || 0;
+
         if (stockFilter === "positive") {
           return stockInHand > 0;
         } else if (stockFilter === "zeroOrBelow") {
-          return stockInHand <= 0;
+          return totalStock <= 0;
         }
         return true; // "all" - no stock filter
       })
