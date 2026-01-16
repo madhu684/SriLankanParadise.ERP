@@ -51,6 +51,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   const [selectedBatch, setSelectedBatch] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
+  const isSubmitting = useRef(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const fetchUserLocations = async () => {
@@ -727,6 +728,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   };
 
   const handleSubmit = async (isSaveAsDraft) => {
+    if (isSubmitting.current) return;
     try {
       const status = isSaveAsDraft ? 0 : 1;
       const isFormValid = validateForm();
@@ -734,6 +736,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
       let allDetailsSuccessful;
 
       if (isFormValid) {
+        isSubmitting.current = true;
         if (isSaveAsDraft) {
           setLoadingDraft(true);
         } else {
@@ -818,9 +821,16 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
             setLoading(false);
             setLoadingDraft(false);
             onFormSubmit();
+            isSubmitting.current = false;
           }, 3000);
         } else {
           setSubmissionStatus("error");
+          setTimeout(() => {
+            setSubmissionStatus(null);
+            setLoading(false);
+            setLoadingDraft(false);
+            isSubmitting.current = false;
+          }, 3000);
         }
       }
     } catch (error) {
@@ -830,6 +840,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         setSubmissionStatus(null);
         setLoading(false);
         setLoadingDraft(false);
+        isSubmitting.current = false;
       }, 3000);
     }
   };
