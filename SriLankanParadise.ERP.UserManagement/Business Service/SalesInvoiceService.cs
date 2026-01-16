@@ -91,5 +91,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
                 TotalAmountDue = result.TotalAmountDue
             };
         }
+
+        public async Task<string> GenerateReferenceNo()
+        {
+            return await _salesInvoiceRepository.GenerateReferenceNo();
+        }
     }
 }

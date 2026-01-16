@@ -1073,9 +1073,8 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.DueDate).HasColumnType("date");
             entity.Property(e => e.InvoiceDate).HasColumnType("date");
             entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
-            entity.Property(e => e.ReferenceNo)
-                .HasMaxLength(20)
-                .HasDefaultValueSql("('SI'+CONVERT([nvarchar](20),NEXT VALUE FOR [dbo].[SalesInvoiceReferenceNoSeq]))");
+            //entity.Property(e => e.ReferenceNo)
+            //    .HasMaxLength(20);
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.SalesOrder).WithMany(p => p.SalesInvoices)
@@ -1423,7 +1422,6 @@ public partial class ErpSystemContext : DbContext
                 .HasConstraintName("FK_UserRole_User");
         });
         modelBuilder.HasSequence("PurchaseOrderReferenceNoSeq").StartsAt(1000L);
-        modelBuilder.HasSequence("SalesInvoiceReferenceNoSeq").StartsAt(1000L);
         modelBuilder.HasSequence("SalesOrderReferenceNoSeq").StartsAt(1000L);
 
         modelBuilder.Entity<SubItemMaster>(entity =>

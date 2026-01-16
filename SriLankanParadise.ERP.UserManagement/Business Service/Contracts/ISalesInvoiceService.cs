@@ -32,5 +32,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task<PagedResult<SalesInvoice>> GetSalesInvoiceByDateRange(DateTime fromDate, DateTime toDate, int? customerId = null, int? regionId = null, int? salesPersonId = null, int pageNumber = 1, int pageSize = 10);
 
         Task<AgeAnalysisResultDto> GetAgeAnalysis(AgeAnalysisRequest request);
+
+        Task<string> GenerateReferenceNo();
     }
 }
