@@ -18,7 +18,6 @@ const MinList = () => {
   const {
     mins,
     isLoadingData,
-    isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
@@ -63,11 +62,11 @@ const MinList = () => {
   //Pagination Handler
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  if (error || isPermissionsError) {
+  if (error) {
     return <ErrorComponent error={error || "Error fetching data"} />;
   }
 
-  if (isLoadingData || isLoadingPermissions || (mins && !(mins?.length >= 0))) {
+  if (isLoadingData || (mins && !(mins?.length >= 0))) {
     return <LoadingSpinner />;
   }
 

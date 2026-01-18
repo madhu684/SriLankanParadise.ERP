@@ -86,10 +86,19 @@ const useTinApproval = ({ tin, onFormSubmit }) => {
   };
 
   const handleApprove = async (tinId) => {
+    if (loading || approvalStatus === "approved") return;
+
     try {
       setLoading(true);
-      // const firstDigit = parseInt(tin.status.toString().charAt(0), 10);
-      // const combinedStatus = parseInt(`${firstDigit}2`, 10);
+
+      // Check if already approved to prevent duplicate inventory reduction
+      if (tin.status === 52) {
+        console.warn("TIN is already approved. Skipping duplicate approval.");
+        setApprovalStatus("approved");
+        setLoading(false);
+        return;
+      }
+
       const currentDate = new Date();
       const formattedDate = currentDate.toISOString();
 

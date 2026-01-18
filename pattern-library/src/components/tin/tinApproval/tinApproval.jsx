@@ -143,7 +143,7 @@ const TinApproval = ({ show, handleClose, handleApproved, tin }) => {
         <Button
           variant="success"
           onClick={() => handleApprove(tin.issueMasterId)}
-          disabled={loading || approvalStatus !== null}
+          disabled={loading || approvalStatus !== null || tin.status === 52}
         >
           {loading && approvalStatus === null ? (
             <ButtonLoadingSpinner text="Approving..." />

@@ -44,13 +44,12 @@ const useTinList = () => {
   } = useQuery({
     queryKey: ["tinList", companyId],
     queryFn: async () => {
-      const TinResponse = await get_issue_masters_with_out_drafts_api(
-        companyId
-      );
+      const TinResponse =
+        await get_issue_masters_with_out_drafts_api(companyId);
       const filteredTins = TinResponse?.data?.result?.filter(
         (rm) =>
           rm.issueType === "TIN" &&
-          rm.issuedLocationId === warehouseUserLocation[0]
+          rm.issuedLocationId === warehouseUserLocation[0],
       );
       return filteredTins || [];
     },
@@ -64,14 +63,13 @@ const useTinList = () => {
   } = useQuery({
     queryKey: ["transferRequisitions", companyId],
     queryFn: async () => {
-      const response = await get_requisition_masters_with_out_drafts_api(
-        companyId
-      );
+      const response =
+        await get_requisition_masters_with_out_drafts_api(companyId);
       const filteredRequisitions = response?.data?.result?.filter(
         (rm) =>
           rm.requisitionType === "TRN" &&
           rm.status === 2 &&
-          rm.requestedToLocationId === warehouseUserLocation[0]
+          rm.requestedToLocationId === warehouseUserLocation[0],
       );
       return filteredRequisitions || [];
     },
@@ -151,10 +149,10 @@ const useTinList = () => {
 
     if (isSelected) {
       setSelectedRows((prevSelected) =>
-        prevSelected.filter((selectedId) => selectedId !== id)
+        prevSelected.filter((selectedId) => selectedId !== id),
       );
       setSelectedRowData((prevSelectedData) =>
-        prevSelectedData.filter((data) => data.issueMasterId !== id)
+        prevSelectedData.filter((data) => data.issueMasterId !== id),
       );
     } else {
       setSelectedRows((prevSelected) => [...prevSelected, id]);

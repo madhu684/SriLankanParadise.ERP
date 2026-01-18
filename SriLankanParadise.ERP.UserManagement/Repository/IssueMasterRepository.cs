@@ -64,6 +64,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(im => im.Unit)
                     .Include(rm => rm.IssueDetails)
                     //.ThenInclude(id => id.Batch)
+                    .OrderByDescending(im => im.IssueDate)
                     .ToListAsync();
 
                 if (issueMasters.Any())
@@ -137,6 +138,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(im => im.Unit)
                     .Include(im => im.IssueDetails)
                     //.ThenInclude(id => id.Batch)
+                    .OrderByDescending(im => im.IssueDate)
                     .ToListAsync();
 
                 if (issueMasters.Any())
