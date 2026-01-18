@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
-import { get_issue_masters_with_out_drafts_api } from "../../../services/purchaseApi";
+import { useState, useContext } from "react";
 import { get_issue_masters_by_user_id_api } from "../../../services/purchaseApi";
-import { get_user_permissions_api } from "../../../services/userManagementApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { UserContext } from "../../../context/userContext";
 
 const useMinList = () => {
-  const [mins, setMins] = useState([]);
-  const [isLoadingData, setIsLoadingData] = useState(true);
-  const [error, setError] = useState(null);
+  const queryClient = useQueryClient();
+  const { hasPermission } = useContext(UserContext);
+  const userId = sessionStorage.getItem("userId");
+
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedRowData, setSelectedRowData] = useState([]);
   const [showApproveMinModal, setShowApproveMinModal] = useState(false);
@@ -20,92 +20,18 @@ const useMinList = () => {
   const [showUpdateMinForm, setShowUpdateMinForm] = useState(false);
   const [MinDetail, setMinDetail] = useState("");
 
-  const fetchUserPermissions = async () => {
-    try {
-      const response = await get_user_permissions_api(
-        sessionStorage.getItem("userId")
-      );
-      return response.data.result;
-    } catch (error) {
-      console.error("Error fetching user permissions:", error);
-    }
-  };
-
   const {
-    data: userPermissions,
-    isLoading: isLoadingPermissions,
-    isError: isPermissionsError,
-    error: permissionError,
+    data: mins = [],
+    isLoading: isLoadingData,
+    error,
   } = useQuery({
-    queryKey: ["userPermissions"],
-    queryFn: fetchUserPermissions,
+    queryKey: ["mins", userId],
+    queryFn: async () => {
+      const response = await get_issue_masters_by_user_id_api(userId);
+      return response.data.result?.filter((im) => im.issueType === "MIN") || [];
+    },
+    enabled: !!userId,
   });
-
-  const fetchData = async () => {
-    try {
-      if (!isLoadingPermissions && userPermissions) {
-        if (hasPermission("Approve Material Issue Note")) {
-          const minWithoutDraftsResponse =
-            await get_issue_masters_with_out_drafts_api(
-              sessionStorage.getItem("companyId")
-            );
-
-          const minByUserIdResponse = await get_issue_masters_by_user_id_api(
-            sessionStorage.getItem("userId")
-          );
-
-          let newMins = [];
-          if (
-            minWithoutDraftsResponse &&
-            minWithoutDraftsResponse.data.result
-          ) {
-            newMins = minWithoutDraftsResponse.data.result?.filter(
-              (im) => im.issueType === "MIN"
-            );
-          }
-
-          let additionalMins = [];
-          if (minByUserIdResponse && minByUserIdResponse.data.result) {
-            additionalMins = minByUserIdResponse.data.result?.filter(
-              (im) => im.issueType === "MIN"
-            );
-          }
-
-          const uniqueNewMins = additionalMins.filter(
-            (min) =>
-              !newMins.some(
-                (existingMin) => existingMin.issueMasterId === min.issueMasterId
-              )
-          );
-
-          newMins = [...newMins, ...uniqueNewMins];
-          setMins(newMins);
-        } else {
-          const minResponse = await get_issue_masters_by_user_id_api(
-            sessionStorage.getItem("userId")
-          );
-          if (
-            minResponse.data.result?.filter((im) => im.issueType === "MIN") ===
-            (null || undefined)
-          ) {
-            setMins([]);
-          } else {
-            setMins(
-              minResponse.data.result?.filter((im) => im.issueType === "MIN")
-            );
-          }
-        }
-      }
-    } catch (error) {
-      setError("Error fetching data");
-    } finally {
-      setIsLoadingData(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [isLoadingPermissions, userPermissions]);
 
   const handleShowApproveMinModal = () => {
     setShowApproveMinModal(true);
@@ -125,7 +51,7 @@ const useMinList = () => {
   };
 
   const handleApproved = async () => {
-    fetchData();
+    queryClient.invalidateQueries(["mins", userId]);
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -157,7 +83,7 @@ const useMinList = () => {
   };
 
   const handleUpdated = async () => {
-    fetchData();
+    queryClient.invalidateQueries(["mins", userId]);
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -177,10 +103,10 @@ const useMinList = () => {
 
     if (isSelected) {
       setSelectedRows((prevSelected) =>
-        prevSelected.filter((selectedId) => selectedId !== id)
+        prevSelected.filter((selectedId) => selectedId !== id),
       );
       setSelectedRowData((prevSelectedData) =>
-        prevSelectedData.filter((data) => data.issueMasterId !== id)
+        prevSelectedData.filter((data) => data.issueMasterId !== id),
       );
     } else {
       setSelectedRows((prevSelected) => [...prevSelected, id]);
@@ -242,18 +168,9 @@ const useMinList = () => {
     });
   };
 
-  const hasPermission = (permissionName) => {
-    return userPermissions?.some(
-      (permission) =>
-        permission.permission.permissionName === permissionName &&
-        permission.permission.permissionStatus
-    );
-  };
-
   return {
     mins,
     isLoadingData,
-    isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
@@ -264,11 +181,9 @@ const useMinList = () => {
     selectedRowData,
     showCreateMinForm,
     showUpdateMinForm,
-    userPermissions,
     MinDetail,
-    isLoadingPermissions,
-    isPermissionsError,
-    permissionError,
+    isPermissionsError: false,
+    permissionError: null,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleViewDetails,

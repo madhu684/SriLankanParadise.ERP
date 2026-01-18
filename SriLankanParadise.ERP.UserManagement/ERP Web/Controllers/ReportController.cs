@@ -22,6 +22,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         private readonly ILocationService _locationService;
         private readonly ISalesReceiptService _salesReceiptService;
         private readonly ICashierExpenseOutService _cashierExpenseOutService;
+        private readonly ICashierSessionService _cashierSessionService;
         private readonly ILogger<ReportController> _logger;
 
         public ReportController
@@ -33,6 +34,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 ILocationService locationService,
                 ISalesReceiptService salesReceiptService,
                 ICashierExpenseOutService cashierExpenseOutService,
+                ICashierSessionService cashierSessionService,
                 ILogger<ReportController> logger
             )
         {
@@ -43,6 +45,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             _locationService = locationService;
             _salesReceiptService = salesReceiptService;
             _cashierExpenseOutService = cashierExpenseOutService;
+            _cashierSessionService = cashierSessionService;
             _logger = logger;
         }
 
@@ -410,10 +413,13 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                         UserName = user.CreatedBy
                     };
 
-                    // distinct sessions from both receipts and expenses
+                    // distinct sessions from both receipts, expenses, and the sessions table itself
                     var receiptSessionIds = userReceipts.Select(r => r.CashierSessionId).Distinct();
                     var expenseSessionIds = userExpenses?.Select(e => e.CashierSessionId).Distinct() ?? Enumerable.Empty<int?>();
-                    var allSessionIds = receiptSessionIds.Union(expenseSessionIds).Distinct().OrderBy(id => id).ToList();
+                    var userSessions = await _cashierSessionService.GetCashierSessionsByUserIdAndDate(userId, date);
+                    var userSessionIds = userSessions.Select(cs => (int?)cs.CashierSessionId);
+                    
+                    var allSessionIds = receiptSessionIds.Union(expenseSessionIds).Union(userSessionIds).Distinct().OrderBy(id => id).ToList();
 
                     var userInvoiceShortAmounts = new Dictionary<int, decimal>();
                     var userInvoiceExcessAmounts = new Dictionary<int, decimal>();
@@ -422,8 +428,18 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     {
                         var sessionReceipts = userReceipts.Where(r => r.CashierSessionId == sessionId).ToList();
                         var sessionExpenses = userExpenses?.Where(e => e.CashierSessionId == sessionId).ToList();
-
+                        
                         var sessionDto = new ManagerCollectionReportSessionDto { SessionId = sessionId };
+
+                        if (sessionId.HasValue)
+                        {
+                            var session = userSessions.FirstOrDefault(cs => cs.CashierSessionId == sessionId.Value) 
+                                          ?? await _cashierSessionService.GetCashierSessionByCashierSessionId(sessionId.Value);
+                            if (session != null)
+                            {
+                                sessionDto.SessionIn = session.SessionIn;
+                            }
+                        }
 
                         var sessionInvoiceShortAmounts = new Dictionary<int, decimal>();
                         var sessionInvoiceExcessAmounts = new Dictionary<int, decimal>();
