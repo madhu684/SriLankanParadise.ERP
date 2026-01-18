@@ -27,6 +27,8 @@ const ManagerCollectionReport = () => {
     hasPermission,
     refetch,
     formatCurrency,
+    formatDateTime,
+    formatTime,
     setDate,
     handleExport,
   } = useManagerCollectionReport();
@@ -311,7 +313,9 @@ const ManagerCollectionReport = () => {
                               <tr key={sIdx}>
                                 <td className="ps-4">
                                   <span className="badge bg-secondary">
-                                    {session.sessionId
+                                    {session.sessionIn
+                                      ? formatTime(session.sessionIn)
+                                      : session.sessionId
                                       ? `Session #${session.sessionId}`
                                       : "Main Session"}
                                   </span>
