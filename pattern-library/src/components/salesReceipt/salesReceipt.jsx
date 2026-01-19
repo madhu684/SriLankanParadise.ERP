@@ -18,6 +18,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
     alertRef,
     salesInvoiceOptions,
     isSalesInvoiceOptionsLoading,
+    isSalesInvoiceOptionsFetching,
     isSalesInvoiceOptionsError,
     salesInvoiceOptionsError,
     selectedsalesInvoice,
@@ -70,12 +71,15 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
 
   const getSelectedPaymentMode = () => {
     const mode = paymentModes?.find(
-      (pm) => pm.paymentModeId === formData.paymentModeId
+      (pm) => pm.paymentModeId === formData.paymentModeId,
     );
     return mode?.mode || "N/A";
   };
 
-  if (isPaymentModesLoading || isSalesInvoiceOptionsLoading) {
+  if (
+    isPaymentModesLoading ||
+    (isSalesInvoiceOptionsLoading && !salesInvoiceOptions)
+  ) {
     return <LoadingSpinner />;
   }
 
@@ -242,7 +246,17 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                     onChange={(e) => setSiSearchTerm(e.target.value)}
                     autoFocus={false}
                   />
-                  {siSearchTerm && (
+                  {isSalesInvoiceOptionsFetching && (
+                    <span className="input-group-text bg-transparent border-start-0">
+                      <div
+                        className="spinner-border spinner-border-sm text-primary"
+                        role="status"
+                      >
+                        <span className="visually-hidden">Loading...</span>
+                      </div>
+                    </span>
+                  )}
+                  {siSearchTerm && !isSalesInvoiceOptionsFetching && (
                     <span
                       className="input-group-text bg-transparent"
                       style={{
@@ -268,19 +282,11 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                       }}
                     >
                       {salesInvoiceOptions
-                        .filter((si) =>
-                          si.referenceNo
-                            ?.replace(/\s/g, "")
-                            ?.toLowerCase()
-                            .includes(
-                              siSearchTerm.toLowerCase().replace(/\s/g, "")
-                            )
-                        )
                         .filter(
                           (si) =>
                             !formData.salesInvoiceReferenceNumbers.includes(
-                              si.referenceNo
-                            )
+                              si.referenceNo,
+                            ),
                         )
                         .map((si) => (
                           <li key={si.salesInvoiceId}>
@@ -303,8 +309,8 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                           ?.replace(/\s/g, "")
                           ?.toLowerCase()
                           .includes(
-                            siSearchTerm.toLowerCase().replace(/\s/g, "")
-                          )
+                            siSearchTerm.toLowerCase().replace(/\s/g, ""),
+                          ),
                       ).length === 0 && (
                         <li className="dropdown-item text-center">
                           <span className="me-3">
@@ -409,7 +415,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                           handleItemDetailsChange(
                             index,
                             "excessAmount",
-                            positiveValue
+                            positiveValue,
                           );
                         }}
                       />
@@ -429,7 +435,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                           handleItemDetailsChange(
                             index,
                             "outstandingAmount",
-                            positiveValue
+                            positiveValue,
                           );
                         }}
                       />
@@ -455,7 +461,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                           handleItemDetailsChange(
                             index,
                             "payment",
-                            positiveValue
+                            positiveValue,
                           );
                         }}
                       />
@@ -489,7 +495,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                           className="btn btn-sm btn-success d-flex align-items-center gap-1"
                           onClick={() => handleAddToExcess(index)}
                           title={`Add ${formatTotals(
-                            item.customerBalance.toFixed(2)
+                            item.customerBalance.toFixed(2),
                           )} to excess amount`}
                         >
                           <i className="bi bi-plus-circle"></i>
@@ -702,7 +708,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                           </p>
                           <p className="fs-5 fw-bold mb-0 text-success">
                             {formatTotals(
-                              calculateTotalAmountCollected().toFixed(2)
+                              calculateTotalAmountCollected().toFixed(2),
                             )}
                           </p>
                         </div>
@@ -712,7 +718,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                           </p>
                           <p className="fw-semibold mb-0">
                             {formatTotals(
-                              calculateTotalExcessAmountAmount().toFixed(2)
+                              calculateTotalExcessAmountAmount().toFixed(2),
                             )}
                           </p>
                         </div>
@@ -722,7 +728,9 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                           </p>
                           <p className="fw-semibold mb-0 text-danger">
                             {formatTotals(
-                              calculateTotalOutstandingAmountAmount().toFixed(2)
+                              calculateTotalOutstandingAmountAmount().toFixed(
+                                2,
+                              ),
                             )}
                           </p>
                         </div>

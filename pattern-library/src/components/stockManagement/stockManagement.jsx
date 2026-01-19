@@ -4,6 +4,7 @@ import useStockManagement from "./useStockManagement";
 import LoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 import Pagination from "../common/Pagination/Pagination";
 import { UserContext } from "../../context/userContext";
+import StockAdjustmentModal from "./StockAdjustmentModal";
 
 const StockManagement = () => {
   const {
@@ -16,16 +17,18 @@ const StockManagement = () => {
     handleSearch,
     paginate,
     handleLocationChange,
-    handleDateChange,
     searchTerm,
     handleSearchChange,
     stockFilter,
     handleStockFilterChange,
     handleExportToExcel,
+    showAdjustmentModal,
+    selectedItem,
+    handleAdjustStockClick,
+    handleCloseAdjustmentModal,
   } = useStockManagement();
 
-  const { user, allLocations, userLocations, userLocationsLoading } =
-    useContext(UserContext);
+  const { user, allLocations, userLocations } = useContext(UserContext);
 
   const displayLocations = user?.userId === 1 ? allLocations : userLocations;
 
@@ -33,7 +36,7 @@ const StockManagement = () => {
     () =>
       allLocations?.find((loc) => loc.locationId === parseInt(selectedLocation))
         ?.locationName,
-    [allLocations, selectedLocation]
+    [allLocations, selectedLocation],
   );
   console.log(selectedLocationName);
 
@@ -71,7 +74,7 @@ const StockManagement = () => {
           </select>
         </div>
       </div>
-      <div className="mt-4">
+      {/* <div className="mt-4">
         <button
           className="btn btn-primary"
           onClick={handleSearch}
@@ -79,7 +82,7 @@ const StockManagement = () => {
         >
           Search
         </button>
-      </div>
+      </div> */}
       <hr />
       <div>
         <h6 className="mt-2 mb-3 fw-semibold">Stock Information</h6>
@@ -161,6 +164,7 @@ const StockManagement = () => {
                 <th>UOM</th>
                 <th>Stock in Hand</th>
                 <th>Batch Reference</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -181,6 +185,14 @@ const StockManagement = () => {
                     <td>{item.unitName}</td>
                     <td>{item.stockInHand}</td>
                     <td>{item?.batchNo || "N/A"}</td>
+                    <td>
+                      <button
+                        className="btn btn-outline-primary btn-sm me-2"
+                        onClick={() => handleAdjustStockClick(item)}
+                      >
+                        Adjust Stock
+                      </button>
+                    </td>
                   </tr>
                 ))
               ) : (
@@ -204,6 +216,13 @@ const StockManagement = () => {
           />
         </div>
       </div>
+
+      <StockAdjustmentModal
+        show={showAdjustmentModal}
+        onHide={handleCloseAdjustmentModal}
+        selectedItem={selectedItem}
+        selectedLocation={selectedLocation}
+      />
     </div>
   );
 };

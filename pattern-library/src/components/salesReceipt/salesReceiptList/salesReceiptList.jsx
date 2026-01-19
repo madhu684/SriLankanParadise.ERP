@@ -55,7 +55,7 @@ const SalesReceiptList = () => {
   const paginatedSalesReceipts = filteredSalesReceipts.filter(
     (sr) =>
       sr.referenceNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      sr.createdBy.toLowerCase().includes(searchQuery.toLowerCase())
+      sr.createdBy.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
@@ -414,7 +414,7 @@ const SalesReceiptList = () => {
                 {paginatedSalesReceipts
                   .slice(
                     (currentPage - 1) * itemsPerPage,
-                    currentPage * itemsPerPage
+                    currentPage * itemsPerPage,
                   )
                   .map((sr) => (
                     <tr key={sr.salesReceiptId}>

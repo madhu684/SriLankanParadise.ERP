@@ -117,5 +117,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             await _locationInventoryRepository.IncreaseInventoryByFIFO(locationId, itemMasterId, transactionTypeId, quantity, sourceLocationId);
         }
+
+        public async Task StockAdjustment(int locationInventoryId, decimal quantity)
+        {
+            await _locationInventoryRepository.StockAdjustment(locationInventoryId, quantity);
+        }
     }
 }

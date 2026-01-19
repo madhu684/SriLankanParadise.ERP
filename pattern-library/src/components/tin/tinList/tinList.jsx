@@ -55,6 +55,8 @@ const TinList = () => {
     handleClose,
     handleConfirmDeleteTIN,
     handleCloseDeleteConfirmation,
+    selectedDate,
+    setSelectedDate,
   } = useTinList();
 
   const { hasPermission } = useContext(UserContext);
@@ -66,7 +68,6 @@ const TinList = () => {
 
   const formatDateTime = (dateString) => {
     if (!dateString) return "-";
-    // Ensure the date is treated as UTC if it doesn't have timezone info
     let normalizedDateStr = dateString.replace(" ", "T");
     if (!normalizedDateStr.endsWith("Z")) {
       normalizedDateStr += "Z";
@@ -84,7 +85,7 @@ const TinList = () => {
   };
 
   const filteredTins = Tins?.filter((tin) =>
-    tin.referenceNumber.toLowerCase().includes(searchQuery.toLowerCase())
+    tin.referenceNumber.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
@@ -143,7 +144,6 @@ const TinList = () => {
 
   return (
     <div className="container-fluid px-4 py-4">
-      {/* Header Section */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="mb-0 fw-bold">Transfer Issue Notes</h2>
         <div className="d-flex gap-2">
@@ -170,23 +170,9 @@ const TinList = () => {
                 Approve Selected
               </button>
             )}
-          {/* {isAnyRowSelected &&
-            selectedRowData[0]?.status === 41 &&
-            Tins?.some(
-              (trn) => trn?.issueMasterId === selectedRowData[0]?.issueMasterId
-            ) && (
-              <button
-                className="btn btn-danger d-flex align-items-center gap-2"
-                onClick={() => setShowTINDeleteModal(true)}
-              >
-                <FaTrash size={14} />
-                Delete
-              </button>
-            )} */}
         </div>
       </div>
 
-      {/* Available Approved TRNs Card */}
       <div className="card border-0 shadow-sm mb-4">
         <div
           className="card-header bg-secondary text-white py-3"
@@ -259,11 +245,10 @@ const TinList = () => {
         </div>
       </div>
 
-      {/* Search Bar */}
       <div className="card border-0 shadow-sm mb-3">
         <div className="card-body py-3">
-          <div className="row align-items-center">
-            <div className="col-md-6">
+          <div className="row align-items-center g-3">
+            <div className="col-md-4">
               <div className="input-group">
                 <span className="input-group-text bg-white border-end-0">
                   <FaSearch className="text-muted" />
@@ -277,11 +262,23 @@ const TinList = () => {
                 />
               </div>
             </div>
+            <div className="col-md-3">
+              <div className="input-group">
+                <span className="input-group-text bg-white border-end-0">
+                  <i className="bi bi-calendar3 text-muted"></i>
+                </span>
+                <input
+                  type="date"
+                  className="form-control border-start-0 ps-0"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* TINs Table */}
       <div className="card border-0 shadow-sm">
         <div className="card-body p-0">
           <div className="table-responsive">
@@ -309,11 +306,11 @@ const TinList = () => {
                   filteredTins
                     .slice(
                       (currentPage - 1) * itemsPerPage,
-                      currentPage * itemsPerPage
+                      currentPage * itemsPerPage,
                     )
                     .map((Tin) => (
                       <tr key={Tin.issueMasterId} className="border-bottom">
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-3">
                           <input
                             type="checkbox"
                             className="form-check-input"
@@ -322,30 +319,30 @@ const TinList = () => {
                             style={{ cursor: "pointer" }}
                           />
                         </td>
-                        <td className="py-3 px-4 fw-semibold text-dark">
+                        <td className="py-3 px-3 fw-semibold text-dark">
                           {Tin.referenceNumber}
                         </td>
                         <td className="py-3 px-4 fw-semibold text-dark">
                           {Tin?.requisitionMaster?.referenceNumber || "N/A"}
                         </td>
-                        <td className="py-3 px-4">{Tin.createdBy}</td>
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-3">{Tin.createdBy}</td>
+                        <td className="py-3 px-3">
                           {Tin?.requisitionMaster?.requestedFromLocation
                             ?.locationName || "N/A"}
                         </td>
                         <td className="py-3 px-4 text-muted">
                           {formatDateTime(Tin?.issueDate)}
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-3">
                           <span
                             className={`badge rounded-pill ${getStatusBadgeClass(
-                              Tin.status
+                              Tin.status,
                             )}`}
                           >
                             {getStatusLabel(Tin.status)}
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-center">
+                        <td className="py-3 px-3 text-center">
                           <button
                             className="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-2"
                             onClick={() => handleViewDetails(Tin)}
@@ -384,7 +381,6 @@ const TinList = () => {
         )}
       </div>
 
-      {/* Modals */}
       {showDetailTinModalInParent && (
         <TinDetails
           show={showDetailTinModal}

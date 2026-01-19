@@ -23,9 +23,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             return await _issueMasterRepository.GetAll();
         }
 
-        public async Task<IEnumerable<IssueMaster>> GetIssueMastersWithoutDraftsByCompanyId(int companyId)
+        public async Task<IEnumerable<IssueMaster>> GetIssueMastersWithoutDraftsByCompanyId(int companyId, DateTime? date = null, int? issuedLocationId = null, string? issueType = null)
         {
-            return await _issueMasterRepository.GetIssueMastersWithoutDraftsByCompanyId(companyId);
+            return await _issueMasterRepository.GetIssueMastersWithoutDraftsByCompanyId(companyId, date, issuedLocationId, issueType);
         }
 
         public async Task ApproveIssueMaster(int issueMasterId, IssueMaster issueMaster)

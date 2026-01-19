@@ -16,39 +16,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         {
             _dbContext = dbContext;
         }
-        //public async Task AddLocationInventory(LocationInventory locationInventory, int m)
-        //{
-        //    try
-        //    {
-        //        // Check if a record with the same ItemMasterId, BatchId, and LocationId exists
-        //        var existingInventory = await _dbContext.LocationInventories
-        //            .FirstOrDefaultAsync(li => li.ItemMasterId == locationInventory.ItemMasterId
-        //                                    && li.BatchId == locationInventory.BatchId
-        //                                    && li.LocationId == locationInventory.LocationId);
-
-        //        if (existingInventory != null)
-        //        {
-        //            // Update the StockInHand
-        //            if (m == 1)
-        //            {
-        //                existingInventory.StockInHand = existingInventory.StockInHand + locationInventory.StockInHand;
-        //            } else if (m == 2)
-        //            {
-        //                existingInventory.StockInHand = existingInventory.StockInHand - locationInventory.StockInHand;
-        //            }
-        //        }
-        //        else
-        //        {
-        //            _dbContext.LocationInventories.Add(locationInventory);
-        //        }
-
-        //        await _dbContext.SaveChangesAsync();
-        //    }
-        //    catch (Exception)
-        //    {
-        //        throw;
-        //    }
-        //}
 
         public async Task AddLocationInventory(LocationInventory locationInventory, int m)
         {
@@ -957,6 +924,82 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     await transaction.CommitAsync();
                 }
                 catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            });
+        }
+
+        public async Task StockAdjustment(int locationInventoryId, decimal quantity)
+        {
+            var strategy = _dbContext.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () => 
+            {
+                using var transaction = await _dbContext.Database.BeginTransactionAsync();
+                try
+                {
+                    var inventory = await _dbContext.LocationInventories
+                        .Where(li => li.LocationInventoryId == locationInventoryId)
+                        .FirstOrDefaultAsync();
+
+                    if (inventory == null)
+                    {
+                        throw new InvalidOperationException($"Location inventory with ID {locationInventoryId} not found.");
+                    }
+
+                    decimal currentStock = inventory.StockInHand ?? 0;
+                    decimal adjustmentQty = quantity - currentStock;
+
+                    if (adjustmentQty == 0)
+                    {
+                        // No adjustment needed if values are the same
+                        return;
+                    }
+
+                    // Set the quantity passed from request to the StockInHand
+                    inventory.StockInHand = quantity;
+                    _dbContext.LocationInventories.Update(inventory);
+
+                    // Determine MovementTypeId and TransactionTypeId
+                    int derivedMovementTypeId;
+                    string transactionTypeName;
+
+                    if (adjustmentQty > 0)
+                    {
+                        derivedMovementTypeId = 1;
+                        transactionTypeName = "Stock Adjustment In";
+                    }
+                    else
+                    {
+                        derivedMovementTypeId = 2;
+                        transactionTypeName = "Stock Adjustment Out";
+                    }
+
+                    var transactionType = await _dbContext.TransactionTypes
+                        .FirstOrDefaultAsync(tt => tt.Name == transactionTypeName);
+                    if (transactionType == null)
+                    {
+                        throw new InvalidOperationException($"Transaction Type '{transactionTypeName}' not found.");
+                    }
+
+                    // Create LocationInventoryMovement
+                    var inventoryMovement = new LocationInventoryMovement
+                    {
+                        MovementTypeId = derivedMovementTypeId,
+                        TransactionTypeId = transactionType.TransactionTypeId,
+                        ItemMasterId = inventory.ItemMasterId,
+                        BatchId = inventory.BatchId,
+                        LocationId = inventory.LocationId,
+                        Date = DateTime.UtcNow,
+                        Qty = Math.Abs(adjustmentQty),
+                    };
+                    _dbContext.LocationInventoryMovements.Add(inventoryMovement);
+
+                    await _dbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                }
+                catch (Exception)
                 {
                     await transaction.RollbackAsync();
                     throw;

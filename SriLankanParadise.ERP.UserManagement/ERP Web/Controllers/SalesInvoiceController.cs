@@ -86,11 +86,17 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
 
         [HttpGet("GetSalesInvoicesWithoutDraftsByCompanyId/{companyId}")]
-        public async Task<ApiResponseModel> GetSalesInvoicesWithoutDraftsByCompanyId(int companyId)
+        public async Task<ApiResponseModel> GetSalesInvoicesWithoutDraftsByCompanyId(
+            int companyId,
+            [FromQuery] DateTime? date = null,
+            [FromQuery] string? searchQuery = null,
+            [FromQuery] string? filter = null,
+            [FromQuery] int? status = null
+            )
         {
             try
             {
-                var salesInvoices = await _salesInvoiceService.GetSalesInvoicesWithoutDraftsByCompanyId(companyId);
+                var salesInvoices = await _salesInvoiceService.GetSalesInvoicesWithoutDraftsByCompanyId(companyId, date, searchQuery, filter, status);
                 if (salesInvoices != null)
                 {
                     var salesInvoiceDtos = _mapper.Map<IEnumerable<SalesInvoiceDto>>(salesInvoices);

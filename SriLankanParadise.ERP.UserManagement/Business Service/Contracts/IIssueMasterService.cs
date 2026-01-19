@@ -8,7 +8,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
 
         Task<IEnumerable<IssueMaster>> GetAll();
 
-        Task<IEnumerable<IssueMaster>> GetIssueMastersWithoutDraftsByCompanyId(int companyId);
+        Task<IEnumerable<IssueMaster>> GetIssueMastersWithoutDraftsByCompanyId(int companyId, DateTime? date = null, int? issuedLocationId = null, string? issueType = null);
 
         Task ApproveIssueMaster(int issueMasterId, IssueMaster issueMaster);
 

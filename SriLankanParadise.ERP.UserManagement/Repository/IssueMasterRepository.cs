@@ -48,34 +48,47 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<IssueMaster>> GetIssueMastersWithoutDraftsByCompanyId(int companyId)
+        public async Task<IEnumerable<IssueMaster>> GetIssueMastersWithoutDraftsByCompanyId(int companyId, DateTime? date = null, int? issuedLocationId = null, string? issueType = null)
         {
             try
             {
-                var issueMasters = await _dbContext.IssueMasters
-                    .Where(rm => rm.Status != 0 && rm.CompanyId == companyId)
+                var query = _dbContext.IssueMasters
+                    .AsNoTracking()
+                    .Where(im => im.Status != 0 && im.CompanyId == companyId);
+
+                if (date.HasValue)
+                {
+                    var targetDate = date.Value.Date;
+                    query = query.Where(im => im.Status == 41 || (im.IssueDate.HasValue && im.IssueDate.Value.Date == targetDate));
+                }
+
+                if (issuedLocationId.HasValue)
+                {
+                    query = query.Where(im => im.IssuedLocationId == issuedLocationId);
+                }
+
+                if (!string.IsNullOrEmpty(issueType))
+                {
+                    var type = issueType.ToLower();
+                    query = query.Where(im => im.IssueType != null && im.IssueType.ToLower() == type);
+                }
+
+                var issueMasters = await query
                     .Include(im => im.RequisitionMaster)
                         .ThenInclude(rm => rm.RequisitionDetails)
                         .ThenInclude(rd => rd.ItemMaster)
                     .Include(im => im.RequisitionMaster)
                         .ThenInclude(rm => rm.RequestedFromLocation)
-                    .Include(rm => rm.IssueDetails)
-                    .ThenInclude(rd => rd.ItemMaster)
-                    .ThenInclude(im => im.Unit)
-                    .Include(rm => rm.IssueDetails)
-                    //.ThenInclude(id => id.Batch)
+                    .Include(im => im.IssueDetails)
+                        .ThenInclude(rd => rd.ItemMaster)
+                            .ThenInclude(im => im.Unit)
                     .OrderByDescending(im => im.IssueDate)
                     .ToListAsync();
 
-                if (issueMasters.Any())
-                {
-                    return issueMasters;
-                }
-                return null;
+                return issueMasters.Any() ? issueMasters : null;
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
