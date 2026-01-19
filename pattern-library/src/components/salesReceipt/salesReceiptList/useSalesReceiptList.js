@@ -1,9 +1,13 @@
-import { useState, useMemo, useContext } from "react";
+import { useState, useMemo, useContext, useEffect } from "react";
 import {
   get_sales_invoices_with_out_drafts_api,
   get_sales_receipts_with_out_drafts_api,
 } from "../../../services/salesApi";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 import { UserContext } from "../../../context/userContext";
 
@@ -78,28 +82,17 @@ const useSalesReceiptList = () => {
   const { data: invoices = [], isLoading: isLoadingInvoices } = useQuery({
     queryKey: ["salesInvoiceOptions", companyId],
     queryFn: async () => {
-      const response = await get_sales_invoices_with_out_drafts_api(companyId);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      const response = await get_sales_invoices_with_out_drafts_api({
+        companyId,
+        date: new Date().toISOString().split("T")[0],
+        filter: "outstanding",
+        status: 2,
+      });
 
-      const filteredInvoices = response.data.result
-        ? response.data.result.filter((si) => {
-            // Must have status 2
-            if (si.status !== 2) return false;
-
-            // Include if amountDue is greater than 100
-            if (si.amountDue > 100) return true;
-
-            // Otherwise, check if invoice date is today
-            if (!si.invoiceDate) return false;
-            const invoiceDate = new Date(si.invoiceDate);
-            invoiceDate.setHours(0, 0, 0, 0);
-            return invoiceDate.getTime() === today.getTime();
-          })
-        : [];
-
-      return filteredInvoices;
+      return response.data.result || [];
     },
+    enabled: !!companyId,
+    placeholderData: keepPreviousData,
   });
 
   // Filter sales receipts based on selected filter
@@ -191,10 +184,10 @@ const useSalesReceiptList = () => {
 
     if (isSelected) {
       setSelectedRows((prevSelected) =>
-        prevSelected.filter((selectedId) => selectedId !== id)
+        prevSelected.filter((selectedId) => selectedId !== id),
       );
       setSelectedRowData((prevSelectedData) =>
-        prevSelectedData.filter((data) => data.salesReceiptId !== id)
+        prevSelectedData.filter((data) => data.salesReceiptId !== id),
       );
     } else {
       setSelectedRows((prevSelected) => [...prevSelected, id]);
@@ -239,7 +232,8 @@ const useSalesReceiptList = () => {
 
   const areAnySelectedRowsPending = (selectedRows) => {
     return selectedRows.some(
-      (id) => salesReceipts.find((sr) => sr.salesReceiptId === id)?.status === 1
+      (id) =>
+        salesReceipts.find((sr) => sr.salesReceiptId === id)?.status === 1,
     );
   };
 

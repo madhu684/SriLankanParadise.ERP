@@ -91,7 +91,8 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<RequisitionMasterRequestModel, RequisitionMaster>();
             CreateMap<ApproveRequisitionMasterRequestModel, RequisitionMaster>();
             CreateMap<PatchIsMINApprovedMRNRequestModel, RequisitionMaster>();
-            CreateMap<RequisitionMaster, RequisitionMasterDto>();
+            CreateMap<RequisitionMaster, RequisitionMasterDto>()
+                .ForMember(dest => dest.IsIssueMasterCreated, opt => opt.MapFrom(src => src.IssueMasters.Any()));
             CreateMap<RequisitionDetailRequestModel, RequisitionDetail>();
             CreateMap<RequisitionDetail, RequisitionDetailDto>();
             CreateMap<SupplierRequestModel, Supplier>();

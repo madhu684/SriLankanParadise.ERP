@@ -570,5 +570,27 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpPost("stock-adjustment/{locationInventoryId}/{quantity}")]
+        public async Task<ApiResponseModel> StockAdjustment(int locationInventoryId, decimal quantity)
+        {
+            try
+            {
+                await _locationInventoryService.StockAdjustment(locationInventoryId, quantity);
+                _logger.LogInformation("Stock adjustment completed successfully");
+                AddResponseMessage(Response, "Stock adjustment completed successfully", null, true, HttpStatusCode.OK);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex.Message);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.BadRequest);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

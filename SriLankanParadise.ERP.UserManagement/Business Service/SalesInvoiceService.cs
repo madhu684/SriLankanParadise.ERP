@@ -24,9 +24,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             return await _salesInvoiceRepository.GetAll();
         }
 
-        public async Task<IEnumerable<SalesInvoice>> GetSalesInvoicesWithoutDraftsByCompanyId(int companyId)
+        public async Task<IEnumerable<SalesInvoice>> GetSalesInvoicesWithoutDraftsByCompanyId(int companyId, DateTime? date = null, string? searchQuery = null, string? filter = null, int? status = null)
         {
-            return await _salesInvoiceRepository.GetSalesInvoicesWithoutDraftsByCompanyId(companyId);
+            return await _salesInvoiceRepository.GetSalesInvoicesWithoutDraftsByCompanyId(companyId, date, searchQuery, filter, status);
         }
 
         public async Task<IEnumerable<SalesInvoice>> GetSalesInvoicesByUserId(int userId)

@@ -862,11 +862,21 @@ export const get_issues_masters_api = async () => {
   }
 };
 
-export const get_issue_masters_with_out_drafts_api = async (companyId) => {
+export const get_issue_masters_with_out_drafts_api = async (
+  companyId,
+  date,
+  issuedLocationId,
+  issueType,
+) => {
   try {
     const response = await api.get(
       `/issueMaster/GetIssueMastersWithoutDraftsByCompanyId/${companyId}`,
       {
+        params: {
+          date: date,
+          issuedLocationId: issuedLocationId,
+          issueType: issueType,
+        },
         withCredentials: true,
       },
     );
@@ -1464,6 +1474,22 @@ export const get_location_inventory_by_batch_id_api = async (batchId) => {
   try {
     const response = await api.get(
       `/locationInventory/GetLocationInventoryByBatchId/${batchId}`,
+      {
+        withCredentials: true,
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const update_stock_api = async (locationInventoryId, quantity) => {
+  try {
+    const response = await api.post(
+      `/locationInventory/stock-adjustment/${locationInventoryId}/${quantity}`,
+      null,
       {
         withCredentials: true,
       },
