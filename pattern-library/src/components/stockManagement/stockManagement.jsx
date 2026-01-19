@@ -28,7 +28,8 @@ const StockManagement = () => {
     handleCloseAdjustmentModal,
   } = useStockManagement();
 
-  const { user, allLocations, userLocations } = useContext(UserContext);
+  const { user, allLocations, userLocations, hasPermission } =
+    useContext(UserContext);
 
   const displayLocations = user?.userId === 1 ? allLocations : userLocations;
 
@@ -189,6 +190,7 @@ const StockManagement = () => {
                       <button
                         className="btn btn-outline-primary btn-sm me-2"
                         onClick={() => handleAdjustStockClick(item)}
+                        disabled={!hasPermission("Stock Adjustment")}
                       >
                         Adjust Stock
                       </button>
