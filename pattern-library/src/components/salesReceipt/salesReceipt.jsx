@@ -338,21 +338,23 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
 
               {formData.salesInvoiceReferenceNumbers.length > 0 && (
                 <label htmlFor="salesInvoice" className="form-label mt-3">
-                  Selected Sales Invoice Reference Numbers
+                  Selected Sales Invoices
                 </label>
               )}
 
               {/* Display selected reference numbers */}
               <ul className="list-group mt-2">
-                {formData.salesInvoiceReferenceNumbers.map((referenceNo) => (
+                {formData.selectedSalesInvoices.map((invoice) => (
                   <li
-                    key={referenceNo}
+                    key={invoice.referenceNo}
                     className="list-group-item d-flex justify-content-between align-items-center"
                   >
-                    {referenceNo}
+                    {invoice.referenceNo} - {invoice.inVoicedPersonName || ""}
                     <button
                       className="btn  btn-outline-danger btn-sm"
-                      onClick={() => handleRemoveSalesInvoice(referenceNo)}
+                      onClick={() =>
+                        handleRemoveSalesInvoice(invoice.referenceNo)
+                      }
                     >
                       Remove
                     </button>

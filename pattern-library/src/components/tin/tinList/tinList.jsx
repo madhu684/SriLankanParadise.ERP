@@ -191,7 +191,13 @@ const TinList = () => {
           </div>
         </div>
         <div className="card-body p-0">
-          {transferRequisitions.length > 0 ? (
+          {isLoadingTrn ? (
+            <div className="d-flex justify-content-center py-5">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          ) : transferRequisitions.length > 0 ? (
             <div
               className="table-responsive"
               style={{
@@ -214,6 +220,9 @@ const TinList = () => {
                     <th className="text-nowrap py-3 px-4 border-bottom">
                       TRN Date
                     </th>
+                    <th className="text-nowrap py-3 px-4 border-bottom">
+                      Status
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -228,6 +237,17 @@ const TinList = () => {
                       </td>
                       <td className="py-3 px-4 text-muted">
                         {formatDateTime(trn.requisitionDate)}
+                      </td>
+                      <td className="py-3 px-4">
+                        {trn.isIssueMasterCreated ? (
+                          <span className="badge bg-success rounded-pill">
+                            TIN Created
+                          </span>
+                        ) : (
+                          <span className="badge bg-warning text-dark rounded-pill">
+                            Pending
+                          </span>
+                        )}
                       </td>
                     </tr>
                   ))}

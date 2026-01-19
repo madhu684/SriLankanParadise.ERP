@@ -49,8 +49,15 @@ const useTinList = () => {
     isLoading: isLoadingTrn,
     error: trnError,
   } = useQuery({
-    queryKey: ["transferRequisitions", companyId],
+    queryKey: [
+      "transferRequisitions",
+      companyId,
+      warehouseUserLocation ? warehouseUserLocation[0] : null,
+    ],
     queryFn: async () => {
+      if (!warehouseUserLocation || warehouseUserLocation.length === 0) {
+        return [];
+      }
       const response =
         await get_requisition_masters_with_out_drafts_api(companyId);
       const filteredRequisitions = response?.data?.result?.filter(
@@ -59,8 +66,13 @@ const useTinList = () => {
           rm.status === 2 &&
           rm.requestedToLocationId === warehouseUserLocation[0],
       );
-      return filteredRequisitions || [];
+      return filteredRequisitions;
     },
+    enabled:
+      !!companyId &&
+      !!warehouseUserLocation &&
+      warehouseUserLocation.length > 0,
+    placeholderData: keepPreviousData,
   });
 
   const {

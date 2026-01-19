@@ -608,9 +608,12 @@ const useSalesReceipt = ({ onFormSubmit }) => {
   };
 
   const handleRemoveSalesInvoice = (selectedId) => {
-    const selectedSalesInvoice = salesInvoiceOptions.find(
+    const selectedSalesInvoice = formData.selectedSalesInvoices.find(
       (salesInvoice) => salesInvoice.referenceNo === selectedId,
     );
+
+    if (!selectedSalesInvoice) return;
+
     setFormData((prevFormData) => ({
       ...prevFormData,
       salesInvoiceReferenceNumbers:

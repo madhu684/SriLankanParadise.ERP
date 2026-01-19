@@ -35,7 +35,10 @@
         public bool IsMINAccepted { get; set; }
         public virtual LocationDto? RequestedFromLocation { get; set; }
 
+
         public virtual LocationDto? RequestedToLocation { get; set; }
+
+        public bool IsIssueMasterCreated { get; set; }
 
         public virtual IEnumerable<RequisitionDetailDto>? RequisitionDetails { get; set; }
     }
