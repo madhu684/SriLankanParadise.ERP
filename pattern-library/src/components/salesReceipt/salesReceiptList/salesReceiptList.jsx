@@ -55,7 +55,7 @@ const SalesReceiptList = () => {
   const paginatedSalesReceipts = filteredSalesReceipts.filter(
     (sr) =>
       sr.referenceNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      sr.createdBy.toLowerCase().includes(searchQuery.toLowerCase())
+      sr.createdBy.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
@@ -154,7 +154,7 @@ const SalesReceiptList = () => {
                                 {moment
                                   .utc(trn.invoiceDate)
                                   .tz("Asia/Colombo")
-                                  .format("YYYY-MM-DD hh:mm:ss A")}
+                                  .format("YYYY-MM-DD")}
                               </td>
                               <td className="py-3 px-4 text-danger">
                                 {formatCurrency(trn.amountDue)}
@@ -414,7 +414,7 @@ const SalesReceiptList = () => {
                 {paginatedSalesReceipts
                   .slice(
                     (currentPage - 1) * itemsPerPage,
-                    currentPage * itemsPerPage
+                    currentPage * itemsPerPage,
                   )
                   .map((sr) => (
                     <tr key={sr.salesReceiptId}>

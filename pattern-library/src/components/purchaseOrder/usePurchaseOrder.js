@@ -50,10 +50,10 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   const fetchUserLocation = async () => {
     try {
       const response = await get_user_locations_by_user_id_api(
-        sessionStorage.getItem("userId")
+        sessionStorage.getItem("userId"),
       );
       return response.data.result.filter(
-        (location) => location.location.locationTypeId === 2
+        (location) => location.location.locationTypeId === 2,
       );
     } catch (error) {
       console.error("Error fetching user location:", error);
@@ -68,10 +68,10 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   const fetchSuppliers = async () => {
     try {
       const response = await get_company_suppliers_api(
-        sessionStorage.getItem("companyId")
+        sessionStorage.getItem("companyId"),
       );
       const filteredSuppliers = response.data.result?.filter(
-        (supplier) => supplier.status === 1
+        (supplier) => supplier.status === 1,
       );
       return filteredSuppliers || [];
     } catch (error) {
@@ -93,7 +93,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   const fetchchargesAndDeductions = async () => {
     try {
       const response = await get_charges_and_deductions_by_company_id_api(
-        sessionStorage.getItem("companyId")
+        sessionStorage.getItem("companyId"),
       );
       return response.data.result;
     } catch (error) {
@@ -115,7 +115,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   const fetchTransactionTypes = async () => {
     try {
       const response = await get_transaction_types_api(
-        sessionStorage.getItem("companyId")
+        sessionStorage.getItem("companyId"),
       );
       return response.data.result;
     } catch (error) {
@@ -195,14 +195,15 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   const fetchItems = async (searchQuery) => {
     try {
       const response = await get_Location_Inventory_Summary_By_Item_Name_api(
-        sessionStorage.getItem("companyId"),
-        userLocation[0]?.locationId,
-        searchQuery
+        // userLocation[0]?.locationId,
+        null,
+        searchQuery,
+        null,
       );
 
       const items =
         response.data?.result
-          ?.filter((item) => item.totalStockInHand <= item.maxStockLevel)
+          // ?.filter((item) => item.totalStockInHand <= item.maxStockLevel)
           .map((summary) => ({
             itemMasterId: summary.itemMasterId,
             itemName: summary.itemMaster?.itemName || "",
@@ -219,7 +220,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
 
       return items.filter(
         (item) =>
-          !formData.supplierId || item.supplierId === formData.supplierId
+          !formData.supplierId || item.supplierId === formData.supplierId,
       );
     } catch (error) {
       console.error("Error fetching items:", error);
@@ -250,7 +251,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     fieldName,
     fieldDisplayName,
     value,
-    additionalRules = {}
+    additionalRules = {},
   ) => {
     let isFieldValid = true;
     let errorMessage = "";
@@ -317,13 +318,13 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     const isSupplierValid = validateField(
       "supplierId",
       "Supplier",
-      formData.supplierId
+      formData.supplierId,
     );
 
     const isOrderDateValid = validateField(
       "orderDate",
       "Order date",
-      formData.orderDate
+      formData.orderDate,
     );
 
     const isAttachmentsValid = validateAttachments(formData.attachments);
@@ -343,7 +344,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
         fieldName,
         fieldDisplayName,
         item.quantity,
-        additionalRules
+        additionalRules,
       );
 
       isItemQuantityValid = isItemQuantityValid && isValidQuantity;
@@ -366,7 +367,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
         unitPriceFieldName,
         unitPriceFieldDisplayName,
         item.unitPrice,
-        unitPriceAdditionalRules
+        unitPriceAdditionalRules,
       );
 
       isItemUnitPriceValid = isItemUnitPriceValid && isValidUnitPrice;
@@ -424,12 +425,12 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
               };
 
               return await post_charges_and_deductions_applied_api(
-                chargesAndDeductionAppliedData
+                chargesAndDeductionAppliedData,
               );
-            })
+            }),
           );
           return appliedCharges;
-        })
+        }),
       );
 
       const commonChargesAndDeductions = await Promise.all(
@@ -463,9 +464,9 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
           };
 
           return await post_charges_and_deductions_applied_api(
-            chargesAndDeductionAppliedData
+            chargesAndDeductionAppliedData,
           );
-        })
+        }),
       );
 
       // Concatenate chargesAndDeductionsAppliedData and commonChargesAndDeductions
@@ -535,9 +536,8 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
           };
 
           // Call post_purchase_requisition_detail_api for each item
-          const detailsApiResponse = await post_purchase_order_detail_api(
-            detailsData
-          );
+          const detailsApiResponse =
+            await post_purchase_order_detail_api(detailsData);
 
           return detailsApiResponse;
         });
@@ -545,7 +545,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
         const detailsResponses = await Promise.all(itemDetailsData);
 
         const allDetailsSuccessful = detailsResponses.every(
-          (detailsResponse) => detailsResponse.status === 201
+          (detailsResponse) => detailsResponse.status === 201,
         );
 
         const postChargesAndDeductionsAppliedResponse =
@@ -553,7 +553,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
 
         const allAppliedSuccessful =
           postChargesAndDeductionsAppliedResponse.every(
-            (detailsResponse) => detailsResponse.status === 201
+            (detailsResponse) => detailsResponse.status === 201,
           );
 
         if (allDetailsSuccessful && allAppliedSuccessful) {
@@ -618,7 +618,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
     const SelectedSupplierId = parseInt(supplierId, 10);
 
     const selectedSupplier = suppliers.find(
-      (supplier) => supplier.supplierId === SelectedSupplierId
+      (supplier) => supplier.supplierId === SelectedSupplierId,
     );
 
     setFormData((prevFormData) => ({
@@ -758,10 +758,10 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
       // Ensure positive values for Quantities, Unit Prices and discounts
       updatedItemDetails[index].quantity = Math.max(
         0,
-        updatedItemDetails[index].quantity
+        updatedItemDetails[index].quantity,
       );
       updatedItemDetails[index].unitPrice = !isNaN(
-        parseFloat(updatedItemDetails[index].unitPrice)
+        parseFloat(updatedItemDetails[index].unitPrice),
       )
         ? Math.max(0, parseFloat(updatedItemDetails[index].unitPrice))
         : 0;
@@ -840,7 +840,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   const calculateSubTotal = () => {
     return formData.itemDetails.reduce(
       (total, item) => total + item.totalPrice,
-      0
+      0,
     );
   };
 
@@ -883,7 +883,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
 
     const itemBatch = await get_item_batches_by_item_master_id_api(
       item.itemMasterId,
-      sessionStorage.getItem("companyId")
+      sessionStorage.getItem("companyId"),
     );
 
     const latestBatch = itemBatch.data.result
@@ -894,14 +894,14 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
       sessionStorage.getItem("companyId"),
       parseInt(item?.itemTypeId),
       parseInt(item?.categoryId),
-      userLocation[0]?.locationId
+      userLocation[0]?.locationId,
     );
 
     const supplierItems = supplierItemResponse.data.result
       ? supplierItemResponse.data.result.filter(
           (si) =>
             si.itemMasterId !== item.itemMasterId &&
-            si.supplierName !== formData?.selectedSupplier?.supplierName
+            si.supplierName !== formData?.selectedSupplier?.supplierName,
         )
       : [];
 
@@ -973,19 +973,19 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
       sessionStorage.getItem("companyId"),
       parseInt(item.itemMaster?.itemTypeId),
       parseInt(item.itemMaster?.categoryId),
-      parseInt(purchaseRequisition?.expectedDeliveryLocation)
+      parseInt(purchaseRequisition?.expectedDeliveryLocation),
     );
 
     const itemInventoryResponse =
       await get_locations_inventories_by_location_id_item_master_id_api(
         parseInt(purchaseRequisition?.expectedDeliveryLocation),
-        item.itemMasterId
+        item.itemMasterId,
       );
 
     const itemInventory = itemInventoryResponse?.data?.result;
     const totalStockInHand = itemInventory?.reduce(
       (total, inventory) => total + (inventory.stockInHand || 0),
-      0
+      0,
     );
     const minReOrderLevel =
       itemInventory?.reduce(
@@ -993,7 +993,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
           min === null || inventory.reOrderLevel < min
             ? inventory.reOrderLevel
             : min,
-        null
+        null,
       ) || 0;
     const maxStockLevel =
       itemInventory?.reduce(
@@ -1001,14 +1001,14 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
           max === null || inventory.maxStockLevel > max
             ? inventory.maxStockLevel
             : max,
-        null
+        null,
       ) || 0;
 
     const supplierItems = supplierItemResponse?.data?.result
       ? supplierItemResponse?.data?.result?.filter(
           (si) =>
             si.itemMasterId !== item.itemMasterId &&
-            si.supplierName !== formData?.selectedSupplier?.supplierName
+            si.supplierName !== formData?.selectedSupplier?.supplierName,
         )
       : [];
 
@@ -1041,14 +1041,14 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
         try {
           console.log(
             "Initializing all items from purchase requisition...",
-            purchaseRequisition
+            purchaseRequisition,
           );
 
           // Process all items in parallel
           const newItemDetails = await Promise.all(
             purchaseRequisition.purchaseRequisitionDetails.map(async (item) => {
               return await createInitializedItem(item, purchaseRequisition);
-            })
+            }),
           );
 
           // Set all items at once, replacing any existing items
@@ -1062,7 +1062,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
           setInitialized(true);
           console.log(
             "Initialization completed. Items count:",
-            newItemDetails.length
+            newItemDetails.length,
           );
         } catch (error) {
           console.error("Error initializing items:", error);
@@ -1215,7 +1215,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
 
                   handleInputChange(
                     `commonChargesAndDeductions_${chargeIndex}_value`,
-                    newValue
+                    newValue,
                   );
                 }}
               />
@@ -1333,7 +1333,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
 
       const response = await get_Low_Stock_Items_api(
         formData.supplierId,
-        userLocation[0]?.locationId
+        userLocation[0]?.locationId,
       );
       const lowStockItems = response.data.result || [];
 
@@ -1351,7 +1351,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
 
       const newItemDetails = await Promise.all(
         lowStockItems
-          .filter((item) => item.totalStockInHand <= item.maxStockLevel)
+          // .filter((item) => item.totalStockInHand <= item.maxStockLevel)
           .map(async (item) => {
             const initializedCharges =
               chargesAndDeductions
@@ -1366,7 +1366,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
 
             const itemBatch = await get_item_batches_by_item_master_id_api(
               item.itemMasterId,
-              companyId
+              companyId,
             );
 
             const latestBatch = itemBatch.data.result
@@ -1378,14 +1378,15 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
                 companyId,
                 parseInt(item.itemMaster?.itemType?.itemTypeId),
                 parseInt(item.itemMaster?.category?.categoryId),
-                userLocation[0]?.locationId
+                userLocation[0]?.locationId,
               );
 
             const supplierItems = supplierItemResponse.data.result
               ? supplierItemResponse.data.result.filter(
                   (si) =>
                     si.itemMasterId !== item.itemMasterId &&
-                    si.supplierName !== formData?.selectedSupplier?.supplierName
+                    si.supplierName !==
+                      formData?.selectedSupplier?.supplierName,
                 )
               : [];
 
@@ -1424,14 +1425,14 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
               maxStockLevel: item.maxStockLevel,
               chargesAndDeductions: initializedCharges,
             };
-          })
+          }),
       );
 
       // Update state with correct totals using fresh data
       setFormData((prevFormData) => {
         const subTotal = newItemDetails.reduce(
           (sum, item) => sum + item.totalPrice,
-          0
+          0,
         );
 
         let totalAmount = subTotal;

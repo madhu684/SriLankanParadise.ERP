@@ -22,8 +22,8 @@ const useCashierExpenseOutList = () => {
     queryKey: ["cashierExpenseOutList", user?.userId, date],
     queryFn: async () => {
       const response = await get_cashier_expense_outs_by_userId_date_api(
-        user.userId,
         date,
+        null,
         null
       );
       return response.data.result;

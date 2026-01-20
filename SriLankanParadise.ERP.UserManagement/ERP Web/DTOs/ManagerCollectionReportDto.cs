@@ -35,6 +35,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
     public class ManagerCollectionReportSessionDto
     {
         public int? SessionId { get; set; }
+        public DateTime? SessionIn { get; set; }
         public decimal SessionTotalAmount { get; set; }
         public decimal SessionTotalShort { get; set; }
         public decimal SessionTotalExcess { get; set; }
