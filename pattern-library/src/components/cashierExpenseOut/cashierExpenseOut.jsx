@@ -3,7 +3,7 @@ import useCashierExpenseOut from "./useCashierExpenseOut";
 import CurrentDateTime from "../currentDateTime/currentDateTime";
 import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 
-const CashierExpenseOut = ({ onFormSubmit, onClose }) => {
+const CashierExpenseOut = ({ onFormSubmit, onClose, initialData }) => {
   const {
     formData,
     validFields,
@@ -22,6 +22,7 @@ const CashierExpenseOut = ({ onFormSubmit, onClose }) => {
       }
     },
     onClose,
+    initialData,
   });
 
   return (
@@ -76,7 +77,9 @@ const CashierExpenseOut = ({ onFormSubmit, onClose }) => {
                 type="number"
                 className={`form-control ${
                   validFields.amount ? "is-valid" : ""
-                } ${validationErrors.amount ? "is-invalid" : ""}`}
+                } ${validationErrors.amount ? "is-invalid" : ""}${
+                  initialData ? " bg-light" : ""
+                }`}
                 id="amount"
                 placeholder="Enter Amount"
                 value={formData.amount}
@@ -87,6 +90,8 @@ const CashierExpenseOut = ({ onFormSubmit, onClose }) => {
                   handleInputChange("amount", positiveValue);
                 }}
                 required
+                readOnly={!!initialData}
+                disabled={!!initialData}
               />
               {validationErrors.amount && (
                 <div className="invalid-feedback">
@@ -102,7 +107,9 @@ const CashierExpenseOut = ({ onFormSubmit, onClose }) => {
               <textarea
                 className={`form-control ${
                   validFields.reason ? "is-valid" : ""
-                } ${validationErrors.reason ? "is-invalid" : ""}`}
+                } ${validationErrors.reason ? "is-invalid" : ""}${
+                  initialData ? " bg-light" : ""
+                }`}
                 id="reason"
                 placeholder="Enter Reason"
                 value={formData.reason}
@@ -110,6 +117,8 @@ const CashierExpenseOut = ({ onFormSubmit, onClose }) => {
                 required
                 rows="2"
                 maxLength="250"
+                readOnly={!!initialData}
+                disabled={!!initialData}
               />
               {validationErrors.reason && (
                 <div className="invalid-feedback">

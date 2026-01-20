@@ -12,7 +12,22 @@ const CashierExpenseOutList = () => {
     setDate,
     handleCreateClick,
     handleCloseForm,
+    requisitions,
+    isRequisitionsLoading,
+    handleRequisitionClick,
+    initialData,
+    searchQuery,
+    setSearchQuery,
   } = useCashierExpenseOutList();
+
+  const filteredRequisitions = requisitions.filter((req) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      req.reason?.toLowerCase().includes(query) ||
+      req.referenceNumber?.toLowerCase().includes(query) ||
+      req.amount?.toString().includes(query)
+    );
+  });
 
   if (showCreateForm) {
     return (
@@ -20,6 +35,7 @@ const CashierExpenseOutList = () => {
         <CashierExpenseOut
           onFormSubmit={handleCloseForm}
           onClose={handleCloseForm}
+          initialData={initialData}
         />
       </div>
     );
@@ -32,6 +48,100 @@ const CashierExpenseOutList = () => {
         <button className="btn btn-primary" onClick={handleCreateClick}>
           Create Expense Out
         </button>
+      </div>
+
+      <div className="card border-0 shadow-sm mb-4">
+        <div
+          className="card-header bg-secondary text-white py-3"
+          style={{
+            background:
+              "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          }}
+        >
+          <div className="d-flex justify-content-between align-items-center">
+            <h5 className="mb-0 d-flex align-items-center gap-2">
+              <i className="bi bi-clipboard-check"></i>
+              Approved Requisitions
+            </h5>
+            <div className="d-flex align-items-center gap-3">
+              <div className="input-group" style={{ maxWidth: "250px" }}>
+                <span className="input-group-text bg-white border-end-0">
+                  <i className="bi bi-search text-muted"></i>
+                </span>
+                <input
+                  type="text"
+                  className="form-control border-start-0 ps-0"
+                  placeholder="Search..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <span className="badge bg-white text-dark fw-semibold px-3 py-2">
+                {filteredRequisitions.length} Available
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="card-body p-0">
+          {isRequisitionsLoading ? (
+            <div className="d-flex justify-content-center my-5">
+              <Spinner animation="border" variant="primary" />
+            </div>
+          ) : filteredRequisitions.length > 0 ? (
+            <div
+              className="table-responsive"
+              style={{ maxHeight: "320px", overflowY: "auto" }}
+            >
+              <table className="table table-hover mb-0">
+                <thead className="table-light sticky-top">
+                  <tr>
+                    <th className="text-nowrap py-3 px-4 border-bottom">
+                      Reference No
+                    </th>
+                    <th className="text-nowrap py-3 px-4 border-bottom">
+                      Description
+                    </th>
+                    <th className="text-nowrap py-3 px-4 border-bottom">
+                      Amount
+                    </th>
+                    <th className="text-nowrap py-3 px-4 border-bottom">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredRequisitions.map((req) => (
+                    <tr key={req.expenseOutRequisitionId} className="border-bottom">
+                      <td className="fw-semibold py-3 px-4 text-dark">
+                        {req.referenceNumber}
+                      </td>
+                      <td className="py-3 px-4">{req.reason}</td>
+                      <td className="py-3 px-4">
+                        {req.amount.toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </td>
+                      <td className="py-3 px-4">
+                        <button
+                          className="btn btn-sm btn-success"
+                          onClick={() => handleRequisitionClick(req)}
+                        >
+                          Create Expense Out
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="text-center py-5">
+              <i className="bi bi-inbox display-4 text-muted d-block mb-3"></i>
+              <p className="text-muted mb-0">No approved requisitions available</p>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="row mb-4">
@@ -54,8 +164,8 @@ const CashierExpenseOutList = () => {
         </div>
       ) : (
         <div className="table-responsive">
-          <table className="table table-striped table-hover mt-3">
-            <thead className="table-dark">
+          <table className="table mt-2">
+            <thead>
               <tr>
                 <th>No</th>
                 <th>Description</th>
@@ -68,7 +178,7 @@ const CashierExpenseOutList = () => {
                 cashierExpenseOutList.map((item, index) => (
                   <tr key={item.cashierExpenseOutId}>
                     <td>{index + 1}</td>
-                    <td>{item.reason}</td>
+                    <td>{item.description}</td>
                     <td>
                       {item.amount.toLocaleString(undefined, {
                         minimumFractionDigits: 2,
