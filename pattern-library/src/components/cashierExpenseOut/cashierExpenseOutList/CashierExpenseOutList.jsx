@@ -2,6 +2,8 @@ import React from "react";
 import useCashierExpenseOutList from "./useCashierExpenseOutList";
 import CashierExpenseOut from "../cashierExpenseOut";
 import { Spinner } from "react-bootstrap";
+import { RiCurrencyLine } from "react-icons/ri";
+import { BiReceipt } from "react-icons/bi";
 
 const CashierExpenseOutList = () => {
   const {
@@ -45,9 +47,11 @@ const CashierExpenseOutList = () => {
     <div className="container mt-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>Cashier Expense Out List</h2>
+        {/* Commented out for future use
         <button className="btn btn-primary" onClick={handleCreateClick}>
           Create Expense Out
         </button>
+        */}
       </div>
 
       <div className="card border-0 shadow-sm mb-4">
@@ -115,7 +119,11 @@ const CashierExpenseOutList = () => {
                       <td className="fw-semibold py-3 px-4 text-dark">
                         {req.referenceNumber}
                       </td>
-                      <td className="py-3 px-4">{req.reason}</td>
+                      <td className="py-3 px-4" style={{ maxWidth: "250px" }}>
+                        <div className="text-truncate" title={req.reason}>
+                          {req.reason}
+                        </div>
+                      </td>
                       <td className="py-3 px-4">
                         {req.amount.toLocaleString(undefined, {
                           minimumFractionDigits: 2,
@@ -156,6 +164,59 @@ const CashierExpenseOutList = () => {
         </div>
       </div>
 
+      {/* Total Expenses Card */}
+      <div className="row g-3 mb-4">
+        <div className="col-lg-3 col-md-4 col-sm-6">
+          <div
+            className="card shadow-sm border-0"
+            style={{ borderLeft: "4px solid #6f42c1" }}
+          >
+            <div className="card-body">
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <p className="text-muted mb-1 small">Total Expenses</p>
+                  <h4 className="mb-0" style={{ color: "#6f42c1" }}>
+                    Rs.{" "}
+                    {cashierExpenseOutList
+                      ?.reduce((sum, item) => sum + (item.amount || 0), 0)
+                      .toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                  </h4>
+                </div>
+                <div
+                  className="p-3 rounded-circle"
+                  style={{ backgroundColor: "rgba(111, 66, 193, 0.1)" }}
+                >
+                  <RiCurrencyLine size={28} style={{ color: "#6f42c1" }} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="col-lg-3 col-md-4 col-sm-6">
+          <div
+            className="card shadow-sm border-0"
+            style={{ borderLeft: "4px solid #6c757d" }}
+          >
+            <div className="card-body">
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <p className="text-muted mb-1 small">Total Records</p>
+                  <h4 className="mb-0 text-secondary">
+                    {cashierExpenseOutList?.length || 0}
+                  </h4>
+                </div>
+                <div className="bg-secondary bg-opacity-10 p-3 rounded-circle">
+                  <BiReceipt size={28} className="text-secondary" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <hr />
 
       {isLoading ? (
@@ -178,7 +239,11 @@ const CashierExpenseOutList = () => {
                 cashierExpenseOutList.map((item, index) => (
                   <tr key={item.cashierExpenseOutId}>
                     <td>{index + 1}</td>
-                    <td>{item.description}</td>
+                    <td style={{ maxWidth: "300px" }}>
+                      <div className="text-truncate" title={item.description}>
+                        {item.description}
+                      </div>
+                    </td>
                     <td>
                       {item.amount.toLocaleString(undefined, {
                         minimumFractionDigits: 2,
