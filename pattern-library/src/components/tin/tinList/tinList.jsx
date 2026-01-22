@@ -95,7 +95,7 @@ const TinList = () => {
     return <ErrorComponent error={error || "Error fetching data..."} />;
   }
 
-  if (isLoadingData || isLoadingTrn || isLoading || isInitializing) {
+  if (isLoadingData || isLoadingTrn || isInitializing) {
     return <LoadingSpinner />;
   }
 
