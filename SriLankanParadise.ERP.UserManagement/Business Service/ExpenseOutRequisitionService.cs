@@ -43,9 +43,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             await _expenseOutRequisitionRepository.UpdateExpenseOutRequisition(expenseOutRequisitionId, expenseOutRequisition);
         }
 
-        public async Task<IEnumerable<ExpenseOutRequisition>> GetApprovedExpenseOutRequisitions(int status, string? searchQuery)
+        public async Task<IEnumerable<ExpenseOutRequisition>> GetApprovedExpenseOutRequisitions(int status,int companyId, string? searchQuery)
         {
-            return await _expenseOutRequisitionRepository.GetApprovedExpenseOutRequisitions(status, searchQuery);
+            return await _expenseOutRequisitionRepository.GetApprovedExpenseOutRequisitions(status, companyId, searchQuery);
         }
     }
 }

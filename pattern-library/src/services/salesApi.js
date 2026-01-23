@@ -957,10 +957,10 @@ export const get_expense_out_requisitions_api = async (companyId) => {
   }
 };
 
-export const get_approved_expense_out_requisitions = async (status, query) => {
+export const get_approved_expense_out_requisitions = async (companyId,status, query) => {
   try {
     const response = await api.get(
-      `/expenseOutRequisition/GetApprovedExpenseOutRequisitio/${status}?query=${query}`,
+      `/expenseOutRequisition/GetApprovedExpenseOutRequisitio/${companyId}/${status}?query=${query}`,
       {
         withCredentials: true,
       }

@@ -114,14 +114,14 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<ExpenseOutRequisition>> GetApprovedExpenseOutRequisitions(int status, string? SearchQuery)
+        public async Task<IEnumerable<ExpenseOutRequisition>> GetApprovedExpenseOutRequisitions(int status, int companyId, string? SearchQuery)
         {
             try
             {
                 var query = _dbContext.ExpenseOutRequisitions
                     .AsNoTracking()
                     .Include(eor => eor.CashierExpenseOuts)
-                    .Where(sr => sr.Status == status);
+                    .Where(sr => sr.Status == status && sr.CompanyId == companyId);
               
 
                 //Apply Filter

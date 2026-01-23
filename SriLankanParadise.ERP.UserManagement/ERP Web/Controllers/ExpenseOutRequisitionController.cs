@@ -200,12 +200,12 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
         }
 
-        [HttpGet("GetApprovedExpenseOutRequisitio/{status}")]
-        public async Task<ApiResponseModel> GetApprovedExpenseOutRequisition(int status,[FromQuery] string? searchQuery) 
+        [HttpGet("GetApprovedExpenseOutRequisitio/{companyId}/{status}")]
+        public async Task<ApiResponseModel> GetApprovedExpenseOutRequisition(int companyId, int status, [FromQuery] string? searchQuery) 
         {
             try
             {
-                var expenseOutRequisitions = await _expenseOutRequisitionService.GetApprovedExpenseOutRequisitions(status, searchQuery);
+                var expenseOutRequisitions = await _expenseOutRequisitionService.GetApprovedExpenseOutRequisitions(status, companyId, searchQuery);
                 if (expenseOutRequisitions != null)
                 {
                     var expenseOutRequisitionDtos = _mapper.Map<IEnumerable<ExpenseOutRequisitionDto>>(expenseOutRequisitions);

@@ -40,6 +40,7 @@ const useCashierExpenseOutList = () => {
     queryFn: async () => {
       try {
         const response = await get_approved_expense_out_requisitions(
+          sessionStorage.getItem("companyId"),
           3,
           searchQuery
         );
