@@ -19,6 +19,8 @@ public partial class LocationInventory
 
     public virtual ItemBatch ItemBatch { get; set; } = null!;
 
+    public virtual ItemMaster ItemMaster { get; set; } = null!;
+
     public virtual Location Location { get; set; } = null!;
 
     public virtual ICollection<DailyLocationInventory> DailyLocationInventories { get; set; } = new List<DailyLocationInventory>();

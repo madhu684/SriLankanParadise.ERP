@@ -659,9 +659,13 @@ public partial class ErpSystemContext : DbContext
 
             entity.HasOne(d => d.ItemBatch).WithMany(p => p.LocationInventories)
                 .HasForeignKey(d => new { d.ItemMasterId, d.BatchId })
-                
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_LocationInventory_ItemMaster_Batch");
+
+            entity.HasOne(d => d.ItemMaster).WithMany(p => p.LocationInventories)
+                .HasForeignKey(d => d.ItemMasterId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_LocationInventory_ItemMaster");
         });
 
         modelBuilder.Entity<LocationInventoryGoodsInTransit>(entity =>
