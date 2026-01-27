@@ -43,6 +43,7 @@ import RolePermissionMapping from "./components/rolePermissionMapping/RolePermis
 import CustomerList from "./components/customer/customerList/CustomerList";
 import CollectionReport from "./components/collectionReport/CollectionReport";
 import ManagerCollectionReport from "./components/ManagerCollectionReport/ManagerCollectionReport";
+import CustomerInqueryReport from "./components/customerInqueryReport/CustomerInqueryReport.jsx";
 
 const Routers = () => {
   return (
@@ -114,6 +115,10 @@ const Routers = () => {
             <Route
               path="collection-report"
               element={<ManagerCollectionReport />}
+            />
+            <Route
+              path="customer-inquiry-report"
+              element={<CustomerInqueryReport />}
             />
           </Route>
 

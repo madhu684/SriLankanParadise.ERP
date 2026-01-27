@@ -273,6 +273,71 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
+        public async Task<PagedResult<SalesInvoice>> GetSalesInvoicesByCustomerSearch(string? name = null, string? phone = null, DateTime? fromDate = null, DateTime? toDate = null, int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                // Input validation
+                if (pageNumber < 1) pageNumber = 1;
+                if (pageSize < 1) pageSize = 10;
+                if (pageSize > 100) pageSize = 100;
+
+                var query = _dbContext.SalesInvoices
+                    .AsNoTracking()
+                    .Include(si => si.SalesInvoiceDetails)
+                        .ThenInclude(ib => ib.Batch)
+                    .Include(si => si.SalesInvoiceDetails)
+                        .ThenInclude(ib => ib.ItemMaster)
+                            .ThenInclude(im => im.Unit)
+                    .Include(si => si.SalesOrder)
+                        .ThenInclude(so => so.Customer)
+                    .AsQueryable();
+
+                if (!string.IsNullOrEmpty(name))
+                {
+                    query = query.Where(si => si.InVoicedPersonName.Contains(name));
+                }
+
+                if (!string.IsNullOrEmpty(phone))
+                {
+                    query = query.Where(si => si.InVoicedPersonMobileNo.Contains(phone));
+                }
+
+                if (fromDate.HasValue)
+                {
+                    var startDate = fromDate.Value.Date;
+                    query = query.Where(si => si.InvoiceDate >= startDate);
+                }
+
+                if (toDate.HasValue)
+                {
+                    var endDate = toDate.Value.Date.AddDays(1).AddTicks(-1);
+                    query = query.Where(si => si.InvoiceDate <= endDate);
+                }
+
+                var totalCount = await query.CountAsync();
+
+                var items = await query
+                    .OrderBy(si => si.InvoiceDate)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                return new PagedResult<SalesInvoice>
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+                };
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public async Task<PagedResult<SalesInvoice>> GetPaginatedFilteredSalesInvoiceByCompanyIdDate(int companyId, DateTime? date, string? searchQuery = null, string? filter = null, int pageNumber = 1, int pageSize = 10)
         {
             try
