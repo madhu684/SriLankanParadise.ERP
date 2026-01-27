@@ -132,6 +132,21 @@ export const get_paginated_customers_by_companyId_api = async ({
   }
 };
 
+export const search_customers_by_name_phone = async (searchQuery) => {
+  try {
+    const response = await api.get(
+      `/customer/search-customers?searchTerm=${searchQuery}`,
+      {
+        withCredentials: true,
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 //sales person apis
 export const get_sales_persons_by_company_id_api = async (companyId) => {
   try {
