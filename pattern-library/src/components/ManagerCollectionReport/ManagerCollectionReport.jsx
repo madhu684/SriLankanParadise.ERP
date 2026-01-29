@@ -17,6 +17,7 @@ import { BsCashStack, BsWallet2 } from "react-icons/bs";
 import CurrentDateTime from "../currentDateTime/currentDateTime";
 import useManagerCollectionReport from "./useManagerCollectionReport";
 import ErrorComponent from "../errorComponent/errorComponent";
+import PermissionComponent from "../errorComponent/permissionComponent";
 
 const ManagerCollectionReport = () => {
   const {
@@ -34,9 +35,7 @@ const ManagerCollectionReport = () => {
   } = useManagerCollectionReport();
 
   if (!hasPermission("View Manager Collection Report"))
-    return (
-      <ErrorComponent error={"You don't have permission to view this page"} />
-    );
+    return <PermissionComponent />;
 
   return (
     <div className="container-fluid mt-4 mb-5">
@@ -297,7 +296,10 @@ const ManagerCollectionReport = () => {
                               <th className="text-end text-info">
                                 Bank Transfer
                               </th>
-                              <th className="text-end" style={{ color: "#fd7e14" }}>
+                              <th
+                                className="text-end"
+                                style={{ color: "#fd7e14" }}
+                              >
                                 Gift Voucher
                               </th>
                               <th className="text-end text-secondary">
@@ -316,8 +318,8 @@ const ManagerCollectionReport = () => {
                                     {session.sessionIn
                                       ? formatTime(session.sessionIn)
                                       : session.sessionId
-                                      ? `Session #${session.sessionId}`
-                                      : "Main Session"}
+                                        ? `Session #${session.sessionId}`
+                                        : "Main Session"}
                                   </span>
                                 </td>
                                 <td className="text-end fw-semibold">
@@ -334,12 +336,15 @@ const ManagerCollectionReport = () => {
                                 </td>
                                 <td className="text-end text-info">
                                   {formatCurrency(
-                                    session.sessionTotalBankTransfer
+                                    session.sessionTotalBankTransfer,
                                   )}
                                 </td>
-                                <td className="text-end" style={{ color: "#fd7e14" }}>
+                                <td
+                                  className="text-end"
+                                  style={{ color: "#fd7e14" }}
+                                >
                                   {formatCurrency(
-                                    session.sessionTotalGiftVoucher
+                                    session.sessionTotalGiftVoucher,
                                   )}
                                 </td>
                                 <td className="text-end text-secondary">
@@ -347,7 +352,7 @@ const ManagerCollectionReport = () => {
                                 </td>
                                 <td className="text-end fw-bold pe-4">
                                   {formatCurrency(
-                                    session.sessionTotalCashInHand
+                                    session.sessionTotalCashInHand,
                                   )}
                                 </td>
                               </tr>
@@ -370,11 +375,16 @@ const ManagerCollectionReport = () => {
                               </td>
                               <td className="text-end text-info">
                                 {formatCurrency(
-                                  userReport.userTotalBankTransfer
+                                  userReport.userTotalBankTransfer,
                                 )}
                               </td>
-                              <td className="text-end" style={{ color: "#fd7e14" }}>
-                                {formatCurrency(userReport.userTotalGiftVoucher)}
+                              <td
+                                className="text-end"
+                                style={{ color: "#fd7e14" }}
+                              >
+                                {formatCurrency(
+                                  userReport.userTotalGiftVoucher,
+                                )}
                               </td>
                               <td className="text-end text-secondary">
                                 {formatCurrency(userReport.userTotalExpenses)}

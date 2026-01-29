@@ -63,6 +63,12 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
   const [selectedParentItem, setSelectedParentItem] = useState("");
   const [supplierSearchTerm, setSupplierSearchTerm] = useState("");
   const [selectedChildItems, setSelectedChildItems] = useState([]);
+  const [itemTypeSearchTerm, setItemTypeSearchTerm] = useState("");
+  const [categorySearchTerm, setCategorySearchTerm] = useState("");
+  const [isItemTypeSelected, setIsItemTypeSelected] = useState(false);
+  const [isCategorySelected, setIsCategorySelected] = useState(false);
+  const [showItemTypeDropdown, setShowItemTypeDropdown] = useState(false);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -270,6 +276,8 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
       previousSupplierId: deepCopyItemMaster?.supplierId ?? null,
       itemModeId: deepCopyItemMaster?.itemModeId ?? null,
     });
+    setIsItemTypeSelected(!!deepCopyItemMaster?.itemTypeId);
+    setIsCategorySelected(!!deepCopyItemMaster?.categoryId);
 
     const fetchParentItem = async () => {
       try {
@@ -928,10 +936,60 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     setFormData((prev) => ({
       ...prev,
       supplier: "",
-      supplierId: null,
+      supplierId: "",
     }));
     setSupplierSearchTerm("");
   };
+
+  const handleItemTypeSelect = (type) => {
+    setFormData((prev) => ({
+      ...prev,
+      itemTypeId: type.itemTypeId,
+      itemTypeName: type.name,
+    }));
+    setIsItemTypeSelected(true);
+    setItemTypeSearchTerm("");
+    setShowItemTypeDropdown(false);
+  };
+
+  const handleResetItemType = () => {
+    setFormData((prev) => ({
+      ...prev,
+      itemTypeId: "",
+      itemTypeName: "",
+    }));
+    setIsItemTypeSelected(false);
+    setItemTypeSearchTerm("");
+    setShowItemTypeDropdown(true);
+  };
+
+  const handleCategorySelect = (category) => {
+    setFormData((prev) => ({
+      ...prev,
+      categoryId: category.categoryId,
+    }));
+    setIsCategorySelected(true);
+    setCategorySearchTerm("");
+    setShowCategoryDropdown(false);
+  };
+
+  const handleResetCategory = () => {
+    setFormData((prev) => ({
+      ...prev,
+      categoryId: "",
+    }));
+    setIsCategorySelected(false);
+    setCategorySearchTerm("");
+    setShowCategoryDropdown(true);
+  };
+
+  const filteredItemTypes = itemTypes?.filter((type) =>
+    type.name.toLowerCase().includes(itemTypeSearchTerm.toLowerCase())
+  );
+
+  const filteredCategories = categoryOptions?.filter((category) =>
+    category.categoryName.toLowerCase().includes(categorySearchTerm.toLowerCase())
+  );
 
   return {
     formData,
@@ -984,6 +1042,24 @@ const useItemMasterUpdate = ({ itemMaster, onFormSubmit }) => {
     handleChildItemQuantityChange,
     handleSupplierChange,
     handleResetSupplier,
+    itemTypeSearchTerm,
+    setItemTypeSearchTerm,
+    categorySearchTerm,
+    setCategorySearchTerm,
+    isItemTypeSelected,
+    setIsItemTypeSelected,
+    isCategorySelected,
+    setIsCategorySelected,
+    handleItemTypeSelect,
+    handleResetItemType,
+    handleCategorySelect,
+    handleResetCategory,
+    filteredItemTypes,
+    filteredCategories,
+    showItemTypeDropdown,
+    setShowItemTypeDropdown,
+    showCategoryDropdown,
+    setShowCategoryDropdown,
   };
 };
 

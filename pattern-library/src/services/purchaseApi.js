@@ -598,6 +598,33 @@ export const get_requisition_masters_by_user_id_api = async (userId) => {
   }
 };
 
+export const get_requisition_masters_with_filters_companyId = async (
+  companyId,
+  date,
+  requestedToLocationId,
+  requestedFromLocationId,
+  issueType,
+) => {
+  try {
+    const response = await api.get(
+      `/requisitionMaster/GetRequisitionMastersWithFiltersByCompanyId/${companyId}`,
+      {
+        params: {
+          date: date,
+          requestedToLocationId: requestedToLocationId,
+          requestedFromLocationId: requestedFromLocationId,
+          issueType: issueType,
+        },
+        withCredentials: true,
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
 export const approve_requisition_master_api = async (
   requisitionMasterId,
   approvalData,

@@ -60,6 +60,12 @@ const useItemMaster = ({ onFormSubmit }) => {
   const [selectedChildItems, setSelectedChildItems] = useState([]);
 
   const [isSupplierSelected, setIsSupplierSelected] = useState(false);
+  const [itemTypeSearchTerm, setItemTypeSearchTerm] = useState("");
+  const [categorySearchTerm, setCategorySearchTerm] = useState("");
+  const [isItemTypeSelected, setIsItemTypeSelected] = useState(false);
+  const [isCategorySelected, setIsCategorySelected] = useState(false);
+  const [showItemTypeDropdown, setShowItemTypeDropdown] = useState(false);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -638,6 +644,56 @@ const useItemMaster = ({ onFormSubmit }) => {
     setSupplierSearchTerm("");
   };
 
+  const handleItemTypeSelect = (type) => {
+    setFormData((prev) => ({
+      ...prev,
+      itemTypeId: type.itemTypeId,
+      itemTypeName: type.name,
+    }));
+    setIsItemTypeSelected(true);
+    setItemTypeSearchTerm("");
+    setShowItemTypeDropdown(false);
+  };
+
+  const handleResetItemType = () => {
+    setFormData((prev) => ({
+      ...prev,
+      itemTypeId: "",
+      itemTypeName: "",
+    }));
+    setIsItemTypeSelected(false);
+    setItemTypeSearchTerm("");
+    setShowItemTypeDropdown(true);
+  };
+
+  const handleCategorySelect = (category) => {
+    setFormData((prev) => ({
+      ...prev,
+      categoryId: category.categoryId,
+    }));
+    setIsCategorySelected(true);
+    setCategorySearchTerm("");
+    setShowCategoryDropdown(false);
+  };
+
+  const handleResetCategory = () => {
+    setFormData((prev) => ({
+      ...prev,
+      categoryId: "",
+    }));
+    setIsCategorySelected(false);
+    setCategorySearchTerm("");
+    setShowCategoryDropdown(true);
+  };
+
+  const filteredItemTypes = itemTypes?.filter((type) =>
+    type.name.toLowerCase().includes(itemTypeSearchTerm.toLowerCase())
+  );
+
+  const filteredCategories = categoryOptions?.filter((category) =>
+    category.categoryName.toLowerCase().includes(categorySearchTerm.toLowerCase())
+  );
+
   console.log(formData);
 
   return {
@@ -689,6 +745,24 @@ const useItemMaster = ({ onFormSubmit }) => {
     handleSelectSubItem,
     handleRemoveChildItem,
     handleChildItemQuantityChange,
+    itemTypeSearchTerm,
+    setItemTypeSearchTerm,
+    categorySearchTerm,
+    setCategorySearchTerm,
+    isItemTypeSelected,
+    setIsItemTypeSelected,
+    isCategorySelected,
+    setIsCategorySelected,
+    handleItemTypeSelect,
+    handleResetItemType,
+    handleCategorySelect,
+    handleResetCategory,
+    filteredItemTypes,
+    filteredCategories,
+    showItemTypeDropdown,
+    setShowItemTypeDropdown,
+    showCategoryDropdown,
+    setShowCategoryDropdown,
   };
 };
 

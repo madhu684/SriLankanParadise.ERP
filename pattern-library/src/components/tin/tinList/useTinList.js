@@ -67,6 +67,14 @@ const useTinList = () => {
           rm.requestedToLocationId === warehouseUserLocation[0],
       );
       return filteredRequisitions;
+      // const response = await get_requisition_masters_with_filters_companyId(
+      //   companyId,
+      //   null,
+      //   warehouseUserLocation[0],
+      //   null,
+      //   "TRN",
+      // );
+      // return response?.data?.result || [];
     },
     enabled:
       !!companyId &&

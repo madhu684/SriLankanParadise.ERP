@@ -17,6 +17,7 @@ import Pagination from "../../components/common/Pagination/Pagination";
 import LoadingSpinner from "../../components/loadingSpinner/loadingSpinner";
 import ErrorComponent from "../errorComponent/errorComponent";
 import { UserContext } from "../../context/userContext";
+import PermissionComponent from "../errorComponent/permissionComponent";
 
 const CustomerInqueryReport = () => {
   const {
@@ -55,9 +56,7 @@ const CustomerInqueryReport = () => {
   };
 
   if (!hasPermission("View Customer Inquiry Report"))
-    return (
-      <ErrorComponent error={"You don't have permission to view this page"} />
-    );
+    return <PermissionComponent />;
 
   return (
     <div className="container-fluid mt-4 mb-5">

@@ -17,5 +17,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task<RequisitionMaster> GetRequisitionMasterByRequisitionMasterId(int requisitionMasterId);
 
         Task<IEnumerable<RequisitionMaster>> GetRequisitionMastersByUserId(int userId);
+
+        Task<IEnumerable<RequisitionMaster>> GetRequisitionMastersWithFiltersByCompanyId(int companyId, DateTime? date = null, int? requestedToLocationId = null, int? requestedFromLocationId = null, string? issueType = null);
     }
 }

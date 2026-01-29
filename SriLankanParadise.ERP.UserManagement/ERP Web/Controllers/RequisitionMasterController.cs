@@ -133,7 +133,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
-        
+
         [HttpPatch("approve/{requisitionMasterId}")]
         public async Task<ApiResponseModel> ApproveRequisitionMaster(int requisitionMasterId, ApproveRequisitionMasterRequestModel approveRequisitionMasterRequest)
         {
@@ -194,6 +194,36 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 _logger.LogError(ex, ErrorMessages.InternalServerError);
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
+        }
+
+        [HttpGet("GetRequisitionMastersWithFiltersByCompanyId/{companyId}")]
+        public async Task<ApiResponseModel> GetRequisitionMastersWithFiltersByCompanyId(
+            int companyId,
+            [FromQuery] DateTime? date = null,
+            [FromQuery] int? requestedToLocationId = null,
+            [FromQuery] int? requestedFromLocationId = null,
+            [FromQuery] string? issueType = null)
+        {
+            try
+            {
+                var requisitionMasters = await _requisitionMasterService.GetRequisitionMastersWithFiltersByCompanyId(companyId, date, requestedToLocationId, requestedFromLocationId, issueType);
+                if (requisitionMasters != null && requisitionMasters.Any())
+                {
+                    var requisitionMasterDtos = _mapper.Map<IEnumerable<RequisitionMasterDto>>(requisitionMasters);
+                    AddResponseMessage(Response, LogMessages.RequisitionMastersRetrieved, requisitionMasterDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.RequisitionMastersNotFound);
+                    AddResponseMessage(Response, LogMessages.RequisitionMastersNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
         }
     }
 }
