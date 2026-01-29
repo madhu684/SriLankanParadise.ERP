@@ -67,8 +67,8 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
   const fetchItems = async (searchQuery) => {
     try {
       const response = await get_Location_Inventory_Summary_By_Item_Name_api(
-        //formData.expectedDeliveryLocation,
-        null,
+        formData.expectedDeliveryLocation,
+        //null,
         searchQuery,
         null
       );
