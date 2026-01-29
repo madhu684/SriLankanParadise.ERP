@@ -383,7 +383,7 @@ const useMin = ({ onFormSubmit }) => {
         referenceNumber: generateReferenceNumber(),
         approvedUserId: null,
         issuedLocationId: parseInt(selectedLocationId),
-        tokenNo: parseInt(formData.tokenNo),
+        tokenNo: formData.tokenNo.trim(),
         permissionId: 1061,
         // toLocationId: searchByMrn
         //   ? parseInt(selectedMrn?.requestedToLocationId)

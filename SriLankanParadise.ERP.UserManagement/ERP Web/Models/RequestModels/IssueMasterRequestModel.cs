@@ -26,7 +26,7 @@
 
         public int? IssuedLocationId { get; set; }
 
-        public int? TokenNo { get; set; }
+        public string? TokenNo { get; set; }
 
         public int PermissionId { get; set; }
     }

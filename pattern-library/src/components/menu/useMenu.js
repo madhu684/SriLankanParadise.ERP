@@ -42,6 +42,7 @@ const submoduleRouteMap = {
   "Cashier Expense Out": "/main/sales/cashier",
   "User Collection Report": "/main/sales/user-collection-report",
   "Collection Report": "/main/sales/collection-report",
+  "Customer Inquiry Report": "/main/sales/customer-inquiry-report",
 
   // Inventory Management
   "Item Masters": "/main/inventory/items",

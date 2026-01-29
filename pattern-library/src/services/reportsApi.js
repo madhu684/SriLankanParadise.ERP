@@ -13,7 +13,7 @@ const api = axios.create({
 export const get_collection_report_by_date_user_api = async (
   userId,
   date,
-  cashierSessionId
+  cashierSessionId,
 ) => {
   const params = {
     date,
@@ -40,6 +40,41 @@ export const get_manager_collection_report_api = async (date) => {
       params: { date },
       withCredentials: true,
     });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_customer_invoices_by_customer_date_api = async ({
+  name,
+  phone,
+  fromDate,
+  toDate,
+  pageNumber = 1,
+  pageSize = 10,
+}) => {
+  try {
+    const params = {
+      name,
+      phone,
+      fromDate,
+      toDate,
+      pageNumber,
+      pageSize,
+    };
+
+    if (name) params.name = name;
+    if (phone) params.phone = phone;
+    if (fromDate) params.fromDate = fromDate;
+    if (toDate) params.toDate = toDate;
+
+    const response = await api.get(`/report/GetCustomerInvoices`, {
+      params,
+      withCredentials: true,
+    });
+
     return response.data;
   } catch (error) {
     console.log(error);
