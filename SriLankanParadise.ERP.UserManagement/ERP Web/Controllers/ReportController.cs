@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SriLankanParadise.ERP.UserManagement.Business_Service;
@@ -22,6 +23,9 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         private readonly ILocationService _locationService;
         private readonly ISalesReceiptService _salesReceiptService;
         private readonly ICashierExpenseOutService _cashierExpenseOutService;
+        private readonly ICashierSessionService _cashierSessionService;
+        private readonly ISalesInvoiceService _salesInvoiceService;
+        private readonly IMapper _mapper;
         private readonly ILogger<ReportController> _logger;
 
         public ReportController
@@ -33,6 +37,9 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 ILocationService locationService,
                 ISalesReceiptService salesReceiptService,
                 ICashierExpenseOutService cashierExpenseOutService,
+                ICashierSessionService cashierSessionService,
+                ISalesInvoiceService salesInvoiceService,
+                IMapper mapper,
                 ILogger<ReportController> logger
             )
         {
@@ -43,6 +50,9 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             _locationService = locationService;
             _salesReceiptService = salesReceiptService;
             _cashierExpenseOutService = cashierExpenseOutService;
+            _cashierSessionService = cashierSessionService;
+            _salesInvoiceService = salesInvoiceService;
+            _mapper = mapper;
             _logger = logger;
         }
 
@@ -192,7 +202,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             try
             {
                 var receiptData = await _salesReceiptService.GetSalesReceiptsByUserIdAndDate(userId, date, cashierSessionId);
-                var cashierExpenses = await _cashierExpenseOutService.GetCashierExpenseOutsByUserIdDate(userId, date, cashierSessionId);
+                var cashierExpenses = await _cashierExpenseOutService.GetCashierExpenseOutsByUserIdDate(date, userId, cashierSessionId);
 
                 var reportItems = new List<CollectionReportItemDto>();
                 decimal totalAmount = 0;
@@ -288,7 +298,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 {
                     // Fetch full day data if filtered by session
                     var dailyReceiptData = await _salesReceiptService.GetSalesReceiptsByUserIdAndDate(userId, date, null);
-                    var dailyCashierExpenses = await _cashierExpenseOutService.GetCashierExpenseOutsByUserIdDate(userId, date, null);
+                    var dailyCashierExpenses = await _cashierExpenseOutService.GetCashierExpenseOutsByUserIdDate(date, userId, null);
 
                     if (dailyReceiptData != null && dailyReceiptData.Any())
                     {
@@ -402,7 +412,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                     int userId = user.CreatedUserId.Value;
                     var userReceipts = allReceipts.Where(r => r.CreatedUserId == userId).ToList();
-                    var userExpenses = await _cashierExpenseOutService.GetCashierExpenseOutsByUserIdDate(userId, date);
+                    var userExpenses = await _cashierExpenseOutService.GetCashierExpenseOutsByUserIdDate(date, userId);
 
                     var userDto = new ManagerCollectionReportUserDto
                     {
@@ -410,10 +420,13 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                         UserName = user.CreatedBy
                     };
 
-                    // distinct sessions from both receipts and expenses
+                    // distinct sessions from both receipts, expenses, and the sessions table itself
                     var receiptSessionIds = userReceipts.Select(r => r.CashierSessionId).Distinct();
                     var expenseSessionIds = userExpenses?.Select(e => e.CashierSessionId).Distinct() ?? Enumerable.Empty<int?>();
-                    var allSessionIds = receiptSessionIds.Union(expenseSessionIds).Distinct().OrderBy(id => id).ToList();
+                    var userSessions = await _cashierSessionService.GetCashierSessionsByUserIdAndDate(userId, date);
+                    var userSessionIds = userSessions.Select(cs => (int?)cs.CashierSessionId);
+                    
+                    var allSessionIds = receiptSessionIds.Union(expenseSessionIds).Union(userSessionIds).Distinct().OrderBy(id => id).ToList();
 
                     var userInvoiceShortAmounts = new Dictionary<int, decimal>();
                     var userInvoiceExcessAmounts = new Dictionary<int, decimal>();
@@ -422,8 +435,18 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     {
                         var sessionReceipts = userReceipts.Where(r => r.CashierSessionId == sessionId).ToList();
                         var sessionExpenses = userExpenses?.Where(e => e.CashierSessionId == sessionId).ToList();
-
+                        
                         var sessionDto = new ManagerCollectionReportSessionDto { SessionId = sessionId };
+
+                        if (sessionId.HasValue)
+                        {
+                            var session = userSessions.FirstOrDefault(cs => cs.CashierSessionId == sessionId.Value) 
+                                          ?? await _cashierSessionService.GetCashierSessionByCashierSessionId(sessionId.Value);
+                            if (session != null)
+                            {
+                                sessionDto.SessionIn = session.SessionIn;
+                            }
+                        }
 
                         var sessionInvoiceShortAmounts = new Dictionary<int, decimal>();
                         var sessionInvoiceExcessAmounts = new Dictionary<int, decimal>();
@@ -527,6 +550,52 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 reportDto.TotalExcess = grandInvoiceExcessAmounts.Values.Sum();
 
                 AddResponseMessage(Response, "Manager Collection Report Retrieved", reportDto, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("GetCustomerInvoices")]
+        public async Task<ApiResponseModel> GetCustomerInvoices(
+            [FromQuery] string? name = null,
+            [FromQuery] string? phone = null,
+            [FromQuery] DateTime? fromDate = null,
+            [FromQuery] DateTime? toDate = null,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var result = await _salesInvoiceService.GetSalesInvoicesByCustomerSearch(name, phone, fromDate, toDate, pageNumber, pageSize);
+                if (result.Items.Any())
+                {
+                    var customerInvoiceDtos = _mapper.Map<IEnumerable<CustomerInvoiceDto>>(result.Items);
+
+                    var responseData = new
+                    {
+                        Data = customerInvoiceDtos,
+                        Pagination = new
+                        {
+                            result.TotalCount,
+                            result.PageNumber,
+                            result.PageSize,
+                            result.TotalPages,
+                            result.HasPreviousPage,
+                            result.HasNextPage
+                        }
+                    };
+
+                    AddResponseMessage(Response, LogMessages.SalesInvoicesRetrieved, responseData, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.SalesInvoicesNotFound);
+                    AddResponseMessage(Response, LogMessages.SalesInvoicesNotFound, null, true, HttpStatusCode.NotFound);
+                }
             }
             catch (Exception ex)
             {

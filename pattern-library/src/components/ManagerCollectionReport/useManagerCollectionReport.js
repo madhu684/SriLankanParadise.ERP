@@ -33,6 +33,41 @@ const useManagerCollectionReport = () => {
     }).format(amount || 0);
   };
 
+  const formatDateTime = (dateString) => {
+    if (!dateString) return "-";
+    // Ensure the date is treated as UTC if it doesn't have timezone info
+    let normalizedDateStr = dateString.replace(" ", "T");
+    if (!normalizedDateStr.endsWith("Z")) {
+      normalizedDateStr += "Z";
+    }
+    const date = new Date(normalizedDateStr);
+    return date.toLocaleString("en-GB", {
+      timeZone: "Asia/Colombo",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
+  const formatTime = (dateString) => {
+    if (!dateString) return "-";
+    // Ensure the date is treated as UTC if it doesn't have timezone info
+    let normalizedDateStr = dateString.replace(" ", "T");
+    if (!normalizedDateStr.endsWith("Z")) {
+      normalizedDateStr += "Z";
+    }
+    const date = new Date(normalizedDateStr);
+    return date.toLocaleString("en-GB", {
+      timeZone: "Asia/Colombo",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
   const handleExport = () => {
     if (!reportData) return;
 
@@ -53,16 +88,16 @@ const useManagerCollectionReport = () => {
 
     // 2. User Wise Details Sheet
     const userDetailsColumns = [
-      { header: "User Name", accessor: (item) => item.userName, width: 25 },
-      { header: "Session", accessor: (item) => item.sessionDisplay, width: 20 },
-      { header: "Total Amount", accessor: (item) => formatCurrency(item.amount), width: 15 },
-      { header: "Short", accessor: (item) => formatCurrency(item.short), width: 15 },
-      { header: "Excess", accessor: (item) => formatCurrency(item.excess), width: 15 },
-      { header: "Cash", accessor: (item) => formatCurrency(item.cash), width: 15 },
-      { header: "Bank Transfer", accessor: (item) => formatCurrency(item.bankTransfer), width: 15 },
-      { header: "Gift Voucher", accessor: (item) => formatCurrency(item.giftVoucher), width: 15 },
-      { header: "Expenses", accessor: (item) => formatCurrency(item.expenses), width: 15 },
-      { header: "Cash In Hand", accessor: (item) => formatCurrency(item.cashInHand), width: 15 },
+      { header: "User Name", accessor: (item) => item.userName || "", width: 25 },
+      { header: "Session", accessor: (item) => item.sessionDisplay || "", width: 20 },
+      { header: "Total Amount", accessor: (item) => item.amount !== undefined ? formatCurrency(item.amount) : "", width: 15 },
+      { header: "Short", accessor: (item) => item.short !== undefined ? formatCurrency(item.short) : "", width: 15 },
+      { header: "Excess", accessor: (item) => item.excess !== undefined ? formatCurrency(item.excess) : "", width: 15 },
+      { header: "Cash", accessor: (item) => item.cash !== undefined ? formatCurrency(item.cash) : "", width: 15 },
+      { header: "Bank Transfer", accessor: (item) => item.bankTransfer !== undefined ? formatCurrency(item.bankTransfer) : "", width: 15 },
+      { header: "Gift Voucher", accessor: (item) => item.giftVoucher !== undefined ? formatCurrency(item.giftVoucher) : "", width: 15 },
+      { header: "Expenses", accessor: (item) => item.expenses !== undefined ? formatCurrency(item.expenses) : "", width: 15 },
+      { header: "Cash In Hand", accessor: (item) => item.cashInHand !== undefined ? formatCurrency(item.cashInHand) : "", width: 15 },
     ];
 
     const userDetailsData = [];
@@ -71,7 +106,11 @@ const useManagerCollectionReport = () => {
       userReport.sessions.forEach((session) => {
         userDetailsData.push({
           userName: userReport.userName,
-          sessionDisplay: session.sessionId ? `Session #${session.sessionId}` : "Main Session",
+          sessionDisplay: session.sessionIn
+            ? formatTime(session.sessionIn)
+            : session.sessionId
+            ? `Session #${session.sessionId}`
+            : "Main Session",
           amount: session.sessionTotalAmount,
           short: session.sessionTotalShort,
           excess: session.sessionTotalExcess,
@@ -129,6 +168,8 @@ const useManagerCollectionReport = () => {
     hasPermission,
     refetch,
     formatCurrency,
+    formatDateTime,
+    formatTime,
     setDate,
     handleExport,
   };

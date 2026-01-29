@@ -8,6 +8,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
 
         Task<IEnumerable<CashierExpenseOut>> GetCashierExpenseOutsByUserId(int userId);
 
-        Task<IEnumerable<CashierExpenseOut>> GetCashierExpenseOutsByUserIdDate(int userId, DateTime date, int? cashierSessionId = null);
+        Task<IEnumerable<CashierExpenseOut>> GetCashierExpenseOutsByUserIdDate(DateTime date, int? userId = null, int? cashierSessionId = null);
     }
 }

@@ -1,10 +1,14 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import {
   // delete_issue_master_api,
   get_issue_masters_with_out_drafts_api,
   get_requisition_masters_with_out_drafts_api,
 } from "../../../services/purchaseApi";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useContext } from "react";
 import { UserContext } from "../../../context/userContext";
 
@@ -23,6 +27,9 @@ const useTinList = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [submissionMessage, setSubmissionMessage] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toLocaleDateString("en-CA"),
+  ); // YYYY-MM-DD format
   const [TinDetail, setTinDetail] = useState("");
 
   const queryClient = useQueryClient();
@@ -38,43 +45,64 @@ const useTinList = () => {
     : null;
 
   const {
-    data: Tins = [],
-    isLoading: isLoadingData,
-    error,
-  } = useQuery({
-    queryKey: ["tinList", companyId],
-    queryFn: async () => {
-      const TinResponse = await get_issue_masters_with_out_drafts_api(
-        companyId
-      );
-      const filteredTins = TinResponse?.data?.result?.filter(
-        (rm) =>
-          rm.issueType === "TIN" &&
-          rm.issuedLocationId === warehouseUserLocation[0]
-      );
-      return filteredTins || [];
-    },
-    enabled: !!companyId,
-  });
-
-  const {
     data: transferRequisitions = [],
     isLoading: isLoadingTrn,
     error: trnError,
   } = useQuery({
-    queryKey: ["transferRequisitions", companyId],
+    queryKey: [
+      "transferRequisitions",
+      companyId,
+      warehouseUserLocation ? warehouseUserLocation[0] : null,
+    ],
     queryFn: async () => {
-      const response = await get_requisition_masters_with_out_drafts_api(
-        companyId
-      );
+      if (!warehouseUserLocation || warehouseUserLocation.length === 0) {
+        return [];
+      }
+      const response =
+        await get_requisition_masters_with_out_drafts_api(companyId);
       const filteredRequisitions = response?.data?.result?.filter(
         (rm) =>
           rm.requisitionType === "TRN" &&
           rm.status === 2 &&
-          rm.requestedToLocationId === warehouseUserLocation[0]
+          rm.requestedToLocationId === warehouseUserLocation[0],
       );
-      return filteredRequisitions || [];
+      return filteredRequisitions;
     },
+    enabled:
+      !!companyId &&
+      !!warehouseUserLocation &&
+      warehouseUserLocation.length > 0,
+    placeholderData: keepPreviousData,
+  });
+
+  const {
+    data: Tins = [],
+    isLoading: isLoadingData,
+    error,
+  } = useQuery({
+    queryKey: [
+      "tinList",
+      companyId,
+      warehouseUserLocation ? warehouseUserLocation[0] : null,
+      selectedDate,
+    ],
+    queryFn: async () => {
+      if (!warehouseUserLocation || warehouseUserLocation.length === 0) {
+        return [];
+      }
+      const TinResponse = await get_issue_masters_with_out_drafts_api(
+        companyId,
+        selectedDate,
+        warehouseUserLocation[0],
+        "TIN",
+      );
+      return TinResponse?.data?.result || [];
+    },
+    enabled:
+      !!companyId &&
+      !!warehouseUserLocation &&
+      warehouseUserLocation.length > 0,
+    placeholderData: keepPreviousData,
   });
 
   const handleShowApproveTinModal = () => {
@@ -151,10 +179,10 @@ const useTinList = () => {
 
     if (isSelected) {
       setSelectedRows((prevSelected) =>
-        prevSelected.filter((selectedId) => selectedId !== id)
+        prevSelected.filter((selectedId) => selectedId !== id),
       );
       setSelectedRowData((prevSelectedData) =>
-        prevSelectedData.filter((data) => data.issueMasterId !== id)
+        prevSelectedData.filter((data) => data.issueMasterId !== id),
       );
     } else {
       setSelectedRows((prevSelected) => [...prevSelected, id]);
@@ -287,6 +315,8 @@ const useTinList = () => {
     handleClose,
     handleConfirmDeleteTIN,
     handleCloseDeleteConfirmation,
+    selectedDate,
+    setSelectedDate,
   };
 };
 

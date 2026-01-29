@@ -58,6 +58,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         .ThenInclude(im => im.Unit)
                     .Include(rm => rm.RequestedFromLocation)
                     .Include(rm => rm.RequestedToLocation)
+                    .Include(rm => rm.IssueMasters)
                     .ToListAsync();
 
                 if (requisitionMasters.Any())

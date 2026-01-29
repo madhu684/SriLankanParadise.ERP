@@ -83,9 +83,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             return await _locationInventoryRepository.GetLowStockItems(supplierId, locationId);
         }
 
-        public async Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByItemName(int companyId, int? locationId, string itemName)
+        public async Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByItemName(int? locationId, string itemName, int? supplierId = null)
         {
-            return await _locationInventoryRepository.GetSumLocationInventoriesByItemName(companyId, locationId, itemName);
+            return await _locationInventoryRepository.GetSumLocationInventoriesByItemName(locationId, itemName, supplierId);
         }
 
         public async Task<IEnumerable<LocationInventorySummary>> GetLowStockItemsByLocationOnly(int locationId)
@@ -116,6 +116,11 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         public async Task IncreaseInventoryByFIFO(int locationId, int itemMasterId, int transactionTypeId, decimal quantity, int? sourceLocationId = null)
         {
             await _locationInventoryRepository.IncreaseInventoryByFIFO(locationId, itemMasterId, transactionTypeId, quantity, sourceLocationId);
+        }
+
+        public async Task StockAdjustment(int locationInventoryId, decimal quantity)
+        {
+            await _locationInventoryRepository.StockAdjustment(locationInventoryId, quantity);
         }
     }
 }

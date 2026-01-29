@@ -6,7 +6,11 @@ import {
   post_sales_receipt_sales_invoice_api,
   put_sales_invoice_api,
 } from "../../services/salesApi";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { UserContext } from "../../context/userContext";
 
 const useSalesReceipt = ({ onFormSubmit }) => {
@@ -38,55 +42,52 @@ const useSalesReceipt = ({ onFormSubmit }) => {
 
   const queryClient = useQueryClient();
 
-  const fetchsalesInvoices = async () => {
+  const fetchsalesInvoices = async (searchQuery) => {
     try {
-      const response = await get_sales_invoices_with_out_drafts_api(
-        sessionStorage?.getItem("companyId")
-      );
-
-      // Get today's date at midnight in local timezone
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      const filteredsalesInvoices = response.data.result?.filter((sr) => {
-        // Must have status 2
-        if (sr.status !== 2) return false;
-
-        // Include if amountDue is greater than 100
-        if (sr.amountDue > 100) return true;
-
-        // Otherwise, check if invoice date is today
-        if (!sr.invoiceDate) return false;
-
-        // Parse the invoice date and set to midnight for comparison
-        const invoiceDate = new Date(sr.invoiceDate);
-        invoiceDate.setHours(0, 0, 0, 0);
-
-        // Check if invoice date matches today
-        return invoiceDate.getTime() === today.getTime();
+      const response = await get_sales_invoices_with_out_drafts_api({
+        companyId: sessionStorage?.getItem("companyId"),
+        date: new Date().toISOString().split("T")[0],
+        filter: "outstanding",
+        status: 2,
+        searchQuery: searchQuery,
       });
 
-      return filteredsalesInvoices || [];
+      return response.data.result || [];
     } catch (error) {
       console.error("Error fetching sales invoices:", error);
       return [];
     }
   };
 
+  const [debouncedSiSearchTerm, setDebouncedSiSearchTerm] = useState("");
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSiSearchTerm(siSearchTerm);
+    }, 500); // 500ms debounce
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [siSearchTerm]);
+
   const {
     data: salesInvoiceOptions,
     isLoading: isSalesInvoiceOptionsLoading,
+    isFetching: isSalesInvoiceOptionsFetching,
     isError: isSalesInvoiceOptionsError,
     error: salesInvoiceOptionsError,
   } = useQuery({
-    queryKey: ["salesInvoiceOptions"],
-    queryFn: fetchsalesInvoices,
+    queryKey: ["salesInvoiceOptions", debouncedSiSearchTerm],
+    queryFn: () => fetchsalesInvoices(debouncedSiSearchTerm),
+    //placeholderData: (previousData) => previousData,
+    placeholderData: keepPreviousData,
   });
 
   const fetchPaymentModes = async () => {
     try {
       const response = await get_payment_modes_api(
-        sessionStorage?.getItem("companyId")
+        sessionStorage?.getItem("companyId"),
       );
       return response.data.result || [];
     } catch (error) {
@@ -124,7 +125,7 @@ const useSalesReceipt = ({ onFormSubmit }) => {
     fieldName,
     fieldDisplayName,
     value,
-    additionalRules = {}
+    additionalRules = {},
   ) => {
     let isFieldValid = true;
     let errorMessage = "";
@@ -189,25 +190,25 @@ const useSalesReceipt = ({ onFormSubmit }) => {
     const isReceiptDateValid = validateField(
       "receiptDate",
       "Receipt date",
-      formData.receiptDate
+      formData.receiptDate,
     );
 
     const isPaymentModeIdValid = validateField(
       "paymentModeId",
       "Payment mode",
-      formData.paymentModeId
+      formData.paymentModeId,
     );
 
     const isSalesInvoiceIdValid = validateField(
       "salesInvoiceId",
       "Sales invoice reference number",
-      formData.salesInvoiceIds
+      formData.salesInvoiceIds,
     );
 
     const isPaymentReferenceValid = validateField(
       "referenceNo",
       "Payment reference",
-      formData.referenceNo
+      formData.referenceNo,
     );
 
     const isAttachmentsValid = validateAttachments(formData.attachments);
@@ -228,7 +229,7 @@ const useSalesReceipt = ({ onFormSubmit }) => {
       const isValidPayment = validateField(
         paymentFieldName,
         paymentDisplayName,
-        invoice.payment
+        invoice.payment,
         // additionalRules
       );
 
@@ -319,7 +320,7 @@ const useSalesReceipt = ({ onFormSubmit }) => {
             };
 
             const postResponse = await post_sales_receipt_sales_invoice_api(
-              salesReceiptSalesInvoiceData
+              salesReceiptSalesInvoiceData,
             );
 
             // Calculate new amount due after this payment, ensuring it's not negative
@@ -362,11 +363,11 @@ const useSalesReceipt = ({ onFormSubmit }) => {
 
             const putResponse = await put_sales_invoice_api(
               item.salesInvoiceId,
-              salesInvoiceData
+              salesInvoiceData,
             );
 
             return { postResponse: postResponse, putResponse };
-          }
+          },
         );
 
         // Wait for all requests to complete
@@ -376,7 +377,7 @@ const useSalesReceipt = ({ onFormSubmit }) => {
         const allUpdatesSuccessful = allResponses.every(
           ({ postResponse, putResponse }) => {
             return postResponse.status === 201 && putResponse.status === 200;
-          }
+          },
         );
 
         if (allUpdatesSuccessful) {
@@ -446,7 +447,7 @@ const useSalesReceipt = ({ onFormSubmit }) => {
           const excessReduction = prevExcess - newExcess;
           currentItem.customerBalance = Math.min(
             prevCustomerBalance + excessReduction,
-            totalAvailable
+            totalAvailable,
           );
         }
       }
@@ -467,22 +468,22 @@ const useSalesReceipt = ({ onFormSubmit }) => {
         // Customer balance is the excess amount received
         currentItem.customerBalance = Math.max(
           0,
-          totalReceived - invoiceTotal - excessAmount
+          totalReceived - invoiceTotal - excessAmount,
         );
       } else {
         // Invoice is partially settled - calculate normally
         currentItem.outstandingAmount = Math.max(
           0,
-          amountDue - payment + excessAmount
+          amountDue - payment + excessAmount,
         );
         // Ensure updatedAmountDue is not negative
         currentItem.updatedAmountDue = Math.max(
           0,
-          amountDue - payment + excessAmount
+          amountDue - payment + excessAmount,
         );
         currentItem.customerBalance = Math.max(
           0,
-          payment - amountDue - excessAmount
+          payment - amountDue - excessAmount,
         );
       }
 
@@ -534,27 +535,27 @@ const useSalesReceipt = ({ onFormSubmit }) => {
     return formData.selectedSalesInvoices.reduce(
       (total, item) =>
         total + ((item.payment || 0) - (item.customerBalance || 0)),
-      0
+      0,
     );
   };
   const calculateTotalAmount = () => {
     return formData.selectedSalesInvoices.reduce(
       (total, item) => total + parseFloat(item.payment || 0),
-      0
+      0,
     );
   };
 
   const calculateTotalExcessAmountAmount = () => {
     return formData.selectedSalesInvoices.reduce(
       (total, item) => total + parseFloat(item.excessAmount || 0),
-      0
+      0,
     );
   };
 
   const calculateTotalOutstandingAmountAmount = () => {
     return formData.selectedSalesInvoices.reduce(
       (total, item) => total + parseFloat(item.outstandingAmount || 0),
-      0
+      0,
     );
   };
 
@@ -581,7 +582,7 @@ const useSalesReceipt = ({ onFormSubmit }) => {
         }));
 
         const selectedSalesInvoice = salesInvoiceOptions.find(
-          (salesInvoice) => salesInvoice.referenceNo === referenceId
+          (salesInvoice) => salesInvoice.referenceNo === referenceId,
         );
 
         selectedSalesInvoice.payment = 0.0;
@@ -607,21 +608,24 @@ const useSalesReceipt = ({ onFormSubmit }) => {
   };
 
   const handleRemoveSalesInvoice = (selectedId) => {
-    const selectedSalesInvoice = salesInvoiceOptions.find(
-      (salesInvoice) => salesInvoice.referenceNo === selectedId
+    const selectedSalesInvoice = formData.selectedSalesInvoices.find(
+      (salesInvoice) => salesInvoice.referenceNo === selectedId,
     );
+
+    if (!selectedSalesInvoice) return;
+
     setFormData((prevFormData) => ({
       ...prevFormData,
       salesInvoiceReferenceNumbers:
         prevFormData.salesInvoiceReferenceNumbers.filter(
-          (id) => id !== selectedId
+          (id) => id !== selectedId,
         ),
       salesInvoiceIds: prevFormData.salesInvoiceIds.filter(
-        (id) => id !== selectedSalesInvoice.salesInvoiceId
+        (id) => id !== selectedSalesInvoice.salesInvoiceId,
       ),
       selectedSalesInvoices: prevFormData.selectedSalesInvoices.filter(
         (salesInvoice) =>
-          salesInvoice.salesInvoiceId !== selectedSalesInvoice.salesInvoiceId
+          salesInvoice.salesInvoiceId !== selectedSalesInvoice.salesInvoiceId,
       ),
     }));
   };
@@ -642,6 +646,7 @@ const useSalesReceipt = ({ onFormSubmit }) => {
     alertRef,
     salesInvoiceOptions,
     isSalesInvoiceOptionsLoading,
+    isSalesInvoiceOptionsFetching,
     isSalesInvoiceOptionsError,
     salesInvoiceOptionsError,
     siSearchTerm,

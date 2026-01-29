@@ -91,7 +91,8 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<RequisitionMasterRequestModel, RequisitionMaster>();
             CreateMap<ApproveRequisitionMasterRequestModel, RequisitionMaster>();
             CreateMap<PatchIsMINApprovedMRNRequestModel, RequisitionMaster>();
-            CreateMap<RequisitionMaster, RequisitionMasterDto>();
+            CreateMap<RequisitionMaster, RequisitionMasterDto>()
+                .ForMember(dest => dest.IsIssueMasterCreated, opt => opt.MapFrom(src => src.IssueMasters.Any()));
             CreateMap<RequisitionDetailRequestModel, RequisitionDetail>();
             CreateMap<RequisitionDetail, RequisitionDetailDto>();
             CreateMap<SupplierRequestModel, Supplier>();
@@ -172,6 +173,11 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<SalesCustomer, SalesCustomerDto>();
             CreateMap<CustomerUpdateRequestModel, Customer>();
             CreateMap<ItemMode, ItemModeDto>();
+            CreateMap<SalesInvoice, CustomerInvoiceDto>()
+                .ForMember(dest => dest.CustomerId, opt => opt.MapFrom(src => src.SalesOrder != null ? src.SalesOrder.CustomerId : null))
+                .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => src.SalesOrder != null && src.SalesOrder.Customer != null ? src.SalesOrder.Customer.CustomerName : null))
+                .ForMember(dest => dest.CustomerPhone, opt => opt.MapFrom(src => src.SalesOrder != null && src.SalesOrder.Customer != null ? src.SalesOrder.Customer.Phone : null));
+            
             // Add more mapping configurations if needed
 
         }

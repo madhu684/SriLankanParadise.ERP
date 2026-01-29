@@ -30,7 +30,7 @@ export const get_customers_by_company_id_api = async (companyId) => {
       `/customer/GetCustomersByCompanyId/${companyId}`,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -41,7 +41,7 @@ export const get_customers_by_company_id_api = async (companyId) => {
 
 export const get_customers_by_customer_type_api = async (
   companyId,
-  customerType
+  customerType,
 ) => {
   try {
     const response = await api.get(
@@ -49,7 +49,7 @@ export const get_customers_by_customer_type_api = async (
       {
         params: { customerType },
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -82,7 +82,7 @@ export const put_customer_api = async (customerId, formData) => {
 
 export const activate_deactivate_customer_api = async (
   customerId,
-  formData
+  formData,
 ) => {
   try {
     const response = await api.patch(
@@ -90,7 +90,7 @@ export const activate_deactivate_customer_api = async (
       formData,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -122,12 +122,27 @@ export const get_paginated_customers_by_companyId_api = async ({
       {
         params,
         withCredentials: true,
-      }
+      },
     );
 
     return response.data;
   } catch (error) {
     console.error("Error fetching sales report:", error);
+    throw error;
+  }
+};
+
+export const search_customers_by_name_phone = async (searchQuery) => {
+  try {
+    const response = await api.get(
+      `/customer/search-customers?searchTerm=${searchQuery}`,
+      {
+        withCredentials: true,
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
     throw error;
   }
 };
@@ -139,7 +154,7 @@ export const get_sales_persons_by_company_id_api = async (companyId) => {
       `/user/GetAllUsersByCompanyId/${companyId}`,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -162,14 +177,14 @@ export const get_sales_persons_by_user_id_api = async (userId) => {
 
 //sales order apis
 export const get_sales_order_details_by_sales_order_id = async (
-  salesOrderId
+  salesOrderId,
 ) => {
   try {
     const response = await api.get(
       `/salesOrderDetail/GetSalesOrderDetailsBySalesOrderId/${salesOrderId}`,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -218,7 +233,7 @@ export const get_sales_orders_with_out_drafts_api = async (companyId) => {
       `/salesOrder/GetSalesOrdersWithoutDraftsByCompanyId/${companyId}`,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -233,7 +248,7 @@ export const get_sales_orders_by_user_id_api = async (userId) => {
       `/salesOrder/GetSalesOrdersByUserId/${userId}`,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -244,7 +259,7 @@ export const get_sales_orders_by_user_id_api = async (userId) => {
 
 export const put_sales_order_detail_api = async (
   salesOrderDetailId,
-  salesOrderDetailData
+  salesOrderDetailData,
 ) => {
   try {
     const response = await api.put(
@@ -252,7 +267,7 @@ export const put_sales_order_detail_api = async (
       salesOrderDetailData,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -267,7 +282,7 @@ export const approve_sales_order_api = async (salesOrderId, approvalData) => {
       approvalData,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -282,7 +297,7 @@ export const put_sales_order_api = async (salesOrderId, salesOrderData) => {
       salesOrderData,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -296,7 +311,7 @@ export const delete_sales_order_detail_api = async (salesOrderDetailId) => {
       `/salesOrderDetail/${salesOrderDetailId}`,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -306,14 +321,14 @@ export const delete_sales_order_detail_api = async (salesOrderDetailId) => {
 
 export const get_sales_orders_with_details_by_date_range = async (
   fromDate,
-  toDate
+  toDate,
 ) => {
   try {
     const response = await api.get(
       `/salesOrder/SalesOrderDetailsByOrderDateRange?fromDate=${fromDate}&toDate=${toDate}`,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -356,13 +371,32 @@ export const get_sales_invoice_api = async () => {
   }
 };
 
-export const get_sales_invoices_with_out_drafts_api = async (companyId) => {
+export const get_sales_invoices_with_out_drafts_api = async ({
+  companyId,
+  date,
+  searchQuery,
+  filter,
+  status,
+}) => {
   try {
+    const params = {
+      date,
+      searchQuery,
+      filter,
+      status,
+    };
+
+    if (date) params.date = date;
+    if (searchQuery) params.searchQuery = searchQuery;
+    if (filter) params.filter = filter;
+    if (status) params.status = status;
+
     const response = await api.get(
       `/salesInvoice/GetSalesInvoicesWithoutDraftsByCompanyId/${companyId}`,
       {
+        params,
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -377,7 +411,7 @@ export const get_sales_invoices_by_user_id_api = async (userId) => {
       `/salesInvoice/GetSalesInvoicesByUserId/${userId}`,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -388,7 +422,7 @@ export const get_sales_invoices_by_user_id_api = async (userId) => {
 
 export const put_sales_invoice_detail_api = async (
   salesInvoiceDetailId,
-  salesInvoiceDetailData
+  salesInvoiceDetailData,
 ) => {
   try {
     const response = await api.put(
@@ -396,7 +430,7 @@ export const put_sales_invoice_detail_api = async (
       salesInvoiceDetailData,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -406,7 +440,7 @@ export const put_sales_invoice_detail_api = async (
 
 export const approve_sales_invoice_api = async (
   salesInvoiceId,
-  approvalData
+  approvalData,
 ) => {
   try {
     const response = await api.patch(
@@ -414,7 +448,7 @@ export const approve_sales_invoice_api = async (
       approvalData,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -424,7 +458,7 @@ export const approve_sales_invoice_api = async (
 
 export const put_sales_invoice_api = async (
   salesInvoiceId,
-  salesInvoiceData
+  salesInvoiceData,
 ) => {
   try {
     const response = await api.put(
@@ -432,7 +466,7 @@ export const put_sales_invoice_api = async (
       salesInvoiceData,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -446,7 +480,7 @@ export const delete_sales_invoice_detail_api = async (salesInvoiceDetailId) => {
       `/salesInvoiceDetail/${salesInvoiceDetailId}`,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -491,7 +525,7 @@ export const get_paginated_sales_invoice_by_companyId = async ({
       {
         params,
         withCredentials: true,
-      }
+      },
     );
 
     return response.data;
@@ -504,14 +538,14 @@ export const get_paginated_sales_invoice_by_companyId = async ({
 //packing slips apis
 
 export const get_packing_slips_details_by_packing_slip_id = async (
-  packingSlipId
+  packingSlipId,
 ) => {
   try {
     const response = await api.get(
       `/packingSlipDetail/GetPackingSlipDetailsByPackingSlipId/${packingSlipId}`,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -560,7 +594,7 @@ export const get_packing_slips_with_out_drafts_api = async (companyId) => {
       `/packingSlip/GetPackingSlipsWithoutDraftsByCompanyId/${companyId}`,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -575,7 +609,7 @@ export const get_packing_slips_by_user_id_api = async (userId) => {
       `/packingSlip/GetPackingSlipsByUserId/${userId}`,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -586,7 +620,7 @@ export const get_packing_slips_by_user_id_api = async (userId) => {
 
 export const put_packing_slip_detail_api = async (
   packingSlipDetailId,
-  packingSlipDetailData
+  packingSlipDetailData,
 ) => {
   try {
     const response = await api.put(
@@ -594,7 +628,7 @@ export const put_packing_slip_detail_api = async (
       packingSlipDetailData,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -609,7 +643,7 @@ export const approve_packing_slip_api = async (packingSlipId, approvalData) => {
       approvalData,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -624,7 +658,7 @@ export const put_packing_slip_api = async (packingSlipId, packingSlipData) => {
       packingSlipData,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -638,7 +672,7 @@ export const delete_packing_slip_detail_api = async (packingSlipDetailId) => {
       `/packingSlipDetail/${packingSlipDetailId}`,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -653,7 +687,7 @@ export const get_payment_modes_api = async (companyId) => {
       `/paymentMode/GetPaymentModesByCompanyId/${companyId}`,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -691,7 +725,7 @@ export const get_sales_receipts_with_out_drafts_api = async (companyId) => {
       `/salesReceipt/GetSalesReceiptsWithoutDraftsByCompanyId/${companyId}`,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -706,7 +740,7 @@ export const get_sales_receipts_by_user_id_api = async (userId) => {
       `/salesReceipt/GetSalesReceiptsByUserId/${userId}`,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -716,14 +750,14 @@ export const get_sales_receipts_by_user_id_api = async (userId) => {
 };
 
 export const get_sales_receipts_by_cashier_session_id_api = async (
-  sessionId
+  sessionId,
 ) => {
   try {
     const response = await api.get(
       `/salesReceipt/GetSalesReceiptsBySessionId/${sessionId}`,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -734,7 +768,7 @@ export const get_sales_receipts_by_cashier_session_id_api = async (
 
 export const put_sales_receipt_api = async (
   salesReceiptId,
-  salesReceiptData
+  salesReceiptData,
 ) => {
   try {
     const response = await api.put(
@@ -742,7 +776,7 @@ export const put_sales_receipt_api = async (
       salesReceiptData,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -765,7 +799,7 @@ export const post_sales_receipt_sales_invoice_api = async (formData) => {
 
 export const put_sales_receipt_sales_invoice_api = async (
   salesReceiptSalesInvoiceId,
-  salesReceiptSalesInvoiceIdData
+  salesReceiptSalesInvoiceIdData,
 ) => {
   try {
     const response = await api.put(
@@ -773,7 +807,7 @@ export const put_sales_receipt_sales_invoice_api = async (
       salesReceiptSalesInvoiceIdData,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -782,14 +816,14 @@ export const put_sales_receipt_sales_invoice_api = async (
 };
 
 export const delete_sales_receipt_sales_invoice_api = async (
-  salesReceiptSalesInvoiceId
+  salesReceiptSalesInvoiceId,
 ) => {
   try {
     const response = await api.delete(
       `/salesReceiptSalesInvoice/${salesReceiptSalesInvoiceId}`,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -812,7 +846,7 @@ export const post_cashier_session_api = async (formData) => {
 
 export const put_cashier_session_api = async (
   cashierSessionId,
-  cashierSessionData
+  cashierSessionData,
 ) => {
   try {
     const response = await api.put(
@@ -820,7 +854,7 @@ export const put_cashier_session_api = async (
       cashierSessionData,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -834,7 +868,7 @@ export const get_cashier_session_by_user_id_api = async (userId) => {
       `/cashierSession/GetActiveCashierSession/${userId}`,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -849,7 +883,7 @@ export const get_cashier_session_by_user_date_api = async (userId, date) => {
       `/cashierSession/GetCashierSessionsByUserIdAndDate/${userId}/${date}`,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -871,22 +905,25 @@ export const post_cashier_expense_out_api = async (formData) => {
 };
 
 export const get_cashier_expense_outs_by_userId_date_api = async (
-  userId,
   date,
-  cashierSessionId
+  userId,
+  cashierSessionId,
 ) => {
   const params = {
+    userId,
     cashierSessionId,
   };
 
+  if (userId) params.userId = userId;
   if (cashierSessionId) params.cashierSessionId = cashierSessionId;
+
   try {
     const response = await api.get(
-      `/cashierExpenseOut/GetCashierExpenseOutsByUserIdDate/${userId}/${date}`,
+      `/cashierExpenseOut/GetCashierExpenseOutsByUserIdDate/${date}`,
       {
         params,
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -926,7 +963,7 @@ export const get_expense_out_requisitions_api = async (companyId) => {
       `/expenseOutRequisition/GetExpenseOutRequisitionsByCompanyId/${companyId}`,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -941,7 +978,7 @@ export const get_expense_out_requisitions_by_user_id_api = async (userId) => {
       `/expenseOutRequisition/GetExpenseOutRequisitionsByUserId/${userId}`,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -952,7 +989,7 @@ export const get_expense_out_requisitions_by_user_id_api = async (userId) => {
 
 export const put_expense_out_requisition_api = async (
   expenseOutRequisitionId,
-  expenseOutRequisitionData
+  expenseOutRequisitionData,
 ) => {
   try {
     const response = await api.put(
@@ -960,7 +997,7 @@ export const put_expense_out_requisition_api = async (
       expenseOutRequisitionData,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -974,7 +1011,7 @@ export const get_cashier_expense_outs_by_user_id_api = async (userId) => {
       `/cashierExpenseOut/GetCashierExpenseOutsByUserId/${userId}`,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {
@@ -990,7 +1027,7 @@ export const get_sales_customers_by_company_id_api = async (companyId) => {
       `/salesCustomer/GetByCompanyId/${companyId}`,
       {
         withCredentials: true,
-      }
+      },
     );
     return response.data;
   } catch (error) {

@@ -44,12 +44,12 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<SalesInvoice>> GetSalesInvoicesWithoutDraftsByCompanyId(int companyId)
+        public async Task<IEnumerable<SalesInvoice>> GetSalesInvoicesWithoutDraftsByCompanyId(int companyId, DateTime? date = null, string? searchQuery = null, string? filter = null, int? status = null)
         {
             try
             {
-                var salesInvoices = await _dbContext.SalesInvoices
-                    .Where(si => si.Status != 0 && si.CompanyId == companyId)
+                var query = _dbContext.SalesInvoices
+                    .AsNoTracking()
                     .Include(si => si.SalesInvoiceDetails)
                     .ThenInclude(ib => ib.Batch)
                     .Include(si => si.SalesInvoiceDetails)
@@ -57,8 +57,66 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(im => im.Unit)
                     .Include(si => si.SalesOrder)
                     .ThenInclude(so => so.SalesOrderDetails)
-                    //.OrderByDescending(si => si.CreatedDate)
-                    .ToListAsync();
+                    .Where(si => si.Status !=0 && si.CompanyId == companyId);
+
+                // Apply search filter
+                if (!string.IsNullOrEmpty(searchQuery))
+                {
+                    var searchTerm = searchQuery.ToLower().Trim();
+                    query = query.Where(im =>
+                        im.ReferenceNo.ToLower().Contains(searchTerm)
+                    );
+                }
+
+                // Apply Status filter
+                if (status.HasValue)
+                {
+                    query = query.Where(im => im.Status == status.Value);
+                }
+
+                // Apply date and filter logic
+                if (!string.IsNullOrEmpty(filter))
+                {
+                    switch (filter.ToLower())
+                    {
+                        case "outstanding":
+                            // Only outstanding invoices (regardless of date)
+                            query = query.Where(im => im.AmountDue > 100);
+                            break;
+
+                        case "all":
+                            // Today's invoices + all outstanding invoices
+                            if (date.HasValue)
+                            {
+                                var targetDate = date.Value.Date;
+                                query = query.Where(im =>
+                                    (im.InvoiceDate.HasValue && im.InvoiceDate.Value.Date == targetDate) ||
+                                    im.AmountDue > 100
+                                );
+                            }
+                            break;
+
+                        default:
+                            // If date is provided but no specific filter, use date only
+                            if (date.HasValue)
+                            {
+                                var targetDate = date.Value.Date;
+                                query = query.Where(im => im.InvoiceDate.HasValue && im.InvoiceDate.Value.Date == targetDate);
+                            }
+                            break;
+                    }
+                }
+                else
+                {
+                    // No filter specified, apply date filter only if date is provided
+                    if (date.HasValue)
+                    {
+                        var targetDate = date.Value.Date;
+                        query = query.Where(im => im.InvoiceDate.HasValue && im.InvoiceDate.Value.Date == targetDate);
+                    }
+                }
+
+                var salesInvoices = await query.ToListAsync();
 
                 return salesInvoices.Any() ? salesInvoices : new List<SalesInvoice>();
             }
@@ -210,6 +268,71 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 return salesInvoice;
             }
             catch(Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<PagedResult<SalesInvoice>> GetSalesInvoicesByCustomerSearch(string? name = null, string? phone = null, DateTime? fromDate = null, DateTime? toDate = null, int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                // Input validation
+                if (pageNumber < 1) pageNumber = 1;
+                if (pageSize < 1) pageSize = 10;
+                if (pageSize > 100) pageSize = 100;
+
+                var query = _dbContext.SalesInvoices
+                    .AsNoTracking()
+                    .Include(si => si.SalesInvoiceDetails)
+                        .ThenInclude(ib => ib.Batch)
+                    .Include(si => si.SalesInvoiceDetails)
+                        .ThenInclude(ib => ib.ItemMaster)
+                            .ThenInclude(im => im.Unit)
+                    .Include(si => si.SalesOrder)
+                        .ThenInclude(so => so.Customer)
+                    .AsQueryable();
+
+                if (!string.IsNullOrEmpty(name))
+                {
+                    query = query.Where(si => si.InVoicedPersonName.Contains(name));
+                }
+
+                if (!string.IsNullOrEmpty(phone))
+                {
+                    query = query.Where(si => si.InVoicedPersonMobileNo.Contains(phone));
+                }
+
+                if (fromDate.HasValue)
+                {
+                    var startDate = fromDate.Value.Date;
+                    query = query.Where(si => si.InvoiceDate >= startDate);
+                }
+
+                if (toDate.HasValue)
+                {
+                    var endDate = toDate.Value.Date.AddDays(1).AddTicks(-1);
+                    query = query.Where(si => si.InvoiceDate <= endDate);
+                }
+
+                var totalCount = await query.CountAsync();
+
+                var items = await query
+                    .OrderBy(si => si.InvoiceDate)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                return new PagedResult<SalesInvoice>
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+                };
+            }
+            catch (Exception)
             {
                 throw;
             }
