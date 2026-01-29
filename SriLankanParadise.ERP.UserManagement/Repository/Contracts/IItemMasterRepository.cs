@@ -37,5 +37,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task<ItemMaster> GetItemMasterByItemCode(string itemCode, int companyId);
 
         Task<PagedResult<ItemMaster>> GetPaginatedItemMastersByCompanyId(int companyId, string? searchQuery = null, int? supplierId = null, int pageNumber = 1, int pageSize = 10);
+
+        Task InitializeItemBatch(int itemMasterId, int companyId, int locationId, decimal costPrice, string? createdBy, int? createdUserId);
     }
 }

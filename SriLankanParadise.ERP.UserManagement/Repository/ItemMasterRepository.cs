@@ -557,5 +557,102 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task InitializeItemBatch(int itemMasterId, int companyId, int locationId, decimal costPrice, string? createdBy, int? createdUserId)
+        {
+            try
+            {
+                var strategy = _dbContext.Database.CreateExecutionStrategy();
+
+                await strategy.ExecuteAsync(async () =>
+                {
+                    using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+                    try
+                    {
+
+                        // Check if records already exist for this ItemMasterId in any of the three tables
+                        bool hasExistingRecords = await _dbContext.ItemBatches.AnyAsync(b => b.ItemMasterId == itemMasterId) ||
+                                                  await _dbContext.LocationInventories.AnyAsync(l => l.ItemMasterId == itemMasterId) ||
+                                                  await _dbContext.LocationInventoryMovements.AnyAsync(m => m.ItemMasterId == itemMasterId);
+
+                        if (hasExistingRecords)
+                        {
+                            throw new InvalidOperationException($"ItemMasterId {itemMasterId} is already initialized or has existing transactions.");
+                        }
+
+                        // Get the last batch for the company
+                        var lastBatch = await _dbContext.Batches
+                                .Where(b => b.CompanyId == companyId)
+                                .OrderByDescending(b => b.BatchId)
+                                .FirstOrDefaultAsync();
+
+                        if (lastBatch == null)
+                        {
+                            throw new InvalidOperationException("No batch found for this company. Please create a batch first.");
+                        }
+
+                        var batchId = lastBatch.BatchId;
+
+                        // Create ItemBatch with 0 quantity
+                        var itemBatch = new ItemBatch
+                        {
+                            BatchId = batchId,
+                            ItemMasterId = itemMasterId,
+                            CostPrice = costPrice,
+                            SellingPrice = costPrice,
+                            Status = true,
+                            CompanyId = companyId,
+                            CreatedBy = createdBy,
+                            CreatedUserId = createdUserId,
+                            TempQuantity = 0,
+                            LocationId = locationId,
+                            Qty = 0
+                        };
+                        _dbContext.ItemBatches.Add(itemBatch);
+                        await _dbContext.SaveChangesAsync();
+
+                        // Create LocationInventory with 0 stock
+                        var locationInventory = new LocationInventory
+                        {
+                            ItemMasterId = itemMasterId,
+                            BatchId = batchId,
+                            LocationId = locationId,
+                            StockInHand = 0,
+                            ReOrderLevel = 0,
+                            MaxStockLevel = 0
+                        };
+                        _dbContext.LocationInventories.Add(locationInventory);
+                        await _dbContext.SaveChangesAsync();
+
+                        // Create LocationInventoryMovement with 0 qty
+                        var movement = new LocationInventoryMovement
+                        {
+                            MovementTypeId = 1,
+                            TransactionTypeId = 4, // Initial Stock as GRN
+                            ItemMasterId = itemMasterId,
+                            BatchId = batchId,
+                            LocationId = locationId,
+                            Date = DateTime.UtcNow,
+                            Qty = 0
+                        };
+                        _dbContext.LocationInventoryMovements.Add(movement);
+                        await _dbContext.SaveChangesAsync();
+
+                        await transaction.CommitAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        await transaction.RollbackAsync();
+                        throw new Exception($"Error initializing item batch for ItemMasterId {itemMasterId}", ex);
+                    }
+
+                });
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

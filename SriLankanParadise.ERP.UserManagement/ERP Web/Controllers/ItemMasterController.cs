@@ -453,5 +453,51 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpPost("InitializeItemBatch")]
+        public async Task<ApiResponseModel> InitializeItemBatch([FromBody] InitializeItemBatchRequestModel request)
+        {
+            try
+            {
+                // Validate item exists
+                var itemMaster = await _itemMasterService.GetItemMasterByItemMasterId(request.ItemMasterId);
+                if (itemMaster == null)
+                {
+                    _logger.LogWarning(LogMessages.ItemMasterNotFound);
+                    return AddResponseMessage(Response, LogMessages.ItemMasterNotFound, null, false, HttpStatusCode.NotFound);
+                }
+
+                // Call service to initialize batch with transaction handling
+                await _itemMasterService.InitializeItemBatch(
+                    request.ItemMasterId,
+                    request.CompanyId,
+                    request.LocationId,
+                    itemMaster.UnitPrice ?? 0,
+                    request.CreatedBy,
+                    request.CreatedUserId
+                );
+
+                var result = new
+                {
+                    ItemMasterId = request.ItemMasterId,
+                    LocationId = request.LocationId,
+                    Message = "Item batch initialized with 0 quantity successfully"
+                };
+
+                _logger.LogInformation("Item batch initialized for ItemMasterId: {ItemMasterId}", request.ItemMasterId);
+                AddResponseMessage(Response, "Item batch initialized successfully", result, true, HttpStatusCode.Created);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex, "Validation error initializing item batch");
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.BadRequest);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error initializing item batch");
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }
