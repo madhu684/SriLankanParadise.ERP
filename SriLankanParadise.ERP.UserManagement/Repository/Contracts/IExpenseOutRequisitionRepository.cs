@@ -15,5 +15,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task<ExpenseOutRequisition> GetExpenseOutRequisitionByExpenseOutRequisitionId(int expenseOutRequisitionId);
 
         Task UpdateExpenseOutRequisition(int expenseOutRequisitionId, ExpenseOutRequisition expenseOutRequisition);
+
+        Task <IEnumerable<ExpenseOutRequisition>> GetApprovedExpenseOutRequisitions(int status, int companyId, string? searchQuery);
     }
 }

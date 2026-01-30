@@ -195,7 +195,7 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   const fetchItems = async (searchQuery) => {
     try {
       const response = await get_Location_Inventory_Summary_By_Item_Name_api(
-        // userLocation[0]?.locationId,
+        //userLocation[0]?.locationId,
         null,
         searchQuery,
         null,

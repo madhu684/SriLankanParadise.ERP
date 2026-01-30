@@ -1,6 +1,8 @@
-﻿using System.Net;
+﻿using System.ComponentModel.Design;
+using System.Net;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SriLankanParadise.ERP.UserManagement.Business_Service;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
@@ -196,6 +198,32 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 _logger.LogError(ex, ErrorMessages.InternalServerError);
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
+        }
+
+        [HttpGet("GetApprovedExpenseOutRequisitio/{companyId}/{status}")]
+        public async Task<ApiResponseModel> GetApprovedExpenseOutRequisition(int companyId, int status, [FromQuery] string? searchQuery) 
+        {
+            try
+            {
+                var expenseOutRequisitions = await _expenseOutRequisitionService.GetApprovedExpenseOutRequisitions(status, companyId, searchQuery);
+                if (expenseOutRequisitions != null)
+                {
+                    var expenseOutRequisitionDtos = _mapper.Map<IEnumerable<ExpenseOutRequisitionDto>>(expenseOutRequisitions);
+                    AddResponseMessage(Response, LogMessages.ExpenseOutRequisitionsRetrieved, expenseOutRequisitionDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.ExpenseOutRequisitionsNotFound);
+                    AddResponseMessage(Response, LogMessages.ExpenseOutRequisitionsNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
         }
     }
 }
