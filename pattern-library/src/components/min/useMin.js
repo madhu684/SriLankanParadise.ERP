@@ -96,11 +96,16 @@ const useMin = ({ onFormSubmit }) => {
     try {
       const response = await get_requisition_masters_with_out_drafts_api(
         sessionStorage?.getItem("companyId"),
+        2,
+        null,
+        null,
+        "MRN",
       );
-      const filteredMrns = response.data.result?.filter(
-        (rm) => rm.requisitionType === "MRN" && rm.status === 2,
-      );
-      return filteredMrns || [];
+      return response.data.result || [];
+      // const filteredMrns = response.data.result?.filter(
+      //   (rm) => rm.requisitionType === "MRN" && rm.status === 2,
+      // );
+      // return filteredMrns || [];
     } catch (error) {
       console.error("Error fetching MRNs:", error);
       return [];

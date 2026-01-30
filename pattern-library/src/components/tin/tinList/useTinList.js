@@ -58,23 +58,14 @@ const useTinList = () => {
       if (!warehouseUserLocation || warehouseUserLocation.length === 0) {
         return [];
       }
-      const response =
-        await get_requisition_masters_with_out_drafts_api(companyId);
-      const filteredRequisitions = response?.data?.result?.filter(
-        (rm) =>
-          rm.requisitionType === "TRN" &&
-          rm.status === 2 &&
-          rm.requestedToLocationId === warehouseUserLocation[0],
+      const response = await get_requisition_masters_with_out_drafts_api(
+        companyId,
+        2,
+        warehouseUserLocation[0],
+        null,
+        "TRN",
       );
-      return filteredRequisitions;
-      // const response = await get_requisition_masters_with_filters_companyId(
-      //   companyId,
-      //   null,
-      //   warehouseUserLocation[0],
-      //   null,
-      //   "TRN",
-      // );
-      // return response?.data?.result || [];
+      return response?.data?.result || [];
     },
     enabled:
       !!companyId &&

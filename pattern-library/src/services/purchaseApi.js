@@ -568,11 +568,21 @@ export const get_requisitions_masters_api = async () => {
 
 export const get_requisition_masters_with_out_drafts_api = async (
   companyId,
+  status,
+  requestedToLocationId,
+  requestedFromLocationId,
+  issueType,
 ) => {
   try {
     const response = await api.get(
       `/requisitionMaster/GetRequisitionMastersWithoutDraftsByCompanyId/${companyId}`,
       {
+        params: {
+          status: status,
+          requestedToLocationId: requestedToLocationId,
+          requestedFromLocationId: requestedFromLocationId,
+          issueType: issueType,
+        },
         withCredentials: true,
       },
     );
@@ -623,7 +633,7 @@ export const get_requisition_masters_with_filters_companyId = async (
     console.log(error);
     throw error;
   }
-}
+};
 
 export const approve_requisition_master_api = async (
   requisitionMasterId,

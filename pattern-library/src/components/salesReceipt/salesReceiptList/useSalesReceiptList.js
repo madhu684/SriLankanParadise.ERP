@@ -60,25 +60,7 @@ const useSalesReceiptList = () => {
     enabled: !!companyId,
   });
 
-  // const { data: invoices = [], isLoading: isLoadingInvoices } = useQuery({
-  //   queryKey: ["salesInvoiceOptions", companyId],
-  //   queryFn: async () => {
-  //     const response = await get_sales_invoices_with_out_drafts_api(companyId);
-  //     const today = new Date();
-  //     today.setHours(0, 0, 0, 0);
-
-  //     const filteredInvoices = response.data.result
-  //       ? response.data.result.filter((si) => {
-  //           if (si.status !== 2 || !si.invoiceDate) return false;
-  //           const invoiceDate = new Date(si.invoiceDate);
-  //           invoiceDate.setHours(0, 0, 0, 0);
-  //           return invoiceDate.getTime() === today.getTime();
-  //         })
-  //       : [];
-
-  //     return filteredInvoices;
-  //   },
-  // });
+  // Fetch Sales Invoices Without Drafts
   const { data: invoices = [], isLoading: isLoadingInvoices } = useQuery({
     queryKey: ["salesInvoiceOptions", companyId],
     queryFn: async () => {

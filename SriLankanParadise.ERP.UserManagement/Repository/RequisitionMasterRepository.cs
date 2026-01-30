@@ -47,12 +47,36 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<RequisitionMaster>> GetRequisitionMastersWithoutDraftsByCompanyId(int companyId)
+        public async Task<IEnumerable<RequisitionMaster>> GetRequisitionMastersWithoutDraftsByCompanyId(int companyId, int? status = null, int? requestedToLocationId = null, int? requestedFromLocationId = null, string? issueType = null)
         {
             try
             {
-                var requisitionMasters = await _dbContext.RequisitionMasters
-                    .Where(rm => rm.Status != 0 && rm.CompanyId == companyId)
+                var query = _dbContext.RequisitionMasters
+                    .AsNoTracking()
+                    .Where(rm => rm.Status != 0 && rm.CompanyId == companyId);
+
+                if (status.HasValue)
+                {
+                    query = query.Where(rm => rm.Status == status.Value);
+                }
+
+                if (requestedToLocationId != null)
+                {
+                    query = query.Where(im => im.RequestedToLocationId == requestedToLocationId);
+                }
+
+                if (requestedFromLocationId != null)
+                {
+                    query = query.Where(im => im.RequestedFromLocationId == requestedFromLocationId);
+                }
+
+                if (!string.IsNullOrEmpty(issueType))
+                {
+                    var type = issueType.ToLower();
+                    query = query.Where(im => im.RequisitionType != null && im.RequisitionType.ToLower() == type);
+                }
+
+                var requisitionMasters = await query
                     .Include(rm => rm.RequisitionDetails)
                         .ThenInclude(rd => rd.ItemMaster)
                         .ThenInclude(im => im.Unit)
@@ -61,11 +85,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(rm => rm.IssueMasters)
                     .ToListAsync();
 
-                if (requisitionMasters.Any())
-                {
-                    return requisitionMasters;
-                }
-                return null;
+                return requisitionMasters.Any() ? requisitionMasters : null;
             }
             catch (Exception)
             {
@@ -178,7 +198,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     query = query.Where(im => im.Status == 2 || (im.RequisitionDate.HasValue && im.RequisitionDate.Value.Date == targetDate));
                 }
 
-                if (requestedToLocationId != null) {
+                if (requestedToLocationId != null) 
+                {
                     query = query.Where(im => im.RequestedToLocationId == requestedToLocationId);
                 }
 

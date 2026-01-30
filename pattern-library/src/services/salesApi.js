@@ -719,11 +719,25 @@ export const get_sales_receipt_api = async () => {
   }
 };
 
-export const get_sales_receipts_with_out_drafts_api = async (companyId) => {
+export const get_sales_receipts_with_out_drafts_api = async ({
+  companyId,
+  date,
+  createdUserId,
+  filter,
+  pageNumber = 1,
+  pageSize = 10,
+}) => {
+  const params = { date, createdUserId, filter, pageNumber, pageSize };
+
+  if (date) params.date = date;
+  if (createdUserId) params.createdUserId = createdUserId;
+  if (filter) params.filter = filter;
+
   try {
     const response = await api.get(
       `/salesReceipt/GetSalesReceiptsWithoutDraftsByCompanyId/${companyId}`,
       {
+        params,
         withCredentials: true,
       },
     );

@@ -1,10 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import {
   get_requisition_masters_with_filters_companyId,
-  get_requisition_masters_with_out_drafts_api,
 } from "../../../services/purchaseApi";
 import {
-  get_requisition_masters_by_user_id_api,
   get_user_locations_by_user_id_api,
 } from "../../../services/purchaseApi";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";

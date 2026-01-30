@@ -85,11 +85,16 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
 
         [HttpGet("GetRequisitionMastersWithoutDraftsByCompanyId/{companyId}")]
-        public async Task<ApiResponseModel> GetRequisitionMastersWithoutDraftsByCompanyId(int companyId)
+        public async Task<ApiResponseModel> GetRequisitionMastersWithoutDraftsByCompanyId(
+            int companyId, 
+            [FromQuery] int? status = null, 
+            [FromQuery] int? requestedToLocationId = null, 
+            [FromQuery] int? requestedFromLocationId = null, 
+            [FromQuery] string? issueType = null)
         {
             try
             {
-                var requisitionMasters = await _requisitionMasterService.GetRequisitionMastersWithoutDraftsByCompanyId(companyId);
+                var requisitionMasters = await _requisitionMasterService.GetRequisitionMastersWithoutDraftsByCompanyId(companyId, status, requestedToLocationId, requestedFromLocationId, issueType);
                 if (requisitionMasters != null)
                 {
                     var requisitionMasterDtos = _mapper.Map<IEnumerable<RequisitionMasterDto>>(requisitionMasters);

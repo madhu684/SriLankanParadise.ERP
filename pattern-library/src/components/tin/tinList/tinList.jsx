@@ -221,7 +221,7 @@ const TinList = () => {
                       TRN Date
                     </th>
                     <th className="text-nowrap py-3 px-4 border-bottom">
-                      Status
+                      Issue Status
                     </th>
                   </tr>
                 </thead>
@@ -375,7 +375,7 @@ const TinList = () => {
                     ))
                 ) : (
                   <tr>
-                    <td colSpan="6" className="text-center py-5">
+                    <td colSpan="8" className="text-center py-5">
                       <div className="text-muted">
                         <i className="bi bi-search display-4 d-block mb-3"></i>
                         <p className="mb-0">
