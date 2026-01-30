@@ -24,9 +24,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             return await _salesReceiptRepository.GetAll();
         }
 
-        public async Task<PagedResult<SalesReceipt>> GetSalesReceiptsWithoutDraftsByCompanyId(int companyId, DateTime? date = null, int? createdUserId = null, string? filter = null, int pageNumber = 1, int pageSize = 10)
+        public async Task<PagedResult<SalesReceipt>> GetSalesReceiptsWithoutDraftsByCompanyId(int companyId, DateTime? date = null, int? createdUserId = null, string? filter = null, string? searchQuery = null, int pageNumber = 1, int pageSize = 10)
         {
-            return await _salesReceiptRepository.GetSalesReceiptsWithoutDraftsByCompanyId(companyId, date, createdUserId, filter, pageNumber, pageSize);
+            return await _salesReceiptRepository.GetSalesReceiptsWithoutDraftsByCompanyId(companyId, date, createdUserId, filter, searchQuery, pageNumber, pageSize);
         }
 
         public async Task<IEnumerable<SalesReceipt>> GetSalesReceiptsByUserId(int userId)

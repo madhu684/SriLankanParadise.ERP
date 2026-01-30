@@ -724,14 +724,23 @@ export const get_sales_receipts_with_out_drafts_api = async ({
   date,
   createdUserId,
   filter,
+  searchQuery,
   pageNumber = 1,
   pageSize = 10,
 }) => {
-  const params = { date, createdUserId, filter, pageNumber, pageSize };
+  const params = {
+    date,
+    createdUserId,
+    filter,
+    searchQuery,
+    pageNumber,
+    pageSize,
+  };
 
   if (date) params.date = date;
   if (createdUserId) params.createdUserId = createdUserId;
   if (filter) params.filter = filter;
+  if (searchQuery) params.searchQuery = searchQuery;
 
   try {
     const response = await api.get(

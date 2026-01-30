@@ -47,7 +47,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<PagedResult<SalesReceipt>> GetSalesReceiptsWithoutDraftsByCompanyId(int companyId, DateTime? date = null, int? createdUserId = null, string? filter = null, int pageNumber = 1, int pageSize = 10)
+        public async Task<PagedResult<SalesReceipt>> GetSalesReceiptsWithoutDraftsByCompanyId(int companyId, DateTime? date = null, int? createdUserId = null, string? filter = null, string? searchQuery = null, int pageNumber = 1, int pageSize = 10)
         {
             try
             {
@@ -90,6 +90,14 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                             // No filter applied
                             break;
                     }
+                }
+
+                if (!string.IsNullOrEmpty(searchQuery))
+                {
+                    var searchTerm = searchQuery.ToLower().Trim();
+                    query = query.Where(sr =>
+                        sr.ReferenceNumber.ToLower().Contains(searchTerm)
+                    );
                 }
 
                 var totalCount = await query.CountAsync();

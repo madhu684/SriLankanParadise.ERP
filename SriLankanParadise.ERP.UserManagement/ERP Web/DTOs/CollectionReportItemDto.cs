@@ -4,6 +4,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
     {
         public DateTime? Date { get; set; }
         public string? BillNo { get; set; }
+        public string? InvoiceReference { get; set; }
         public int? ChannelNo { get; set; }
         public string? PatientName { get; set; }
         public decimal? Amount { get; set; }

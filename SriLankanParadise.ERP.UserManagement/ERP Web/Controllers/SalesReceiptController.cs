@@ -90,12 +90,13 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             [FromQuery] DateTime? date = null,
             [FromQuery] int? createdUserId = null,
             [FromQuery] string? filter = null,
+            [FromQuery] string? searchQuery = null,
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10)
         {
             try
             {
-                var result = await _salesReceiptService.GetSalesReceiptsWithoutDraftsByCompanyId(companyId, date, createdUserId, filter, pageNumber, pageSize);
+                var result = await _salesReceiptService.GetSalesReceiptsWithoutDraftsByCompanyId(companyId, date, createdUserId, filter, searchQuery, pageNumber, pageSize);
 
                 if (result.Items.Any())
                 {
