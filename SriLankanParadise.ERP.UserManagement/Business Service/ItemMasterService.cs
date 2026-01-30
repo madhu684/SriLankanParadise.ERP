@@ -88,5 +88,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             await _itemMasterRepository.ForceDeleteItemMaster(itemMasterId);
         }
+
+        public async Task InitializeItemBatch(int itemMasterId, int companyId, int locationId, decimal costPrice, string? createdBy, int? createdUserId)
+        {
+            await _itemMasterRepository.InitializeItemBatch(itemMasterId, companyId, locationId, costPrice, createdBy, createdUserId);
+        }
     }
 }
