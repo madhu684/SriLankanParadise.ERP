@@ -41,21 +41,24 @@ const useTin = ({ onFormSubmit }) => {
         .map((l) => l.locationId)
     : null;
 
-  console.log("warehouseUserLocation: ", warehouseUserLocation);
-
   // Fetch TRNs
   const fetchTrns = async () => {
     try {
       const response = await get_requisition_masters_with_out_drafts_api(
-        sessionStorage?.getItem("companyId")
+        sessionStorage?.getItem("companyId"),
+        2,
+        warehouseUserLocation[0],
+        null,
+        "TRN",
       );
-      const filteredTrns = response.data.result?.filter(
-        (rm) =>
-          rm.requisitionType === "TRN" &&
-          rm.status === 2 &&
-          rm.requestedToLocationId === warehouseUserLocation[0]
-      );
-      return filteredTrns || [];
+      return response?.data?.result || [];
+      // const filteredTrns = response.data.result?.filter(
+      //   (rm) =>
+      //     rm.requisitionType === "TRN" &&
+      //     rm.status === 2 &&
+      //     rm.requestedToLocationId === warehouseUserLocation[0],
+      // );
+      // return filteredTrns || [];
     } catch (error) {
       console.error("Error fetching TRNs:", error);
       return [];
@@ -75,11 +78,12 @@ const useTin = ({ onFormSubmit }) => {
   // Fetch TINs by requisitionMasterId
   const fetchTinsByRequisitionMasterId = async (requisitionMasterId) => {
     try {
-      const response = await get_issue_masters_by_requisition_master_id_api(
-        requisitionMasterId
-      );
+      const response =
+        await get_issue_masters_by_requisition_master_id_api(
+          requisitionMasterId,
+        );
       const filteredTins = response.data.result?.filter(
-        (rm) => rm.issueType === "TIN"
+        (rm) => rm.issueType === "TIN",
       );
       return filteredTins || null;
     } catch (error) {
@@ -104,7 +108,7 @@ const useTin = ({ onFormSubmit }) => {
   const fetchItemBatches = async () => {
     try {
       const response = await get_item_batches_api(
-        sessionStorage?.getItem("companyId")
+        sessionStorage?.getItem("companyId"),
       );
       return response.data.result || [];
     } catch (error) {
@@ -127,13 +131,13 @@ const useTin = ({ onFormSubmit }) => {
   const fetchLocationInventories = async () => {
     try {
       const response = await get_locations_inventories_by_location_id_api(
-        selectedTrn?.requestedToLocationId
+        selectedTrn?.requestedToLocationId,
       );
       console.log(
         "Fetched location inventories for location",
         selectedTrn?.requestedToLocationId,
         ":",
-        response.data.result
+        response.data.result,
       );
       return response.data.result || [];
     } catch (error) {
@@ -141,7 +145,7 @@ const useTin = ({ onFormSubmit }) => {
         "Error fetching location inventories for location",
         selectedTrn?.requestedToLocationId,
         ":",
-        error
+        error,
       );
       return [];
     }
@@ -171,7 +175,8 @@ const useTin = ({ onFormSubmit }) => {
               const issuedQuantity = tins.reduce((total, tin) => {
                 const tinDetail = tin.issueDetails.find(
                   (detail) =>
-                    detail.itemMasterId === requestItem.itemMaster?.itemMasterId
+                    detail.itemMasterId ===
+                    requestItem.itemMaster?.itemMasterId,
                 );
                 return total + (tinDetail ? tinDetail.quantity : 0);
               }, 0);
@@ -190,7 +195,7 @@ const useTin = ({ onFormSubmit }) => {
             (requestItem) => ({
               requestItem,
               pendingRequestQuantity: requestItem.quantity,
-            })
+            }),
           );
         }
 
@@ -199,7 +204,7 @@ const useTin = ({ onFormSubmit }) => {
         try {
           const inventoryResponse =
             await get_sum_of_item_inventory_by_location_id_api(
-              selectedTrn.requestedToLocationId
+              selectedTrn.requestedToLocationId,
             );
           const inventoryResult = inventoryResponse.data.result || [];
           // Create a map for quick lookup: itemMasterId -> totalStockInHand
@@ -225,7 +230,7 @@ const useTin = ({ onFormSubmit }) => {
               issuedQuantity: "",
               batchId: "",
             };
-          }
+          },
         );
 
         setFormData((prevFormData) => ({
@@ -251,7 +256,7 @@ const useTin = ({ onFormSubmit }) => {
     fieldName,
     fieldDisplayName,
     value,
-    additionalRules = {}
+    additionalRules = {},
   ) => {
     let isFieldValid = true;
     let errorMessage = "";
@@ -285,7 +290,7 @@ const useTin = ({ onFormSubmit }) => {
     const isTrnIdValid = validateField(
       "trnId",
       "Transfer requisition reference number",
-      formData.trnId
+      formData.trnId,
     );
 
     let isItemQuantityValid = true;
@@ -303,7 +308,7 @@ const useTin = ({ onFormSubmit }) => {
         quantityFieldName,
         quantityFieldDisplayName,
         item.issuedQuantity,
-        quantityRules
+        quantityRules,
       );
 
       isItemQuantityValid = isItemQuantityValid && isValidQuantity;
@@ -383,18 +388,18 @@ const useTin = ({ onFormSubmit }) => {
 
       const detailsResponses = await Promise.all(itemDetailsData);
       const allDetailsSuccessful = detailsResponses.every(
-        (detailsResponse) => detailsResponse.status === 201
+        (detailsResponse) => detailsResponse.status === 201,
       );
 
       if (allDetailsSuccessful) {
         setSubmissionStatus(
-          isSaveAsDraft ? "successSavedAsDraft" : "successSubmitted"
+          isSaveAsDraft ? "successSavedAsDraft" : "successSubmitted",
         );
         console.log(
           isSaveAsDraft
             ? "Transfer issue note saved as draft!"
             : "Transfer issue note submitted successfully!",
-          formData
+          formData,
         );
         queryClient.invalidateQueries(["tinList", companyId]);
         setTimeout(() => {
@@ -433,7 +438,7 @@ const useTin = ({ onFormSubmit }) => {
         const selectedBatch = locationInventories.find(
           (batch) =>
             batch.batchId === parseInt(value) &&
-            batch.itemMasterId === updatedItemDetails[index].id
+            batch.itemMasterId === updatedItemDetails[index].id,
         );
         updatedItemDetails[index].batchId = value;
         updatedItemDetails[index].remainingQuantity =

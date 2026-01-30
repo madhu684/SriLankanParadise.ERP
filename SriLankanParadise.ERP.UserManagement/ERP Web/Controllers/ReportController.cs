@@ -226,6 +226,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                                 {
                                     Date = receipt.ReceiptDate,
                                     BillNo = receipt.ReferenceNumber,
+                                    InvoiceReference = salesReceiptInvoice.SalesInvoice?.ReferenceNo,
                                     ChannelNo = salesReceiptInvoice.SalesInvoice?.TokenNo,
                                     PatientName = salesReceiptInvoice.SalesInvoice?.InVoicedPersonName,
                                     Amount = salesReceiptInvoice.AmountCollect ?? 0,

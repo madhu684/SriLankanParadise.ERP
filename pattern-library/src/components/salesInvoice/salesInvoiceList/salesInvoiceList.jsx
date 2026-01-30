@@ -57,6 +57,7 @@ const SalesInvoiceList = () => {
     handleSearch,
     handleFilterChange,
     handlePageChange,
+    isFetchingData,
   } = useSalesInvoiceList();
 
   const { hasPermission } = useContext(UserContext);
@@ -70,7 +71,7 @@ const SalesInvoiceList = () => {
   const paginate = (pageNumber) => handlePageChange(pageNumber);
 
   if (error) {
-    return <ErrorComponent error={error || "Error fetching data"} />;
+    return <ErrorComponent error={error.message || error || "Error fetching data"} />;
   }
 
   if (isLoadingData && salesInvoices.length === 0) {
@@ -125,7 +126,7 @@ const SalesInvoiceList = () => {
   }
 
   return (
-    <div className="container mt-4">
+    <div className="container mt-2">
       <h2>Sales Invoices</h2>
       <div className="mt-3 d-flex justify-content-start align-items-center">
         <div className="btn-group" role="group">
@@ -189,7 +190,7 @@ const SalesInvoiceList = () => {
           <button
             type="button"
             className={`btn ${
-              filterType === "all" ? "btn-info" : "btn-outline-info"
+              filterType === "all" ? "btn-info text-white" : "btn-outline-info"
             }`}
             onClick={() => handleFilterChange("all")}
           >
@@ -207,26 +208,30 @@ const SalesInvoiceList = () => {
         </div>
 
         <div className="input-group" style={{ maxWidth: "300px" }}>
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Search by Reference No"
-            value={searchQuery}
-            onChange={handleSearchInput}
-          />
-          <span className="input-group-text">
-            <FaSearch />
-          </span>
+            <span className="input-group-text bg-white border-end-0">
+                  <FaSearch className="text-muted" />
+            </span>
+            <input
+                type="text"
+                className={`form-control border-start-0 ps-0 ${
+                    isFetchingData ? "border-end-0" : ""
+                }`}
+                placeholder="Search by Reference No"
+                value={searchQuery}
+                onChange={handleSearchInput}
+            />
+            {isFetchingData && (
+                <span className="input-group-text bg-white border-start-0">
+                    <div
+                        className="spinner-border spinner-border-sm text-primary"
+                        role="status"
+                    >
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                </span>
+            )}
         </div>
       </div>
-
-      {isLoadingData && (
-        <div className="text-center my-3">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      )}
 
       <div className="table-responsive">
         <table className="table mt-2">

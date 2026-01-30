@@ -81,3 +81,42 @@ export const get_customer_invoices_by_customer_date_api = async ({
     throw error;
   }
 };
+
+export const get_min_report_api = async ({
+  companyId,
+  issueType,
+  locationId,
+  startDate,
+  endDate,
+  pageNumber = 1,
+  pageSize = 10,
+}) => {
+  try {
+    const params = {
+      issueType,
+      locationId,
+      startDate,
+      endDate,
+      pageNumber,
+      pageSize,
+    };
+
+    if (issueType) params.issueType = issueType;
+    if (locationId) params.locationId = locationId;
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+
+    const response = await api.get(
+      `/issueMaster/GetPaginatedIssueMastersByCompanyIdLocationDateRange/${companyId}`,
+      {
+        params,
+        withCredentials: true,
+      },
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};

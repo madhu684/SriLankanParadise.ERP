@@ -9,7 +9,7 @@ const useCollectionReport = () => {
   const { user, activeCashierSession } = useContext(UserContext);
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [selectedSessionId, setSelectedSessionId] = useState(
-    activeCashierSession?.cashierSessionId
+    activeCashierSession?.cashierSessionId,
   );
   const exportToExcel = useExcelExport();
 
@@ -18,7 +18,7 @@ const useCollectionReport = () => {
     queryFn: async () => {
       const response = await get_cashier_session_by_user_date_api(
         user.userId,
-        date
+        date,
       );
       return response.data.result;
     },
@@ -34,7 +34,7 @@ const useCollectionReport = () => {
       // Check if active session is in the list (for the selected date)
       const activeSessionInList = userCashierSessions.find(
         (session) =>
-          session.cashierSessionId === activeCashierSession?.cashierSessionId
+          session.cashierSessionId === activeCashierSession?.cashierSessionId,
       );
 
       if (activeSessionInList) {
@@ -45,7 +45,7 @@ const useCollectionReport = () => {
         // Assuming the API returns sorted or we just pick one.
         // Let's pick the last one.
         setSelectedSessionId(
-          userCashierSessions[userCashierSessions.length - 1].cashierSessionId
+          userCashierSessions[userCashierSessions.length - 1].cashierSessionId,
         );
       }
     } else {
@@ -64,7 +64,7 @@ const useCollectionReport = () => {
       const response = await get_collection_report_by_date_user_api(
         user.userId,
         date,
-        selectedSessionId // Use selected session ID
+        selectedSessionId, // Use selected session ID
       );
 
       if (response.data?.handShake && response.data?.result) {
@@ -112,6 +112,11 @@ const useCollectionReport = () => {
       {
         header: "Bill No",
         accessor: (item) => item.billNo,
+        width: 30,
+      },
+      {
+        header: "Invoice Reference",
+        accessor: (item) => item.invoiceReference,
         width: 15,
       },
       {
@@ -143,8 +148,8 @@ const useCollectionReport = () => {
           item.isSummary
             ? ""
             : item.shortAmount > 0
-            ? formatCurrency(item.shortAmount)
-            : "-",
+              ? formatCurrency(item.shortAmount)
+              : "-",
         width: 15,
       },
       {
@@ -153,8 +158,8 @@ const useCollectionReport = () => {
           item.isSummary
             ? ""
             : item.excessAmount > 0
-            ? formatCurrency(item.excessAmount)
-            : "-",
+              ? formatCurrency(item.excessAmount)
+              : "-",
         width: 15,
       },
       {
@@ -263,7 +268,7 @@ const useCollectionReport = () => {
     }
 
     const selectedSession = userCashierSessions.find(
-      (session) => session.cashierSessionId === selectedSessionId
+      (session) => session.cashierSessionId === selectedSessionId,
     );
 
     exportToExcel({

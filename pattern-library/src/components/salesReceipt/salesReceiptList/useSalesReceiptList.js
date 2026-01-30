@@ -1,4 +1,4 @@
-import { useState, useMemo, useContext, useEffect } from "react";
+import { useState, useMemo, useContext, useEffect, useCallback } from "react";
 import {
   get_sales_invoices_with_out_drafts_api,
   get_sales_receipts_with_out_drafts_api,
@@ -24,6 +24,9 @@ const useSalesReceiptList = () => {
   const [showUpdateSRForm, setShowUpdateSRForm] = useState(false);
   const [SRDetail, setSRDetail] = useState("");
   const [filter, setFilter] = useState("all");
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
 
@@ -32,54 +35,65 @@ const useSalesReceiptList = () => {
   // Retrieve the cashier session
   const isCashierSessionOpen = !!activeCashierSession;
 
+  // Debounce search query to prevent excessive API calls
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500); // 500ms debounce delay
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery]);
+
   // Fetch Sales Receipts Without Drafts (for users with "View All" permission)
   const {
-    data: salesReceipts,
+    data: salesReceiptsData,
     isLoading: isLoadingData,
+    isFetching: isFetchingReceipts,
     error,
   } = useQuery({
-    queryKey: ["salesReceipts", companyId],
+    queryKey: [
+      "salesReceipts",
+      companyId,
+      filter,
+      debouncedSearchQuery,
+      pageNumber,
+      pageSize,
+    ],
     queryFn: async () => {
-      const response = await get_sales_receipts_with_out_drafts_api(companyId);
-      const allReceipts = response.data.result || [];
-
-      // Filter for today's receipts
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      return allReceipts.filter((receipt) => {
-        const receiptDate = new Date(receipt.receiptDate);
-        receiptDate.setHours(0, 0, 0, 0);
-
-        const isToday = receiptDate.getTime() === today.getTime();
-        const isCreatedByCurrentUser = receipt.createdUserId === user?.userId;
-
-        return isToday && isCreatedByCurrentUser;
+      const response = await get_sales_receipts_with_out_drafts_api({
+        companyId,
+        date: new Date().toISOString().split("T")[0],
+        createdUserId: user?.userId,
+        filter: filter,
+        searchQuery: debouncedSearchQuery,
+        pageNumber,
+        pageSize,
       });
+      return response.data.result;
     },
-    enabled: !!companyId,
+    enabled: !!companyId && !!user?.userId,
+    placeholderData: keepPreviousData,
   });
 
-  // const { data: invoices = [], isLoading: isLoadingInvoices } = useQuery({
-  //   queryKey: ["salesInvoiceOptions", companyId],
-  //   queryFn: async () => {
-  //     const response = await get_sales_invoices_with_out_drafts_api(companyId);
-  //     const today = new Date();
-  //     today.setHours(0, 0, 0, 0);
+  const salesReceipts = useMemo(
+    () => salesReceiptsData?.data || [],
+    [salesReceiptsData],
+  );
+  const paginationData = useMemo(
+    () => salesReceiptsData?.pagination || null,
+    [salesReceiptsData],
+  );
 
-  //     const filteredInvoices = response.data.result
-  //       ? response.data.result.filter((si) => {
-  //           if (si.status !== 2 || !si.invoiceDate) return false;
-  //           const invoiceDate = new Date(si.invoiceDate);
-  //           invoiceDate.setHours(0, 0, 0, 0);
-  //           return invoiceDate.getTime() === today.getTime();
-  //         })
-  //       : [];
-
-  //     return filteredInvoices;
-  //   },
-  // });
-  const { data: invoices = [], isLoading: isLoadingInvoices } = useQuery({
+  // Fetch Sales Invoices Without Drafts
+  const {
+    data: invoices = [],
+    isLoading: isLoadingInvoices,
+    isFetching: isFetchingInvoices,
+  } = useQuery({
     queryKey: ["salesInvoiceOptions", companyId],
     queryFn: async () => {
       const response = await get_sales_invoices_with_out_drafts_api({
@@ -95,21 +109,8 @@ const useSalesReceiptList = () => {
     placeholderData: keepPreviousData,
   });
 
-  // Filter sales receipts based on selected filter
-  const filteredSalesReceipts = useMemo(() => {
-    return salesReceipts
-      ? salesReceipts?.filter((receipt) => {
-          if (filter === "all") return true;
-          if (filter === "outstanding") return receipt.outstandingAmount > 0;
-          if (filter === "excess") return receipt.excessAmount > 0;
-          return true;
-        })
-      : [];
-  }, [salesReceipts, filter]);
-
-  const approvedInvoices = useMemo(() => {
-    return invoices || [];
-  }, [invoices]);
+  const approvedInvoices = invoices;
+  const filteredSalesReceipts = salesReceipts;
 
   const handleShowApproveSRModal = () => {
     setShowApproveSRModal(true);
@@ -157,6 +158,10 @@ const useSalesReceiptList = () => {
   const handleViewDetails = (salesReceipt) => {
     setSRDetail(salesReceipt);
     handleShowDetailSRModal();
+  };
+
+  const handlePageChange = (page) => {
+    setPageNumber(page);
   };
 
   const handleUpdate = (salesReceipt) => {
@@ -283,6 +288,15 @@ const useSalesReceiptList = () => {
     handleClose,
     closeAlertAfterDelay,
     setFilter,
+    pageNumber,
+    setPageNumber,
+    pageSize,
+    setPageSize,
+    paginationData,
+    handlePageChange,
+    searchQuery,
+    setSearchQuery,
+    isFetchingData: isFetchingReceipts,
   };
 };
 

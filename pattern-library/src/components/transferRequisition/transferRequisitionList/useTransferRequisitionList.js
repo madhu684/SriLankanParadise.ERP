@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
-import { get_requisition_masters_with_out_drafts_api } from "../../../services/purchaseApi";
 import {
-  get_requisition_masters_by_user_id_api,
+  get_requisition_masters_with_filters_companyId,
+} from "../../../services/purchaseApi";
+import {
   get_user_locations_by_user_id_api,
 } from "../../../services/purchaseApi";
-import { get_user_permissions_api } from "../../../services/userManagementApi";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 const useTransferRequisitionList = () => {
   const [error, setError] = useState(null);
@@ -23,7 +23,10 @@ const useTransferRequisitionList = () => {
   const [userWarehouses, setUserWarehouses] = useState([]);
   const [openTINsList, setOpenTINsList] = useState(false);
   const [selectedWarehouse, setSelectedWarehouse] = useState(
-    userWarehouses[0]?.id || ""
+    userWarehouses[0]?.id || "",
+  );
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0],
   );
   const [refetch, setRefetch] = useState(false);
 
@@ -32,7 +35,7 @@ const useTransferRequisitionList = () => {
   const fetchUserLocations = async () => {
     try {
       const response = await get_user_locations_by_user_id_api(
-        sessionStorage.getItem("userId")
+        sessionStorage.getItem("userId"),
       );
       return response.data.result;
     } catch (error) {
@@ -53,7 +56,7 @@ const useTransferRequisitionList = () => {
   useEffect(() => {
     if (!isUserLocationsLoading && userLocations) {
       const locations = userLocations?.filter(
-        (location) => location?.location?.locationTypeId === 2
+        (location) => location?.location?.locationTypeId === 2,
       );
       console.log("locations: ", locations);
       setUserWarehouses(locations);
@@ -61,47 +64,33 @@ const useTransferRequisitionList = () => {
     }
   }, [isUserLocationsLoading, userLocations]);
 
-  const fetchUserPermissions = async () => {
-    try {
-      const response = await get_user_permissions_api(
-        sessionStorage.getItem("userId")
-      );
-      return response.data.result;
-    } catch (error) {
-      console.error("Error fetching user permissions:", error);
-    }
-  };
-
-  const {
-    data: userPermissions,
-    isLoading: isLoadingPermissions,
-    isError: isPermissionsError,
-    error: permissionError,
-  } = useQuery({
-    queryKey: ["userPermissions"],
-    queryFn: fetchUserPermissions,
-  });
-
   const {
     data: transferRequisitions = [],
     isLoading: isLoadingTrn,
     error: trnError,
   } = useQuery({
-    queryKey: ["transferRequisitions", companyId, userLocations, refetch],
+    queryKey: ["transferRequisitions", companyId, selectedDate],
     queryFn: async () => {
-      const response = await get_requisition_masters_with_out_drafts_api(
-        companyId
+      const response = await get_requisition_masters_with_filters_companyId(
+        companyId,
+        selectedDate,
+        null,
+        userLocations.filter((l) => l.location.locationTypeId === 2)[0]
+          ?.locationId,
+        "TRN",
       );
-      const filteredRequisitions = response?.data?.result?.filter(
-        (rm) =>
-          rm.requisitionType === "TRN" &&
-          rm.requestedFromLocationId ===
-            userLocations.filter((l) => l.location.locationTypeId === 2)[0]
-              ?.locationId
-      );
-      return filteredRequisitions || [];
+      // const filteredRequisitions = response?.data?.result?.filter(
+      //   (rm) =>
+      //     rm.requisitionType === "TRN" &&
+      //     rm.requestedFromLocationId ===
+      //       userLocations.filter((l) => l.location.locationTypeId === 2)[0]
+      //         ?.locationId,
+      // );
+      // return filteredRequisitions || [];
+      return response?.data?.result || [];
     },
-    enabled: !!userLocations && userLocations.length > 0,
+    enabled: !!userLocations && !!selectedDate,
+    placeholderData: keepPreviousData,
   });
 
   const handleShowApproveTRModal = () => {
@@ -168,15 +157,15 @@ const useTransferRequisitionList = () => {
   const handleRowSelect = (id) => {
     const isSelected = selectedRows.includes(id);
     const selectedRow = transferRequisitions.find(
-      (mr) => mr.requisitionMasterId === id
+      (mr) => mr.requisitionMasterId === id,
     );
 
     if (isSelected) {
       setSelectedRows((prevSelected) =>
-        prevSelected.filter((selectedId) => selectedId !== id)
+        prevSelected.filter((selectedId) => selectedId !== id),
       );
       setSelectedRowData((prevSelectedData) =>
-        prevSelectedData.filter((data) => data.requisitionMasterId !== id)
+        prevSelectedData.filter((data) => data.requisitionMasterId !== id),
       );
     } else {
       setSelectedRows((prevSelected) => [...prevSelected, id]);
@@ -223,15 +212,7 @@ const useTransferRequisitionList = () => {
     return selectedRows.some(
       (id) =>
         transferRequisitions.find((mr) => mr.requisitionMasterId === id)
-          ?.status === 1
-    );
-  };
-
-  const hasPermission = (permissionName) => {
-    return userPermissions?.some(
-      (permission) =>
-        permission.permission.permissionName === permissionName &&
-        permission.permission.permissionStatus
+          ?.status === 1,
     );
   };
 
@@ -266,7 +247,6 @@ const useTransferRequisitionList = () => {
   return {
     transferRequisitions,
     isLoadingTrn,
-    isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
@@ -277,14 +257,13 @@ const useTransferRequisitionList = () => {
     selectedRowData,
     showCreateTRForm,
     TRDetail,
-    isPermissionsError,
-    permissionError,
     selectedWarehouse,
     userWarehouses,
     filter,
     filteredRequisitions,
     openTINsList,
     refetch,
+    selectedDate,
     setRefetch,
     areAnySelectedRowsPending,
     setSelectedRows,
@@ -298,13 +277,13 @@ const useTransferRequisitionList = () => {
     handleCloseDetailTRModal,
     handleApproved,
     setShowCreateTRForm,
-    hasPermission,
     handleUpdated,
     handleClose,
     formatDateInTimezone,
     setSelectedWarehouse,
     setFilter,
     setOpenTINsList,
+    setSelectedDate,
   };
 };
 

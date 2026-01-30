@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 using System.ComponentModel.Design;
 
@@ -46,20 +47,75 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<SalesReceipt>> GetSalesReceiptsWithoutDraftsByCompanyId(int companyId)
+        public async Task<PagedResult<SalesReceipt>> GetSalesReceiptsWithoutDraftsByCompanyId(int companyId, DateTime? date = null, int? createdUserId = null, string? filter = null, string? searchQuery = null, int pageNumber = 1, int pageSize = 10)
         {
             try
             {
-                var salesReceipts = await _dbContext.SalesReceipts
+                // Input validation
+                if (pageNumber < 1) pageNumber = 1;
+                if (pageSize < 1) pageSize = 10;
+                if (pageSize > 100) pageSize = 100;
+
+                var query = _dbContext.SalesReceipts
+                    .AsNoTracking()
                     .Where(sr => sr.Status != 0 && sr.CompanyId == companyId)
                     .Include(sr => sr.PaymentMode)
                     .Include(sr => sr.SalesReceiptSalesInvoices)
                         .ThenInclude(srsi => srsi.SalesInvoice)
                             .ThenInclude(si => si.SalesInvoiceDetails)
                                 .ThenInclude(sid => sid.ItemMaster)
+                    .AsQueryable();
+
+                if (date.HasValue)
+                {
+                    query = query.Where(sr => sr.ReceiptDate.HasValue && sr.ReceiptDate.Value.Date == date.Value.Date);
+                }
+
+                if (createdUserId.HasValue)
+                {
+                    query = query.Where(sr => sr.CreatedUserId == createdUserId.Value);
+                }
+
+                if (!string.IsNullOrEmpty(filter))
+                {
+                    switch(filter.ToLower())
+                    {
+                        case "outstanding":
+                            query = query.Where(sr => sr.OutstandingAmount > 0);
+                            break;
+                        case "excess":
+                            query = query.Where(sr => sr.ExcessAmount > 0);
+                            break;
+                        default:
+                            // No filter applied
+                            break;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(searchQuery))
+                {
+                    var searchTerm = searchQuery.ToLower().Trim();
+                    query = query.Where(sr =>
+                        sr.ReferenceNumber.ToLower().Contains(searchTerm)
+                    );
+                }
+
+                var totalCount = await query.CountAsync();
+
+                var items = await query
+                    .OrderByDescending(sr => sr.SalesReceiptId)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
                     .ToListAsync();
 
-                return salesReceipts.Any() ? salesReceipts : null;
+                return new PagedResult<SalesReceipt>
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+                };
             }
             catch (Exception)
             {

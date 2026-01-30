@@ -58,8 +58,7 @@ const CashierExpenseOutList = () => {
         <div
           className="card-header bg-secondary text-white py-3"
           style={{
-            background:
-              "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
           }}
         >
           <div className="d-flex justify-content-between align-items-center">
@@ -115,7 +114,10 @@ const CashierExpenseOutList = () => {
                 </thead>
                 <tbody>
                   {filteredRequisitions.map((req) => (
-                    <tr key={req.expenseOutRequisitionId} className="border-bottom">
+                    <tr
+                      key={req.expenseOutRequisitionId}
+                      className="border-bottom"
+                    >
                       <td className="fw-semibold py-3 px-4 text-dark">
                         {req.referenceNumber}
                       </td>
@@ -146,7 +148,9 @@ const CashierExpenseOutList = () => {
           ) : (
             <div className="text-center py-5">
               <i className="bi bi-inbox display-4 text-muted d-block mb-3"></i>
-              <p className="text-muted mb-0">No approved requisitions available</p>
+              <p className="text-muted mb-0">
+                No approved requisitions available
+              </p>
             </div>
           )}
         </div>
@@ -230,6 +234,7 @@ const CashierExpenseOutList = () => {
               <tr>
                 <th>No</th>
                 <th>Description</th>
+                <th>Expense Out Requisition</th>
                 <th>Amount</th>
                 <th>Created At</th>
               </tr>
@@ -243,6 +248,9 @@ const CashierExpenseOutList = () => {
                       <div className="text-truncate" title={item.description}>
                         {item.description}
                       </div>
+                    </td>
+                    <td>
+                      {item?.expenseOutRequisition?.referenceNumber || "-"}
                     </td>
                     <td>
                       {item.amount.toLocaleString(undefined, {

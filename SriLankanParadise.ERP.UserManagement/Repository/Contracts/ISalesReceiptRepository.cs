@@ -9,7 +9,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
 
         Task<IEnumerable<SalesReceipt>> GetAll();
 
-        Task<IEnumerable<SalesReceipt>> GetSalesReceiptsWithoutDraftsByCompanyId(int companyId);
+        Task<PagedResult<SalesReceipt>> GetSalesReceiptsWithoutDraftsByCompanyId(int companyId, DateTime? date = null, int? createdUserId = null, string? filter = null, string? searchQuery = null, int pageNumber = 1, int pageSize = 10);
 
         Task<IEnumerable<SalesReceipt>> GetSalesReceiptsByUserId(int userId);
 

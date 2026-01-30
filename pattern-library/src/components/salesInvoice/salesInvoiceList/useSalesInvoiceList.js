@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { get_paginated_sales_invoice_by_companyId } from "../../../services/salesApi";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
@@ -29,11 +29,15 @@ const useSalesInvoiceList = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
-      setPageNumber(1);
     }, 500);
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  // Reset page number when search or filter changes
+  useEffect(() => {
+    setPageNumber(1);
+  }, [debouncedSearchQuery, filterType]);
 
   // Get companyId from session storage
   const companyId = sessionStorage.getItem("companyId") || 1;
@@ -49,6 +53,7 @@ const useSalesInvoiceList = () => {
   const {
     data,
     isLoading: isLoadingData,
+    isFetching,
     error,
     refetch,
   } = useQuery({
@@ -72,15 +77,22 @@ const useSalesInvoiceList = () => {
   });
 
   // Extract sales invoices and pagination from response
-  const salesInvoices = data?.data?.result?.data || [];
-  const pagination = data?.data?.result?.pagination || {
-    totalCount: 0,
-    pageNumber: 1,
-    pageSize: 10,
-    totalPages: 1,
-    hasPreviousPage: false,
-    hasNextPage: false,
-  };
+  const salesInvoices = useMemo(
+    () => data?.data?.result?.data || [],
+    [data],
+  );
+  const pagination = useMemo(
+    () =>
+      data?.data?.result?.pagination || {
+        totalCount: 0,
+        pageNumber: 1,
+        pageSize: 10,
+        totalPages: 1,
+        hasPreviousPage: false,
+        hasNextPage: false,
+      },
+    [data],
+  );
 
   const handleShowApproveSIModal = () => {
     setShowApproveSIModal(true);
@@ -292,6 +304,7 @@ const useSalesInvoiceList = () => {
     handleSearch,
     handleFilterChange,
     handlePageChange,
+    isFetchingData: isFetching,
     refetch,
   };
 };

@@ -330,8 +330,8 @@ const useSalesReceipt = ({ onFormSubmit }) => {
             let siStatus = item.status;
             if (newAmountDue <= 0) {
               siStatus = 5; // Settled - fully paid
-            } else if (item.outstandingAmount <= 100) {
-              // NEW LOGIC: If outstanding amount (outstanding amount) <= 100, set to settled
+            } else if (item.payment > 0 && item.outstandingAmount <= 100) {
+              // NEW LOGIC: If payment is made and outstanding amount <= 100, set to settled
               siStatus = 5; // Settled - outstanding amount within tolerance
             } else {
               siStatus = 2; // Approved - partially paid
@@ -587,7 +587,7 @@ const useSalesReceipt = ({ onFormSubmit }) => {
 
         selectedSalesInvoice.payment = 0.0;
         selectedSalesInvoice.excessAmount = 0.0;
-        selectedSalesInvoice.outstandingAmount = 0.0;
+        selectedSalesInvoice.outstandingAmount = selectedSalesInvoice.amountDue;
         selectedSalesInvoice.customerBalance = 0.0;
         selectedSalesInvoice.updatedAmountDue = selectedSalesInvoice.amountDue;
 
