@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import useExpenseOutRequisitionList from "./useExpenseOutRequisitionList";
 import ExpenseOutRequisitionApproval from "../expenseOutRequisitionApproval/expenseOutRequisitionApproval";
 import ExpenseOutRequisition from "../expenseOutRequisition";
@@ -6,6 +6,7 @@ import ExpenseOutRequisitionDetail from "../expenseOutRequisitionDetail/expenseO
 import ExpenseOutRequisitionUpdate from "../expenseOutRequisitionUpdate/expenseOutRequisitionUpdate";
 import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
+import { UserContext } from "../../../context/userContext";
 import moment from "moment";
 import "moment-timezone";
 
@@ -13,49 +14,47 @@ const ExpenseOutRequisitionList = () => {
   const {
     expenseOutRequisitions,
     isLoadingData,
-    isLoadingPermissions,
-    isPermissionsError,
     error,
     isAnyRowSelected,
     selectedRows,
-    selectedRowData,
     showApproveEORModal,
     showApproveEORModalInParent,
     showDetailEORModal,
     showDetailEORModalInParent,
+    selectedRowData,
     showCreateEORForm,
     showUpdateEORForm,
     EORDetail,
+    showConvertEORForm,
     approvalType,
     areAnySelectedRowsPendingRecommendation,
     areAnySelectedRowsPendingApproval,
     setSelectedRows,
-    handleRowSelect,
+    handleViewDetails,
     getStatusLabel,
     getStatusBadgeClass,
+    handleRowSelect,
     handleShowApproveEORModal,
     handleCloseApproveEORModal,
+    handleShowDetailEORModal,
     handleCloseDetailEORModal,
     handleApproved,
-    handleViewDetails,
     setShowCreateEORForm,
     setShowUpdateEORForm,
-    hasPermission,
     handleUpdate,
     handleUpdated,
     handleClose,
+    setShowConvertEORForm,
     handleExpensedOut,
   } = useExpenseOutRequisitionList();
 
-  if (error || isPermissionsError) {
-    return <ErrorComponent error={error || "Error fetching data"} />;
+  const { hasPermission } = useContext(UserContext);
+
+  if (error) {
+    return <ErrorComponent error={error?.message || "Error fetching data"} />;
   }
 
-  if (
-    isLoadingData ||
-    isLoadingPermissions ||
-    (expenseOutRequisitions && !(expenseOutRequisitions.length >= 0))
-  ) {
+  if (isLoadingData) {
     return <LoadingSpinner />;
   }
 
@@ -188,7 +187,7 @@ const ExpenseOutRequisitionList = () => {
                 <td>
                   <span
                     className={`badge rounded-pill ${getStatusBadgeClass(
-                      eor.status
+                      eor.status,
                     )}`}
                   >
                     {getStatusLabel(eor.status)}
