@@ -1,12 +1,16 @@
 import { useState, useEffect, useRef, useContext } from "react";
-import { post_cashier_expense_out_api } from "../../services/salesApi";
+import {
+  post_cashier_expense_out_api,
+  put_expense_out_requisition_api,
+} from "../../services/salesApi";
 import { UserContext } from "../../context/userContext";
 
-const useCashierExpenseOut = ({ onFormSubmit, onClose }) => {
+const useCashierExpenseOut = ({ onFormSubmit, onClose, initialData }) => {
   const { activeCashierSession } = useContext(UserContext);
   const [formData, setFormData] = useState({
-    reason: "",
-    amount: "",
+    reason: initialData?.reason || "",
+    amount: initialData?.amount || "",
+    expenseOutRequisitionId: initialData?.expenseOutRequisitionId || 0,
   });
   const [validFields, setValidFields] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
@@ -82,6 +86,7 @@ const useCashierExpenseOut = ({ onFormSubmit, onClose }) => {
           companyId: sessionStorage.getItem("companyId"),
           cashierSessionId: activeCashierSession?.cashierSessionId,
           permissionId: 1069,
+          expenseOutRequisitionId: formData.expenseOutRequisitionId,
         };
 
         const response = await post_cashier_expense_out_api(
@@ -91,6 +96,21 @@ const useCashierExpenseOut = ({ onFormSubmit, onClose }) => {
         if (response.status === 201) {
           setSubmissionStatus("successSubmitted");
           console.log("Cashier expense out created successfully!", formData);
+
+          if (formData.expenseOutRequisitionId > 0 && initialData) {
+            try {
+              await put_expense_out_requisition_api(
+                formData.expenseOutRequisitionId,
+                {
+                  ...initialData,
+                  status: 4,
+                }
+              );
+              console.log("Requisition status updated to 4 with full payload");
+            } catch (updateError) {
+              console.error("Error updating requisition status:", updateError);
+            }
+          }
 
           setTimeout(() => {
             setSubmissionStatus(null);
@@ -115,6 +135,7 @@ const useCashierExpenseOut = ({ onFormSubmit, onClose }) => {
     setFormData({
       reason: "",
       amount: "",
+      expenseOutRequisitionId: 0,
     });
     setValidFields({});
     setValidationErrors({});

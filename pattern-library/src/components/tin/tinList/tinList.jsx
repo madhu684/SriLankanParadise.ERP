@@ -57,6 +57,7 @@ const TinList = () => {
     handleCloseDeleteConfirmation,
     selectedDate,
     setSelectedDate,
+    isInitializing,
   } = useTinList();
 
   const { hasPermission } = useContext(UserContext);
@@ -94,7 +95,7 @@ const TinList = () => {
     return <ErrorComponent error={error || "Error fetching data..."} />;
   }
 
-  if (isLoadingData || (Tins && !(Tins?.length >= 0))) {
+  if (isLoadingData || isLoadingTrn || isInitializing) {
     return <LoadingSpinner />;
   }
 

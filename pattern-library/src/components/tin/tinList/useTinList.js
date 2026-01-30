@@ -44,6 +44,9 @@ const useTinList = () => {
         .map((l) => l.locationId)
     : null;
 
+  // Check for locations to be ready
+  const isInitializing = !userLocations || !warehouseUserLocation || warehouseUserLocation.length === 0;
+
   const {
     data: transferRequisitions = [],
     isLoading: isLoadingTrn,
@@ -297,6 +300,7 @@ const useTinList = () => {
     showTINDeleteModal,
     transferRequisitions,
     isLoadingTrn,
+    isInitializing,
     setShowTINDeleteModal,
     areAnySelectedRowsPending,
     setSelectedRows,

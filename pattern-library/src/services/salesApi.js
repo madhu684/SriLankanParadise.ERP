@@ -972,6 +972,21 @@ export const get_expense_out_requisitions_api = async (companyId) => {
   }
 };
 
+export const get_approved_expense_out_requisitions = async (companyId,status, query) => {
+  try {
+    const response = await api.get(
+      `/expenseOutRequisition/GetApprovedExpenseOutRequisitio/${companyId}/${status}?query=${query}`,
+      {
+        withCredentials: true,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const get_expense_out_requisitions_by_user_id_api = async (userId) => {
   try {
     const response = await api.get(

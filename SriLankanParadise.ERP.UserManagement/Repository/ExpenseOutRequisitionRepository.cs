@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
@@ -109,6 +110,34 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             catch (Exception)
             {
 
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<ExpenseOutRequisition>> GetApprovedExpenseOutRequisitions(int status, int companyId, string? SearchQuery)
+        {
+            try
+            {
+                var query = _dbContext.ExpenseOutRequisitions
+                    .AsNoTracking()
+                    .Include(eor => eor.CashierExpenseOuts)
+                    .Where(sr => sr.Status == status && sr.CompanyId == companyId);
+              
+
+                //Apply Filter
+                if (!string.IsNullOrEmpty(SearchQuery))
+                {
+                    var searchTerm = SearchQuery.ToLower().Trim();
+                    query = query.Where(sr => 
+                    sr.ReferenceNumber.ToLower().Contains(searchTerm));    
+                }
+
+                var expenseOutRequisitions = await query.ToListAsync();
+
+                return expenseOutRequisitions.Any() ? expenseOutRequisitions : null;
+            }
+            catch (Exception)
+            {
                 throw;
             }
         }
