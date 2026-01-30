@@ -8,6 +8,7 @@ import {
   get_item_masters_by_company_id_with_query_api,
   put_item_master_api,
   get_all_item_modes_api,
+  initialize_item_batch_api,
 } from "../../services/inventoryApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -552,6 +553,22 @@ const useItemMaster = ({ onFormSubmit }) => {
               itemMasterId: itemMasterId,
             };
             await post_supplier_item_api(supplierData);
+          }
+          
+          // Initialize item batch with 0 quantity in main store
+          if (formData.itemModeId !== 2) {
+            try {
+              await initialize_item_batch_api({
+                itemMasterId: itemMasterId,
+                companyId: parseInt(sessionStorage.getItem("companyId")),
+                locationId: 4,
+                createdBy: sessionStorage.getItem("username"),
+                createdUserId: parseInt(sessionStorage.getItem("userId")),
+              });
+              console.log("Item batch initialized with 0 quantity for item:", itemMasterId);
+            } catch (batchError) {
+              console.error("Error initializing item batch:", batchError);
+            }
           }
 
           setTimeout(() => {

@@ -151,6 +151,18 @@ export const post_item_master_api = async (formData) => {
   }
 };
 
+export const initialize_item_batch_api = async (data) => {
+  try {
+    const response = await api.post("/itemMaster/InitializeItemBatch", data, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const put_item_master_api = async (itemMasterId, itemMasterIdData) => {
   try {
     const response = await api.put(
