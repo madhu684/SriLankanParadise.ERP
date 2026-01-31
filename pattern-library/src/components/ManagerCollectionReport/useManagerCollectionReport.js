@@ -82,6 +82,8 @@ const useManagerCollectionReport = () => {
       { description: "Overall Cash Collection", amount: reportData.totalCash },
       { description: "Overall Bank Transfer", amount: reportData.totalBankTransfer },
       { description: "Overall Gift Voucher", amount: reportData.totalGiftVoucher },
+      { description: "Overall Total Short", amount: reportData.totalShort },
+      { description: "Overall Total Excess", amount: reportData.totalExcess },
       { description: "Overall Cashier Expenses", amount: reportData.totalExpenses },
       { description: "Overall Cash In Hand", amount: reportData.totalCashInHand },
     ];

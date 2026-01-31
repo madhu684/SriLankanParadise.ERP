@@ -1,8 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import {
+  approve_issue_master_api,
   approve_requisition_master_api,
   get_issue_details_api,
+  get_issue_masters_by_requisition_master_id_api,
   get_locations_inventories_by_location_id_item_master_id_api,
   patch_issue_detail_api,
   patch_location_inventory_api,
@@ -65,22 +67,29 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
     }
   }, [issuedetails]);
 
+  const isAlreadyAccepted =
+    tin?.status?.toString().charAt(1) === "5" ||
+    (issuedetails?.length > 0 &&
+      issuedetails.every(
+        (d) => d.receivedQuantity !== null && d.receivedQuantity !== undefined
+      ));
+
   const getStatusLabel = () => {
     let statusLabel = "Unknown Status";
-    if (tin?.requisitionMaster?.isMINAccepted === false) {
-      statusLabel = "In Progress";
-    } else {
+    if (isAlreadyAccepted) {
       statusLabel = "Completed";
+    } else {
+      statusLabel = "In Progress";
     }
     return statusLabel;
   };
 
   const getStatusBadgeClass = () => {
     let statusClass = "bg-secondary";
-    if (tin?.requisitionMaster?.isMINAccepted === false) {
-      statusClass = "bg-info";
-    } else {
+    if (isAlreadyAccepted) {
       statusClass = "bg-success";
+    } else {
+      statusClass = "bg-info";
     }
     return statusClass;
   };
@@ -333,21 +342,80 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
 
   const updateMrnState = async () => {
     try {
+      // 1. Fetch all TINs for this TRN to check overall progress
+      const tinsResponse = await get_issue_masters_by_requisition_master_id_api(
+        tin.requisitionMasterId
+      );
+      const allTins = tinsResponse?.data?.result || [];
+
+      // 2. Calculate total received quantity for each item across ALL TINs
+      // Also check if all existing TINs are accepted
+      let allTinsAccepted = true;
+      const totalReceivedMap = {};
+
+      allTins.forEach((t) => {
+        // Check if TIN is accepted (status starts with 5)
+        if (t.status?.toString().charAt(1) !== "5") {
+          // If the TIN we just accepted isn't updated in the list yet, we handle it
+          if (t.issueMasterId !== tin.issueMasterId) {
+            allTinsAccepted = false;
+          }
+        }
+
+        t.issueDetails?.forEach((detail) => {
+          const itemId = detail.itemMasterId;
+          const received = detail.receivedQuantity || 0;
+          totalReceivedMap[itemId] = (totalReceivedMap[itemId] || 0) + received;
+        });
+      });
+
+      // 3. Compare with requested quantities
+      const requestedDetails = tin.requisitionMaster?.requisitionDetails || [];
+      let allItemsFullyReceived = true;
+
+      requestedDetails.forEach((req) => {
+        const itemId = req.itemMasterId;
+        const requestedQty = req.quantity || 0;
+        const totalReceived = totalReceivedMap[itemId] || 0;
+
+        if (totalReceived < requestedQty) {
+          allItemsFullyReceived = false;
+        }
+      });
+
+      // 4. Determine final TRN status
+      // If all items are dispatched and all TINs are accepted -> Completed (5)
+      // Otherwise -> In Progress (4)
+      const finalStatus = allItemsFullyReceived && allTinsAccepted ? 5 : 4;
+
       await update_min_state_in_mrn_api(tin.requisitionMasterId, {
         isMINApproved: tin?.requisitionMaster?.isMINApproved,
-        isMINAccepted: true,
+        isMINAccepted: allItemsFullyReceived && allTinsAccepted,
       });
-      if (tin?.requisitionMaster?.status !== 5) {
-        await approve_requisition_master_api(tin.requisitionMasterId, {
-          status: 5,
-          approvedBy: tin?.requisitionMaster?.approvedBy,
-          approvedUserId: tin?.requisitionMaster?.approvedUserId,
-          approvedDate: tin?.requisitionMaster?.approvedDate,
-          permissionId: 1053,
-        });
-      }
+
+      await approve_requisition_master_api(tin.requisitionMasterId, {
+        status: finalStatus,
+        approvedBy: tin?.requisitionMaster?.approvedBy,
+        approvedUserId: tin?.requisitionMaster?.approvedUserId,
+        approvedDate: tin?.requisitionMaster?.approvedDate,
+        permissionId: 1053,
+      });
     } catch (error) {
       console.error("Error updating MRN state:", error);
+    }
+  };
+
+  const updateTinStatus = async (tinId) => {
+    try {
+      await approve_issue_master_api(tinId, {
+        status: 55, // Completed
+        approvedBy: sessionStorage.getItem("username"),
+        approvedUserId: sessionStorage.getItem("userId"),
+        approvedDate: new Date().toISOString(),
+        permissionId: 1064,
+      });
+    } catch (error) {
+      console.error("Error updating TIN status:", error);
     }
   };
 
@@ -446,6 +514,7 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
 
       console.log("increaseInventoryFifo completed successfully");
 
+      await updateTinStatus(tinId);
       await updateMrnState();
 
       queryClient.invalidateQueries(["tins", tinId]);
@@ -481,6 +550,7 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
     handleReceivedQuantityChange,
     handleReturnedQuantityChange,
     validateQuantities,
+    isAlreadyAccepted,
     getStatusBadgeClass,
     getStatusLabel,
   };

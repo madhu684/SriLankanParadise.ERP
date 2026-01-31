@@ -200,7 +200,53 @@ const ManagerCollectionReport = () => {
                       className="bg-opacity-10 p-2 rounded-circle"
                       style={{ backgroundColor: "rgba(253, 126, 20, 0.1)" }}
                     >
-                      <RiCoupon2Line size={24} style={{ color: "#fd7e14" }} />
+                      <div style={{ color: "#fd7e14" }}>
+                        <RiCoupon2Line size={24} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Total Short */}
+            <div className="col-lg-3 col-md-4 col-sm-6">
+              <div
+                className="card shadow-sm border-0 h-100"
+                style={{ borderLeft: "4px solid #dc3545" }}
+              >
+                <div className="card-body">
+                  <p className="text-muted mb-1 small uppercase fw-bold">
+                    Overall Total Short
+                  </p>
+                  <div className="d-flex justify-content-between align-items-center">
+                    <h4 className="mb-0 text-danger">
+                      Rs. {formatCurrency(reportData.totalShort)}
+                    </h4>
+                    <div className="bg-danger bg-opacity-10 p-2 rounded-circle">
+                      <FiTrendingDown size={24} className="text-danger" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Total Excess */}
+            <div className="col-lg-3 col-md-4 col-sm-6">
+              <div
+                className="card shadow-sm border-0 h-100"
+                style={{ borderLeft: "4px solid #ffc107" }}
+              >
+                <div className="card-body">
+                  <p className="text-muted mb-1 small uppercase fw-bold">
+                    Overall Total Excess
+                  </p>
+                  <div className="d-flex justify-content-between align-items-center">
+                    <h4 className="mb-0 text-warning">
+                      Rs. {formatCurrency(reportData.totalExcess)}
+                    </h4>
+                    <div className="bg-warning bg-opacity-10 p-2 rounded-circle">
+                      <FiTrendingUp size={24} className="text-warning" />
                     </div>
                   </div>
                 </div>

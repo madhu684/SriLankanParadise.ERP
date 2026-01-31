@@ -83,7 +83,7 @@ const TinsListDetail = ({ refetch, setRefetch, trnId, handleBack }) => {
                 <td>
                   <span
                     className={`badge rounded-pill ${getStatusBadgeClass(
-                      tin.status
+                      tin.status,
                     )}`}
                   >
                     {getStatusLabel(tin.status)}
