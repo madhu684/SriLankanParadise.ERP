@@ -282,9 +282,9 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin, trnId }) => {
               <tbody>
                 {pendingItems.map((item, index) => (
                   <tr key={index}>
-                    <td className="mb-0 text-danger">{item.itemMaster?.itemName || "N/A"}</td>
+                    <td>{item.itemMaster?.itemName || "N/A"}</td>
                     <td>{item.itemMaster?.unit?.unitName || "N/A"}</td>
-                    <td>{item.quantity}</td>
+                    <td className="fw-bold">{item.quantity}</td>
                   </tr>
                 ))}
               </tbody>
