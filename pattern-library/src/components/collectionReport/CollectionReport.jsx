@@ -459,7 +459,7 @@ const CollectionReport = () => {
                     </tbody>
                     <tfoot className="table-light">
                       <tr className="fw-bold">
-                        <td colSpan="5" className="text-end">
+                        <td colSpan="6" className="text-end">
                           Totals:
                         </td>
                         <td className="text-end">
