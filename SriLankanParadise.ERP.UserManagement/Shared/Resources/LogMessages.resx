@@ -585,6 +585,12 @@
   <data name="RequisitionMastersRetrieved" xml:space="preserve">
     <value>Requisition masters retrieved</value>
   </data>
+  <data name="RequisitionMasterRetrieved" xml:space="preserve">
+    <value>Requisition master retrieved</value>
+  </data>
+  <data name="RequisitionMasterPatched" xml:space="preserve">
+    <value>Requisition master patched</value>
+  </data>
   <data name="RoleCreated" xml:space="preserve">
     <value>Role created successfully</value>
   </data>

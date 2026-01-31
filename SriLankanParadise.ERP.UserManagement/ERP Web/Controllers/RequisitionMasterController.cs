@@ -139,6 +139,32 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpGet("{requisitionMasterId}")]
+        public async Task<ApiResponseModel> GetRequisitionMasterById(int requisitionMasterId)
+        {
+            try
+            {
+                var requisitionMaster = await _requisitionMasterService.GetRequisitionMasterByRequisitionMasterId(requisitionMasterId);
+                if (requisitionMaster != null)
+                {
+                    var requisitionMasterDto = _mapper.Map<RequisitionMasterDto>(requisitionMaster);
+                    AddResponseMessage(Response, LogMessages.RequisitionMastersRetrieved, requisitionMasterDto, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.RequisitionMasterNotFound);
+                    AddResponseMessage(Response, LogMessages.RequisitionMasterNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+        
+
         [HttpPatch("approve/{requisitionMasterId}")]
         public async Task<ApiResponseModel> ApproveRequisitionMaster(int requisitionMasterId, ApproveRequisitionMasterRequestModel approveRequisitionMasterRequest)
         {
