@@ -340,7 +340,7 @@ const CollectionReport = () => {
                         <h4 className="mb-0" style={{ color: "#6f42c1" }}>
                           Rs.{" "}
                           {formatCurrency(
-                            reportData.totalCashierExpenseOutAmount
+                            reportData.totalCashierExpenseOutAmount,
                           )}
                         </h4>
                       </div>
@@ -389,6 +389,7 @@ const CollectionReport = () => {
                       <tr>
                         <th className="text-center"></th>
                         <th>Bill No</th>
+                        <th>Invoice Reference</th>
                         <th className="text-center">Token No</th>
                         <th>Patient Name</th>
                         <th>Telephone</th>
@@ -405,6 +406,9 @@ const CollectionReport = () => {
                           <td className="text-center">{index + 1}</td>
                           <td>
                             <strong>{item.billNo}</strong>
+                          </td>
+                          <td>
+                            <strong>{item.invoiceReference || "-"}</strong>
                           </td>
                           <td className="text-center">
                             {item.channelNo || "-"}
@@ -438,10 +442,10 @@ const CollectionReport = () => {
                                 item.modeOfPayment === "Cash"
                                   ? "bg-success"
                                   : item.modeOfPayment === "Bank Transfer"
-                                  ? "bg-info"
-                                  : item.modeOfPayment === "Gift Voucher"
-                                  ? "bg-warning"
-                                  : "bg-secondary"
+                                    ? "bg-info"
+                                    : item.modeOfPayment === "Gift Voucher"
+                                      ? "bg-warning"
+                                      : "bg-secondary"
                               }`}
                             >
                               {item.modeOfPayment}
@@ -455,7 +459,7 @@ const CollectionReport = () => {
                     </tbody>
                     <tfoot className="table-light">
                       <tr className="fw-bold">
-                        <td colSpan="5" className="text-end">
+                        <td colSpan="6" className="text-end">
                           Totals:
                         </td>
                         <td className="text-end">
@@ -578,7 +582,7 @@ const CollectionReport = () => {
                           <h5 className="mb-0 text-secondary">
                             Rs.{" "}
                             {formatCurrency(
-                              reportData.dailyTotalCashierExpenseOutAmount
+                              reportData.dailyTotalCashierExpenseOutAmount,
                             )}
                           </h5>
                         </div>

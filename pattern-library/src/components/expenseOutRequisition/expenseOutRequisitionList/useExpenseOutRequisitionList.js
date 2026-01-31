@@ -1,13 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { get_expense_out_requisitions_api } from "../../../services/salesApi";
-import { get_expense_out_requisitions_by_user_id_api } from "../../../services/salesApi";
-import { get_user_permissions_api } from "../../../services/userManagementApi";
 import { useQuery } from "@tanstack/react-query";
 
 const useExpenseOutRequisitionList = () => {
-  const [expenseOutRequisitions, setExpenseOutRequisitions] = useState([]);
-  const [isLoadingData, setIsLoadingData] = useState(true);
-  const [error, setError] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedRowData, setSelectedRowData] = useState([]);
   const [showApproveEORModal, setShowApproveEORModal] = useState(false);
@@ -22,99 +17,23 @@ const useExpenseOutRequisitionList = () => {
   const [showConvertEORForm, setShowConvertEORForm] = useState(false);
   const [approvalType, setApprovalType] = useState("");
 
-  const fetchUserPermissions = async () => {
-    try {
-      const response = await get_user_permissions_api(
-        sessionStorage.getItem("userId")
-      );
-      return response.data.result;
-    } catch (error) {
-      console.error("Error fetching user permissions:", error);
-    }
+  const fetchExpenseOutRequisitions = async () => {
+    const response = await get_expense_out_requisitions_api(
+      sessionStorage.getItem("companyId"),
+    );
+    return response.data.result || [];
   };
 
   const {
-    data: userPermissions,
-    isLoading: isLoadingPermissions,
-    isError: isPermissionsError,
-    error: permissionError,
+    data: expenseOutRequisitions = [],
+    isLoading: isLoadingData,
+    isError,
+    error,
+    refetch,
   } = useQuery({
-    queryKey: ["userPermissions"],
-    queryFn: fetchUserPermissions,
+    queryKey: ["expenseOutRequisitions"],
+    queryFn: fetchExpenseOutRequisitions,
   });
-
-  const fetchData = async () => {
-    try {
-      if (!isLoadingPermissions && userPermissions) {
-        if (hasPermission("View All Expense Out Requisitions")) {
-          const ExpenseOutRequisitionWithoutDraftsResponse =
-            await get_expense_out_requisitions_api(
-              sessionStorage.getItem("companyId")
-            );
-
-          const ExpenseOutRequisitionByUserIdResponse =
-            await get_expense_out_requisitions_by_user_id_api(
-              sessionStorage.getItem("userId")
-            );
-
-          let newExpenseOutRequisitions = [];
-          if (
-            ExpenseOutRequisitionWithoutDraftsResponse &&
-            ExpenseOutRequisitionWithoutDraftsResponse.data.result
-          ) {
-            newExpenseOutRequisitions =
-              ExpenseOutRequisitionWithoutDraftsResponse.data.result;
-          }
-
-          let additionalOrders = [];
-          if (
-            ExpenseOutRequisitionByUserIdResponse &&
-            ExpenseOutRequisitionByUserIdResponse.data.result
-          ) {
-            additionalOrders =
-              ExpenseOutRequisitionByUserIdResponse.data.result;
-          }
-          //let newExpenseOutRequisitions = ExpenseOutRequisitionWithoutDraftsResponse.data.result;
-          //const additionalOrders = ExpenseOutRequisitionByUserIdResponse.data.result;
-
-          const uniqueNewOrders = additionalOrders.filter(
-            (order) =>
-              !newExpenseOutRequisitions.some(
-                (existingOrder) =>
-                  existingOrder.ExpenseOutRequisitionId ===
-                  order.ExpenseOutRequisitionId
-              )
-          );
-
-          newExpenseOutRequisitions = [
-            ...newExpenseOutRequisitions,
-            ...uniqueNewOrders,
-          ];
-          setExpenseOutRequisitions(newExpenseOutRequisitions);
-        } else {
-          const ExpenseOutRequisitionResponse =
-            await get_expense_out_requisitions_by_user_id_api(
-              sessionStorage.getItem("userId")
-            );
-          setExpenseOutRequisitions(
-            ExpenseOutRequisitionResponse.data.result || []
-          );
-        }
-      }
-    } catch (error) {
-      setError("Error fetching data");
-    } finally {
-      setIsLoadingData(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchUserPermissions();
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [isLoadingPermissions, userPermissions]);
 
   const handleShowApproveEORModal = (approvalType) => {
     setApprovalType(approvalType);
@@ -135,7 +54,7 @@ const useExpenseOutRequisitionList = () => {
   };
 
   const handleApproved = async () => {
-    fetchData();
+    refetch();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -144,7 +63,7 @@ const useExpenseOutRequisitionList = () => {
   };
 
   const handleExpensedOut = async () => {
-    fetchData();
+    refetch();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -181,7 +100,7 @@ const useExpenseOutRequisitionList = () => {
   };
 
   const handleUpdated = async () => {
-    fetchData();
+    refetch();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -199,15 +118,15 @@ const useExpenseOutRequisitionList = () => {
   const handleRowSelect = (id) => {
     const isSelected = selectedRows.includes(id);
     const selectedRow = expenseOutRequisitions.find(
-      (eor) => eor.expenseOutRequisitionId === id
+      (eor) => eor.expenseOutRequisitionId === id,
     );
 
     if (isSelected) {
       setSelectedRows((prevSelected) =>
-        prevSelected.filter((selectedId) => selectedId !== id)
+        prevSelected.filter((selectedId) => selectedId !== id),
       );
       setSelectedRowData((prevSelectedData) =>
-        prevSelectedData.filter((data) => data.expenseOutRequisitionId !== id)
+        prevSelectedData.filter((data) => data.expenseOutRequisitionId !== id),
       );
     } else {
       setSelectedRows((prevSelected) => [...prevSelected, id]);
@@ -248,15 +167,7 @@ const useExpenseOutRequisitionList = () => {
     return selectedRows.some(
       (id) =>
         expenseOutRequisitions.find((eor) => eor.expenseOutRequisitionId === id)
-          ?.status === 1
-    );
-  };
-
-  const hasPermission = (permissionName) => {
-    return userPermissions?.some(
-      (permission) =>
-        permission.permission.permissionName === permissionName &&
-        permission.permission.permissionStatus
+          ?.status === 1,
     );
   };
 
@@ -264,16 +175,13 @@ const useExpenseOutRequisitionList = () => {
     return selectedRows.some(
       (id) =>
         expenseOutRequisitions.find((eor) => eor.expenseOutRequisitionId === id)
-          ?.status === 2
+          ?.status === 2,
     );
   };
 
   return {
     expenseOutRequisitions,
     isLoadingData,
-    isLoadingPermissions,
-    isPermissionsError,
-    permissionError,
     error,
     isAnyRowSelected,
     selectedRows,
@@ -284,7 +192,6 @@ const useExpenseOutRequisitionList = () => {
     selectedRowData,
     showCreateEORForm,
     showUpdateEORForm,
-    userPermissions,
     EORDetail,
     showConvertEORForm,
     approvalType,
@@ -302,7 +209,6 @@ const useExpenseOutRequisitionList = () => {
     handleApproved,
     setShowCreateEORForm,
     setShowUpdateEORForm,
-    hasPermission,
     handleUpdate,
     handleUpdated,
     handleClose,

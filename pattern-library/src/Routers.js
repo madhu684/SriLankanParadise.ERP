@@ -44,6 +44,7 @@ import CustomerList from "./components/customer/customerList/CustomerList";
 import CollectionReport from "./components/collectionReport/CollectionReport";
 import ManagerCollectionReport from "./components/ManagerCollectionReport/ManagerCollectionReport";
 import CustomerInqueryReport from "./components/customerInqueryReport/CustomerInqueryReport.jsx";
+import MinReport from "./components/MinReport/MinReport.jsx";
 
 const Routers = () => {
   return (
@@ -93,6 +94,7 @@ const Routers = () => {
             <Route path="min" element={<MinList />} />
             <Route path="tin" element={<TinList />} />
             <Route path="batch-update" element={<ItemBatchUpdate />} />
+            <Route path="min-report" element={<MinReport />} />
           </Route>
 
           {/* Sales Management Module */}

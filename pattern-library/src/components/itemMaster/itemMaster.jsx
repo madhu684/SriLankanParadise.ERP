@@ -55,6 +55,24 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
     handleSelectSubItem,
     handleRemoveChildItem,
     handleChildItemQuantityChange,
+    itemTypeSearchTerm,
+    setItemTypeSearchTerm,
+    categorySearchTerm,
+    setCategorySearchTerm,
+    isItemTypeSelected,
+    setIsItemTypeSelected,
+    isCategorySelected,
+    setIsCategorySelected,
+    handleItemTypeSelect,
+    handleResetItemType,
+    handleCategorySelect,
+    handleResetCategory,
+    filteredItemTypes,
+    filteredCategories,
+    showItemTypeDropdown,
+    setShowItemTypeDropdown,
+    showCategoryDropdown,
+    setShowCategoryDropdown,
   } = useItemMaster({
     onFormSubmit: () => {
       handleClose();
@@ -210,26 +228,85 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
               <label htmlFor="itemType" className="form-label">
                 Item Type
               </label>
-              <select
-                className={`form-select ${
-                  validFields.itemTypeId ? "is-valid" : ""
-                } ${validationErrors.itemTypeId ? "is-invalid" : ""}`}
-                id="itemType"
-                value={formData.itemTypeId}
-                onChange={(e) =>
-                  handleInputChange("itemTypeId", e.target.value)
-                }
-                required
+              <div
+                className="dropdown"
+                style={{ width: "100%" }}
+                onBlur={(e) => {
+                  if (!e.currentTarget.contains(e.relatedTarget)) {
+                    setShowItemTypeDropdown(false);
+                  }
+                }}
               >
-                <option value="">Select Item Type</option>
-                {itemTypes?.map((type) => (
-                  <option key={type.itemTypeId} value={type.itemTypeId}>
-                    {type.name}
-                  </option>
-                ))}
-              </select>
+                <div className="input-group">
+                  <span className="input-group-text bg-transparent">
+                    <i className="bi bi-search"></i>
+                  </span>
+                  <input
+                    type="text"
+                    className={`form-control ${
+                      validFields.itemTypeId ? "is-valid" : ""
+                    } ${validationErrors.itemTypeId ? "is-invalid" : ""}`}
+                    placeholder="Select or search item type..."
+                    value={
+                      isItemTypeSelected && !showItemTypeDropdown
+                        ? formData.itemTypeName
+                        : itemTypeSearchTerm
+                    }
+                    onChange={(e) => setItemTypeSearchTerm(e.target.value)}
+                    onFocus={() => {
+                      setShowItemTypeDropdown(true);
+                      if (isItemTypeSelected) {
+                        handleResetItemType();
+                      }
+                    }}
+                  />
+                  <button
+                    className="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                    type="button"
+                    onClick={() => setShowItemTypeDropdown(!showItemTypeDropdown)}
+                  ></button>
+                  {isItemTypeSelected && (
+                    <span
+                      className="input-group-text bg-transparent"
+                      style={{ cursor: "pointer" }}
+                      onClick={handleResetItemType}
+                    >
+                      <i className="bi bi-x"></i>
+                    </span>
+                  )}
+                </div>
+
+                {showItemTypeDropdown && (
+                  <ul
+                    className="dropdown-menu show"
+                    style={{
+                      width: "100%",
+                      maxHeight: "200px",
+                      overflowY: "auto",
+                    }}
+                  >
+                    {filteredItemTypes.length > 0 ? (
+                      filteredItemTypes.map((type) => (
+                        <li key={type.itemTypeId}>
+                          <button
+                            className="dropdown-item"
+                            type="button"
+                            onMouseDown={() => handleItemTypeSelect(type)}
+                          >
+                            {type.name}
+                          </button>
+                        </li>
+                      ))
+                    ) : (
+                      <li className="dropdown-item disabled">
+                        No results found
+                      </li>
+                    )}
+                  </ul>
+                )}
+              </div>
               {validationErrors.itemTypeId && (
-                <div className="invalid-feedback">
+                <div className="text-danger small mt-1">
                   {validationErrors.itemTypeId}
                 </div>
               )}
@@ -239,33 +316,87 @@ const ItemMaster = ({ handleClose, handleUpdated, setShowCreateIMForm }) => {
               <label htmlFor="categoryId" className="form-label">
                 Category
               </label>
-              <select
-                className={`form-select ${
-                  validFields.categoryId ? "is-valid" : ""
-                } ${validationErrors.categoryId ? "is-invalid" : ""}`}
-                id="categoryId"
-                value={formData.categoryId}
-                onChange={(e) =>
-                  handleInputChange("categoryId", e.target.value)
-                }
-                required
+              <div
+                className="dropdown"
+                style={{ width: "100%" }}
+                onBlur={(e) => {
+                  if (!e.currentTarget.contains(e.relatedTarget)) {
+                    setShowCategoryDropdown(false);
+                  }
+                }}
               >
-                <option value="">Select Category</option>
-                {categoryOptions
-                  // ?.filter((category) =>
-                  //   isTreatmentType() ? category.isTreatment === true : true
-                  // )
-                  .map((category) => (
-                    <option
-                      key={category.categoryId}
-                      value={category.categoryId}
+                <div className="input-group">
+                  <span className="input-group-text bg-transparent">
+                    <i className="bi bi-search"></i>
+                  </span>
+                  <input
+                    type="text"
+                    className={`form-control ${
+                      validFields.categoryId ? "is-valid" : ""
+                    } ${validationErrors.categoryId ? "is-invalid" : ""}`}
+                    placeholder="Select or search category..."
+                    value={
+                      isCategorySelected && !showCategoryDropdown
+                        ? categoryOptions.find(
+                            (c) => c.categoryId === formData.categoryId
+                          )?.categoryName
+                        : categorySearchTerm
+                    }
+                    onChange={(e) => setCategorySearchTerm(e.target.value)}
+                    onFocus={() => {
+                      setShowCategoryDropdown(true);
+                      if (isCategorySelected) {
+                        handleResetCategory();
+                      }
+                    }}
+                  />
+                  <button
+                    className="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                    type="button"
+                    onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                  ></button>
+                  {isCategorySelected && (
+                    <span
+                      className="input-group-text bg-transparent"
+                      style={{ cursor: "pointer" }}
+                      onClick={handleResetCategory}
                     >
-                      {category.categoryName}
-                    </option>
-                  ))}
-              </select>
+                      <i className="bi bi-x"></i>
+                    </span>
+                  )}
+                </div>
+
+                {showCategoryDropdown && (
+                  <ul
+                    className="dropdown-menu show"
+                    style={{
+                      width: "100%",
+                      maxHeight: "200px",
+                      overflowY: "auto",
+                    }}
+                  >
+                    {filteredCategories.length > 0 ? (
+                      filteredCategories.map((category) => (
+                        <li key={category.categoryId}>
+                          <button
+                            className="dropdown-item"
+                            type="button"
+                            onMouseDown={() => handleCategorySelect(category)}
+                          >
+                            {category.categoryName}
+                          </button>
+                        </li>
+                      ))
+                    ) : (
+                      <li className="dropdown-item disabled">
+                        No results found
+                      </li>
+                    )}
+                  </ul>
+                )}
+              </div>
               {validationErrors.categoryId && (
-                <div className="invalid-feedback">
+                <div className="text-danger small mt-1">
                   {validationErrors.categoryId}
                 </div>
               )}

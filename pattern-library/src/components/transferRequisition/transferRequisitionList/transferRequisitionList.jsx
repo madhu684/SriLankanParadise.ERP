@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import useTransferRequisitionList from "./useTransferRequisitionList";
 import TransferRequisitionApproval from "../transferRequisitionApproval/transferRequisitionApproval";
 import TransferRequisition from "../transferRequisition";
@@ -10,6 +10,7 @@ import moment from "moment";
 import "moment-timezone";
 import { FaSearch } from "react-icons/fa";
 import Pagination from "../../common/Pagination/Pagination";
+import { UserContext } from "../../../context/userContext";
 
 const TransferRequisitionList = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -19,7 +20,6 @@ const TransferRequisitionList = () => {
   const {
     transferRequisitions,
     isLoadingTrn,
-    isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
@@ -30,14 +30,13 @@ const TransferRequisitionList = () => {
     selectedRowData,
     showCreateTRForm,
     TRDetail,
-    isPermissionsError,
-    permissionError,
     selectedWarehouse,
     userWarehouses,
     filter,
     filteredRequisitions,
     openTINsList,
     refetch,
+    selectedDate,
     setRefetch,
     areAnySelectedRowsPending,
     setSelectedRows,
@@ -51,14 +50,16 @@ const TransferRequisitionList = () => {
     handleCloseDetailTRModal,
     handleApproved,
     setShowCreateTRForm,
-    hasPermission,
     handleUpdated,
     handleClose,
     formatDateInTimezone,
     setSelectedWarehouse,
     setFilter,
     setOpenTINsList,
+    setSelectedDate,
   } = useTransferRequisitionList();
+
+  const { hasPermission } = useContext(UserContext);
 
   const [selectedTrnId, setSelectedTrnId] = useState(null);
 
@@ -72,19 +73,18 @@ const TransferRequisitionList = () => {
   const filteredTransferRequisitions = filteredRequisitions?.filter(
     (tr) =>
       tr.requestedBy.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tr.referenceNumber.toLowerCase().includes(searchQuery.toLowerCase())
+      tr.referenceNumber.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   //Pagination Handler
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  if (error || isPermissionsError) {
-    return <ErrorComponent error={error || permissionError.message} />;
+  if (error) {
+    return <ErrorComponent error={error} />;
   }
 
   if (
     isLoadingTrn ||
-    isLoadingPermissions ||
     (transferRequisitions && !(transferRequisitions.length >= 0))
   ) {
     return <LoadingSpinner />;
@@ -181,6 +181,14 @@ const TransferRequisitionList = () => {
             ))}
           </select>
         </div>
+        <div className="me-3 mb-2 mb-md-0">
+          <input
+            type="date"
+            className="form-control"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+          />
+        </div>
         {selectedWarehouse && (
           <div className="filter-buttons">
             <button
@@ -248,7 +256,7 @@ const TransferRequisitionList = () => {
             {filteredTransferRequisitions
               .slice(
                 (currentPage - 1) * itemsPerPage,
-                currentPage * itemsPerPage
+                currentPage * itemsPerPage,
               )
               .map((mr) => (
                 <tr key={mr.requisitionMasterId}>
@@ -270,7 +278,7 @@ const TransferRequisitionList = () => {
                   <td>
                     <span
                       className={`badge rounded-pill ${getStatusBadgeClass(
-                        mr.status
+                        mr.status,
                       )}`}
                     >
                       {getStatusLabel(mr.status)}

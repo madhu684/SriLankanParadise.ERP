@@ -33,6 +33,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             try
             {
                 var cashierExpenseOuts = await _dbContext.CashierExpenseOuts
+                    .Include(eo => eo.ExpenseOutRequisition)
                     .Where(eo => eo.UserId == userId)
                     .ToListAsync();
 
@@ -61,7 +62,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     query = query.Where(eo => eo.UserId == userId.Value);
                 }
 
-                var cashierExpenseOuts = await query.ToListAsync();
+                var cashierExpenseOuts = await query
+                    .Include(ce => ce.ExpenseOutRequisition)
+                    .ToListAsync();
 
                 return cashierExpenseOuts.Any() ? cashierExpenseOuts : null;
             }

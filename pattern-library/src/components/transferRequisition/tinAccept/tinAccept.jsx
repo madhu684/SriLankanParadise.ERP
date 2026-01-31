@@ -20,6 +20,7 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin, trnId }) => {
     handleReceivedQuantityChange,
     handleReturnedQuantityChange,
     validateQuantities,
+    isAlreadyAccepted,
     getStatusBadgeClass,
     getStatusLabel,
   } = useTinAccept({
@@ -211,10 +212,7 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin, trnId }) => {
                         }
                         placeholder="Enter received qty"
                         className={receivedExceedsIssued ? "is-invalid" : ""}
-                        disabled={
-                          loading ||
-                          tin.requisitionMaster.isMINAccepted === true
-                        }
+                        disabled={loading || isAlreadyAccepted}
                       />
                       {receivedExceedsIssued && (
                         <div className="invalid-feedback">
@@ -241,10 +239,7 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin, trnId }) => {
                           )
                         }
                         placeholder="Enter returned qty"
-                        disabled={
-                          loading ||
-                          tin.requisitionMaster.isMINAccepted === true
-                        }
+                        disabled={loading || isAlreadyAccepted}
                       />
                     </td>
                   </tr>
@@ -326,7 +321,7 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin, trnId }) => {
           disabled={
             loading ||
             approvalStatus !== null ||
-            tin.requisitionMaster.isMINAccepted === true ||
+            isAlreadyAccepted ||
             hasValidationErrors
           }
         >
