@@ -598,6 +598,21 @@ export const get_requisition_masters_by_user_id_api = async (userId) => {
   }
 };
 
+export const get_requisition_master_by_id_api = async (requisitionMasterId) => {
+  try {
+    const response = await api.get(
+      `/requisitionMaster/${requisitionMasterId}`,
+      {
+        withCredentials: true,
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const approve_requisition_master_api = async (
   requisitionMasterId,
   approvalData,
