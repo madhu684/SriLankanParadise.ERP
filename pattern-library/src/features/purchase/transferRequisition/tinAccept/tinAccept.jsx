@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   get_requisition_master_by_id_api,
   get_issue_masters_by_requisition_master_id_api,
-} from "../../../services/purchaseApi";
+} from "../../../../common/services/purchaseApi.js";
 
 const TinAccept = ({ refetch, setRefetch, show, handleClose, tin, trnId }) => {
   const {
@@ -39,7 +39,7 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin, trnId }) => {
   // Helper function to get validation error for specific item
   const getItemValidationError = (itemMasterId) => {
     return validationErrors.find((error) =>
-      error.includes(`item ${itemMasterId}`)
+      error.includes(`item ${itemMasterId}`),
     );
   };
 
@@ -64,7 +64,8 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin, trnId }) => {
   const { data: allTins } = useQuery({
     queryKey: ["tins", trnId],
     queryFn: async () => {
-      const response = await get_issue_masters_by_requisition_master_id_api(trnId);
+      const response =
+        await get_issue_masters_by_requisition_master_id_api(trnId);
       return response.data.result || [];
     },
     enabled: !!trnId,
@@ -93,7 +94,9 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin, trnId }) => {
       .map((rd) => ({
         ...rd,
         issuedQuantity: issuedQtyByItem[rd.itemMasterId] || 0,
-        pendingQuantity: (parseFloat(rd.quantity || 0) - (issuedQtyByItem[rd.itemMasterId] || 0)),
+        pendingQuantity:
+          parseFloat(rd.quantity || 0) -
+          (issuedQtyByItem[rd.itemMasterId] || 0),
       }));
   }, [trnDetails, allTins]);
 
@@ -180,7 +183,7 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin, trnId }) => {
             {tin.issueDetails.map((item, index) => {
               const receivedExceedsIssued = isReceivedExceedsIssued(item);
               const itemError = getItemValidationError(
-                item.itemMaster?.itemMasterId
+                item.itemMaster?.itemMasterId,
               );
 
               return (
@@ -201,13 +204,13 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin, trnId }) => {
                         value={
                           receivedQuantities[item.issueDetailId] !== undefined
                             ? receivedQuantities[item.issueDetailId]
-                            : item.quantity ?? 0
+                            : (item.quantity ?? 0)
                         }
                         onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleReceivedQuantityChange(
                             item.issueDetailId,
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         placeholder="Enter received qty"
@@ -229,13 +232,13 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin, trnId }) => {
                         value={
                           returnedQuantities[item.issueDetailId] !== undefined
                             ? returnedQuantities[item.issueDetailId]
-                            : item.returnedQuantity ?? 0
+                            : (item.returnedQuantity ?? 0)
                         }
                         onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleReturnedQuantityChange(
                             item.issueDetailId,
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         placeholder="Enter returned qty"
@@ -250,7 +253,7 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin, trnId }) => {
                           <i className="bi bi-exclamation-circle me-1"></i>
                           {itemError.replace(
                             `item ${item.itemMaster?.itemMasterId}`,
-                            `item ${item.itemMaster?.itemName}`
+                            `item ${item.itemMaster?.itemName}`,
                           )}
                         </div>
                       </td>
@@ -268,9 +271,11 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin, trnId }) => {
             <hr className="my-4" />
             <div className="d-flex align-items-center mb-3">
               <h6 className="mb-0 text-danger">Not Issued Items</h6>
-              <span className="badge bg-danger ms-2">{pendingItems.length} items</span>
+              <span className="badge bg-danger ms-2">
+                {pendingItems.length} items
+              </span>
             </div>
-            
+
             <table className="table mt-2">
               <thead className="table-light">
                 <tr>
@@ -337,16 +342,3 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin, trnId }) => {
 };
 
 export default TinAccept;
-
-
-
-
-
-
-
-
-
-
-
-
-
