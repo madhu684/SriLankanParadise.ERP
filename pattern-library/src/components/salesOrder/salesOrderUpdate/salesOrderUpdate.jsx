@@ -114,17 +114,15 @@ const SalesOrderUpdate = ({
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          <button
-            onClick={handleBack}
-            className="btn btn-dark d-flex align-items-center"
-          >
-            Back
-          </button>
+          <i
+            className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+            onClick={handleClose}
+          />
           <p>
             <CurrentDateTime />
           </p>
         </div>
-        <h1 className="mt-2 text-center">Sales Order</h1>
+        <h1 className="mt-2 text-center">Sales Order Update</h1>
         <hr />
       </div>
 
@@ -309,6 +307,59 @@ const SalesOrderUpdate = ({
                 )}
               </div>
             )}
+          </div>
+
+          <div className="col-md-5">
+            {/* Order Information */}
+            <h4>2. Order Information</h4>
+            <div className="d-flex justify-content-between">
+              <div className="mb-3">
+                <label htmlFor="orderDate" className="form-label">
+                  Order Date
+                </label>
+                <input
+                  type="date"
+                  className={`form-control ${
+                    validFields.orderDate ? "is-valid" : ""
+                  } ${validationErrors.orderDate ? "is-invalid" : ""}`}
+                  id="orderDate"
+                  placeholder="Enter order date"
+                  value={formData.orderDate}
+                  onChange={(e) =>
+                    handleInputChange("orderDate", e.target.value)
+                  }
+                  required
+                />
+                {validationErrors.orderDate && (
+                  <div className="invalid-feedback">
+                    {validationErrors.orderDate}
+                  </div>
+                )}
+              </div>
+              <div className="mb-3">
+                <label htmlFor="deliveryDate" className="form-label">
+                  Delivery Date
+                </label>
+                <input
+                  type="date"
+                  className={`form-control ${
+                    validFields.deliveryDate ? "is-valid" : ""
+                  } ${validationErrors.deliveryDate ? "is-invalid" : ""}`}
+                  id="deliveryDate"
+                  placeholder="Enter delivery date"
+                  value={formData.deliveryDate}
+                  onChange={(e) =>
+                    handleInputChange("deliveryDate", e.target.value)
+                  }
+                  required
+                />
+                {validationErrors.deliveryDate && (
+                  <div className="invalid-feedback">
+                    {validationErrors.deliveryDate}
+                  </div>
+                )}
+              </div>
+            </div>
 
             {/* Sales Person Information */}
             <label htmlFor="salesPersonId" className="form-label mt-3">
@@ -424,55 +475,6 @@ const SalesOrderUpdate = ({
                 </div>
               </div>
             )}
-          </div>
-
-          <div className="col-md-5">
-            {/* Order Information */}
-            <h4>2. Order Information</h4>
-            <div className="mb-3 mt-3">
-              <label htmlFor="orderDate" className="form-label">
-                Order Date
-              </label>
-              <input
-                type="date"
-                className={`form-control ${
-                  validFields.orderDate ? "is-valid" : ""
-                } ${validationErrors.orderDate ? "is-invalid" : ""}`}
-                id="orderDate"
-                placeholder="Enter order date"
-                value={formData.orderDate}
-                onChange={(e) => handleInputChange("orderDate", e.target.value)}
-                required
-              />
-              {validationErrors.orderDate && (
-                <div className="invalid-feedback">
-                  {validationErrors.orderDate}
-                </div>
-              )}
-            </div>
-            <div className="mb-3">
-              <label htmlFor="deliveryDate" className="form-label">
-                Delivery Date
-              </label>
-              <input
-                type="date"
-                className={`form-control ${
-                  validFields.deliveryDate ? "is-valid" : ""
-                } ${validationErrors.deliveryDate ? "is-invalid" : ""}`}
-                id="deliveryDate"
-                placeholder="Enter delivery date"
-                value={formData.deliveryDate}
-                onChange={(e) =>
-                  handleInputChange("deliveryDate", e.target.value)
-                }
-                required
-              />
-              {validationErrors.deliveryDate && (
-                <div className="invalid-feedback">
-                  {validationErrors.deliveryDate}
-                </div>
-              )}
-            </div>
           </div>
         </div>
 
@@ -671,6 +673,7 @@ const SalesOrderUpdate = ({
                             : ""
                         }`}
                         value={item.quantity}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
@@ -692,6 +695,7 @@ const SalesOrderUpdate = ({
                           className="form-control"
                           type="number"
                           value={charge?.value}
+                          onWheel={(e) => e.target.blur()}
                           onChange={(e) => {
                             let newValue = parseFloat(e.target.value);
 
@@ -811,7 +815,7 @@ const SalesOrderUpdate = ({
               "Update and Submit"
             )}
           </button>
-          <button
+          {/* <button
             type="button"
             className="btn btn-secondary me-2"
             onClick={() => handleSubmit(true)}
@@ -830,7 +834,7 @@ const SalesOrderUpdate = ({
             disabled={loading || loadingDraft || submissionStatus !== null}
           >
             Print
-          </button>
+          </button> */}
           <button
             type="button"
             className="btn btn-danger"

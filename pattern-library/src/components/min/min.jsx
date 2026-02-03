@@ -140,6 +140,22 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                 </div>
               )}
             </div>
+            {searchByWithoutMrn && (
+              <div className="mb-3">
+                <label htmlFor="tokenNo" className="form-label">
+                  Patient Token No
+                </label>
+                <input
+                  type="text"
+                  className={`form-control ${
+                    validFields.tokenNo ? "is-valid" : ""
+                  } ${validationErrors.tokenNo ? "is-invalid" : ""}`}
+                  id="tokenNo"
+                  value={formData.tokenNo}
+                  onChange={(e) => handleInputChange("tokenNo", e.target.value)}
+                />
+              </div>
+            )}
           </div>
 
           {/* 2. Material Requisition Details */}
@@ -315,40 +331,6 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
               )}
             </div>
           </div>
-          {/* {selectedMrn && (
-            <div className="card mb-3">
-              <div className="card-header">Selected Material Requisition</div>
-              <div className="card-body">
-                <p>
-                  Material Requisition Reference No:{" "}
-                  {selectedMrn.referenceNumber}
-                </p>
-                <p>Requested By: {selectedMrn.requestedBy}</p>
-                <p>
-                  MRN Date:{" "}
-                  {moment
-                    .utc(selectedMrn.requisitionDate)
-                    .tz("Asia/Colombo")
-                    .format("YYYY-MM-DD hh:mm:ss A")}
-                </p>
-                <p>
-                  Delivery Location:{" "}
-                  {selectedMrn.requestedToLocation.locationName}
-                </p>
-                <p>
-                  Warehouse Location:{" "}
-                  {selectedMrn.requestedFromLocation.locationName}
-                </p>
-                <button
-                  type="button"
-                  className="btn btn-outline-danger float-end"
-                  onClick={handleResetMrn}
-                >
-                  Reset Material Requisition
-                </button>
-              </div>
-            </div>
-          )} */}
         </div>
         {selectedMrn === null && searchByWithoutMrn === false && (
           <div className="mb-3">
@@ -398,12 +380,12 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                     </span>
                   )}
                 </div>
-                {noItembatchesError && (
+                {/* {noItembatchesError && (
                   <span className="text-danger">
                     No batches available for this item in user location,{" "}
                     {userLocations[0]?.location?.locationName}
                   </span>
-                )}
+                )} */}
                 {isItemsLoading && <LoadingSpinner />}
                 {isItemsError && (
                   <ErrorComponent error="Error fetching items" />
@@ -440,7 +422,7 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                   <th>Unit</th>
                   {searchByMrn && formData.mrnId && <th>Requested Quantity</th>}
                   <th>Stock In Hand</th>
-                  <th>Item Batch</th>
+                  {/* <th>Item Batch</th> */}
                   <th>Dispatched Quantity</th>
                   <th>Action</th>
                 </tr>
@@ -452,7 +434,7 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                     <td>{item.unit}</td>
                     {searchByMrn && formData.mrnId && <td>{item.quantity}</td>}
                     <td>{item.remainingQuantity}</td>
-                    <td>
+                    {/* <td>
                       <select
                         className="form-select"
                         value={item.batchId}
@@ -466,7 +448,10 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                       >
                         <option value="">Select item batch</option>
                         {locationInventories
-                          ?.filter((i) => i.itemMasterId === item.id)
+                          ?.filter(
+                            (i) =>
+                              i.itemMasterId === item.id && i.stockInHand > 0
+                          )
                           ?.map((i, batchIndex) => (
                             <option
                               key={batchIndex}
@@ -477,7 +462,7 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                             </option>
                           ))}
                       </select>
-                    </td>
+                    </td> */}
                     <td>
                       <input
                         type="number"
@@ -493,6 +478,7 @@ const Min = ({ handleClose, handleUpdated, setShowCreateMinForm }) => {
                             : ""
                         }`}
                         value={item.issuedQuantity}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,

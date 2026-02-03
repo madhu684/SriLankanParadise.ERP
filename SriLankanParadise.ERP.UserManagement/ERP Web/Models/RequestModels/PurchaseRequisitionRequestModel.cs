@@ -20,7 +20,7 @@
 
         public int ExpectedDeliveryLocation { get; set; }
 
-        public string? ReferenceNo { get; set; }
+        //public string? ReferenceNo { get; set; }
 
         public decimal TotalAmount { get; set; }
 

@@ -119,5 +119,44 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
         }
+
+        [HttpGet("GetActiveCashierSession/{userId}")]
+        public async Task<ApiResponseModel> GetActiveCashierSession(int userId)
+        {
+            try
+            {
+                var cashierSession = await _cashierSessionService.GetActiveSessionByUserId(userId);
+                if (cashierSession == null)
+                {
+                    _logger.LogWarning(LogMessages.CashierSessionNotFound);
+                    return AddResponseMessage(Response, LogMessages.CashierSessionNotFound, null, true, HttpStatusCode.NotFound);
+                }
+                var cashierSessionDto = _mapper.Map<CashierSessionDto>(cashierSession);
+                AddResponseMessage(Response, LogMessages.CashierSessionRetrieved, cashierSessionDto, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("GetCashierSessionsByUserIdAndDate/{userId}/{date}")]
+        public async Task<ApiResponseModel> GetCashierSessionsByUserIdAndDate(int userId, DateTime date)
+        {
+            try
+            {
+                var cashierSessions = await _cashierSessionService.GetCashierSessionsByUserIdAndDate(userId, date);
+                var cashierSessionDtos = _mapper.Map<IEnumerable<CashierSessionDto>>(cashierSessions);
+                AddResponseMessage(Response, LogMessages.CashierSessionsRetrieved, cashierSessionDtos, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

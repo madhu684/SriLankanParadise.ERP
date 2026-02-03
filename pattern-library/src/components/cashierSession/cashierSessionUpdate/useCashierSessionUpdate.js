@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { put_cashier_session_api } from "../../../services/salesApi";
 import {
-  get_sales_receipts_by_user_id_api,
+  get_sales_receipts_by_cashier_session_id_api,
   get_cashier_expense_outs_by_user_id_api,
 } from "../../../services/salesApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import moment from "moment";
 
 const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
@@ -22,31 +22,34 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
     useState(false);
   const [reasonCashInHand, setReasonCashInHand] = useState("");
   const [reasonChequesInHand, setReasonChequesInHand] = useState("");
-  const [actualCashInHand, setActualCashInHand] = useState("");
-  const [actualChequesInHand, setActualChequesInHand] = useState("");
+  const [actualCashInHand, setActualCashInHand] = useState(0);
+  const [actualChequesInHand, setActualChequesInHand] = useState(0);
   const [selectedMode, setSelectedMode] = useState(null);
   const [showExpenseOutDetailModal, setShowExpenseOutDetailModal] =
     useState(false);
 
-  const fetchUserSalesReceipts = async () => {
+  const queryClient = useQueryClient();
+
+  const fetchSessionSalesReceipts = async () => {
     try {
-      const response = await get_sales_receipts_by_user_id_api(
-        sessionStorage.getItem("userId")
+      const response = await get_sales_receipts_by_cashier_session_id_api(
+        cashierSession?.cashierSessionId
       );
-      return response.data.result;
+      return response?.data?.result;
     } catch (error) {
-      console.error("Error fetching user sales receipts:", error);
+      console.error("Error fetching session sales receipts:", error);
     }
   };
 
   const {
-    data: userSalesReceipts,
+    data: sessionSalesReceipts,
     isLoading: isLoadingSalesReceipts,
     isError: isSalesReceiptsError,
     error: SalesReceiptError,
   } = useQuery({
-    queryKey: ["userSalesReceipts"],
-    queryFn: fetchUserSalesReceipts,
+    queryKey: ["sessionSalesReceipts", cashierSession?.cashierSessionId],
+    queryFn: fetchSessionSalesReceipts,
+    enabled: !!cashierSession?.cashierSessionId,
   });
 
   const fetchCashierExpenseOuts = async () => {
@@ -71,26 +74,13 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
   });
 
   useEffect(() => {
-    if (!isLoadingSalesReceipts && userSalesReceipts) {
-      // Filter sales receipts based on the session opening datetime and current datetime
-      const filteredSalesReceipts = userSalesReceipts.filter((receipt) => {
-        // return (
-        //   receipt.createdDate >= cashierSession.sessionIn &&
-        //   receipt.createdDate <= new Date().toISOString()
-        // );
-        const createdDate = moment.utc(receipt.createdDate);
-        const sessionIn = moment.utc(cashierSession.sessionIn);
-        const currentDate = moment.utc();
+    if (!isLoadingSalesReceipts && sessionSalesReceipts) {
+      // Set the session sales receipts
+      setSalesReceipts(sessionSalesReceipts);
 
-        return createdDate.isBetween(sessionIn, currentDate);
-      });
-
-      // Set the filtered sales receipts
-      setSalesReceipts(filteredSalesReceipts);
-
-      // Calculate the total amount received from the filtered sales receipts
-      const total = filteredSalesReceipts.reduce(
-        (acc, curr) => acc + curr.amountReceived,
+      // Calculate the total amount received from the session sales receipts
+      const total = sessionSalesReceipts.reduce(
+        (acc, curr) => acc + curr.amountCollect,
         0
       );
       setCollectionTotal(total);
@@ -101,7 +91,7 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
       const filteredcashierExpenseOuts = cashierExpenseOuts.filter(
         (expenseOut) => {
           const createdDate = moment.utc(expenseOut.createdDate);
-          const sessionIn = moment.utc(cashierSession.sessionIn);
+          const sessionIn = moment.utc(cashierSession?.sessionIn);
           const currentDate = moment.utc();
 
           return createdDate.isBetween(sessionIn, currentDate);
@@ -120,7 +110,7 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
     }
   }, [
     isLoadingSalesReceipts,
-    userSalesReceipts,
+    sessionSalesReceipts,
     isLoadingCashierExpenseOuts,
     cashierExpenseOuts,
   ]);
@@ -238,25 +228,32 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
         setLoading(true);
         const cashierSessionData = {
           userId: sessionStorage.getItem("userId"),
-          sessionIn: cashierSession.sessionIn,
+          sessionIn: cashierSession?.sessionIn,
           sessionOut: currentDate,
-          openingBalance: cashierSession.openingBalance,
+          openingBalance: cashierSession?.openingBalance,
           companyId: sessionStorage.getItem("companyId"),
           actualCashInHand: actualCashInHand,
           actualChequesInHand: actualChequesInHand,
           reasonCashInHandDifference: reasonCashInHand,
           reasonChequesInHandDifference: reasonChequesInHand,
+          isActiveSession: false,
           permissionId: 1068,
         };
 
         const response = await put_cashier_session_api(
-          cashierSession.cashierSessionId,
+          cashierSession?.cashierSessionId,
           cashierSessionData
         );
 
         if (response.status === 200) {
           setSubmissionStatus("success");
           console.log("Cashier session close successfully", cashierSessionData);
+          queryClient.invalidateQueries({
+            queryKey: [
+              "activeCashierSession",
+              parseInt(sessionStorage.getItem("userId")),
+            ],
+          });
           setTimeout(() => {
             setSubmissionStatus(null);
             setLoading(false);
@@ -279,7 +276,7 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
   // Calculate totals for each payment mode
   const totalsByPaymentMode = salesReceipts.reduce((totals, receipt) => {
     const modeId = receipt.paymentMode.paymentModeId;
-    totals[modeId] = (totals[modeId] || 0) + receipt.amountReceived;
+    totals[modeId] = (totals[modeId] || 0) + receipt.amountCollect;
     return totals;
   }, {});
 

@@ -49,16 +49,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 var locationInventory = _mapper.Map<LocationInventory>(locationInventoryRequest);
                 await _locationInventoryService.AddLocationInventory(locationInventory, locationInventoryRequest.MovementTypeId);
 
-                // Create action log
-                //var actionLog = new ActionLogModel()
-                //{
-                //    ActionId = locationInventoryRequest.PermissionId,
-                //    UserId = Int32.Parse(HttpContext.User.Identity.Name),
-                //    Ipaddress = _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString(),
-                //    Timestamp = DateTime.UtcNow
-                //};
-                //await _actionLogService.CreateActionLog(_mapper.Map<ActionLog>(actionLog));
-
                 // send response
                 var locationInventoryDto = _mapper.Map<LocationInventoryDto>(locationInventory);
                 _logger.LogInformation(LogMessages.LocationInventoryCreated);
@@ -134,11 +124,11 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         }
 
         [HttpGet("GetEmptyReturnItemLocationInventoriesByLocationId/{locationId}")]
-        public async Task<ApiResponseModel> GetEmptyReturnItemLocationInventoriesByLocationId(int locationId)
+        public async Task<ApiResponseModel> GetEmptyReturnItemLocationInventoriesByLocationId([FromQuery] int companyId, int locationId)
         {
             try
             {
-                var locationInventories = await _locationInventoryService.GetEmptyReturnItemLocationInventoriesByLocationId(locationId);
+                var locationInventories = await _locationInventoryService.GetEmptyReturnItemLocationInventoriesByLocationId(companyId, locationId);
                 if (locationInventories != null)
                 {
                     var locationInventoryDtos = _mapper.Map<IEnumerable<EmptyReturnItemLocationInventoryDto>>(locationInventories);
@@ -464,11 +454,11 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
         }
 
         [HttpGet("GetLocationInventorySummaryByItemName")]
-        public async Task<ApiResponseModel> GetLocationInventorySummaryByItemName([FromQuery] int? locationId, [FromQuery] string itemName)
+        public async Task<ApiResponseModel> GetLocationInventorySummaryByItemName([FromQuery] int? locationId, [FromQuery] string itemName, [FromQuery] int? supplierId = null)
         {
             try
             {
-                var summary = await _locationInventoryService.GetSumLocationInventoriesByItemName(locationId, itemName);
+                var summary = await _locationInventoryService.GetSumLocationInventoriesByItemName(locationId, itemName, supplierId);
 
                 if (summary != null)
                 {
@@ -530,6 +520,77 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 _logger.LogError(ex, ErrorMessages.InternalServerError);
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
+        }
+
+        [HttpGet("GetSumLocationInventoriesByLocationIdItemCode")]
+        public async Task<ApiResponseModel> GetSumLocationInventoriesByLocationIdItemCode([FromQuery] string itemCode, [FromQuery] int? locationId = null)
+        {
+            try
+            {
+                var locationInventorySummary = await _locationInventoryService.GetSumLocationInventoriesByLocationIdItemCode(locationId, itemCode);
+                if (locationInventorySummary != null)
+                {
+                    var locationInventorySummaryDto = _mapper.Map<LocationInventorySummaryDto>(locationInventorySummary);
+                    AddResponseMessage(Response, LogMessages.LocationInventoriesRetrieved, locationInventorySummaryDto, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.LocationInventoriesNotFound);
+                    AddResponseMessage(Response, LogMessages.LocationInventoriesNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpPost("increase-inventory-fifo")]
+        public async Task<ApiResponseModel> IncreaseInventoryByFIFO(IncreaseInventoryRequestModel request)
+        {
+            try
+            {
+                _logger.LogInformation("++++++++++++++++ Increase-inventory-fifo calling +++++++++++++++++++");
+                await _locationInventoryService.IncreaseInventoryByFIFO(request.LocationId, request.ItemMasterId, request.TransactionTypeId, request.Quantity, request.sourceLocationId);
+
+                _logger.LogInformation("Inventory increase successfully using FIFO method");
+                AddResponseMessage(Response, "Inventory increase successfully", null, true, HttpStatusCode.OK);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex.Message);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.BadRequest);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpPost("stock-adjustment/{locationInventoryId}/{quantity}")]
+        public async Task<ApiResponseModel> StockAdjustment(int locationInventoryId, decimal quantity)
+        {
+            try
+            {
+                await _locationInventoryService.StockAdjustment(locationInventoryId, quantity);
+                _logger.LogInformation("Stock adjustment completed successfully");
+                AddResponseMessage(Response, "Stock adjustment completed successfully", null, true, HttpStatusCode.OK);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex.Message);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.BadRequest);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
         }
     }
 }

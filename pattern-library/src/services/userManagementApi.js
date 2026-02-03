@@ -52,14 +52,37 @@ export const company_modules_api = async (companyId) => {
   }
 };
 
-export const module_roles_api = async (moduleIds) => {
+// export const module_roles_api = async (moduleIds) => {
+//   try {
+//     const formattedModuleIds = moduleIds
+//       .map((id) => `moduleIds=${id}`)
+//       .join("&");
+
+//     const response = await api.get(
+//       `/role/GetRolesByModuleIds?${formattedModuleIds}`,
+//       {
+//         withCredentials: true,
+//       }
+//     );
+
+//     return response.data;
+//   } catch (error) {
+//     console.log(error);
+//     throw error;
+//   }
+// };
+
+export const module_roles_api = async (companyId, moduleIds) => {
   try {
-    const formattedModuleIds = moduleIds
-      .map((id) => `moduleIds=${id}`)
-      .join("&");
+    if (!moduleIds || moduleIds.length === 0) {
+      throw new Error("moduleIds is required and cannot be empty");
+    }
+
+    const moduleParams = moduleIds.map((id) => `moduleIds=${id}`).join("&");
+    const companyParam = `companyId=${companyId}`;
 
     const response = await api.get(
-      `/role/GetRolesByModuleIds?${formattedModuleIds}`,
+      `/role/GetRolesByModuleIds?${companyParam}&${moduleParams}`,
       {
         withCredentials: true,
       }
@@ -67,7 +90,7 @@ export const module_roles_api = async (moduleIds) => {
 
     return response.data;
   } catch (error) {
-    console.log(error);
+    console.error(error);
     throw error;
   }
 };

@@ -22,9 +22,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             return await _requisitionMasterRepository.GetAll();
         }
 
-        public async Task<IEnumerable<RequisitionMaster>> GetRequisitionMastersWithoutDraftsByCompanyId(int companyId)
+        public async Task<IEnumerable<RequisitionMaster>> GetRequisitionMastersWithoutDraftsByCompanyId(int companyId, int? status = null, int? requestedToLocationId = null, int? requestedFromLocationId = null, string? issueType = null)
         {
-            return await _requisitionMasterRepository.GetRequisitionMastersWithoutDraftsByCompanyId(companyId);
+            return await _requisitionMasterRepository.GetRequisitionMastersWithoutDraftsByCompanyId(companyId, status, requestedToLocationId, requestedFromLocationId, issueType);
         }
 
         public async Task ApproveRequisitionMaster(int requisitionMasterId, RequisitionMaster requisitionMaster)
@@ -45,6 +45,11 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         public async Task PatchMinApproved(int requisitionMasterId, RequisitionMaster requisitionMaster)
         {
             await _requisitionMasterRepository.PatchMinApproved(requisitionMasterId, requisitionMaster);
+        }
+
+        public async Task<IEnumerable<RequisitionMaster>> GetRequisitionMastersWithFiltersByCompanyId(int companyId, DateTime? date = null, int? requestedToLocationId = null, int? requestedFromLocationId = null, string? issueType = null)
+        {
+            return await _requisitionMasterRepository.GetRequisitionMastersWithFiltersByCompanyId(companyId, date, requestedToLocationId, requestedFromLocationId, issueType);
         }
     }
 }

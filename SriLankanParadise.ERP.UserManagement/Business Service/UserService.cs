@@ -58,5 +58,18 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             await _userRepository.Activate(userId);
         }
+
+        public async Task<bool> ResetPasswordAsync(int userId, string password)
+        {
+            var user = await _userRepository.GetUserByUserId(userId);
+            if (user == null)
+            {
+                return false;
+            }
+            var newHashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
+            await _userRepository.UpdatePassword(userId, newHashedPassword);
+
+            return true;
+        }
     }
 }

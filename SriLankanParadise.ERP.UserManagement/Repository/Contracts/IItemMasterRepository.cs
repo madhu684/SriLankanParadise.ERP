@@ -1,5 +1,6 @@
 ﻿using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using System.Threading.Tasks;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
@@ -21,6 +22,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
 
         Task DeleteItemMaster(int itemMasterId);
 
+        Task ForceDeleteItemMaster(int itemMasterId);
+
         Task<IEnumerable<ItemMaster>> GetItemMastersByUserId(int userId);
 
         Task<IEnumerable<ItemMaster>> GetSubItemsByItemMasterId(int itemMaster);
@@ -30,5 +33,11 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task<IEnumerable<SameCategoryTypeSupplierItemDto>> GetSupplierItemsByTypeAndCategory(int companyId, int itemTypeId, int categoryId, int locationId);
 
         Task<IEnumerable<ItemMaster>> SearchItemByCode(string searchTerm);
+
+        Task<ItemMaster> GetItemMasterByItemCode(string itemCode, int companyId);
+
+        Task<PagedResult<ItemMaster>> GetPaginatedItemMastersByCompanyId(int companyId, string? searchQuery = null, int? supplierId = null, int pageNumber = 1, int pageSize = 10);
+
+        Task InitializeItemBatch(int itemMasterId, int companyId, int locationId, decimal costPrice, string? createdBy, int? createdUserId);
     }
 }

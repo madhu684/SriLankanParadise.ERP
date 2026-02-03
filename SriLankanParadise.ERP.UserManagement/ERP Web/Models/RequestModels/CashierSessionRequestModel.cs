@@ -20,6 +20,8 @@
 
         public string? ReasonChequesInHandDifference { get; set; }
 
+        public bool IsActiveSession { get; set; }
+
         public int PermissionId { get; set; }
     }
 }

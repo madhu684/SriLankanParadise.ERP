@@ -85,11 +85,16 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
 
         [HttpGet("GetRequisitionMastersWithoutDraftsByCompanyId/{companyId}")]
-        public async Task<ApiResponseModel> GetRequisitionMastersWithoutDraftsByCompanyId(int companyId)
+        public async Task<ApiResponseModel> GetRequisitionMastersWithoutDraftsByCompanyId(
+            int companyId, 
+            [FromQuery] int? status = null, 
+            [FromQuery] int? requestedToLocationId = null, 
+            [FromQuery] int? requestedFromLocationId = null, 
+            [FromQuery] string? issueType = null)
         {
             try
             {
-                var requisitionMasters = await _requisitionMasterService.GetRequisitionMastersWithoutDraftsByCompanyId(companyId);
+                var requisitionMasters = await _requisitionMasterService.GetRequisitionMastersWithoutDraftsByCompanyId(companyId, status, requestedToLocationId, requestedFromLocationId, issueType);
                 if (requisitionMasters != null)
                 {
                     var requisitionMasterDtos = _mapper.Map<IEnumerable<RequisitionMasterDto>>(requisitionMasters);
@@ -133,7 +138,33 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpGet("{requisitionMasterId}")]
+        public async Task<ApiResponseModel> GetRequisitionMasterById(int requisitionMasterId)
+        {
+            try
+            {
+                var requisitionMaster = await _requisitionMasterService.GetRequisitionMasterByRequisitionMasterId(requisitionMasterId);
+                if (requisitionMaster != null)
+                {
+                    var requisitionMasterDto = _mapper.Map<RequisitionMasterDto>(requisitionMaster);
+                    AddResponseMessage(Response, LogMessages.RequisitionMastersRetrieved, requisitionMasterDto, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.RequisitionMasterNotFound);
+                    AddResponseMessage(Response, LogMessages.RequisitionMasterNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
         
+
         [HttpPatch("approve/{requisitionMasterId}")]
         public async Task<ApiResponseModel> ApproveRequisitionMaster(int requisitionMasterId, ApproveRequisitionMasterRequestModel approveRequisitionMasterRequest)
         {
@@ -194,6 +225,36 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 _logger.LogError(ex, ErrorMessages.InternalServerError);
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
+        }
+
+        [HttpGet("GetRequisitionMastersWithFiltersByCompanyId/{companyId}")]
+        public async Task<ApiResponseModel> GetRequisitionMastersWithFiltersByCompanyId(
+            int companyId,
+            [FromQuery] DateTime? date = null,
+            [FromQuery] int? requestedToLocationId = null,
+            [FromQuery] int? requestedFromLocationId = null,
+            [FromQuery] string? issueType = null)
+        {
+            try
+            {
+                var requisitionMasters = await _requisitionMasterService.GetRequisitionMastersWithFiltersByCompanyId(companyId, date, requestedToLocationId, requestedFromLocationId, issueType);
+                if (requisitionMasters != null && requisitionMasters.Any())
+                {
+                    var requisitionMasterDtos = _mapper.Map<IEnumerable<RequisitionMasterDto>>(requisitionMasters);
+                    AddResponseMessage(Response, LogMessages.RequisitionMastersRetrieved, requisitionMasterDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.RequisitionMastersNotFound);
+                    AddResponseMessage(Response, LogMessages.RequisitionMastersNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
         }
     }
 }

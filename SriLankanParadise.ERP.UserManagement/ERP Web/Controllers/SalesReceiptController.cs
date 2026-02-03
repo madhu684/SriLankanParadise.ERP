@@ -85,22 +85,44 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
 
         [HttpGet("GetSalesReceiptsWithoutDraftsByCompanyId/{companyId}")]
-        public async Task<ApiResponseModel> GetSalesReceiptsByCompanyId(int companyId)
+        public async Task<ApiResponseModel> GetSalesReceiptsByCompanyId(
+            int companyId, 
+            [FromQuery] DateTime? date = null,
+            [FromQuery] int? createdUserId = null,
+            [FromQuery] string? filter = null,
+            [FromQuery] string? searchQuery = null,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
         {
             try
             {
-                var salesReceipts = await _salesReceiptService.GetSalesReceiptsWithoutDraftsByCompanyId(companyId);
-                if (salesReceipts != null)
+                var result = await _salesReceiptService.GetSalesReceiptsWithoutDraftsByCompanyId(companyId, date, createdUserId, filter, searchQuery, pageNumber, pageSize);
+
+                if (result.Items.Any())
                 {
-                    var salesReceiptDtos = _mapper.Map<IEnumerable<SalesReceiptDto>>(salesReceipts);
-                    AddResponseMessage(Response, LogMessages.SalesReceiptsRetrieved, salesReceiptDtos, true, HttpStatusCode.OK);
+                    var salesReceiptDtos = _mapper.Map<IEnumerable<SalesReceiptDto>>(result.Items);
+
+                    var responseData = new
+                    {
+                        Data = salesReceiptDtos,
+                        Pagination = new
+                        {
+                            result.TotalCount,
+                            result.PageNumber,
+                            result.PageSize,
+                            result.TotalPages,
+                            result.HasPreviousPage,
+                            result.HasNextPage
+                        }
+                    };
+
+                    AddResponseMessage(Response, LogMessages.SalesReceiptsRetrieved, responseData, true, HttpStatusCode.OK);
                 }
                 else
                 {
                     _logger.LogWarning(LogMessages.SalesReceiptsNotFound);
                     AddResponseMessage(Response, LogMessages.SalesReceiptsNotFound, null, true, HttpStatusCode.NotFound);
                 }
-
             }
             catch (Exception ex)
             {
@@ -196,6 +218,31 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 _logger.LogError(ex, ErrorMessages.InternalServerError);
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
+        }
+
+        [HttpGet("GetSalesReceiptsBySessionId/{sessionId}")]
+        public async Task<ApiResponseModel> GetSalesReceiptsBySessionId(int sessionId)
+        {
+            try
+            {
+                var salesReceipts = await _salesReceiptService.GetSalesReceiptsBySessionId(sessionId);
+                if (salesReceipts != null)
+                {
+                    var salesReceiptDtos = _mapper.Map<IEnumerable<SalesReceiptDto>>(salesReceipts);
+                    AddResponseMessage(Response, LogMessages.SalesReceiptsRetrieved, salesReceiptDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.SalesReceiptsNotFound);
+                    AddResponseMessage(Response, LogMessages.SalesReceiptsNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
         }
     }
 }

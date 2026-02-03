@@ -33,8 +33,17 @@
         public string? ReferenceNumber { get; set; }
 
         public int PermissionId { get; set; }
+
         public int? LocationId { get; set; }
+
         public string? InVoicedPersonName { get; set; }
+
         public string? InVoicedPersonMobileNo { get; set; }
+
+        public int? AppointmentId { get; set; }
+
+        public int? TokenNo { get; set; }
+
+        public decimal? DiscountAmount { get; set; }
     }
 }

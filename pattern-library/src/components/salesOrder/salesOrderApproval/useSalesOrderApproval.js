@@ -41,24 +41,29 @@ const useSalesOrderApproval = ({ onFormSubmit, salesOrder }) => {
       );
 
       if (approvalResponse.status === 200) {
-        //setApprovalStatus("approved");
-        for (const item of salesOrder.salesOrderDetails) {
-          const fifoResponse = await post_reduce_inventory_fifo_api({
-            locationId: salesOrder.inventoryLocationId,
-            itemMasterId: item.itemBatchItemMasterId,
-            transactionTypeId: 1,
-            quantity: item.quantity,
-          });
-          detailFifo.push(fifoResponse.data);
-        }
-        if (detailFifo.every((item) => item.status === 200)) {
-          setApprovalStatus("approved");
-        } else {
-          setApprovalStatus("error");
-        }
+        setApprovalStatus("approved");
       } else {
         setApprovalStatus("error");
       }
+
+      // if (approvalResponse.status === 200) {
+      //   for (const item of salesOrder.salesOrderDetails) {
+      //     const fifoResponse = await post_reduce_inventory_fifo_api({
+      //       locationId: salesOrder.inventoryLocationId,
+      //       itemMasterId: item.itemBatchItemMasterId,
+      //       transactionTypeId: 1,
+      //       quantity: item.quantity,
+      //     });
+      //     detailFifo.push(fifoResponse.data);
+      //   }
+      //   if (detailFifo.every((item) => item.status === 200)) {
+      //     setApprovalStatus("approved");
+      //   } else {
+      //     setApprovalStatus("error");
+      //   }
+      // } else {
+      //   setApprovalStatus("error");
+      // }
 
       setTimeout(() => {
         setApprovalStatus(null);

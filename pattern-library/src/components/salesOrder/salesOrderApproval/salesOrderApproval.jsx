@@ -87,17 +87,19 @@ const SalesOrderApproval = ({
                   <>
                     <p>
                       <strong>Customer Name:</strong>{" "}
-                      {salesOrder.customer.customerName}
+                      {salesOrder?.customer?.customerName || "Unknown"}
                     </p>
                     <p>
                       <strong>Contact Person:</strong>{" "}
-                      {salesOrder.customer.contactPerson}
+                      {salesOrder?.customer?.contactPerson || "Unknown"}
                     </p>
                     <p>
-                      <strong>Phone:</strong> {salesOrder.customer.phone}
+                      <strong>Phone:</strong>{" "}
+                      {salesOrder?.customer?.phone || "Unknown"}
                     </p>
                     <p>
-                      <strong>Email:</strong> {salesOrder.customer.email}
+                      <strong>Email:</strong>{" "}
+                      {salesOrder?.customer?.email || "Unknown"}
                     </p>
                   </>
                 )}
@@ -188,7 +190,7 @@ const SalesOrderApproval = ({
                             value = Math.abs(value);
                           }
 
-                          if (charge.chargesAndDeduction.percentage) {
+                          if (charge.chargesAndDeduction.percentage !== null) {
                             // Calculate percentage value
                             const percentageValue =
                               (value / (item.unitPrice * item.quantity)) * 100;
@@ -236,7 +238,7 @@ const SalesOrderApproval = ({
                       ); // Remove negative sign
 
                       // Check if the charge is percentage-based
-                      if (charge.chargesAndDeduction.percentage) {
+                      if (charge.chargesAndDeduction.percentage !== null) {
                         // Calculate percentage value based on subtotal
                         const percentageValue =
                           (renderedValue / calculateSubTotal()) * 100;

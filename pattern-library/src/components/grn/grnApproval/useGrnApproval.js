@@ -14,7 +14,7 @@ import {
   approve_purchase_order_api,
   get_locations_inventories_by_location_id_item_master_id_api,
 } from "../../../services/purchaseApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const useGrnApproval = ({ grn, onFormSubmit }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
@@ -28,6 +28,8 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
     directPurchase: "Direct Purchase",
     goodsReceivedNote: "Goods Received Note",
   };
+
+  const queryClient = useQueryClient();
 
   console.log("grn: ", grn);
   const isComplete = grn?.grnDetails.every(
@@ -157,6 +159,8 @@ const useGrnApproval = ({ grn, onFormSubmit }) => {
         if (grn.purchaseOrderId && purchaseOrder?.purchaseOrderId) {
           await updatePO();
         }
+
+        queryClient.invalidateQueries(["grnList"]);
       } else {
         setApprovalStatus("error");
       }

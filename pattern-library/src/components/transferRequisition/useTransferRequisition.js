@@ -8,7 +8,7 @@ import {
   get_Low_Stock_Items_for_location_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const useTransferRequisition = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -29,6 +29,10 @@ const useTransferRequisition = ({ onFormSubmit }) => {
   const [isUpdatingStock, setIsUpdatingStock] = useState(false);
   const [isTRGenerated, setIsTRGenerated] = useState(false);
   const [showToast, setShowToast] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const companyId = sessionStorage.getItem("companyId");
 
   const fetchLocations = async () => {
     try {
@@ -303,20 +307,20 @@ const useTransferRequisition = ({ onFormSubmit }) => {
       const fieldName = `quantity_${index}`;
       const fieldDisplayName = `Quantity for ${item.name}`;
 
-      const additionalRules = {
-        validationFunction: (value) =>
-          parseFloat(value) > 0 &&
-          parseFloat(value) <= (item.totalStockInHandTo || Infinity),
-        errorMessage: `${fieldDisplayName} must be greater than 0 and not exceed available stock (${
-          item.totalStockInHandTo || 0
-        })`,
-      };
+      // const additionalRules = {
+      //   validationFunction: (value) =>
+      //     parseFloat(value) > 0 &&
+      //     parseFloat(value) <= (item.totalStockInHandTo || Infinity),
+      //   errorMessage: `${fieldDisplayName} must be greater than 0 and not exceed available stock (${
+      //     item.totalStockInHandTo || 0
+      //   })`,
+      // };
 
       const isValidQuantity = validateField(
         fieldName,
         fieldDisplayName,
-        item.quantity,
-        additionalRules
+        item.quantity
+        // additionalRules
       );
 
       isItemQuantityValid = isItemQuantityValid && isValidQuantity;
@@ -411,6 +415,8 @@ const useTransferRequisition = ({ onFormSubmit }) => {
               formData
             );
           }
+
+          queryClient.invalidateQueries(["transferRequisitions", companyId]);
 
           setTimeout(() => {
             setSubmissionStatus(null);
@@ -532,7 +538,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
       id: item.itemMasterId,
       name: item.itemName,
       unit: item.unit.unitName,
-      quantity: 0,
+      quantity: null,
       totalStockInHand: currentStockDetails?.totalStockInHand || 0,
       totalStockInHandTo: toStockDetails?.totalStockInHand || 0,
       reOrderLevel: currentStockDetails?.minReOrderLevel || 0,
@@ -542,6 +548,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
       itemDetails: [...prevFormData.itemDetails, newItem],
+      // itemDetails: [newItem, ...prevFormData.itemDetails],
     }));
 
     setSearchTerm("");
@@ -588,7 +595,7 @@ const useTransferRequisition = ({ onFormSubmit }) => {
                     ? item.totalStockInHand
                     : fromStockDetails?.maxStockLevel -
                       fromStockDetails?.totalStockInHand
-                  : 0,
+                  : null,
               maxStockLevel: item.maxStockLevel || 0,
               minReOrderLevel: item.minReOrderLevel || 0,
               totalStockInHand: fromStockDetails?.totalStockInHand || 0,

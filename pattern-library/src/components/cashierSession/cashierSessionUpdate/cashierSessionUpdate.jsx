@@ -8,6 +8,7 @@ import CollectionDetail from "./collectionDetail/collectionDetail";
 import ExpenseOutDetail from "./expenseOutDetail/expenseOutDetail";
 import LoadingSpinner from "../../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../../errorComponent/errorComponent";
+import useFormatCurrency from "../../../utility/useFormatCurrency";
 
 const CashierSessionUpdate = ({
   show,
@@ -53,6 +54,12 @@ const CashierSessionUpdate = ({
     cashierSession,
   });
 
+  const formatTotals = useFormatCurrency({ showCurrency: false });
+
+  if (!cashierSession) {
+    return null;
+  }
+
   return (
     <>
       {!(selectedMode !== null) && !showExpenseOutDetailModal && (
@@ -65,10 +72,16 @@ const CashierSessionUpdate = ({
           keyboard={!(loading || submissionStatus !== null)}
           size="lg"
         >
-          <Modal.Header closeButton={!(loading || submissionStatus !== null)}>
-            <Modal.Title>Close Cashier Session</Modal.Title>
+          <Modal.Header
+            closeButton={!(loading || submissionStatus !== null)}
+            className="bg-success bg-opacity-50 text-dark border-0"
+          >
+            <Modal.Title className="d-flex align-items-center gap-2">
+              <i className="bi bi-cash-stack"></i>
+              Close Cashier Session
+            </Modal.Title>
           </Modal.Header>
-          <Modal.Body>
+          <Modal.Body className="p-4">
             {isSalesReceiptsError && isCashierExpenseOutsError && (
               <ErrorComponent error={"Error fetching data"} />
             )}
@@ -80,271 +93,428 @@ const CashierSessionUpdate = ({
               !isSalesReceiptsError &&
               !isLoadingSalesReceipts && (
                 <>
-                  <p>
-                    <strong>Cashier Session In:</strong>{" "}
-                    {moment
-                      .utc(cashierSession?.sessionIn)
-                      .tz("Asia/Colombo")
-                      .format("YYYY-MM-DD hh:mm:ss A")}
-                  </p>
-                  <p>
-                    <strong>Cashier Session Opening Balance:</strong>{" "}
-                    {cashierSession?.openingBalance.toFixed(2)}
-                  </p>
+                  {/* Session Info Card */}
+                  <div className="card bg-light border-0 shadow mb-4">
+                    <div className="card-body">
+                      <div className="row g-3">
+                        <div className="col-md-6">
+                          <div className="d-flex align-items-start gap-2">
+                            <i className="bi bi-clock-history text-primary mt-1"></i>
+                            <div>
+                              <p className="text-muted small mb-1">
+                                Session Started
+                              </p>
+                              <p className="fw-semibold mb-0">
+                                {moment
+                                  .utc(cashierSession?.sessionIn)
+                                  .tz("Asia/Colombo")
+                                  .format("YYYY-MM-DD hh:mm:ss A")}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="col-md-6">
+                          <div className="d-flex align-items-start gap-2">
+                            <i className="bi bi-wallet2 text-success mt-1"></i>
+                            <div>
+                              <p className="text-muted small mb-1">
+                                Opening Balance
+                              </p>
+                              <p className="fw-bold mb-0 fs-5 text-success">
+                                {formatTotals(
+                                  cashierSession?.openingBalance.toFixed(2)
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-                  <div className="card border-success mb-4">
-                    <div className="card-header bg-transparent border-success">
-                      <strong>Collection Summary</strong>
+                  {/* Collection Summary Card */}
+                  <div className="card border-success shadow mb-4">
+                    <div className="card-header bg-success bg-opacity-10 border-success">
+                      <h6 className="mb-0 fw-semibold text-success d-flex align-items-center gap-2">
+                        <i className="bi bi-collection"></i>
+                        Collection Summary
+                      </h6>
                     </div>
                     <div className="card-body">
                       {Object.keys(totalsByPaymentMode).length === 0 ? (
-                        <div className="alert alert-warning" role="alert">
-                          You haven't made any transactions yet.
+                        <div
+                          className="alert alert-warning d-flex align-items-center mb-0"
+                          role="alert"
+                        >
+                          <i className="bi bi-info-circle-fill me-3"></i>
+                          <span>You haven't made any transactions yet.</span>
                         </div>
                       ) : (
-                        <table className="table">
-                          <thead>
-                            <tr>
-                              <th>Payment Mode</th>
-                              <th>Total</th>
-                              <th>Details</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {Object.keys(totalsByPaymentMode).map((modeId) => {
-                              const totalAmount = totalsByPaymentMode[modeId];
-                              const mode = salesReceipts.find(
-                                (r) =>
-                                  r.paymentMode.paymentModeId ===
-                                  parseInt(modeId)
-                              );
+                        <div className="table-responsive">
+                          <table className="table table-hover align-middle mb-0">
+                            <thead className="table-light">
+                              <tr>
+                                <th className="fw-semibold">Payment Mode</th>
+                                <th className="fw-semibold">Total</th>
+                                <th className="fw-semibold text-end">
+                                  Actions
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {Object.keys(totalsByPaymentMode).map(
+                                (modeId) => {
+                                  const totalAmount =
+                                    totalsByPaymentMode[modeId];
+                                  const mode = salesReceipts.find(
+                                    (r) =>
+                                      r.paymentMode.paymentModeId ===
+                                      parseInt(modeId)
+                                  );
 
-                              return (
-                                <tr key={modeId}>
-                                  <td>{mode.paymentMode.mode}</td>
-                                  <td>{totalAmount.toFixed(2)}</td>
-                                  <td>
-                                    <button
-                                      className="btn btn-primary"
-                                      onClick={() =>
-                                        openCollectionDetailModal(modeId)
-                                      }
-                                    >
-                                      <span className="bi bi-arrow-right"></span>{" "}
-                                      View
-                                    </button>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
+                                  return (
+                                    <tr key={modeId}>
+                                      <td>
+                                        <span className="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+                                          {mode.paymentMode.mode}
+                                        </span>
+                                      </td>
+                                      <td className="fw-bold">
+                                        {formatTotals(totalAmount.toFixed(2))}
+                                      </td>
+                                      <td className="text-end">
+                                        <button
+                                          className="btn btn-sm btn-outline-primary"
+                                          onClick={() =>
+                                            openCollectionDetailModal(modeId)
+                                          }
+                                        >
+                                          <i className="bi bi-eye me-1"></i>
+                                          View Details
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  );
+                                }
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
                       )}
                     </div>
                   </div>
-                  <p>
-                    <strong>Total Cashier Expense Out:</strong>{" "}
-                    {expenseOutTotal.toFixed(2)}{" "}
-                    {expenseOutTotal !== 0 && (
-                      <button
-                        className="btn btn-primary"
-                        onClick={() => handleExpenseOutDetailModal()}
-                      >
-                        <span className="bi bi-arrow-right"></span> View
-                      </button>
-                    )}
-                  </p>
 
-                  <p>
-                    <strong>Total Cash Collection:</strong>{" "}
-                    {(
-                      cashierSession?.openingBalance +
-                      (totalsByPaymentMode[1] ?? 0) -
-                      expenseOutTotal
-                    ).toFixed(2)}
-                  </p>
-
-                  <form>
-                    <div className="row">
-                      <div className="col-md-6">
-                        <div className="mb-3">
-                          <label
-                            htmlFor="actualCashInHand"
-                            className="form-label"
+                  {/* Expense Out Card */}
+                  <div className="card bg-danger bg-opacity-10 border-danger shadow-sm mb-4">
+                    <div className="card-body">
+                      <div className="d-flex justify-content-between align-items-center">
+                        <div className="d-flex align-items-center gap-2">
+                          <i className="bi bi-arrow-down-circle text-danger fs-4"></i>
+                          <div>
+                            <p className="text-muted small mb-1">
+                              Total Cashier Expense Out
+                            </p>
+                            <p className="fw-bold mb-0 fs-5 text-danger">
+                              {formatTotals(expenseOutTotal.toFixed(2))}
+                            </p>
+                          </div>
+                        </div>
+                        {expenseOutTotal !== 0 && (
+                          <button
+                            className="btn btn-sm btn-outline-danger"
+                            onClick={() => handleExpenseOutDetailModal()}
                           >
-                            Actual Cash In Hand:
-                          </label>
-                          <input
-                            type="number"
-                            className={`form-control ${
-                              validFields.actualCashInHand ? "is-valid" : ""
-                            } ${
-                              validationErrors.actualCashInHand
-                                ? "is-invalid"
-                                : ""
-                            }`}
-                            id="actualCashInHand"
-                            value={actualCashInHand}
-                            onChange={(e) => {
-                              const value = parseFloat(e.target.value);
-                              if (!isNaN(value) && value >= 0) {
-                                setActualCashInHand(value);
-                              } else {
-                                setActualCashInHand(0);
-                              }
-                            }}
-                          />
-                          {validationErrors.actualCashInHand && (
-                            <div className="invalid-feedback">
-                              {validationErrors.actualCashInHand}
+                            <i className="bi bi-eye me-1"></i>
+                            View Details
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Total Cash Collection Card */}
+                  <div className="card bg-primary bg-opacity-10 border-primary shadow-sm mb-4">
+                    <div className="card-body">
+                      <div className="d-flex align-items-center gap-2">
+                        <i className="bi bi-cash-coin text-primary fs-4"></i>
+                        <div>
+                          <p className="text-muted small mb-1">
+                            Total Cash Collection
+                          </p>
+                          <p className="fw-bold mb-0 fs-4 text-primary">
+                            {formatTotals(
+                              (
+                                cashierSession?.openingBalance +
+                                (totalsByPaymentMode[1] ?? 0) -
+                                expenseOutTotal
+                              ).toFixed(2)
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Cash In Hand Section */}
+                  <div className="card border-warning shadow mb-4">
+                    <div className="card-header border-warning bg-warning bg-opacity-50">
+                      <h6 className="mb-0 fw-semibold d-flex align-items-center gap-2">
+                        <i className="bi bi-currency-dollar text-success"></i>
+                        Cash Verification
+                      </h6>
+                    </div>
+                    <div className="card-body">
+                      <form>
+                        <div className="row g-3">
+                          <div
+                            className={
+                              isDifferenceCashInHand ? "col-md-6" : "col-md-12"
+                            }
+                          >
+                            <label
+                              htmlFor="actualCashInHand"
+                              className="form-label fw-semibold small text-secondary"
+                            >
+                              Actual Cash In Hand{" "}
+                              <span className="text-danger">*</span>
+                            </label>
+                            <div className="input-group">
+                              <span className="input-group-text bg-white">
+                                <i className="bi bi-cash text-success"></i>
+                              </span>
+                              <input
+                                type="number"
+                                className={`form-control ${
+                                  validFields.actualCashInHand ? "is-valid" : ""
+                                } ${
+                                  validationErrors.actualCashInHand
+                                    ? "is-invalid"
+                                    : ""
+                                }`}
+                                id="actualCashInHand"
+                                value={actualCashInHand}
+                                onWheel={(e) => e.target.blur()}
+                                onChange={(e) => {
+                                  const value = parseFloat(e.target.value);
+                                  if (!isNaN(value) && value >= 0) {
+                                    setActualCashInHand(value);
+                                  } else {
+                                    setActualCashInHand(0);
+                                  }
+                                }}
+                                placeholder="0.00"
+                                step="0.01"
+                              />
+                              {validationErrors.actualCashInHand && (
+                                <div className="invalid-feedback">
+                                  {validationErrors.actualCashInHand}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          {isDifferenceCashInHand && (
+                            <div className="col-md-6">
+                              <label
+                                htmlFor="reasonCashInHand"
+                                className="form-label fw-semibold small text-secondary"
+                              >
+                                Reason for Difference{" "}
+                                <span className="text-danger">*</span>
+                              </label>
+                              <textarea
+                                className={`form-control ${
+                                  validFields.reasonCashInHand ? "is-valid" : ""
+                                } ${
+                                  validationErrors.reasonCashInHand
+                                    ? "is-invalid"
+                                    : ""
+                                }`}
+                                id="reasonCashInHand"
+                                placeholder="Please explain the cash difference..."
+                                value={reasonCashInHand}
+                                onChange={(e) =>
+                                  setReasonCashInHand(e.target.value)
+                                }
+                                rows="3"
+                                maxLength="250"
+                              />
+                              <div className="form-text">
+                                {reasonCashInHand.length}/250 characters
+                              </div>
+                              {validationErrors.reasonCashInHand && (
+                                <div className="invalid-feedback">
+                                  {validationErrors.reasonCashInHand}
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
-                      </div>
-                      {isDifferenceCashInHand && (
-                        <div className="col-md-6">
-                          <div className="mb-3">
-                            <label htmlFor="reason" className="form-label">
-                              Reason:
-                            </label>
-                            <textarea
-                              className={`form-control ${
-                                validFields.reasonCashInHand ? "is-valid" : ""
-                              } ${
-                                validationErrors.reasonCashInHand
-                                  ? "is-invalid"
-                                  : ""
-                              }`}
-                              id="reason"
-                              placeholder="Enter Reason"
-                              value={reasonCashInHand}
-                              onChange={(e) =>
-                                setReasonCashInHand(e.target.value)
-                              }
-                              rows="2"
-                              maxLength="250"
-                            />
-                            {validationErrors.reasonCashInHand && (
-                              <div className="invalid-feedback">
-                                {validationErrors.reasonCashInHand}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
+                      </form>
                     </div>
-                  </form>
+                  </div>
 
-                  <p>
-                    <strong>Total Cheques Collection:</strong>{" "}
-                    {(totalsByPaymentMode[2] ?? 0).toFixed(2)}
-                  </p>
-
-                  <form>
-                    <div className="row">
-                      <div className="col-md-6">
-                        <div className="mb-3">
-                          <label
-                            htmlFor="actualchequesInHand"
-                            className="form-label"
+                  {/* Cheques In Hand Section */}
+                  <div className="card border-info shadow mb-4">
+                    <div className="card-header border-info bg-info bg-opacity-50">
+                      <div className="d-flex justify-content-between align-items-center">
+                        <h6 className="mb-0 fw-semibold d-flex align-items-center gap-2">
+                          <i className="bi bi-file-earmark-check text-info"></i>
+                          Cheques Verification
+                        </h6>
+                        {/* <span className="badge bg-dark bg-opacity-10 text-dark">
+                          Expected: {(totalsByPaymentMode[2] ?? 0).toFixed(2)}
+                        </span> */}
+                      </div>
+                    </div>
+                    <div className="card-body">
+                      <form>
+                        <div className="row g-3">
+                          <div
+                            className={
+                              isDifferenceChequesInHand
+                                ? "col-md-6"
+                                : "col-md-12"
+                            }
                           >
-                            Actual Cheques In Hand:
-                          </label>
-                          <input
-                            type="number"
-                            className={`form-control ${
-                              validFields.actualChequesInHand ? "is-valid" : ""
-                            } ${
-                              validationErrors.actualChequesInHand
-                                ? "is-invalid"
-                                : ""
-                            }`}
-                            id="actualCashInHand"
-                            value={actualChequesInHand}
-                            onChange={(e) => {
-                              const value = parseFloat(e.target.value);
-                              if (!isNaN(value) && value >= 0) {
-                                setActualChequesInHand(value);
-                              } else {
-                                setActualChequesInHand(0);
-                              }
-                            }}
-                          />
-                          {validationErrors.actualChequesInHand && (
-                            <div className="invalid-feedback">
-                              {validationErrors.actualChequesInHand}
+                            <label
+                              htmlFor="actualChequesInHand"
+                              className="form-label fw-semibold small text-secondary"
+                            >
+                              Actual Cheques In Hand{" "}
+                              <span className="text-danger">*</span>
+                            </label>
+                            <div className="input-group">
+                              <span className="input-group-text bg-white">
+                                <i className="bi bi-file-earmark-text text-info"></i>
+                              </span>
+                              <input
+                                type="number"
+                                className={`form-control ${
+                                  validFields.actualChequesInHand
+                                    ? "is-valid"
+                                    : ""
+                                } ${
+                                  validationErrors.actualChequesInHand
+                                    ? "is-invalid"
+                                    : ""
+                                }`}
+                                id="actualChequesInHand"
+                                value={actualChequesInHand}
+                                onWheel={(e) => e.target.blur()}
+                                onChange={(e) => {
+                                  const value = parseFloat(e.target.value);
+                                  if (!isNaN(value) && value >= 0) {
+                                    setActualChequesInHand(value);
+                                  } else {
+                                    setActualChequesInHand(0);
+                                  }
+                                }}
+                                placeholder="0.00"
+                                step="0.01"
+                              />
+                              {validationErrors.actualChequesInHand && (
+                                <div className="invalid-feedback">
+                                  {validationErrors.actualChequesInHand}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          {isDifferenceChequesInHand && (
+                            <div className="col-md-6">
+                              <label
+                                htmlFor="reasonChequesInHand"
+                                className="form-label fw-semibold small text-secondary"
+                              >
+                                Reason for Difference{" "}
+                                <span className="text-danger">*</span>
+                              </label>
+                              <textarea
+                                className={`form-control ${
+                                  validFields.reasonChequesInHand
+                                    ? "is-valid"
+                                    : ""
+                                } ${
+                                  validationErrors.reasonChequesInHand
+                                    ? "is-invalid"
+                                    : ""
+                                }`}
+                                id="reasonChequesInHand"
+                                placeholder="Please explain the cheque difference..."
+                                value={reasonChequesInHand}
+                                onChange={(e) =>
+                                  setReasonChequesInHand(e.target.value)
+                                }
+                                rows="3"
+                                maxLength="250"
+                              />
+                              <div className="form-text">
+                                {reasonChequesInHand.length}/250 characters
+                              </div>
+                              {validationErrors.reasonChequesInHand && (
+                                <div className="invalid-feedback">
+                                  {validationErrors.reasonChequesInHand}
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
-                      </div>
-                      {isDifferenceChequesInHand && (
-                        <div className="col-md-6">
-                          <div className="mb-3">
-                            <label htmlFor="reason" className="form-label">
-                              Reason:
-                            </label>
-                            <textarea
-                              className={`form-control ${
-                                validFields.reasonChequesInHand
-                                  ? "is-valid"
-                                  : ""
-                              } ${
-                                validationErrors.reasonChequesInHand
-                                  ? "is-invalid"
-                                  : ""
-                              }`}
-                              id="reason"
-                              placeholder="Enter Reason"
-                              value={reasonChequesInHand}
-                              onChange={(e) =>
-                                setReasonChequesInHand(e.target.value)
-                              }
-                              rows="2"
-                              maxLength="250"
-                            />
-                            {validationErrors.reasonChequesInHand && (
-                              <div className="invalid-feedback">
-                                {validationErrors.reasonChequesInHand}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
+                      </form>
                     </div>
-                  </form>
+                  </div>
 
                   <div ref={alertRef}></div>
-                  {/* Display success or error messages */}
+
+                  {/* Status Messages */}
                   {submissionStatus === "success" && (
-                    <div className="alert alert-success mb-0" role="alert">
-                      Your cashier session is closed now!
+                    <div
+                      className="alert alert-success d-flex align-items-center shadow-sm mb-0"
+                      role="alert"
+                    >
+                      <i className="bi bi-check-circle-fill me-3 fs-4"></i>
+                      <div>
+                        <strong>Success!</strong> Your cashier session is closed
+                        now!
+                      </div>
                     </div>
                   )}
                   {submissionStatus === "error" && (
-                    <div className="alert alert-danger mb-0" role="alert">
-                      Error closing your cashier session. Please try again.
+                    <div
+                      className="alert alert-danger d-flex align-items-center shadow-sm mb-0"
+                      role="alert"
+                    >
+                      <i className="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
+                      <div>
+                        <strong>Error!</strong> Error closing your cashier
+                        session. Please try again.
+                      </div>
                     </div>
                   )}
                 </>
               )}
           </Modal.Body>
-          <Modal.Footer>
+          <Modal.Footer className="bg-light border-0">
             <Button
-              variant="secondary"
+              variant="outline-secondary"
               onClick={handleClose}
               disabled={loading || submissionStatus !== null}
+              className="px-4"
             >
-              Close
+              <i className="bi bi-x-circle me-2"></i>
+              Cancel
             </Button>
             <Button
               variant="primary"
               onClick={handleSubmit}
               disabled={loading || submissionStatus !== null}
+              className="px-4"
             >
               {loading && submissionStatus === null ? (
-                <ButtonLoadingSpinner text="Closing..." />
+                <ButtonLoadingSpinner text="Closing Session..." />
               ) : (
-                "Close Cashier Session"
+                <>
+                  <i className="bi bi-lock-fill me-2"></i>
+                  Close Cashier Session
+                </>
               )}
             </Button>
           </Modal.Footer>
@@ -355,11 +525,13 @@ const CashierSessionUpdate = ({
         handleClose={closeCollectionDetailModal}
         modeId={selectedMode}
         salesReceipts={salesReceipts}
+        thousandSeperator={formatTotals}
       />
       <ExpenseOutDetail
         show={showExpenseOutDetailModal}
         handleClose={handleExpenseOutDetailModal}
         expenseOuts={expenseOuts}
+        thousandSeperator={formatTotals}
       />
     </>
   );

@@ -45,13 +45,17 @@ const useMinAccept = ({ min, refetch, setRefetch, onFormSubmit }) => {
     if (issuedetails?.length > 0) {
       const updatedReceivedQuantities = issuedetails.reduce((acc, item) => {
         acc[item.issueDetailId] =
-          item.receivedQuantity !== undefined ? item.quantity : "";
+          item.receivedQuantity !== undefined && item.receivedQuantity !== null
+            ? item.receivedQuantity
+            : item.quantity;
         return acc;
       }, {});
 
       const updatedReturnedQuantities = issuedetails.reduce((acc, item) => {
         acc[item.issueDetailId] =
-          item.returnedQuantity !== undefined ? item.returnedQuantity : "";
+          item.returnedQuantity !== undefined && item.returnedQuantity !== null
+            ? item.returnedQuantity
+            : 0;
         return acc;
       }, {});
 
@@ -200,31 +204,32 @@ const useMinAccept = ({ min, refetch, setRefetch, onFormSubmit }) => {
         returnedQuantities[item.issueDetailId] || 0
       );
       const issuedQty = parseFloat(item.quantity || 0);
+      const itemIdentifier = item.itemMaster?.itemName || item.itemMasterId;
 
       // Check for negative quantities
       if (receivedQty < 0) {
         errors.push(
-          `Received quantity cannot be negative for item ${item.itemMasterId}`
+          `Received quantity cannot be negative for item ${itemIdentifier}`
         );
       }
 
       if (returnedQty < 0) {
         errors.push(
-          `Returned quantity cannot be negative for item ${item.itemMasterId}`
+          `Returned quantity cannot be negative for item ${itemIdentifier}`
         );
       }
 
       // Check if both received and returned quantities are 0
       if (receivedQty === 0 && returnedQty === 0) {
         errors.push(
-          `Both received and returned quantities cannot be 0 for item ${item.itemMasterId}`
+          `Both received and returned quantities cannot be 0 for item ${itemIdentifier}`
         );
       }
 
       // Check if received quantity plus returned quantity equals issued quantity
       if (receivedQty + returnedQty !== issuedQty) {
         errors.push(
-          `Received quantity plus returned quantity must equal issued quantity for item ${item.itemMasterId}`
+          `Received quantity plus returned quantity must equal issued quantity for item ${itemIdentifier}`
         );
       }
     });

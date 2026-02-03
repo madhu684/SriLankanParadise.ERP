@@ -1,12 +1,13 @@
-import React from "react";
-import { FaSearch } from "react-icons/fa";
+import React, { useContext, useMemo } from "react";
+import { FaSearch, FaFileExcel } from "react-icons/fa";
 import useStockManagement from "./useStockManagement";
 import LoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 import Pagination from "../common/Pagination/Pagination";
+import { UserContext } from "../../context/userContext";
+import StockAdjustmentModal from "./StockAdjustmentModal";
 
 const StockManagement = () => {
   const {
-    companyLocations,
     selectedLocation,
     inventories,
     currentItems,
@@ -16,8 +17,30 @@ const StockManagement = () => {
     handleSearch,
     paginate,
     handleLocationChange,
-    handleDateChange,
+    searchTerm,
+    handleSearchChange,
+    stockFilter,
+    handleStockFilterChange,
+    handleExportToExcel,
+    showAdjustmentModal,
+    selectedItem,
+    handleAdjustStockClick,
+    handleCloseAdjustmentModal,
   } = useStockManagement();
+
+  const { user, allLocations, userLocations, hasPermission } =
+    useContext(UserContext);
+
+  const displayLocations = user?.userId === 1 ? allLocations : userLocations;
+
+  const selectedLocationName = useMemo(
+    () =>
+      allLocations?.find((loc) => loc.locationId === parseInt(selectedLocation))
+        ?.locationName,
+    [allLocations, selectedLocation],
+  );
+  console.log(selectedLocationName);
+
   return (
     <div className="container-sm mt-4" style={{ maxWidth: "1200px" }}>
       <h2 className="text-black fw-bold">Manage Stock</h2>
@@ -34,101 +57,105 @@ const StockManagement = () => {
             <option value="" disabled selected>
               Select a Warehouse
             </option>
-            {companyLocations && companyLocations.length > 0 ? (
-              companyLocations
-                .filter((l) => l.locationTypeId === 2)
-                .map((item) => (
-                  <option key={item.id} value={item.locationId}>
-                    {item.locationName}
+            {displayLocations ? (
+              displayLocations.map((item) => {
+                const locationId = item.locationId;
+                const locationName =
+                  item.location?.locationName || item.locationName;
+
+                return (
+                  <option key={locationId} value={locationId}>
+                    {locationName}
                   </option>
-                ))
+                );
+              })
             ) : (
               <option>No warehouses available</option>
             )}
           </select>
         </div>
-        {/* <div className="col-md-3">
-          <label htmlFor="transactionType" className="form-label">
-            Transaction Type
-          </label>
-          <select
-            className="form-select"
-            id="transactionType"
-            //onChange={handleTransactionTypeChange}
-          >
-            <option value="" disabled selected>
-              Select a Transaction type
-            </option>
-            <option>Adjustment</option>
-            {transactionTypes && transactionTypes.length > 0 ? (
-              transactionTypes.map((tr) => (
-                <option key={tr.id} value={tr.id}>
-                  {tr.name}
-                </option>
-              ))
-            ) : (
-              <option>No Trasaction Types available</option>
-            )}
-          </select>
-        </div> */}
-        {/* <div className="col-md-3">
-          <label htmlFor="transactionDate" className="form-label">
-            Adjusted Date
-          </label>
-          <input
-            type="date"
-            className="form-control"
-            id="transactionDate"
-            name="transactionDate"
-            //value={transactionDate}
-            onChange={handleDateChange}
-          />
-        </div> */}
       </div>
-      <div className="mt-4">
+      {/* <div className="mt-4">
         <button
-          className="btn btn-success"
+          className="btn btn-primary"
           onClick={handleSearch}
           disabled={selectedLocation === null}
-          //   disable={
-          //     !isTransactionTypeSelected ||
-          //     !isTransactionDateSelected
-          //   }
         >
           Search
         </button>
-      </div>
+      </div> */}
       <hr />
-      {/* {isWarehouseSelected && ( */}
       <div>
-        <h6 className="mt-2">Stock Information</h6>
-        <div className="d-flex justify-content-between">
-          <div className="input-group search-bar  d-flex justify-content-between">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Search by item name"
-              //value={searchTerm}
-              //onChange={handleSearchChange}
-            />
-            <span className="input-group-text">
-              <FaSearch />
-            </span>
+        <h6 className="mt-2 mb-3 fw-semibold">Stock Information</h6>
+        <div className="d-flex justify-content-between align-items-center mb-3 gap-3 flex-wrap">
+          <div className="d-flex gap-3 align-items-center flex-wrap">
+            {/* Search Input */}
+            <div className="input-group" style={{ maxWidth: "250px" }}>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search by item name"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                style={{
+                  borderRight: "none",
+                  paddingLeft: "12px",
+                }}
+              />
+              <span
+                className="input-group-text bg-white"
+                style={{ borderLeft: "none" }}
+              >
+                <FaSearch style={{ color: "#6c757d" }} />
+              </span>
+            </div>
+
+            {/* Stock Filter */}
+            <div className="d-flex align-items-center gap-2">
+              <label
+                htmlFor="stockFilter"
+                className="form-label mb-0 text-nowrap fw-medium"
+                style={{ fontSize: "14px" }}
+              >
+                Stock Filter:
+              </label>
+              <select
+                className="form-select"
+                id="stockFilter"
+                value={stockFilter}
+                onChange={handleStockFilterChange}
+                style={{
+                  width: "auto",
+                  minWidth: "150px",
+                  fontSize: "14px",
+                }}
+              >
+                <option value="all">All Items</option>
+                <option value="positive">Positive Stock</option>
+                <option value="zeroOrBelow">Zero Stock</option>
+              </select>
+            </div>
           </div>
-          {/* <div className="form-check">
-            <input
-              type="checkbox"
-              className="form-check-input"
-              id="show-all-items"
-              //onChange={handleIsChecked}
-              //checked={isChecked}
-            />
-            <label className="form-check-label" htmlFor="show-all-items">
-              Show all items
-            </label>
-          </div> */}
+
+          {/* Export Button */}
+          <button
+            className="btn btn-success d-flex align-items-center gap-2"
+            onClick={() => handleExportToExcel(selectedLocationName)}
+            disabled={inventories.length === 0}
+            style={{
+              backgroundColor: "#198754",
+              border: "none",
+              padding: "8px 20px",
+              fontSize: "14px",
+              fontWeight: "500",
+            }}
+          >
+            <FaFileExcel size={16} />
+            Export to Excel
+          </button>
         </div>
-        <div className="tabnle-responsive">
+
+        <div className="table-responsive">
           <table className="table mt-2">
             <thead>
               <tr>
@@ -137,8 +164,8 @@ const StockManagement = () => {
                 <th>Item Name</th>
                 <th>UOM</th>
                 <th>Stock in Hand</th>
-                <th>Batch Number</th>
-                {/* <th>Adjusted Quantity</th> */}
+                <th>Batch Reference</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -158,26 +185,16 @@ const StockManagement = () => {
                     <td>{item.itemName}</td>
                     <td>{item.unitName}</td>
                     <td>{item.stockInHand}</td>
-                    <td>{item.batchNo}</td>
-                    {/* <td>
-                      <input
-                        type="number"
-                        className="form-control form-input rounded-4"
-                        placeholder="Enter quantity"
-                        value={
-                          adjustedVolumes[
-                            itemsPerPage * (currentPage - 1) + index
-                          ]
-                        }
-                        onChange={(e) =>
-                          handleSetAdjustedVolumes(
-                            itemsPerPage * (currentPage - 1) + index,
-                            parseFloat(e.target.value)
-                          )
-                        }
-                        step="any"
-                      />
-                    </td> */}
+                    <td>{item?.batchNo || "N/A"}</td>
+                    <td>
+                      <button
+                        className="btn btn-outline-primary btn-sm me-2"
+                        onClick={() => handleAdjustStockClick(item)}
+                        disabled={!hasPermission("Stock Adjustment")}
+                      >
+                        Adjust Stock
+                      </button>
+                    </td>
                   </tr>
                 ))
               ) : (
@@ -199,27 +216,15 @@ const StockManagement = () => {
             paginate={paginate}
             currentPage={currentPage}
           />
-          <div className="d-flex">
-            <button
-              className="btn btn-danger me-2"
-              //onClick={handleClear}
-            >
-              Clear
-            </button>
-            <button
-              className="btn btn-primary me-2"
-              //onClick={handleSubmit}
-              // disable={
-              //   isSubmitting
-              // }
-              //loading={isSubmitting}
-            >
-              Submit
-            </button>
-          </div>
         </div>
       </div>
-      {/* )} */}
+
+      <StockAdjustmentModal
+        show={showAdjustmentModal}
+        onHide={handleCloseAdjustmentModal}
+        selectedItem={selectedItem}
+        selectedLocation={selectedLocation}
+      />
     </div>
   );
 };

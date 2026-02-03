@@ -151,6 +151,18 @@ export const post_item_master_api = async (formData) => {
   }
 };
 
+export const initialize_item_batch_api = async (data) => {
+  try {
+    const response = await api.post("/itemMaster/InitializeItemBatch", data, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const put_item_master_api = async (itemMasterId, itemMasterIdData) => {
   try {
     const response = await api.put(
@@ -273,6 +285,39 @@ export const get_sub_item_masters_by_item_master_id_api = async (
   }
 };
 
+export const get_paginated_item_masters_by_company_id_api = async ({
+  companyId,
+  searchQuery,
+  supplierId,
+  pageNumber = 1,
+  pageSize = 10,
+}) => {
+  try {
+    const params = {
+      searchQuery,
+      supplierId,
+      pageNumber,
+      pageSize,
+    };
+
+    if (searchQuery) params.searchQuery = searchQuery;
+    if (supplierId) params.supplierId = supplierId;
+
+    const response = await api.get(
+      `/itemMaster/GetPaginatedItemMastersByCompanyId/${companyId}`,
+      {
+        params,
+        withCredentials: true,
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 //item types api
 export const get_item_types_by_company_id_api = async (companyId) => {
   try {
@@ -321,10 +366,10 @@ export const get_stock_report_api = async (fromDate, toDate, locationId) => {
 };
 
 export const get_Empty_Return_Item_locations_inventories_by_location_id_api =
-  async (locationId) => {
+  async (companyId, locationId) => {
     try {
       const response = await api.get(
-        `/locationInventory/GetEmptyReturnItemLocationInventoriesByLocationId/${locationId}`,
+        `/locationInventory/GetEmptyReturnItemLocationInventoriesByLocationId/${locationId}?companyId=${companyId}`,
         {
           withCredentials: true,
         }
@@ -411,6 +456,19 @@ export const get_supplier_items_by_type_category_api = async (
         withCredentials: true,
       }
     );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+// Item Mode API
+export const get_all_item_modes_api = async () => {
+  try {
+    const response = await api.get("/itemMode/GetAll", {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);

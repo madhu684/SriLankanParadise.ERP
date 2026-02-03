@@ -60,6 +60,8 @@ public partial class ItemMaster
     public decimal? BulkPrice { get; set; }
     public int? SupplierId { get; set; }
 
+    public int? ItemModeId { get; set; }
+
     //nav properties
     public virtual Category Category { get; set; } = null!;
     public virtual Unit? InventoryUnit { get; set; }
@@ -67,6 +69,7 @@ public partial class ItemMaster
     public virtual ItemMaster? Parent { get; set; }
     public virtual Unit Unit { get; set; } = null!;
     public virtual Supplier? Supplier { get; set; }
+    public virtual ItemMode? ItemMode { get; set; }
     public virtual ICollection<PurchaseOrderDetail> PurchaseOrderDetails { get; set; } = new List<PurchaseOrderDetail>();
     public virtual ICollection<PurchaseRequisitionDetail> PurchaseRequisitionDetails { get; set; } = new List<PurchaseRequisitionDetail>();
     public virtual ICollection<RequisitionDetail> RequisitionDetails { get; set; } = new List<RequisitionDetail>();

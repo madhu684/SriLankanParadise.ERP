@@ -14,8 +14,6 @@ public partial class LocationInventory
 
     public string? BatchNo { get; set; }
 
-    public string? RackNo { get; set; }
-
     public int? ReOrderLevel { get; set; }
 
     public int? MaxStockLevel { get; set; }

@@ -86,11 +86,17 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
 
         [HttpGet("GetSalesInvoicesWithoutDraftsByCompanyId/{companyId}")]
-        public async Task<ApiResponseModel> GetSalesInvoicesWithoutDraftsByCompanyId(int companyId)
+        public async Task<ApiResponseModel> GetSalesInvoicesWithoutDraftsByCompanyId(
+            int companyId,
+            [FromQuery] DateTime? date = null,
+            [FromQuery] string? searchQuery = null,
+            [FromQuery] string? filter = null,
+            [FromQuery] int? status = null
+            )
         {
             try
             {
-                var salesInvoices = await _salesInvoiceService.GetSalesInvoicesWithoutDraftsByCompanyId(companyId);
+                var salesInvoices = await _salesInvoiceService.GetSalesInvoicesWithoutDraftsByCompanyId(companyId, date, searchQuery, filter, status);
                 if (salesInvoices != null)
                 {
                     var salesInvoiceDtos = _mapper.Map<IEnumerable<SalesInvoiceDto>>(salesInvoices);
@@ -257,6 +263,52 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 _logger.LogError(ex, ErrorMessages.InternalServerError);
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
+        }
+
+        [HttpGet("PaginatedSalesInvoiceByCompanyId/{companyId}")]
+        public async Task<ApiResponseModel> GetPaginatedFilteredSalesInvoiceByCompanyIdDate(
+            int companyId, 
+            [FromQuery] DateTime? date = null,
+            [FromQuery]  string? searchQuery = null,
+            [FromQuery]  string? filter = null,
+            [FromQuery]  int pageNumber = 1,
+            [FromQuery]  int pageSize = 10)
+        {
+            try
+            {
+                var result = await _salesInvoiceService.GetPaginatedFilteredSalesInvoiceByCompanyIdDate(companyId, date, searchQuery, filter, pageNumber, pageSize);
+
+                if (result.Items.Any())
+                {
+                    var salesInvoiceDtos = _mapper.Map<IEnumerable<SalesInvoiceDto>>(result.Items);
+
+                    var responseData = new
+                    {
+                        Data = salesInvoiceDtos,
+                        Pagination = new
+                        {
+                            result.TotalCount,
+                            result.PageNumber,
+                            result.PageSize,
+                            result.TotalPages,
+                            result.HasPreviousPage,
+                            result.HasNextPage
+                        }
+                    };
+
+                    AddResponseMessage(Response, "Paginated Sales invoices retrieved successfully", responseData, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    AddResponseMessage(Response, "No invoices found", null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
         }
     }
 }

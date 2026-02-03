@@ -208,7 +208,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 }
 
                 var updatedPurchaseRequisition = _mapper.Map<PurchaseRequisition>(purchaseRequisitionRequest);
-                updatedPurchaseRequisition.PurchaseRequisitionId = purchaseRequisitionId; // Ensure the ID is not changed
+                updatedPurchaseRequisition.PurchaseRequisitionId = purchaseRequisitionId;
+                updatedPurchaseRequisition.ReferenceNo = existingPurchaseRequisition.ReferenceNo;
 
                 await _purchaseRequisitionService.UpdatePurchaseRequisition(existingPurchaseRequisition.PurchaseRequisitionId, updatedPurchaseRequisition);
 

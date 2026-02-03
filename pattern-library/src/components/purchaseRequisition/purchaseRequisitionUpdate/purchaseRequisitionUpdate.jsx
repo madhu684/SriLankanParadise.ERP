@@ -118,30 +118,6 @@ const PurchaseRequisitionUpdate = ({
                 </div>
               )}
             </div>
-            {/* <div className="mb-3">
-              <label htmlFor="department" className="form-label">
-                Department
-              </label>
-              <input
-                type="text"
-                className={`form-control ${
-                  validFields.department ? "is-valid" : ""
-                } ${validationErrors.department ? "is-invalid" : ""}`}
-                id="department"
-                placeholder="Enter department"
-                value={formData.department}
-                onChange={(e) =>
-                  handleInputChange("department", e.target.value)
-                }
-                required
-                disabled
-              />
-              {validationErrors.department && (
-                <div className="invalid-feedback">
-                  {validationErrors.department}
-                </div>
-              )}
-            </div> */}
             <div className="mb-3">
               <label htmlFor="department" className="form-label">
                 Department
@@ -351,6 +327,7 @@ const PurchaseRequisitionUpdate = ({
                 onChange={(e) =>
                   handleInputChange("referenceNumber", e.target.value)
                 }
+                disabled
               />
             </div>
           </div>
@@ -508,6 +485,7 @@ const PurchaseRequisitionUpdate = ({
                             : ""
                         }`}
                         value={item.quantity}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
@@ -527,6 +505,7 @@ const PurchaseRequisitionUpdate = ({
                         type="number"
                         className="form-control"
                         value={item.unitPrice}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,

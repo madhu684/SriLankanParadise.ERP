@@ -47,11 +47,11 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
   });
   //const companyLogoUrl = useCompanyLogoUrl();
 
-  if (isLoading || isItemBatchesLoading) {
+  if (isLoading) {
     return <LoadingSpinner />;
   }
 
-  if (isError || isItemBatchesError) {
+  if (isError) {
     return <ErrorComponent error={"Error fetching data"} />;
   }
   const handleBack = () => {
@@ -295,7 +295,7 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
                   <th>Unit</th>
                   <th>Requested Quantity</th>
                   <th>Stock In Hand</th>
-                  <th>Item Batch</th>
+                  {/* <th>Item Batch</th> */}
                   <th>Dispatched Quantity</th>
                   <th>Action</th>
                 </tr>
@@ -307,7 +307,7 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
                     <td>{item.unit}</td>
                     <td>{item.quantity}</td>
                     <td>{item.remainingQuantity}</td>
-                    <td>
+                    {/* <td>
                       <select
                         className="form-select"
                         value={item.batchId}
@@ -332,7 +332,7 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
                             </option>
                           ))}
                       </select>
-                    </td>
+                    </td> */}
                     <td>
                       <input
                         type="number"
@@ -348,6 +348,7 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
                             : ""
                         }`}
                         value={item.issuedQuantity}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
@@ -387,13 +388,13 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
           </div>
         )}
 
-        {selectedTrn !== null && formData.itemDetails.length === 0 && (
+        {/* {selectedTrn !== null && formData.itemDetails.length === 0 && (
           <div className="mb-3">
             <small className="form-text  text-danger">
               Selected transfer requisition has no remaining items to issue.
             </small>
           </div>
-        )}
+        )} */}
 
         {/* Actions */}
         <div className="mb-3">
@@ -414,14 +415,14 @@ const Tin = ({ handleClose, handleUpdated, setShowCreateTinForm }) => {
               "Submit"
             )}
           </button>
-          <button
+          {/* <button
             type="button"
             className="btn btn-success me-2"
             onClick={handlePrint}
             disabled={loading || loadingDraft || submissionStatus !== null}
           >
             Print
-          </button>
+          </button> */}
           <button
             type="button"
             className="btn btn-danger"

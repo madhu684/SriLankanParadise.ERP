@@ -6,8 +6,6 @@
 
         public int? CustomerId { get; set; }
 
-        public virtual CustomerDto? Customer { get; set; }
-
         public DateTime? OrderDate { get; set; }
 
         public DateTime? DeliveryDate { get; set; }
@@ -40,6 +38,7 @@
         public double? Longitude { get; set; }
         public int InventoryLocationId { get; set; }
 
+        public virtual CustomerDto? Customer { get; set; }
         public virtual IEnumerable<SalesOrderDetailDto>? SalesOrderDetails { get; set; }
     }
 }

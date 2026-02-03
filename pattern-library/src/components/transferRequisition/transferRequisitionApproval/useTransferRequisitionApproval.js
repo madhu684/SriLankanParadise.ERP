@@ -1,10 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { approve_requisition_master_api } from "../../../services/purchaseApi";
+import { useQueryClient } from "@tanstack/react-query";
 
 const useTransferRequisitionApproval = ({ onFormSubmit }) => {
   const [approvalStatus, setApprovalStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const alertRef = useRef(null);
+
+  const queryClient = useQueryClient();
+
+  const companyId = sessionStorage.getItem("companyId");
 
   useEffect(() => {
     if (approvalStatus === "approved") {
@@ -47,6 +52,8 @@ const useTransferRequisitionApproval = ({ onFormSubmit }) => {
       } else {
         setApprovalStatus("error");
       }
+
+      queryClient.invalidateQueries(["transferRequisitions", companyId]);
 
       setTimeout(() => {
         setApprovalStatus(null);

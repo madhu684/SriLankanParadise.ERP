@@ -13,11 +13,17 @@ import {
   get_locations_inventories_by_location_id_api,
   get_sum_location_inventories_by_locationId_itemMasterId_api,
   get_item_batches_by_item_master_id_api,
+  get_sum_location_inventories_by_locationId_itemCode_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
-import { useQuery } from "@tanstack/react-query";
+import { get_appointment_tokens_by_date_api } from "../../services/ayuOMSApi";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
+  const [useAppointment, setUseAppointment] = useState(false);
+  const [appointmentSearchTerm, setAppointmentSearchTerm] = useState("");
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [formData, setFormData] = useState({
     storeLocation: null,
     invoiceDate: "",
@@ -25,12 +31,15 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     referenceNumber: "",
     patientName: "",
     patientNo: "",
+    appointmentId: null,
+    tokenNo: null,
     itemDetails: [],
     attachments: [],
     totalAmount: 0,
     salesOrderId: "",
     subTotal: 0,
     commonChargesAndDeductions: [],
+    deductionAmount: 0,
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -42,15 +51,18 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   const [selectedBatch, setSelectedBatch] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
-  const [initialized, setInitialized] = useState(false);
+  const isSubmitting = useRef(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const queryClient = useQueryClient();
 
   const fetchUserLocations = async () => {
     try {
       const response = await get_user_locations_by_user_id_api(
-        sessionStorage.getItem("userId")
+        sessionStorage.getItem("userId"),
       );
       return response.data.result.filter(
-        (location) => location.location.locationTypeId === 2
+        (location) => location.location.locationTypeId === 2,
       );
     } catch (error) {
       console.error("Error fetching user locations:", error);
@@ -71,7 +83,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
       const response = await get_item_masters_by_company_id_with_query_api(
         companyId,
         searchQuery,
-        true
+        true,
       );
       return response.data.result;
     } catch (error) {
@@ -93,9 +105,8 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   const fetchLocationInventories = async (locationId) => {
     try {
       if (!locationId) return [];
-      const response = await get_locations_inventories_by_location_id_api(
-        locationId
-      );
+      const response =
+        await get_locations_inventories_by_location_id_api(locationId);
       console.log("Location inventories:", response.data.result);
       return response.data.result || [];
     } catch (error) {
@@ -103,7 +114,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         "Error fetching location inventories for location",
         locationId,
         ":",
-        error
+        error,
       );
       return [];
     }
@@ -129,7 +140,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   const fetchchargesAndDeductions = async () => {
     try {
       const response = await get_charges_and_deductions_by_company_id_api(
-        sessionStorage.getItem("companyId")
+        sessionStorage.getItem("companyId"),
       );
       return response.data.result;
     } catch (error) {
@@ -151,7 +162,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   const fetchTransactionTypes = async () => {
     try {
       const response = await get_transaction_types_api(
-        sessionStorage.getItem("companyId")
+        sessionStorage.getItem("companyId"),
       );
       return response.data.result;
     } catch (error) {
@@ -174,7 +185,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
       const response = await get_charges_and_deductions_applied_api(
         1,
         salesOrder?.salesOrderId ?? 0,
-        sessionStorage.getItem("companyId")
+        sessionStorage.getItem("companyId"),
       );
       return response.data.result;
     } catch (error) {
@@ -195,7 +206,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   const fetchCompany = async () => {
     try {
       const response = await get_company_api(
-        sessionStorage?.getItem("companyId")
+        sessionStorage?.getItem("companyId"),
       );
       return response.data.result;
     } catch (error) {
@@ -213,13 +224,58 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     queryFn: fetchCompany,
   });
 
+  const {
+    data: appointments = [],
+    isLoading: isAppointmentsLoading,
+    error: appointmentsError,
+    refetch: refetchAppointments,
+  } = useQuery({
+    queryKey: ["appointments", formData.invoiceDate],
+    queryFn: async () => {
+      const response = await get_appointment_tokens_by_date_api(
+        sessionStorage.getItem("companyId"),
+        formData.invoiceDate,
+      );
+      return response.data.result || [];
+    },
+    enabled: !!formData.invoiceDate,
+  });
+
+  // Effects
   useEffect(() => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      subTotal: calculateSubTotal(),
-      totalAmount: calculateTotalAmount(),
-    }));
-  }, [formData.itemDetails, formData.commonChargesAndDeductions]);
+    if (!useAppointment) {
+      setSelectedAppointment(null);
+      setAppointmentSearchTerm("");
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        patientName: "",
+        patientNo: "",
+        appointmentId: null,
+        tokenNo: null,
+      }));
+    }
+  }, [useAppointment]);
+
+  useEffect(() => {
+    setFormData((prevFormData) => {
+      const subTotal = calculateSubTotal(prevFormData.itemDetails);
+      const totalAmount = calculateTotalAmount(
+        subTotal,
+        prevFormData.commonChargesAndDeductions,
+        prevFormData.deductionAmount,
+      );
+      return {
+        ...prevFormData,
+        subTotal,
+        totalAmount,
+      };
+    });
+  }, [
+    formData.itemDetails,
+    formData.commonChargesAndDeductions,
+    formData.deductionAmount,
+    chargesAndDeductions, // Add this just in case
+  ]);
 
   useEffect(() => {
     const today = new Date().toISOString().split("T")[0]; // Get YYYY-MM-DD format
@@ -234,7 +290,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   useEffect(() => {
     if (userLocations && userLocations.length > 0) {
       const filteredLocations = userLocations.filter(
-        (location) => location.location.locationType.name === "Warehouse"
+        (location) => location.location.locationType.name === "Warehouse",
       );
       if (filteredLocations.length > 0) {
         setFormData((prevFormData) => ({
@@ -244,6 +300,113 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
       }
     }
   }, [userLocations]);
+
+  // useEffect(() => {
+  //   if (
+  //     salesOrder !== null &&
+  //     !isChargesAndDeductionsAppliedLoading &&
+  //     chargesAndDeductionsApplied &&
+  //     !isLoadingchargesAndDeductions &&
+  //     chargesAndDeductions
+  //   ) {
+  //     const deepCopySalesOrder = JSON.parse(JSON.stringify(salesOrder));
+
+  //     // Initialize line item charges and deductions
+  //     const initializedLineItemCharges =
+  //       deepCopySalesOrder.salesOrderDetails.map((item) => {
+  //         const initializedCharges = chargesAndDeductionsApplied
+  //           ?.filter(
+  //             (charge) => charge.lineItemId === item.itemBatch.itemMasterId
+  //           )
+  //           .map((charge) => {
+  //             let value;
+  //             if (charge.chargesAndDeduction.percentage !== null) {
+  //               // Calculate percentage value
+  //               value =
+  //                 (Math.abs(charge.appliedValue) /
+  //                   (item.unitPrice * item.quantity)) *
+  //                 100;
+  //             } else {
+  //               value = Math.abs(charge.appliedValue);
+  //             }
+  //             return {
+  //               id: charge.chargesAndDeduction.chargesAndDeductionId,
+  //               name: charge.chargesAndDeduction.displayName,
+  //               value: value.toFixed(2),
+  //               sign: charge.chargesAndDeduction.sign,
+  //               isPercentage: charge.chargesAndDeduction.percentage !== null,
+  //               chargesAndDeductionAppliedId:
+  //                 charge.chargesAndDeductionAppliedId,
+  //             };
+  //           });
+
+  //         // Sort the charges and deductions according to the order of display names
+  //         const sortedLineItemCharges = chargesAndDeductions
+  //           .filter((charge) => charge.isApplicableForLineItem)
+  //           .map((charge) => {
+  //             const displayName = charge.displayName; // Extract display name from charge
+  //             const matchedCharge = initializedCharges.find(
+  //               (c) => c.name === displayName
+  //             );
+  //             return matchedCharge || null; // Return null if no matching charge is found
+  //           });
+
+  //         return {
+  //           ...item,
+  //           itemMasterId: item.itemBatch.itemMasterId,
+  //           itemBatchId: item.itemBatch.batchId,
+  //           name: item.itemBatch.itemMaster.itemName,
+  //           unit: item.itemBatch.itemMaster.unit.unitName,
+  //           batchRef: item.itemBatch.batch.batchRef,
+  //           tempQuantity: item.itemBatch.tempQuantity + item.quantity,
+  //           chargesAndDeductions: sortedLineItemCharges,
+  //           batch: item.itemBatch,
+  //           isInventoryItem: item.isInventoryItem,
+  //         };
+  //       });
+
+  //     const subTotal = deepCopySalesOrder.salesOrderDetails.reduce(
+  //       (total, item) => total + item.totalPrice,
+  //       0
+  //     );
+
+  //     // Initialize common charges and deductions
+  //     const initializedCommonCharges = chargesAndDeductionsApplied
+  //       ?.filter((charge) => !charge.lineItemId)
+  //       .map((charge) => {
+  //         let value;
+  //         if (charge.chargesAndDeduction.percentage !== null) {
+  //           // Calculate percentage value based on subtotal
+  //           value = (Math.abs(charge.appliedValue) / subTotal) * 100;
+  //         } else {
+  //           value = Math.abs(charge.appliedValue);
+  //         }
+  //         return {
+  //           id: charge.chargesAndDeduction.chargesAndDeductionId,
+  //           name: charge.chargesAndDeduction.displayName,
+  //           value: value.toFixed(2),
+  //           sign: charge.chargesAndDeduction.sign,
+  //           isPercentage: charge.chargesAndDeduction.percentage !== null,
+  //           chargesAndDeductionAppliedId: charge.chargesAndDeductionAppliedId,
+  //         };
+  //       });
+
+  //     setFormData((prevFormData) => ({
+  //       ...prevFormData,
+  //       patientName: salesOrder?.customer?.customerName || "",
+  //       patientNo: salesOrder?.customer?.phone || "",
+  //       itemDetails: initializedLineItemCharges,
+  //       salesOrderId: salesOrder.salesOrderId,
+  //       commonChargesAndDeductions: initializedCommonCharges,
+  //     }));
+  //   }
+  // }, [
+  //   salesOrder,
+  //   isChargesAndDeductionsAppliedLoading,
+  //   chargesAndDeductionsApplied,
+  //   isLoadingchargesAndDeductions,
+  //   chargesAndDeductions,
+  // ]);
 
   useEffect(() => {
     if (
@@ -260,23 +423,21 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         deepCopySalesOrder.salesOrderDetails.map((item) => {
           const initializedCharges = chargesAndDeductionsApplied
             ?.filter(
-              (charge) => charge.lineItemId === item.itemBatch.itemMasterId
+              (charge) => charge.lineItemId === item.itemBatch.itemMasterId,
             )
             .map((charge) => {
               let value;
-              if (charge.chargesAndDeduction.percentage) {
-                // Calculate percentage value
-                value =
-                  (Math.abs(charge.appliedValue) /
-                    (item.unitPrice * item.quantity)) *
-                  100;
+              if (charge.chargesAndDeduction.percentage !== null) {
+                // Calculate percentage value - Fixed calculation
+                const baseAmount = item.unitPrice * item.quantity;
+                value = (Math.abs(charge.appliedValue) / baseAmount) * 100;
               } else {
                 value = Math.abs(charge.appliedValue);
               }
               return {
                 id: charge.chargesAndDeduction.chargesAndDeductionId,
                 name: charge.chargesAndDeduction.displayName,
-                value: value.toFixed(2),
+                value: parseFloat(value.toFixed(2)),
                 sign: charge.chargesAndDeduction.sign,
                 isPercentage: charge.chargesAndDeduction.percentage !== null,
                 chargesAndDeductionAppliedId:
@@ -288,12 +449,27 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
           const sortedLineItemCharges = chargesAndDeductions
             .filter((charge) => charge.isApplicableForLineItem)
             .map((charge) => {
-              const displayName = charge.displayName; // Extract display name from charge
+              const displayName = charge.displayName;
               const matchedCharge = initializedCharges.find(
-                (c) => c.name === displayName
+                (c) => c.name === displayName,
               );
-              return matchedCharge || null; // Return null if no matching charge is found
+              return matchedCharge || null;
             });
+
+          // Calculate the correct totalPrice for this item
+          const basePrice =
+            (parseFloat(item.quantity) || 0) *
+            (parseFloat(item.unitPrice) || 0);
+          let totalPrice = basePrice;
+          initializedCharges.forEach((charge) => {
+            const chargeValue = parseFloat(charge.value) || 0;
+            if (charge.isPercentage) {
+              const amount = (basePrice * chargeValue) / 100;
+              totalPrice += charge.sign === "+" ? amount : -amount;
+            } else {
+              totalPrice += charge.sign === "+" ? chargeValue : -chargeValue;
+            }
+          });
 
           return {
             ...item,
@@ -306,40 +482,52 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
             chargesAndDeductions: sortedLineItemCharges,
             batch: item.itemBatch,
             isInventoryItem: item.isInventoryItem,
+            totalPrice: isNaN(totalPrice) ? 0 : totalPrice,
           };
         });
 
-      const subTotal = deepCopySalesOrder.salesOrderDetails.reduce(
-        (total, item) => total + item.totalPrice,
-        0
-      );
+      const subTotal = calculateSubTotal(initializedLineItemCharges);
 
       // Initialize common charges and deductions
       const initializedCommonCharges = chargesAndDeductionsApplied
         ?.filter((charge) => !charge.lineItemId)
         .map((charge) => {
           let value;
-          if (charge.chargesAndDeduction.percentage) {
-            // Calculate percentage value based on subtotal
-            value = (Math.abs(charge.appliedValue) / subTotal) * 100;
+          if (charge.chargesAndDeduction.percentage !== null) {
+            // Calculate percentage value based on subtotal - Fixed calculation
+            value = subTotal
+              ? (Math.abs(charge.appliedValue) / subTotal) * 100
+              : 0;
           } else {
             value = Math.abs(charge.appliedValue);
           }
           return {
             id: charge.chargesAndDeduction.chargesAndDeductionId,
             name: charge.chargesAndDeduction.displayName,
-            value: value.toFixed(2),
+            value: parseFloat(value.toFixed(2)),
             sign: charge.chargesAndDeduction.sign,
             isPercentage: charge.chargesAndDeduction.percentage !== null,
             chargesAndDeductionAppliedId: charge.chargesAndDeductionAppliedId,
+            isDisableFromSubTotal:
+              charge.chargesAndDeduction.isDisableFromSubTotal,
           };
         });
 
+      const totalAmount = calculateTotalAmount(
+        subTotal,
+        initializedCommonCharges,
+        formData.deductionAmount,
+      );
+
       setFormData((prevFormData) => ({
         ...prevFormData,
+        patientName: salesOrder?.customer?.customerName || "",
+        patientNo: salesOrder?.customer?.phone || "",
         itemDetails: initializedLineItemCharges,
         salesOrderId: salesOrder.salesOrderId,
         commonChargesAndDeductions: initializedCommonCharges,
+        subTotal,
+        totalAmount,
       }));
     }
   }, [
@@ -354,7 +542,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     fieldName,
     fieldDisplayName,
     value,
-    additionalRules = {}
+    additionalRules = {},
   ) => {
     let isFieldValid = true;
     let errorMessage = "";
@@ -419,19 +607,19 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     const isInvoiceDateValid = validateField(
       "invoiceDate",
       "Invoice date",
-      formData.invoiceDate
+      formData.invoiceDate,
     );
 
     const isDueDateValid = validateField(
       "dueDate",
       "Due date",
-      formData.dueDate
+      formData.dueDate,
     );
 
     const isReferenceNumberValid = validateField(
       "referenceNumber",
       "Reference Number",
-      formData.referenceNumber
+      formData.referenceNumber,
     );
 
     const isAttachmentsValid = validateAttachments(formData.attachments);
@@ -453,17 +641,17 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         fieldName,
         fieldDisplayName,
         item.quantity,
-        additionalRules
+        additionalRules,
       );
 
-      isItemQuantityValid =
-        isItemQuantityValid && isValidQuantity && isReferenceNumberValid;
+      isItemQuantityValid = isItemQuantityValid && isValidQuantity;
     });
 
     return (
       isInvoiceDateValid &&
       isDueDateValid &&
       isAttachmentsValid &&
+      isReferenceNumberValid &&
       isItemQuantityValid
     );
   };
@@ -513,12 +701,12 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
               };
 
               return await post_charges_and_deductions_applied_api(
-                chargesAndDeductionAppliedData
+                chargesAndDeductionAppliedData,
               );
-            })
+            }),
           );
           return appliedCharges;
-        })
+        }),
       );
 
       const commonChargesAndDeductions = await Promise.all(
@@ -552,9 +740,9 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
           };
 
           return await post_charges_and_deductions_applied_api(
-            chargesAndDeductionAppliedData
+            chargesAndDeductionAppliedData,
           );
-        })
+        }),
       );
 
       // Concatenate chargesAndDeductionsAppliedData and commonChargesAndDeductions
@@ -575,6 +763,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   };
 
   const handleSubmit = async (isSaveAsDraft) => {
+    if (isSubmitting.current) return;
     try {
       const status = isSaveAsDraft ? 0 : 1;
       const isFormValid = validateForm();
@@ -582,6 +771,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
       let allDetailsSuccessful;
 
       if (isFormValid) {
+        isSubmitting.current = true;
         if (isSaveAsDraft) {
           setLoadingDraft(true);
         } else {
@@ -609,6 +799,9 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
           locationId: formData.storeLocation,
           inVoicedPersonName: formData.patientName,
           inVoicedPersonMobileNo: formData.patientNo,
+          appointmentId: formData.appointmentId,
+          tokenNo: formData.tokenNo,
+          discountAmount: formData.deductionAmount,
         };
 
         const response = await post_sales_invoice_api(salesInvoiceData);
@@ -628,9 +821,8 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
             permissionId: 25,
           };
 
-          const detailsApiResponse = await post_sales_invoice_detail_api(
-            detailsData
-          );
+          const detailsApiResponse =
+            await post_sales_invoice_detail_api(detailsData);
 
           return detailsApiResponse;
         });
@@ -638,7 +830,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         const detailsResponses = await Promise.all(itemDetailsData);
 
         allDetailsSuccessful = detailsResponses.every(
-          (detailsResponse) => detailsResponse.status === 201
+          (detailsResponse) => detailsResponse.status === 201,
         );
 
         const postChargesAndDeductionsAppliedResponse =
@@ -646,7 +838,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
 
         const allAppliedSuccessful =
           postChargesAndDeductionsAppliedResponse.every(
-            (detailsResponse) => detailsResponse.status === 201
+            (detailsResponse) => detailsResponse.status === 201,
           );
 
         if (allDetailsSuccessful && allAppliedSuccessful) {
@@ -663,9 +855,21 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
             setLoading(false);
             setLoadingDraft(false);
             onFormSubmit();
+            isSubmitting.current = false;
+
+            // queryClient.invalidateQueries([
+            //   "appointments",
+            //   formData.invoiceDate,
+            // ]);
           }, 3000);
         } else {
           setSubmissionStatus("error");
+          setTimeout(() => {
+            setSubmissionStatus(null);
+            setLoading(false);
+            setLoadingDraft(false);
+            isSubmitting.current = false;
+          }, 3000);
         }
       }
     } catch (error) {
@@ -675,33 +879,53 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         setSubmissionStatus(null);
         setLoading(false);
         setLoadingDraft(false);
+        isSubmitting.current = false;
       }, 3000);
     }
   };
 
   const handleInputChange = (field, value) => {
     setFormData((prevFormData) => {
-      // Check if the field belongs to commonChargesAndDeductions
       if (field.startsWith("commonChargesAndDeductions")) {
         // Get the charge or deduction index
         const chargeIndex = parseInt(field.split("_")[1]);
 
         // Update the value of the corresponding charge or deduction
-        const updatedChargesAndDeductions = [
-          ...prevFormData.commonChargesAndDeductions,
-        ];
+        const updatedChargesAndDeductions =
+          prevFormData.commonChargesAndDeductions.map((charge, index) =>
+            index === chargeIndex
+              ? { ...charge, value: parseFloat(value) || 0 }
+              : charge,
+          );
 
-        updatedChargesAndDeductions[chargeIndex].value = value;
+        const subTotal = calculateSubTotal(prevFormData.itemDetails);
+        const totalAmount = calculateTotalAmount(
+          subTotal,
+          updatedChargesAndDeductions,
+          prevFormData.deductionAmount,
+        );
 
-        // Return updated form data with the updated commonChargesAndDeductions array
         return {
           ...prevFormData,
           commonChargesAndDeductions: updatedChargesAndDeductions,
+          subTotal,
+          totalAmount,
         };
       } else {
+        const newValue =
+          field === "deductionAmount" ? parseFloat(value) || 0 : value;
+        const subTotal = calculateSubTotal(prevFormData.itemDetails);
+        const totalAmount = calculateTotalAmount(
+          subTotal,
+          prevFormData.commonChargesAndDeductions,
+          field === "deductionAmount" ? newValue : prevFormData.deductionAmount,
+        );
+
         return {
           ...prevFormData,
-          [field]: value,
+          [field]: newValue,
+          subTotal,
+          totalAmount,
         };
       }
     });
@@ -709,54 +933,62 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
 
   const handleItemDetailsChange = async (index, field, value) => {
     setFormData((prevFormData) => {
-      const updatedItemDetails = [...prevFormData.itemDetails];
+      const updatedItemDetails = prevFormData.itemDetails.map((item, i) => {
+        if (i !== index) return item;
 
-      if (field.startsWith("chargesAndDeductions")) {
-        // Handle charges and deductions
-        const chargeIndex = parseInt(field.split("_")[1]);
-        updatedItemDetails[index].chargesAndDeductions[chargeIndex].value =
-          value;
-      } else {
-        // Handle other fields
-        updatedItemDetails[index][field] = value;
-      }
-
-      // Ensure positive values for Quantities and Unit Prices
-      updatedItemDetails[index].quantity = Math.max(
-        0,
-        updatedItemDetails[index].quantity
-      );
-      updatedItemDetails[index].unitPrice = !isNaN(
-        parseFloat(updatedItemDetails[index].unitPrice)
-      )
-        ? Math.max(0, parseFloat(updatedItemDetails[index].unitPrice))
-        : 0;
-
-      // Calculate total price based on charges and deductions
-      const grandTotalPrice =
-        updatedItemDetails[index].quantity *
-        updatedItemDetails[index].unitPrice;
-      let totalPrice =
-        updatedItemDetails[index].quantity *
-        updatedItemDetails[index].unitPrice;
-
-      updatedItemDetails[index].chargesAndDeductions.forEach((charge) => {
-        if (charge.isPercentage) {
-          const amount = (grandTotalPrice * charge.value) / 100;
-          totalPrice += charge.sign === "+" ? amount : -amount;
+        let updatedItem = { ...item };
+        if (field.startsWith("chargesAndDeductions")) {
+          const chargeIndex = parseInt(field.split("_")[1]);
+          const updatedCharges = item.chargesAndDeductions.map(
+            (charge, cIdx) =>
+              cIdx === chargeIndex
+                ? { ...charge, value: parseFloat(value) || 0 }
+                : charge,
+          );
+          updatedItem.chargesAndDeductions = updatedCharges;
         } else {
-          totalPrice += charge.sign === "+" ? charge.value : -charge.value;
+          updatedItem[field] =
+            field === "quantity" || field === "unitPrice"
+              ? parseFloat(value) || 0
+              : value;
         }
+
+        // Ensure positive values for Quantities and Unit Prices
+        updatedItem.quantity = Math.max(0, updatedItem.quantity);
+        updatedItem.unitPrice = Math.max(0, updatedItem.unitPrice);
+
+        // Calculate total price based on charges and deductions
+        const basePrice = updatedItem.quantity * updatedItem.unitPrice;
+        let totalPrice = basePrice;
+
+        updatedItem.chargesAndDeductions.forEach((charge) => {
+          if (charge.isPercentage) {
+            const amount = (basePrice * (parseFloat(charge.value) || 0)) / 100;
+            totalPrice += charge.sign === "+" ? amount : -amount;
+          } else {
+            totalPrice +=
+              charge.sign === "+"
+                ? parseFloat(charge.value) || 0
+                : -(parseFloat(charge.value) || 0);
+          }
+        });
+
+        updatedItem.totalPrice = isNaN(totalPrice) ? 0 : totalPrice;
+        return updatedItem;
       });
 
-      totalPrice = isNaN(totalPrice) ? 0 : totalPrice;
-      updatedItemDetails[index].totalPrice = totalPrice;
+      const subTotal = calculateSubTotal(updatedItemDetails);
+      const totalAmount = calculateTotalAmount(
+        subTotal,
+        prevFormData.commonChargesAndDeductions,
+        prevFormData.deductionAmount,
+      );
 
       return {
         ...prevFormData,
         itemDetails: updatedItemDetails,
-        subTotal: calculateSubTotal(),
-        totalAmount: calculateTotalAmount(),
+        subTotal,
+        totalAmount,
       };
     });
   };
@@ -779,20 +1011,25 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
 
   const handleRemoveItem = (index) => {
     setFormData((prevFormData) => {
-      const updatedItemDetails = [...prevFormData.itemDetails];
-      updatedItemDetails.splice(index, 1);
+      const updatedItemDetails = prevFormData.itemDetails.filter(
+        (_, i) => i !== index,
+      );
+      const subTotal = calculateSubTotal(updatedItemDetails);
+      const totalAmount = calculateTotalAmount(
+        subTotal,
+        prevFormData.commonChargesAndDeductions,
+        prevFormData.deductionAmount,
+      );
+
       return {
         ...prevFormData,
         itemDetails: updatedItemDetails,
+        subTotal,
+        totalAmount,
       };
     });
     setValidFields({});
     setValidationErrors({});
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      itemMasterId: 0,
-      itemMaster: "",
-    }));
   };
 
   const handlePrint = () => {
@@ -806,22 +1043,195 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     }));
   };
 
-  const calculateSubTotal = () => {
-    return formData.itemDetails.reduce(
-      (total, item) => total + item.totalPrice,
-      0
+  const handleSelectAppointment = async (appointment) => {
+    setSelectedAppointment(appointment);
+    setAppointmentSearchTerm("");
+
+    // Set patient details and appointment ID
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      appointmentId: appointment.id,
+      tokenNo: appointment.tokenNo,
+      patientName: appointment.customerName,
+      patientNo: appointment.contactNo,
+    }));
+
+    // Process appointment treatments
+    // if (
+    //   appointment.appointmentTreatments &&
+    //   appointment.appointmentTreatments.length > 0
+    // ) {
+    //   try {
+    //     const itemDetailsPromises = appointment.appointmentTreatments.map(
+    //       async (treatment) => {
+    //         const itemCode = treatment.treatmentType.treatmentShortCode;
+
+    //         try {
+    //           // Fetch inventory by item code
+    //           const inventoryResponse =
+    //             await get_sum_location_inventories_by_locationId_itemCode_api(
+    //               itemCode,
+    //               formData.storeLocation || userLocations[0]?.locationId
+    //             );
+
+    //           const inventoryData = inventoryResponse?.data?.result;
+
+    //           if (!inventoryData || !inventoryData.itemMaster) {
+    //             console.warn(
+    //               `No inventory found for treatment: ${treatment.treatmentType.name}`
+    //             );
+    //             return null;
+    //           }
+
+    //           const itemMaster = inventoryData.itemMaster;
+    //           const isInventoryItem = itemMaster.isInventoryItem;
+
+    //           // Initialize charges and deductions
+    //           const initializedCharges =
+    //             chargesAndDeductions
+    //               ?.filter((charge) => charge.isApplicableForLineItem)
+    //               ?.map((charge) => ({
+    //                 id: charge.chargesAndDeductionId,
+    //                 name: charge.displayName,
+    //                 value: charge.amount || charge.percentage,
+    //                 sign: charge.sign,
+    //                 isPercentage: charge.percentage !== null,
+    //               })) || [];
+
+    //           // Handle inventory items
+    //           if (isInventoryItem) {
+    //             const availableStock = inventoryData.totalStockInHand || 0;
+
+    //             if (availableStock <= 0) {
+    //               console.warn(
+    //                 `No stock available for treatment: ${treatment.treatmentType.name}`
+    //               );
+    //               alert(
+    //                 `No stock available for treatment: ${treatment.treatmentType.name}`
+    //               );
+    //               return null;
+    //             }
+
+    //             // Get highest selling price from available batches
+    //             let highestSellingPrice = 0;
+    //             const batchesResponse =
+    //               await get_item_batches_by_item_master_id_api(
+    //                 itemMaster.itemMasterId,
+    //                 sessionStorage.getItem("companyId")
+    //               );
+    //             highestSellingPrice =
+    //               batchesResponse?.data?.result?.reduce(
+    //                 (maxPrice, batch) =>
+    //                   batch.sellingPrice > maxPrice
+    //                     ? batch.sellingPrice
+    //                     : maxPrice,
+    //                 0
+    //               ) || 0;
+
+    //             return {
+    //               name: treatment.treatmentType.name,
+    //               id: itemMaster.itemMasterId,
+    //               unit: itemMaster.unit?.unitName || "Unit",
+    //               batchId: null,
+    //               stockInHand: availableStock,
+    //               quantity: 1, // Default quantity to 1
+    //               unitPrice: highestSellingPrice,
+    //               totalPrice: highestSellingPrice,
+    //               isInventoryItem: true,
+    //               chargesAndDeductions: initializedCharges,
+    //             };
+    //           }
+    //           // Handle non-inventory items (services)
+    //           else {
+    //             return {
+    //               name: treatment.treatmentType.name,
+    //               id: itemMaster.itemMasterId,
+    //               unit: itemMaster.unit?.unitName || "Service",
+    //               batchId: null,
+    //               stockInHand: 0,
+    //               quantity: 1, // Services don't have quantity restrictions
+    //               unitPrice:
+    //                 itemMaster.unitPrice || itemMaster.sellingPrice || 0,
+    //               totalPrice:
+    //                 itemMaster.unitPrice || itemMaster.sellingPrice || 0,
+    //               isInventoryItem: false,
+    //               chargesAndDeductions: initializedCharges,
+    //             };
+    //           }
+    //         } catch (error) {
+    //           console.error(
+    //             `Error processing treatment ${treatment.treatmentType.name}:`,
+    //             error
+    //           );
+    //           return null;
+    //         }
+    //       }
+    //     );
+
+    //     // Wait for all items to be processed
+    //     const itemDetails = await Promise.all(itemDetailsPromises);
+
+    //     // Filter out null values (items that couldn't be processed)
+    //     const validItemDetails = itemDetails.filter((item) => item !== null);
+
+    //     if (validItemDetails.length === 0) {
+    //       alert("No valid items could be added from this appointment.");
+    //       return;
+    //     }
+
+    //     // Update form data with the new item details
+    //     setFormData((prevFormData) => ({
+    //       ...prevFormData,
+    //       itemDetails: [...prevFormData.itemDetails, ...validItemDetails],
+    //     }));
+    //   } catch (error) {
+    //     console.error("Error processing appointment treatments:", error);
+    //     alert("Error processing appointment treatments. Please try again.");
+    //   }
+    // }
+  };
+
+  const handleResetAppointment = () => {
+    setSelectedAppointment(null);
+    setAppointmentSearchTerm("");
+
+    // Clear appointment-related data and item details
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      appointmentId: null,
+      tokenNo: null,
+      patientName: "",
+      patientNo: "",
+      itemDetails: [], // Clear all item details when resetting appointment
+    }));
+  };
+
+  const handleRefreshAppointments = async () => {
+    setIsRefreshing(true);
+    await refetchAppointments();
+    // Keep spinning for a bit even after data is fetched for better UX
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 600);
+  };
+
+  const calculateSubTotal = (itemDetails = formData.itemDetails) => {
+    return itemDetails.reduce(
+      (total, item) => total + (parseFloat(item.totalPrice) || 0),
+      0,
     );
   };
 
-  const calculateTotalAmount = () => {
-    // Calculate total price based on item details
-    const subtotal = calculateSubTotal();
-
-    // Calculate total amount based on subtotal and common charges and deductions
+  const calculateTotalAmount = (
+    subtotal = calculateSubTotal(),
+    commonChargesAndDeductions = formData.commonChargesAndDeductions,
+    deductionAmount = formData.deductionAmount,
+  ) => {
     let totalAmount = subtotal;
-    formData.commonChargesAndDeductions.forEach((charge) => {
+    commonChargesAndDeductions.forEach((charge) => {
+      const chargeValue = parseFloat(charge.value) || 0;
       if (charge.isPercentage) {
-        const amount = (subtotal * charge.value) / 100;
+        const amount = (subtotal * chargeValue) / 100;
         if (charge.sign === "+") {
           totalAmount += amount;
         } else if (charge.sign === "-") {
@@ -829,12 +1239,15 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         }
       } else {
         if (charge.sign === "+") {
-          totalAmount += charge.value;
+          totalAmount += chargeValue;
         } else if (charge.sign === "-") {
-          totalAmount -= charge.value;
+          totalAmount -= chargeValue;
         }
       }
     });
+
+    // Subtract deduction amount from total
+    totalAmount -= parseFloat(deductionAmount) || 0;
 
     return totalAmount;
   };
@@ -854,58 +1267,69 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
         })) || [];
 
     let availableStock = 0;
-    let highestSellingPrice = 0;
 
     try {
       if (item.isInventoryItem === true) {
         const inventory =
           await get_sum_location_inventories_by_locationId_itemMasterId_api(
             item.itemMasterId,
-            userLocations[0]?.locationId
+            userLocations[0]?.locationId,
           );
         availableStock = inventory?.data?.result?.totalStockInHand || 0;
 
         if (availableStock <= 0) {
           console.warn("No stock available for this item");
-          alert("No stock available for this item");
+          toast.error(`No stock available for ${item.itemName}`);
           return;
         }
-
-        // Get highest selling price from available batches
-        const batchesResponse = await get_item_batches_by_item_master_id_api(
-          item.itemMasterId,
-          sessionStorage.getItem("companyId")
-        );
-        highestSellingPrice =
-          batchesResponse?.data?.result?.reduce(
-            (maxPrice, batch) =>
-              batch.sellingPrice > maxPrice ? batch.sellingPrice : maxPrice,
-            0
-          ) || 0;
       }
 
+      // Calculate initial totalPrice for the new item
+      const initialQuantity = item.isInventoryItem === false ? 1 : 0;
+      const initialUnitPrice = parseFloat(item.unitPrice) || 0;
+      const basePrice = initialQuantity * initialUnitPrice;
+      let initialTotalPrice = basePrice;
+
+      initializedCharges.forEach((charge) => {
+        const chargeValue = parseFloat(charge.value) || 0;
+        if (charge.isPercentage) {
+          const amount = (basePrice * chargeValue) / 100;
+          initialTotalPrice += charge.sign === "+" ? amount : -amount;
+        } else {
+          initialTotalPrice += charge.sign === "+" ? chargeValue : -chargeValue;
+        }
+      });
+
+      const newItem = {
+        name: item?.itemName,
+        id: item?.itemMasterId,
+        unit: item?.unit?.unitName,
+        batchId: null,
+        stockInHand: availableStock,
+        quantity: initialQuantity,
+        unitPrice: initialUnitPrice,
+        totalPrice: isNaN(initialTotalPrice) ? 0 : initialTotalPrice,
+        isInventoryItem: item?.isInventoryItem,
+        chargesAndDeductions: initializedCharges,
+      };
+
       // Update form data
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        itemDetails: [
-          ...prevFormData.itemDetails,
-          {
-            name: item?.itemName,
-            id: item?.itemMasterId,
-            unit: item?.unit?.unitName,
-            batchId: null,
-            stockInHand: availableStock,
-            quantity: 0,
-            unitPrice:
-              item.isInventoryItem === true
-                ? highestSellingPrice
-                : item.unitPrice,
-            totalPrice: item.isInventoryItem === false ? item.unitPrice : 0.0,
-            isInventoryItem: item?.isInventoryItem,
-            chargesAndDeductions: initializedCharges,
-          },
-        ],
-      }));
+      setFormData((prevFormData) => {
+        const updatedItemDetails = [...prevFormData.itemDetails, newItem];
+        const subTotal = calculateSubTotal(updatedItemDetails);
+        const totalAmount = calculateTotalAmount(
+          subTotal,
+          prevFormData.commonChargesAndDeductions,
+          prevFormData.deductionAmount,
+        );
+
+        return {
+          ...prevFormData,
+          itemDetails: updatedItemDetails,
+          subTotal,
+          totalAmount,
+        };
+      });
     } catch (error) {
       console.error("Error processing item:", error);
       alert("Error processing item. Please try again.");
@@ -934,22 +1358,48 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     });
   };
 
+  // const handleAddCommonChargesAndDeductions = () => {
+  //   const initializedCharges = chargesAndDeductions.reduce((acc, charge) => {
+  //     if (charge.isDisableFromSubTotal === false) {
+  //       // Initialize additional properties for the common on charges and deductions
+  //       acc[charge.displayName] = charge.amount || charge.percentage;
+  //     }
+  //     return acc;
+  //   }, {});
+
+  //   // Generate chargesAndDeductions array for the newly added item
+  //   const initializedChargesArray = chargesAndDeductions
+  //     .filter((charge) => charge.isDisableFromSubTotal === false)
+  //     .map((charge) => ({
+  //       id: charge.chargesAndDeductionId,
+  //       name: charge.displayName,
+  //       value: charge.amount || charge.percentage,
+  //       sign: charge.sign,
+  //       isPercentage: charge.percentage !== null,
+  //       isDisableFromSubTotal: charge.isDisableFromSubTotal,
+  //     }));
+
+  //   setFormData((prevFormData) => ({
+  //     ...prevFormData,
+  //     ...initializedCharges,
+  //     commonChargesAndDeductions: initializedChargesArray,
+  //   }));
+  // };
+
   const handleAddCommonChargesAndDeductions = () => {
     const initializedCharges = chargesAndDeductions.reduce((acc, charge) => {
       if (charge.isDisableFromSubTotal === false) {
-        // Initialize additional properties for the common on charges and deductions
         acc[charge.displayName] = charge.amount || charge.percentage;
       }
       return acc;
     }, {});
 
-    // Generate chargesAndDeductions array for the newly added item
     const initializedChargesArray = chargesAndDeductions
       .filter((charge) => charge.isDisableFromSubTotal === false)
       .map((charge) => ({
         id: charge.chargesAndDeductionId,
         name: charge.displayName,
-        value: charge.amount || charge.percentage,
+        value: parseFloat(charge.amount || charge.percentage), // Ensure it's a number
         sign: charge.sign,
         isPercentage: charge.percentage !== null,
         isDisableFromSubTotal: charge.isDisableFromSubTotal,
@@ -958,13 +1408,24 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
       ...initializedCharges,
-      commonChargesAndDeductions: initializedChargesArray,
+      // Only set commonChargesAndDeductions if there's no sales order
+      // or if it hasn't been set yet
+      commonChargesAndDeductions: prevFormData.salesOrderId
+        ? prevFormData.commonChargesAndDeductions
+        : initializedChargesArray,
     }));
   };
 
+  // useEffect(() => {
+  //   chargesAndDeductions && handleAddCommonChargesAndDeductions();
+  // }, [isLoadingchargesAndDeductions]);
+
   useEffect(() => {
-    chargesAndDeductions && handleAddCommonChargesAndDeductions();
-  }, [isLoadingchargesAndDeductions]);
+    // Only initialize common charges if there's no sales order
+    if (chargesAndDeductions && !formData.salesOrderId) {
+      handleAddCommonChargesAndDeductions();
+    }
+  }, [isLoadingchargesAndDeductions, formData.salesOrderId]);
 
   const renderSubColumns = () => {
     return formData.commonChargesAndDeductions.map((charge, chargeIndex) => {
@@ -1006,7 +1467,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
 
                   handleInputChange(
                     `commonChargesAndDeductions_${chargeIndex}_value`,
-                    newValue
+                    newValue,
                   );
                 }}
               />
@@ -1020,6 +1481,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
   };
 
   console.log("formData", formData);
+  console.log("SO", salesOrder);
 
   return {
     formData,
@@ -1048,6 +1510,18 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     company,
     userLocations,
     locationInventories,
+    appointments,
+    appointmentsError,
+    isAppointmentsLoading,
+    useAppointment,
+    appointmentSearchTerm,
+    selectedAppointment,
+    isRefreshing,
+    handleRefreshAppointments,
+    setUseAppointment,
+    setAppointmentSearchTerm,
+    handleSelectAppointment,
+    handleResetAppointment,
     handleInputChange,
     handleItemDetailsChange,
     handleAttachmentChange,
@@ -1062,6 +1536,7 @@ const useSalesInvoice = ({ onFormSubmit, salesOrder }) => {
     calculateSubTotal,
     renderColumns,
     renderSubColumns,
+    refetchAppointments,
   };
 };
 

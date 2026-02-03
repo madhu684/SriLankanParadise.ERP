@@ -13,9 +13,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             _roleRepository = roleRepository;
         }
 
-        public async Task<Dictionary<int, List<Role>>> GetRolesByModuleIds(int[] moduleIds)
+        public async Task<Dictionary<int, List<Role>>> GetRolesByModuleIds(int companyId, int[] moduleIds)
         {
-            return await _roleRepository.GetRolesByModuleIds(moduleIds);
+            return await _roleRepository.GetRolesByModuleIds(companyId, moduleIds);
         }
 
         public async Task AddRole(Role role)

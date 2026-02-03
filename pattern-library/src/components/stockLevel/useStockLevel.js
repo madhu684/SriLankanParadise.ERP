@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import {
-  get_company_locations_api,
   get_sum_of_item_inventory_by_location_id_api,
   put_location_inventory_by_id_api,
   update_reorderlevel_maxorder_level_api,
@@ -49,23 +48,6 @@ const useStockLevel = () => {
   );
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
-  const { data: companyLocations, isLoading: companyLocationsLoading } =
-    useQuery({
-      queryKey: ["companyLocations"],
-      queryFn: async () => {
-        try {
-          const response = await get_company_locations_api(
-            sessionStorage.getItem("companyId")
-          );
-          console.log("Company locations fetched:", response.data.result);
-          return response.data.result;
-        } catch (error) {
-          console.error("Error fetching company locations:", error);
-          return [];
-        }
-      },
-    });
 
   const handleLocationChange = (e) => {
     console.log("Selected location: ", e.target.value);
@@ -268,8 +250,6 @@ const useStockLevel = () => {
   };
 
   return {
-    companyLocations,
-    companyLocationsLoading,
     selectedLocation,
     inventories,
     currentItems,

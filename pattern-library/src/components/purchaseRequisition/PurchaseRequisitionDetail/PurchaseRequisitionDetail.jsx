@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useRef } from "react";
 import { Modal, Button } from "react-bootstrap";
+import { useReactToPrint } from "react-to-print";
 import usePurchaseRequisitionDetial from "./usePurchaseRequisitionDetail";
 import usePurchaseRequisitionList from "../PurchaseRequisitionList/usePurchaseRequisitionList";
+import PrintablePurchaseRequisition from "./PrintablePurchaseRequisition";
 import moment from "moment";
 import "moment-timezone";
 
@@ -11,7 +13,33 @@ const PurchaseRequisitionDetail = ({
   purchaseRequisition,
 }) => {
   const { getStatusLabel, getStatusBadgeClass } = usePurchaseRequisitionList();
+  const printRef = useRef(null);
+
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: `PurchaseRequisition_${purchaseRequisition?.purchaseRequisitionId || "N/A"}`,
+    pageStyle: `
+      @page {
+        size: A4;
+        margin: 15mm;
+      }
+      @media print {
+        body {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+      }
+    `,
+  });
+
   return (
+    <>
+      <div style={{ display: "none" }}>
+        <PrintablePurchaseRequisition
+          ref={printRef}
+          purchaseRequisition={purchaseRequisition}
+        />
+      </div>
     <Modal show={show} onHide={handleClose} centered scrollable size="lg">
       <Modal.Header closeButton>
         <Modal.Title>Purchase Requisition</Modal.Title>
@@ -146,11 +174,15 @@ const PurchaseRequisitionDetail = ({
         </table>
       </Modal.Body>
       <Modal.Footer>
+        <Button variant="primary" onClick={handlePrint}>
+          Print
+        </Button>
         <Button variant="secondary" onClick={handleClose}>
           Close
         </Button>
       </Modal.Footer>
     </Modal>
+  </>
   );
 };
 

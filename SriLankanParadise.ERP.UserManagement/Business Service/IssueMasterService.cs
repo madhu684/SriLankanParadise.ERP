@@ -1,5 +1,6 @@
 ﻿using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Repository;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
@@ -23,9 +24,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             return await _issueMasterRepository.GetAll();
         }
 
-        public async Task<IEnumerable<IssueMaster>> GetIssueMastersWithoutDraftsByCompanyId(int companyId)
+        public async Task<IEnumerable<IssueMaster>> GetIssueMastersWithoutDraftsByCompanyId(int companyId, DateTime? date = null, int? issuedLocationId = null, string? issueType = null)
         {
-            return await _issueMasterRepository.GetIssueMastersWithoutDraftsByCompanyId(companyId);
+            return await _issueMasterRepository.GetIssueMastersWithoutDraftsByCompanyId(companyId, date, issuedLocationId, issueType);
         }
 
         public async Task ApproveIssueMaster(int issueMasterId, IssueMaster issueMaster)
@@ -51,6 +52,11 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         public async Task<IEnumerable<IssueMaster>> GetIssueMastersById(int id)
         {
             return await _issueMasterRepository.GetIssueMastersById(id);
+        }
+
+        public async Task<PagedResult<IssueMaster>> GetPaginatedIssueMastersByCompanyIdLocationDateRange(int companyId, string? issueType = null, int? locationId = null, DateTime? startDate = null, DateTime? endDate = null, int pageNumber = 1, int pageSize = 10)
+        {
+            return await _issueMasterRepository.GetPaginatedIssueMastersByCompanyIdLocationDateRange(companyId, issueType, locationId, startDate, endDate, pageNumber, pageSize);
         }
     }
 }

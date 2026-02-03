@@ -400,19 +400,19 @@ function template() {
                               >
                                 <option value="">Select Department</option>
                                 {this.state.locations
-                                  .filter(
+                                  ?.filter(
                                     (location) =>
-                                      location.locationType.name ===
+                                      location.locationType?.name ===
                                       "Department"
                                   )
-                                  .map((location) => (
+                                  ?.map((location) => (
                                     <option
                                       key={location.locationId}
                                       value={location.locationId}
                                     >
                                       {location.locationName}
                                     </option>
-                                  ))}
+                                  )) ?? []}
                               </Form.Select>
                               {this.state.validationErrors.basic
                                 ?.department && (
@@ -452,22 +452,23 @@ function template() {
                               >
                                 <option value="">Select Warehouses</option>
                                 {this.state.locations
-                                  .filter(
+                                  ?.filter(
                                     (location) =>
                                       location.parentId ===
                                         parseInt(
                                           this.state.formData.basic.department
                                         ) &&
-                                      location.locationType.name === "Warehouse"
+                                      location.locationType?.name ===
+                                        "Warehouse"
                                   )
-                                  .map((location) => (
+                                  ?.map((location) => (
                                     <option
                                       key={location.locationId}
                                       value={location.locationId}
                                     >
                                       {location.locationName}
                                     </option>
-                                  ))}
+                                  )) ?? []}
                               </Form.Select>
                               {this.state.validationErrors.basic?.warehouse && (
                                 <div className="invalid-feedback">

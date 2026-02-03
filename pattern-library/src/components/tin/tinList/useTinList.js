@@ -1,13 +1,18 @@
-import { useState, useEffect } from "react";
-import { get_issue_masters_with_out_drafts_api } from "../../../services/purchaseApi";
-import { get_issue_masters_by_user_id_api } from "../../../services/purchaseApi";
-import { get_user_permissions_api } from "../../../services/userManagementApi";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useMemo } from "react";
+import {
+  // delete_issue_master_api,
+  get_issue_masters_with_out_drafts_api,
+  get_requisition_masters_with_out_drafts_api,
+} from "../../../services/purchaseApi";
+import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useContext } from "react";
+import { UserContext } from "../../../context/userContext";
 
 const useTinList = () => {
-  const [Tins, setTins] = useState([]);
-  const [isLoadingData, setIsLoadingData] = useState(true);
-  const [error, setError] = useState(null);
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedRowData, setSelectedRowData] = useState([]);
   const [showApproveTinModal, setShowApproveTinModal] = useState(false);
@@ -18,94 +23,89 @@ const useTinList = () => {
     useState(false);
   const [showCreateTinForm, setShowCreateTinForm] = useState(false);
   const [showUpdateTinForm, setShowUpdateTinForm] = useState(false);
+  const [showTINDeleteModal, setShowTINDeleteModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [submissionStatus, setSubmissionStatus] = useState(null);
+  const [submissionMessage, setSubmissionMessage] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toLocaleDateString("en-CA"),
+  ); // YYYY-MM-DD format
   const [TinDetail, setTinDetail] = useState("");
 
-  const fetchUserPermissions = async () => {
-    try {
-      const response = await get_user_permissions_api(
-        sessionStorage.getItem("userId")
-      );
-      return response.data.result;
-    } catch (error) {
-      console.error("Error fetching user permissions:", error);
-    }
-  };
+  const queryClient = useQueryClient();
+
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
+
+  const { userLocations } = useContext(UserContext);
+
+  const warehouseUserLocation = userLocations
+    ? userLocations
+        .filter((loc) => loc.location.locationTypeId === 2)
+        .map((l) => l.locationId)
+    : null;
+
+  // Check for locations to be ready
+  const isInitializing = !userLocations || !warehouseUserLocation || warehouseUserLocation.length === 0;
 
   const {
-    data: userPermissions,
-    isLoading: isLoadingPermissions,
-    isError: isPermissionsError,
-    error: permissionError,
+    data: transferRequisitions = [],
+    isLoading: isLoadingTrn,
+    error: trnError,
   } = useQuery({
-    queryKey: ["userPermissions"],
-    queryFn: fetchUserPermissions,
+    queryKey: [
+      "transferRequisitions",
+      companyId,
+      warehouseUserLocation ? warehouseUserLocation[0] : null,
+    ],
+    queryFn: async () => {
+      if (!warehouseUserLocation || warehouseUserLocation.length === 0) {
+        return [];
+      }
+      const response = await get_requisition_masters_with_out_drafts_api(
+        companyId,
+        2,
+        warehouseUserLocation[0],
+        null,
+        "TRN",
+      );
+      return response?.data?.result || [];
+    },
+    enabled:
+      !!companyId &&
+      !!warehouseUserLocation &&
+      warehouseUserLocation.length > 0,
+    placeholderData: keepPreviousData,
   });
 
-  const fetchData = async () => {
-    try {
-      if (!isLoadingPermissions && userPermissions) {
-        if (hasPermission("Approve Transfer Issue Note")) {
-          const tinWithoutDraftsResponse =
-            await get_issue_masters_with_out_drafts_api(
-              sessionStorage.getItem("companyId")
-            );
-
-          const tinByUserIdResponse = await get_issue_masters_by_user_id_api(
-            sessionStorage.getItem("userId")
-          );
-
-          let newTins = [];
-          if (
-            tinWithoutDraftsResponse &&
-            tinWithoutDraftsResponse.data.result
-          ) {
-            newTins = tinWithoutDraftsResponse.data.result?.filter(
-              (im) => im.issueType === "TIN"
-            );
-          }
-
-          let additionalTins = [];
-          if (tinByUserIdResponse && tinByUserIdResponse.data.result) {
-            additionalTins = tinByUserIdResponse.data.result?.filter(
-              (im) => im.issueType === "TIN"
-            );
-          }
-
-          const uniqueNewTins = additionalTins.filter(
-            (tin) =>
-              !newTins.some(
-                (existingTin) => existingTin.issueMasterId === tin.issueMasterId
-              )
-          );
-
-          newTins = [...newTins, ...uniqueNewTins];
-          setTins(newTins);
-        } else {
-          const tinResponse = await get_issue_masters_by_user_id_api(
-            sessionStorage.getItem("userId")
-          );
-          if (
-            tinResponse.data.result?.filter((im) => im.issueType === "TIN") ===
-            (null || undefined)
-          ) {
-            setTins([]);
-          } else {
-            setTins(
-              tinResponse.data.result?.filter((im) => im.issueType === "TIN")
-            );
-          }
-        }
+  const {
+    data: Tins = [],
+    isLoading: isLoadingData,
+    error,
+  } = useQuery({
+    queryKey: [
+      "tinList",
+      companyId,
+      warehouseUserLocation ? warehouseUserLocation[0] : null,
+      selectedDate,
+    ],
+    queryFn: async () => {
+      if (!warehouseUserLocation || warehouseUserLocation.length === 0) {
+        return [];
       }
-    } catch (error) {
-      setError("Error fetching data");
-    } finally {
-      setIsLoadingData(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [isLoadingPermissions, userPermissions]);
+      const TinResponse = await get_issue_masters_with_out_drafts_api(
+        companyId,
+        selectedDate,
+        warehouseUserLocation[0],
+        "TIN",
+      );
+      return TinResponse?.data?.result || [];
+    },
+    enabled:
+      !!companyId &&
+      !!warehouseUserLocation &&
+      warehouseUserLocation.length > 0,
+    placeholderData: keepPreviousData,
+  });
 
   const handleShowApproveTinModal = () => {
     setShowApproveTinModal(true);
@@ -125,7 +125,6 @@ const useTinList = () => {
   };
 
   const handleApproved = async () => {
-    fetchData();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -156,8 +155,13 @@ const useTinList = () => {
     handleShowDetailTinModal();
   };
 
+  const handleCloseDeleteConfirmation = () => {
+    setShowTINDeleteModal(false);
+    setSubmissionMessage(null);
+    setSubmissionStatus(null);
+  };
+
   const handleUpdated = async () => {
-    fetchData();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -177,10 +181,10 @@ const useTinList = () => {
 
     if (isSelected) {
       setSelectedRows((prevSelected) =>
-        prevSelected.filter((selectedId) => selectedId !== id)
+        prevSelected.filter((selectedId) => selectedId !== id),
       );
       setSelectedRowData((prevSelectedData) =>
-        prevSelectedData.filter((data) => data.issueMasterId !== id)
+        prevSelectedData.filter((data) => data.issueMasterId !== id),
       );
     } else {
       setSelectedRows((prevSelected) => [...prevSelected, id]);
@@ -189,6 +193,39 @@ const useTinList = () => {
         selectedRow,
       ]);
     }
+  };
+
+  const handleConfirmDeleteTIN = async () => {
+    // try {
+    //   setIsLoading(true);
+    //   const response = await delete_issue_master_api(
+    //     selectedRowData[0]?.issueMasterId
+    //   );
+    //   if (response.status === 204) {
+    //     queryClient.invalidateQueries(["tinList", companyId]);
+    //     setTimeout(() => {
+    //       setSubmissionStatus("successSubmitted");
+    //       setSubmissionMessage("TIN deleted successfully!");
+    //       handleCloseDeleteConfirmation();
+    //     }, 3000);
+    //     setSelectedRows([]);
+    //     setSelectedRowData([]);
+    //   } else {
+    //     setTimeout(() => {
+    //       setSubmissionStatus("error");
+    //       setSubmissionMessage("Error deleting TIN. Please try again.");
+    //       handleCloseDeleteConfirmation();
+    //     }, 3000);
+    //   }
+    // } catch (error) {
+    //   setTimeout(() => {
+    //     setSubmissionStatus("error");
+    //     setSubmissionMessage("Error deleting TIN. Please try again.");
+    //     handleCloseDeleteConfirmation();
+    //   }, 3000);
+    // } finally {
+    //   setIsLoading(false);
+    // }
   };
 
   const isAnyRowSelected = selectedRows.length === 1;
@@ -242,18 +279,9 @@ const useTinList = () => {
     });
   };
 
-  const hasPermission = (permissionName) => {
-    return userPermissions?.some(
-      (permission) =>
-        permission.permission.permissionName === permissionName &&
-        permission.permission.permissionStatus
-    );
-  };
-
   return {
     Tins,
     isLoadingData,
-    isLoadingPermissions,
     error,
     isAnyRowSelected,
     selectedRows,
@@ -264,11 +292,15 @@ const useTinList = () => {
     selectedRowData,
     showCreateTinForm,
     showUpdateTinForm,
-    userPermissions,
     TinDetail,
-    isLoadingPermissions,
-    isPermissionsError,
-    permissionError,
+    submissionMessage,
+    submissionStatus,
+    isLoading,
+    showTINDeleteModal,
+    transferRequisitions,
+    isLoadingTrn,
+    isInitializing,
+    setShowTINDeleteModal,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleViewDetails,
@@ -282,9 +314,12 @@ const useTinList = () => {
     handleApproved,
     setShowCreateTinForm,
     setShowUpdateTinForm,
-    hasPermission,
     handleUpdated,
     handleClose,
+    handleConfirmDeleteTIN,
+    handleCloseDeleteConfirmation,
+    selectedDate,
+    setSelectedDate,
   };
 };
 

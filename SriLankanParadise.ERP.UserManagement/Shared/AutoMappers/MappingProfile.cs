@@ -2,6 +2,7 @@
 using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models;
 
 namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
 {
@@ -90,7 +91,8 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<RequisitionMasterRequestModel, RequisitionMaster>();
             CreateMap<ApproveRequisitionMasterRequestModel, RequisitionMaster>();
             CreateMap<PatchIsMINApprovedMRNRequestModel, RequisitionMaster>();
-            CreateMap<RequisitionMaster, RequisitionMasterDto>();
+            CreateMap<RequisitionMaster, RequisitionMasterDto>()
+                .ForMember(dest => dest.IsIssueMasterCreated, opt => opt.MapFrom(src => src.IssueMasters.Any()));
             CreateMap<RequisitionDetailRequestModel, RequisitionDetail>();
             CreateMap<RequisitionDetail, RequisitionDetailDto>();
             CreateMap<SupplierRequestModel, Supplier>();
@@ -167,6 +169,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.AutoMappers
             CreateMap<EmptyReturnMaster, EmptyReturnMasterDto>();
             CreateMap<SupplierItemRequestModel, SupplierItem>();
             CreateMap<SupplierItem, SupplierItemDto>();
+            CreateMap<SalesCustomerRequestModel, SalesCustomer>();
+            CreateMap<SalesCustomer, SalesCustomerDto>();
+            CreateMap<CustomerUpdateRequestModel, Customer>();
+            CreateMap<ItemMode, ItemModeDto>();
+            CreateMap<SalesInvoice, CustomerInvoiceDto>()
+                .ForMember(dest => dest.CustomerId, opt => opt.MapFrom(src => src.SalesOrder != null ? src.SalesOrder.CustomerId : null))
+                .ForMember(dest => dest.CustomerName, opt => opt.MapFrom(src => src.SalesOrder != null && src.SalesOrder.Customer != null ? src.SalesOrder.Customer.CustomerName : null))
+                .ForMember(dest => dest.CustomerPhone, opt => opt.MapFrom(src => src.SalesOrder != null && src.SalesOrder.Customer != null ? src.SalesOrder.Customer.Phone : null));
+            
             // Add more mapping configurations if needed
 
         }

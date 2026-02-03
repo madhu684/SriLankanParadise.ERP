@@ -131,6 +131,7 @@ const UpdateCompanyForm = ({
               id="maxUserCount"
               placeholder="Max User Count"
               value={formData?.maxUserCount ?? 0}
+              onWheel={(e) => e.target.blur()}
               onChange={(e) =>
                 handleChange(
                   "maxUserCount",

@@ -2,23 +2,26 @@ import { useState, useEffect, useRef } from "react";
 import {
   get_requisition_masters_with_out_drafts_api,
   get_user_locations_by_user_id_api,
+  update_min_state_in_mrn_api,
+  get_Location_Inventory_Summary_By_Item_Name_api,
+  post_reduce_inventory_fifo_api,
 } from "../../services/purchaseApi";
 import {
   post_issue_master_api,
   post_issue_detail_api,
-  get_issue_masters_by_requisition_master_id_api,
   get_item_batches_api,
   get_locations_inventories_by_location_id_api,
-  post_location_inventory_goods_in_transit_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
 import { useQuery } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const useMin = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
     itemDetails: [],
-    status: "",
+    status: "4",
     mrnId: "",
+    tokenNo: null,
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const [validFields, setValidFields] = useState({});
@@ -52,7 +55,7 @@ const useMin = ({ onFormSubmit }) => {
     const response = await get_item_masters_by_company_id_with_query_api(
       companyId,
       searchQuery,
-      false
+      false,
     );
     if (!response.data.result) throw new Error("No items found");
     return response.data.result;
@@ -71,10 +74,10 @@ const useMin = ({ onFormSubmit }) => {
   const fetchUserLocations = async () => {
     try {
       const response = await get_user_locations_by_user_id_api(
-        sessionStorage.getItem("userId")
+        sessionStorage.getItem("userId"),
       );
       return response?.data?.result?.filter(
-        (loc) => loc.location.locationTypeId === 2
+        (loc) => loc.location.locationTypeId === 2,
       );
     } catch (error) {
       console.error("Error fetching user locations:", error);
@@ -88,63 +91,21 @@ const useMin = ({ onFormSubmit }) => {
     enabled: !!sessionStorage.getItem("userId") && searchByWithoutMrn,
   });
 
-  // Handle adding an item to itemDetails
-  const handleAddDummyItem = (item) => {
-    const exists = formData.itemDetails.find(
-      (d) => d.id === (item.itemMasterId || item.id)
-    );
-    if (exists) {
-      console.log("Item already exists in the list");
-      return;
-    }
-
-    // For items added via search (without MRN), we need to get available batches from locationInventories
-    const itemBatches = locationInventories?.filter(
-      (batch) => batch.itemMasterId === (item.itemMasterId || item.id)
-    );
-
-    if (!itemBatches || itemBatches.length === 0) {
-      console.log("No batches available for this item in selected location");
-      setNoItembatchesError(true);
-      setSearchTerm("");
-      setDummySearchTerm("");
-      setTimeout(() => setNoItembatchesError(false), 3500);
-      return;
-    }
-
-    const defaultBatch = itemBatches?.[0] || { batchId: "", stockInHand: 0 };
-
-    const newItem = {
-      id: item.itemMasterId || item.id,
-      name: item.itemMaster?.itemName || item.itemName,
-      unit: item.itemMaster?.unit?.unitName || item.unit?.unitName || "Unit",
-      //quantity: defaultBatch.stockInHand || 0,
-      quantity: 0,
-      remainingQuantity: 0,
-      issuedQuantity: "",
-      //batchId: defaultBatch.batchId || "",
-      batchId: "",
-    };
-
-    setFormData((prev) => ({
-      ...prev,
-      itemDetails: [...prev.itemDetails, newItem],
-    }));
-
-    setSearchTerm("");
-    setDummySearchTerm("");
-  };
-
   // Fetch MRNs
   const fetchMrns = async () => {
     try {
       const response = await get_requisition_masters_with_out_drafts_api(
-        sessionStorage?.getItem("companyId")
+        sessionStorage?.getItem("companyId"),
+        2,
+        null,
+        null,
+        "MRN",
       );
-      const filteredMrns = response.data.result?.filter(
-        (rm) => rm.requisitionType === "MRN" && rm.status === 2
-      );
-      return filteredMrns || [];
+      return response.data.result || [];
+      // const filteredMrns = response.data.result?.filter(
+      //   (rm) => rm.requisitionType === "MRN" && rm.status === 2,
+      // );
+      // return filteredMrns || [];
     } catch (error) {
       console.error("Error fetching MRNs:", error);
       return [];
@@ -165,7 +126,7 @@ const useMin = ({ onFormSubmit }) => {
   const fetchItemBatches = async () => {
     try {
       const response = await get_item_batches_api(
-        sessionStorage?.getItem("companyId")
+        sessionStorage?.getItem("companyId"),
       );
       return response.data.result;
     } catch (error) {
@@ -187,9 +148,8 @@ const useMin = ({ onFormSubmit }) => {
   const fetchLocationInventories = async (locationId) => {
     try {
       if (!locationId) return [];
-      const response = await get_locations_inventories_by_location_id_api(
-        locationId
-      );
+      const response =
+        await get_locations_inventories_by_location_id_api(locationId);
       console.log("Location inventories:", response.data.result);
       return response.data.result || [];
     } catch (error) {
@@ -197,7 +157,7 @@ const useMin = ({ onFormSubmit }) => {
         "Error fetching location inventories for location",
         locationId,
         ":",
-        error
+        error,
       );
       return [];
     }
@@ -229,7 +189,7 @@ const useMin = ({ onFormSubmit }) => {
             remainingQuantity: 0,
             issuedQuantity: "",
             batchId: "",
-          })
+          }),
         );
         setFormData((prev) => ({
           ...prev,
@@ -273,7 +233,7 @@ const useMin = ({ onFormSubmit }) => {
     fieldName,
     fieldDisplayName,
     value,
-    additionalRules = {}
+    additionalRules = {},
   ) => {
     let isFieldValid = true;
     let errorMessage = "";
@@ -309,12 +269,11 @@ const useMin = ({ onFormSubmit }) => {
       isMrnIdValid = validateField(
         "mrnId",
         "Material requisition reference number",
-        formData.mrnId
+        formData.mrnId,
       );
     }
 
     let isItemQuantityValid = true;
-    let isBatchValid = true;
 
     formData.itemDetails.forEach((item, index) => {
       // Validate issued quantity
@@ -335,19 +294,9 @@ const useMin = ({ onFormSubmit }) => {
         quantityFieldName,
         quantityFieldDisplayName,
         item.issuedQuantity,
-        quantityAdditionalRules
+        quantityAdditionalRules,
       );
       isItemQuantityValid = isItemQuantityValid && isValidQuantity;
-
-      // Validate batch selection
-      const batchFieldName = `batchId_${index}`;
-      const batchFieldDisplayName = `Item Batch for ${item.name}`;
-      const isValidBatch = validateField(
-        batchFieldName,
-        batchFieldDisplayName,
-        item.batchId
-      );
-      isBatchValid = isBatchValid && isValidBatch;
     });
 
     const isItemsPresent = formData.itemDetails.length > 0;
@@ -359,11 +308,7 @@ const useMin = ({ onFormSubmit }) => {
     }
 
     return (
-      isStatusValid &&
-      isMrnIdValid &&
-      isItemQuantityValid &&
-      isBatchValid &&
-      isItemsPresent
+      isStatusValid && isMrnIdValid && isItemQuantityValid && isItemsPresent
     );
   };
 
@@ -376,6 +321,39 @@ const useMin = ({ onFormSubmit }) => {
       .slice(0, 14);
     const randomNumber = Math.floor(1000 + Math.random() * 9000);
     return `MIN_${formattedDate}_${randomNumber}`;
+  };
+
+  // Update inventory and relavant MRN
+  const updateInventoryFIFO = async (details, fromLocationId) => {
+    let detailFifo = [];
+    try {
+      const locationId = fromLocationId || 4;
+      for (const detail of details) {
+        const fifoResponse = await post_reduce_inventory_fifo_api({
+          locationId: locationId,
+          itemMasterId: detail.id,
+          transactionTypeId: 5,
+          quantity: detail?.issuedQuantity,
+        });
+        detailFifo.push(fifoResponse.data);
+        if (detailFifo.every((item) => item.status === 200)) {
+          console.log("Post Reduce FIFO without error");
+        }
+      }
+    } catch (error) {
+      throw new Error("Error updating inventory: " + error.message);
+    }
+  };
+
+  const updateMrnState = async (min) => {
+    try {
+      await update_min_state_in_mrn_api(min.requisitionMasterId, {
+        isMINApproved: true,
+        isMINAccepted: false,
+      });
+    } catch (error) {
+      console.error("Error updating MRN state:", error);
+    }
   };
 
   // Handle form submission
@@ -401,7 +379,8 @@ const useMin = ({ onFormSubmit }) => {
         issueDate: currentDate,
         createdBy: sessionStorage?.getItem("username") ?? null,
         createdUserId: sessionStorage?.getItem("userId") ?? null,
-        status: combinedStatus,
+        // status: combinedStatus,
+        status: 52,
         approvedBy: null,
         approvedDate: null,
         companyId: sessionStorage?.getItem("companyId") ?? null,
@@ -409,6 +388,7 @@ const useMin = ({ onFormSubmit }) => {
         referenceNumber: generateReferenceNumber(),
         approvedUserId: null,
         issuedLocationId: parseInt(selectedLocationId),
+        tokenNo: formData.tokenNo,
         permissionId: 1061,
         // toLocationId: searchByMrn
         //   ? parseInt(selectedMrn?.requestedToLocationId)
@@ -416,11 +396,11 @@ const useMin = ({ onFormSubmit }) => {
       };
 
       const response = await post_issue_master_api(MinData);
-      const issueMasterId = response.data.result.issueMasterId;
+      const min = response.data.result;
 
       const itemDetailsData = formData.itemDetails.map(async (item) => {
         const detailsData = {
-          issueMasterId: issueMasterId,
+          issueMasterId: min.issueMasterId,
           itemMasterId: item.id,
           batchId: item.batchId ? parseInt(item.batchId) : null,
           quantity: parseFloat(item.issuedQuantity),
@@ -431,12 +411,21 @@ const useMin = ({ onFormSubmit }) => {
 
       const detailsResponses = await Promise.all(itemDetailsData);
       const allDetailsSuccessful = detailsResponses.every(
-        (detailsResponse) => detailsResponse.status === 201
+        (detailsResponse) => detailsResponse.status === 201,
       );
 
       if (allDetailsSuccessful) {
+        await updateInventoryFIFO(
+          formData.itemDetails,
+          parseInt(selectedLocationId),
+        );
+
+        if (min.requisitionMasterId !== null) {
+          await updateMrnState(min);
+        }
+
         setSubmissionStatus(
-          isSaveAsDraft ? "successSavedAsDraft" : "successSubmitted"
+          isSaveAsDraft ? "successSavedAsDraft" : "successSubmitted",
         );
         setTimeout(() => {
           setSubmissionStatus(null);
@@ -479,7 +468,7 @@ const useMin = ({ onFormSubmit }) => {
         const selectedBatch = locationInventories?.find(
           (batch) =>
             batch.batchId === parseInt(value) &&
-            batch.itemMasterId === updatedItemDetails[index].id
+            batch.itemMasterId === updatedItemDetails[index].id,
         );
         updatedItemDetails[index].batchId = value;
         updatedItemDetails[index].remainingQuantity =
@@ -576,6 +565,66 @@ const useMin = ({ onFormSubmit }) => {
     setValidationErrors({});
   };
 
+  // Handle adding an item to itemDetails
+  const handleAddDummyItem = (item) => {
+    const exists = formData.itemDetails.find(
+      (d) => d.id === (item.itemMasterId || item.id),
+    );
+    if (exists) {
+      console.log("Item already exists in the list");
+      toast.error(`Item "${item.itemName}" already exists in the list`);
+      return;
+    }
+
+    // For items added via search (without MRN), we need to get available batches from locationInventories
+    const itemBatches = locationInventories?.filter(
+      (batch) => batch.itemMasterId === (item.itemMasterId || item.id),
+    );
+    console.log("itemBatches: ", itemBatches);
+
+    // Call the API to get total stock
+    const fetchTotalStock = async () => {
+      try {
+        const response = await get_Location_Inventory_Summary_By_Item_Name_api(
+          selectedLocationId,
+          item.itemMaster?.itemName || item.itemName,
+          null,
+        );
+        const result = response.data.result;
+        const currentItemSummary = result.find(
+          (summary) => summary.itemMasterId === (item.itemMasterId || item.id),
+        );
+
+        const totalStock = currentItemSummary?.totalStockInHand || 0;
+
+        const newItem = {
+          id: item.itemMasterId || item.id,
+          name: item.itemMaster?.itemName || item.itemName,
+          unit:
+            item.itemMaster?.unit?.unitName || item.unit?.unitName || "Unit",
+          quantity: 0,
+          remainingQuantity: totalStock,
+          issuedQuantity: "",
+          batchId: "",
+        };
+
+        setFormData((prev) => ({
+          ...prev,
+          itemDetails: [...prev.itemDetails, newItem],
+          // itemDetails: [newItem, ...prev.itemDetails],
+        }));
+
+        setSearchTerm("");
+        setDummySearchTerm("");
+      } catch (error) {
+        console.error("Error fetching total stock:", error);
+        toast.error("Error fetching total stock detail");
+      }
+    };
+
+    fetchTotalStock();
+  };
+
   // Handle item selection from search
   const handleSearchItemSelect = (item) => {
     handleAddDummyItem(item);
@@ -628,8 +677,7 @@ const useMin = ({ onFormSubmit }) => {
     statusOptions,
     submissionStatus,
     alertRef,
-    isLoading:
-      isLoading || isItemBatchesLoading || isLocationInventoriesLoading,
+    isLoading: isLoading || isItemBatchesLoading,
     isError,
     mrnSearchTerm,
     loading,

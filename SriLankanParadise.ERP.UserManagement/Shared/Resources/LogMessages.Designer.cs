@@ -178,6 +178,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cashier session retrieved successfully.
+        /// </summary>
+        public static string CashierSessionRetrieved {
+            get {
+                return ResourceManager.GetString("CashierSessionRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cashier sessions retrieved.
         /// </summary>
         public static string CashierSessionsRetrieved {
@@ -525,6 +534,15 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string CustomersRetrieved {
             get {
                 return ResourceManager.GetString("CustomersRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Customer updated successfully.
+        /// </summary>
+        public static string CustomerUpdated {
+            get {
+                return ResourceManager.GetString("CustomerUpdated", resourceCulture);
             }
         }
         
@@ -939,6 +957,24 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string ItemMasterUpdated {
             get {
                 return ResourceManager.GetString("ItemMasterUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item modes not found.
+        /// </summary>
+        public static string ItemModesNotFound {
+            get {
+                return ResourceManager.GetString("ItemModesNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Item modes retrieved successfully.
+        /// </summary>
+        public static string ItemModesRetrived {
+            get {
+                return ResourceManager.GetString("ItemModesRetrived", resourceCulture);
             }
         }
         
@@ -1866,6 +1902,42 @@ namespace SriLankanParadise.ERP.UserManagement.Shared.Resources {
         public static string RoleUpdated {
             get {
                 return ResourceManager.GetString("RoleUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales customer created successfully.
+        /// </summary>
+        public static string SalesCustomerCreated {
+            get {
+                return ResourceManager.GetString("SalesCustomerCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales customer not found.
+        /// </summary>
+        public static string SalesCustomerNotFound {
+            get {
+                return ResourceManager.GetString("SalesCustomerNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales customer retrieved.
+        /// </summary>
+        public static string SalesCustomerRetrieved {
+            get {
+                return ResourceManager.GetString("SalesCustomerRetrieved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sales customers retrieved.
+        /// </summary>
+        public static string SalesCustomersRetrieved {
+            get {
+                return ResourceManager.GetString("SalesCustomersRetrieved", resourceCulture);
             }
         }
         

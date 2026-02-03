@@ -326,6 +326,7 @@ const EmptyReturnList = () => {
                             id="transferQty"
                             placeholder="Enter transfer qty"
                             value={transferDetails.transferQty ?? ""}
+                            onWheel={(e) => e.target.blur()}
                             onChange={(e) =>
                               handleModalInputChange(
                                 "transferQty",
@@ -479,6 +480,7 @@ const EmptyReturnList = () => {
                             id="transferQty"
                             placeholder="Enter Reduce qty"
                             value={transferDetails.transferQty ?? ""}
+                            onWheel={(e) => e.target.blur()}
                             onChange={(e) =>
                               handleModalInputChange(
                                 "transferQty",
@@ -550,6 +552,7 @@ const EmptyReturnList = () => {
       <AddEmpties
         show={showAddEmptiesForm}
         handleClose={() => setShowAddEmptiesForm(false)}
+        handleSearch={handleSearch}
       />
     </>
   );

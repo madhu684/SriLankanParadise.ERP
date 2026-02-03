@@ -151,7 +151,11 @@ const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
                         <td>{item.rejectedQuantity}</td>
                         <td>{item.freeQuantity}</td>
                         {/* <td>{item.itemBarcode}</td> */}
-                        <td>{item.expiryDate.split("T")[0]}</td>
+                        <td>
+                          {item.expiryDate
+                            ? item.expiryDate.split("T")[0]
+                            : "Not Set"}
+                        </td>
                         <td>{item.unitPrice.toFixed(2)}</td>
                         {/* Additional fields */}
                         <td>
@@ -159,6 +163,7 @@ const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
                             type="number"
                             className="form-control"
                             value={item.costPrice}
+                            onWheel={(e) => e.target.blur()}
                             onChange={(e) =>
                               handleCostPriceChange(e.target.value, index)
                             }
@@ -169,6 +174,7 @@ const GrnApproval = ({ show, handleClose, handleApproved, grn }) => {
                             type="number"
                             className="form-control"
                             value={item.sellingPrice}
+                            onWheel={(e) => e.target.blur()}
                             onChange={(e) =>
                               handleSellingPriceChange(e.target.value, index)
                             }

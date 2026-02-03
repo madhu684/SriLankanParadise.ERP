@@ -71,14 +71,18 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                   <strong>Reference Number:</strong>{" "}
                   {salesInvoice?.referenceNumber}
                 </p>
-                <p>
-                  <strong>Patient Name:</strong>{" "}
-                  {salesInvoice?.inVoicedPersonName || "-"}
-                </p>
-                <p>
-                  <strong>Patient Contact No:</strong>{" "}
-                  {salesInvoice?.inVoicedPersonMobileNo || "-"}
-                </p>
+                {salesInvoice?.inVoicedPersonName !== null && (
+                  <p>
+                    <strong>Customer Name:</strong>{" "}
+                    {salesInvoice?.inVoicedPersonName || "-"}
+                  </p>
+                )}
+                {salesInvoice?.inVoicedPersonMobileNo !== null && (
+                  <p>
+                    <strong>Customer Contact No:</strong>{" "}
+                    {salesInvoice?.inVoicedPersonMobileNo || "-"}
+                  </p>
+                )}
                 {salesInvoice.status === 2 && (
                   <>
                     <p>
@@ -95,6 +99,12 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                 )}
               </div>
               <div className="col-md-6">
+                {salesInvoice.tokenNo !== null && (
+                  <p>
+                    <strong>Appointment Token No:</strong>{" "}
+                    {salesInvoice?.tokenNo}
+                  </p>
+                )}
                 <p>
                   <strong>Invoice Date:</strong>{" "}
                   {salesInvoice?.invoiceDate?.split("T")[0]}
@@ -229,6 +239,21 @@ const SalesInvoiceDetail = ({ show, handleClose, salesInvoice }) => {
                     <th>Sub Total</th>
                     <td className="text-end">
                       {calculateSubTotal().toFixed(2)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td
+                      colSpan={
+                        4 +
+                        uniqueLineItemDisplayNames.length -
+                        (company.batchStockType === "FIFO" ? 1 : 0)
+                      }
+                    ></td>
+                    <th>Deduction Amount</th>
+                    <td className="text-end text-danger fw-semibold">
+                      {salesInvoice?.discountAmount !== null
+                        ? salesInvoice?.discountAmount.toFixed(2)
+                        : 0}
                     </td>
                   </tr>
                   {/* Rendering common charges/deductions */}

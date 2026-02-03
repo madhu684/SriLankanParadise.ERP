@@ -13,11 +13,13 @@ import {
   get_company_locations_api,
 } from "../../services/purchaseApi";
 import { get_item_masters_by_company_id_with_query_api } from "../../services/inventoryApi";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+
+const EMPTY_ARRAY = [];
 
 const useGrn = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
-    grnDate: "",
+    grnDate: new Date().toISOString().split("T")[0],
     receivedBy: "",
     receivedDate: "",
     itemDetails: [],
@@ -58,6 +60,8 @@ const useGrn = ({ onFormSubmit }) => {
   const [searchByPR, setSearchByPR] = useState(false);
   const [searchBySR, setSearchBySR] = useState(false);
   const [supplierSearchTerm, setSupplierSearchTerm] = useState("");
+
+  const queryClient = useQueryClient();
 
   const fetchLocations = async () => {
     try {
@@ -210,7 +214,7 @@ const useGrn = ({ onFormSubmit }) => {
   });
 
   const {
-    data: grns = [],
+    data: grnsData,
     isFetched: isGrnsFetched,
     isLoading: isGrnsLoading,
     isError: isGrnsError,
@@ -222,6 +226,8 @@ const useGrn = ({ onFormSubmit }) => {
       fetchGrnsBypurchaseOrderId(selectedPurchaseOrder.purchaseOrderId),
     enabled: !!selectedPurchaseOrder,
   });
+
+  const grns = grnsData || EMPTY_ARRAY;
 
   useEffect(() => {
     if (isGrnsFetched) {
@@ -733,6 +739,7 @@ const useGrn = ({ onFormSubmit }) => {
         if (allDetailsSuccessful && updateSupplyReturnSuccessfull) {
           if (isSaveAsDraft) {
             setSubmissionStatus("successSavedAsDraft");
+            queryClient.invalidateQueries(["grnList"]);
             console.log("GRN saved as draft!", formData);
           } else {
             setSubmissionStatus("successSubmitted");
@@ -964,9 +971,10 @@ const useGrn = ({ onFormSubmit }) => {
           itemBarcode: "",
           unitPrice: 0.0,
         },
+        // ...prevFormData.itemDetails,
       ],
     }));
-    setSearchTerm(""); // Clear the search term
+    setSearchTerm("");
   };
 
   const handleSelectSupplier = (selectedSupplier) => {

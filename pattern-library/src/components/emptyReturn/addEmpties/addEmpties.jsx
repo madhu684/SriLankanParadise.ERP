@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { AddEmptiesManagement } from "./addEmpties";
 import ButtonLoadingSpinner from "../../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 
-const AddEmpties = ({ show, handleClose }) => {
+const AddEmpties = ({ show, handleClose, handleSearch }) => {
   const {
     formData,
     warehouses,
@@ -27,7 +27,7 @@ const AddEmpties = ({ show, handleClose }) => {
     handleWarehouseLocationChange,
 
     errors,
-  } = AddEmptiesManagement(handleClose);
+  } = AddEmptiesManagement(handleClose, handleSearch);
   console.log("Fetched warehouses dinusha:", warehouses);
   console.log("Fetched items:", availableItems);
 
@@ -217,6 +217,7 @@ const AddEmpties = ({ show, handleClose }) => {
                                   : ""
                               }`}
                               value={item.quantity}
+                              onWheel={(e) => e.target.blur()}
                               onChange={(e) =>
                                 handleItemDetailsChange(
                                   index,

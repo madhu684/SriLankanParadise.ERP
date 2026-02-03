@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  get_all_customers_api,
   post_sales_order_api,
   post_sales_order_detail_api,
   get_company_api,
   get_sales_persons_by_company_id_api,
+  get_customers_by_customer_type_api,
 } from "../../services/salesApi";
 import {
   get_charges_and_deductions_by_company_id_api,
@@ -20,7 +20,7 @@ import { useQuery } from "@tanstack/react-query";
 const useSalesOrder = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
     customerId: "",
-    orderDate: "",
+    orderDate: new Date().toISOString().split("T")[0],
     deliveryDate: "",
     itemDetails: [],
     status: 0,
@@ -56,10 +56,11 @@ const useSalesOrder = ({ onFormSubmit }) => {
       const response = await get_user_locations_by_user_id_api(
         sessionStorage.getItem("userId")
       );
-      setWarehouseLocationId(response.data.result[0].locationId);
-      return response.data.result.filter(
+      const filteredLoc = response.data.result.filter(
         (location) => location.location.locationTypeId === 2
       );
+      setWarehouseLocationId(filteredLoc?.map((lc) => lc.locationId)[0]);
+      return filteredLoc;
     } catch (error) {
       console.error("Error fetching user locations:", error);
     }
@@ -127,24 +128,20 @@ const useSalesOrder = ({ onFormSubmit }) => {
     }
   }, [submissionStatus]);
 
-  const fetchCustomers = async () => {
-    try {
-      const response = await get_all_customers_api();
-      return response.data.result || [];
-    } catch (error) {
-      console.error("Error fetching customers:", error);
-    }
-  };
-
   const {
     data: customers,
     isLoading: isCustomersLoading,
     isError: isCustomersError,
     error: customersError,
-    refetch: refetchCustomers,
   } = useQuery({
-    queryKey: ["customers"],
-    queryFn: fetchCustomers,
+    queryKey: ["customers", "salesCustomer"],
+    queryFn: async () => {
+      const response = await get_customers_by_customer_type_api(
+        sessionStorage?.getItem("companyId"),
+        "salesCustomer"
+      );
+      return response.data.result || [];
+    },
   });
 
   const fetchSalesPersons = async () => {
@@ -805,7 +802,6 @@ const useSalesOrder = ({ onFormSubmit }) => {
 
   const handleAddCustomer = (responseData) => {
     handleSelectCustomer(responseData);
-    refetchCustomers();
   };
 
   // Handler to add the selected item to itemDetails
@@ -1073,7 +1069,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
 
   const handleAddCommonChargesAndDeductions = () => {
     const initializedCharges = chargesAndDeductions.reduce((acc, charge) => {
-      if (!charge.isApplicableForLineItem) {
+      if (charge.isDisableFromSubTotal === false) {
         // Initialize additional properties for the common on charges and deductions
         acc[charge.displayName] = charge.amount || charge.percentage;
       }
@@ -1082,7 +1078,7 @@ const useSalesOrder = ({ onFormSubmit }) => {
 
     // Generate chargesAndDeductions array for the newly added item
     const initializedChargesArray = chargesAndDeductions
-      .filter((charge) => !charge.isApplicableForLineItem)
+      .filter((charge) => charge.isDisableFromSubTotal === false)
       .map((charge) => ({
         id: charge.chargesAndDeductionId,
         name: charge.displayName,

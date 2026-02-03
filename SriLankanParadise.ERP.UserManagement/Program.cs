@@ -3,6 +3,8 @@ using Consul;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Polly;
 using Polly.Extensions.Http;
 using SriLankanParadise.ERP.UserManagement.Business_Service;
@@ -38,8 +40,18 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddControllers().AddNewtonsoftJson(x =>
- x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+//builder.Services.AddControllers().AddNewtonsoftJson(x =>
+// x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+        options.SerializerSettings.NullValueHandling = NullValueHandling.Include;
+        options.SerializerSettings.ContractResolver = new DefaultContractResolver
+        {
+            NamingStrategy = new CamelCaseNamingStrategy()
+        };
+    });
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -74,31 +86,66 @@ builder.Services.AddLogging(loggingBuilder =>
     loggingBuilder.AddConsole(); // You can add other logging providers here
 });
 
+// Configure HttpClient for AyuOMS with Polly policies
 builder.Services.AddHttpClient("AyuOMSClient", client =>
 {
-    client.BaseAddress = new Uri(builder.Configuration["AyuOMS:BaseUrl"]);
+    var baseUrl = builder.Configuration["AyuOMS:BaseUrl"];
+    if (string.IsNullOrEmpty(baseUrl))
+    {
+        throw new InvalidOperationException("AyuOMS:BaseUrl configuration is missing");
+    }
+
+    client.BaseAddress = new Uri(baseUrl);
     client.Timeout = TimeSpan.FromSeconds(30);
     client.DefaultRequestHeaders.Add("Accept", "application/json");
     client.DefaultRequestHeaders.Add("User-Agent", "SriLankanParadise-ERP");
 })
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+{
+    // Limit connections per server to prevent exhaustion
+    MaxConnectionsPerServer = 10,
+    // Enable automatic decompression
+    AutomaticDecompression = System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate
+})
+.SetHandlerLifetime(TimeSpan.FromMinutes(5)) // Default is 2 minutes
 .AddPolicyHandler(GetRetryPolicy())
 .AddPolicyHandler(GetCircuitBreakerPolicy());
 
 builder.Services.AddScoped<IHttpClientHelper, HttpClientHelper>();
+builder.Services.AddScoped<IAyuOMSService, AyuOMSService>();
 
 // Resilience policies using Polly
 static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
 {
     return HttpPolicyExtensions
         .HandleTransientHttpError()
-        .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
+        .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.TooManyRequests) // Handle rate limiting
+        .WaitAndRetryAsync(
+            3,
+            retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+            onRetry: (outcome, timespan, retryCount, context) =>
+            {
+                // Log retry attempts
+                Console.WriteLine($"Retry {retryCount} after {timespan.TotalSeconds}s due to {outcome.Exception?.Message ?? outcome.Result?.StatusCode.ToString()}");
+            });
 }
 
 static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
 {
     return HttpPolicyExtensions
         .HandleTransientHttpError()
-        .CircuitBreakerAsync(5, TimeSpan.FromSeconds(30));
+        .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+        .CircuitBreakerAsync(
+            handledEventsAllowedBeforeBreaking: 5,
+            durationOfBreak: TimeSpan.FromSeconds(30),
+            onBreak: (outcome, duration) =>
+            {
+                Console.WriteLine($"Circuit breaker opened for {duration.TotalSeconds}s");
+            },
+            onReset: () =>
+            {
+                Console.WriteLine("Circuit breaker reset");
+            });
 }
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -239,6 +286,10 @@ builder.Services.AddScoped<IEmptyReturnService, EmptyReturnService>();
 builder.Services.AddScoped<IEmptyReturnRepository, EmptyReturnRepository>();
 builder.Services.AddScoped<ISupplierItemService, SupplierItemService>();
 builder.Services.AddScoped<ISupplierItemRepository, SupplierItemRepository>();
+builder.Services.AddScoped<ISalesCustomerService, SalesCustomerService>();
+builder.Services.AddScoped<ISalesCustomerRepository, SalesCustomerRepository>();
+builder.Services.AddScoped<IItemModeService, ItemModeService>();
+builder.Services.AddScoped<IItemModeRepository, ItemModeRepository>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

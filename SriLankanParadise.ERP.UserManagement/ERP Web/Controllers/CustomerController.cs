@@ -98,31 +98,31 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
-        //[HttpGet("GetCustomersByCompanyId/{companyId}")]
-        //public async Task<ApiResponseModel> GetCustomersByCompanyId(int companyId)
-        //{
-        //    try
-        //    {
-        //        var customers = await _customerService.GetCustomersByCompanyId(companyId);
-        //        if (customers != null)
-        //        {
-        //            var customerDtos = _mapper.Map<IEnumerable<CustomerDto>>(customers);
-        //            AddResponseMessage(Response, LogMessages.CustomersRetrieved, customerDtos, true, HttpStatusCode.OK);
-        //        }
-        //        else
-        //        {
-        //            _logger.LogWarning(LogMessages.CustomersNotFound);
-        //            AddResponseMessage(Response, LogMessages.CustomersNotFound, null, true, HttpStatusCode.NotFound);
-        //        }
+        [HttpGet("GetCustomersByCompanyId/{companyId}")]
+        public async Task<ApiResponseModel> GetCustomersByCompanyId(int companyId)
+        {
+            try
+            {
+                var customers = await _customerService.GetCustomersByCompanyId(companyId);
+                if (customers != null)
+                {
+                    var customerDtos = _mapper.Map<IEnumerable<CustomerDto>>(customers);
+                    AddResponseMessage(Response, LogMessages.CustomersRetrieved, customerDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.CustomersNotFound);
+                    AddResponseMessage(Response, LogMessages.CustomersNotFound, null, true, HttpStatusCode.NotFound);
+                }
 
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, ErrorMessages.InternalServerError);
-        //        AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
-        //    }
-        //    return Response;
-        //}
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
 
         [HttpGet("search-customers")]
         public async Task<ApiResponseModel> SearchCustomersByNamePhone([FromQuery] string searchTerm)
@@ -140,6 +140,132 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     _logger.LogWarning(LogMessages.CustomersNotFound);
                     AddResponseMessage(Response, LogMessages.CustomersNotFound, null, true, HttpStatusCode.NotFound);
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ApiResponseModel> UpdateCustomer(int id, CustomerRequestModel customerRequest)
+        {
+            try
+            {
+                var existingCustomer = await _customerService.GetCustomerById(id);
+                if (existingCustomer == null)
+                {
+                    _logger.LogWarning(LogMessages.CustomersNotFound);
+                    AddResponseMessage(Response, LogMessages.CustomersNotFound, null, true, HttpStatusCode.NotFound);
+                    return Response;
+                }
+                var customerToUpdate = _mapper.Map<Customer>(customerRequest);
+
+                customerToUpdate.CustomerId = id;
+
+                await _customerService.UpdateCustomer(existingCustomer.CustomerId, customerToUpdate);
+                _logger.LogInformation(LogMessages.CustomerUpdated);
+                AddResponseMessage(Response, LogMessages.CustomerUpdated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpPatch("ActiveDeactiveUser/{id}")]
+        public async Task<ApiResponseModel> ActiveDeactiveUser(int id, CustomerUpdateRequestModel customerRequest)
+        {
+            try
+            {
+                var existingCustomer = await _customerService.GetCustomerById(id);
+                if (existingCustomer == null)
+                {
+                    _logger.LogWarning(LogMessages.CustomersNotFound);
+                    AddResponseMessage(Response, LogMessages.CustomersNotFound, null, true, HttpStatusCode.NotFound);
+                    return Response;
+                }
+                var customerToUpdate = _mapper.Map<Customer>(customerRequest);
+                customerToUpdate.CustomerId = id;
+                await _customerService.ActiveDeactiveUser(existingCustomer.CustomerId, customerToUpdate);
+                _logger.LogInformation(LogMessages.CustomerUpdated);
+                AddResponseMessage(Response, LogMessages.CustomerUpdated, null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("GetCustomersByCustomerTypeCompanyId/{companyId}")]
+        public async Task<ApiResponseModel> GetCustomersByCustomerTypeCompanyId(int companyId, [FromQuery] string customerType)
+        {
+            try
+            {
+                var customers = await _customerService.GetCustomersByCustomerTypeCompanyId(companyId, customerType);
+                if (customers != null)
+                {
+                    var customerDtos = _mapper.Map<IEnumerable<CustomerDto>>(customers);
+                    AddResponseMessage(Response, LogMessages.CustomersRetrieved, customerDtos, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.CustomersNotFound);
+                    AddResponseMessage(Response, LogMessages.CustomersNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("GetPaginatedCustomersByCompanyId/{companyId}")]
+        public async Task<ApiResponseModel> GetPaginatedCustomersByCompanyId(
+            int companyId, 
+            [FromQuery] string? customerType = null,
+            [FromQuery] string? searchQuery = null,
+            [FromQuery] int pageNumber = 1, 
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var result = await _customerService.GetPaginatedCustomersByCompanyId(companyId, customerType, searchQuery, pageNumber, pageSize);
+
+                if (result.Items.Any())
+                {
+                    var customerDto = _mapper.Map<IEnumerable<CustomerDto>>(result.Items);
+
+                    var responseData = new
+                    {
+                        Data = customerDto,
+                        Pagination = new
+                        {
+                            result.TotalCount,
+                            result.PageNumber,
+                            result.PageSize,
+                            result.TotalPages,
+                            result.HasPreviousPage,
+                            result.HasNextPage
+                        }
+                    };
+
+                    AddResponseMessage(Response, "Paginated customers retrieved successfully", responseData, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    AddResponseMessage(Response, "No records found", null, true, HttpStatusCode.NotFound);
+                }
+
             }
             catch (Exception ex)
             {

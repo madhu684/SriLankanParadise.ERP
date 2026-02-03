@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useContext } from "react";
 import {
   get_requisition_masters_with_out_drafts_api,
   post_issue_master_api,
@@ -6,13 +6,15 @@ import {
   get_issue_masters_by_requisition_master_id_api,
   get_item_batches_api,
   get_locations_inventories_by_location_id_api,
+  get_sum_of_item_inventory_by_location_id_api,
 } from "../../services/purchaseApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { UserContext } from "../../context/userContext";
 
 const useTin = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
     itemDetails: [],
-    status: "",
+    status: "4",
     trnId: "",
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
@@ -27,18 +29,36 @@ const useTin = ({ onFormSubmit }) => {
   const [trnSearchTerm, setTrnSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingDraft, setLoadingDraft] = useState(false);
+
+  const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
   const queryClient = useQueryClient();
+
+  const { userLocations } = useContext(UserContext);
+
+  const warehouseUserLocation = userLocations
+    ? userLocations
+        .filter((loc) => loc.location.locationTypeId === 2)
+        .map((l) => l.locationId)
+    : null;
 
   // Fetch TRNs
   const fetchTrns = async () => {
     try {
       const response = await get_requisition_masters_with_out_drafts_api(
-        sessionStorage?.getItem("companyId")
+        sessionStorage?.getItem("companyId"),
+        2,
+        warehouseUserLocation[0],
+        null,
+        "TRN",
       );
-      const filteredTrns = response.data.result?.filter(
-        (rm) => rm.requisitionType === "TRN" && rm.status === 2
-      );
-      return filteredTrns || [];
+      return response?.data?.result || [];
+      // const filteredTrns = response.data.result?.filter(
+      //   (rm) =>
+      //     rm.requisitionType === "TRN" &&
+      //     rm.status === 2 &&
+      //     rm.requestedToLocationId === warehouseUserLocation[0],
+      // );
+      // return filteredTrns || [];
     } catch (error) {
       console.error("Error fetching TRNs:", error);
       return [];
@@ -58,11 +78,12 @@ const useTin = ({ onFormSubmit }) => {
   // Fetch TINs by requisitionMasterId
   const fetchTinsByRequisitionMasterId = async (requisitionMasterId) => {
     try {
-      const response = await get_issue_masters_by_requisition_master_id_api(
-        requisitionMasterId
-      );
+      const response =
+        await get_issue_masters_by_requisition_master_id_api(
+          requisitionMasterId,
+        );
       const filteredTins = response.data.result?.filter(
-        (rm) => rm.issueType === "TIN"
+        (rm) => rm.issueType === "TIN",
       );
       return filteredTins || null;
     } catch (error) {
@@ -87,7 +108,7 @@ const useTin = ({ onFormSubmit }) => {
   const fetchItemBatches = async () => {
     try {
       const response = await get_item_batches_api(
-        sessionStorage?.getItem("companyId")
+        sessionStorage?.getItem("companyId"),
       );
       return response.data.result || [];
     } catch (error) {
@@ -110,13 +131,13 @@ const useTin = ({ onFormSubmit }) => {
   const fetchLocationInventories = async () => {
     try {
       const response = await get_locations_inventories_by_location_id_api(
-        selectedTrn?.requestedToLocationId
+        selectedTrn?.requestedToLocationId,
       );
       console.log(
         "Fetched location inventories for location",
         selectedTrn?.requestedToLocationId,
         ":",
-        response.data.result
+        response.data.result,
       );
       return response.data.result || [];
     } catch (error) {
@@ -124,7 +145,7 @@ const useTin = ({ onFormSubmit }) => {
         "Error fetching location inventories for location",
         selectedTrn?.requestedToLocationId,
         ":",
-        error
+        error,
       );
       return [];
     }
@@ -143,59 +164,84 @@ const useTin = ({ onFormSubmit }) => {
 
   // Update itemDetails when selectedTrn or tins change
   useEffect(() => {
-    if (selectedTrn) {
-      refetchLocationInventories();
-      if (tins) {
-        const updatedItemDetails = selectedTrn.requisitionDetails
-          .map((requestItem) => {
-            const issuedQuantity = tins.reduce((total, tin) => {
-              const tinDetail = tin.issueDetails.find(
-                (detail) =>
-                  detail.itemMasterId === requestItem.itemMaster?.itemMasterId
-              );
-              return total + (tinDetail ? tinDetail.quantity : 0);
-            }, 0);
+    const processItems = async () => {
+      if (selectedTrn) {
+        refetchLocationInventories();
+        let itemsToProcess = [];
 
-            const remainingQuantity = requestItem.quantity - issuedQuantity;
+        if (tins) {
+          itemsToProcess = selectedTrn.requisitionDetails
+            .map((requestItem) => {
+              const issuedQuantity = tins.reduce((total, tin) => {
+                const tinDetail = tin.issueDetails.find(
+                  (detail) =>
+                    detail.itemMasterId ===
+                    requestItem.itemMaster?.itemMasterId,
+                );
+                return total + (tinDetail ? tinDetail.quantity : 0);
+              }, 0);
+
+              const pendingRequestQuantity =
+                requestItem.quantity - issuedQuantity;
+
+              return {
+                requestItem,
+                pendingRequestQuantity,
+              };
+            })
+            .filter((item) => item.pendingRequestQuantity > 0);
+        } else {
+          itemsToProcess = selectedTrn.requisitionDetails.map(
+            (requestItem) => ({
+              requestItem,
+              pendingRequestQuantity: requestItem.quantity,
+            }),
+          );
+        }
+
+        // Fetch total stock inventory for the location once
+        let locationInventoryMap = {};
+        try {
+          const inventoryResponse =
+            await get_sum_of_item_inventory_by_location_id_api(
+              selectedTrn.requestedToLocationId,
+            );
+          const inventoryResult = inventoryResponse.data.result || [];
+          // Create a map for quick lookup: itemMasterId -> totalStockInHand
+          inventoryResult.forEach((item) => {
+            locationInventoryMap[item.itemMasterId] = item.totalStockInHand;
+          });
+        } catch (error) {
+          console.error("Error fetching location inventory summary:", error);
+        }
+
+        const updatedItemDetails = itemsToProcess.map(
+          ({ requestItem, pendingRequestQuantity }) => {
+            const totalStock =
+              locationInventoryMap[requestItem.itemMaster?.itemMasterId] || 0;
 
             return {
               id: requestItem.itemMaster?.itemMasterId,
               name: requestItem.itemMaster?.itemName,
               unit: requestItem.itemMaster?.unit.unitName || "Unit",
               quantity: requestItem.quantity,
-              remainingQuantity: Math.max(0, remainingQuantity),
+              remainingQuantity: totalStock, // Set Remaining Quantity to Total Stock
+              pendingRequestQuantity: pendingRequestQuantity, // Keep track of pending request separately if needed for validation
               issuedQuantity: "",
               batchId: "",
             };
-          })
-          .filter((item) => item.remainingQuantity > 0);
+          },
+        );
 
         setFormData((prevFormData) => ({
           ...prevFormData,
           itemDetails: updatedItemDetails,
           trnId: selectedTrn?.requisitionMasterId ?? "",
         }));
-      } else {
-        const allItemDetails = selectedTrn.requisitionDetails.map(
-          (requestItem) => ({
-            id: requestItem.itemMaster?.itemMasterId,
-            name: requestItem.itemMaster?.itemName,
-            unit: requestItem.itemMaster?.unit.unitName || "Unit",
-            quantity: requestItem.quantity,
-            //remainingQuantity: requestItem.quantity,
-            remainingQuantity: 0,
-            issuedQuantity: "",
-            batchId: "",
-          })
-        );
-
-        setFormData((prevFormData) => ({
-          ...prevFormData,
-          itemDetails: allItemDetails,
-          trnId: selectedTrn?.requisitionMasterId ?? "",
-        }));
       }
-    }
+    };
+
+    processItems();
   }, [selectedTrn, tins, refetchLocationInventories]);
 
   // Scroll to alert on submission status change
@@ -210,7 +256,7 @@ const useTin = ({ onFormSubmit }) => {
     fieldName,
     fieldDisplayName,
     value,
-    additionalRules = {}
+    additionalRules = {},
   ) => {
     let isFieldValid = true;
     let errorMessage = "";
@@ -244,11 +290,10 @@ const useTin = ({ onFormSubmit }) => {
     const isTrnIdValid = validateField(
       "trnId",
       "Transfer requisition reference number",
-      formData.trnId
+      formData.trnId,
     );
 
     let isItemQuantityValid = true;
-    let isBatchValid = true;
 
     formData.itemDetails.forEach((item, index) => {
       // Validate issued quantity
@@ -263,20 +308,10 @@ const useTin = ({ onFormSubmit }) => {
         quantityFieldName,
         quantityFieldDisplayName,
         item.issuedQuantity,
-        quantityRules
-      );
-
-      // Validate batch selection
-      const batchFieldName = `batchId_${index}`;
-      const batchFieldDisplayName = `Batch for ${item.name}`;
-      const isValidBatch = validateField(
-        batchFieldName,
-        batchFieldDisplayName,
-        item.batchId
+        quantityRules,
       );
 
       isItemQuantityValid = isItemQuantityValid && isValidQuantity;
-      isBatchValid = isBatchValid && isValidBatch;
     });
 
     const isItemsPresent = formData.itemDetails.length > 0;
@@ -288,11 +323,7 @@ const useTin = ({ onFormSubmit }) => {
     }
 
     return (
-      isStatusValid &&
-      isTrnIdValid &&
-      isItemQuantityValid &&
-      isBatchValid &&
-      isItemsPresent
+      isStatusValid && isTrnIdValid && isItemQuantityValid && isItemsPresent
     );
   };
 
@@ -357,19 +388,20 @@ const useTin = ({ onFormSubmit }) => {
 
       const detailsResponses = await Promise.all(itemDetailsData);
       const allDetailsSuccessful = detailsResponses.every(
-        (detailsResponse) => detailsResponse.status === 201
+        (detailsResponse) => detailsResponse.status === 201,
       );
 
       if (allDetailsSuccessful) {
         setSubmissionStatus(
-          isSaveAsDraft ? "successSavedAsDraft" : "successSubmitted"
+          isSaveAsDraft ? "successSavedAsDraft" : "successSubmitted",
         );
         console.log(
           isSaveAsDraft
             ? "Transfer issue note saved as draft!"
             : "Transfer issue note submitted successfully!",
-          formData
+          formData,
         );
+        queryClient.invalidateQueries(["tinList", companyId]);
         setTimeout(() => {
           setSubmissionStatus(null);
           setLoading(false);
@@ -406,7 +438,7 @@ const useTin = ({ onFormSubmit }) => {
         const selectedBatch = locationInventories.find(
           (batch) =>
             batch.batchId === parseInt(value) &&
-            batch.itemMasterId === updatedItemDetails[index].id
+            batch.itemMasterId === updatedItemDetails[index].id,
         );
         updatedItemDetails[index].batchId = value;
         updatedItemDetails[index].remainingQuantity =
@@ -493,14 +525,12 @@ const useTin = ({ onFormSubmit }) => {
     setSelectedTrn(null);
     setValidFields({});
     setValidationErrors({});
-    // Reset query states to clear errors
-    refetchTrns();
-    refetchTins();
-    refetchItemBatches();
-    refetchLocationInventories();
-    // Explicitly reset selectedTrn to null to disable dependent queries
-    queryClient.resetQueries(["tins", null]);
-    queryClient.resetQueries(["locationInventories", null]);
+    // refetchTrns();
+    // refetchTins();
+    // refetchItemBatches();
+    // refetchLocationInventories();
+    // queryClient.resetQueries(["tins", null]);
+    // queryClient.resetQueries(["locationInventories", null]);
   };
 
   console.log("formData", formData);
@@ -514,16 +544,8 @@ const useTin = ({ onFormSubmit }) => {
     statusOptions,
     submissionStatus,
     alertRef,
-    isLoading:
-      isLoading ||
-      isTinsLoading ||
-      isItemBatchesLoading ||
-      isLocationInventoriesLoading,
-    isError:
-      isError ||
-      isTinsError ||
-      isItemBatchesError ||
-      isLocationInventoriesError,
+    isLoading: isLoading || isItemBatchesLoading,
+    isError,
     trnSearchTerm,
     loading,
     loadingDraft,

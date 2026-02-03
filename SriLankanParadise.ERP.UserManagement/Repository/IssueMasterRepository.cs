@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
@@ -38,7 +39,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(id => id.ItemMaster )
                     .ThenInclude(im => im.Unit)
                     .Include(rm => rm.IssueDetails)
-                    .ThenInclude(id => id.Batch)
+                    //.ThenInclude(id => id.Batch)
                     .ToListAsync();
             }
             catch (Exception)
@@ -48,31 +49,47 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             }
         }
 
-        public async Task<IEnumerable<IssueMaster>> GetIssueMastersWithoutDraftsByCompanyId(int companyId)
+        public async Task<IEnumerable<IssueMaster>> GetIssueMastersWithoutDraftsByCompanyId(int companyId, DateTime? date = null, int? issuedLocationId = null, string? issueType = null)
         {
             try
             {
-                var issueMasters = await _dbContext.IssueMasters
-                    .Where(rm => rm.Status != 0 && rm.CompanyId == companyId)
+                var query = _dbContext.IssueMasters
+                    .AsNoTracking()
+                    .Where(im => im.Status != 0 && im.CompanyId == companyId);
+
+                if (date.HasValue)
+                {
+                    var targetDate = date.Value.Date;
+                    query = query.Where(im => im.Status == 41 || (im.IssueDate.HasValue && im.IssueDate.Value.Date == targetDate));
+                }
+
+                if (issuedLocationId.HasValue)
+                {
+                    query = query.Where(im => im.IssuedLocationId == issuedLocationId);
+                }
+
+                if (!string.IsNullOrEmpty(issueType))
+                {
+                    var type = issueType.ToLower();
+                    query = query.Where(im => im.IssueType != null && im.IssueType.ToLower() == type);
+                }
+
+                var issueMasters = await query
                     .Include(im => im.RequisitionMaster)
-                          .ThenInclude(rm => rm.RequisitionDetails)
+                        .ThenInclude(rm => rm.RequisitionDetails)
                         .ThenInclude(rd => rd.ItemMaster)
-                    .Include(rm => rm.IssueDetails)
-                    .ThenInclude(rd => rd.ItemMaster)
-                    .ThenInclude(im => im.Unit)
-                    .Include(rm => rm.IssueDetails)
-                    .ThenInclude(id => id.Batch)
+                    .Include(im => im.RequisitionMaster)
+                        .ThenInclude(rm => rm.RequestedFromLocation)
+                    .Include(im => im.IssueDetails)
+                        .ThenInclude(rd => rd.ItemMaster)
+                            .ThenInclude(im => im.Unit)
+                    .OrderByDescending(im => im.IssueDate)
                     .ToListAsync();
 
-                if (issueMasters.Any())
-                {
-                    return issueMasters;
-                }
-                return null;
+                return issueMasters.Any() ? issueMasters : null;
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
@@ -112,7 +129,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(rd => rd.ItemMaster)
                     .ThenInclude(im => im.Unit)
                     .Include(rm => rm.IssueDetails)
-                    .ThenInclude(id => id.Batch)
+                    //.ThenInclude(id => id.Batch)
                     .FirstOrDefaultAsync();
 
                 return requisitionMaster;
@@ -134,7 +151,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(id => id.ItemMaster)
                     .ThenInclude(im => im.Unit)
                     .Include(im => im.IssueDetails)
-                    .ThenInclude(id => id.Batch)
+                    //.ThenInclude(id => id.Batch)
+                    .OrderByDescending(im => im.IssueDate)
                     .ToListAsync();
 
                 if (issueMasters.Any())
@@ -160,7 +178,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(id=>id.ItemMaster)
                     .ThenInclude(im => im.Unit)
                     .Include(im=> im.IssueDetails)
-                    .ThenInclude(id => id.Batch)
+                    //.ThenInclude(id => id.Batch)
                     .ToListAsync();
 
                 return issueMasters.Any() ? issueMasters : null;
@@ -182,10 +200,74 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .ThenInclude(id => id.ItemMaster)
                     .ThenInclude(im => im.Unit)
                     .Include(im => im.IssueDetails)
-                    .ThenInclude(id => id.Batch)
+                    //.ThenInclude(id => id.Batch)
                     .ToListAsync();
 
                 return issueMasters.Any() ? issueMasters : null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<PagedResult<IssueMaster>> GetPaginatedIssueMastersByCompanyIdLocationDateRange(int companyId, string? issueType = null, int? locationId = null, DateTime? startDate = null, DateTime? endDate = null, int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                // Input validation
+                if (pageNumber < 1) pageNumber = 1;
+                if (pageSize < 1) pageSize = 10;
+                if (pageSize > 100) pageSize = 100;
+
+                var query = _dbContext.IssueMasters
+                    .AsNoTracking()
+                    .Include(im => im.RequisitionMaster)
+                    .Include(im => im.IssueDetails)
+                        .ThenInclude(id => id.ItemMaster)
+                            .ThenInclude(im => im.Unit)
+                    .Include(im => im.IssueDetails)
+                    .Where(im => im.CompanyId == companyId);
+
+                if (!string.IsNullOrEmpty(issueType))
+                {
+                    var type = issueType.ToLower();
+                    query = query.Where(im => im.IssueType != null && im.IssueType.ToLower() == type);
+                }
+
+                if (locationId.HasValue)
+                {
+                    query = query.Where(im => im.IssuedLocationId == locationId);
+                }
+
+                if (startDate.HasValue)
+                {
+                    var start = startDate.Value.Date;
+                    query = query.Where(im => im.IssueDate.HasValue && im.IssueDate.Value.Date >= start);
+                }
+
+                if (endDate.HasValue)
+                {
+                    var end = endDate.Value.Date;
+                    query = query.Where(im => im.IssueDate.HasValue && im.IssueDate.Value.Date <= end);
+                }
+
+                var totalCount = query.Count();
+
+                var issueMasters = await query
+                    .OrderBy(si => si.IssueDate)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                return new PagedResult<IssueMaster>
+                {
+                    Items = issueMasters,
+                    TotalCount = totalCount,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+                };
             }
             catch (Exception)
             {

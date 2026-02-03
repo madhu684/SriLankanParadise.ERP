@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { post_cashier_session_api } from "../../services/salesApi";
+import { useQueryClient } from "@tanstack/react-query";
 
 const useCashierSession = ({ onFormSubmit }) => {
   const [formData, setFormData] = useState({
@@ -10,6 +11,8 @@ const useCashierSession = ({ onFormSubmit }) => {
   const [submissionStatus, setSubmissionStatus] = useState(null);
   const alertRef = useRef(null);
   const [loading, setLoading] = useState(false);
+
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (submissionStatus != null) {
@@ -84,6 +87,7 @@ const useCashierSession = ({ onFormSubmit }) => {
           actualChequesInHand: null,
           reasonCashInHandDifference: null,
           reasonChequesInHandDifference: null,
+          isActiveSession: true,
           permissionId: 1067,
         };
 
@@ -92,6 +96,12 @@ const useCashierSession = ({ onFormSubmit }) => {
         if (response.status === 201) {
           setSubmissionStatus("success");
           console.log("Cashier session open successfully", cashierSessionData);
+          queryClient.invalidateQueries({
+            queryKey: [
+              "activeCashierSession",
+              parseInt(sessionStorage.getItem("userId")),
+            ],
+          });
           setTimeout(() => {
             setSubmissionStatus(null);
             setLoading(false);

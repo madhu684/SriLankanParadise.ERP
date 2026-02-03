@@ -165,6 +165,10 @@ public partial class ErpSystemContext : DbContext
 
     public virtual DbSet<SupplierItem> SupplierItems { get; set; }
 
+    public virtual DbSet<SalesCustomer> SalesCustomers { get; set; }
+
+    public virtual DbSet<ItemMode> ItemModes { get; set; }
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:LocalSqlServerConnection");
@@ -411,6 +415,20 @@ public partial class ErpSystemContext : DbContext
         {
             entity.HasKey(e => e.CustomerId).HasName("PK__Customer__A4AE64D8B489EACD");
 
+            entity.Property(e => e.Status)
+                .HasDefaultValue(1);
+
+            entity.Property(e => e.IsVATRegistered)
+                .HasDefaultValue(false);
+
+            entity.Property(e => e.CustomerType)
+                .HasMaxLength(50)
+                .HasDefaultValue("patient");
+
+            entity.Property(e => e.CreatedDate)
+                .HasColumnType("datetime")
+                .IsRequired(false);
+
             entity.ToTable("Customer");
         });
 
@@ -624,6 +642,10 @@ public partial class ErpSystemContext : DbContext
                 .HasForeignKey(d => d.UnitId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__ItemMaste__UnitI__73852659");
+
+            entity.HasOne(d => d.ItemMode).WithMany(p => p.ItemMasters)
+                .HasForeignKey(d => d.ItemModeId)
+                .HasConstraintName("FK_ItemMaster_ItemMode");
         });
 
         modelBuilder.Entity<ItemType>(entity =>
@@ -923,6 +945,10 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.RequisitionDate).HasColumnType("date");
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
 
+            entity.Property(e => e.ReferenceNo)
+                .HasMaxLength(20)
+                .HasDefaultValueSql("('PR'+CONVERT([nvarchar](20),NEXT VALUE FOR [dbo].[PurchaseRequisitionReferenceNoSeq]))");
+
             entity.HasOne(d => d.DepartmentNavigation).WithMany(p => p.PurchaseRequisitionDepartmentNavigations)
                 .HasForeignKey(d => d.Department)
                 .HasConstraintName("FK_PurchaseRequisition_Department_Location");
@@ -1093,10 +1119,9 @@ public partial class ErpSystemContext : DbContext
 
             entity.HasOne(d => d.Customer).WithMany(p => p.SalesOrders)
                 .HasForeignKey(d => d.CustomerId)
-                .HasConstraintName("FK__SalesOrde__Custo__1F63A897");
+                .HasConstraintName("FK_SalesOrder_Customer");
 
-            entity.HasOne(d => d.SalesPerson)
-                .WithMany(p => p.SalesOrders)
+            entity.HasOne(d => d.SalesPerson).WithMany(p => p.SalesOrders)
                 .HasForeignKey(d => d.SalesPersonId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .HasConstraintName("FK_SalesOrder_SalesPerson");
@@ -1133,7 +1158,6 @@ public partial class ErpSystemContext : DbContext
             entity.Property(e => e.CreatedDate).HasColumnType("datetime");
             entity.Property(e => e.ExcessAmount).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.LastUpdatedDate).HasColumnType("datetime");
-            entity.Property(e => e.PaymentReferenceNo).HasMaxLength(20);
             entity.Property(e => e.ReceiptDate).HasColumnType("date");
             entity.Property(e => e.ReferenceNumber).HasMaxLength(255);
             entity.Property(e => e.OutstandingAmount).HasColumnType("decimal(18, 2)");
@@ -1542,6 +1566,16 @@ public partial class ErpSystemContext : DbContext
                   .HasForeignKey(e => e.ItemMasterId)
                   .HasConstraintName("FK_SupplierItems_ItemMaster")
                   .IsRequired();
+        });
+
+        modelBuilder.Entity<SalesCustomer>(entity =>
+        {
+            entity.ToTable("SalesCustomer");
+        });
+
+        modelBuilder.Entity<ItemMode>(entity =>
+        {
+            entity.ToTable("ItemMode");
         });
 
 

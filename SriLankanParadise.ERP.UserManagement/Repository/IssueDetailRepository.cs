@@ -35,7 +35,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var issueDetails = await _dbContext.IssueDetails
                     .Include(r => r.ItemMaster)
-                    .Include(r => r.Batch)
+                    //.Include(r => r.Batch)
                     .Where(r => r.IssueMasterId == issueMasterId)
                     .ToListAsync();
 

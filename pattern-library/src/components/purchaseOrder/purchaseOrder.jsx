@@ -492,6 +492,7 @@ const PurchaseOrder = ({
                             : ""
                         }`}
                         value={item.quantity}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
@@ -517,6 +518,7 @@ const PurchaseOrder = ({
                             : ""
                         }`}
                         value={item.unitPrice}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleItemDetailsChange(
                             index,
@@ -540,6 +542,7 @@ const PurchaseOrder = ({
                           className="form-control"
                           type="number"
                           value={charge.value}
+                          onWheel={(e) => e.target.blur()}
                           onChange={(e) => {
                             let newValue = parseFloat(e.target.value);
 
@@ -683,7 +686,7 @@ const PurchaseOrder = ({
               "Submit"
             )}
           </button>
-          <button
+          {/* <button
             type="button"
             className="btn btn-secondary me-2"
             onClick={() => handleSubmit(true)}
@@ -708,7 +711,7 @@ const PurchaseOrder = ({
             disabled={loading || loadingDraft || submissionStatus !== null}
           >
             Print
-          </button>
+          </button> */}
           <button
             type="button"
             className="btn btn-danger"

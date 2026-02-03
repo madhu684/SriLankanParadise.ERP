@@ -89,6 +89,11 @@ const TinDetail = ({ show, handleClose, tin }) => {
               <strong>Transfer Requisition Reference No:</strong>{" "}
               {tin.requisitionMaster.referenceNumber}
             </p>
+            <p>
+              <strong>Dispatched Location:</strong>{" "}
+              {tin?.requisitionMaster?.requestedFromLocation?.locationName ||
+                "-"}
+            </p>
           </div>
         </div>
 
@@ -121,6 +126,7 @@ const TinDetail = ({ show, handleClose, tin }) => {
                           ? receivedQuantities[item.issueDetailId]
                           : item.receivedQuantity ?? 0
                       }
+                      onWheel={(e) => e.target.blur()}
                       onChange={(e) =>
                         handleReceivedQuantityChange(
                           item.issueDetailId,
@@ -145,6 +151,7 @@ const TinDetail = ({ show, handleClose, tin }) => {
                           ? returnedQuantities[item.issueDetailId]
                           : item.returnedQuantity ?? ""
                       }
+                      onWheel={(e) => e.target.blur()}
                       onChange={(e) =>
                         handleReturnedQuantityChange(
                           item.issueDetailId,

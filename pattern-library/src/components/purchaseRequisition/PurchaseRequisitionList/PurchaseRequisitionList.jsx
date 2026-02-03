@@ -219,6 +219,7 @@ const PurchaseRequisitionList = () => {
                 <input type="checkbox" />
               </th>
               <th>ID</th>
+              <th>Reference No</th>
               <th>Requested By</th>
               <th>Expected Delivery Date</th>
               <th>Status</th>
@@ -241,6 +242,7 @@ const PurchaseRequisitionList = () => {
                     />
                   </td>
                   <td>{pr.purchaseRequisitionId}</td>
+                  <td>{pr.referenceNo || "N/A"}</td>
                   <td>{pr.requestedBy}</td>
                   <td>{pr.expectedDeliveryDate?.split("T")[0]}</td>
                   <td>

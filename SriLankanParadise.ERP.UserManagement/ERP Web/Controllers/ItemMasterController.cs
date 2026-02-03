@@ -44,6 +44,15 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             try
             {
                 var itemMaster = _mapper.Map<ItemMaster>(itemMasterRequest);
+                if (!string.IsNullOrEmpty(itemMaster.ItemCode) && itemMaster.CompanyId.HasValue)
+                {
+                    var existingItem = await _itemMasterService.GetItemMasterByItemCode(itemMaster.ItemCode, itemMaster.CompanyId.Value);
+
+                    if (existingItem != null)
+                    {
+                        return AddResponseMessage(Response, "Item Code already exists", null, false, HttpStatusCode.BadRequest);
+                    }
+                }
                 await _itemMasterService.AddItemMaster(itemMaster);
 
                 var subItemMasters = new List<SubItemMaster>();
@@ -229,6 +238,28 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
         }
 
+        [HttpDelete("ForceDelete/{itemMasterId}")]
+        public async Task<ApiResponseModel> ForceDeleteItemMaster(int itemMasterId)
+        {
+            try
+            {
+                var existingItemMaster = await _itemMasterService.GetItemMasterByItemMasterId(itemMasterId);
+                if (existingItemMaster == null)
+                {
+                    _logger.LogWarning(LogMessages.ItemMasterNotFound);
+                    return AddResponseMessage(Response, LogMessages.ItemMasterNotFound, null, true, HttpStatusCode.NotFound);
+                }
+                await _itemMasterService.ForceDeleteItemMaster(itemMasterId);
+                _logger.LogInformation("Item deleted using force delete");
+                return AddResponseMessage(Response, "Item deleted using force delete", null, true, HttpStatusCode.NoContent);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
+
         [HttpGet("GetItemMastersByUserId/{userId}")]
         public async Task<ApiResponseModel> GetItemMastersByUserId(int userId)
         {
@@ -373,6 +404,97 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("GetPaginatedItemMastersByCompanyId/{companyId}")]
+        public async Task<ApiResponseModel> GetPaginatedItemMastersByCompanyId(
+            int companyId,
+            [FromQuery] string? searchQuery = null,
+            [FromQuery] int? supplierId = null,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var result = await _itemMasterService.GetPaginatedItemMastersByCompanyId(companyId, searchQuery, supplierId, pageNumber, pageSize);
+
+                if (result.Items.Any())
+                {
+                    var itemDto = _mapper.Map<IEnumerable<ItemMasterDto>>(result.Items);
+
+                    var responseData = new
+                    {
+                        Data = itemDto,
+                        Pagination = new
+                        {
+                            result.TotalCount,
+                            result.PageNumber,
+                            result.PageSize,
+                            result.TotalPages,
+                            result.HasPreviousPage,
+                            result.HasNextPage
+                        }
+                    };
+
+                    AddResponseMessage(Response, "Paginated Item masters retrieved successfully", responseData, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    AddResponseMessage(Response, "No records found", null, true, HttpStatusCode.OK);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpPost("InitializeItemBatch")]
+        public async Task<ApiResponseModel> InitializeItemBatch([FromBody] InitializeItemBatchRequestModel request)
+        {
+            try
+            {
+                // Validate item exists
+                var itemMaster = await _itemMasterService.GetItemMasterByItemMasterId(request.ItemMasterId);
+                if (itemMaster == null)
+                {
+                    _logger.LogWarning(LogMessages.ItemMasterNotFound);
+                    return AddResponseMessage(Response, LogMessages.ItemMasterNotFound, null, false, HttpStatusCode.NotFound);
+                }
+
+                // Call service to initialize batch with transaction handling
+                await _itemMasterService.InitializeItemBatch(
+                    request.ItemMasterId,
+                    request.CompanyId,
+                    request.LocationId,
+                    itemMaster.UnitPrice ?? 0,
+                    request.CreatedBy,
+                    request.CreatedUserId
+                );
+
+                var result = new
+                {
+                    ItemMasterId = request.ItemMasterId,
+                    LocationId = request.LocationId,
+                    Message = "Item batch initialized with 0 quantity successfully"
+                };
+
+                _logger.LogInformation("Item batch initialized for ItemMasterId: {ItemMasterId}", request.ItemMasterId);
+                AddResponseMessage(Response, "Item batch initialized successfully", result, true, HttpStatusCode.Created);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex, "Validation error initializing item batch");
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.BadRequest);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error initializing item batch");
                 AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
             return Response;

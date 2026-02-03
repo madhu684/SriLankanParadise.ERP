@@ -23,7 +23,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     requisitionDate: currentDate,
     purposeOfRequest: "",
     expectedDeliveryDate: "",
-    referenceNumber: "",
+    // referenceNumber: "",
     itemDetails: [],
     attachments: [],
     totalAmount: 0,
@@ -64,82 +64,33 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
     queryFn: fetchUserLocations,
   });
 
-  // const fetchItems = async (searchQuery) => {
-  //   try {
-  //     const response = await get_Location_Inventory_Summary_By_Item_Name_api(
-  //       formData.expectedDeliveryLocation,
-  //       searchQuery
-  //     );
-
-  //     const companyId = sessionStorage.getItem("companyId");
-
-  //     const items = await Promise.all(
-  //       response.data?.result?.map(async (summary) => {
-  //         const supplierItemResponse =
-  //           await get_supplier_items_by_type_category_api(
-  //             companyId,
-  //             parseInt(summary.itemMaster?.itemType?.itemTypeId),
-  //             parseInt(summary.itemMaster?.category?.categoryId),
-  //             formData.expectedDeliveryLocation
-  //           );
-
-  //         const supplierItems = supplierItemResponse.data.result
-  //           ? supplierItemResponse.data.result.filter(
-  //               (si) =>
-  //                 si.itemMasterId !== summary.itemMasterId &&
-  //                 si.supplierName !== formData?.selectedSupplier?.supplierName
-  //             )
-  //           : [];
-
-  //         return {
-  //           itemMasterId: summary.itemMasterId,
-  //           itemName: summary.itemMaster?.itemName || "",
-  //           unit: summary.itemMaster?.unit || { unitName: "" },
-  //           categoryId: summary.itemMaster?.category?.categoryId || "",
-  //           itemTypeId: summary.itemMaster?.itemType?.itemTypeId || "",
-  //           supplierId: summary.itemMaster?.supplierId || null,
-  //           totalStockInHand: summary.totalStockInHand,
-  //           minReOrderLevel: summary.minReOrderLevel,
-  //           maxStockLevel: summary.maxStockLevel,
-  //           supplierItems: supplierItems,
-  //         };
-  //       }) || []
-  //     );
-
-  //     const filterItems = formData.supplierId
-  //       ? items.filter(
-  //           (item) =>
-  //             !formData.supplierId || item.supplierId === formData.supplierId
-  //         )
-  //       : items;
-  //     return filterItems;
-  //   } catch (error) {
-  //     console.error("Error fetching items:", error);
-  //     return [];
-  //   }
-  // };
-
   const fetchItems = async (searchQuery) => {
     try {
       const response = await get_Location_Inventory_Summary_By_Item_Name_api(
-        formData.expectedDeliveryLocation,
-        searchQuery
+        //formData.expectedDeliveryLocation,
+        null,
+        searchQuery,
+        null
       );
 
       const items =
-        response.data?.result?.map((summary) => ({
-          itemMasterId: summary.itemMasterId,
-          itemName: summary.itemMaster?.itemName || "",
-          itemCode: summary.itemMaster?.itemCode || "",
-          unit: summary.itemMaster?.unit || { unitName: "" },
-          categoryId: summary.itemMaster?.category?.categoryId || "",
-          itemTypeId: summary.itemMaster?.itemType?.itemTypeId || "",
-          supplierId: summary.itemMaster?.supplierId || null,
-          totalStockInHand: summary.totalStockInHand,
-          minReOrderLevel: summary.minReOrderLevel,
-          maxStockLevel: summary.maxStockLevel,
-          supplierItems: [],
-        })) || [];
+        response.data?.result
+          // ?.filter((item) => item.totalStockInHand <= item.maxStockLevel)
+          .map((summary) => ({
+            itemMasterId: summary.itemMasterId,
+            itemName: summary.itemMaster?.itemName || "",
+            itemCode: summary.itemMaster?.itemCode || "",
+            unit: summary.itemMaster?.unit || { unitName: "" },
+            categoryId: summary.itemMaster?.category?.categoryId || "",
+            itemTypeId: summary.itemMaster?.itemType?.itemTypeId || "",
+            supplierId: summary.itemMaster?.supplierId || null,
+            totalStockInHand: summary.totalStockInHand,
+            minReOrderLevel: summary.minReOrderLevel,
+            maxStockLevel: summary.maxStockLevel,
+            supplierItems: [],
+          })) || [];
+
+      console.log("Filter items: ", items);
 
       const filterItems = formData.supplierId
         ? items.filter(
@@ -465,7 +416,7 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
           purposeOfRequest: formData.purposeOfRequest,
           expectedDeliveryDate: formData.expectedDeliveryDate,
           expectedDeliveryLocation: formData.expectedDeliveryLocation,
-          referenceNo: formData.referenceNumber,
+          // referenceNo: formData.referenceNumber,
           totalAmount: formData.totalAmount,
           status: status,
           approvedBy: null,
@@ -701,10 +652,11 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
       setPRGenerating(true);
       setIsPRGenerated(true);
       const response = await get_Low_Stock_Items_api(
-        formData.supplierId,
-        formData.expectedDeliveryLocation
+        formData.supplierId
+        //formData.expectedDeliveryLocation
       );
       const lowStockItems = response.data.result || [];
+      console.log("lowStockItems: ", lowStockItems);
 
       if (lowStockItems.length === 0) {
         setShowToast(true);
@@ -721,41 +673,44 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
 
         // Transform low-stock items into itemDetails format with API calls
         const newItemDetails = await Promise.all(
-          lowStockItems.map(async (item) => {
-            const supplierItemResponse =
-              await get_supplier_items_by_type_category_api(
-                companyId,
-                parseInt(item.itemMaster?.itemType?.itemTypeId),
-                parseInt(item.itemMaster?.category?.categoryId),
-                formData.expectedDeliveryLocation
-              );
+          lowStockItems
+            // .filter((item) => item.totalStockInHand <= item.maxStockLevel)
+            .map(async (item) => {
+              const supplierItemResponse =
+                await get_supplier_items_by_type_category_api(
+                  companyId,
+                  parseInt(item.itemMaster?.itemType?.itemTypeId),
+                  parseInt(item.itemMaster?.category?.categoryId),
+                  formData.expectedDeliveryLocation
+                );
 
-            const supplierItems = supplierItemResponse.data.result
-              ? supplierItemResponse.data.result.filter(
-                  (si) =>
-                    si.itemMasterId !== item.itemMasterId &&
-                    si.supplierName !== formData?.selectedSupplier?.supplierName
-                )
-              : [];
+              const supplierItems = supplierItemResponse.data.result
+                ? supplierItemResponse.data.result.filter(
+                    (si) =>
+                      si.itemMasterId !== item.itemMasterId &&
+                      si.supplierName !==
+                        formData?.selectedSupplier?.supplierName
+                  )
+                : [];
 
-            return {
-              id: item.itemMasterId,
-              name: item.itemMaster.itemName,
-              unit: item.itemMaster.unit?.unitName || "",
-              categoryId: item.itemMaster?.category?.categoryId || "",
-              itemTypeId: item.itemMaster?.itemType?.itemTypeId || "",
-              quantity:
-                item.maxStockLevel - item.totalStockInHand >= 0
-                  ? item.maxStockLevel - item.totalStockInHand
-                  : 0,
-              unitPrice: 0.0,
-              totalPrice: 0.0,
-              supplierItems: supplierItems,
-              totalStockInHand: item.totalStockInHand,
-              minReOrderLevel: item.minReOrderLevel,
-              maxStockLevel: item.maxStockLevel,
-            };
-          })
+              return {
+                id: item.itemMasterId,
+                name: item.itemMaster.itemName,
+                unit: item.itemMaster.unit?.unitName || "",
+                categoryId: item.itemMaster?.category?.categoryId || "",
+                itemTypeId: item.itemMaster?.itemType?.itemTypeId || "",
+                quantity:
+                  item.maxStockLevel - item.totalStockInHand >= 0
+                    ? item.maxStockLevel - item.totalStockInHand
+                    : 0,
+                unitPrice: 0.0,
+                totalPrice: 0.0,
+                supplierItems: supplierItems,
+                totalStockInHand: item.totalStockInHand,
+                minReOrderLevel: item.minReOrderLevel,
+                maxStockLevel: item.maxStockLevel,
+              };
+            })
         );
 
         // Update formData with new itemDetails

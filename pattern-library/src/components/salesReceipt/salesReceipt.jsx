@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import useSalesReceipt from "./useSalesReceipt";
 import CurrentDateTime from "../currentDateTime/currentDateTime";
 import useCompanyLogoUrl from "../companyLogo/useCompanyLogoUrl";
 import ButtonLoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 import LoadingSpinner from "../loadingSpinner/loadingSpinner";
 import ErrorComponent from "../errorComponent/errorComponent";
+import useFormatCurrency from "../../utility/useFormatCurrency";
 
 const SalesReceipt = ({ handleClose, handleUpdated }) => {
   const {
@@ -17,6 +18,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
     alertRef,
     salesInvoiceOptions,
     isSalesInvoiceOptionsLoading,
+    isSalesInvoiceOptionsFetching,
     isSalesInvoiceOptionsError,
     salesInvoiceOptionsError,
     selectedsalesInvoice,
@@ -38,7 +40,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
     calculateTotalAmountReceived,
     calculateTotalExcessAmountAmount,
     calculateTotalOutstandingAmountAmount,
-    handleAddToExcess, // Add this line
+    handleAddToExcess,
     calculateTotalAmountCollected,
   } = useSalesReceipt({
     onFormSubmit: () => {
@@ -47,9 +49,37 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
     },
   });
 
-  //const companyLogoUrl = useCompanyLogoUrl();
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [isDraftSubmission, setIsDraftSubmission] = useState(false);
 
-  if (isPaymentModesLoading || isSalesInvoiceOptionsLoading) {
+  const formatTotals = useFormatCurrency({ showCurrency: false });
+
+  const handleSubmitClick = (isSaveAsDraft) => {
+    setIsDraftSubmission(isSaveAsDraft);
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmSubmit = async () => {
+    setShowConfirmModal(false);
+    await handleSubmit(isDraftSubmission);
+  };
+
+  const handleCancelSubmit = () => {
+    setShowConfirmModal(false);
+    setIsDraftSubmission(false);
+  };
+
+  const getSelectedPaymentMode = () => {
+    const mode = paymentModes?.find(
+      (pm) => pm.paymentModeId === formData.paymentModeId,
+    );
+    return mode?.mode || "N/A";
+  };
+
+  if (
+    isPaymentModesLoading ||
+    (isSalesInvoiceOptionsLoading && !salesInvoiceOptions)
+  ) {
     return <LoadingSpinner />;
   }
 
@@ -63,11 +93,9 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
       <div className="mb-4">
         <div ref={alertRef}></div>
         <div className="d-flex justify-content-between">
-          {/* <img src={companyLogoUrl} alt="Company Logo" height={30} /> */}
           <i
-            class="bi bi-arrow-left"
-            onClick={handleClose}
             className="bi bi-arrow-left btn btn-dark d-flex align-items-center justify-content-center"
+            onClick={handleClose}
           ></i>
           <p>
             <CurrentDateTime />
@@ -77,22 +105,39 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
         <hr />
       </div>
 
-      {/* Display success or error messages */}
+      {/* Status Messages */}
       {submissionStatus === "successSubmitted" && (
-        <div className="alert alert-success mb-3" role="alert">
-          Sales receipt created successfully!
-          {/* Reference Number: {referenceNo} */}
+        <div
+          className="alert alert-success d-flex align-items-center shadow-sm mb-4"
+          role="alert"
+        >
+          <i className="bi bi-check-circle-fill me-3 fs-4"></i>
+          <div>
+            <strong>Success!</strong> Sales receipt created successfully.
+          </div>
         </div>
       )}
       {submissionStatus === "successSavedAsDraft" && (
-        <div className="alert alert-success mb-3" role="alert">
-          Sales receipt saved as draft, you can edit and create it later!
-          {/* Reference Number: {referenceNo} */}
+        <div
+          className="alert alert-info d-flex align-items-center shadow-sm mb-4"
+          role="alert"
+        >
+          <i className="bi bi-save-fill me-3 fs-4"></i>
+          <div>
+            <strong>Saved as Draft!</strong> You can edit and create it later.
+          </div>
         </div>
       )}
       {submissionStatus === "error" && (
-        <div className="alert alert-danger mb-3" role="alert">
-          Error submitting sales receipt. Please try again.
+        <div
+          className="alert alert-danger d-flex align-items-center shadow-sm mb-4"
+          role="alert"
+        >
+          <i className="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
+          <div>
+            <strong>Error!</strong> Failed to submit sales receipt. Please try
+            again.
+          </div>
         </div>
       )}
 
@@ -116,7 +161,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                 onChange={(e) =>
                   handleInputChange("receiptDate", e.target.value)
                 }
-                required
+                disabled
               />
               {validationErrors.receiptDate && (
                 <div className="invalid-feedback">
@@ -142,7 +187,6 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                 required
               >
                 <option value="">Select Payment Mode</option>
-                {/* Populate payment modes dynamically */}
                 {paymentModes.map((mode) => (
                   <option key={mode.paymentModeId} value={mode.paymentModeId}>
                     {mode.mode}
@@ -202,7 +246,17 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                     onChange={(e) => setSiSearchTerm(e.target.value)}
                     autoFocus={false}
                   />
-                  {siSearchTerm && (
+                  {isSalesInvoiceOptionsFetching && (
+                    <span className="input-group-text bg-transparent border-start-0">
+                      <div
+                        className="spinner-border spinner-border-sm text-primary"
+                        role="status"
+                      >
+                        <span className="visually-hidden">Loading...</span>
+                      </div>
+                    </span>
+                  )}
+                  {siSearchTerm && !isSalesInvoiceOptionsFetching && (
                     <span
                       className="input-group-text bg-transparent"
                       style={{
@@ -228,13 +282,11 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                       }}
                     >
                       {salesInvoiceOptions
-                        .filter((si) =>
-                          si.referenceNo
-                            ?.replace(/\s/g, "")
-                            ?.toLowerCase()
-                            .includes(
-                              siSearchTerm.toLowerCase().replace(/\s/g, "")
-                            )
+                        .filter(
+                          (si) =>
+                            !formData.salesInvoiceReferenceNumbers.includes(
+                              si.referenceNo,
+                            ),
                         )
                         .map((si) => (
                           <li key={si.salesInvoiceId}>
@@ -248,7 +300,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                               <span className="me-3">
                                 <i className="bi bi-file-earmark-text"></i>
                               </span>{" "}
-                              {si?.referenceNo}
+                              {si?.referenceNo} - {si?.inVoicedPersonName || ""}
                             </button>
                           </li>
                         ))}
@@ -257,8 +309,8 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                           ?.replace(/\s/g, "")
                           ?.toLowerCase()
                           .includes(
-                            siSearchTerm.toLowerCase().replace(/\s/g, "")
-                          )
+                            siSearchTerm.toLowerCase().replace(/\s/g, ""),
+                          ),
                       ).length === 0 && (
                         <li className="dropdown-item text-center">
                           <span className="me-3">
@@ -286,21 +338,23 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
 
               {formData.salesInvoiceReferenceNumbers.length > 0 && (
                 <label htmlFor="salesInvoice" className="form-label mt-3">
-                  Selected Sales Invoice Reference Numbers
+                  Selected Sales Invoices
                 </label>
               )}
 
               {/* Display selected reference numbers */}
               <ul className="list-group mt-2">
-                {formData.salesInvoiceReferenceNumbers.map((referenceNo) => (
+                {formData.selectedSalesInvoices.map((invoice) => (
                   <li
-                    key={referenceNo}
+                    key={invoice.referenceNo}
                     className="list-group-item d-flex justify-content-between align-items-center"
                   >
-                    {referenceNo}
+                    {invoice.referenceNo} - {invoice.inVoicedPersonName || ""}
                     <button
                       className="btn  btn-outline-danger btn-sm"
-                      onClick={() => handleRemoveSalesInvoice(referenceNo)}
+                      onClick={() =>
+                        handleRemoveSalesInvoice(invoice.referenceNo)
+                      }
                     >
                       Remove
                     </button>
@@ -346,13 +400,14 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                   <tr key={index}>
                     <td>{item.referenceNo}</td>
                     <td>{item?.referenceNumber}</td>
-                    <td>{item.totalAmount.toFixed(2)}</td>
-                    <td>{item.amountDue.toFixed(2)}</td>
+                    <td className="small">{item.totalAmount.toFixed(2)}</td>
+                    <td className="small">{item.amountDue.toFixed(2)}</td>
                     <td>
                       <input
                         type="number"
                         className="form-control"
-                        value={item.excessAmount}
+                        value={item.excessAmount.toFixed(2)}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) => {
                           const value = parseFloat(e.target.value);
                           const positiveValue = isNaN(value)
@@ -362,7 +417,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                           handleItemDetailsChange(
                             index,
                             "excessAmount",
-                            positiveValue
+                            positiveValue,
                           );
                         }}
                       />
@@ -371,7 +426,8 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                       <input
                         type="number"
                         className="form-control"
-                        value={item.outstandingAmount}
+                        value={item.outstandingAmount.toFixed(2)}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) => {
                           const value = parseFloat(e.target.value);
                           const positiveValue = isNaN(value)
@@ -381,7 +437,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                           handleItemDetailsChange(
                             index,
                             "outstandingAmount",
-                            positiveValue
+                            positiveValue,
                           );
                         }}
                       />
@@ -397,6 +453,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                             : ""
                         }`}
                         value={item.payment}
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) => {
                           const value = parseFloat(e.target.value);
                           const positiveValue = isNaN(value)
@@ -406,7 +463,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                           handleItemDetailsChange(
                             index,
                             "payment",
-                            positiveValue
+                            positiveValue,
                           );
                         }}
                       />
@@ -417,17 +474,40 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                       )}
                     </td>
                     <td className="text-end">
-                      {item.customerBalance.toFixed(2)}
-                    </td>
-                    <td>
+                      <span
+                        className={`fw-semibold ${
+                          item.customerBalance > 0
+                            ? "text-success"
+                            : "text-muted"
+                        }`}
+                      >
+                        {formatTotals(item.customerBalance.toFixed(2))}
+                      </span>
                       {item.customerBalance > 0 && (
+                        <i
+                          className="bi bi-arrow-right text-success ms-1"
+                          title="Excess available"
+                        ></i>
+                      )}
+                    </td>
+                    <td className="text-center">
+                      {item.customerBalance > 0 ? (
                         <button
                           type="button"
-                          className="btn btn-sm btn-outline-primary"
+                          className="btn btn-sm btn-success d-flex align-items-center gap-1"
                           onClick={() => handleAddToExcess(index)}
+                          title={`Add ${formatTotals(
+                            item.customerBalance.toFixed(2),
+                          )} to excess amount`}
                         >
-                          Add to Excess
+                          <i className="bi bi-plus-circle"></i>
+                          <span className="d-none d-lg-inline">Add</span>
                         </button>
+                      ) : (
+                        <i
+                          className="bi bi-check-circle-fill text-success fs-5"
+                          title="Payment settled"
+                        ></i>
                       )}
                     </td>
                   </tr>
@@ -437,14 +517,14 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
                 <tr>
                   <td colSpan="7"></td>
                   <th>Total Excess Amount</th>
-                  <td className="text-end">
+                  <td className="text-end text-primary">
                     {calculateTotalExcessAmountAmount().toFixed(2)}
                   </td>
                 </tr>
                 <tr>
                   <td colSpan="7"></td>
                   <th>Total Outstanding Amount</th>
-                  <td className="text-end">
+                  <td className="text-end text-danger">
                     {calculateTotalOutstandingAmountAmount().toFixed(2)}
                   </td>
                 </tr>
@@ -468,7 +548,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
         )}
 
         {/* Attachments */}
-        <h4>4. Attachments</h4>
+        {/* <h4>4. Attachments</h4>
         <div className="col-md-6 mb-3">
           <label htmlFor="attachment" className="form-label">
             Attachments (if any)
@@ -488,14 +568,14 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
               {validationErrors.attachments}
             </div>
           )}
-        </div>
+        </div> */}
 
         {/* Actions */}
         <div className="mb-3">
           <button
             type="button"
             className="btn btn-primary me-2"
-            onClick={() => handleSubmit(false)}
+            onClick={() => handleSubmitClick(false)}
             disabled={
               !formData.selectedSalesInvoices?.length > 0 ||
               loading ||
@@ -509,10 +589,10 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
               "Submit"
             )}
           </button>
-          <button
+          {/* <button
             type="button"
             className="btn btn-secondary me-2"
-            onClick={() => handleSubmit(true)}
+            onClick={() => handleSubmitClick(true)}
             disabled={
               !formData.selectedSalesInvoices?.length > 0 ||
               loading ||
@@ -533,7 +613,7 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
             disabled={loading || loadingDraft || submissionStatus !== null}
           >
             Print
-          </button>
+          </button> */}
           <button
             type="button"
             className="btn btn-danger"
@@ -544,6 +624,167 @@ const SalesReceipt = ({ handleClose, handleUpdated }) => {
           </button>
         </div>
       </form>
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <>
+          <div className="modal fade show d-block" tabIndex="-1" role="dialog">
+            <div className="modal-dialog modal-dialog-centered modal-lg">
+              <div className="modal-content border-0 shadow-lg">
+                <div className="modal-header bg-primary text-white">
+                  <h5 className="modal-title d-flex align-items-center gap-2">
+                    <i className="bi bi-check-circle-fill"></i>
+                    Confirm {isDraftSubmission ? "Draft" : "Submission"}
+                  </h5>
+                </div>
+                <div className="modal-body p-4">
+                  <div className="alert alert-info d-flex align-items-start mb-4">
+                    <i className="bi bi-info-circle-fill me-3 fs-4"></i>
+                    <div>
+                      Please review the receipt details before{" "}
+                      {isDraftSubmission ? "saving as draft" : "submitting"}.
+                    </div>
+                  </div>
+
+                  <div className="mb-4">
+                    <h6 className="fw-bold mb-3">Selected Invoices</h6>
+                    <div className="list-group">
+                      {formData.selectedSalesInvoices.map((si, index) => (
+                        <div
+                          key={index}
+                          className="list-group-item border rounded mb-2"
+                        >
+                          <div className="d-flex justify-content-between align-items-center mb-2">
+                            <span className="fw-semibold">
+                              {si.referenceNo}
+                            </span>
+                            {/* <span className="badge bg-secondary">
+                              {si.customer.customerName}
+                            </span> */}
+                          </div>
+                          <div className="row g-2 small">
+                            <div className="col-6">
+                              <span className="text-muted">Amount Due:</span>
+                              <span className="fw-semibold ms-2">
+                                {formatTotals(si.amountDue.toFixed(2))}
+                              </span>
+                            </div>
+                            <div className="col-6">
+                              <span className="text-muted">Payment:</span>
+                              <span className="fw-semibold ms-2 text-success">
+                                {formatTotals(si.payment.toFixed(2))}
+                              </span>
+                            </div>
+                            <div className="col-6">
+                              <span className="text-muted">Excess:</span>
+                              <span className="fw-semibold ms-2">
+                                {formatTotals(si.excessAmount.toFixed(2))}
+                              </span>
+                            </div>
+                            <div className="col-6">
+                              <span className="text-muted">Outstanding:</span>
+                              <span className="fw-semibold ms-2 text-danger">
+                                {formatTotals(si.outstandingAmount.toFixed(2))}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="card bg-primary bg-opacity-10 border-primary">
+                    <div className="card-body">
+                      <div className="row g-3">
+                        <div className="col-6">
+                          <p className="text-muted small mb-1">
+                            Total Amount Received
+                          </p>
+                          <p className="fs-5 fw-bold mb-0 text-primary">
+                            {formatTotals(calculateTotalAmount().toFixed(2))}
+                          </p>
+                        </div>
+                        <div className="col-6">
+                          <p className="text-muted small mb-1">
+                            Total Amount Collected
+                          </p>
+                          <p className="fs-5 fw-bold mb-0 text-success">
+                            {formatTotals(
+                              calculateTotalAmountCollected().toFixed(2),
+                            )}
+                          </p>
+                        </div>
+                        <div className="col-6">
+                          <p className="text-muted small mb-1">
+                            Total Excess Amount
+                          </p>
+                          <p className="fw-semibold mb-0">
+                            {formatTotals(
+                              calculateTotalExcessAmountAmount().toFixed(2),
+                            )}
+                          </p>
+                        </div>
+                        <div className="col-6">
+                          <p className="text-muted small mb-1">
+                            Total Outstanding Amount
+                          </p>
+                          <p className="fw-semibold mb-0 text-danger">
+                            {formatTotals(
+                              calculateTotalOutstandingAmountAmount().toFixed(
+                                2,
+                              ),
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="modal-footer bg-light">
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary"
+                    onClick={handleCancelSubmit}
+                  >
+                    <i className="bi bi-x-circle me-2"></i>
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className={`btn ${
+                      isDraftSubmission ? "btn-secondary" : "btn-primary"
+                    } px-4`}
+                    onClick={handleConfirmSubmit}
+                    disabled={loading || loadingDraft}
+                  >
+                    {loading || loadingDraft ? (
+                      <ButtonLoadingSpinner
+                        text={
+                          isDraftSubmission
+                            ? "Saving Draft..."
+                            : "Submitting..."
+                        }
+                      />
+                    ) : (
+                      <>
+                        <i
+                          className={`bi ${
+                            isDraftSubmission ? "bi-save" : "bi-check-circle"
+                          } me-2`}
+                        ></i>
+                        {isDraftSubmission
+                          ? "Confirm & Save Draft"
+                          : "Confirm & Submit"}
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="modal-backdrop fade show"></div>
+        </>
+      )}
     </div>
   );
 };

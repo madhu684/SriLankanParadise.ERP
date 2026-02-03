@@ -31,6 +31,8 @@
 
         public string? ReferenceNumber { get; set; }
 
+        public int? CashierSessionId { get; set; }
+
         public int PermissionId { get; set; }
     }
 }

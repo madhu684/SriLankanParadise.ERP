@@ -168,14 +168,16 @@ const SalesOrderList = () => {
                 Convert
               </button>
             )}
-          {hasPermission("Update Sales Order") && isAnyRowSelected && (
-            <button
-              className="btn btn-warning"
-              onClick={() => setShowUpdateSOForm(true)}
-            >
-              Edit
-            </button>
-          )}
+          {hasPermission("Update Sales Order") &&
+            selectedRowData[0]?.status === 1 &&
+            isAnyRowSelected && (
+              <button
+                className="btn btn-warning"
+                onClick={() => setShowUpdateSOForm(true)}
+              >
+                Edit
+              </button>
+            )}
         </div>
       </div>
       <div className="d-flex justify-content-end mb-3">

@@ -585,6 +585,12 @@
   <data name="RequisitionMastersRetrieved" xml:space="preserve">
     <value>Requisition masters retrieved</value>
   </data>
+  <data name="RequisitionMasterRetrieved" xml:space="preserve">
+    <value>Requisition master retrieved</value>
+  </data>
+  <data name="RequisitionMasterPatched" xml:space="preserve">
+    <value>Requisition master patched</value>
+  </data>
   <data name="RoleCreated" xml:space="preserve">
     <value>Role created successfully</value>
   </data>
@@ -1064,5 +1070,29 @@
   </data>
   <data name="SalesInvoiceDeleted" xml:space="preserve">
     <value>Sales Invoice deleted successfully</value>
+  </data>
+  <data name="CashierSessionRetrieved" xml:space="preserve">
+    <value>Cashier session retrieved successfully</value>
+  </data>
+  <data name="SalesCustomerCreated" xml:space="preserve">
+    <value>Sales customer created successfully</value>
+  </data>
+  <data name="SalesCustomerNotFound" xml:space="preserve">
+    <value>Sales customer not found</value>
+  </data>
+  <data name="SalesCustomerRetrieved" xml:space="preserve">
+    <value>Sales customer retrieved</value>
+  </data>
+  <data name="SalesCustomersRetrieved" xml:space="preserve">
+    <value>Sales customers retrieved</value>
+  </data>
+  <data name="CustomerUpdated" xml:space="preserve">
+    <value>Customer updated successfully</value>
+  </data>
+  <data name="ItemModesRetrived" xml:space="preserve">
+    <value>Item modes retrieved successfully</value>
+  </data>
+  <data name="ItemModesNotFound" xml:space="preserve">
+    <value>Item modes not found</value>
   </data>
 </root>

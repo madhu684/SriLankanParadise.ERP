@@ -1,6 +1,6 @@
-﻿using System.Net;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using SriLankanParadise.ERP.UserManagement.Business_Service;
 using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
@@ -8,6 +8,7 @@ using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.RequestModels;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Shared.Resources;
+using System.Net;
 
 namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 {
@@ -86,11 +87,16 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
 
         [HttpGet("GetIssueMastersWithoutDraftsByCompanyId/{companyId}")]
-        public async Task<ApiResponseModel> GetIssueMastersWithoutDraftsByCompanyId(int companyId)
+        public async Task<ApiResponseModel> GetIssueMastersWithoutDraftsByCompanyId(
+            int companyId,
+            [FromQuery] DateTime? date = null,
+            [FromQuery] int? issuedLocationId = null,
+            [FromQuery] string? issueType = null
+            )
         {
             try
             {
-                var issueMasters = await _issueMasterService.GetIssueMastersWithoutDraftsByCompanyId(companyId);
+                var issueMasters = await _issueMasterService.GetIssueMastersWithoutDraftsByCompanyId(companyId, date, issuedLocationId, issueType);
                 if (issueMasters != null)
                 {
                     var issueMasterDtos = _mapper.Map<IEnumerable<IssueMasterDto>>(issueMasters);
@@ -196,8 +202,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
             return Response;
-        }        
-        
+        }
+
         [HttpGet("getIssueMastersById/{id}")]
         public async Task<ApiResponseModel> GetIssueMastersById(int id)
         {
@@ -214,6 +220,54 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                     _logger.LogWarning(LogMessages.IssueMastersNotFound);
                     AddResponseMessage(Response, LogMessages.IssueMastersNotFound, null, true, HttpStatusCode.NotFound);
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
+        [HttpGet("GetPaginatedIssueMastersByCompanyIdLocationDateRange/{companyId}")]
+        public async Task<ApiResponseModel> GetPaginatedIssueMastersByCompanyIdLocationDateRange(
+            int companyId,
+            [FromQuery] string? issueType = null,
+            [FromQuery] int? locationId = null,
+            [FromQuery] DateTime? startDate = null,
+            [FromQuery] DateTime? endDate = null,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var result = await _issueMasterService.GetPaginatedIssueMastersByCompanyIdLocationDateRange(companyId, issueType, locationId, startDate, endDate, pageNumber, pageSize);
+
+                if (result.Items.Any())
+                {
+                    var issueMasterDtos = _mapper.Map<IEnumerable<IssueMasterDto>>(result.Items);
+
+                    var responseData = new
+                    {
+                        Data = issueMasterDtos,
+                        Pagination = new
+                        {
+                            result.TotalCount,
+                            result.PageNumber,
+                            result.PageSize,
+                            result.TotalPages,
+                            result.HasPreviousPage,
+                            result.HasNextPage
+                        }
+                    };
+
+                    AddResponseMessage(Response, "Paginated MIN retrieved successfully", responseData, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    AddResponseMessage(Response, "No MIN found", null, true, HttpStatusCode.NotFound);
+                }
+
             }
             catch (Exception ex)
             {

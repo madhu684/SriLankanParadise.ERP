@@ -77,7 +77,9 @@ const MinDetail = ({ show, handleClose, min }) => {
               <strong>MRN Reference No:</strong>{" "}
               <span
                 className={`p-1 badge ${
-                  min.requisitionMaster ? "text-bg-secondary" : " text-bg-danger"
+                  min.requisitionMaster
+                    ? "text-bg-secondary"
+                    : " text-bg-danger"
                 }`}
               >
                 {min.requisitionMaster
@@ -85,18 +87,28 @@ const MinDetail = ({ show, handleClose, min }) => {
                   : "MIN Without MRN"}
               </span>
             </p>
+            {min.requisitionMasterId === null && (
+              <p>
+                <strong>Patient Token No:</strong>{" "}
+                <span className="fw-semibold">{min?.tokenNo || "N/A"}</span>
+              </p>
+            )}
             {parseInt(min.status.toString().charAt(1), 10) === 2 && (
               <>
-                <p>
-                  <strong>Approved By:</strong> {min.approvedBy}
-                </p>
-                <p>
-                  <strong>Approved Date:</strong>{" "}
-                  {moment
-                    .utc(min?.approvedDate)
-                    .tz("Asia/Colombo")
-                    .format("YYYY-MM-DD hh:mm:ss A")}
-                </p>
+                {min?.approvedBy && (
+                  <p>
+                    <strong>Approved By:</strong> {min.approvedBy}
+                  </p>
+                )}
+                {min?.approvedDate && (
+                  <p>
+                    <strong>Approved Date:</strong>{" "}
+                    {moment
+                      .utc(min?.approvedDate)
+                      .tz("Asia/Colombo")
+                      .format("YYYY-MM-DD hh:mm:ss A")}
+                  </p>
+                )}
               </>
             )}
           </div>
@@ -108,7 +120,6 @@ const MinDetail = ({ show, handleClose, min }) => {
             <tr>
               <th>Item Name</th>
               <th>Unit</th>
-              <th>Item Batch</th>
               <th>Dispatched Quantity</th>
               {/* <th>Received Quantity</th>
               <th>Returned Quantity</th> */}
@@ -120,7 +131,6 @@ const MinDetail = ({ show, handleClose, min }) => {
                 <tr key={index}>
                   <td>{item.itemMaster?.itemName}</td>
                   <td>{item.itemMaster?.unit.unitName}</td>
-                  <td>{item.batch?.batchRef}</td>
                   <td>{item.quantity}</td>
                   {/* <td>
                     {isRequester ? (
@@ -132,6 +142,7 @@ const MinDetail = ({ show, handleClose, min }) => {
                             ? receivedQuantities[item.issueDetailId]
                             : item.receivedQuantity ?? 0
                         }
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleReceivedQuantityChange(
                             item.issueDetailId,
@@ -156,6 +167,7 @@ const MinDetail = ({ show, handleClose, min }) => {
                             ? returnedQuantities[item.issueDetailId]
                             : item.returnedQuantity ?? 0
                         }
+                        onWheel={(e) => e.target.blur()}
                         onChange={(e) =>
                           handleReturnedQuantityChange(
                             item.issueDetailId,

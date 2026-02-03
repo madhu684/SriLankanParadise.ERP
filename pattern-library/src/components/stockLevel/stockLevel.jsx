@@ -1,12 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
 import { FaSearch } from "react-icons/fa";
 import useStockLevel from "./useStockLevel";
 import LoadingSpinner from "../loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
 import Pagination from "../common/Pagination/Pagination";
+import { UserContext } from "../../context/userContext";
 
 const StockLevel = () => {
   const {
-    companyLocations,
     selectedLocation,
     inventories,
     currentItems,
@@ -30,6 +30,11 @@ const StockLevel = () => {
     handleModalInputChange,
     handleModalSubmit,
   } = useStockLevel();
+
+  const { user, allLocations, userLocations, userLocationsLoading } =
+    useContext(UserContext);
+
+  const displayLocations = user?.userId === 1 ? allLocations : userLocations;
 
   return (
     <div className="container-sm mt-4" style={{ maxWidth: "1200px" }}>
@@ -61,14 +66,27 @@ const StockLevel = () => {
             <option value="" disabled>
               Select a Warehouse
             </option>
-            {companyLocations && companyLocations.length > 0 ? (
-              companyLocations
-                .filter((l) => l.locationTypeId === 2)
-                .map((item) => (
-                  <option key={item.id} value={item.locationId}>
-                    {item.locationName}
+            {/* {userLocations ? (
+              userLocations.map((item) => (
+                <option key={item.locationId} value={item.locationId}>
+                  {item.location.locationName}
+                </option>
+              ))
+            ) : (
+              <option>No warehouses available</option>
+            )} */}
+            {displayLocations ? (
+              displayLocations.map((item) => {
+                const locationId = item.locationId;
+                const locationName =
+                  item.location?.locationName || item.locationName;
+
+                return (
+                  <option key={locationId} value={locationId}>
+                    {locationName}
                   </option>
-                ))
+                );
+              })
             ) : (
               <option>No warehouses available</option>
             )}
@@ -260,6 +278,7 @@ const StockLevel = () => {
                           id="reorderLevel"
                           placeholder="Enter reorder level"
                           value={modalAdjustedVolumes.reOrderLevel ?? ""}
+                          onWheel={(e) => e.target.blur()}
                           onChange={(e) =>
                             handleModalInputChange(
                               "reOrderLevel",
@@ -279,6 +298,7 @@ const StockLevel = () => {
                           id="maxStockLevel"
                           placeholder="Enter max stock level"
                           value={modalAdjustedVolumes.maxStockLevel ?? ""}
+                          onWheel={(e) => e.target.blur()}
                           onChange={(e) =>
                             handleModalInputChange(
                               "maxStockLevel",

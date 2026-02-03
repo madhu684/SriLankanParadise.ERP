@@ -168,9 +168,26 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Where(l => l.MovementTypeId == movementTypeId)
                     .Include(l => l.Batch)
                     .ToListAsync();
+                
+                return inventoryMovements.Any() ? inventoryMovements : null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
-                
-                
+        public async Task<IEnumerable<LocationInventoryMovement>> ByDateRangeAndLocationId(DateTime fromDate, DateTime toDate, int locationId)
+        {
+            try
+            {
+                var inventoryMovements = await _dbContext.LocationInventoryMovements
+                    .Where(l => l.Date.HasValue && l.Date.Value.Date >= fromDate.Date && l.Date.Value.Date <= toDate.Date)
+                    .Where(l => l.LocationId == locationId)
+                    .Include(l => l.Batch)
+                    .Include(l => l.TransactionType)
+                    .ToListAsync();
+
                 return inventoryMovements.Any() ? inventoryMovements : null;
             }
             catch (Exception)

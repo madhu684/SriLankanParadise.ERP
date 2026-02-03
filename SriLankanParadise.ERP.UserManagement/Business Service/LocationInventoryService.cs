@@ -32,9 +32,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             return await _locationInventoryRepository.GetLocationInventoriesByLocationId(locationId);
         }
-        public async Task<IEnumerable<LocationInventory>> GetEmptyReturnItemLocationInventoriesByLocationId(int locationId)
+        public async Task<IEnumerable<LocationInventory>> GetEmptyReturnItemLocationInventoriesByLocationId(int companyId, int locationId)
         {
-            return await _locationInventoryRepository.GetEmptyReturnItemLocationInventoriesByLocationId(locationId);
+            return await _locationInventoryRepository.GetEmptyReturnItemLocationInventoriesByLocationId(companyId, locationId);
         }
 
         public async Task<IEnumerable<LocationInventory>> GetLocationInventoriesByLocationIdItemMasterId(int locationId, int itemMasrerId)
@@ -83,9 +83,9 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             return await _locationInventoryRepository.GetLowStockItems(supplierId, locationId);
         }
 
-        public async Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByItemName(int? locationId, string itemName)
+        public async Task<IEnumerable<LocationInventorySummary>> GetSumLocationInventoriesByItemName(int? locationId, string itemName, int? supplierId = null)
         {
-            return await _locationInventoryRepository.GetSumLocationInventoriesByItemName(locationId, itemName);
+            return await _locationInventoryRepository.GetSumLocationInventoriesByItemName(locationId, itemName, supplierId);
         }
 
         public async Task<IEnumerable<LocationInventorySummary>> GetLowStockItemsByLocationOnly(int locationId)
@@ -106,6 +106,21 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         public async Task UpdateReorderLevelMaxStockLevel(int locationId, int itemMasterId, LocationInventory locationInventory)
         {
             await _locationInventoryRepository.UpdateReorderLevelMaxStockLevel(locationId, itemMasterId, locationInventory);
+        }
+
+        public async Task<LocationInventorySummary> GetSumLocationInventoriesByLocationIdItemCode(int? locationId, string itemCode)
+        {
+            return await _locationInventoryRepository.GetSumLocationInventoriesByLocationIdItemCode(locationId, itemCode);
+        }
+
+        public async Task IncreaseInventoryByFIFO(int locationId, int itemMasterId, int transactionTypeId, decimal quantity, int? sourceLocationId = null)
+        {
+            await _locationInventoryRepository.IncreaseInventoryByFIFO(locationId, itemMasterId, transactionTypeId, quantity, sourceLocationId);
+        }
+
+        public async Task StockAdjustment(int locationInventoryId, decimal quantity)
+        {
+            await _locationInventoryRepository.StockAdjustment(locationInventoryId, quantity);
         }
     }
 }

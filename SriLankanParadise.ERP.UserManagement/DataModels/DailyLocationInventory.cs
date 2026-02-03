@@ -23,6 +23,10 @@ namespace SriLankanParadise.ERP.UserManagement.DataModels
 
         public string? BatchNo { get; set; }
 
+        public int? ReOrderLevel { get; set; }
+
+        public int? MaxStockLevel { get; set; }
+
         public virtual LocationInventory LocationInventory { get; set; } = null!;
 
         public virtual ItemMaster ItemMaster { get; set; } = null!;

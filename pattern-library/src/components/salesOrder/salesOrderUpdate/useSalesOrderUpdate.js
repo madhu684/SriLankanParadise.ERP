@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  get_all_customers_api,
   put_sales_order_api,
   put_sales_order_detail_api,
   post_sales_order_detail_api,
@@ -8,10 +7,10 @@ import {
   get_company_api,
   get_sales_persons_by_company_id_api,
   get_sales_persons_by_user_id_api,
+  get_customers_by_customer_type_api,
 } from "../../../services/salesApi";
 import {
   get_item_batches_by_item_master_id_api,
-  put_item_batch_api,
   get_charges_and_deductions_by_company_id_api,
   post_charges_and_deductions_applied_api,
   get_transaction_types_api,
@@ -112,24 +111,20 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
     }
   }, [submissionStatus]);
 
-  const fetchCustomers = async () => {
-    try {
-      const response = await get_all_customers_api();
-      return response.data.result || [];
-    } catch (error) {
-      console.error("Error fetching customers:", error);
-    }
-  };
-
   const {
     data: customers,
     isLoading: isCustomersLoading,
     isError: isCustomersError,
     error: customersError,
-    refetch: refetchCustomers,
   } = useQuery({
-    queryKey: ["customers"],
-    queryFn: fetchCustomers,
+    queryKey: ["customers", "salesCustomer"],
+    queryFn: async () => {
+      const response = await get_customers_by_customer_type_api(
+        sessionStorage?.getItem("companyId"),
+        "salesCustomer"
+      );
+      return response.data.result || [];
+    },
   });
 
   const fetchSalesPersons = async () => {
@@ -275,11 +270,12 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
         let salesOrderDetails = salesOrder.salesOrderDetails;
 
         // Fetch inventory data for all items in parallel
-        const inventoryPromises = salesOrderDetails.map((item) =>
-          get_sum_location_inventories_by_locationId_itemMasterId_api(
-            item.itemBatchItemMasterId,
-            salesOrder.inventoryLocationId
-          )
+        const inventoryPromises = salesOrderDetails.map(
+          async (item) =>
+            await get_sum_location_inventories_by_locationId_itemMasterId_api(
+              item.itemBatchItemMasterId,
+              salesOrder.inventoryLocationId
+            )
         );
         const inventoryResults = await Promise.all(inventoryPromises);
 
@@ -290,13 +286,15 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
             const availableStock =
               inventory?.data?.result?.totalStockInHand || 0;
 
+            console.log("inventory 289: ", inventory);
+
             const initializedCharges = chargesAndDeductionsApplied
               ?.filter(
                 (charge) => charge.lineItemId === item.itemBatch.itemMasterId
               )
               .map((charge) => {
                 let value;
-                if (charge.chargesAndDeduction.percentage) {
+                if (charge.chargesAndDeduction.percentage !== null) {
                   value =
                     (Math.abs(charge.appliedValue) /
                       (item.unitPrice * item.quantity)) *
@@ -349,7 +347,7 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
           ?.filter((charge) => !charge.lineItemId)
           .map((charge) => {
             let value;
-            if (charge.chargesAndDeduction.percentage) {
+            if (charge.chargesAndDeduction.percentage !== null) {
               value = (Math.abs(charge.appliedValue) / subTotal) * 100;
             } else {
               value = Math.abs(charge.appliedValue);
@@ -650,9 +648,7 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
       const customerId = directOrder ? null : formData.customerId;
       const status = isSaveAsDraft ? 0 : 1;
       const currentDate = new Date().toISOString();
-      let allDetailsBatchSuccessful;
-      let allDetailsSuccessful;
-      let allDetailsDeleteBatchSuccessful;
+      let putSalesOrderSuccessful;
 
       const isFormValid = validateForm(isSaveAsDraft);
       if (isFormValid) {
@@ -676,8 +672,9 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
           companyId: sessionStorage?.getItem("companyId") ?? null,
           createdDate: salesOrder.createdDate,
           lastUpdatedDate: currentDate,
-          permissionId: 27,
           salesPersonId: formData.salesPersonId,
+          inventoryLocationId: salesOrder.inventoryLocationId,
+          permissionId: 27,
         };
 
         console.log("Sales order data", salesOrderData);
@@ -686,283 +683,37 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
           salesOrderData
         );
 
-        if (company.batchStockType === "FIFO") {
-          const batchUpdates = [];
-          const detailsPromises = [];
+        putSalesOrderSuccessful =
+          response.status === 201 || response.status === 200;
 
-          const itemDetailsBatchData = formData.itemDetails.map(
-            async (item) => {
-              let remainingQuantity = item.quantity;
-
-              for (const batch of item.batches) {
-                const quantityToConsume = Math.min(
-                  remainingQuantity,
-                  batch.tempQuantity
-                );
-
-                const itemBatchUpdateData = {
-                  batchId: batch.batchId,
-                  itemMasterId: batch.itemMasterId,
-                  costPrice: batch.costPrice,
-                  sellingPrice: batch.sellingPrice,
-                  status: batch.status,
-                  companyId: batch.companyId,
-                  createdBy: batch.createdBy,
-                  createdUserId: batch.createdUserId,
-                  tempQuantity: batch.tempQuantity - quantityToConsume,
-                  locationId: batch.locationId,
-                  expiryDate: batch.expiryDate,
-                  permissionId: 1065,
-                };
-
-                batchUpdates.push(
-                  put_item_batch_api(
-                    batch.batchId,
-                    batch.itemMasterId,
-                    itemBatchUpdateData
-                  )
-                );
-
-                if (quantityToConsume > 0) {
-                  if (item.salesOrderDetailId != null) {
-                    detailsPromises.push(
-                      put_sales_order_detail_api(item.salesOrderDetailId, {
-                        itemBatchItemMasterId: batch.itemMasterId,
-                        itemBatchBatchId: batch.batchId,
-                        salesOrderId: salesOrder.salesOrderId,
-                        quantity: quantityToConsume,
-                        unitPrice: item.unitPrice,
-                        totalPrice:
-                          (item.totalPrice / item.quantity) * quantityToConsume,
-                        permissionId: 25,
-                      })
-                    );
-                  } else {
-                    detailsPromises.push(
-                      post_sales_order_detail_api({
-                        itemBatchItemMasterId: batch.itemMasterId,
-                        itemBatchBatchId: batch.batchId,
-                        salesOrderId: salesOrder.salesOrderId,
-                        quantity: quantityToConsume,
-                        unitPrice: item.unitPrice,
-                        totalPrice:
-                          (item.totalPrice / item.quantity) * quantityToConsume,
-                        permissionId: 25,
-                      })
-                    );
-                  }
-                }
-
-                remainingQuantity -= quantityToConsume;
-
-                if (remainingQuantity <= 0) break; // Stop iterating if all quantity consumed
-              }
-            }
-          );
-
-          await Promise.all(itemDetailsBatchData);
-
-          // Check if all details were successful
-          allDetailsBatchSuccessful = (await Promise.all(batchUpdates)).every(
-            (response) => response.status === 200
-          );
-
-          allDetailsSuccessful = (await Promise.all(detailsPromises)).every(
-            (response) => response.status === 201 || 200
-          );
-
-          const itemDetailsDeletedBatchData = itemIdsToBeDeleted.map(
-            async (item) => {
-              const batchUpdatePromises = item.batches.map(async (batch) => {
-                const itemBatchUpdateData = {
-                  batchId: batch.batchId,
-                  itemMasterId: batch.itemMasterId,
-                  costPrice: batch.costPrice,
-                  sellingPrice: batch.sellingPrice,
-                  status: batch.status,
-                  companyId: batch.companyId,
-                  createdBy: batch.createdBy,
-                  createdUserId: batch.createdUserId,
-                  tempQuantity: batch.tempQuantity,
-                  locationId: batch.locationId,
-                  expiryDate: batch.expiryDate,
-                  permissionId: 1065,
-                };
-
-                const detailsBatchApiResponse = await put_item_batch_api(
-                  batch.batchId,
-                  batch.itemMasterId,
-                  itemBatchUpdateData
-                );
-
-                return detailsBatchApiResponse;
-              });
-
-              // Wait for all batch update promises to resolve
-              const batchResponses = await Promise.all(batchUpdatePromises);
-
-              // Check if all batch updates were successful
-              const allBatchUpdatesSuccessful = batchResponses.every(
-                (detailsResponse) => detailsResponse.status === 200
-              );
-
-              return allBatchUpdatesSuccessful;
-            }
-          );
-
-          const detailsDeleteBatchResponse = await Promise.all(
-            itemDetailsDeletedBatchData
-          );
-
-          // Check if all batch updates for all items were successful
-          allDetailsDeleteBatchSuccessful = detailsDeleteBatchResponse.every(
-            (response) => response
-          );
-
-          // Define an array to store the salesOrderDetailIds to be deleted
-          const salesOrderDetailIdsToBeDeleted = [];
-
-          // Loop through each item in itemIdsToBeDeleted
-          for (const itemIdToBeDeleted of itemIdsToBeDeleted) {
-            const matchingSalesOrderDetails =
-              salesOrder.salesOrderDetails.filter(
-                (detail) =>
-                  detail.itemBatchItemMasterId ===
-                  itemIdToBeDeleted.itemBatchItemMasterId
-              );
-
-            // If matching salesOrderDetails are found, add their salesOrderDetailIds to the array
-            if (matchingSalesOrderDetails.length > 0) {
-              matchingSalesOrderDetails.forEach((detail) => {
-                salesOrderDetailIdsToBeDeleted.push(detail.salesOrderDetailId);
-              });
-            }
-          }
-
-          for (const salesOrderDetailId of salesOrderDetailIdsToBeDeleted) {
-            const response = await delete_sales_order_detail_api(
-              salesOrderDetailId
-            );
-            console.log(
-              `Successfully deleted item with ID: ${salesOrderDetailId}`
-            );
-          }
-
-          // Clear the itemIdsToBeDeleted array after deletion
-          setItemIdsToBeDeleted([]);
-        } else {
-          const itemDetailsBatchData = formData.itemDetails.map(
-            async (item) => {
-              const itemBatchUpdateData = {
-                batchId: item.batch.batchId,
-                itemMasterId: item.batch.itemMasterId,
-                costPrice: item.batch.costPrice,
-                sellingPrice: item.batch.sellingPrice,
-                status: item.batch.status,
-                companyId: item.batch.companyId,
-                createdBy: item.batch.createdBy,
-                createdUserId: item.batch.createdUserId,
-                tempQuantity: item.tempQuantity - item.quantity,
-                locationId: item.batch.locationId,
-                expiryDate: item.batch.expiryDate,
-                permissionId: 1065,
-              };
-
-              const detailsBatchApiResponse = await put_item_batch_api(
-                item.batch.batchId,
-                item.batch.itemMasterId,
-                itemBatchUpdateData
-              );
-
-              return detailsBatchApiResponse;
-            }
-          );
-
-          const detailsBatchResponse = await Promise.all(itemDetailsBatchData);
-
-          allDetailsBatchSuccessful = detailsBatchResponse.every(
-            (detailsResponse) => detailsResponse.status === 200
-          );
-
-          const itemDetailsData = formData.itemDetails.map(async (item) => {
-            let detailsApiResponse;
-            const detailsData = {
-              itemBatchItemMasterId: item.itemMasterId,
-              itemBatchBatchId: item.itemBatchId,
+        for (const itemDetail of formData.itemDetails) {
+          if (itemDetail.salesOrderDetailId === null) {
+            const itemDetailData = {
+              itemBatchItemMasterId: itemDetail.itemMasterId,
+              itemBatchBatchId: itemDetail.batchId,
               salesOrderId: salesOrder.salesOrderId,
-              quantity: item.quantity,
-              unitPrice: item.unitPrice,
-              totalPrice: item.totalPrice,
-              permissionId: 25,
+              quantity: itemDetail.quantity,
+              unitPrice: itemDetail.unitPrice,
+              totalPrice: itemDetail.totalPrice,
+              permissionId: 1065,
+            };
+            await post_sales_order_detail_api(itemDetailData);
+          } else {
+            const itemDetailData = {
+              itemBatchItemMasterId: itemDetail.itemMasterId,
+              itemBatchBatchId: itemDetail.batchId,
+              salesOrderId: salesOrder.salesOrderId,
+              quantity: itemDetail.quantity,
+              unitPrice: itemDetail.unitPrice,
+              totalPrice: itemDetail.totalPrice,
+              permissionId: 1065,
             };
 
-            if (item.salesOrderDetailId != null) {
-              // Call put_slaes_Order_detail_api for each item
-              detailsApiResponse = await put_sales_order_detail_api(
-                item.salesOrderDetailId,
-                detailsData
-              );
-            } else {
-              // Call post_slaes_Order_detail_api for each item
-              detailsApiResponse = await post_sales_order_detail_api(
-                detailsData
-              );
-            }
-
-            return detailsApiResponse;
-          });
-
-          const detailsResponses = await Promise.all(itemDetailsData);
-
-          allDetailsSuccessful = detailsResponses.every(
-            (detailsResponse) => detailsResponse.status === 201 || 200
-          );
-
-          const itemDetailsDeletedBatchData = itemIdsToBeDeleted.map(
-            async (item) => {
-              const itemBatchUpdateData = {
-                batchId: item.batch.batchId,
-                itemMasterId: item.batch.itemMasterId,
-                costPrice: item.batch.costPrice,
-                sellingPrice: item.batch.sellingPrice,
-                status: item.batch.status,
-                companyId: item.batch.companyId,
-                createdBy: item.batch.createdBy,
-                createdUserId: item.batch.createdUserId,
-                tempQuantity: item.tempQuantity,
-                locationId: item.batch.locationId,
-                expiryDate: item.batch.expiryDate,
-                permissionId: 1065,
-              };
-
-              const detailsBatchApiResponse = await put_item_batch_api(
-                item.batch.batchId,
-                item.batch.itemMasterId,
-                itemBatchUpdateData
-              );
-
-              return detailsBatchApiResponse;
-            }
-          );
-
-          const detailsDeleteBatchResponse = await Promise.all(
-            itemDetailsDeletedBatchData
-          );
-
-          allDetailsDeleteBatchSuccessful = detailsDeleteBatchResponse.every(
-            (detailsResponse) => detailsResponse.status === 200
-          );
-
-          for (const itemIdToBeDeleted of itemIdsToBeDeleted) {
-            const response = await delete_sales_order_detail_api(
-              itemIdToBeDeleted.salesOrderDetailId
-            );
-            console.log(
-              `Successfully deleted item with ID: ${itemIdToBeDeleted.salesOrderDetailId}`
+            await put_sales_order_detail_api(
+              itemDetail.salesOrderDetailId,
+              itemDetailData
             );
           }
-          // Clear the itmeIdsToBeDeleted array after deletion
-          setItemIdsToBeDeleted([]);
         }
 
         const updateChargesAndDeductionsAppliedResponse =
@@ -981,15 +732,21 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
             `Successfully deleted item with ID: ${chargesAndDeductionsAppliedIdToBeDeleted}`
           );
         }
-        // Clear the itmeIdsToBeDeleted array after deletion
         setChargesAndDeductionsAppliedIdsToBeDeleted([]);
 
-        if (
-          allDetailsSuccessful &&
-          allAppliedSuccessful &&
-          allDetailsBatchSuccessful &&
-          allDetailsDeleteBatchSuccessful
-        ) {
+        if (itemIdsToBeDeleted.length > 0) {
+          for (const itemIdToBeDeleted of itemIdsToBeDeleted) {
+            await delete_sales_order_detail_api(
+              itemIdToBeDeleted.salesOrderDetailId
+            );
+            console.log(
+              `Successfully deleted item with ID: ${itemIdToBeDeleted}`
+            );
+          }
+          setItemIdsToBeDeleted([]);
+        }
+
+        if (putSalesOrderSuccessful && allAppliedSuccessful) {
           if (isSaveAsDraft) {
             setSubmissionStatus("successSavedAsDraft");
             console.log("Sales order updated and saved as draft!", formData);
@@ -1180,11 +937,11 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
     });
     setValidFields({});
     setValidationErrors({});
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      itemMasterId: 0,
-      itemMaster: "",
-    }));
+    // setFormData((prevFormData) => ({
+    //   ...prevFormData,
+    //   itemMasterId: 0,
+    //   itemMaster: "",
+    // }));
   };
 
   const handlePrint = () => {
@@ -1554,7 +1311,8 @@ const useSalesOrderUpdate = ({ salesOrder, onFormSubmit }) => {
     setShowModal(false);
   };
 
-  console.log("formData", formData);
+  console.log("formData: ", formData);
+  console.log("itemIdsToBeDeleted: ", itemIdsToBeDeleted);
 
   return {
     formData,

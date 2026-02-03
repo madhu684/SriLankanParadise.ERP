@@ -8,7 +8,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
 
         Task<IEnumerable<RequisitionMaster>> GetAll();
 
-        Task<IEnumerable<RequisitionMaster>> GetRequisitionMastersWithoutDraftsByCompanyId(int companyId);
+        Task<IEnumerable<RequisitionMaster>> GetRequisitionMastersWithoutDraftsByCompanyId(int companyId, int? status = null, int? requestedToLocationId = null, int? requestedFromLocationId = null, string? issueType = null);
 
         Task ApproveRequisitionMaster(int requisitionMasterId, RequisitionMaster requisitionMaster);
 
@@ -17,6 +17,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task<RequisitionMaster> GetRequisitionMasterByRequisitionMasterId(int requisitionMasterId);
 
         Task<IEnumerable<RequisitionMaster>> GetRequisitionMastersByUserId(int userId);
+
+        Task<IEnumerable<RequisitionMaster>> GetRequisitionMastersWithFiltersByCompanyId(int companyId, DateTime? date = null, int? requestedToLocationId = null, int? requestedFromLocationId = null, string? issueType = null);
 
     }
 }
