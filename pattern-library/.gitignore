@@ -27,3 +27,6 @@ yarn-error.log*
 # Application configuration files
 appsettings.json
 appsettings.*.json
+
+# Tempary files
+.idea/

@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -6,45 +6,46 @@ import {
   Navigate,
 } from "react-router-dom";
 
-import Login from "./components/login/login";
-import Main from "./components/main";
-import Registration from "./components/registration/registration";
-import PurchaseRequisitionList from "./components/purchaseRequisition/PurchaseRequisitionList/PurchaseRequisitionList";
-import PurchaseOrderList from "./components/purchaseOrder/PurchaseOrderList/PurchaseOrderList";
-import GrnList from "./components/grn/grnList/grnList";
-import SalesOrderList from "./components/salesOrder/salesOrderList/salesOrderList";
-import SalesInvoiceList from "./components/salesInvoice/salesInvoiceList/salesInvoiceList";
-import ItemMasterList from "./components/itemMaster/itemMasterList/itemMasterList";
-import CategoryList from "./components/category/categoryList/categoryList";
-import UnitList from "./components/unit/unitList/unitList";
-import SalesReceiptList from "./components/salesReceipt/salesReceiptList/salesReceiptList";
-import MaterialRequisitionList from "./components/materialRequisition/materialRequisitionList/materialRequisitionList";
-import TransferRequisitionList from "./components/transferRequisition/transferRequisitionList/transferRequisitionList";
-import MinList from "./components/min/minList/minList";
-import TinList from "./components/tin/tinList/tinList";
-import ItemBatchUpdate from "./components/itemBatch/itemBatchUpdate/itemBatchUpdate";
-import ExpenseOutRequisitionList from "./components/expenseOutRequisition/expenseOutRequisitionList/expenseOutRequisitionList";
-import CashierExpenseOutList from "./components/cashierExpenseOut/cashierExpenseOutList/CashierExpenseOutList.jsx";
-import SupplierList from "./components/supplier/supplierMain/supplierList/supplierList";
-import StockReport from "./components/stockReport/stockReport";
-import SalesOrderReport from "./components/salesOrderReport/salesOrderReport";
-import UserRoleList from "./components/userRole/userRoleList/userRoleList";
-import SystemPrivilegeList from "./components/systemPrivilages/SystemPrivilageList/SystemPrivilageList";
-import UserAccountList from "./components/registration/userAccount/userAccountList";
-import LocationList from "./components/location/locationList/locationList";
-import StockManagement from "./components/stockManagement/stockManagement";
-import StockLevel from "./components/stockLevel/stockLevel";
-import InventoryAnalysisReport from "./components/inventoryAnalysisReport/InventoryAnalysisReport";
-import InventoryAnalysisAsAtDateReport from "./components/inventoryAnalysisReportAsAtDateReport/InventoryAnalysisAsAtDateReport";
-import PackingSlipList from "./components/packingSlip/packingSlipList/packingSlipList";
-import SupplierReturnList from "./components/supplierReturn/supplierReturnList/supplierReturnList";
-import EmptyReturnList from "./components/emptyReturn/emptyReturnList/emptyReturnList.jsx";
-import RolePermissionMapping from "./components/rolePermissionMapping/RolePermissionMapping";
-import CustomerList from "./components/customer/customerList/CustomerList";
-import CollectionReport from "./components/collectionReport/CollectionReport";
-import ManagerCollectionReport from "./components/ManagerCollectionReport/ManagerCollectionReport";
-import CustomerInqueryReport from "./components/customerInqueryReport/CustomerInqueryReport.jsx";
-import MinReport from "./components/MinReport/MinReport.jsx";
+import Login from "features/user-management/login/login";
+import Main from "layout/main";
+import Registration from "features/user-management/registration/registration";
+import PurchaseRequisitionList from "features/purchase/purchaseRequisition/PurchaseRequisitionList/PurchaseRequisitionList";
+import PurchaseOrderList from "features/purchase/purchaseOrder/PurchaseOrderList/PurchaseOrderList";
+import GrnList from "features/purchase/grn/grnList/grnList";
+import SalesOrderList from "features/sales/salesOrder/salesOrderList/salesOrderList";
+import SalesInvoiceList from "features/sales/salesInvoice/salesInvoiceList/salesInvoiceList";
+import ItemMasterList from "features/inventory/itemMaster/itemMasterList/itemMasterList";
+import CategoryList from "features/inventory/category/categoryList/categoryList";
+import UnitList from "features/inventory/unit/unitList/unitList";
+import SalesReceiptList from "features/sales/salesReceipt/salesReceiptList/salesReceiptList";
+import MaterialRequisitionList from "features/purchase/materialRequisition/materialRequisitionList/materialRequisitionList";
+import TransferRequisitionList from "features/purchase/transferRequisition/transferRequisitionList/transferRequisitionList";
+import MinList from "features/purchase/min/minList/minList";
+import TinList from "features/purchase/tin/tinList/tinList";
+import ItemBatchUpdate from "features/purchase/itemBatch/itemBatchUpdate/itemBatchUpdate";
+import ExpenseOutRequisitionList from "features/sales/expenseOutRequisition/expenseOutRequisitionList/expenseOutRequisitionList";
+import CashierExpenseOutList from "features/sales/cashierExpenseOut/cashierExpenseOutList/CashierExpenseOutList";
+import SupplierList from "features/purchase/supplier/supplierMain/supplierList/supplierList";
+import StockReport from "features/reports/stockReport/stockReport";
+import SalesOrderReport from "features/reports/salesOrderReport/salesOrderReport";
+import UserRoleList from "features/user-management/userRole/userRoleList/userRoleList";
+import SystemPrivilegeList from "features/user-management/systemPrivilages/SystemPrivilageList/SystemPrivilageList";
+import UserAccountList from "features/user-management/registration/userAccount/userAccountList";
+import LocationList from "features/inventory/location/locationList/locationList";
+import StockManagement from "features/inventory/stockManagement/stockManagement";
+import StockLevel from "features/inventory/stockLevel/stockLevel";
+import InventoryAnalysisReport from "features/reports/inventoryAnalysisReport/InventoryAnalysisReport";
+import InventoryAnalysisAsAtDateReport from "features/reports/inventoryAnalysisReportAsAtDateReport/InventoryAnalysisAsAtDateReport";
+import PackingSlipList from "features/sales/packingSlip/packingSlipList/packingSlipList";
+import SupplierReturnList from "features/purchase/supplierReturn/supplierReturnList/supplierReturnList";
+import EmptyReturnList from "features/inventory/emptyReturn/emptyReturnList/emptyReturnList.jsx";
+import RolePermissionMapping from "features/user-management/rolePermissionMapping/RolePermissionMapping";
+import CustomerList from "features/sales/customer/customerList/CustomerList";
+import CollectionReport from "features/reports/collectionReport/CollectionReport";
+import ManagerCollectionReport from "features/reports/ManagerCollectionReport/ManagerCollectionReport";
+import CustomerInqueryReport from "features/reports/customerInqueryReport/CustomerInqueryReport";
+import MinReport from "features/reports/MinReport/MinReport";
+import NotFound from "common/components/NotFound/NotFound";
 
 const Routers = () => {
   return (
@@ -145,8 +146,8 @@ const Routers = () => {
           </Route>
         </Route>
 
-        {/* Catch all - redirect to login */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        {/* Catch all - Page Not Found */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );
