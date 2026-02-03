@@ -239,7 +239,7 @@ const useMenu = (props = {}) => {
   // Redirect after logout
   useEffect(() => {
     if (isLogout) {
-      navigate("/login/login", { replace: true });
+      navigate("/login", { replace: true });
     }
   }, [isLogout, navigate]);
 
