@@ -1,10 +1,15 @@
-﻿import React from "react";
+import React, { useMemo } from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import moment from "moment";
 import useTinAccept from "./tinAccept.js";
 import ButtonLoadingSpinner from "common/components/loadingSpinner/buttonLoadingSpinner/buttonLoadingSpinner";
+import { useQuery } from "@tanstack/react-query";
+import {
+  get_requisition_master_by_id_api,
+  get_issue_masters_by_requisition_master_id_api,
+} from "../../../services/purchaseApi";
 
-const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
+const TinAccept = ({ refetch, setRefetch, show, handleClose, tin, trnId }) => {
   const {
     approvalStatus,
     loading,
@@ -44,6 +49,53 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
     const issuedQty = parseFloat(item.quantity || 0);
     return receivedQty > issuedQty;
   };
+
+  // Fetch TRN details (requisition master with requisition details)
+  const { data: trnDetails } = useQuery({
+    queryKey: ["trnDetails", trnId],
+    queryFn: async () => {
+      const response = await get_requisition_master_by_id_api(trnId);
+      return response.data.result || null;
+    },
+    enabled: !!trnId,
+  });
+
+  // Fetch all TINs for this TRN
+  const { data: allTins } = useQuery({
+    queryKey: ["tins", trnId],
+    queryFn: async () => {
+      const response = await get_issue_masters_by_requisition_master_id_api(trnId);
+      return response.data.result || [];
+    },
+    enabled: !!trnId,
+  });
+
+  // Compute items from TRN that are not yet fully covered by TINs
+  const pendingItems = useMemo(() => {
+    if (!trnDetails?.requisitionDetails) return [];
+
+    // Aggregate issued quantities per itemMasterId from all TINs
+    const issuedQtyByItem = {};
+    allTins?.forEach((tin) => {
+      tin.issueDetails?.forEach((detail) => {
+        const itemId = detail.itemMasterId;
+        issuedQtyByItem[itemId] =
+          (issuedQtyByItem[itemId] || 0) + (detail.quantity || 0);
+      });
+    });
+
+    // Filter items where issued qty is 0 (fully not issued)
+    return trnDetails.requisitionDetails
+      .filter((rd) => {
+        const issuedQty = parseFloat(issuedQtyByItem[rd.itemMasterId] || 0);
+        return issuedQty === 0;
+      })
+      .map((rd) => ({
+        ...rd,
+        issuedQuantity: issuedQtyByItem[rd.itemMasterId] || 0,
+        pendingQuantity: (parseFloat(rd.quantity || 0) - (issuedQtyByItem[rd.itemMasterId] || 0)),
+      }));
+  }, [trnDetails, allTins]);
 
   return (
     <Modal
@@ -209,6 +261,37 @@ const TinAccept = ({ refetch, setRefetch, show, handleClose, tin }) => {
             })}
           </tbody>
         </table>
+
+        {/* Not Issued Items Section */}
+        {pendingItems.length > 0 && (
+          <div className="mt-5">
+            <hr className="my-4" />
+            <div className="d-flex align-items-center mb-3">
+              <h6 className="mb-0 text-danger">Not Issued Items</h6>
+              <span className="badge bg-danger ms-2">{pendingItems.length} items</span>
+            </div>
+            
+            <table className="table mt-2">
+              <thead className="table-light">
+                <tr>
+                  <th>Item Name</th>
+                  <th>Unit</th>
+                  <th>Requested Qty</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingItems.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.itemMaster?.itemName || "N/A"}</td>
+                    <td>{item.itemMaster?.unit?.unitName || "N/A"}</td>
+                    <td className="fw-bold">{item.quantity}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
         <div ref={alertRef}></div>
         {approvalStatus === "approved" && (
           <div

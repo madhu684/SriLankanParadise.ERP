@@ -31,6 +31,7 @@ const TinsListDetail = ({ refetch, setRefetch, trnId, handleBack }) => {
       return requisitionMasterResponse.data.result || [];
     } catch (error) {
       console.log("Error fetching TINS for the given TRN id", error);
+      return [];
     }
   };
 
@@ -58,6 +59,7 @@ const TinsListDetail = ({ refetch, setRefetch, trnId, handleBack }) => {
         <hr />
       </div>
 
+      <h5>Transfer Issue Notes List</h5>
       <div className="table-responsive">
         <table className="table mt-2">
           <thead>
@@ -121,6 +123,7 @@ const TinsListDetail = ({ refetch, setRefetch, trnId, handleBack }) => {
             show={showTinAcceptModal}
             handleClose={handleCloseDetailTinModal}
             tin={tinDetail}
+            trnId={trnId}
           />
         )}
       </div>
@@ -129,16 +132,3 @@ const TinsListDetail = ({ refetch, setRefetch, trnId, handleBack }) => {
 };
 
 export default TinsListDetail;
-
-
-
-
-
-
-
-
-
-
-
-
-
