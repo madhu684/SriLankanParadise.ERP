@@ -7,6 +7,7 @@ using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Shared.Resources;
+using System;
 using System.Collections.Generic;
 using System.Net;
 
@@ -67,22 +68,18 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 var previousDateOnly = new DateOnly(previousDate.Year, previousDate.Month, previousDate.Day);
 
                 var alreadyStockedItemsLocInv = await _dailyLocationInventoryService.Get(previousDateOnly, locationId);
-
-                var in_ItemsLocInv = await _locationInventoryMovementService.ByDateRangeLocationIdMovementTypeId(fromDate, toDate, locationId, 1);
-                var out_ItemsLocInv = await _locationInventoryMovementService.ByDateRangeLocationIdMovementTypeId(fromDate, toDate, locationId, 2);
+                var allMovements = await _locationInventoryMovementService.ByDateRangeAndLocationId(fromDate, toDate, locationId);
 
                 if (alreadyStockedItemsLocInv != null && alreadyStockedItemsLocInv.Any())
                 {
                     foreach (var item in alreadyStockedItemsLocInv)
                     {
-                        var location = await _locationService.GetLocationByLocationId(item.LocationId);
-
                         inventoryItems.Add(new StockReportDto
                         {
                             itemId = item.ItemMasterId,
                             batchId = item.BatchId,
                             batchNumber = item.Batch?.BatchRef ?? "-",
-                            location = location?.LocationName ?? "-",
+                            location = item.Location?.LocationName,
                             itemName = item.ItemMaster?.ItemName ?? "-",
                             itemCode = item.ItemMaster?.ItemCode ?? "-",
                             unitName = item.ItemMaster?.Unit?.UnitName ?? "-",
@@ -90,53 +87,101 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                             openingBalance = item.StockInHand ?? 0,
                             totalIn = 0,
                             totalOut = 0,
-                            closingBalance = 0
+                            closingBalance = 0,
+                            salesOrder = 0,
+                            purchaseOrder = 0,
+                            salesInvoice = 0,
+                            grn = 0,
+                            min = 0,
+                            tin = 0,
+                            productionIn = 0,
+                            productionOut = 0,
+                            packingSlip = 0,
+                            supplierReturnNote = 0,
+                            emptyReturnIn = 0,
+                            emptyReturnOut = 0,
+                            emptyReturnReduce = 0,
+                            adjustIn = 0,
+                            adjustOut = 0
                         });
                     }
                 }
 
-
-                if (in_ItemsLocInv != null && in_ItemsLocInv.Any())
+                // add movements
+                if (allMovements != null && allMovements.Any())
                 {
-                    foreach (var in_Item in in_ItemsLocInv)
+                    foreach (var movement in allMovements)
                     {
-                        if (inventoryItems.Any(i => i.itemId == in_Item.ItemMasterId && in_Item.BatchId == i.batchId))
-                        {
-                            var index = inventoryItems.FindIndex(i => i.itemId == in_Item.ItemMasterId && in_Item.BatchId == i.batchId);
-                            inventoryItems[index].totalIn += in_Item.Qty ?? 0;
-                        }
-                        else
-                        {
-                            var itemMaster = await _itemMasterService.GetItemMasterByItemMasterId(in_Item.ItemMasterId);
-                            var location = await _locationService.GetLocationByLocationId(in_Item.LocationId);
+                        var itemDto = inventoryItems.FirstOrDefault(i => i.itemId == movement.ItemMasterId && i.batchId == movement.BatchId);
 
-                            inventoryItems.Add(new StockReportDto
+                        if (itemDto == null)
+                        {
+                            var itemMaster = await _itemMasterService.GetItemMasterByItemMasterId(movement.ItemMasterId);
+                            var location = await _locationService.GetLocationByLocationId(movement.LocationId);
+
+                            itemDto = new StockReportDto
                             {
-                                itemId = in_Item.ItemMasterId,
-                                batchId = in_Item.BatchId,
-                                batchNumber = in_Item.Batch?.BatchRef ?? "-",
+                                itemId = movement.ItemMasterId,
+                                batchId = movement.BatchId,
+                                batchNumber = movement.Batch?.BatchRef ?? "-",
                                 location = location.LocationName ?? "-",
                                 itemName = itemMaster.ItemName ?? "-",
                                 itemCode = itemMaster.ItemCode ?? "-",
                                 unitName = itemMaster.Unit?.UnitName ?? "-",
                                 reorderLevel = itemMaster.ReorderLevel ?? 0,
                                 openingBalance = 0,
-                                totalIn = in_Item.Qty ?? 0,
+                                totalIn = 0,
                                 totalOut = 0,
-                                closingBalance = 0
-                            });
+                                closingBalance = 0,
+                                salesOrder = 0,
+                                purchaseOrder = 0,
+                                salesInvoice = 0,
+                                grn = 0,
+                                min = 0,
+                                tin = 0,
+                                productionIn = 0,
+                                productionOut = 0,
+                                packingSlip = 0,
+                                supplierReturnNote = 0,
+                                emptyReturnIn = 0,
+                                emptyReturnOut = 0,
+                                emptyReturnReduce = 0,
+                                adjustIn = 0,
+                                adjustOut = 0
+                            };
+                            inventoryItems.Add(itemDto);
                         }
-                    }
-                }
 
-                if (out_ItemsLocInv != null && out_ItemsLocInv.Any())
-                {
-                    foreach (var out_Item in out_ItemsLocInv)
-                    {
-                        if (inventoryItems.Any(i => i.itemId == out_Item.ItemMasterId && out_Item.BatchId == i.batchId))
+                        decimal qty = movement.Qty ?? 0;
+
+                        // Map transaction types
+                        switch (movement.TransactionTypeId)
                         {
-                            var index = inventoryItems.FindIndex(i => i.itemId == out_Item.ItemMasterId && out_Item.BatchId == i.batchId);
-                            inventoryItems[index].totalOut += out_Item.Qty ?? 0;
+                            case 1: itemDto.salesOrder += qty; break;
+                            case 2: itemDto.purchaseOrder += qty; break;
+                            case 3: itemDto.salesInvoice += qty; break;
+                            case 4: itemDto.grn += qty; break;
+                            case 5: itemDto.min += qty; break;
+                            case 6: itemDto.tin += qty; break;
+                            case 7: itemDto.productionIn += qty; break;
+                            case 8: itemDto.productionOut += qty; break;
+                            case 9: itemDto.packingSlip += qty; break;
+                            case 10: itemDto.supplierReturnNote += qty; break;
+                            case 11: itemDto.emptyReturnIn += qty; break;
+                            case 12: itemDto.emptyReturnOut += qty; break;
+                            case 13: itemDto.emptyReturnReduce += qty; break;
+                            case 14: itemDto.adjustIn += qty; break;
+                            case 15: itemDto.adjustOut += qty; break;
+                        }
+
+                        // Calculate totalIn and totalOut based on MovementTypeId
+                        if (movement.MovementTypeId == 1) // In
+                        {
+                            itemDto.totalIn += qty;
+                        }
+                        else if (movement.MovementTypeId == 2) // Out
+                        {
+                            itemDto.totalOut += qty;
                         }
                     }
                 }
@@ -149,43 +194,12 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                 if (inventoryItems != null && inventoryItems.Any())
                 {
-                    var reportData = new List<StockReportDto>();
-
-                    foreach (var item in inventoryItems)
-                    {
-                        var report = new StockReportDto
-                        {
-                            itemId = item.itemId,
-                            batchId = item.batchId,
-                            batchNumber = item.batchNumber,
-                            location = item.location,
-                            itemName = item.itemName,
-                            itemCode = item.itemCode,
-                            unitName = item.unitName,
-                            reorderLevel = item.reorderLevel,
-                            openingBalance = item.openingBalance,
-                            totalIn = item.totalIn,
-                            totalOut = item.totalOut,
-                            closingBalance = item.closingBalance
-                        };
-                        reportData.Add(report);
-                    }
-
-                    if (reportData.Any())
-                    {
-                        AddResponseMessage(Response, LogMessages.StockReportRetrieved, reportData, true, HttpStatusCode.OK);
-                    }
-                    else
-                    {
-                        AddResponseMessage(Response, LogMessages.StockReportNotFound, new List<StockReportDto>(), true, HttpStatusCode.OK);
-                    }
+                    AddResponseMessage(Response, LogMessages.StockReportRetrieved, inventoryItems, true, HttpStatusCode.OK);
                 }
                 else
                 {
                     AddResponseMessage(Response, LogMessages.StockReportNotFound, new List<StockReportDto>(), true, HttpStatusCode.OK);
                 }
-
-
             }
             catch (Exception ex)
             {

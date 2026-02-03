@@ -9,12 +9,14 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
     public class AyuOMSService : IAyuOMSService
     {
         private readonly IHttpClientHelper _httpClientHelper;
+        private readonly ISalesInvoiceService _salesInvoiceService;
         private readonly string _baseUrl;
         private readonly string _baseUrlSigiriya;
 
-        public AyuOMSService(IHttpClientHelper httpClientHelper, IConfiguration configuration)
+        public AyuOMSService(IHttpClientHelper httpClientHelper, IConfiguration configuration, ISalesInvoiceService salesInvoiceService)
         {
             _httpClientHelper = httpClientHelper;
+            _salesInvoiceService = salesInvoiceService;
 
             _baseUrl = configuration.GetValue<string>("AyuOMS:BaseUrl")
                 ?? throw new InvalidOperationException("AyuOMS:BaseUrl configuration is missing");
@@ -71,6 +73,15 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             var jsonString = await _httpClientHelper.GetStringAsync(endpoint);
             var result = JArray.Parse(jsonString);
             return result;
+
+            // var invoices = await _salesInvoiceService.GetSalesInvoicesWithoutDraftsByCompanyId(companyId, date);
+            // var invoicedTokenNos = invoices.Where(i => i.TokenNo.HasValue).Select(i => i.TokenNo.Value).ToHashSet();
+
+            // var filteredResult = new JArray(result.Where(t =>
+            //     t["tokenNo"] == null || !invoicedTokenNos.Contains((int)t["tokenNo"])
+            // ));
+
+            // return filteredResult;
         }
     }
 }

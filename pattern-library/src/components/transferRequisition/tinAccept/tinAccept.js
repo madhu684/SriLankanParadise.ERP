@@ -71,7 +71,7 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
     tin?.status?.toString().charAt(1) === "5" ||
     (issuedetails?.length > 0 &&
       issuedetails.every(
-        (d) => d.receivedQuantity !== null && d.receivedQuantity !== undefined
+        (d) => d.receivedQuantity !== null && d.receivedQuantity !== undefined,
       ));
 
   const getStatusLabel = () => {
@@ -256,7 +256,7 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
   const increaseInventoryFifo = async (
     details,
     locationId,
-    sourceLocationId
+    sourceLocationId,
   ) => {
     console.log("=== increaseInventoryFifo STARTED ===");
     console.log("Details:", details);
@@ -284,7 +284,7 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
         const returnedQty = parseFloat(returnedQuantities[issueDetailId] || 0);
 
         console.log(
-          `Item ${itemMasterId}: Received=${receivedQty}, Returned=${returnedQty}`
+          `Item ${itemMasterId}: Received=${receivedQty}, Returned=${returnedQty}`,
         );
 
         // Handle received quantity
@@ -293,16 +293,15 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
           const payload = {
             locationId: parseInt(locationId, 10),
             itemMasterId: parseInt(itemMasterId, 10),
-            transactionTypeId: 5,
+            transactionTypeId: 7,
             quantity: receivedQty,
             sourceLocationId: parseInt(sourceLocationId, 10),
           };
           console.log("Payload:", payload);
 
           try {
-            const fifoResponse = await post_increase_inventory_fifo_api(
-              payload
-            );
+            const fifoResponse =
+              await post_increase_inventory_fifo_api(payload);
             console.log("API Response:", fifoResponse);
           } catch (apiError) {
             console.error("API call failed:", apiError);
@@ -316,16 +315,15 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
           const payload = {
             locationId: parseInt(sourceLocationId, 10),
             itemMasterId: parseInt(itemMasterId, 10),
-            transactionTypeId: 5,
+            transactionTypeId: 7,
             quantity: returnedQty,
             sourceLocationId: null,
           };
           console.log("Payload:", payload);
 
           try {
-            const fifoResponse = await post_increase_inventory_fifo_api(
-              payload
-            );
+            const fifoResponse =
+              await post_increase_inventory_fifo_api(payload);
             console.log("API Response:", fifoResponse);
           } catch (apiError) {
             console.error("API call failed:", apiError);
@@ -344,7 +342,7 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
     try {
       // 1. Fetch all TINs for this TRN to check overall progress
       const tinsResponse = await get_issue_masters_by_requisition_master_id_api(
-        tin.requisitionMasterId
+        tin.requisitionMasterId,
       );
       const allTins = tinsResponse?.data?.result || [];
 
@@ -429,37 +427,37 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
 
     issuedetails.forEach((item) => {
       const receivedQty = parseFloat(
-        receivedQuantities[item.issueDetailId] || 0
+        receivedQuantities[item.issueDetailId] || 0,
       );
       const returnedQty = parseFloat(
-        returnedQuantities[item.issueDetailId] || 0
+        returnedQuantities[item.issueDetailId] || 0,
       );
       const issuedQty = parseFloat(item.quantity || 0);
 
       // Check for negative quantities
       if (receivedQty < 0) {
         errors.push(
-          `Received quantity cannot be negative for item ${item.itemMasterId}`
+          `Received quantity cannot be negative for item ${item.itemMasterId}`,
         );
       }
 
       if (returnedQty < 0) {
         errors.push(
-          `Returned quantity cannot be negative for item ${item.itemMasterId}`
+          `Returned quantity cannot be negative for item ${item.itemMasterId}`,
         );
       }
 
       // Check if both received and returned quantities are 0
       if (receivedQty === 0 && returnedQty === 0) {
         errors.push(
-          `Both received and returned quantities cannot be 0 for item ${item.itemMasterId}`
+          `Both received and returned quantities cannot be 0 for item ${item.itemMasterId}`,
         );
       }
 
       // Check if received quantity plus returned quantity equals issued quantity
       if (receivedQty + returnedQty !== issuedQty) {
         errors.push(
-          `Received quantity plus returned quantity must equal issued quantity for item ${item.itemMasterId}`
+          `Received quantity plus returned quantity must equal issued quantity for item ${item.itemMasterId}`,
         );
       }
     });
@@ -509,7 +507,7 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
       await increaseInventoryFifo(
         tin.issueDetails,
         fromLocationId,
-        toLocationId
+        toLocationId,
       );
 
       console.log("increaseInventoryFifo completed successfully");

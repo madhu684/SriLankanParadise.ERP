@@ -57,5 +57,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             return await _locationInventoryMovementRepository.ByDateRangeLocationIdMovementTypeId(fromDate, toDate, locationId, movementTypeId);
         }
+
+        public async Task<IEnumerable<LocationInventoryMovement>> ByDateRangeAndLocationId(DateTime fromDate, DateTime toDate, int locationId)
+        {
+            return await _locationInventoryMovementRepository.ByDateRangeAndLocationId(fromDate, toDate, locationId);
+        }
     }
 }
