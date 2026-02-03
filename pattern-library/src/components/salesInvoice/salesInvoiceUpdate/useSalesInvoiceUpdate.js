@@ -29,7 +29,7 @@ import toast from "react-hot-toast";
 
 const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   const [useAppointment, setUseAppointment] = useState(
-    !!salesInvoice?.appointmentId
+    !!salesInvoice?.appointmentId,
   );
   const [appointmentSearchTerm, setAppointmentSearchTerm] = useState("");
   const [selectedAppointment, setSelectedAppointment] = useState(null);
@@ -78,7 +78,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
       if (!salesInvoice?.appointmentId) return null;
       const response = await get_appointment_by_id_api(
         sessionStorage.getItem("companyId"),
-        salesInvoice.appointmentId
+        salesInvoice.appointmentId,
       );
       return response.data.result;
     },
@@ -95,7 +95,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     queryFn: async () => {
       const response = await get_appointment_tokens_by_date_api(
         sessionStorage.getItem("companyId"),
-        formData.invoiceDate
+        formData.invoiceDate,
       );
       return response.data.result || [];
     },
@@ -107,7 +107,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
       const response = await get_item_masters_by_company_id_with_query_api(
         companyId,
         searchQuery,
-        true
+        true,
       );
       return response.data.result;
     } catch (error) {
@@ -128,9 +128,8 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   const fetchLocationInventories = async (locationId) => {
     try {
       if (!locationId) return [];
-      const response = await get_locations_inventories_by_location_id_api(
-        locationId
-      );
+      const response =
+        await get_locations_inventories_by_location_id_api(locationId);
       console.log("Location inventories:", response.data.result);
       return response.data.result || [];
     } catch (error) {
@@ -138,7 +137,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
         "Error fetching location inventories for location",
         locationId,
         ":",
-        error
+        error,
       );
       return [];
     }
@@ -165,7 +164,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   const fetchchargesAndDeductions = async () => {
     try {
       const response = await get_charges_and_deductions_by_company_id_api(
-        sessionStorage.getItem("companyId")
+        sessionStorage.getItem("companyId"),
       );
       return response.data.result;
     } catch (error) {
@@ -187,7 +186,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   const fetchTransactionTypes = async () => {
     try {
       const response = await get_transaction_types_api(
-        sessionStorage.getItem("companyId")
+        sessionStorage.getItem("companyId"),
       );
       return response.data.result;
     } catch (error) {
@@ -210,7 +209,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
       const response = await get_charges_and_deductions_applied_api(
         3,
         salesInvoice.salesInvoiceId,
-        sessionStorage.getItem("companyId")
+        sessionStorage.getItem("companyId"),
       );
       return response.data.result;
     } catch (error) {
@@ -231,7 +230,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   const fetchCompany = async () => {
     try {
       const response = await get_company_api(
-        sessionStorage?.getItem("companyId")
+        sessionStorage?.getItem("companyId"),
       );
       return response.data.result;
     } catch (error) {
@@ -268,8 +267,8 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
         const inventoryPromises = salesInvoiceDetails.map((item) =>
           get_sum_location_inventories_by_locationId_itemMasterId_api(
             item.itemBatchItemMasterId,
-            salesInvoice.locationId
-          )
+            salesInvoice.locationId,
+          ),
         );
         const inventoryResults = await Promise.all(inventoryPromises);
 
@@ -282,22 +281,21 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
 
             const initializedCharges = chargesAndDeductionsApplied
               ?.filter(
-                (charge) => charge.lineItemId === item.itemBatchItemMasterId
+                (charge) => charge.lineItemId === item.itemBatchItemMasterId,
               )
               .map((charge) => {
                 let value;
                 if (charge.chargesAndDeduction.percentage !== null) {
-                  value =
-                    (Math.abs(charge.appliedValue) /
-                      (item.unitPrice * item.quantity)) *
-                    100;
+                  // Calculate percentage value - Fixed calculation
+                  const baseAmount = item.unitPrice * item.quantity;
+                  value = (Math.abs(charge.appliedValue) / baseAmount) * 100;
                 } else {
                   value = Math.abs(charge.appliedValue);
                 }
                 return {
                   id: charge.chargesAndDeduction.chargesAndDeductionId,
                   name: charge.chargesAndDeduction.displayName,
-                  value: value.toFixed(2),
+                  value: parseFloat(value.toFixed(2)),
                   sign: charge.chargesAndDeduction.sign,
                   isPercentage: charge.chargesAndDeduction.percentage !== null,
                   chargesAndDeductionAppliedId:
@@ -310,10 +308,25 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
               .map((charge) => {
                 const displayName = charge.displayName;
                 const matchedCharge = initializedCharges.find(
-                  (c) => c.name === displayName
+                  (c) => c.name === displayName,
                 );
                 return matchedCharge || null;
               });
+
+            // Calculate the correct totalPrice for this item
+            const basePrice =
+              (parseFloat(item.quantity) || 0) *
+              (parseFloat(item.unitPrice) || 0);
+            let totalPrice = basePrice;
+            initializedCharges.forEach((charge) => {
+              const chargeValue = parseFloat(charge.value) || 0;
+              if (charge.isPercentage) {
+                const amount = (basePrice * chargeValue) / 100;
+                totalPrice += charge.sign === "+" ? amount : -amount;
+              } else {
+                totalPrice += charge.sign === "+" ? chargeValue : -chargeValue;
+              }
+            });
 
             return {
               salesInvoiceDetailId: item?.salesInvoiceDetailId,
@@ -325,16 +338,13 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
               stockInHand: availableStock,
               quantity: item.quantity,
               unitPrice: item.unitPrice,
-              totalPrice: item.totalPrice,
+              totalPrice: isNaN(totalPrice) ? 0 : totalPrice,
               chargesAndDeductions: sortedLineItemCharges,
             };
-          }
+          },
         );
 
-        const subTotal = deepCopySalesInvoice.salesInvoiceDetails.reduce(
-          (total, item) => total + item.totalPrice,
-          0
-        );
+        const subTotal = calculateSubTotal(initializedLineItemCharges);
 
         // Initialize common charges and deductions
         const initializedCommonCharges = chargesAndDeductionsApplied
@@ -342,20 +352,28 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           .map((charge) => {
             let value;
             if (charge.chargesAndDeduction.percentage !== null) {
-              // Calculate percentage value based on subtotal
-              value = (Math.abs(charge.appliedValue) / subTotal) * 100;
+              // Calculate percentage value based on subtotal - Fixed calculation
+              value = subTotal
+                ? (Math.abs(charge.appliedValue) / subTotal) * 100
+                : 0;
             } else {
               value = Math.abs(charge.appliedValue);
             }
             return {
               id: charge.chargesAndDeduction.chargesAndDeductionId,
               name: charge.chargesAndDeduction.displayName,
-              value: value.toFixed(2),
+              value: parseFloat(value.toFixed(2)),
               sign: charge.chargesAndDeduction.sign,
               isPercentage: charge.chargesAndDeduction.percentage !== null,
               chargesAndDeductionAppliedId: charge.chargesAndDeductionAppliedId,
             };
           });
+
+        const totalAmount = calculateTotalAmount(
+          subTotal,
+          initializedCommonCharges,
+          deepCopySalesInvoice?.discountAmount ?? 0,
+        );
 
         setFormData({
           salesInvoiceId: deepCopySalesInvoice?.salesInvoiceId ?? "",
@@ -368,8 +386,8 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
           tokenNo: deepCopySalesInvoice?.tokenNo ?? null,
           itemDetails: initializedLineItemCharges,
           attachments: deepCopySalesInvoice?.attachments ?? [],
-          totalAmount: deepCopySalesInvoice?.totalAmount ?? "",
-          subTotal: 0,
+          totalAmount: totalAmount,
+          subTotal: subTotal,
           commonChargesAndDeductions: initializedCommonCharges,
           salesOrderId: deepCopySalesInvoice?.salesOrderId ?? null,
           storeLocation: deepCopySalesInvoice?.locationId ?? null,
@@ -435,7 +453,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
 
               console.log(
                 `Applied charge for ${item.itemMasterId}: `,
-                appliedValue
+                appliedValue,
               );
 
               const chargesAndDeductionAppliedData = {
@@ -457,17 +475,17 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
               if (charge.chargesAndDeductionAppliedId) {
                 return await put_charges_and_deductions_applied_api(
                   charge.chargesAndDeductionAppliedId,
-                  chargesAndDeductionAppliedData
+                  chargesAndDeductionAppliedData,
                 );
               } else {
                 return await post_charges_and_deductions_applied_api(
-                  chargesAndDeductionAppliedData
+                  chargesAndDeductionAppliedData,
                 );
               }
-            })
+            }),
           );
           return appliedCharges;
-        })
+        }),
       );
 
       const commonChargesAndDeductions = await Promise.all(
@@ -502,9 +520,9 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
 
           return await put_charges_and_deductions_applied_api(
             charge.chargesAndDeductionAppliedId,
-            chargesAndDeductionAppliedData
+            chargesAndDeductionAppliedData,
           );
-        })
+        }),
       );
 
       // Concatenate chargesAndDeductionsAppliedData and commonChargesAndDeductions
@@ -525,22 +543,31 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
   };
 
   useEffect(() => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      subTotal: calculateSubTotal(),
-      totalAmount: calculateTotalAmount(),
-    }));
+    setFormData((prevFormData) => {
+      const subTotal = calculateSubTotal(prevFormData.itemDetails);
+      const totalAmount = calculateTotalAmount(
+        subTotal,
+        prevFormData.commonChargesAndDeductions,
+        prevFormData.deductionAmount,
+      );
+      return {
+        ...prevFormData,
+        subTotal,
+        totalAmount,
+      };
+    });
   }, [
     formData.itemDetails,
     formData.commonChargesAndDeductions,
     formData.deductionAmount,
+    chargesAndDeductions, // Added to ensure updates when charges configuration changes
   ]);
 
   const validateField = (
     fieldName,
     fieldDisplayName,
     value,
-    additionalRules = {}
+    additionalRules = {},
   ) => {
     let isFieldValid = true;
     let errorMessage = "";
@@ -607,19 +634,19 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     const isInvoiceDateValid = validateField(
       "invoiceDate",
       "Invoice date",
-      formData.invoiceDate
+      formData.invoiceDate,
     );
 
     const isDueDateValid = validateField(
       "dueDate",
       "Due date",
-      formData.dueDate
+      formData.dueDate,
     );
 
     const isReferenceNumberValid = validateField(
       "referenceNumber",
       "Reference Number",
-      formData.referenceNumber
+      formData.referenceNumber,
     );
 
     let isItemQuantityValid = true;
@@ -639,7 +666,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
         fieldName,
         fieldDisplayName,
         item.quantity,
-        additionalRules
+        additionalRules,
       );
 
       isItemQuantityValid = isItemQuantityValid && isValidQuantity;
@@ -696,7 +723,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
 
         const response = await put_sales_invoice_api(
           salesInvoice.salesInvoiceId,
-          salesInvoiceData
+          salesInvoiceData,
         );
 
         putSalesInvoiceSuccessful =
@@ -727,7 +754,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
 
             await put_sales_invoice_detail_api(
               itemDetail.salesInvoiceDetailId,
-              itemDetailData
+              itemDetailData,
             );
           }
         }
@@ -737,15 +764,15 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
 
         const allAppliedSuccessful =
           updateChargesAndDeductionsAppliedResponse.every(
-            (detailsResponse) => detailsResponse.status === 201 || 200
+            (detailsResponse) => detailsResponse.status === 201 || 200,
           );
 
         for (const chargesAndDeductionsAppliedIdToBeDeleted of chargesAndDeductionsAppliedIdsToBeDeleted) {
           const response = await delete_charges_and_deductions_applied_api(
-            chargesAndDeductionsAppliedIdToBeDeleted
+            chargesAndDeductionsAppliedIdToBeDeleted,
           );
           console.log(
-            `Successfully deleted item with ID: ${chargesAndDeductionsAppliedIdToBeDeleted}`
+            `Successfully deleted item with ID: ${chargesAndDeductionsAppliedIdToBeDeleted}`,
           );
         }
         setChargesAndDeductionsAppliedIdsToBeDeleted([]);
@@ -753,10 +780,10 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
         if (itemIdsToBeDeleted.length > 0) {
           for (const itemIdToBeDeleted of itemIdsToBeDeleted) {
             await delete_sales_invoice_detail_api(
-              itemIdToBeDeleted.salesInvoiceDetailId
+              itemIdToBeDeleted.salesInvoiceDetailId,
             );
             console.log(
-              `Successfully deleted item with ID: ${itemIdToBeDeleted.salesInvoiceDetailId}`
+              `Successfully deleted item with ID: ${itemIdToBeDeleted.salesInvoiceDetailId}`,
             );
           }
           setItemIdsToBeDeleted([]);
@@ -776,6 +803,11 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
             setLoading(false);
             setLoadingDraft(false);
             onFormSubmit();
+
+            // queryClient.invalidateQueries([
+            //   "appointments",
+            //   formData.invoiceDate,
+            // ]);
 
             queryClient.invalidateQueries([
               "salesInvoiceOptions",
@@ -805,21 +837,42 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
         const chargeIndex = parseInt(field.split("_")[1]);
 
         // Update the value of the corresponding charge or deduction
-        const updatedChargesAndDeductions = [
-          ...prevFormData.commonChargesAndDeductions,
-        ];
+        const updatedChargesAndDeductions =
+          prevFormData.commonChargesAndDeductions.map((charge, index) =>
+            index === chargeIndex
+              ? { ...charge, value: parseFloat(value) || 0 }
+              : charge,
+          );
 
-        updatedChargesAndDeductions[chargeIndex].value = value;
+        const subTotal = calculateSubTotal(prevFormData.itemDetails);
+        const totalAmount = calculateTotalAmount(
+          subTotal,
+          updatedChargesAndDeductions,
+          prevFormData.deductionAmount,
+        );
 
         // Return updated form data with the updated commonChargesAndDeductions array
         return {
           ...prevFormData,
           commonChargesAndDeductions: updatedChargesAndDeductions,
+          subTotal,
+          totalAmount,
         };
       } else {
+        const newValue =
+          field === "deductionAmount" ? parseFloat(value) || 0 : value;
+        const subTotal = calculateSubTotal(prevFormData.itemDetails);
+        const totalAmount = calculateTotalAmount(
+          subTotal,
+          prevFormData.commonChargesAndDeductions,
+          field === "deductionAmount" ? newValue : prevFormData.deductionAmount,
+        );
+
         return {
           ...prevFormData,
-          [field]: value,
+          [field]: newValue,
+          subTotal,
+          totalAmount,
         };
       }
     });
@@ -827,76 +880,73 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
 
   const handleItemDetailsChange = (index, field, value) => {
     setFormData((prevFormData) => {
-      const updatedItemDetails = [...prevFormData.itemDetails];
+      const updatedItemDetails = prevFormData.itemDetails.map((item, i) => {
+        if (i !== index) return item;
 
-      // Check if the field belongs to chargesAndDeductions
-      if (field.startsWith("chargesAndDeductions")) {
-        // Get the charge or deduction index
-        const chargeIndex = parseInt(field.split("_")[1]);
+        let updatedItem = { ...item };
+        // Check if the field belongs to chargesAndDeductions
+        if (field.startsWith("chargesAndDeductions")) {
+          // Get the charge or deduction index
+          const chargeIndex = parseInt(field.split("_")[1]);
 
-        // Update the value of the corresponding charge or deduction
-        updatedItemDetails[index].chargesAndDeductions[chargeIndex].value =
-          value;
-      } else {
-        // If the field is not part of chargesAndDeductions, update other fields
-        updatedItemDetails[index][field] = value;
-      }
-
-      // Ensure positive values for Quantities and Unit Prices
-      updatedItemDetails[index].quantity = Math.max(
-        0,
-        updatedItemDetails[index].quantity
-      );
-
-      updatedItemDetails[index].unitPrice = !isNaN(
-        parseFloat(updatedItemDetails[index].unitPrice)
-      )
-        ? Math.max(0, parseFloat(updatedItemDetails[index].unitPrice))
-        : 0;
-
-      // Calculate total price based on charges and deductions
-      const grandTotalPrice =
-        updatedItemDetails[index].isInventoryItem === true
-          ? updatedItemDetails[index].quantity *
-            updatedItemDetails[index].unitPrice
-          : updatedItemDetails[index].unitPrice;
-
-      let totalPrice =
-        updatedItemDetails[index].isInventoryItem === true
-          ? updatedItemDetails[index].quantity *
-            updatedItemDetails[index].unitPrice
-          : updatedItemDetails[index].unitPrice;
-
-      // Add or subtract charges and deductions from total price
-      updatedItemDetails[index].chargesAndDeductions.forEach((charge) => {
-        if (charge.isPercentage) {
-          // If charge is a percentage, calculate the amount and add/subtract it
-          const amount = (grandTotalPrice * charge.value) / 100;
-          if (charge.sign === "+") {
-            totalPrice += amount;
-          } else if (charge.sign === "-") {
-            totalPrice -= amount;
-          }
+          // Update the value of the corresponding charge or deduction
+          const updatedCharges = item.chargesAndDeductions.map(
+            (charge, cIdx) =>
+              cIdx === chargeIndex
+                ? { ...charge, value: parseFloat(value) || 0 }
+                : charge,
+          );
+          updatedItem.chargesAndDeductions = updatedCharges;
         } else {
-          // If charge is not a percentage, directly add/subtract the value
-          if (charge.sign === "+") {
-            totalPrice += charge.value;
-          } else if (charge.sign === "-") {
-            totalPrice -= charge.value;
-          }
+          // If the field is not part of chargesAndDeductions, update other fields
+          updatedItem[field] =
+            field === "quantity" || field === "unitPrice"
+              ? parseFloat(value) || 0
+              : value;
         }
+
+        // Ensure positive values for Quantities and Unit Prices
+        updatedItem.quantity = Math.max(0, updatedItem.quantity);
+        updatedItem.unitPrice = Math.max(0, updatedItem.unitPrice);
+
+        // Calculate total price based on charges and deductions
+        const basePrice =
+          updatedItem.isInventoryItem === true
+            ? updatedItem.quantity * updatedItem.unitPrice
+            : updatedItem.unitPrice;
+
+        let totalPrice = basePrice;
+
+        // Add or subtract charges and deductions from total price
+        updatedItem.chargesAndDeductions.forEach((charge) => {
+          const chargeValue = parseFloat(charge.value) || 0;
+          if (charge.isPercentage) {
+            // If charge is a percentage, calculate the amount and add/subtract it
+            const amount = (basePrice * chargeValue) / 100;
+            totalPrice += charge.sign === "+" ? amount : -amount;
+          } else {
+            // If charge is not a percentage, directly add/subtract the value
+            totalPrice += charge.sign === "+" ? chargeValue : -chargeValue;
+          }
+        });
+
+        // Ensure totalPrice is initialized and is a numerical value
+        updatedItem.totalPrice = isNaN(totalPrice) ? 0 : totalPrice;
+        return updatedItem;
       });
 
-      // Ensure totalPrice is initialized and is a numerical value
-      totalPrice = isNaN(totalPrice) ? 0 : totalPrice;
-
-      updatedItemDetails[index].totalPrice = totalPrice;
+      const subTotal = calculateSubTotal(updatedItemDetails);
+      const totalAmount = calculateTotalAmount(
+        subTotal,
+        prevFormData.commonChargesAndDeductions,
+        prevFormData.deductionAmount,
+      );
 
       return {
         ...prevFormData,
         itemDetails: updatedItemDetails,
-        subTotal: calculateSubTotal(),
-        totalAmount: calculateTotalAmount(),
+        subTotal,
+        totalAmount,
       };
     });
   };
@@ -919,11 +969,21 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
 
   const handleRemoveItem = (index, item, chargesAndDeductions) => {
     setFormData((prevFormData) => {
-      const updatedItemDetails = [...prevFormData.itemDetails];
-      updatedItemDetails.splice(index, 1);
+      const updatedItemDetails = prevFormData.itemDetails.filter(
+        (_, i) => i !== index,
+      );
+      const subTotal = calculateSubTotal(updatedItemDetails);
+      const totalAmount = calculateTotalAmount(
+        subTotal,
+        prevFormData.commonChargesAndDeductions,
+        prevFormData.deductionAmount,
+      );
+
       return {
         ...prevFormData,
         itemDetails: updatedItemDetails,
+        subTotal,
+        totalAmount,
       };
     });
 
@@ -945,11 +1005,6 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
         ]);
       }
     });
-    // setFormData((prevFormData) => ({
-    //   ...prevFormData,
-    //   itemMasterId: 0,
-    //   itemMaster: "",
-    // }));
   };
 
   const handlePrint = () => {
@@ -1144,7 +1199,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
 
     // Mark all existing items for deletion
     const existingItemsToDelete = formData.itemDetails.filter(
-      (item) => item.salesInvoiceDetailId !== null
+      (item) => item.salesInvoiceDetailId !== null,
     );
 
     if (existingItemsToDelete.length > 0) {
@@ -1186,22 +1241,23 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
     }, 600);
   };
 
-  const calculateSubTotal = () => {
-    return formData.itemDetails.reduce(
-      (total, item) => total + item.totalPrice,
-      0
+  const calculateSubTotal = (itemDetails = formData.itemDetails) => {
+    return itemDetails.reduce(
+      (total, item) => total + (parseFloat(item.totalPrice) || 0),
+      0,
     );
   };
 
-  const calculateTotalAmount = () => {
-    // Calculate total price based on item details
-    const subtotal = calculateSubTotal();
-
-    // Calculate total amount based on subtotal and common charges and deductions
+  const calculateTotalAmount = (
+    subtotal = calculateSubTotal(),
+    commonChargesAndDeductions = formData.commonChargesAndDeductions,
+    deductionAmount = formData.deductionAmount,
+  ) => {
     let totalAmount = subtotal;
-    formData.commonChargesAndDeductions.forEach((charge) => {
+    commonChargesAndDeductions.forEach((charge) => {
+      const chargeValue = parseFloat(charge.value) || 0;
       if (charge.isPercentage) {
-        const amount = (subtotal * charge.value) / 100;
+        const amount = (subtotal * chargeValue) / 100;
         if (charge.sign === "+") {
           totalAmount += amount;
         } else if (charge.sign === "-") {
@@ -1209,15 +1265,15 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
         }
       } else {
         if (charge.sign === "+") {
-          totalAmount += charge.value;
+          totalAmount += chargeValue;
         } else if (charge.sign === "-") {
-          totalAmount -= charge.value;
+          totalAmount -= chargeValue;
         }
       }
     });
 
     // Subtract deduction amount from total
-    totalAmount -= parseFloat(formData.deductionAmount) || 0;
+    totalAmount -= parseFloat(deductionAmount) || 0;
 
     return totalAmount;
   };
@@ -1242,7 +1298,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
         const inventory =
           await get_sum_location_inventories_by_locationId_itemMasterId_api(
             item.itemMasterId,
-            formData.storeLocation
+            formData.storeLocation,
           );
         availableStock = inventory?.data?.result?.totalStockInHand || 0;
 
@@ -1253,26 +1309,56 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
         }
       }
 
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        itemDetails: [
-          ...prevFormData.itemDetails,
-          {
-            salesInvoiceDetailId: null,
-            salesInvoiceId: salesInvoice.salesInvoiceId,
-            itemMasterId: item?.itemMasterId,
-            isInventoryItem: item?.isInventoryItem,
-            name: item?.itemName,
-            unit: item?.unit?.unitName,
-            stockInHand: item.isInventoryItem === true ? availableStock : 0,
-            quantity: item.isInventoryItem === false ? 1 : 0,
-            unitPrice: item.unitPrice,
-            totalPrice:
-              item.isInventoryItem === false ? item.unitPrice : item.unitPrice,
-            chargesAndDeductions: initializedCharges,
-          },
-        ],
-      }));
+      // Calculate initial totalPrice for the new item
+      const initialQuantity = item.isInventoryItem === false ? 1 : 0;
+      const initialUnitPrice = parseFloat(item.unitPrice) || 0;
+      const basePrice =
+        item.isInventoryItem === true
+          ? initialQuantity * initialUnitPrice
+          : initialUnitPrice;
+
+      let initialTotalPrice = basePrice;
+
+      initializedCharges.forEach((charge) => {
+        const chargeValue = parseFloat(charge.value) || 0;
+        if (charge.isPercentage) {
+          const amount = (basePrice * chargeValue) / 100;
+          initialTotalPrice += charge.sign === "+" ? amount : -amount;
+        } else {
+          initialTotalPrice += charge.sign === "+" ? chargeValue : -chargeValue;
+        }
+      });
+
+      const newItem = {
+        salesInvoiceDetailId: null,
+        salesInvoiceId: salesInvoice.salesInvoiceId,
+        itemMasterId: item?.itemMasterId,
+        isInventoryItem: item?.isInventoryItem,
+        name: item?.itemName,
+        unit: item?.unit?.unitName,
+        stockInHand: item.isInventoryItem === true ? availableStock : 0,
+        quantity: initialQuantity,
+        unitPrice: initialUnitPrice,
+        totalPrice: isNaN(initialTotalPrice) ? 0 : initialTotalPrice,
+        chargesAndDeductions: initializedCharges,
+      };
+
+      setFormData((prevFormData) => {
+        const updatedItemDetails = [...prevFormData.itemDetails, newItem];
+        const subTotal = calculateSubTotal(updatedItemDetails);
+        const totalAmount = calculateTotalAmount(
+          subTotal,
+          prevFormData.commonChargesAndDeductions,
+          prevFormData.deductionAmount,
+        );
+
+        return {
+          ...prevFormData,
+          itemDetails: updatedItemDetails,
+          subTotal,
+          totalAmount,
+        };
+      });
 
       setSearchTerm("");
       setSelectedBatch(null);
@@ -1338,7 +1424,7 @@ const useSalesInvoiceUpdate = ({ salesInvoice, onFormSubmit }) => {
 
                   handleInputChange(
                     `commonChargesAndDeductions_${chargeIndex}_value`,
-                    newValue
+                    newValue,
                   );
                 }}
               />
