@@ -150,7 +150,7 @@ const StockReport = () => {
                   value={searchTerm}
                   onChange={handleSearchChange}
                 />
-                {searchTerm && (
+                {/* {searchTerm && (
                   <span
                     className="input-group-text bg-transparent"
                     style={{ cursor: "pointer" }}
@@ -158,7 +158,7 @@ const StockReport = () => {
                   >
                     <i className="bi bi-x"></i>
                   </span>
-                )}
+                )} */}
               </div>
               <div className="mb-2">
                 <small className="form-text text-muted">
@@ -172,7 +172,7 @@ const StockReport = () => {
             <div className="table-responsive mb-2">
               <table
                 className="table"
-                style={{ minWidth: "1000px", overflowX: "auto" }}
+                style={{ minWidth: "2000px", overflowX: "auto" }}
               >
                 <thead>
                   <tr>
@@ -187,36 +187,54 @@ const StockReport = () => {
                     <th>
                       <i className="bi bi-arrow-up"></i> Out
                     </th>
-                    <th>Closing Balance</th>
-                    <th>Reorder Level</th>
+                    <th>Sale Order</th>
+                    <th>Purchase Order</th>
+                    <th>Sales Invoice</th>
+                    <th>GRN</th>
+                    <th>MIN</th>
+                    <th>TIN</th>
+                    <th>Prod In</th>
+                    <th>Prod Out</th>
+                    <th>Packing Slip</th>
+                    <th>Supp. Return</th>
+                    <th>Emp. Ret. In</th>
+                    <th>Emp. Ret. Out</th>
+                    <th>Emp. Ret. Red.</th>
+                    <th>Adjusted In</th>
+                    <th>Adjusted Out</th>
+                    <th>Closing Bal</th>
                   </tr>
                 </thead>
                 <tbody>
                   {currentItems.map((item) => (
-                    <tr
-                      className={
-                        item.closingBalance < item.reorderLevel
-                          ? "table-warning"
-                          : ""
-                      }
-                    >
+                    <tr key={`${item.itemId}-${item.batchId}`}>
                       <td>{item.itemName}</td>
                       <td>{item.itemCode}</td>
                       <td>{item.batchNumber}</td>
                       <td>{item.unitName}</td>
-                      <td>{item.openingBalance}</td>
+                      <td className="fw-bold">{item.openingBalance}</td>
                       <td className="fw-bold">{item.totalIn}</td>
                       <td className="text-danger fw-bold">{item.totalOut}</td>
-                      <td>{item.closingBalance}</td>
-                      <td>{item.reorderLevel}</td>
+                      <td>{item.salesOrder}</td>
+                      <td>{item.purchaseOrder}</td>
+                      <td>{item.salesInvoice}</td>
+                      <td>{item.grn}</td>
+                      <td>{item.min}</td>
+                      <td>{item.tin}</td>
+                      <td>{item.productionIn}</td>
+                      <td>{item.productionOut}</td>
+                      <td>{item.packingSlip}</td>
+                      <td>{item.supplierReturnNote}</td>
+                      <td>{item.emptyReturnIn}</td>
+                      <td>{item.emptyReturnOut}</td>
+                      <td>{item.emptyReturnReduce}</td>
+                      <td className="fw-bold">{item.adjustIn}</td>
+                      <td className="text-danger fw-bold">{item.adjustOut}</td>
+                      <td className="fw-bold">{item.closingBalance}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              <small className="text-muted">
-                *Items with a closing balance below the reorder level are
-                highlighted.
-              </small>
             </div>
           ) : (
             <div className="alert alert-primary text-center mb-3">

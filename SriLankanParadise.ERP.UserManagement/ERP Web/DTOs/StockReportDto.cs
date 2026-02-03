@@ -16,5 +16,20 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
         public decimal totalIn { get; set; }
         public decimal totalOut { get; set; }
         public decimal closingBalance { get; set; }
+        public decimal salesOrder { get; set; } // 1
+        public decimal purchaseOrder { get; set; } // 2
+        public decimal salesInvoice { get; set; } // 3
+        public decimal grn { get; set; } // 4
+        public decimal min { get; set; } // 5
+        public decimal tin { get; set; } // 6
+        public decimal productionIn { get; set; } // 7
+        public decimal productionOut { get; set; } // 8
+        public decimal packingSlip { get; set; } // 9
+        public decimal supplierReturnNote { get; set; } // 10
+        public decimal emptyReturnIn { get; set; } // 11
+        public decimal emptyReturnOut { get; set; } // 12
+        public decimal emptyReturnReduce { get; set; } // 13
+        public decimal adjustIn { get; set; } // 14
+        public decimal adjustOut { get; set; } // 15
     }
 }

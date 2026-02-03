@@ -17,5 +17,9 @@
         public decimal? StockInHand { get; set; }
 
         public string? BatchNo { get; set; }
+
+        public int? ReOrderLevel { get; set; }
+
+        public int? MaxStockLevel { get; set; }
     }
 }
