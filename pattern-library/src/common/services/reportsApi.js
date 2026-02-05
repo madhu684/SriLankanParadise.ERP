@@ -128,4 +128,3 @@ export const get_invoice_report_api = async ({ fromDate, toDate, filter }) => {
     throw error;
   }
 };
-

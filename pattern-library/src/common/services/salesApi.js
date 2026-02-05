@@ -3,7 +3,7 @@
 //customer apis
 export const post_customer_api = async (formData) => {
   try {
-    const response = await api.post("/customer/customer", formData, {
+    const response = await api.post("/customer", formData, {
       withCredentials: true,
     });
     return response.data;
@@ -49,7 +49,7 @@ export const get_customers_by_customer_type_api = async (
 
 export const get_all_customers_api = async () => {
   try {
-    const response = await api.get("/customer/customer");
+    const response = await api.get("/customer");
     return response.data;
   } catch (error) {
     console.log(error);
@@ -184,7 +184,7 @@ export const get_sales_order_details_by_sales_order_id = async (
 
 export const post_sales_order_api = async (formData) => {
   try {
-    const response = await api.post("/salesOrder/salesOrder", formData, {
+    const response = await api.post("/salesOrder", formData, {
       withCredentials: true,
     });
     return response.data;
@@ -208,7 +208,7 @@ export const post_sales_order_detail_api = async (formData) => {
 
 export const get_sales_orders_api = async () => {
   try {
-    const response = await api.get("/salesOrder/salesOrder");
+    const response = await api.get("/salesOrder");
     return response.data;
   } catch (error) {
     console.log(error);
@@ -328,7 +328,7 @@ export const get_sales_orders_with_details_by_date_range = async (
 //sales invoice apis
 export const post_sales_invoice_api = async (formData) => {
   try {
-    const response = await api.post("/salesInvoice/salesInvoice", formData, {
+    const response = await api.post("/salesInvoice", formData, {
       withCredentials: true,
     });
     return response.data;
@@ -352,7 +352,7 @@ export const post_sales_invoice_detail_api = async (formData) => {
 
 export const get_sales_invoice_api = async () => {
   try {
-    const response = await api.get("/salesInvoice/salesInvoice");
+    const response = await api.get("/salesInvoice");
     return response.data;
   } catch (error) {
     console.log(error);
@@ -545,7 +545,7 @@ export const get_packing_slips_details_by_packing_slip_id = async (
 
 export const post_packing_slip_api = async (formData) => {
   try {
-    const response = await api.post("/packingSlip/packingSlip", formData, {
+    const response = await api.post("/packingSlip", formData, {
       withCredentials: true,
     });
     return response.data;
@@ -569,7 +569,7 @@ export const post_packing_slip_detail_api = async (formData) => {
 
 export const get_packing_slips_api = async () => {
   try {
-    const response = await api.get("/packingSlip/packingSlip");
+    const response = await api.get("/packingSlip");
     return response.data;
   } catch (error) {
     console.log(error);
@@ -688,7 +688,7 @@ export const get_payment_modes_api = async (companyId) => {
 //sales receipt apis
 export const post_sales_receipt_api = async (formData) => {
   try {
-    const response = await api.post("/salesReceipt/salesReceipt", formData, {
+    const response = await api.post("/salesReceipt", formData, {
       withCredentials: true,
     });
     return response.data;
@@ -700,7 +700,7 @@ export const post_sales_receipt_api = async (formData) => {
 
 export const get_sales_receipt_api = async () => {
   try {
-    const response = await api.get("/salesReceipt/salesReceipt");
+    const response = await api.get("/salesReceipt");
     return response.data;
   } catch (error) {
     console.log(error);
@@ -846,13 +846,9 @@ export const delete_sales_receipt_sales_invoice_api = async (
 //cashier session apis
 export const post_cashier_session_api = async (formData) => {
   try {
-    const response = await api.post(
-      "/cashierSession/cashierSession",
-      formData,
-      {
-        withCredentials: true,
-      },
-    );
+    const response = await api.post("/cashierSession", formData, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);
@@ -910,13 +906,9 @@ export const get_cashier_session_by_user_date_api = async (userId, date) => {
 
 export const post_cashier_expense_out_api = async (formData) => {
   try {
-    const response = await api.post(
-      "/cashierExpenseOut/cashierExpenseOut",
-      formData,
-      {
-        withCredentials: true,
-      },
-    );
+    const response = await api.post("/cashierExpenseOut", formData, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);
@@ -967,13 +959,9 @@ export const get_company_api = async (companyId) => {
 //expense out requisition apis
 export const post_expense_out_requisition_api = async (formData) => {
   try {
-    const response = await api.post(
-      "/expenseOutRequisition/expenseOutRequisition",
-      formData,
-      {
-        withCredentials: true,
-      },
-    );
+    const response = await api.post("/expenseOutRequisition", formData, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);

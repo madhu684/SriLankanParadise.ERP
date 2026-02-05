@@ -3,13 +3,9 @@
 //purchase requisition apis
 export const post_purchase_requisition_api = async (formData) => {
   try {
-    const response = await api.post(
-      "/purchaseRequisition/purchaseRequisition",
-      formData,
-      {
-        withCredentials: true,
-      },
-    );
+    const response = await api.post("/purchaseRequisition", formData, {
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);
@@ -19,7 +15,7 @@ export const post_purchase_requisition_api = async (formData) => {
 
 export const get_purchase_requisitions_api = async () => {
   try {
-    const response = await api.get("/purchaseRequisition/purchaseRequisition", {
+    const response = await api.get("/purchaseRequisition", {
       withCredentials: true,
     });
     return response.data;
@@ -179,7 +175,7 @@ export const get_purchase_requisition_by_id_api = async (
 //purchase order apis
 export const post_purchase_order_api = async (formData) => {
   try {
-    const response = await api.post("/purchaseOrder/purchaseOrder", formData, {
+    const response = await api.post("/purchaseOrder", formData, {
       withCredentials: true,
     });
     return response.data;
@@ -191,7 +187,7 @@ export const post_purchase_order_api = async (formData) => {
 
 export const get_purchase_order_api = async () => {
   try {
-    const response = await api.get("/purchaseOrder/purchaseOrder");
+    const response = await api.get("/purchaseOrder");
     return response.data;
   } catch (error) {
     console.log(error);
@@ -524,7 +520,7 @@ export const get_company_suppliers_api = async (companyId) => {
 
 export const post_supplier_api = async (formData) => {
   try {
-    const response = await api.post("/supplier/supplier", formData, {
+    const response = await api.post("/supplier", formData, {
       withCredentials: true,
     });
     return response.data;
@@ -827,7 +823,7 @@ export const post_batchHasGrnMaster_api = async (formData) => {
 
 export const post_itemBatch_api = async (formData) => {
   try {
-    const response = await api.post("/itemBatch/itemBatch", formData, {
+    const response = await api.post("/itemBatch", formData, {
       withCredentials: true,
     });
     return response.data;
@@ -1713,7 +1709,7 @@ export const get_Location_Inventory_Summary_By_Item_Name_api = async (
 
 export const post_comapny_location_api = async (locationData) => {
   try {
-    const response = await api.post("/location/location", locationData, {
+    const response = await api.post("/location", locationData, {
       withCredentials: true,
     });
     return response.data;
