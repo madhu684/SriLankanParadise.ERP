@@ -22,7 +22,7 @@ const useSalesInvoiceReport = () => {
     });
 
     const reportItems = useMemo(() => {
-        const items = reportData?.data?.result || [];
+        const items = reportData?.data?.result?.items || [];
         // Sort items by Invoice No to ensure grouping, although the API might already do this
         const sortedItems = [...items].sort((a, b) => a.invoiceNo.localeCompare(b.invoiceNo));
 
@@ -30,12 +30,14 @@ const useSalesInvoiceReport = () => {
         let currentInvoiceId = null;
         let spanCount = 0;
         let spanStartIndex = 0;
+        let invoiceCounter = 0;
 
         sortedItems.forEach((item, index) => {
             const newItem = { ...item, rowSpan: 0 }; // Default to 0 (hidden)
 
             if (item.salesInvoiceId !== currentInvoiceId) {
                 // New invoice group starting
+                invoiceCounter++;
                 if (currentInvoiceId !== null) {
                     // Update the start item of the previous group
                     processedItems[spanStartIndex].rowSpan = spanCount;
@@ -49,6 +51,7 @@ const useSalesInvoiceReport = () => {
                 // Continuing same invoice group
                 spanCount++;
             }
+            newItem.invoiceIndex = invoiceCounter;
 
             processedItems.push(newItem);
         });
@@ -61,26 +64,16 @@ const useSalesInvoiceReport = () => {
         return processedItems;
     }, [reportData]);
 
-    const { totalInvoiceAmount, totalReceiptAmount, totalDifference, totalInvoiceCount } = useMemo(() => {
-        if (!reportItems.length) return { totalInvoiceCount: 0, totalInvoiceAmount: 0, totalReceiptAmount: 0 };
-
-        const uniqueInvoices = new Set();
-        let invoiceSum = 0;
-        let receiptSum = 0;
-
-        reportItems.forEach((item) => {
-            // Sum Receipt Amount
-            receiptSum += item.receiptAmount || 0;
-
-            // Sum Invoice Amount (only for unique invoices to avoid double counting)
-            if (!uniqueInvoices.has(item.salesInvoiceId)) {
-                uniqueInvoices.add(item.salesInvoiceId);
-                invoiceSum += item.invoiceAmount || 0;
-            }
-        });
-
-        return { totalInvoiceAmount: invoiceSum, totalReceiptAmount: receiptSum, totalDifference: invoiceSum - receiptSum, totalInvoiceCount: uniqueInvoices.size };
-    }, [reportItems]);
+    const { totalInvoiceAmount, totalReceiptAmount, totalExcessAmount, totalOutstandingAmount, totalInvoiceCount } = useMemo(() => {
+        const result = reportData?.data?.result || {};
+        return {
+            totalInvoiceAmount: result.totalInvoiceAmount || 0,
+            totalReceiptAmount: result.totalReceiptAmount || 0,
+            totalExcessAmount: result.totalExcessAmount || 0,
+            totalOutstandingAmount: result.totalOutstandingAmount || 0,
+            totalInvoiceCount: result.totalInvoiceCount || 0
+        };
+    }, [reportData]);
 
 
 
@@ -90,22 +83,74 @@ const useSalesInvoiceReport = () => {
             return;
         }
 
+        // Calculate Payment Mode Breakdowns
+        let cashCollection = 0;
+        let bankTransfers = 0;
+        let giftVouchers = 0;
+
+        reportItems.forEach(item => {
+            const amount = item.receiptAmount || 0;
+            const mode = item.paymentMode;
+            if (mode === "Cash") cashCollection += amount;
+            else if (mode === "Bank Transfer") bankTransfers += amount;
+            else if (mode === "Gift Voucher") giftVouchers += amount;
+        });
+
+        const summaryRows = [
+            { isTotal: true }, // Empty row
+            {
+                isTotal: true,
+                invoiceNo: "Total Invoice Amount",
+                customerName: totalInvoiceAmount
+            },
+            {
+                isTotal: true,
+                invoiceNo: "Total Receipt Amount",
+                customerName: totalReceiptAmount
+            },
+            {
+                isTotal: true,
+                invoiceNo: "Cash Collection",
+                customerName: cashCollection
+            },
+            {
+                isTotal: true,
+                invoiceNo: "Bank Transfers",
+                customerName: bankTransfers
+            },
+            {
+                isTotal: true,
+                invoiceNo: "Gift Vouchers",
+                customerName: giftVouchers
+            },
+            {
+                isTotal: true,
+                invoiceNo: "Total Excess Amount",
+                customerName: totalExcessAmount
+            },
+            {
+                isTotal: true,
+                invoiceNo: "Total Outstanding Amount",
+                customerName: totalOutstandingAmount
+            }
+        ];
+
         const columns = [
-            { header: "Invoice No", accessor: (d) => d.invoiceNo, width: 20 },
+            { header: "Invoice No", accessor: (d) => d.invoiceNo, width: 25 },
             { header: "Customer Name", accessor: (d) => d.customerName, width: 30 },
-            { header: "Invoice Status", accessor: (d) => getStatusLabel(d.invoiceStatus), width: 15 },
+            { header: "Invoice Status", accessor: (d) => d.isTotal ? "" : getStatusLabel(d.invoiceStatus), width: 15 },
             { header: "Invoice Amount", accessor: (d) => d.invoiceAmount, width: 15 },
-            { header: "Receipt No", accessor: (d) => d.receiptNumber, width: 20 },
+            { header: "Receipt No", accessor: (d) => d.isTotal ? "" : d.receiptNumber, width: 20 },
             { header: "Receipt Amount", accessor: (d) => d.receiptAmount, width: 15 },
             { header: "Excess Amount", accessor: (d) => d.excessAmount, width: 15 },
             { header: "Due Amount", accessor: (d) => d.dueAmount, width: 15 },
-            { header: "Payment Mode", accessor: (d) => d.paymentMode, width: 15 },
-            { header: "Receipt Status", accessor: (d) => getReceiptStatusLabel(d.receiptStatus), width: 15 },
-            { header: "Receipt Date", accessor: (d) => formatDate(d.receiptDate), width: 15 },
+            { header: "Payment Mode", accessor: (d) => d.isTotal ? "" : d.paymentMode, width: 15 },
+            { header: "Receipt Status", accessor: (d) => d.isTotal ? "" : getReceiptStatusLabel(d.receiptStatus), width: 15 },
+            { header: "Receipt Date", accessor: (d) => d.isTotal ? "" : formatDate(d.receiptDate), width: 15 },
         ];
 
         exportToExcel({
-            data: reportItems,
+            data: [...reportItems, ...summaryRows],
             columns: columns,
             fileName: `Invoice_Report_${fromDate}_${toDate}.xlsx`,
             sheetName: "Invoice Report",
@@ -206,7 +251,8 @@ const useSalesInvoiceReport = () => {
         setFilter,
         totalInvoiceAmount,
         totalReceiptAmount,
-        totalDifference,
+        totalExcessAmount,
+        totalOutstandingAmount,
         totalInvoiceCount,
         hasPermission,
     };

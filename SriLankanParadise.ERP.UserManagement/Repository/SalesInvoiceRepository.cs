@@ -432,7 +432,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
-        public async Task<PagedResult<SalesInvoice>> GetSalesInvoicesForReport(DateTime? fromDate = null, DateTime? toDate = null, string? filter = null)
+        public async Task<IEnumerable<SalesInvoice>> GetSalesInvoicesForReport(DateTime? fromDate = null, DateTime? toDate = null, string? filter = null)
         {
             try
             {
@@ -478,14 +478,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var totalCount = await query.CountAsync();
                 var items = await query.OrderBy(si => si.InvoiceDate).ToListAsync();
 
-                return new PagedResult<SalesInvoice>
-                {
-                    Items = items,
-                    TotalCount = totalCount,
-                    PageNumber = 1,
-                    PageSize = totalCount > 0 ? totalCount : 10,
-                    TotalPages = 1
-                };
+                return items.Any() ? items : Enumerable.Empty<SalesInvoice>();
             }
             catch (Exception)
             {

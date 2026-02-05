@@ -7,8 +7,10 @@ using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
 using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Shared.Resources;
+using SriLankanParadise.ERP.UserManagement.DataModels;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 
 namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
@@ -626,15 +628,27 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             {
                 var result = await _salesInvoiceService.GetSalesInvoicesForReport(fromDate, toDate, filter);
                 
-                var reportItems = new List<InvoiceReportDto>();
-
-                if (result.Items != null && result.Items.Any())
+                var responseDto = new InvoiceReportResponseDto
                 {
-                    foreach (var invoice in result.Items)
+                    Items = new List<InvoiceReportDto>(),
+                    TotalInvoiceAmount = 0,
+                    TotalReceiptAmount = 0,
+                    TotalExcessAmount = 0,
+                    TotalOutstandingAmount = 0,
+                    TotalInvoiceCount = 0
+                };
+                
+                var reportItems = new List<InvoiceReportDto>();
+                var invoiceShortAmounts = new Dictionary<int, decimal>();
+                var invoiceExcessAmounts = new Dictionary<int, decimal>();
+
+                if (result != null && result.Any())
+                {
+                    foreach (var invoice in result)
                     {
                         if (invoice.SalesReceiptSalesInvoices != null && invoice.SalesReceiptSalesInvoices.Any())
                         {
-                            foreach (var receiptMapping in invoice.SalesReceiptSalesInvoices)
+                            foreach (var receiptMapping in invoice.SalesReceiptSalesInvoices.OrderBy(x => x.SalesReceipt.ReceiptDate))
                             {
                                 var receipt = receiptMapping.SalesReceipt;
                                 if (receipt != null)
@@ -655,6 +669,10 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                                         ExcessAmount = receiptMapping.ExcessAmount,
                                         DueAmount = receiptMapping.OutstandingAmount
                                     });
+
+                                    // Update latest snapshot for this invoice
+                                    invoiceShortAmounts[invoice.SalesInvoiceId] = receiptMapping.OutstandingAmount ?? 0;
+                                    invoiceExcessAmounts[invoice.SalesInvoiceId] = receiptMapping.ExcessAmount ?? 0;
                                 }
                             }
                         }
@@ -677,17 +695,34 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                                 ExcessAmount = 0,
                                 DueAmount = invoice.AmountDue
                             });
+                            
+                            invoiceShortAmounts[invoice.SalesInvoiceId] = invoice.AmountDue ?? 0;
+                            invoiceExcessAmounts[invoice.SalesInvoiceId] = 0;
                         }
                     }
+
+                    responseDto.Items = reportItems;
+                    responseDto.TotalInvoiceCount = result.Count();
+                    responseDto.TotalInvoiceAmount = result.Sum(i => i.TotalAmount ?? 0);
+                    
+                    // Sum up the snapshot dictionaries
+                    responseDto.TotalOutstandingAmount = invoiceShortAmounts.Values.Sum();
+                    responseDto.TotalExcessAmount = invoiceExcessAmounts.Values.Sum();
+                    
+                    // Sum receipts (Additive)
+                    responseDto.TotalReceiptAmount = result
+                        .Where(i => i.SalesReceiptSalesInvoices != null)
+                        .SelectMany(i => i.SalesReceiptSalesInvoices)
+                        .Sum(r => r.AmountCollect ?? 0);
                 }
 
-                if (reportItems.Any())
+                if (responseDto.Items.Any())
                 {
-                    AddResponseMessage(Response, "Invoice report retrieved", reportItems, true, HttpStatusCode.OK);
+                    AddResponseMessage(Response, "Invoice report retrieved", responseDto, true, HttpStatusCode.OK);
                 }
                 else
                 {
-                    AddResponseMessage(Response, "No records found", new List<InvoiceReportDto>(), true, HttpStatusCode.OK);
+                    AddResponseMessage(Response, "No records found", responseDto, true, HttpStatusCode.OK);
                 }
             }
             catch (Exception ex)
