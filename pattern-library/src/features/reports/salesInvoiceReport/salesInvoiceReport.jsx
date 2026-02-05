@@ -188,7 +188,7 @@ const SalesInvoiceReport = () => {
             <table className="table table-hover align-middle mb-0">
               <thead className="table-light">
                 <tr>
-                  <th>#</th>
+                  <th></th>
                   <th className="px-3">Invoice No</th>
                   <th>Customer Name</th>
                   <th>Inv Status</th>
