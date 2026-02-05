@@ -69,7 +69,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
             return await _salesInvoiceRepository.GetPaginatedFilteredSalesInvoiceByCompanyIdDate(companyId, date, searchQuery, filter, pageNumber, pageSize);
         }
 
-        public async Task<PagedResult<SalesInvoice>> GetSalesInvoicesForReport(DateTime? fromDate = null, DateTime? toDate = null, string? filter = null)
+        public async Task<IEnumerable<SalesInvoice>> GetSalesInvoicesForReport(DateTime? fromDate = null, DateTime? toDate = null, string? filter = null)
         {
             return await _salesInvoiceRepository.GetSalesInvoicesForReport(fromDate, toDate, filter);
         }
