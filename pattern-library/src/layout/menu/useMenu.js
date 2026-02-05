@@ -44,6 +44,7 @@ const submoduleRouteMap = {
   "User Collection Report": "/main/sales/user-collection-report",
   "Collection Report": "/main/sales/collection-report",
   "Customer Inquiry Report": "/main/sales/customer-inquiry-report",
+  "Invoice Report": "/main/sales/invoice-report",
 
   // Inventory Management
   "Item Masters": "/main/inventory/items",

@@ -110,3 +110,22 @@ export const get_min_report_api = async ({
     throw error;
   }
 };
+
+export const get_invoice_report_api = async ({ fromDate, toDate, filter }) => {
+  try {
+    const params = {
+      fromDate,
+      toDate,
+      filter,
+    };
+    const response = await api.get(`/report/InvoiceReport`, {
+      params,
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
