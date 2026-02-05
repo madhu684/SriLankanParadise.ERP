@@ -432,5 +432,65 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+        public async Task<PagedResult<SalesInvoice>> GetSalesInvoicesForReport(DateTime? fromDate = null, DateTime? toDate = null, string? filter = null)
+        {
+            try
+            {
+                var query = _dbContext.SalesInvoices
+                    .AsNoTracking()
+                    .Include(si => si.SalesInvoiceDetails)
+                        .ThenInclude(ib => ib.Batch)
+                    .Include(si => si.SalesInvoiceDetails)
+                        .ThenInclude(ib => ib.ItemMaster)
+                            .ThenInclude(im => im.Unit)
+                    .Include(si => si.SalesOrder)
+                        .ThenInclude(so => so.Customer)
+                    .Include(si => si.SalesReceiptSalesInvoices)
+                        .ThenInclude(sr => sr.SalesReceipt)
+                            .ThenInclude(r => r.PaymentMode)
+                    .AsQueryable();
+
+                if (fromDate.HasValue)
+                {
+                    var startDate = fromDate.Value.Date;
+                    query = query.Where(si => si.InvoiceDate >= startDate);
+                }
+
+                if (toDate.HasValue)
+                {
+                    var endDate = toDate.Value.Date.AddDays(1).AddTicks(-1);
+                    query = query.Where(si => si.InvoiceDate <= endDate);
+                }
+
+                if (!string.IsNullOrEmpty(filter))
+                {
+                    switch (filter.ToLower())
+                    {
+                        case "outstanding":
+                            query = query.Where(si => si.AmountDue > 100);
+                            break;
+                        case "excess":
+                            query = query.Where(si => si.SalesReceiptSalesInvoices.Any(sr => sr.ExcessAmount > 0));
+                            break;
+                    }
+                }
+
+                var totalCount = await query.CountAsync();
+                var items = await query.OrderBy(si => si.InvoiceDate).ToListAsync();
+
+                return new PagedResult<SalesInvoice>
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    PageNumber = 1,
+                    PageSize = totalCount > 0 ? totalCount : 10,
+                    TotalPages = 1
+                };
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }

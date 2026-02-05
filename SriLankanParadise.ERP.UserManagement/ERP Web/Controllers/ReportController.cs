@@ -619,5 +619,83 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+        [HttpGet("InvoiceReport")]
+        public async Task<ApiResponseModel> InvoiceReport([FromQuery] DateTime fromDate, [FromQuery] DateTime toDate, [FromQuery] string? filter = null)
+        {
+            try
+            {
+                var result = await _salesInvoiceService.GetSalesInvoicesForReport(fromDate, toDate, filter);
+                
+                var reportItems = new List<InvoiceReportDto>();
+
+                if (result.Items != null && result.Items.Any())
+                {
+                    foreach (var invoice in result.Items)
+                    {
+                        if (invoice.SalesReceiptSalesInvoices != null && invoice.SalesReceiptSalesInvoices.Any())
+                        {
+                            foreach (var receiptMapping in invoice.SalesReceiptSalesInvoices)
+                            {
+                                var receipt = receiptMapping.SalesReceipt;
+                                if (receipt != null)
+                                {
+                                    reportItems.Add(new InvoiceReportDto
+                                    {
+                                        SalesInvoiceId = invoice.SalesInvoiceId,
+                                        InvoiceNo = invoice.ReferenceNo,
+                                        CustomerName = invoice.InVoicedPersonName ?? invoice.SalesOrder?.Customer?.CustomerName,
+                                        InvoiceStatus = invoice.Status,
+                                        InvoiceAmount = invoice.TotalAmount,
+                                        
+                                        ReceiptNumber = receipt.ReferenceNumber,
+                                        ReceiptAmount = receiptMapping.AmountCollect,
+                                        PaymentMode = receipt.PaymentMode?.Mode,
+                                        ReceiptStatus = receipt.Status,
+                                        ReceiptDate = receipt.ReceiptDate,
+                                        ExcessAmount = receiptMapping.ExcessAmount,
+                                        DueAmount = receiptMapping.OutstandingAmount
+                                    });
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // Invoice with no receipts
+                            reportItems.Add(new InvoiceReportDto
+                            {
+                                SalesInvoiceId = invoice.SalesInvoiceId,
+                                InvoiceNo = invoice.ReferenceNo,
+                                CustomerName = invoice.InVoicedPersonName ?? invoice.SalesOrder?.Customer?.CustomerName,
+                                InvoiceStatus = invoice.Status,
+                                InvoiceAmount = invoice.AmountDue, 
+                                
+                                ReceiptNumber = "-",
+                                ReceiptAmount = 0,
+                                PaymentMode = "-",
+                                ReceiptStatus = null,
+                                ReceiptDate = null,
+                                ExcessAmount = 0,
+                                DueAmount = invoice.AmountDue
+                            });
+                        }
+                    }
+                }
+
+                if (reportItems.Any())
+                {
+                    AddResponseMessage(Response, "Invoice report retrieved", reportItems, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    AddResponseMessage(Response, "No records found", new List<InvoiceReportDto>(), true, HttpStatusCode.OK);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }
