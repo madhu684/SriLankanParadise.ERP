@@ -5,12 +5,8 @@ import {
   approve_requisition_master_api,
   get_issue_details_api,
   get_issue_masters_by_requisition_master_id_api,
-  get_locations_inventories_by_location_id_item_master_id_api,
   patch_issue_detail_api,
-  patch_location_inventory_api,
   post_increase_inventory_fifo_api,
-  post_location_inventory_api,
-  post_location_inventory_movement_api,
   update_min_state_in_mrn_api,
 } from "common/services/purchaseApi";
 
@@ -293,7 +289,7 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
           const payload = {
             locationId: parseInt(locationId, 10),
             itemMasterId: parseInt(itemMasterId, 10),
-            transactionTypeId: 7,
+            transactionTypeId: 18,
             quantity: receivedQty,
             sourceLocationId: parseInt(sourceLocationId, 10),
           };
@@ -315,7 +311,7 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
           const payload = {
             locationId: parseInt(sourceLocationId, 10),
             itemMasterId: parseInt(itemMasterId, 10),
-            transactionTypeId: 7,
+            transactionTypeId: 18,
             quantity: returnedQty,
             sourceLocationId: null,
           };

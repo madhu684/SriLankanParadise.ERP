@@ -1,16 +1,4 @@
-﻿// import axios from "axios";
-
-import api from "common/utility/api";
-
-// //Import url from config file
-// const baseUrl = process.env.REACT_APP_API_BASEURL;
-// const sublink = process.env.REACT_APP_API_SUBLINK;
-
-// export const API_BASE_URL = `${baseUrl}${sublink}`;
-
-// const api = axios.create({
-//   baseURL: API_BASE_URL,
-// });
+﻿import api from "common/utility/api";
 
 //uit apis
 export const get_units_by_company_id_api = async (companyId) => {
@@ -42,7 +30,7 @@ export const get_all_units_by_company_id_api = async (companyId) => {
 
 export const post_unit_api = async (formData) => {
   try {
-    const response = await api.post("/unit/unit", formData, {
+    const response = await api.post("/unit", formData, {
       withCredentials: true,
     });
     return response.data;
@@ -107,7 +95,7 @@ export const get_all_categories_by_company_id_api = async (companyId) => {
 
 export const post_category_api = async (formData) => {
   try {
-    const response = await api.post("/category/category", formData, {
+    const response = await api.post("/category", formData, {
       withCredentials: true,
     });
     return response.data;
@@ -142,7 +130,7 @@ export const delete_category_api = async (categoryId) => {
 //item master apis
 export const post_item_master_api = async (formData) => {
   try {
-    const response = await api.post("/itemMaster/itemMaster", formData, {
+    const response = await api.post("/itemMaster", formData, {
       withCredentials: true,
     });
     return response.data;

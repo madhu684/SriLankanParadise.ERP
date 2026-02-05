@@ -32,7 +32,7 @@ export const company_modules_api = async (companyId) => {
       `/companySubscriptionModule/modules/company/${companyId}`,
       {
         withCredentials: true,
-      },
+      }
     );
     return response.data;
   } catch (error) {
@@ -74,7 +74,7 @@ export const module_roles_api = async (companyId, moduleIds) => {
       `/role/GetRolesByModuleIds?${companyParam}&${moduleParams}`,
       {
         withCredentials: true,
-      },
+      }
     );
 
     return response.data;
@@ -94,7 +94,7 @@ export const module_permissions_api = async (moduleIds) => {
       `/permission/GetPermissionsByModuleIds?${formattedModuleIds}`,
       {
         withCredentials: true,
-      },
+      }
     );
     return response.data;
   } catch (error) {
@@ -117,7 +117,7 @@ export const user_registration_api = async (userFromData) => {
 
 export const user_role_api = async (userRoleFromData) => {
   try {
-    const response = await api.post("/userRole/userRole", userRoleFromData, {
+    const response = await api.post("/userRole", userRoleFromData, {
       withCredentials: true,
     });
     return response.data;
@@ -156,7 +156,7 @@ export const role_permissions_api = async (moduleIds) => {
     const formattedRoleIds = moduleIds.map((id) => `roleIds=${id}`).join("&");
 
     const response = await api.get(
-      `/rolePermission/GetRolePermissionsByRoleIds?${formattedRoleIds}`,
+      `/rolePermission/GetRolePermissionsByRoleIds?${formattedRoleIds}`
     );
 
     return response.data;
@@ -169,7 +169,7 @@ export const role_permissions_api = async (moduleIds) => {
 export const delete_role_permission_api = async (roleId) => {
   try {
     const response = await api.delete(
-      `/rolePermission/DeleteRolePermissionByRoleId/${roleId}`,
+      `/rolePermission/DeleteRolePermissionByRoleId/${roleId}`
     );
     return response.data;
   } catch (error) {
@@ -180,7 +180,7 @@ export const delete_role_permission_api = async (roleId) => {
 
 // Company Subscription Module User API's
 export const company_subscription_module_user_api = async (
-  userModulesFromData,
+  userModulesFromData
 ) => {
   try {
     const response = await api.post(
@@ -188,7 +188,7 @@ export const company_subscription_module_user_api = async (
       userModulesFromData,
       {
         withCredentials: true,
-      },
+      }
     );
     return response.data;
   } catch (error) {
@@ -198,12 +198,12 @@ export const company_subscription_module_user_api = async (
 };
 
 export const update_company_subscription_module_user_api = async (
-  userModulesFromData,
+  userModulesFromData
 ) => {
   try {
     const response = await api.put(
       "/companySubscriptionModuleUser",
-      userModulesFromData,
+      userModulesFromData
     );
     return response.data;
   } catch (error) {
@@ -227,14 +227,14 @@ export const user_modules_api = async (userId) => {
 
 export const get_company_subscription_module_id_api = async (
   companyId,
-  moduleId,
+  moduleId
 ) => {
   try {
     const response = await api.get(
       `/companySubscriptionModule/companySubscriptionModuleId/${companyId}/${moduleId}`,
       {
         withCredentials: true,
-      },
+      }
     );
     return response.data;
   } catch (error) {
@@ -370,7 +370,7 @@ export const post_subscription_api = async (subscriptionData) => {
 
 export const put_subscription_api = async (
   subscriptionId,
-  subscriptionData,
+  subscriptionData
 ) => {
   try {
     const response = await api.put(
@@ -378,7 +378,7 @@ export const put_subscription_api = async (
       subscriptionData,
       {
         withCredentials: true,
-      },
+      }
     );
     return response.data;
   } catch (error) {
@@ -439,7 +439,7 @@ export const get_user_modules_by_user_id_api = async (userId) => {
       `/module/GetModulesByUserId?userId=${userId}`, // Use template literals to include userId in the URL
       {
         withCredentials: true, // Include credentials if necessary
-      },
+      }
     );
     return response.data; // Return the response data
   } catch (error) {
@@ -455,7 +455,7 @@ export const get_user_permissions_api = async (userId) => {
       {
         params: { userId: userId },
         withCredentials: true,
-      },
+      }
     );
     return response.data;
   } catch (error) {
@@ -471,7 +471,7 @@ export const get_user_permissions_by_user_id_api = async (userId) => {
       {
         params: { userId }, // Pass userId as a query parameter
         withCredentials: true,
-      },
+      }
     );
     return response.data;
   } catch (error) {
@@ -516,7 +516,7 @@ export const delete_user_location_api = async (userId, locationId) => {
 export const getUserLocationsByUserId = async (userId) => {
   try {
     const response = await api.get(
-      `/userLocation/GetUserLocationsByUserId/${userId}`,
+      `/userLocation/GetUserLocationsByUserId/${userId}`
     );
     return response.data;
   } catch (error) {
@@ -529,7 +529,7 @@ export const userLocations_update_api = async (userId, locationIds) => {
   try {
     const response = await api.put(
       `/userLocation/UpdateUserLocations/${userId}`,
-      locationIds,
+      locationIds
     );
     return response.data;
   } catch (error) {
@@ -592,7 +592,7 @@ export const update_user_role_api = async (userId, roleIds) => {
       roleIds,
       {
         withCredentials: true,
-      },
+      }
     );
     return response.data;
   } catch (error) {
@@ -606,7 +606,7 @@ export const get_user_roles_by_user_id_api = async (userId) => {
       `/userRole/GetUserRolesByUserId/${userId}`, // Use template literals to include userId in the URL
       {
         withCredentials: true, // Include credentials if necessary
-      },
+      }
     );
     return response.data; // Return the response data
   } catch (error) {
@@ -621,7 +621,7 @@ export const get_permissions_by_company_id_api = async (companyId) => {
       `/permission/GetPermissionsByCompanyId/${companyId}`,
       {
         withCredentials: true,
-      },
+      }
     );
     return response.data;
   } catch (error) {
@@ -648,7 +648,7 @@ export const update_user_permissions_api = async (userId, permissionIds) => {
       permissionIds,
       {
         withCredentials: true,
-      },
+      }
     );
     return response.data;
   } catch (error) {
@@ -663,7 +663,7 @@ export const get_all_users_by_company_id_api = async (companyId) => {
       `/user/GetAllUsersByCompanyId/${companyId}`,
       {
         withCredentials: true,
-      },
+      }
     );
     return response.data;
   } catch (error) {
@@ -737,7 +737,7 @@ export const put_permission_api = async (permissionId, permissionData) => {
       permissionData,
       {
         withCredentials: true,
-      },
+      }
     );
     return response.data;
   } catch (error) {

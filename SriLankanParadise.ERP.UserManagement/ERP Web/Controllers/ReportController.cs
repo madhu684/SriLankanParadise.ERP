@@ -104,7 +104,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                             emptyReturnOut = 0,
                             emptyReturnReduce = 0,
                             adjustIn = 0,
-                            adjustOut = 0
+                            adjustOut = 0,
+                            trnIn = 0
                         });
                     }
                 }
@@ -149,7 +150,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                                 emptyReturnOut = 0,
                                 emptyReturnReduce = 0,
                                 adjustIn = 0,
-                                adjustOut = 0
+                                adjustOut = 0,
+                                trnIn = 0
                             };
                             inventoryItems.Add(itemDto);
                         }
@@ -174,6 +176,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                             case 13: itemDto.emptyReturnReduce += qty; break;
                             case 14: itemDto.adjustIn += qty; break;
                             case 15: itemDto.adjustOut += qty; break;
+                            case 18: itemDto.trnIn += qty; break;
                         }
 
                         // Calculate totalIn and totalOut based on MovementTypeId

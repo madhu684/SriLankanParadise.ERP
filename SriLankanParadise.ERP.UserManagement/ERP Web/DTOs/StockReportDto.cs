@@ -31,5 +31,6 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
         public decimal emptyReturnReduce { get; set; } // 13
         public decimal adjustIn { get; set; } // 14
         public decimal adjustOut { get; set; } // 15
+        public decimal trnIn { get; set; } // 18
     }
 }

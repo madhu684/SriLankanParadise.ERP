@@ -26,9 +26,10 @@ const StockReport = () => {
     handleStartDateChange,
     handleEndDateChange,
     handleLocationChange,
-    handleSearch,
+    //handleSearch,
     paginate,
     handleSearchChange,
+    handleExport,
   } = useStockReport();
 
   //const companyLogoUrl = useCompanyLogoUrl();
@@ -108,24 +109,8 @@ const StockReport = () => {
               )}
             </select>
           </div>
-          <div className="col-md-2 d-flex align-items-end">
-            <button
-              className="btn btn-primary w-100"
-              onClick={handleSearch}
-              disabled={
-                isLoading ||
-                isCompanyLocationsLoading ||
-                !selectedLoction ||
-                !startDate ||
-                !endDate
-              }
-            >
-              {isLoading ? (
-                <ButtonLoadingSpinner text="Processing..." />
-              ) : (
-                "Search"
-              )}
-            </button>
+          <div className="col-md-5 d-flex align-items-end">
+             {/* Search button removed as per requirement */}
           </div>
         </div>
       </div>
@@ -166,6 +151,15 @@ const StockReport = () => {
                 </small>
               </div>
             </div>
+            <div className="col-md-2 d-flex align-items-end mb-3">
+              <button
+                className="btn btn-success w-100"
+                onClick={handleExport}
+                disabled={!reportData || reportData.length === 0}
+              >
+                <i className="bi bi-file-earmark-excel me-2"></i>Export to Excel
+              </button>
+            </div>
           </div>
 
           {currentItems && currentItems.length > 0 ? (
@@ -193,6 +187,7 @@ const StockReport = () => {
                     <th>GRN</th>
                     <th>MIN</th>
                     <th>TIN</th>
+                    <th>TRN</th>
                     <th>Prod In</th>
                     <th>Prod Out</th>
                     <th>Packing Slip</th>
@@ -221,6 +216,7 @@ const StockReport = () => {
                       <td>{item.grn}</td>
                       <td>{item.min}</td>
                       <td>{item.tin}</td>
+                      <td>{item.trnIn}</td>
                       <td>{item.productionIn}</td>
                       <td>{item.productionOut}</td>
                       <td>{item.packingSlip}</td>
@@ -276,16 +272,3 @@ const StockReport = () => {
 };
 
 export default StockReport;
-
-
-
-
-
-
-
-
-
-
-
-
-
