@@ -46,6 +46,7 @@ import ManagerCollectionReport from "features/reports/ManagerCollectionReport/Ma
 import CustomerInqueryReport from "features/reports/customerInqueryReport/CustomerInqueryReport";
 import MinReport from "features/reports/MinReport/MinReport";
 import NotFound from "common/components/NotFound/NotFound";
+import SalesInvoiceReport from "features/reports/salesInvoiceReport/salesInvoiceReport.jsx";
 
 const Routers = () => {
   return (
@@ -123,6 +124,10 @@ const Routers = () => {
               path="customer-inquiry-report"
               element={<CustomerInqueryReport />}
             />
+            <Route
+              path="invoice-report"
+              element={<SalesInvoiceReport />}
+            />
           </Route>
 
           {/* Inventory Management Module */}
@@ -149,7 +154,7 @@ const Routers = () => {
         {/* Catch all - Page Not Found */}
         <Route path="*" element={<NotFound />} />
       </Routes>
-    </Router>
+    </Router >
   );
 };
 
