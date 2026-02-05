@@ -195,8 +195,8 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
   const fetchItems = async (searchQuery) => {
     try {
       const response = await get_Location_Inventory_Summary_By_Item_Name_api(
-        //userLocation[0]?.locationId,
-        null,
+        userLocation[0]?.locationId,
+        // null,
         searchQuery,
         null,
       );
@@ -899,10 +899,10 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
 
     const supplierItems = supplierItemResponse.data.result
       ? supplierItemResponse.data.result.filter(
-          (si) =>
-            si.itemMasterId !== item.itemMasterId &&
-            si.supplierName !== formData?.selectedSupplier?.supplierName,
-        )
+        (si) =>
+          si.itemMasterId !== item.itemMasterId &&
+          si.supplierName !== formData?.selectedSupplier?.supplierName,
+      )
       : [];
 
     setFormData((prevFormData) => ({
@@ -1006,10 +1006,10 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
 
     const supplierItems = supplierItemResponse?.data?.result
       ? supplierItemResponse?.data?.result?.filter(
-          (si) =>
-            si.itemMasterId !== item.itemMasterId &&
-            si.supplierName !== formData?.selectedSupplier?.supplierName,
-        )
+        (si) =>
+          si.itemMasterId !== item.itemMasterId &&
+          si.supplierName !== formData?.selectedSupplier?.supplierName,
+      )
       : [];
 
     // Return the new item object
@@ -1383,11 +1383,11 @@ const usePurchaseOrder = ({ onFormSubmit, purchaseRequisition }) => {
 
             const supplierItems = supplierItemResponse.data.result
               ? supplierItemResponse.data.result.filter(
-                  (si) =>
-                    si.itemMasterId !== item.itemMasterId &&
-                    si.supplierName !==
-                      formData?.selectedSupplier?.supplierName,
-                )
+                (si) =>
+                  si.itemMasterId !== item.itemMasterId &&
+                  si.supplierName !==
+                  formData?.selectedSupplier?.supplierName,
+              )
               : [];
 
             // Calculate initial totalPrice with line-item charges
