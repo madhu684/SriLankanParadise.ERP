@@ -28,6 +28,11 @@ const SalesInvoiceRightOff = ({
         referenceNumber: salesInvoice.referenceNumber,
         permissionId: salesInvoice.permissionId,
         locationId: salesInvoice.locationId,
+        inVoicedPersonName: salesInvoice.patientName,
+        inVoicedPersonMobileNo: salesInvoice.patientNo,
+        appointmentId: salesInvoice.appointmentId,
+        tokenNo: salesInvoice.tokenNo,
+        discountAmount: salesInvoice.discountAmount,
       });
       handleRightOff();
       handleClose();
