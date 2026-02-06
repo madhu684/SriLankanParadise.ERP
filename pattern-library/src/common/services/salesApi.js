@@ -524,6 +524,21 @@ export const get_paginated_sales_invoice_by_companyId = async ({
   }
 };
 
+export const reverse_sales_invoice = async (salesInvoiceId) => {
+  try {
+    const responsse = await api.post(
+      `/salesInvoice/reverse/${salesInvoiceId}`,
+      {
+        withCredentials: true,
+      },
+    );
+    return responsse.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 //packing slips apis
 
 export const get_packing_slips_details_by_packing_slip_id = async (
