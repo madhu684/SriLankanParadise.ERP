@@ -10,6 +10,8 @@ import { UserContext } from "common/context/userContext";
 import moment from "moment";
 import "moment-timezone";
 
+import Pagination from "common/components/common/Pagination/Pagination";
+
 const ExpenseOutRequisitionList = () => {
   const {
     expenseOutRequisitions,
@@ -46,6 +48,12 @@ const ExpenseOutRequisitionList = () => {
     handleClose,
     setShowConvertEORForm,
     handleExpensedOut,
+    pageNumber,
+    pageSize,
+    filterDate,
+    totalCount,
+    setPageNumber,
+    setFilterDate,
   } = useExpenseOutRequisitionList();
 
   const { hasPermission } = useContext(UserContext);
@@ -74,31 +82,6 @@ const ExpenseOutRequisitionList = () => {
         expenseOutRequisition={EORDetail || selectedRowData[0]}
         handleUpdated={handleUpdated}
       />
-    );
-  }
-
-  if (expenseOutRequisitions.length === 0) {
-    return (
-      <div className="container mt-4">
-        <h2>Expense Out Requisitions</h2>
-        <div
-          className="d-flex flex-column justify-content-center align-items-center text-center vh-100"
-          style={{ maxHeight: "80vh" }}
-        >
-          <p>
-            You haven't created any expense out requisition. Create a new one.
-          </p>
-          {hasPermission("Create Expense Out Requisition") && (
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={() => setShowCreateEORForm(true)}
-            >
-              Create
-            </button>
-          )}
-        </div>
-      </div>
     );
   }
 
@@ -150,6 +133,25 @@ const ExpenseOutRequisitionList = () => {
             )}
         </div>
       </div>
+
+      <div className="d-flex justify-content-end align-items-center mb-3 mt-3">
+         <div className="d-flex align-items-center">
+            <label className="me-2 fw-bold">Date:</label>
+            <input
+              type="date"
+              className="form-control"
+              value={filterDate}
+              onChange={(e) => setFilterDate(e.target.value)}
+              style={{ maxWidth: "200px" }}
+            />
+         </div>
+      </div>
+      
+      {expenseOutRequisitions.length === 0 ? (
+        <div className="text-center mt-5">
+           <p>No expense out requisitions found for the selected date.</p>
+        </div>
+      ) : (
       <div className="table-responsive">
         <table className="table mt-2">
           <thead>
@@ -237,6 +239,16 @@ const ExpenseOutRequisitionList = () => {
             ))}
           </tbody>
         </table>
+        
+        <div className="d-flex justify-content-end mt-3">
+            <Pagination
+                itemsPerPage={pageSize}
+                totalItems={totalCount}
+                paginate={setPageNumber}
+                currentPage={pageNumber}
+            />
+        </div>
+
         {showApproveEORModalInParent && (
           <ExpenseOutRequisitionApproval
             show={showApproveEORModal}
@@ -255,6 +267,7 @@ const ExpenseOutRequisitionList = () => {
           />
         )}
       </div>
+      )}
     </div>
   );
 };

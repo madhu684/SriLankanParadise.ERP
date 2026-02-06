@@ -474,6 +474,9 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         case "excess":
                             query = query.Where(si => si.SalesReceiptSalesInvoices.Any(sr => sr.ExcessAmount > 0));
                             break;
+                        case "settled":
+                            query = query.Where(si => si.Status == 5);
+                            break;
                     }
                 }
 

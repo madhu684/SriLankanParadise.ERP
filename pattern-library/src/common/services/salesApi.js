@@ -999,6 +999,33 @@ export const get_expense_out_requisitions_api = async (companyId) => {
   }
 };
 
+export const get_paginated_expense_out_requisitions_by_companyId_api = async ({
+  companyId,
+  pageNumber = 1,
+  pageSize = 10,
+  date,
+}) => {
+  try {
+    const params = {
+      pageNumber,
+      pageSize,
+    };
+    if (date) params.date = date;
+
+    const response = await api.get(
+      `/expenseOutRequisition/GetPaginatedExpenseOutRequisitionsByCompanyId/${companyId}`,
+      {
+        params,
+        withCredentials: true,
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const get_approved_expense_out_requisitions = async (
   companyId,
   status,
