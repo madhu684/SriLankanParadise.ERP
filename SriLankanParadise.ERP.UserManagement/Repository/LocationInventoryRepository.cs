@@ -1006,5 +1006,95 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 }
             });
         }
+
+        public async Task IncreaseInventoryByFIFOInternal(int locationId, int itemMasterId, int transactionTypeId, decimal quantity, int? sourceLocationId = null)
+        {
+            try
+            {
+                // Check if the item is a service item
+                var itemMaster = await _dbContext.ItemMasters
+                    .Where(im => im.ItemMasterId == itemMasterId)
+                    .FirstOrDefaultAsync();
+
+                if (itemMaster == null)
+                {
+                    throw new InvalidOperationException($"ItemMaster with ID {itemMasterId} not found.");
+                }
+
+                if (itemMaster.IsInventoryItem == false)
+                {
+                    // For service items, skip inventory checks and movements
+                    await _dbContext.SaveChangesAsync();
+                    return;
+                }
+
+                // Get existing inventory at destination location
+                var existingBatch = await _dbContext.LocationInventories
+                    .Where(li => li.LocationId == locationId &&
+                                li.ItemMasterId == itemMasterId)
+                    .OrderBy(li => li.BatchId) // FIFO by BatchId
+                    .FirstOrDefaultAsync();
+
+                int batchIdToUse;
+
+                if (existingBatch != null)
+                {
+                    // Use the existing batch (FIFO - first batch)
+                    batchIdToUse = existingBatch.BatchId.Value;
+                    existingBatch.StockInHand = (existingBatch.StockInHand ?? 0m) + quantity;
+                    _dbContext.LocationInventories.Update(existingBatch);
+                }
+                else
+                {
+                    // No inventory at destination - get batch from source location
+                    if (sourceLocationId == null)
+                    {
+                        throw new InvalidOperationException("Source location is required when no inventory exists at the destination location.");
+                    }
+
+                    var sourceBatch = await _dbContext.LocationInventories
+                        .Where(li => li.LocationId == sourceLocationId.Value &&
+                                    li.ItemMasterId == itemMasterId)
+                        .OrderBy(li => li.BatchId) // FIFO by BatchId
+                        .FirstOrDefaultAsync();
+
+                    if (sourceBatch == null)
+                    {
+                        throw new InvalidOperationException($"No batches found for item {itemMasterId} in source location {sourceLocationId}.");
+                    }
+
+                    batchIdToUse = sourceBatch.BatchId.Value;
+
+                    // Create new inventory record at destination location
+                    var newInventory = new LocationInventory
+                    {
+                        LocationId = locationId,
+                        ItemMasterId = itemMasterId,
+                        BatchId = batchIdToUse,
+                        StockInHand = quantity
+                    };
+                    _dbContext.LocationInventories.Add(newInventory);
+                }
+
+                // Record the inventory movement
+                var inventoryMovement = new LocationInventoryMovement
+                {
+                    MovementTypeId = 1,
+                    TransactionTypeId = transactionTypeId,
+                    ItemMasterId = itemMasterId,
+                    BatchId = batchIdToUse,
+                    LocationId = locationId,
+                    Date = DateTime.UtcNow,
+                    Qty = quantity,
+                };
+                _dbContext.LocationInventoryMovements.Add(inventoryMovement);
+
+                //await _dbContext.SaveChangesAsync();
+            }
+            catch
+            {
+                throw;
+            }
+        }
     }
 }

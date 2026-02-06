@@ -28,5 +28,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service.Contracts
         Task<PagedResult<SalesInvoice>> GetPaginatedFilteredSalesInvoiceByCompanyIdDate(int companyId, DateTime? date = null, string? searchQuery = null, string? filter = null, int pageNumber = 1, int pageSize = 10);
         
         Task<PagedResult<SalesInvoice>> GetSalesInvoicesForReport(DateTime? fromDate = null, DateTime? toDate = null, string? filter = null);
+        
+        Task ReverseInvoice(int salesInvoiceId);
     }
 }

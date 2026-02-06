@@ -9,6 +9,7 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
     public class SalesInvoiceService : ISalesInvoiceService
     {
         private readonly ISalesInvoiceRepository _salesInvoiceRepository;
+
         public SalesInvoiceService(ISalesInvoiceRepository salesInvoiceRepository)
         {
             _salesInvoiceRepository = salesInvoiceRepository;
@@ -72,6 +73,11 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         public async Task<PagedResult<SalesInvoice>> GetSalesInvoicesForReport(DateTime? fromDate = null, DateTime? toDate = null, string? filter = null)
         {
             return await _salesInvoiceRepository.GetSalesInvoicesForReport(fromDate, toDate, filter);
+        }
+
+        public async Task ReverseInvoice(int salesInvoiceId)
+        {
+            await _salesInvoiceRepository.ReverseInvoice(salesInvoiceId);
         }
     }
 }

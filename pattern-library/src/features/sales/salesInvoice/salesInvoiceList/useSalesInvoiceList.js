@@ -18,6 +18,7 @@ const useSalesInvoiceList = () => {
   const [showUpdateSIForm, setShowUpdateSIForm] = useState(false);
   const [SIDetail, setSIDetail] = useState("");
   const [showDeleteSIForm, setShowDeleteSIForm] = useState(false);
+  const [showReverseSIForm, setShowReverseSIForm] = useState(false);
 
   // New states for pagination and filtering
   const [searchQuery, setSearchQuery] = useState("");
@@ -77,10 +78,7 @@ const useSalesInvoiceList = () => {
   });
 
   // Extract sales invoices and pagination from response
-  const salesInvoices = useMemo(
-    () => data?.data?.result?.data || [],
-    [data],
-  );
+  const salesInvoices = useMemo(() => data?.data?.result?.data || [], [data]);
   const pagination = useMemo(
     () =>
       data?.data?.result?.pagination || {
@@ -119,6 +117,23 @@ const useSalesInvoiceList = () => {
   const handleCloseRightOffSIModal = () => {
     setShowRightOffSIModal(false);
     handleCloseRightOffSIModalInParent();
+  };
+
+  const handleReverseSI = () => {
+    setShowReverseSIForm(true);
+  };
+
+  const handleCloseReverseSIForm = () => {
+    setShowReverseSIForm(false);
+  };
+
+  const handleReverse = async () => {
+    await refetch();
+    setSelectedRows([]);
+    const delay = 300;
+    setTimeout(() => {
+      setSelectedRowData([]);
+    }, delay);
   };
 
   const handleCloseRightOffSIModalInParent = () => {
@@ -188,10 +203,10 @@ const useSalesInvoiceList = () => {
 
     if (isSelected) {
       setSelectedRows((prevSelected) =>
-        prevSelected.filter((selectedId) => selectedId !== id)
+        prevSelected.filter((selectedId) => selectedId !== id),
       );
       setSelectedRowData((prevSelectedData) =>
-        prevSelectedData.filter((data) => data.salesInvoiceId !== id)
+        prevSelectedData.filter((data) => data.salesInvoiceId !== id),
       );
     } else {
       setSelectedRows((prevSelected) => [...prevSelected, id]);
@@ -238,13 +253,15 @@ const useSalesInvoiceList = () => {
 
   const areAnySelectedRowsPending = (selectedRows) => {
     return selectedRows.some(
-      (id) => salesInvoices.find((si) => si.salesInvoiceId === id)?.status === 1
+      (id) =>
+        salesInvoices.find((si) => si.salesInvoiceId === id)?.status === 1,
     );
   };
 
   const areAnySelectedRowsApproved = (selectedRows) => {
     return selectedRows.some(
-      (id) => salesInvoices.find((si) => si.salesInvoiceId === id)?.status === 2
+      (id) =>
+        salesInvoices.find((si) => si.salesInvoiceId === id)?.status === 2,
     );
   };
 
@@ -281,6 +298,8 @@ const useSalesInvoiceList = () => {
     searchQuery,
     filterType,
     pagination,
+    isFetchingData: isFetching,
+    showReverseSIForm,
     setShowDeleteSIForm,
     areAnySelectedRowsPending,
     areAnySelectedRowsApproved,
@@ -304,22 +323,11 @@ const useSalesInvoiceList = () => {
     handleSearch,
     handleFilterChange,
     handlePageChange,
-    isFetchingData: isFetching,
+    handleCloseReverseSIForm,
+    handleReverseSI,
     refetch,
+    handleReverse,
   };
 };
 
 export default useSalesInvoiceList;
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -310,5 +310,28 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpPost("reverse/{salesInvoiceId}")]
+        public async Task<ApiResponseModel> ReverseInvoice(int salesInvoiceId)
+        {
+            try
+            {
+                var existingSalesInvoice = await _salesInvoiceService.GetSalesInvoiceBySalesInvoiceId(salesInvoiceId);
+                if (existingSalesInvoice == null)
+                {
+                    _logger.LogWarning(LogMessages.SalesInvoiceNotFound);
+                    return AddResponseMessage(Response, LogMessages.SalesInvoiceNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+                await _salesInvoiceService.ReverseInvoice(salesInvoiceId);
+                _logger.LogInformation("Sales Invoice reversed successfully");
+                return AddResponseMessage(Response, "Sales Invoice reversed successfully", null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
     }
 }

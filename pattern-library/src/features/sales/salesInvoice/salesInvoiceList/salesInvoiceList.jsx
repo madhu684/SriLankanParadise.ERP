@@ -12,6 +12,7 @@ import { UserContext } from "common/context/userContext";
 import { FaSearch } from "react-icons/fa";
 import SalesInvoiceDelete from "features/sales/salesInvoice/salesInvoiceDelete/salesInvoiceDelete";
 import useFormatCurrency from "common/utility/useFormatCurrency";
+import SalesInvoiceReverse from "../salesInvoiceReverse/SalesInvoiceReverse.jsx";
 
 const SalesInvoiceList = () => {
   const {
@@ -34,6 +35,8 @@ const SalesInvoiceList = () => {
     searchQuery,
     filterType,
     pagination,
+    isFetchingData,
+    showReverseSIForm,
     setShowDeleteSIForm,
     areAnySelectedRowsPending,
     areAnySelectedRowsApproved,
@@ -57,7 +60,9 @@ const SalesInvoiceList = () => {
     handleSearch,
     handleFilterChange,
     handlePageChange,
-    isFetchingData,
+    handleCloseReverseSIForm,
+    handleReverseSI,
+    handleReverse,
   } = useSalesInvoiceList();
 
   const { hasPermission } = useContext(UserContext);
@@ -71,7 +76,9 @@ const SalesInvoiceList = () => {
   const paginate = (pageNumber) => handlePageChange(pageNumber);
 
   if (error) {
-    return <ErrorComponent error={error.message || error || "Error fetching data"} />;
+    return (
+      <ErrorComponent error={error.message || error || "Error fetching data"} />
+    );
   }
 
   if (isLoadingData && salesInvoices.length === 0) {
@@ -181,6 +188,13 @@ const SalesInvoiceList = () => {
                 Write Off
               </button>
             )}
+          {hasPermission("Reverse Sales Invoice") &&
+            isAnyRowSelected &&
+            selectedRowData[0]?.status === 2 && (
+              <button className="btn btn-warning" onClick={handleReverseSI}>
+                Reverse
+              </button>
+            )}
         </div>
       </div>
 
@@ -208,28 +222,28 @@ const SalesInvoiceList = () => {
         </div>
 
         <div className="input-group" style={{ maxWidth: "300px" }}>
-            <span className="input-group-text bg-white border-end-0">
-                  <FaSearch className="text-muted" />
+          <span className="input-group-text bg-white border-end-0">
+            <FaSearch className="text-muted" />
+          </span>
+          <input
+            type="text"
+            className={`form-control border-start-0 ps-0 ${
+              isFetchingData ? "border-end-0" : ""
+            }`}
+            placeholder="Search by Reference No"
+            value={searchQuery}
+            onChange={handleSearchInput}
+          />
+          {isFetchingData && (
+            <span className="input-group-text bg-white border-start-0">
+              <div
+                className="spinner-border spinner-border-sm text-primary"
+                role="status"
+              >
+                <span className="visually-hidden">Loading...</span>
+              </div>
             </span>
-            <input
-                type="text"
-                className={`form-control border-start-0 ps-0 ${
-                    isFetchingData ? "border-end-0" : ""
-                }`}
-                placeholder="Search by Reference No"
-                value={searchQuery}
-                onChange={handleSearchInput}
-            />
-            {isFetchingData && (
-                <span className="input-group-text bg-white border-start-0">
-                    <div
-                        className="spinner-border spinner-border-sm text-primary"
-                        role="status"
-                    >
-                        <span className="visually-hidden">Loading...</span>
-                    </div>
-                </span>
-            )}
+          )}
         </div>
       </div>
 
@@ -274,7 +288,7 @@ const SalesInvoiceList = () => {
                   <td>
                     <span
                       className={`badge rounded-pill ${getStatusBadgeClass(
-                        si.status
+                        si.status,
                       )}`}
                     >
                       {getStatusLabel(si.status)}
@@ -366,22 +380,17 @@ const SalesInvoiceList = () => {
             salesInvoice={selectedRowData[0]}
           />
         )}
+        {showReverseSIForm && (
+          <SalesInvoiceReverse
+            show={showReverseSIForm}
+            handleClose={handleCloseReverseSIForm}
+            salesInvoice={selectedRowData[0]}
+            handleReverse={handleReverse}
+          />
+        )}
       </div>
     </div>
   );
 };
 
 export default SalesInvoiceList;
-
-
-
-
-
-
-
-
-
-
-
-
-
