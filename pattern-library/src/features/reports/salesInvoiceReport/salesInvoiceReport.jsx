@@ -24,7 +24,8 @@ const SalesInvoiceReport = () => {
     setFilter,
     totalInvoiceAmount,
     totalReceiptAmount,
-    totalDifference,
+    totalExcessAmount,
+    totalOutstandingAmount,
     totalInvoiceCount,
     hasPermission,
   } = useSalesInvoiceReport();
@@ -135,14 +136,31 @@ const SalesInvoiceReport = () => {
           </div>
         </div>
 
-        {/* Difference */}
+        {/* Total Excess Amount */}
+        <div className="col-lg-3 col-md-6">
+          <div className="card shadow-sm border-0" style={{ borderLeft: "4px solid #198754" }}>
+            <div className="card-body">
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <p className="text-muted mb-1 small">Total Excess Amount</p>
+                  <h4 className="mb-0 text-success">{formatCurrency(totalExcessAmount)}</h4>
+                </div>
+                <div className="bg-success bg-opacity-10 p-3 rounded-circle">
+                  <BiReceipt size={28} className="text-success" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Total Outstanding Amount */}
         <div className="col-lg-3 col-md-6">
           <div className="card shadow-sm border-0" style={{ borderLeft: "4px solid #f00d0dff" }}>
             <div className="card-body">
               <div className="d-flex justify-content-between align-items-center">
                 <div>
-                  <p className="text-muted mb-1 small">Difference</p>
-                  <h4 className="mb-0 text-danger">{formatCurrency(totalDifference)}</h4>
+                  <p className="text-muted mb-1 small">Total Outstanding Amount</p>
+                  <h4 className="mb-0 text-danger">{formatCurrency(totalOutstandingAmount)}</h4>
                 </div>
                 <div className="bg-danger bg-opacity-10 p-3 rounded-circle">
                   <FiActivity size={28} className="text-danger" />
@@ -170,7 +188,7 @@ const SalesInvoiceReport = () => {
             <table className="table table-hover align-middle mb-0">
               <thead className="table-light">
                 <tr>
-                  <th>#</th>
+                  <th></th>
                   <th className="px-3">Invoice No</th>
                   <th>Customer Name</th>
                   <th>Inv Status</th>
@@ -194,9 +212,9 @@ const SalesInvoiceReport = () => {
                 ) : reportItems.length > 0 ? (
                   reportItems.map((item, index) => (
                     <tr key={index}>
-                      <td>{index + 1}</td>
                       {item.rowSpan > 0 && (
                         <>
+                          <td className="align-middle" rowSpan={item.rowSpan}>{item.invoiceIndex}</td>
                           <td className="px-3 fw-bold align-middle" rowSpan={item.rowSpan}>{item.invoiceNo}</td>
                           <td className="align-middle" rowSpan={item.rowSpan}>{item.customerName}</td>
                           <td className="align-middle" rowSpan={item.rowSpan}>
@@ -231,8 +249,8 @@ const SalesInvoiceReport = () => {
                                   : item.paymentMode === "Bank Transfer"
                                     ? "bg-info"
                                     : item.paymentMode === "Gift Voucher"
-                                      ? "bg-warning"
-                                      : "bg-secondary"
+                                      ? "bg-secondary"
+                                      : "bg-danger"
                               }`}
                             >
                               {item.paymentMode}
@@ -256,6 +274,19 @@ const SalesInvoiceReport = () => {
                   </tr>
                 )}
               </tbody>
+              {reportItems.length > 0 && (
+                <tfoot className="table-light fw-bold">
+                  <tr>
+                    <td colSpan="4" className="text-end pe-3">Total</td>
+                    <td className="text-end">{formatCurrency(totalInvoiceAmount)}</td>
+                    <td></td>
+                    <td className="text-end">{formatCurrency(totalReceiptAmount)}</td>
+                    <td className="text-end">{formatCurrency(totalExcessAmount)}</td>
+                    <td className="text-end text-danger">{formatCurrency(totalOutstandingAmount)}</td>
+                    <td colSpan="3"></td>
+                  </tr>
+                </tfoot>
+              )}
             </table>
           </div>
         </div>

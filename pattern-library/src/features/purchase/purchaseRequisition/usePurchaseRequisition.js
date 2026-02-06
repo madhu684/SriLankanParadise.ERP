@@ -67,8 +67,8 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
   const fetchItems = async (searchQuery) => {
     try {
       const response = await get_Location_Inventory_Summary_By_Item_Name_api(
-        //formData.expectedDeliveryLocation,
-        null,
+        formData.expectedDeliveryLocation,
+        // null,
         searchQuery,
         null
       );
@@ -94,9 +94,9 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
 
       const filterItems = formData.supplierId
         ? items.filter(
-            (item) =>
-              !formData.supplierId || item.supplierId === formData.supplierId
-          )
+          (item) =>
+            !formData.supplierId || item.supplierId === formData.supplierId
+        )
         : items;
       return filterItems;
     } catch (error) {
@@ -331,9 +331,9 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
 
     const isEmailValid = formData.email
       ? validateField("email", "Email", formData.email, {
-          validationFunction: (value) => /\S+@\S+\.\S+/.test(value),
-          errorMessage: "Please enter a valid email address",
-        })
+        validationFunction: (value) => /\S+@\S+\.\S+/.test(value),
+        errorMessage: "Please enter a valid email address",
+      })
       : true;
 
     const isContactNumberValid = validateField(
@@ -583,10 +583,10 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
 
     const supplierItems = supplierItemResponse.data.result
       ? supplierItemResponse.data.result.filter(
-          (si) =>
-            si.itemMasterId !== item.itemMasterId &&
-            si.supplierName !== formData?.selectedSupplier?.supplierName
-        )
+        (si) =>
+          si.itemMasterId !== item.itemMasterId &&
+          si.supplierName !== formData?.selectedSupplier?.supplierName
+      )
       : [];
 
     setFormData((prevFormData) => ({
@@ -652,8 +652,8 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
       setPRGenerating(true);
       setIsPRGenerated(true);
       const response = await get_Low_Stock_Items_api(
-        formData.supplierId
-        //formData.expectedDeliveryLocation
+        formData.supplierId,
+        formData.expectedDeliveryLocation
       );
       const lowStockItems = response.data.result || [];
       console.log("lowStockItems: ", lowStockItems);
@@ -686,11 +686,11 @@ const usePurchaseRequisition = ({ onFormSubmit }) => {
 
               const supplierItems = supplierItemResponse.data.result
                 ? supplierItemResponse.data.result.filter(
-                    (si) =>
-                      si.itemMasterId !== item.itemMasterId &&
-                      si.supplierName !==
-                        formData?.selectedSupplier?.supplierName
-                  )
+                  (si) =>
+                    si.itemMasterId !== item.itemMasterId &&
+                    si.supplierName !==
+                    formData?.selectedSupplier?.supplierName
+                )
                 : [];
 
               return {
