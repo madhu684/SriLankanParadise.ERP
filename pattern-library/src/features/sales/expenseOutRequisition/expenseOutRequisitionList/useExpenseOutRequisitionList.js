@@ -1,6 +1,7 @@
 ﻿import { useState } from "react";
-import { get_expense_out_requisitions_api } from "common/services/salesApi";
+import { get_paginated_expense_out_requisitions_by_companyId_api } from "common/services/salesApi";
 import { useQuery } from "@tanstack/react-query";
+import moment from "moment";
 
 const useExpenseOutRequisitionList = () => {
   const [selectedRows, setSelectedRows] = useState([]);
@@ -17,11 +18,47 @@ const useExpenseOutRequisitionList = () => {
   const [showConvertEORForm, setShowConvertEORForm] = useState(false);
   const [approvalType, setApprovalType] = useState("");
 
+  // Pagination and Filter State
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [filterDate, setFilterDate] = useState(moment().format("YYYY-MM-DD"));
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
+
   const fetchExpenseOutRequisitions = async () => {
-    const response = await get_expense_out_requisitions_api(
-      sessionStorage.getItem("companyId"),
-    );
-    return response.data.result || [];
+    try {
+      const response = await get_paginated_expense_out_requisitions_by_companyId_api({
+        companyId: sessionStorage.getItem("companyId"),
+        pageNumber,
+        pageSize,
+        date: filterDate,
+      });
+
+      // Handle nested structure: response.data.result or response.result
+      const dataLayer = response.data || response.Data || response;
+      const resultData = dataLayer.result || dataLayer.Result || dataLayer;
+
+      if (resultData) {
+
+
+        // Extract values with fallbacks
+        const totalPages = resultData.totalPages || resultData.TotalPages || 0;
+        const totalCount = resultData.totalCount || resultData.TotalCount || 0;
+        const items = resultData.items || resultData.Items || [];
+
+        setTotalPages(totalPages);
+        setTotalCount(totalCount);
+
+
+        return items;
+      }
+
+
+      return [];
+    } catch (err) {
+      console.error("Error fetching expense out requisitions:", err);
+      throw err;
+    }
   };
 
   const {
@@ -31,8 +68,9 @@ const useExpenseOutRequisitionList = () => {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["expenseOutRequisitions"],
+    queryKey: ["expenseOutRequisitions", pageNumber, pageSize, filterDate],
     queryFn: fetchExpenseOutRequisitions,
+    keepPreviousData: true,
   });
 
   const handleShowApproveEORModal = (approvalType) => {
@@ -197,6 +235,14 @@ const useExpenseOutRequisitionList = () => {
     approvalType,
     areAnySelectedRowsPendingRecommendation,
     areAnySelectedRowsPendingApproval,
+    pageNumber,
+    pageSize,
+    filterDate,
+    totalPages,
+    totalCount,
+    setPageNumber,
+    setPageSize,
+    setFilterDate,
     setSelectedRows,
     handleViewDetails,
     getStatusLabel,

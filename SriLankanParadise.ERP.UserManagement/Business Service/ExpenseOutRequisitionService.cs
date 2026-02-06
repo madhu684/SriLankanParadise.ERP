@@ -1,5 +1,6 @@
 ﻿using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Business_Service
@@ -46,6 +47,11 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         public async Task<IEnumerable<ExpenseOutRequisition>> GetApprovedExpenseOutRequisitions(int status,int companyId, string? searchQuery)
         {
             return await _expenseOutRequisitionRepository.GetApprovedExpenseOutRequisitions(status, companyId, searchQuery);
+        }
+
+        public async Task<PagedResult<ExpenseOutRequisition>> GetExpenseOutRequisitionsWithPagination(int companyId, int pageNumber, int pageSize, DateTime? filterDate)
+        {
+            return await _expenseOutRequisitionRepository.GetExpenseOutRequisitionsWithPagination(companyId, pageNumber, pageSize, filterDate);
         }
     }
 }

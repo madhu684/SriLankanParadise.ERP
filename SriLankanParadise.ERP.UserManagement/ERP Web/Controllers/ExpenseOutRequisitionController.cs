@@ -112,6 +112,32 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             return Response;
         }
 
+        [HttpGet("GetPaginatedExpenseOutRequisitionsByCompanyId/{companyId}")]
+        public async Task<ApiResponseModel> GetPaginatedExpenseOutRequisitionsByCompanyId(int companyId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] DateTime? date = null)
+        {
+            try
+            {
+                var pagedResult = await _expenseOutRequisitionService.GetExpenseOutRequisitionsWithPagination(companyId, pageNumber, pageSize, date);
+                
+                var expenseOutRequisitionDtos = _mapper.Map<IEnumerable<ExpenseOutRequisitionDto>>(pagedResult.Items);
+                
+                var result = new
+                {
+                   Items = expenseOutRequisitionDtos,
+                   TotalCount = pagedResult.TotalCount,
+                   TotalPages = pagedResult.TotalPages
+                };
+
+                AddResponseMessage(Response, LogMessages.ExpenseOutRequisitionsRetrieved, result, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
 
         [HttpGet("GetExpenseOutRequisitionsByUserId/{userId}")]
         public async Task<ApiResponseModel> GetExpenseOutRequisitionsByUserId(int userId)
