@@ -118,7 +118,10 @@ const useMinReport = () => {
       }
 
       const exportData = [];
+      const summaryMap = new Map();
+
       allReportItems.forEach((item) => {
+        // Prepare Detail Data
         if (item.issueDetails && item.issueDetails.length > 0) {
           item.issueDetails.forEach((detail, index) => {
             exportData.push({
@@ -126,6 +129,20 @@ const useMinReport = () => {
               itemDetail: detail,
               isFirstItem: index === 0,
             });
+
+            // Aggregate Summary Data
+            const itemName = detail?.itemMaster?.itemName || "-";
+            const unitName = detail?.itemMaster?.unit?.unitName || "-";
+            const key = `${itemName}|${unitName}`;
+
+            if (!summaryMap.has(key)) {
+              summaryMap.set(key, {
+                itemName,
+                unitName,
+                totalQty: 0,
+              });
+            }
+            summaryMap.get(key).totalQty += detail?.quantity || 0;
           });
         } else {
           exportData.push({
@@ -135,6 +152,8 @@ const useMinReport = () => {
           });
         }
       });
+
+      const summaryData = Array.from(summaryMap.values());
 
       const columns = [
         {
@@ -153,8 +172,8 @@ const useMinReport = () => {
           accessor: (d) =>
             d.isFirstItem
               ? allLocations.find(
-                  (loc) => loc.locationId === d.issuedLocationId,
-                )?.locationName || d.issuedLocationId
+                (loc) => loc.locationId === d.issuedLocationId,
+              )?.locationName || d.issuedLocationId
               : "",
           width: 20,
         },
@@ -190,6 +209,24 @@ const useMinReport = () => {
         },
       ];
 
+      const summaryColumns = [
+        {
+          header: "Item Name",
+          accessor: (d) => d.itemName,
+          width: 30,
+        },
+        {
+          header: "Unit",
+          accessor: (d) => d.unitName,
+          width: 10,
+        },
+        {
+          header: "Sum of Dispatched Qty",
+          accessor: (d) => d.totalQty,
+          width: 20,
+        },
+      ];
+
       // Dynamic naming based on issueType
       const getReportNames = (type) => {
         switch (type?.toUpperCase()) {
@@ -218,11 +255,21 @@ const useMinReport = () => {
       const currentDate = new Date().toISOString().split("T")[0];
 
       exportToExcel({
-        data: exportData,
-        columns: columns,
         fileName: `${reportNames.prefix}_Report_${currentDate}.xlsx`,
-        sheetName: reportNames.sheetName,
-        topic: `${reportNames.fullName} Report - ${issueType || "All"}`,
+        sheets: [
+          {
+            data: exportData,
+            columns: columns,
+            sheetName: reportNames.sheetName,
+            topic: `${reportNames.fullName} Report - ${issueType || "All"}`,
+          },
+          {
+            data: summaryData,
+            columns: summaryColumns,
+            sheetName: "Summary",
+            topic: "Summary Report",
+          },
+        ],
       });
     } catch (err) {
       console.error("Export failed:", err);
