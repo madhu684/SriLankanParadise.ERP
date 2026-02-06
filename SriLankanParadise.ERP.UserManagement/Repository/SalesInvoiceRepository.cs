@@ -9,10 +9,12 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
     public class SalesInvoiceRepository : ISalesInvoiceRepository
     {
         private readonly ErpSystemContext _dbContext;
+        private readonly ILocationInventoryRepository _locationInventoryRepository;
 
-        public SalesInvoiceRepository(ErpSystemContext dbContext)
+        public SalesInvoiceRepository(ErpSystemContext dbContext, ILocationInventoryRepository locationInventoryRepository)
         {
             _dbContext = dbContext;
+            _locationInventoryRepository = locationInventoryRepository;
         }
         public async Task AddSalesInvoice(SalesInvoice salesInvoice)
         {
@@ -479,6 +481,71 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 var items = await query.OrderBy(si => si.InvoiceDate).ToListAsync();
 
                 return items.Any() ? items : Enumerable.Empty<SalesInvoice>();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task ReverseInvoice(int salesInvoiceId)
+        {
+            try
+            {
+                var salesInvoice = await _dbContext.SalesInvoices.FirstOrDefaultAsync(po => po.SalesInvoiceId == salesInvoiceId);
+                if (salesInvoice == null)
+                {
+                    throw new KeyNotFoundException($"Sales Invoice with ID {salesInvoiceId} not found");
+                }
+
+                var strategy = _dbContext.Database.CreateExecutionStrategy();
+
+                await strategy.ExecuteAsync(async () =>
+                {
+                    using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+                    try
+                    {
+                        var charges = await _dbContext.ChargesAndDeductionApplieds
+                            .Where(c => c.TransactionId == salesInvoiceId && c.TransactionTypeId == 3)
+                            .ToListAsync();
+
+                        if (charges.Any())
+                        {
+                            _dbContext.ChargesAndDeductionApplieds.RemoveRange(charges);
+                        }
+
+                        var salesInvoiceDetails = await _dbContext.SalesInvoiceDetails
+                            .Where(si => si.SalesInvoiceId == salesInvoiceId)
+                            .ToListAsync();
+
+                        if (salesInvoiceDetails.Any())
+                        {
+                            if (salesInvoice.LocationId.HasValue)
+                            {
+                                foreach (var detail in salesInvoiceDetails)
+                                {
+                                    if (detail.ItemBatchItemMasterId.HasValue && detail.Quantity.HasValue)
+                                    {
+                                        await _locationInventoryRepository.IncreaseInventoryByFIFOInternal(salesInvoice.LocationId.Value, detail.ItemBatchItemMasterId.Value, 14, (decimal)detail.Quantity.Value);
+                                    }
+                                }
+                            }
+                            _dbContext.SalesInvoiceDetails.RemoveRange(salesInvoiceDetails);
+                        }
+
+                        _dbContext.SalesInvoices.Remove(salesInvoice);
+
+                        await _dbContext.SaveChangesAsync();
+
+                        await transaction.CommitAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        await transaction.RollbackAsync();
+                        throw new Exception($"Error reversing sales invoice with ID {salesInvoiceId}", ex);
+                    }
+                });
             }
             catch (Exception)
             {
