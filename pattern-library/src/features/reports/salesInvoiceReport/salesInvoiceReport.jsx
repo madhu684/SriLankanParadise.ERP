@@ -77,6 +77,7 @@ const SalesInvoiceReport = () => {
                 <option value="All">All</option>
                 <option value="Outstanding">Outstanding</option>
                 <option value="Excess">Excess</option>
+                <option value="Settled">Settled</option>
               </select>
             </div>
           </div>
