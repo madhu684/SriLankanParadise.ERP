@@ -32,6 +32,7 @@ const ManagerCollectionReport = () => {
     formatTime,
     setDate,
     handleExport,
+    isExporting,
   } = useManagerCollectionReport();
 
   if (!hasPermission("View Manager Collection Report"))
@@ -82,10 +83,18 @@ const ManagerCollectionReport = () => {
               <button
                 className="btn btn-success w-100"
                 onClick={handleExport}
-                disabled={loading || !reportData}
+                disabled={loading || !reportData || isExporting}
               >
-                <FiDownload className="me-1" />
-                Export to Excel
+                {isExporting ? (
+                  <span
+                    className="spinner-border spinner-border-sm me-1"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
+                ) : (
+                  <FiDownload className="me-1" />
+                )}
+                {isExporting ? "Exporting..." : "Export to Excel"}
               </button>
             </div>
           </div>
