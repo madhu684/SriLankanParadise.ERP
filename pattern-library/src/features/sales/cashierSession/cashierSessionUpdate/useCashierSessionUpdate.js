@@ -128,8 +128,8 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
     if (
       actualCashInHand !==
       cashierSession?.openingBalance +
-        (totalsByPaymentMode[1] ?? 0) -
-        expenseOutTotal
+      (totalsByPaymentMode[1] ?? 0) -
+      expenseOutTotal
     ) {
       setIsDifferenceCashInHand(true);
     } else {
@@ -180,10 +180,24 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
     setValidFields({});
     setValidationErrors({});
 
+    // Calculate expected totals
+    const expectedCashTotal = (cashierSession?.openingBalance || 0) + (totalsByPaymentMode[1] ?? 0) - expenseOutTotal;
+    const expectedChequesTotal = totalsByPaymentMode[2] ?? 0;
+
+    const hasCashDifference = actualCashInHand !== expectedCashTotal;
+    const hasChequesDifference = actualChequesInHand !== expectedChequesTotal;
+
+    if (hasCashDifference) {
+      setIsDifferenceCashInHand(true);
+    }
+    if (hasChequesDifference) {
+      setIsDifferenceChequesInHand(true);
+    }
+
     let isReasonCashInHandValid = true;
     let isReasonChequesInHandValid = true;
 
-    if (isDifferenceCashInHand) {
+    if (hasCashDifference) {
       isReasonCashInHandValid = validateField(
         "reasonCashInHand",
         "Reason",
@@ -191,7 +205,7 @@ const useCashierSessionUpdate = ({ onFormSubmit, cashierSession }) => {
       );
     }
 
-    if (isDifferenceChequesInHand) {
+    if (hasChequesDifference) {
       isReasonChequesInHandValid = validateField(
         "reasonChequesInHand",
         "Reason",
