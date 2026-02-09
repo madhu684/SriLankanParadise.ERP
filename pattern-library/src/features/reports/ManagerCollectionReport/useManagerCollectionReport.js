@@ -138,7 +138,7 @@ const useManagerCollectionReport = () => {
             get_collection_report_by_date_user_api(
               userReport.userId,
               date,
-              session.cashierSessionId
+              session.sessionId
             ).then((res) => ({
               userName: userReport.userName,
               sessionDisplay: session.sessionIn
