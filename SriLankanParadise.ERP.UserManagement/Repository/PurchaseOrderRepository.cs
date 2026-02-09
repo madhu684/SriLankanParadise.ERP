@@ -156,6 +156,10 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
             {
                 var purchaseOrders = await _dbContext.PurchaseOrders
                     .Where(po => po.CompanyId == companyId)
+                    .Include(po => po.Supplier)
+                    .Include(po => po.PurchaseOrderDetails)
+                    .ThenInclude(pod => pod.ItemMaster)
+                    .ThenInclude(im => im.Unit)
                     .ToListAsync();
 
                 return purchaseOrders.Any() ? purchaseOrders : null;

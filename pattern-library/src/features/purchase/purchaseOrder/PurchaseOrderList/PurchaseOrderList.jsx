@@ -35,7 +35,7 @@ const PurchaseOrderList = () => {
     permissionError,
     showDeletePOForm,
     refetch,
-    setRefetch,
+
     areAnySelectedRowsPending,
     setSelectedRows,
     handleRowSelect,
@@ -297,8 +297,7 @@ const PurchaseOrderList = () => {
             show={showDeletePOForm}
             handleClose={() => setShowDeletePOForm(false)}
             purchaseOrder={selectedRowData[0]}
-            refetch={refetch}
-            setRefetch={setRefetch}
+            onDeleteSuccess={refetch}
           />
         )}
       </div>

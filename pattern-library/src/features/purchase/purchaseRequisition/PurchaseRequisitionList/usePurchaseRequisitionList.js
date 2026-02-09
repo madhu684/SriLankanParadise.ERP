@@ -1,13 +1,13 @@
-﻿import { useState, useEffect } from "react";
+﻿import { useState, useContext } from "react";
 import { get_purchase_requisitions_with_out_drafts_api } from "common/services/purchaseApi";
 import { get_purchase_requisitions_by_user_id_api } from "common/services/purchaseApi";
-import { get_user_permissions_api } from "common/services/userManagementApi";
 import { useQuery } from "@tanstack/react-query";
+import { UserContext } from "common/context/userContext";
 
 const usePurchaseRequisitionList = () => {
-  const [purchaseRequisitions, setPurchaseRequisitions] = useState([]);
-  const [isLoadingData, setIsLoadingData] = useState(true);
-  const [error, setError] = useState(null);
+  const { user, hasPermission, isLoadingPermissions, isPermissionsError } =
+    useContext(UserContext);
+
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedRowData, setSelectedRowData] = useState([]);
   const [showApprovePRModal, setShowApprovePRModal] = useState(false);
@@ -22,95 +22,35 @@ const usePurchaseRequisitionList = () => {
   const [PRDetail, setPRDetail] = useState("");
   const [showDeletePRForm, setShowDeletePRForm] = useState(false);
 
-  const [refetch, setRefetch] = useState(false);
+  const fetchPurchaseRequisitions = async () => {
+    if (hasPermission("Approve Purchase Requisition")) {
+      const purchaseRequisitionWithoutDraftsResponse =
+        await get_purchase_requisitions_with_out_drafts_api(
+          user?.companyId
+        );
 
-  const fetchUserPermissions = async () => {
-    try {
-      const response = await get_user_permissions_api(
-        sessionStorage.getItem("userId")
-      );
-      return response.data.result;
-    } catch (error) {
-      console.error("Error fetching user permissions:", error);
+      return purchaseRequisitionWithoutDraftsResponse?.data?.result || [];
+
+    } else {
+      const purchaseRequisitionResponse =
+        await get_purchase_requisitions_by_user_id_api(
+          user?.userId
+        );
+      return purchaseRequisitionResponse?.data?.result || [];
     }
   };
 
   const {
-    data: userPermissions,
-    isLoading: isLoadingPermissions,
-    isError: isPermissionsError,
-    error: permissionError,
+    data: purchaseRequisitions = [],
+    isLoading: isLoadingData,
+    isError: isError,
+    error: error,
+    refetch,
   } = useQuery({
-    queryKey: ["userPermissions"],
-    queryFn: fetchUserPermissions,
+    queryKey: ["purchaseRequisitions", user?.companyId, user?.userId],
+    queryFn: fetchPurchaseRequisitions,
+    enabled: !!user?.companyId && !isLoadingPermissions,
   });
-
-  const fetchData = async () => {
-    try {
-      if (!isLoadingPermissions && userPermissions) {
-        if (hasPermission("Approve Purchase Requisition")) {
-          const purchaseRequisitionWithoutDraftsResponse =
-            await get_purchase_requisitions_with_out_drafts_api(
-              sessionStorage.getItem("companyId")
-            );
-
-          const purchaseRequisitionByUserIdResponse =
-            await get_purchase_requisitions_by_user_id_api(
-              sessionStorage.getItem("userId")
-            );
-
-          let newPurchaseRequisitions = [];
-          if (
-            purchaseRequisitionWithoutDraftsResponse &&
-            purchaseRequisitionWithoutDraftsResponse.data.result
-          ) {
-            newPurchaseRequisitions =
-              purchaseRequisitionWithoutDraftsResponse.data.result;
-          }
-
-          let additionalRequisitions = [];
-          if (
-            purchaseRequisitionByUserIdResponse &&
-            purchaseRequisitionByUserIdResponse.data.result
-          ) {
-            additionalRequisitions =
-              purchaseRequisitionByUserIdResponse.data.result;
-          }
-
-          const uniqueNewRequisitions = additionalRequisitions.filter(
-            (requisition) =>
-              !newPurchaseRequisitions.some(
-                (existingRequisition) =>
-                  existingRequisition.purchaseRequisitionId ===
-                  requisition.purchaseRequisitionId
-              )
-          );
-
-          newPurchaseRequisitions = [
-            ...newPurchaseRequisitions,
-            ...uniqueNewRequisitions,
-          ];
-          setPurchaseRequisitions(newPurchaseRequisitions);
-        } else {
-          const purchaseRequisitionResponse =
-            await get_purchase_requisitions_by_user_id_api(
-              sessionStorage.getItem("userId")
-            );
-          setPurchaseRequisitions(
-            purchaseRequisitionResponse.data.result || []
-          );
-        }
-      }
-    } catch (error) {
-      setError("Error fetching data");
-    } finally {
-      setIsLoadingData(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [isLoadingPermissions, userPermissions, refetch]);
 
   const handleShowApprovePRModal = () => {
     setShowApprovePRModal(true);
@@ -130,7 +70,7 @@ const usePurchaseRequisitionList = () => {
   };
 
   const handleApproved = async () => {
-    fetchData();
+    refetch();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -167,7 +107,7 @@ const usePurchaseRequisitionList = () => {
   };
 
   const handleUpdated = async () => {
-    fetchData();
+    refetch();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -187,27 +127,6 @@ const usePurchaseRequisitionList = () => {
     setShowConvertPRForm(true);
   };
 
-  // const handleRowSelect = (id) => {
-  //   const selectedRow = purchaseRequisitions.find(
-  //     (pr) => pr.purchaseRequisitionId === id
-  //   );
-  //   const isSelected = selectedRows.includes(id);
-
-  //   if (isSelected) {
-  //     setSelectedRows((prevSelected) =>
-  //       prevSelected.filter((selectedId) => selectedId !== id)
-  //     );
-  //     setSelectedRowData((prevSelectedData) =>
-  //       prevSelectedData.filter((data) => data.purchaseRequisitionId !== id)
-  //     );
-  //   } else {
-  //     setSelectedRows((prevSelected) => [...prevSelected, id]);
-  //     setSelectedRowData((prevSelectedData) => [
-  //       ...prevSelectedData,
-  //       selectedRow,
-  //     ]);
-  //   }
-  // };
   const handleRowSelect = (id) => {
     const selectedRow = purchaseRequisitions.find(
       (pr) => pr.purchaseRequisitionId === id
@@ -258,11 +177,6 @@ const usePurchaseRequisitionList = () => {
   };
 
   const areAnySelectedRowsPending = (selectedRows) => {
-    // return selectedRows.some(
-    //   (id) =>
-    //     purchaseRequisitions.find((pr) => pr.purchaseRequisitionId === id)
-    //       ?.status === 1
-    // );
     return selectedRows.some((id) => {
       const po = purchaseRequisitions.find(
         (po) => po.purchaseRequisitionId === id
@@ -276,14 +190,6 @@ const usePurchaseRequisitionList = () => {
       (id) =>
         purchaseRequisitions.find((pr) => pr.purchaseRequisitionId === id)
           ?.status === 2
-    );
-  };
-
-  const hasPermission = (permissionName) => {
-    return userPermissions?.some(
-      (permission) =>
-        permission.permission.permissionName === permissionName &&
-        permission.permission.permissionStatus
     );
   };
 
@@ -304,10 +210,9 @@ const usePurchaseRequisitionList = () => {
     PRDetail,
     showConvertPRForm,
     isPermissionsError,
-    permissionError,
+    permissionError: error,
     showDeletePRForm,
     refetch,
-    setRefetch,
     setShowDeletePRForm,
     areAnySelectedRowsPending,
     areAnySelectedRowsApproved,

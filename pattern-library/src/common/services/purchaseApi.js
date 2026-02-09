@@ -1568,7 +1568,7 @@ export const get_location_inventory_by_locationInvemtoryId_api = async (
       },
     );
     return response.data;
-  } catch (error) {}
+  } catch (error) { }
 };
 
 //=============

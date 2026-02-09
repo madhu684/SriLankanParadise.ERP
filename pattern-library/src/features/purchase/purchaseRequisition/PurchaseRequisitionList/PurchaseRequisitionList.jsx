@@ -325,7 +325,6 @@ const PurchaseRequisitionList = () => {
             handleClose={() => setShowDeletePRForm(false)}
             purchaseRequisition={selectedRowData[0]}
             refetch={refetch}
-            setRefetch={setRefetch}
           />
         )}
       </div>

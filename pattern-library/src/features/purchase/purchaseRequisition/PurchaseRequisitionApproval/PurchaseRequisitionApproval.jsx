@@ -121,7 +121,7 @@ const PurchaseRequisitionApproval = ({
             <p>
               <strong>Supplier:</strong> {purchaseRequisition.remarks}
               {purchaseRequisition.supplier
-                ? purchaseRequisition.supplier.supplierName
+                ? purchaseRequisition.supplier?.supplierName
                 : "No Supplier any tagged"}
             </p>
           </div>
@@ -143,10 +143,10 @@ const PurchaseRequisitionApproval = ({
               (item, index) => (
                 <tr key={index}>
                   <td>{item.itemMaster?.itemName}</td>
-                  <td>{item.itemMaster?.unit.unitName}</td>
+                  <td>{item.itemMaster?.unit?.unitName}</td>
                   <td>{item.quantity}</td>
-                  <td>{item.unitPrice.toFixed(2)}</td>
-                  <td className="text-end">{item.totalPrice.toFixed(2)}</td>
+                  <td>{item.unitPrice?.toFixed(2)}</td>
+                  <td className="text-end">{item.totalPrice?.toFixed(2)}</td>
                 </tr>
               )
             )}
