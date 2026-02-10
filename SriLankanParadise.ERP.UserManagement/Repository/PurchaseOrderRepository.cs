@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
@@ -210,6 +211,47 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                         throw new Exception($"Error deleting purchase order with ID {purchaseOrderId}", ex);
                     }
                 });
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<PagedResult<PurchaseOrder>> GetPaginatedPurchaseOrdersByCompanyId(
+            int companyId,
+            int pageNumber,
+            int pageSize)
+        {
+            try
+            {
+                if (pageNumber < 1) pageNumber = 1;
+                if (pageSize < 1) pageSize = 10;
+                if (pageSize > 100) pageSize = 100;
+
+                var query = _dbContext.PurchaseOrders
+                    .Where(po => po.CompanyId == companyId)
+                    .Include(po => po.Supplier)
+                    .Include(po => po.PurchaseOrderDetails)
+                    .ThenInclude(pod => pod.ItemMaster)
+                    .ThenInclude(im => im.Unit);
+
+                var totalCount = await query.CountAsync();
+
+                var items = await query
+                    .OrderByDescending(po => po.OrderDate)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                return new PagedResult<PurchaseOrder>
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+                };
             }
             catch (Exception)
             {

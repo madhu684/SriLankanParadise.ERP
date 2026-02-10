@@ -1,5 +1,6 @@
 ﻿using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Repository;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
@@ -56,6 +57,11 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         public async Task DeletePurchaseOrder(int purchaseOrderId)
         {
             await _purchaseOrderRepository.DeletePurchaseOrder(purchaseOrderId);
+        }
+
+        public async Task<PagedResult<PurchaseOrder>> GetPaginatedPurchaseOrdersByCompanyId(int companyId, int pageNumber, int pageSize)
+        {
+            return await _purchaseOrderRepository.GetPaginatedPurchaseOrdersByCompanyId(companyId, pageNumber, pageSize);
         }
     }
 }

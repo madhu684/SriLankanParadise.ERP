@@ -1,5 +1,5 @@
 ﻿import { useContext, useState } from "react";
-import { get_purchase_orders_api } from "common/services/purchaseApi";
+import { get_paginated_purchase_orders_api } from "common/services/purchaseApi";
 
 import { useQuery } from "@tanstack/react-query";
 import { UserContext } from "common/context/userContext";
@@ -21,18 +21,36 @@ const usePurchaseOrderList = () => {
   const [showDeletePOForm, setShowDeletePOForm] = useState(false);
   const [PODetail, setPODetail] = useState("");
 
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
+  const fetchPurchaseOrders = async () => {
+    const response = await get_paginated_purchase_orders_api({
+      companyId: user?.companyId,
+      pageNumber,
+      pageSize,
+    });
+
+    setTotalCount(response?.result?.pagination?.totalCount || 0);
+    setTotalPages(response?.result?.pagination?.totalPages || 0);
+
+    return response?.result?.data || [];
+  };
+
   const {
-    data: purchaseOrderResponse,
+    data: purchaseOrders = [],
     isLoading: isLoadingData,
     error,
     refetch,
   } = useQuery({
-    queryKey: ["purchaseOrders", user?.companyId],
-    queryFn: () => get_purchase_orders_api(user?.companyId),
+    queryKey: ["purchaseOrders", user?.companyId, pageNumber, pageSize],
+    queryFn: fetchPurchaseOrders,
     enabled: !!user?.companyId && !isLoadingPermissions,
   });
 
-  const purchaseOrders = purchaseOrderResponse?.data?.result || [];
+  const permissionError = isPermissionsError ? new Error("Permission error") : null;
 
   const handleShowApprovePOModal = () => {
     setShowApprovePOModal(true);
@@ -198,8 +216,14 @@ const usePurchaseOrderList = () => {
     showUpdatePOForm,
     PODetail,
     isPermissionsError,
+    permissionError,
     showDeletePOForm,
     refetch,
+    pageNumber,
+    pageSize,
+    totalCount,
+    totalPages,
+    setPageNumber,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleViewDetails,
@@ -222,16 +246,3 @@ const usePurchaseOrderList = () => {
 };
 
 export default usePurchaseOrderList;
-
-
-
-
-
-
-
-
-
-
-
-
-

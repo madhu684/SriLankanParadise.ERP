@@ -248,6 +248,29 @@ export const get_purchase_orders_api = async (companyId) => {
   }
 };
 
+export const get_paginated_purchase_orders_api = async ({
+  companyId,
+  pageNumber,
+  pageSize,
+}) => {
+  try {
+    const response = await api.get(
+      `/purchaseOrder/GetPaginatedPurchaseOrdersByCompanyId/${companyId}`,
+      {
+        params: {
+          pageNumber,
+          pageSize,
+        },
+        withCredentials: true,
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const get_purchase_orders_by_user_id_api = async (userId) => {
   try {
     const response = await api.get(
