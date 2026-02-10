@@ -254,5 +254,49 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
         }
+        [HttpGet("GetPaginatedPurchaseRequisitionsWithoutDraftsByCompanyId/{companyId}")]
+        public async Task<ApiResponseModel> GetPaginatedPurchaseRequisitionsWithoutDraftsByCompanyId(
+            int companyId,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var result = await _purchaseRequisitionService.GetPaginatedPurchaseRequisitionsWithoutDraftsByCompanyId(companyId, pageNumber, pageSize);
+
+                if (result.Items.Any())
+                {
+                    var purchaseRequisitionDtos = _mapper.Map<IEnumerable<PurchaseRequisitionDto>>(result.Items);
+
+                    var responseData = new
+                    {
+                        Data = purchaseRequisitionDtos,
+                        Pagination = new
+                        {
+                            result.TotalCount,
+                            result.PageNumber,
+                            result.PageSize,
+                            result.TotalPages,
+                            result.HasPreviousPage,
+                            result.HasNextPage
+                        }
+                    };
+
+                    AddResponseMessage(Response, LogMessages.PurchaseRequisitionsRetrieved, responseData, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.PurchaseRequisitionsNotFound);
+                    AddResponseMessage(Response, LogMessages.PurchaseRequisitionsNotFound, null, true, HttpStatusCode.OK);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
+
     }
 }

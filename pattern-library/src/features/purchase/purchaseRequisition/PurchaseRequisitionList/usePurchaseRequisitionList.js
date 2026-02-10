@@ -1,5 +1,5 @@
 ﻿import { useState, useContext } from "react";
-import { get_purchase_requisitions_with_out_drafts_api } from "common/services/purchaseApi";
+import { get_paginated_purchase_requisitions_with_out_drafts_api } from "common/services/purchaseApi";
 import { get_purchase_requisitions_by_user_id_api } from "common/services/purchaseApi";
 import { useQuery } from "@tanstack/react-query";
 import { UserContext } from "common/context/userContext";
@@ -22,14 +22,24 @@ const usePurchaseRequisitionList = () => {
   const [PRDetail, setPRDetail] = useState("");
   const [showDeletePRForm, setShowDeletePRForm] = useState(false);
 
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
   const fetchPurchaseRequisitions = async () => {
     if (hasPermission("Approve Purchase Requisition")) {
       const purchaseRequisitionWithoutDraftsResponse =
-        await get_purchase_requisitions_with_out_drafts_api(
-          user?.companyId
-        );
+        await get_paginated_purchase_requisitions_with_out_drafts_api({
+          companyId: user?.companyId,
+          pageNumber,
+          pageSize
+        });
 
-      return purchaseRequisitionWithoutDraftsResponse?.data?.result || [];
+      setTotalCount(purchaseRequisitionWithoutDraftsResponse?.result?.pagination?.totalCount || 0);
+      setTotalPages(purchaseRequisitionWithoutDraftsResponse?.result?.pagination?.totalPages || 0);
+
+      return purchaseRequisitionWithoutDraftsResponse?.result?.data || [];
 
     } else {
       const purchaseRequisitionResponse =
@@ -47,7 +57,7 @@ const usePurchaseRequisitionList = () => {
     error: error,
     refetch,
   } = useQuery({
-    queryKey: ["purchaseRequisitions", user?.companyId, user?.userId],
+    queryKey: ["purchaseRequisitions", user?.companyId, user?.userId, pageNumber, pageSize],
     queryFn: fetchPurchaseRequisitions,
     enabled: !!user?.companyId && !isLoadingPermissions,
   });
@@ -234,6 +244,12 @@ const usePurchaseRequisitionList = () => {
     handleClose,
     handleConvert,
     setShowConvertPRForm,
+    pageNumber,
+    setPageNumber,
+    pageSize,
+    setPageSize,
+    totalCount,
+    totalPages,
   };
 };
 
