@@ -36,10 +36,10 @@ const usePurchaseRequisitionList = () => {
           pageSize
         });
 
-      setTotalCount(purchaseRequisitionWithoutDraftsResponse?.result?.pagination?.totalCount || 0);
-      setTotalPages(purchaseRequisitionWithoutDraftsResponse?.result?.pagination?.totalPages || 0);
+      setTotalCount(purchaseRequisitionWithoutDraftsResponse?.data?.result?.pagination?.totalCount || 0);
+      setTotalPages(purchaseRequisitionWithoutDraftsResponse?.data?.result?.pagination?.totalPages || 0);
 
-      return purchaseRequisitionWithoutDraftsResponse?.result?.data || [];
+      return purchaseRequisitionWithoutDraftsResponse?.data?.result?.data || [];
 
     } else {
       const purchaseRequisitionResponse =

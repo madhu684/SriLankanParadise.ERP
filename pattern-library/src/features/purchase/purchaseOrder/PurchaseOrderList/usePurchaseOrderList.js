@@ -33,10 +33,10 @@ const usePurchaseOrderList = () => {
       pageSize,
     });
 
-    setTotalCount(response?.result?.pagination?.totalCount || 0);
-    setTotalPages(response?.result?.pagination?.totalPages || 0);
+    setTotalCount(response?.data?.result?.pagination?.totalCount || 0);
+    setTotalPages(response?.data?.result?.pagination?.totalPages || 0);
 
-    return response?.result?.data || [];
+    return response?.data?.result?.data || [];
   };
 
   const {
