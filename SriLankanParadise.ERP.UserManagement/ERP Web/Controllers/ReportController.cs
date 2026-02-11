@@ -248,6 +248,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                                     InvoiceReference = salesReceiptInvoice.SalesInvoice?.ReferenceNo,
                                     ChannelNo = salesReceiptInvoice.SalesInvoice?.TokenNo,
                                     PatientName = salesReceiptInvoice.SalesInvoice?.InVoicedPersonName,
+                                    TokenNumber = salesReceiptInvoice.SalesInvoice.TokenNo,
                                     Amount = salesReceiptInvoice.AmountCollect ?? 0,
                                     ShortAmount = salesReceiptInvoice.OutstandingAmount ?? 0,
                                     ExcessAmount = salesReceiptInvoice.ExcessAmount ?? 0,
@@ -661,6 +662,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                                         SalesInvoiceId = invoice.SalesInvoiceId,
                                         InvoiceNo = invoice.ReferenceNo,
                                         CustomerName = invoice.InVoicedPersonName ?? invoice.SalesOrder?.Customer?.CustomerName,
+                                        TokenNumber = invoice.TokenNo,
                                         InvoiceStatus = invoice.Status,
                                         InvoiceAmount = invoice.TotalAmount,
                                         
@@ -687,6 +689,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                                 SalesInvoiceId = invoice.SalesInvoiceId,
                                 InvoiceNo = invoice.ReferenceNo,
                                 CustomerName = invoice.InVoicedPersonName ?? invoice.SalesOrder?.Customer?.CustomerName,
+                                TokenNumber = invoice.TokenNo,
                                 InvoiceStatus = invoice.Status,
                                 InvoiceAmount = invoice.AmountDue, 
                                 
