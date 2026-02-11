@@ -22,6 +22,7 @@ const useTrnReport = () => {
     const [searchText, setSearchText] = useState("");
     const [pageNumber, setPageNumber] = useState(1);
     const [pageSize, setPageSize] = useState(25);
+    const [isExporting, setIsExporting] = useState(false);
 
     const exportToExcel = useExcelExport();
 
@@ -109,24 +110,19 @@ const useTrnReport = () => {
         };
     }, [rawData]);
 
-    // Process and flatten TRN + TIN data into rows with rowSpan info
-    const reportItems = useMemo(() => {
-        if (!rawData || rawData.length === 0) return [];
-
-        // Flatten TRN + TIN into rows with rowSpan info
+    // Helper to process data
+    const processTrnData = (data, startIndex = 0) => {
         const processedItems = [];
-        let trnCounter = (pageNumber - 1) * pageSize; // Start counter based on page
+        let trnCounter = startIndex;
 
-        reportData.forEach((trn) => {
+        data.forEach((trn) => {
             trnCounter++;
             const tins = trn.issueMasters || [];
 
             if (tins.length === 0) {
-                // TRN with no TINs - single row
                 processedItems.push({
                     trnIndex: trnCounter,
                     rowSpan: 1,
-                    // TRN fields
                     trnReferenceNumber: trn.referenceNumber,
                     trnCreatedDate: trn.requisitionDate,
                     trnCreatedUser: trn.requestedBy,
@@ -135,7 +131,6 @@ const useTrnReport = () => {
                     trnStatus: trn.status,
                     trnApprovedUser: trn.approvedBy,
                     trnApprovedDate: trn.approvedDate,
-                    // TIN fields - empty
                     tinReferenceNumber: "-",
                     tinCreatedDate: null,
                     tinCreatedUser: "-",
@@ -150,7 +145,6 @@ const useTrnReport = () => {
                     processedItems.push({
                         trnIndex: trnCounter,
                         rowSpan: tinIndex === 0 ? tins.length : 0,
-                        // TRN fields
                         trnReferenceNumber: trn.referenceNumber,
                         trnCreatedDate: trn.requisitionDate,
                         trnCreatedUser: trn.requestedBy,
@@ -159,7 +153,6 @@ const useTrnReport = () => {
                         trnStatus: trn.status,
                         trnApprovedUser: trn.approvedBy,
                         trnApprovedDate: trn.approvedDate,
-                        // TIN fields
                         tinReferenceNumber: tin.referenceNumber || "-",
                         tinCreatedDate: tin.issueDate,
                         tinCreatedUser: tin.createdBy || "-",
@@ -174,9 +167,13 @@ const useTrnReport = () => {
                 });
             }
         });
+        return processedItems;
+    };
 
-        return processedItems;
-        return processedItems;
+    // Process and flatten TRN + TIN data into rows with rowSpan info
+    const reportItems = useMemo(() => {
+        if (!reportData || reportData.length === 0) return [];
+        return processTrnData(reportData, (pageNumber - 1) * pageSize);
     }, [reportData, pageNumber, pageSize]);
 
     // Summary counts
@@ -302,109 +299,135 @@ const useTrnReport = () => {
     };
 
     // Excel export
-    const handleExportExcel = () => {
-        if (reportItems.length === 0) {
-            alert("No data to export");
-            return;
+    const handleExportExcel = async () => {
+        try {
+            setIsExporting(true);
+
+            // Fetch all data
+            const allDataResponse = await get_trn_report_api(
+                companyId,
+                fromDate || null,
+                toDate || null,
+                selectedWarehouse || null,
+                searchText || null,
+                null, // createdUserId
+                1,
+                100000 // Large page size to get all records
+            );
+
+            const allData = allDataResponse?.data?.result?.data || [];
+
+            if (allData.length === 0) {
+                alert("No data to export");
+                setIsExporting(false);
+                return;
+            }
+
+            const processedAllData = processTrnData(allData, 0);
+
+            const columns = [
+                {
+                    header: "TRN Number",
+                    accessor: (d) => d.trnReferenceNumber,
+                    width: 25,
+                },
+                {
+                    header: "TRN Created Date",
+                    accessor: (d) => formatDateTime(d.trnCreatedDate),
+                    width: 22,
+                },
+                {
+                    header: "TRN Created User",
+                    accessor: (d) => d.trnCreatedUser,
+                    width: 18,
+                },
+                {
+                    header: "TRN From Location",
+                    accessor: (d) => d.trnWarehouse,
+                    width: 20,
+                },
+                {
+                    header: "TRN To Location",
+                    accessor: (d) => d.trnToWarehouse,
+                    width: 20,
+                },
+                {
+                    header: "TRN Status",
+                    accessor: (d) => getTrnStatusLabel(d.trnStatus),
+                    width: 15,
+                },
+                {
+                    header: "TRN Approved User",
+                    accessor: (d) => d.trnApprovedUser || "-",
+                    width: 18,
+                },
+                {
+                    header: "TRN Approved Date",
+                    accessor: (d) => formatDateTime(d.trnApprovedDate),
+                    width: 22,
+                },
+                {
+                    header: "TIN Number",
+                    accessor: (d) => d.tinReferenceNumber,
+                    width: 25,
+                },
+                {
+                    header: "TIN Created Date",
+                    accessor: (d) => formatDateTime(d.tinCreatedDate),
+                    width: 22,
+                },
+                {
+                    header: "TIN Created User",
+                    accessor: (d) => d.tinCreatedUser,
+                    width: 18,
+                },
+                {
+                    header: "TIN Location",
+                    accessor: (d) => d.tinWarehouse,
+                    width: 20,
+                },
+                {
+                    header: "TIN Status",
+                    accessor: (d) => (d.tinStatus !== null ? getTinStatusLabel(d.tinStatus) : "-"),
+                    width: 15,
+                },
+                {
+                    header: "TIN Approved User",
+                    accessor: (d) => d.tinApprovedUser || "-",
+                    width: 18,
+                },
+                {
+                    header: "TIN Approved Date",
+                    accessor: (d) => formatDateTime(d.tinApprovedDate),
+                    width: 22,
+                },
+                {
+                    header: "Accepted/Not Accepted",
+                    accessor: (d) =>
+                        d.tinAccepted === null ? "-" : d.tinAccepted ? "Accepted" : "Not Accepted",
+                    width: 20,
+                },
+            ];
+
+            const warehouseName = selectedWarehouse
+                ? warehouseLocations.find(
+                    (w) => String(w.locationId) === String(selectedWarehouse)
+                )?.locationName || ""
+                : "All";
+
+            exportToExcel({
+                data: processedAllData,
+                columns: columns,
+                fileName: `TRN_Report_${fromDate || "all"}_${toDate || "all"}.xlsx`,
+                sheetName: "TRN Report",
+                topic: `TRN Report - ${fromDate || "all"} to ${toDate || "all"} - Location: ${warehouseName}`,
+            });
+        } catch (error) {
+            console.error("Export failed:", error);
+            alert("Failed to export Excel file.");
+        } finally {
+            setIsExporting(false);
         }
-
-        const columns = [
-            {
-                header: "TRN Number",
-                accessor: (d) => d.trnReferenceNumber,
-                width: 20,
-            },
-            {
-                header: "TRN Created Date",
-                accessor: (d) => formatDateTime(d.trnCreatedDate),
-                width: 22,
-            },
-            {
-                header: "TRN Created User",
-                accessor: (d) => d.trnCreatedUser,
-                width: 18,
-            },
-            {
-                header: "TRN From Location",
-                accessor: (d) => d.trnWarehouse,
-                width: 20,
-            },
-            {
-                header: "TRN To Location",
-                accessor: (d) => d.trnToWarehouse,
-                width: 20,
-            },
-            {
-                header: "TRN Status",
-                accessor: (d) => getTrnStatusLabel(d.trnStatus),
-                width: 15,
-            },
-            {
-                header: "TRN Approved User",
-                accessor: (d) => d.trnApprovedUser || "-",
-                width: 18,
-            },
-            {
-                header: "TRN Approved Date",
-                accessor: (d) => formatDateTime(d.trnApprovedDate),
-                width: 22,
-            },
-            {
-                header: "TIN Number",
-                accessor: (d) => d.tinReferenceNumber,
-                width: 20,
-            },
-            {
-                header: "TIN Created Date",
-                accessor: (d) => formatDateTime(d.tinCreatedDate),
-                width: 22,
-            },
-            {
-                header: "TIN Created User",
-                accessor: (d) => d.tinCreatedUser,
-                width: 18,
-            },
-            {
-                header: "TIN Location",
-                accessor: (d) => d.tinWarehouse,
-                width: 20,
-            },
-            {
-                header: "TIN Status",
-                accessor: (d) => (d.tinStatus !== null ? getTinStatusLabel(d.tinStatus) : "-"),
-                width: 15,
-            },
-            {
-                header: "TIN Approved User",
-                accessor: (d) => d.tinApprovedUser || "-",
-                width: 18,
-            },
-            {
-                header: "TIN Approved Date",
-                accessor: (d) => formatDateTime(d.tinApprovedDate),
-                width: 22,
-            },
-            {
-                header: "Accepted/Not Accepted",
-                accessor: (d) =>
-                    d.tinAccepted === null ? "-" : d.tinAccepted ? "Accepted" : "Not Accepted",
-                width: 20,
-            },
-        ];
-
-        const warehouseName = selectedWarehouse
-            ? warehouseLocations.find(
-                (w) => String(w.locationId) === String(selectedWarehouse)
-            )?.locationName || ""
-            : "All";
-
-        exportToExcel({
-            data: reportItems,
-            columns: columns,
-            fileName: `TRN_Report_${fromDate || "all"}_${toDate || "all"}.xlsx`,
-            sheetName: "TRN Report",
-            topic: `TRN Report - ${fromDate || "all"} to ${toDate || "all"} - Location: ${warehouseName}`,
-        });
     };
 
     return {
@@ -434,6 +457,7 @@ const useTrnReport = () => {
         hasPermission,
         hasPermission,
         isPrivilegedUser,
+        isPrivilegedUser,
         paginate,
         pageNumber,
         setPageNumber,
@@ -441,6 +465,7 @@ const useTrnReport = () => {
         setPageSize,
         totalPages: pagination.totalPages || 1,
         totalItems: pagination.totalCount || 0,
+        isExporting,
     };
 };
 

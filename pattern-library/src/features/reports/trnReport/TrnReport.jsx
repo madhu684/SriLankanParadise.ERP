@@ -46,6 +46,7 @@ const TrnReport = () => {
     totalItems,
     pageSize,
     paginate,
+    isExporting,
   } = useTrnReport();
 
   return (
@@ -204,9 +205,10 @@ const TrnReport = () => {
           <button
             className="btn btn-outline-success"
             onClick={handleExportExcel}
-            disabled={reportItems.length === 0}
+            disabled={reportItems.length === 0 || isExporting}
           >
-            <FiDownload className="me-1" /> Export Excel
+            <FiDownload className={`me-1 ${isExporting ? "spin" : ""}`} /> 
+            {isExporting ? "Exporting..." : "Export Excel"}
           </button>
         </div>
         <div className="card-body p-0">
@@ -379,6 +381,20 @@ const TrnReport = () => {
           />
         </div>
       )}
+      {/* Add CSS for spin animation */}
+      <style jsx>{`
+        .spin {
+          animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
     </div>
   );
 };
