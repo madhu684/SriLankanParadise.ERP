@@ -133,6 +133,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Where(d => d.Location.LocationTypeId == locationTypeId && d.LocationId == locationId && d.RunDate == runDate)
                     .Include(d => d.ItemMaster)
                         .ThenInclude(im => im.Unit)
+                    .Include(d => d.ItemMaster)
+                        .ThenInclude(im => im.SubItemMasters)
                     .ToListAsync();
             }
             else {
@@ -142,6 +144,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                    .Include(d => d.Location)
                    .Include(d => d.ItemMaster)
                        .ThenInclude(im => im.Unit)
+                    .Include(d => d.ItemMaster)
+                        .ThenInclude(im => im.SubItemMasters)
                    .ToListAsync();
             }
 

@@ -223,7 +223,16 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                             ReturnQty = item.ReturnQty,
                             StAdjIn = item.StAdjIn,
                             StAdjOut = item.StAdjOut,
-                            StDisOut = item.StDisOut
+                            StDisOut = item.StDisOut,
+                            SubItems = item.ItemMaster.SubItemMasters?
+                                .Select(s => new SubItemReportDto
+                                {
+                                    MainItemMasterId = s.MainItemMasterId,
+                                    SubItemMasterId = s.SubItemMasterId,
+                                    Quantity = s.Quantity
+                                })
+                                .Cast<object>()
+                                .ToList() ?? new List<object>()
                         };
                         reportData.Add(report);
                     }
@@ -301,7 +310,16 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                                 OpeningBalance = item.openingBalance,
                                 ReceivedQty = item.receivedQty,
                                 ActualUsage = item.actualUsage,
-                                ClosingBalance = item.closingBalance
+                                ClosingBalance = item.closingBalance,
+                                SubItems = item.ItemMaster.SubItemMasters?
+                                .Select(s => new SubItemReportDto
+                                {
+                                    MainItemMasterId = s.MainItemMasterId,
+                                    SubItemMasterId = s.SubItemMasterId,
+                                    Quantity = s.Quantity
+                                })
+                                .Cast<object>()
+                                .ToList() ?? new List<object>()
                             };
                             reportData.Add(report);
                         }

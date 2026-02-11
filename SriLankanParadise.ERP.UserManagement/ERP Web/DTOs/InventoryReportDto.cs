@@ -19,5 +19,13 @@
         public decimal StAdjIn { get; set; }
         public decimal StAdjOut { get; set; }
         public decimal StDisOut { get; set; }
+        public List<object>? SubItems { get; set; } = new List<object>();
+    }
+
+    public class SubItemReportDto
+    {
+        public int MainItemMasterId { get; set; }
+        public int SubItemMasterId { get; set; }
+        public decimal Quantity { get; set; }
     }
 }

@@ -51,16 +51,18 @@ public partial class ItemMaster
 
     public virtual ItemMaster? Parent { get; set; }
 
+    public virtual Unit Unit { get; set; } = null!;
+
     public virtual ICollection<PurchaseOrderDetail> PurchaseOrderDetails { get; set; } = new List<PurchaseOrderDetail>();
 
     public virtual ICollection<PurchaseRequisitionDetail> PurchaseRequisitionDetails { get; set; } = new List<PurchaseRequisitionDetail>();
 
     public virtual ICollection<RequisitionDetail> RequisitionDetails { get; set; } = new List<RequisitionDetail>();
 
-    public virtual Unit Unit { get; set; } = null!;
 
     public virtual ICollection<SubItemMaster> SubItemMasters { get; set; } = new List<SubItemMaster>();
 
     public virtual ICollection<DailyLocationInventory> DailyLocationInventories { get; set; } = new List<DailyLocationInventory>();
+    public virtual ICollection<LocationInventory> LocationInventories { get; set; } = new List<LocationInventory>();
 
 }
