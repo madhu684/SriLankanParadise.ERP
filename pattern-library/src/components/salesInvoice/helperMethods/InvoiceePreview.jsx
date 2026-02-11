@@ -22,7 +22,7 @@ const InvoicePrintPreview = ({
     pageStyle: `
       @page {
         size: A4 portrait;
-        margin: 0mm;
+        margin: 0;
       }
       @media print {
         body { 
@@ -33,10 +33,10 @@ const InvoicePrintPreview = ({
           display: none !important; 
         }
         .invoice-container {
-          width: 210mm;
+          width: 100% !important;
           height: auto;
           margin: 0 !important;
-          padding: 0 !important;
+          padding: 10mm !important;
           box-shadow: none !important;
           position: absolute;
           top: 0;
@@ -52,10 +52,21 @@ const InvoicePrintPreview = ({
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
         }
-        table, th, td {
-          border-collapse: seperate !important;
-          border: 3px solid black !important;
+        table {
+          border-collapse: collapse !important;
+          border: 1px solid black !important;
           page-break-inside: avoid;
+          overflow: visible !important;
+          border-radius: 0 !important;
+        }
+        th, td {
+          border: 1px solid black !important;
+          overflow: visible !important;
+          border-radius: 0 !important;
+        }
+        div {
+          overflow: visible !important;
+          border-radius: 0 !important;
         }
         tr { 
           page-break-inside: avoid; 
