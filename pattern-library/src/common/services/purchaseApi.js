@@ -582,6 +582,39 @@ export const get_requisition_masters_with_out_drafts_api = async (
   }
 };
 
+export const get_trn_report_api = async (
+  companyId,
+  fromDate,
+  toDate,
+  warehouseLocationId,
+  searchText,
+  createdUserId,
+  pageNumber = 1,
+  pageSize = 25,
+) => {
+  try {
+    const response = await api.get(
+      `/requisitionMaster/GetTrnReport/${companyId}`,
+      {
+        params: {
+          fromDate: fromDate,
+          toDate: toDate,
+          warehouseLocationId: warehouseLocationId,
+          searchText: searchText,
+          createdUserId: createdUserId,
+          pageNumber: pageNumber,
+          pageSize: pageSize,
+        },
+        withCredentials: true,
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const get_requisition_masters_by_user_id_api = async (userId) => {
   try {
     const response = await api.get(
@@ -1568,7 +1601,7 @@ export const get_location_inventory_by_locationInvemtoryId_api = async (
       },
     );
     return response.data;
-  } catch (error) {}
+  } catch (error) { }
 };
 
 //=============

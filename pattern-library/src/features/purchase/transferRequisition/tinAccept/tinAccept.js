@@ -403,9 +403,9 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
     try {
       await approve_issue_master_api(tinId, {
         status: 55, // Completed
-        approvedBy: sessionStorage.getItem("username"),
-        approvedUserId: sessionStorage.getItem("userId"),
-        approvedDate: new Date().toISOString(),
+        approvedBy: tin?.approvedBy,
+        approvedUserId: tin?.approvedUserId,
+        approvedDate: tin?.approvedDate,
         permissionId: 1064,
       });
     } catch (error) {

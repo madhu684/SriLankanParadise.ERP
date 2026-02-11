@@ -1,34 +1,72 @@
-import { useState, useMemo, useContext } from "react";
+import { useState, useMemo, useContext, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-    get_requisition_masters_with_out_drafts_api,
-} from "../../../common/services/purchaseApi";
+import { get_trn_report_api } from "../../../common/services/purchaseApi";
 import { useExcelExport } from "../../../common/components/common/excelSheetGenerator/excelSheetGenerator";
 import { UserContext } from "../../../common/context/userContext";
 import moment from "moment-timezone";
 
 const useTrnReport = () => {
-    const { hasPermission, userLocations } = useContext(UserContext);
-    const [fromDate, setFromDate] = useState("");
-    const [toDate, setToDate] = useState("");
+    const { user, hasPermission, userLocations, allLocations } = useContext(UserContext);
+
+    const PRIVILEGED_USER_IDS = [1, 44];
+    // 1 - Mr. Pathum
+    //44 - Dr. Chamila
+
+    // Default dates: Yesterday and Today
+    const today = moment().tz("Asia/Colombo").format("YYYY-MM-DD");
+    const yesterday = moment().tz("Asia/Colombo").subtract(1, 'days').format("YYYY-MM-DD");
+
+    const [fromDate, setFromDate] = useState(yesterday);
+    const [toDate, setToDate] = useState(today);
     const [selectedWarehouse, setSelectedWarehouse] = useState("");
+    const [searchText, setSearchText] = useState("");
+    const [pageNumber, setPageNumber] = useState(1);
+    const [pageSize, setPageSize] = useState(25);
 
     const exportToExcel = useExcelExport();
 
     const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
 
-    // Get warehouse locations for the dropdown
+    // Get warehouse locations based on user role
     const warehouseLocations = useMemo(() => {
-        if (!userLocations) return [];
-        return userLocations
-            .filter((loc) => loc.location.locationTypeId === 2)
-            .map((l) => ({
-                locationId: l.locationId,
-                locationName: l.location.locationName,
-            }));
-    }, [userLocations]);
+        if (!user) return [];
 
-    // Fetch TRN data using the existing API
+        const locationsSource = PRIVILEGED_USER_IDS.includes(user.userId) ? allLocations : userLocations;
+
+        if (!locationsSource) return [];
+
+        return locationsSource
+            .filter((loc) => {
+                const location = loc.location || loc;
+                return location.locationTypeId === 2;
+            })
+            .map((loc) => {
+                const location = loc.location || loc;
+                return {
+                    locationId: loc.locationId || location.locationId,
+                    locationName: location.locationName,
+                };
+            });
+
+    }, [user, allLocations, userLocations]);
+
+    const isPrivilegedUser = useMemo(() => {
+        return user && PRIVILEGED_USER_IDS.includes(user.userId);
+    }, [user, PRIVILEGED_USER_IDS]);
+
+    // Set default warehouse
+    useEffect(() => {
+        if (isPrivilegedUser) {
+            // For privileged users, default to "All Locations" (empty string) if not already set
+            if (selectedWarehouse === undefined || selectedWarehouse === null) {
+                setSelectedWarehouse("");
+            }
+        } else if (warehouseLocations.length > 0 && !selectedWarehouse) {
+            setSelectedWarehouse(warehouseLocations[0].locationId);
+        }
+    }, [warehouseLocations, selectedWarehouse, isPrivilegedUser]);
+
+    // Fetch TRN data using the dedicated report API
     const {
         data: rawData,
         isLoading,
@@ -36,54 +74,50 @@ const useTrnReport = () => {
         queryKey: [
             "trnReport",
             companyId,
+            fromDate,
+            toDate,
             selectedWarehouse,
+            searchText,
+            pageNumber,
+            pageSize
         ],
         queryFn: async () => {
-            const response = await get_requisition_masters_with_out_drafts_api(
+            const response = await get_trn_report_api(
                 companyId,
-                null, // status - get all non-drafts
-                selectedWarehouse || null, // requestedToLocationId
-                null, // requestedFromLocationId
-                "TRN", // issueType
+                fromDate || null,
+                toDate || null,
+                selectedWarehouse || null,
+                searchText || null,
+                null, // createdUserId
+                pageNumber,
+                pageSize
             );
-            return response?.data?.result || [];
+            return response?.data?.result || { data: [], pagination: {} };
         },
         enabled: !!companyId,
     });
 
-    // Process and flatten TRN + TIN data, filtered by date range
+    const { reportData, pagination } = useMemo(() => {
+        if (!rawData) return { reportData: [], pagination: {} };
+        // Handle both old array format (fallback) and new object format
+        if (Array.isArray(rawData)) {
+            return { reportData: rawData, pagination: {} };
+        }
+        return {
+            reportData: rawData.data || [],
+            pagination: rawData.pagination || {}
+        };
+    }, [rawData]);
+
+    // Process and flatten TRN + TIN data into rows with rowSpan info
     const reportItems = useMemo(() => {
         if (!rawData || rawData.length === 0) return [];
 
-        // Filter by date range
-        let filteredData = rawData;
-        if (fromDate) {
-            const from = new Date(fromDate);
-            from.setHours(0, 0, 0, 0);
-            filteredData = filteredData.filter((trn) => {
-                const trnDate = new Date(trn.requisitionDate);
-                return trnDate >= from;
-            });
-        }
-        if (toDate) {
-            const to = new Date(toDate);
-            to.setHours(23, 59, 59, 999);
-            filteredData = filteredData.filter((trn) => {
-                const trnDate = new Date(trn.requisitionDate);
-                return trnDate <= to;
-            });
-        }
-
-        // Sort by date descending
-        filteredData.sort(
-            (a, b) => new Date(b.requisitionDate) - new Date(a.requisitionDate)
-        );
-
         // Flatten TRN + TIN into rows with rowSpan info
         const processedItems = [];
-        let trnCounter = 0;
+        let trnCounter = (pageNumber - 1) * pageSize; // Start counter based on page
 
-        filteredData.forEach((trn) => {
+        reportData.forEach((trn) => {
             trnCounter++;
             const tins = trn.issueMasters || [];
 
@@ -142,7 +176,8 @@ const useTrnReport = () => {
         });
 
         return processedItems;
-    }, [rawData, fromDate, toDate]);
+        return processedItems;
+    }, [reportData, pageNumber, pageSize]);
 
     // Summary counts
     const { totalTrnCount, totalTinCount, acceptedTinCount, pendingTinCount } =
@@ -181,6 +216,11 @@ const useTrnReport = () => {
             };
         }, [reportItems]);
 
+    // Pagination handler
+    const paginate = (page) => {
+        setPageNumber(page);
+    };
+
     // Format date/time
     const formatDateTime = (dateString) => {
         if (!dateString) return "-";
@@ -195,8 +235,25 @@ const useTrnReport = () => {
         return moment.utc(dateString).tz("Asia/Colombo").format("YYYY-MM-DD");
     };
 
-    // Status helpers (second digit based)
-    const getStatusLabel = (statusCode) => {
+    // TRN Status helpers (direct status code)
+    const getTrnStatusLabel = (statusCode) => {
+        if (statusCode === null || statusCode === undefined) return "-";
+        const status = parseInt(statusCode, 10);
+        const statusLabels = {
+            0: "Draft",
+            1: "Pending Approval",
+            2: "Approved",
+            3: "Rejected",
+            4: "In Progress",
+            5: "Completed",
+            6: "Cancelled",
+            7: "On Hold",
+        };
+        return statusLabels[status] || "Unknown";
+    };
+
+    // TIN Status helpers (second digit based)
+    const getTinStatusLabel = (statusCode) => {
         if (statusCode === null || statusCode === undefined) return "-";
         const secondDigit = parseInt(String(statusCode).charAt(1), 10);
         const statusLabels = {
@@ -212,7 +269,23 @@ const useTrnReport = () => {
         return statusLabels[secondDigit] || "Unknown";
     };
 
-    const getStatusBadgeClass = (statusCode) => {
+    const getTrnStatusBadgeClass = (statusCode) => {
+        if (statusCode === null || statusCode === undefined) return "bg-secondary";
+        const status = parseInt(statusCode, 10);
+        const statusClasses = {
+            0: "bg-secondary",
+            1: "bg-warning",
+            2: "bg-success",
+            3: "bg-danger",
+            4: "bg-info",
+            5: "bg-primary",
+            6: "bg-dark",
+            7: "bg-secondary",
+        };
+        return statusClasses[status] || "bg-secondary";
+    };
+
+    const getTinStatusBadgeClass = (statusCode) => {
         if (statusCode === null || statusCode === undefined) return "bg-secondary";
         const secondDigit = parseInt(String(statusCode).charAt(1), 10);
         const statusClasses = {
@@ -252,18 +325,18 @@ const useTrnReport = () => {
                 width: 18,
             },
             {
-                header: "TRN From Warehouse",
+                header: "TRN From Location",
                 accessor: (d) => d.trnWarehouse,
                 width: 20,
             },
             {
-                header: "TRN To Warehouse",
+                header: "TRN To Location",
                 accessor: (d) => d.trnToWarehouse,
                 width: 20,
             },
             {
                 header: "TRN Status",
-                accessor: (d) => getStatusLabel(d.trnStatus),
+                accessor: (d) => getTrnStatusLabel(d.trnStatus),
                 width: 15,
             },
             {
@@ -292,13 +365,13 @@ const useTrnReport = () => {
                 width: 18,
             },
             {
-                header: "TIN Warehouse",
+                header: "TIN Location",
                 accessor: (d) => d.tinWarehouse,
                 width: 20,
             },
             {
                 header: "TIN Status",
-                accessor: (d) => (d.tinStatus !== null ? getStatusLabel(d.tinStatus) : "-"),
+                accessor: (d) => (d.tinStatus !== null ? getTinStatusLabel(d.tinStatus) : "-"),
                 width: 15,
             },
             {
@@ -330,7 +403,7 @@ const useTrnReport = () => {
             columns: columns,
             fileName: `TRN_Report_${fromDate || "all"}_${toDate || "all"}.xlsx`,
             sheetName: "TRN Report",
-            topic: `TRN Report - ${fromDate || "all"} to ${toDate || "all"} - Warehouse: ${warehouseName}`,
+            topic: `TRN Report - ${fromDate || "all"} to ${toDate || "all"} - Location: ${warehouseName}`,
         });
     };
 
@@ -341,19 +414,33 @@ const useTrnReport = () => {
         setToDate,
         selectedWarehouse,
         setSelectedWarehouse,
+        searchText,
+        setSearchText,
         warehouseLocations,
         reportItems,
         isLoading,
         handleExportExcel,
         formatDateTime,
         formatDate,
-        getStatusLabel,
-        getStatusBadgeClass,
+        formatDate,
+        getTrnStatusLabel,
+        getTinStatusLabel,
+        getTrnStatusBadgeClass,
+        getTinStatusBadgeClass,
         totalTrnCount,
         totalTinCount,
         acceptedTinCount,
         pendingTinCount,
         hasPermission,
+        hasPermission,
+        isPrivilegedUser,
+        paginate,
+        pageNumber,
+        setPageNumber,
+        pageSize,
+        setPageSize,
+        totalPages: pagination.totalPages || 1,
+        totalItems: pagination.totalCount || 0,
     };
 };
 

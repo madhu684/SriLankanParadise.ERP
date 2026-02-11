@@ -6,9 +6,12 @@ import {
   FiFileText,
   FiCheckCircle,
   FiClock,
+  FiSearch,
+  FiMapPin,
 } from "react-icons/fi";
 import { BiTransfer } from "react-icons/bi";
 import LoadingSpinner from "../../../common/components/loadingSpinner/loadingSpinner";
+import Pagination from "../../../common/components/common/Pagination/Pagination";
 
 const TrnReport = () => {
   const {
@@ -18,17 +21,31 @@ const TrnReport = () => {
     setToDate,
     selectedWarehouse,
     setSelectedWarehouse,
+    searchText,
+    setSearchText,
     warehouseLocations,
     reportItems,
     isLoading,
     handleExportExcel,
     formatDateTime,
-    getStatusLabel,
-    getStatusBadgeClass,
+    getTrnStatusLabel,
+    getTinStatusLabel,
+    getTrnStatusBadgeClass,
+    getTinStatusBadgeClass,
     totalTrnCount,
     totalTinCount,
     acceptedTinCount,
     pendingTinCount,
+    users,
+    createdUserId,
+    setCreatedUserId,
+    isPrivilegedUser,
+    pageNumber,
+    setPageNumber,
+    totalPages,
+    totalItems,
+    pageSize,
+    paginate,
   } = useTrnReport();
 
   return (
@@ -44,14 +61,14 @@ const TrnReport = () => {
           <div className="row g-3 align-items-end">
             <div className="col-md-3">
               <label className="form-label fw-semibold">
-                <BiTransfer className="me-1" /> Warehouse
+                <FiMapPin className="me-1" /> Locations
               </label>
               <select
                 className="form-select"
                 value={selectedWarehouse}
                 onChange={(e) => setSelectedWarehouse(e.target.value)}
               >
-                <option value="">All Warehouses</option>
+                {isPrivilegedUser && <option value="">All Locations</option>}
                 {warehouseLocations.map((loc) => (
                   <option key={loc.locationId} value={loc.locationId}>
                     {loc.locationName}
@@ -79,6 +96,18 @@ const TrnReport = () => {
                 className="form-control"
                 value={toDate}
                 onChange={(e) => setToDate(e.target.value)}
+              />
+            </div>
+            <div className="col-md-3">
+              <label className="form-label fw-semibold">
+                <FiSearch className="me-1" /> Search
+              </label>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search by TRN or TIN number..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
               />
             </div>
           </div>
@@ -200,7 +229,7 @@ const TrnReport = () => {
                   </th>
                 </tr>
                 <tr>
-                  <th>#</th>
+                  <th></th>
                   <th>TRN No</th>
                   <th>Created Date</th>
                   <th>Created User</th>
@@ -265,11 +294,11 @@ const TrnReport = () => {
                             rowSpan={item.rowSpan}
                           >
                             <span
-                              className={`badge rounded-pill ${getStatusBadgeClass(
+                              className={`badge rounded-pill ${getTrnStatusBadgeClass(
                                 item.trnStatus
                               )}`}
                             >
-                              {getStatusLabel(item.trnStatus)}
+                              {getTrnStatusLabel(item.trnStatus)}
                             </span>
                           </td>
                           <td
@@ -298,11 +327,11 @@ const TrnReport = () => {
                       <td>
                         {item.tinStatus !== null ? (
                           <span
-                            className={`badge rounded-pill ${getStatusBadgeClass(
+                            className={`badge rounded-pill ${getTinStatusBadgeClass(
                               item.tinStatus
                             )}`}
                           >
-                            {getStatusLabel(item.tinStatus)}
+                            {getTinStatusLabel(item.tinStatus)}
                           </span>
                         ) : (
                           "-"
@@ -339,6 +368,17 @@ const TrnReport = () => {
           </div>
         </div>
       </div>
+      {/* Pagination */}
+      {!isLoading && reportItems && reportItems.length > 0 && (
+        <div className="mt-4 d-flex justify-content-end">
+          <Pagination
+            itemsPerPage={pageSize}
+            totalItems={totalItems}
+            paginate={paginate}
+            currentPage={pageNumber}
+          />
+        </div>
+      )}
     </div>
   );
 };
