@@ -30,6 +30,7 @@ const submoduleRouteMap = {
   "Transfer Issue Notes": "/main/purchase/tin",
   "Update Item Batches": "/main/purchase/batch-update",
   "MIN Report": "/main/purchase/min-report",
+  "TRN Report": "/main/purchase/trn-report",
 
   // Sales Management
   "Sales Orders": "/main/sales/orders",
