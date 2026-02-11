@@ -192,6 +192,7 @@ const SalesInvoiceReport = () => {
                   <th></th>
                   <th className="px-3">Invoice No</th>
                   <th>Customer Name</th>
+                  <th>Token No</th>
                   <th>Inv Status</th>
                   <th className="text-end">Inv Amount</th>
                   <th>Receipt No</th>
@@ -218,6 +219,7 @@ const SalesInvoiceReport = () => {
                           <td className="align-middle" rowSpan={item.rowSpan}>{item.invoiceIndex}</td>
                           <td className="px-3 fw-bold align-middle" rowSpan={item.rowSpan}>{item.invoiceNo}</td>
                           <td className="align-middle" rowSpan={item.rowSpan}>{item.customerName}</td>
+                          <td className="align-middle" rowSpan={item.rowSpan}>{item.tokenNumber}</td>
                           <td className="align-middle" rowSpan={item.rowSpan}>
                             <span
                               className={`badge rounded-pill ${getStatusBadgeClass(
