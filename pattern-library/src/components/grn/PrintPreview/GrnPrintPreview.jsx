@@ -19,7 +19,7 @@ const GrnPrintPreview = ({
     pageStyle: `
       @page {
         size: A4 portrait;
-        margin: 0mm;
+        margin: 0;
       }
       @media print {
         body { 
@@ -30,14 +30,11 @@ const GrnPrintPreview = ({
           display: none !important; 
         }
         .grn-container {
-          width: 210mm;
+          width: 100% !important;
           height: auto;
           margin: 0 !important;
-          padding: 0 !important;
+          padding: 10mm !important;
           box-shadow: none !important;
-          position: absolute;
-          top: 0;
-          left: 0;
           border: none !important;
           page-break-after: avoid !important;
           page-break-inside: avoid !important;
@@ -49,10 +46,21 @@ const GrnPrintPreview = ({
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
         }
-        table, th, td {
+        table {
           border-collapse: collapse !important;
           border: 1px solid black !important;
           page-break-inside: avoid;
+          overflow: visible !important;
+          border-radius: 0 !important;
+        }
+        th, td {
+          border: 1px solid black !important;
+          overflow: visible !important;
+          border-radius: 0 !important;
+        }
+        div {
+          overflow: visible !important;
+          border-radius: 0 !important;
         }
         tr { 
           page-break-inside: avoid; 
