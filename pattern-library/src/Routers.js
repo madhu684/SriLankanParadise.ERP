@@ -47,6 +47,7 @@ import CustomerInqueryReport from "features/reports/customerInqueryReport/Custom
 import MinReport from "features/reports/MinReport/MinReport";
 import NotFound from "common/components/NotFound/NotFound";
 import SalesInvoiceReport from "features/reports/salesInvoiceReport/salesInvoiceReport.jsx";
+import TrnReport from "features/reports/trnReport/TrnReport";
 
 const Routers = () => {
   return (
@@ -97,6 +98,7 @@ const Routers = () => {
             <Route path="tin" element={<TinList />} />
             <Route path="batch-update" element={<ItemBatchUpdate />} />
             <Route path="min-report" element={<MinReport />} />
+            <Route path="trn-report" element={<TrnReport />} />
           </Route>
 
           {/* Sales Management Module */}

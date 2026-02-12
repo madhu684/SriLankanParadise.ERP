@@ -1,4 +1,5 @@
 ﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
 {
@@ -19,6 +20,8 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
         Task<IEnumerable<RequisitionMaster>> GetRequisitionMastersByUserId(int userId);
 
         Task<IEnumerable<RequisitionMaster>> GetRequisitionMastersWithFiltersByCompanyId(int companyId, DateTime? date = null, int? requestedToLocationId = null, int? requestedFromLocationId = null, string? issueType = null);
+
+        Task<PagedResult<RequisitionMaster>> GetTrnReportByCompanyId(int companyId, int pageNumber, int pageSize, DateTime? fromDate = null, DateTime? toDate = null, int? warehouseLocationId = null, string? searchText = null, int? createdUserId = null);
 
     }
 }

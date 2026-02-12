@@ -1,5 +1,6 @@
 ﻿using SriLankanParadise.ERP.UserManagement.Business_Service.Contracts;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
@@ -50,6 +51,11 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
         public async Task<IEnumerable<RequisitionMaster>> GetRequisitionMastersWithFiltersByCompanyId(int companyId, DateTime? date = null, int? requestedToLocationId = null, int? requestedFromLocationId = null, string? issueType = null)
         {
             return await _requisitionMasterRepository.GetRequisitionMastersWithFiltersByCompanyId(companyId, date, requestedToLocationId, requestedFromLocationId, issueType);
+        }
+
+        public async Task<PagedResult<RequisitionMaster>> GetTrnReportByCompanyId(int companyId, int pageNumber, int pageSize, DateTime? fromDate = null, DateTime? toDate = null, int? warehouseLocationId = null, string? searchText = null, int? createdUserId = null)
+        {
+            return await _requisitionMasterRepository.GetTrnReportByCompanyId(companyId, pageNumber, pageSize, fromDate, toDate, warehouseLocationId, searchText, createdUserId);
         }
     }
 }
