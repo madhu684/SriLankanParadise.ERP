@@ -222,7 +222,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(rm => rm.RequestedFromLocation)
                     .Include(rm => rm.RequestedToLocation)
                     .Include(rm => rm.IssueMasters)
-                    .OrderBy(rm => rm.Status)
+                    .OrderByDescending(rm => rm.RequisitionDate)
                     .ToListAsync();
 
                 return requisitionMasters.Any() ? requisitionMasters : null;
