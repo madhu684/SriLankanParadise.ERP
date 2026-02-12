@@ -243,14 +243,14 @@ const TrnReport = () => {
                   <th>TRN No</th>
                   <th>Created Date</th>
                   <th>Created User</th>
-                  <th>From Warehouse</th>
+                  <th>Requested Location</th>
                   <th>Status</th>
                   <th>Approved User</th>
                   <th>Approved Date</th>
                   <th>TIN No</th>
                   <th>Created Date</th>
                   <th>Created User</th>
-                  <th>Warehouse</th>
+                  <th>Dispatched Location</th>
                   <th>Status</th>
                   <th>Approved User</th>
                   <th>Approved Date</th>

@@ -342,13 +342,8 @@ const useTrnReport = () => {
                     width: 18,
                 },
                 {
-                    header: "TRN From Location",
+                    header: "Requested Location",
                     accessor: (d) => d.trnWarehouse,
-                    width: 20,
-                },
-                {
-                    header: "TRN To Location",
-                    accessor: (d) => d.trnToWarehouse,
                     width: 20,
                 },
                 {
@@ -382,7 +377,7 @@ const useTrnReport = () => {
                     width: 18,
                 },
                 {
-                    header: "TIN Location",
+                    header: "Dispatched Location",
                     accessor: (d) => d.tinWarehouse,
                     width: 20,
                 },
