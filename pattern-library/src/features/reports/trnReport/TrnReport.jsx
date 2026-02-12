@@ -232,7 +232,7 @@ const TrnReport = () => {
                     Transfer Requisition (TRN)
                   </th>
                   <th
-                    colSpan="8"
+                    colSpan="9"
                     className="text-center bg-success bg-opacity-10"
                   >
                     Transfer Issue Note (TIN)
@@ -255,12 +255,13 @@ const TrnReport = () => {
                   <th>Approved User</th>
                   <th>Approved Date</th>
                   <th>Accepted</th>
+                  <th>Accepted Time</th>
                 </tr>
               </thead>
               <tbody>
                 {isLoading ? (
                   <tr>
-                    <td colSpan="16" className="text-center py-5">
+                    <td colSpan="17" className="text-center py-5">
                       <LoadingSpinner />
                     </td>
                   </tr>
@@ -364,11 +365,14 @@ const TrnReport = () => {
                           </span>
                         )}
                       </td>
+                      <td className="text-nowrap">
+                        {formatDateTime(item.tinAcceptedDate)}
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="16" className="text-center py-5 text-muted">
+                    <td colSpan="17" className="text-center py-5 text-muted">
                       No records found.
                     </td>
                   </tr>

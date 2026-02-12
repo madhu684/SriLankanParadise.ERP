@@ -280,7 +280,7 @@ const SalesInvoiceReport = () => {
               {reportItems.length > 0 && (
                 <tfoot className="table-light fw-bold">
                   <tr>
-                    <td colSpan="4" className="text-end pe-3">Total</td>
+                    <td colSpan="5" className="text-end pe-3">Total</td>
                     <td className="text-end">{formatCurrency(totalInvoiceAmount)}</td>
                     <td></td>
                     <td className="text-end">{formatCurrency(totalReceiptAmount)}</td>
