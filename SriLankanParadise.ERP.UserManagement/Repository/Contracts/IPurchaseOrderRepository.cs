@@ -1,4 +1,5 @@
 ﻿using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
 {
@@ -20,5 +21,6 @@ namespace SriLankanParadise.ERP.UserManagement.Repository.Contracts
 
         Task<IEnumerable<PurchaseOrder>> GetPurchaseOrdersByCompanyId(int companyId);
         Task DeletePurchaseOrder(int purchaseOrderId);
+        Task<PagedResult<PurchaseOrder>> GetPaginatedPurchaseOrdersByCompanyId(int companyId, int pageNumber, int pageSize);
     }
 }

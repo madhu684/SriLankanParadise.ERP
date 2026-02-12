@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
@@ -210,6 +212,52 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 });
             }
             catch(Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<PagedResult<PurchaseRequisition>> GetPaginatedPurchaseRequisitionsWithoutDraftsByCompanyId(
+            int companyId,
+            int pageNumber,
+            int pageSize)
+        {
+            try
+            {
+                // Input validation
+                if (pageNumber < 1) pageNumber = 1;
+                if (pageSize < 1) pageSize = 10;
+                if (pageSize > 100) pageSize = 100;
+
+                var query = _dbContext.PurchaseRequisitions
+                    .Where(pr => pr.Status != 0 && pr.CompanyId == companyId)
+                    .Include(pr => pr.PurchaseRequisitionDetails)
+                    .ThenInclude(prd => prd.ItemMaster)
+                    .ThenInclude(im => im.Unit)
+                    .Include(pr => pr.ExpectedDeliveryLocationNavigation)
+                    .Include(pr => pr.DepartmentNavigation)
+                    .Include(pr => pr.Supplier);
+
+                var totalCount = await query.CountAsync();
+
+                // Apply pagination and ordering
+                // Ordering by RequisitionDate descending seems appropriate for a list
+                var items = await query
+                    .OrderByDescending(pr => pr.RequisitionDate)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                return new PagedResult<PurchaseRequisition>
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+                };
+            }
+            catch (Exception)
             {
                 throw;
             }

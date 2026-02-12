@@ -1,13 +1,13 @@
-﻿import { useState, useEffect } from "react";
-import { get_purchase_orders_with_out_drafts_api } from "common/services/purchaseApi";
-import { get_purchase_orders_by_user_id_api } from "common/services/purchaseApi";
-import { get_user_permissions_api } from "common/services/userManagementApi";
+﻿import { useContext, useState } from "react";
+import { get_paginated_purchase_orders_api } from "common/services/purchaseApi";
+
 import { useQuery } from "@tanstack/react-query";
+import { UserContext } from "common/context/userContext";
 
 const usePurchaseOrderList = () => {
-  const [purchaseOrders, setPurchaseOrders] = useState([]);
-  const [isLoadingData, setIsLoadingData] = useState(true);
-  const [error, setError] = useState(null);
+  const { user, hasPermission, isLoadingPermissions, isPermissionsError } =
+    useContext(UserContext);
+
   const [selectedRows, setSelectedRows] = useState([]);
   const [selectedRowData, setSelectedRowData] = useState([]);
   const [showApprovePOModal, setShowApprovePOModal] = useState(false);
@@ -21,87 +21,36 @@ const usePurchaseOrderList = () => {
   const [showDeletePOForm, setShowDeletePOForm] = useState(false);
   const [PODetail, setPODetail] = useState("");
 
-  const [refetch, setRefetch] = useState(false);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
-  const fetchUserPermissions = async () => {
-    try {
-      const response = await get_user_permissions_api(
-        sessionStorage.getItem("userId")
-      );
-      return response.data.result;
-    } catch (error) {
-      console.error("Error fetching user permissions:", error);
-    }
+  const fetchPurchaseOrders = async () => {
+    const response = await get_paginated_purchase_orders_api({
+      companyId: user?.companyId,
+      pageNumber,
+      pageSize,
+    });
+
+    setTotalCount(response?.data?.result?.pagination?.totalCount || 0);
+    setTotalPages(response?.data?.result?.pagination?.totalPages || 0);
+
+    return response?.data?.result?.data || [];
   };
 
   const {
-    data: userPermissions,
-    isLoading: isLoadingPermissions,
-    isError: isPermissionsError,
-    error: permissionError,
+    data: purchaseOrders = [],
+    isLoading: isLoadingData,
+    error,
+    refetch,
   } = useQuery({
-    queryKey: ["userPermissions"],
-    queryFn: fetchUserPermissions,
+    queryKey: ["purchaseOrders", user?.companyId, pageNumber, pageSize],
+    queryFn: fetchPurchaseOrders,
+    enabled: !!user?.companyId && !isLoadingPermissions,
   });
 
-  const fetchData = async () => {
-    try {
-      if (!isLoadingPermissions && userPermissions) {
-        if (hasPermission("Approve Purchase Order")) {
-          const purchaseOrderWithoutDraftsResponse =
-            await get_purchase_orders_with_out_drafts_api(
-              sessionStorage.getItem("companyId")
-            );
-
-          const purchaseOrderByUserIdResponse =
-            await get_purchase_orders_by_user_id_api(
-              sessionStorage.getItem("userId")
-            );
-
-          let newPurchaseOrders = [];
-          if (
-            purchaseOrderWithoutDraftsResponse &&
-            purchaseOrderWithoutDraftsResponse.data.result
-          ) {
-            newPurchaseOrders = purchaseOrderWithoutDraftsResponse.data.result;
-          }
-
-          let additionalOrders = [];
-          if (
-            purchaseOrderByUserIdResponse &&
-            purchaseOrderByUserIdResponse.data.result
-          ) {
-            additionalOrders = purchaseOrderByUserIdResponse.data.result;
-          }
-
-          const uniqueNewOrders = additionalOrders.filter(
-            (order) =>
-              !newPurchaseOrders.some(
-                (existingOrder) =>
-                  existingOrder.purchaseOrderId === order.purchaseOrderId
-              )
-          );
-
-          newPurchaseOrders = [...newPurchaseOrders, ...uniqueNewOrders];
-          setPurchaseOrders(newPurchaseOrders);
-        } else {
-          const purchaseOrderResponse =
-            await get_purchase_orders_by_user_id_api(
-              sessionStorage.getItem("userId")
-            );
-          setPurchaseOrders(purchaseOrderResponse.data.result || []);
-        }
-      }
-    } catch (error) {
-      setError("Error fetching data");
-    } finally {
-      setIsLoadingData(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [isLoadingPermissions, userPermissions, refetch]);
+  const permissionError = isPermissionsError ? new Error("Permission error") : null;
 
   const handleShowApprovePOModal = () => {
     setShowApprovePOModal(true);
@@ -121,7 +70,7 @@ const usePurchaseOrderList = () => {
   };
 
   const handleApproved = async () => {
-    fetchData();
+    refetch();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -158,7 +107,7 @@ const usePurchaseOrderList = () => {
   };
 
   const handleUpdated = async () => {
-    fetchData();
+    refetch();
     setSelectedRows([]);
     const delay = 300;
     setTimeout(() => {
@@ -251,14 +200,6 @@ const usePurchaseOrderList = () => {
     });
   };
 
-  const hasPermission = (permissionName) => {
-    return userPermissions?.some(
-      (permission) =>
-        permission.permission.permissionName === permissionName &&
-        permission.permission.permissionStatus
-    );
-  };
-
   return {
     purchaseOrders,
     isLoadingData,
@@ -273,13 +214,16 @@ const usePurchaseOrderList = () => {
     selectedRowData,
     showCreatePOForm,
     showUpdatePOForm,
-    userPermissions,
     PODetail,
     isPermissionsError,
     permissionError,
     showDeletePOForm,
     refetch,
-    setRefetch,
+    pageNumber,
+    pageSize,
+    totalCount,
+    totalPages,
+    setPageNumber,
     areAnySelectedRowsPending,
     setSelectedRows,
     handleViewDetails,
@@ -302,16 +246,3 @@ const usePurchaseOrderList = () => {
 };
 
 export default usePurchaseOrderList;
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -42,6 +42,29 @@ export const get_purchase_requisitions_with_out_drafts_api = async (
   }
 };
 
+export const get_paginated_purchase_requisitions_with_out_drafts_api = async ({
+  companyId,
+  pageNumber,
+  pageSize,
+}) => {
+  try {
+    const response = await api.get(
+      `/purchaseRequisition/GetPaginatedPurchaseRequisitionsWithoutDraftsByCompanyId/${companyId}`,
+      {
+        params: {
+          pageNumber,
+          pageSize,
+        },
+        withCredentials: true,
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 export const get_purchase_requisitions_by_user_id_api = async (userId) => {
   try {
     const response = await api.get(
@@ -215,6 +238,29 @@ export const get_purchase_orders_api = async (companyId) => {
     const response = await api.get(
       `/purchaseOrder/GetPurchaseOrdersByCompanyId/${companyId}`,
       {
+        withCredentials: true,
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+export const get_paginated_purchase_orders_api = async ({
+  companyId,
+  pageNumber,
+  pageSize,
+}) => {
+  try {
+    const response = await api.get(
+      `/purchaseOrder/GetPaginatedPurchaseOrdersByCompanyId/${companyId}`,
+      {
+        params: {
+          pageNumber,
+          pageSize,
+        },
         withCredentials: true,
       },
     );
