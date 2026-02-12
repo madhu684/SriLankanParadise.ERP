@@ -5,6 +5,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
         public int SalesInvoiceId { get; set; }
         public string? InvoiceNo { get; set; }
         public string? CustomerName { get; set; }
+        public int? TokenNumber {  get; set; }
         public int? InvoiceStatus { get; set; }
         public decimal? InvoiceAmount { get; set; }
         
