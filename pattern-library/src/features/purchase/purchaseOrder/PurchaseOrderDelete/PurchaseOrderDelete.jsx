@@ -11,8 +11,7 @@ const PurchaseOrderDelete = ({
   show,
   handleClose,
   purchaseOrder,
-  refetch,
-  setRefetch,
+  onDeleteSuccess,
 }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
@@ -55,7 +54,7 @@ const PurchaseOrderDelete = ({
       setIsDeleting(false);
 
       setTimeout(() => {
-        setRefetch(!refetch);
+        onDeleteSuccess();
         handleClose();
         // Reset states when modal closes
         setIsDeleted(false);

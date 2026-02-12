@@ -7,7 +7,6 @@ const PurchaseRuquisitionDelete = ({
   handleClose,
   purchaseRequisition,
   refetch,
-  setRefetch,
 }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
@@ -23,7 +22,7 @@ const PurchaseRuquisitionDelete = ({
       setIsDeleting(false);
 
       setTimeout(() => {
-        setRefetch(!refetch);
+        refetch();
         handleClose();
         setIsDeleted(false);
       }, 2000);

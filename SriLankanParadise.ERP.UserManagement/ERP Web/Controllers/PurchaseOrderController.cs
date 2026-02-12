@@ -283,5 +283,49 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
                 return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
             }
         }
+
+        [HttpGet("GetPaginatedPurchaseOrdersByCompanyId/{companyId}")]
+        public async Task<ApiResponseModel> GetPaginatedPurchaseOrdersByCompanyId(
+            int companyId,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var result = await _purchaseOrderService.GetPaginatedPurchaseOrdersByCompanyId(companyId, pageNumber, pageSize);
+
+                if (result.Items.Any())
+                {
+                    var purchaseOrderDtos = _mapper.Map<IEnumerable<PurchaseOrderDto>>(result.Items);
+
+                    var responseData = new
+                    {
+                        Data = purchaseOrderDtos,
+                        Pagination = new
+                        {
+                            result.TotalCount,
+                            result.PageNumber,
+                            result.PageSize,
+                            result.TotalPages,
+                            result.HasPreviousPage,
+                            result.HasNextPage
+                        }
+                    };
+
+                    AddResponseMessage(Response, LogMessages.PurchaseOrdersRetrieved, responseData, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.PurchaseOrdersNotFound);
+                    AddResponseMessage(Response, LogMessages.PurchaseOrdersNotFound, null, true, HttpStatusCode.OK);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }

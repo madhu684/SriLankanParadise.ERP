@@ -13,7 +13,7 @@ import PurchaseRuquisitionDelete from "features/purchase/purchaseRequisition/Pur
 
 const PurchaseRequisitionList = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  // const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   const {
@@ -58,12 +58,16 @@ const PurchaseRequisitionList = () => {
     handleClose,
     handleConvert,
     setShowConvertPRForm,
+    pageNumber, 
+    setPageNumber, 
+    totalCount, 
+    totalPages,
   } = usePurchaseRequisitionList();
 
   //Handler for search
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
-    setCurrentPage(1);
+    setPageNumber(1);
   };
 
   //filter prs based on search query
@@ -72,10 +76,10 @@ const PurchaseRequisitionList = () => {
   );
 
   // Pagination handler
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const paginate = (pageNumber) => setPageNumber(pageNumber);
 
   if (error || isPermissionsError) {
-    return <ErrorComponent error={error || permissionError.message} />;
+    return <ErrorComponent error={error?.message || permissionError?.message} />;
   }
 
   if (
@@ -228,10 +232,6 @@ const PurchaseRequisitionList = () => {
           </thead>
           <tbody>
             {filteredPurchaseRequisitions
-              .slice(
-                (currentPage - 1) * itemsPerPage,
-                currentPage * itemsPerPage
-              )
               .map((pr) => (
                 <tr key={pr.purchaseRequisitionId}>
                   <td>
@@ -300,9 +300,9 @@ const PurchaseRequisitionList = () => {
         </table>
         <Pagination
           itemsPerPage={itemsPerPage}
-          totalItems={filteredPurchaseRequisitions.length}
+          totalItems={totalCount}
           paginate={paginate}
-          currentPage={currentPage}
+          currentPage={pageNumber}
         />
         {showApprovePRModalInParent && (
           <PurchaseRequisitionApproval
@@ -325,7 +325,6 @@ const PurchaseRequisitionList = () => {
             handleClose={() => setShowDeletePRForm(false)}
             purchaseRequisition={selectedRowData[0]}
             refetch={refetch}
-            setRefetch={setRefetch}
           />
         )}
       </div>

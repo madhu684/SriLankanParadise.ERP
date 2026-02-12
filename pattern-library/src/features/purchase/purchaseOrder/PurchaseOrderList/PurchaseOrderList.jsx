@@ -13,7 +13,6 @@ import PurchaseOrderDelete from "features/purchase/purchaseOrder/PurchaseOrderDe
 
 const PurchaseOrderList = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   const {
@@ -35,7 +34,10 @@ const PurchaseOrderList = () => {
     permissionError,
     showDeletePOForm,
     refetch,
-    setRefetch,
+    pageNumber,
+    totalCount,
+    setPageNumber,
+
     areAnySelectedRowsPending,
     setSelectedRows,
     handleRowSelect,
@@ -58,19 +60,19 @@ const PurchaseOrderList = () => {
   //Handler for search input
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
-    setCurrentPage(1);
+    setPageNumber(1);
   };
 
-  //Filter MRNs based on search query
+  //Filter POs based on search query
   const filteredPurchaseOrders = purchaseOrders.filter((po) =>
     po.referenceNo.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   //Pagination Handler
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const paginate = (pageNumber) => setPageNumber(pageNumber);
 
   if (error || isPermissionsError) {
-    return <ErrorComponent error={error || "Error fetching data"} />;
+    return <ErrorComponent error={error?.message || permissionError?.message} />;
   }
 
   if (
@@ -202,10 +204,6 @@ const PurchaseOrderList = () => {
           </thead>
           <tbody>
             {filteredPurchaseOrders
-              .slice(
-                (currentPage - 1) * itemsPerPage,
-                currentPage * itemsPerPage
-              )
               .map((po) => (
                 <tr key={po.purchaseOrderId}>
                   <td>
@@ -273,9 +271,9 @@ const PurchaseOrderList = () => {
         </table>
         <Pagination
           itemsPerPage={itemsPerPage}
-          totalItems={filteredPurchaseOrders.length}
+          totalItems={totalCount}
           paginate={paginate}
-          currentPage={currentPage}
+          currentPage={pageNumber}
         />
         {showApprovePOModalInParent && (
           <PurchaseOrderApproval
@@ -297,8 +295,7 @@ const PurchaseOrderList = () => {
             show={showDeletePOForm}
             handleClose={() => setShowDeletePOForm(false)}
             purchaseOrder={selectedRowData[0]}
-            refetch={refetch}
-            setRefetch={setRefetch}
+            onDeleteSuccess={refetch}
           />
         )}
       </div>
@@ -307,16 +304,3 @@ const PurchaseOrderList = () => {
 };
 
 export default PurchaseOrderList;
-
-
-
-
-
-
-
-
-
-
-
-
-
