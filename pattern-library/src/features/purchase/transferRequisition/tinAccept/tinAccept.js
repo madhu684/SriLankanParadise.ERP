@@ -406,6 +406,7 @@ const useTinAccept = ({ tin, refetch, setRefetch, onFormSubmit }) => {
         approvedBy: tin?.approvedBy,
         approvedUserId: tin?.approvedUserId,
         approvedDate: tin?.approvedDate,
+        acceptedDate: new Date().toISOString(),
         permissionId: 1064,
       });
     } catch (error) {

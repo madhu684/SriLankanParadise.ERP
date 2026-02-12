@@ -34,6 +34,8 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
 
         public string? TokenNo { get; set; }
 
+        public DateTime? AcceptedDate { get; set; }
+
         public virtual IEnumerable<IssueDetailDto>? IssueDetails { get; set; }
     }
 }

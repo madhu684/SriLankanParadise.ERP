@@ -139,6 +139,7 @@ const useTrnReport = () => {
                     tinApprovedUser: "-",
                     tinApprovedDate: null,
                     tinAccepted: null,
+                    tinAcceptedDate: null,
                 });
             } else {
                 tins.forEach((tin, tinIndex) => {
@@ -163,6 +164,7 @@ const useTrnReport = () => {
                         tinAccepted: tin.status
                             ? String(tin.status).charAt(1) === "5"
                             : false,
+                        tinAcceptedDate: tin.acceptedDate,
                     });
                 });
             }
@@ -401,6 +403,11 @@ const useTrnReport = () => {
                     accessor: (d) =>
                         d.tinAccepted === null ? "-" : d.tinAccepted ? "Accepted" : "Not Accepted",
                     width: 20,
+                },
+                {
+                    header: "Accepted Time",
+                    accessor: (d) => formatDateTime(d.tinAcceptedDate),
+                    width: 22,
                 },
             ];
 
