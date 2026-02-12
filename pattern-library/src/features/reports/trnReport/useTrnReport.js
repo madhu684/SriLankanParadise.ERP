@@ -6,7 +6,7 @@ import { UserContext } from "../../../common/context/userContext";
 import moment from "moment-timezone";
 
 const useTrnReport = () => {
-    const { user, hasPermission, userLocations, allLocations } = useContext(UserContext);
+    const { user, userLocations, allLocations } = useContext(UserContext);
 
     const PRIVILEGED_USER_IDS = [1, 44];
     // 1 - Mr. Pathum
@@ -454,9 +454,6 @@ const useTrnReport = () => {
         totalTinCount,
         acceptedTinCount,
         pendingTinCount,
-        hasPermission,
-        hasPermission,
-        isPrivilegedUser,
         isPrivilegedUser,
         paginate,
         pageNumber,

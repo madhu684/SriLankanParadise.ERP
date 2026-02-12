@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import useTrnReport from "./useTrnReport";
 import {
   FiDownload,
@@ -12,6 +12,8 @@ import {
 import { BiTransfer } from "react-icons/bi";
 import LoadingSpinner from "../../../common/components/loadingSpinner/loadingSpinner";
 import Pagination from "../../../common/components/common/Pagination/Pagination";
+import { UserContext } from "../../../common/context/userContext";
+import PermissionComponent from "../../../common/components/errorComponent/permissionComponent";
 
 const TrnReport = () => {
   const {
@@ -48,6 +50,12 @@ const TrnReport = () => {
     paginate,
     isExporting,
   } = useTrnReport();
+
+  const { hasPermission } = useContext(UserContext);
+
+  if (!hasPermission("View TRN Report")) {
+    return <PermissionComponent />;
+  }
 
   return (
     <div className="container-fluid mt-4 mb-5">
