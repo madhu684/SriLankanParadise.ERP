@@ -525,6 +525,9 @@ public partial class ErpSystemContext : DbContext
             entity.HasOne(d => d.WarehouseLocation).WithMany(p => p.GrnMasters)
                 .HasForeignKey(d => d.WarehouseLocationId)
                 .HasConstraintName("FK_GrnMaster_WarehouseLocationId");
+
+            entity.Property(e => e.GrnReferenceNo)
+                .HasDefaultValueSql("('GRN'+CONVERT([nvarchar](20),NEXT VALUE FOR [dbo].[GrnReferenceNoSeq]))");
         });
 
         modelBuilder.Entity<IssueDetail>(entity =>

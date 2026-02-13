@@ -41,7 +41,10 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.DTOs
         public string? GrnType { get; set; }
 
         public int? WarehouseLocationId { get; set; }
+
         public string? CustDekNo { get; set; }
+
+        public string? GrnReferenceNo { get; set; }
 
         public virtual LocationDto? WarehouseLocation { get; set; }
 

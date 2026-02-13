@@ -269,7 +269,7 @@ const GrnPrintPreview = ({
                   </p>
                 </div>
                 <div
-                  style={{ width: "80px", flexShrink: 0, textAlign: "right" }}
+                  style={{ width: "120px", flexShrink: 0, textAlign: "right" }}
                 >
                   <div
                     style={{
@@ -280,9 +280,9 @@ const GrnPrintPreview = ({
                   >
                     {grn?.custDekNo || "N/A"}
                   </div>
-                  {/* <div style={{ fontSize: "10px", marginTop: "75px" }}>
-                    <span style={{ fontWeight: "bold" }}>Customer Copy</span>
-                  </div> */}
+                  <div style={{ fontSize: "12px", fontWeight: "bold", color: "black", marginTop: "2px" }}>
+                    {grn?.grnReferenceNo || ""}
+                  </div>
                 </div>
               </div>
 
