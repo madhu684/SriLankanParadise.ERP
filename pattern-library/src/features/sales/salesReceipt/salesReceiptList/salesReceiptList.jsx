@@ -10,6 +10,8 @@ import { FaSearch, FaPlus, FaFilter } from "react-icons/fa";
 import { UserContext } from "common/context/userContext";
 import moment from "moment";
 import useFormatCurrency from "common/utility/useFormatCurrency";
+import SalesReceiptReverse from "../salesReceiptReverse/SalesReceiptReverse";
+import { Badge } from "react-bootstrap";
 
 const SalesReceiptList = () => {
   const itemsPerPage = 10;
@@ -29,7 +31,10 @@ const SalesReceiptList = () => {
     isCashierSessionOpen,
     filter,
     filteredSalesReceipts,
+    isAnyRowSelected,
+    selectedRows,
     handleViewDetails,
+    handleRowSelect,
     getStatusLabel,
     getStatusBadgeClass,
     handleCloseDetailSRModal,
@@ -46,6 +51,9 @@ const SalesReceiptList = () => {
     searchQuery,
     setSearchQuery,
     isFetchingData,
+    showReverseSRForm,
+    handleReverseSR,
+    handleCloseReverseSRForm,
   } = useSalesReceiptList();
 
   const { hasPermission } = useContext(UserContext);
@@ -86,6 +94,7 @@ const SalesReceiptList = () => {
     );
   }
 
+  // Approved Invoices
   if (salesReceipts.length === 0 && searchQuery === "" && filter === "all") {
     return (
       <div className="container-fluid px-4">
@@ -223,25 +232,27 @@ const SalesReceiptList = () => {
         <div className="card-body">
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h2 className="card-title mb-0 fw-bold">Sales Receipts</h2>
-            {hasPermission("Create Sales Receipt") && (
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => setShowCreateSRForm(true)}
-              >
-                <FaPlus className="me-2" />
-                Create
-              </button>
-            )}
-            {/* {hasPermission("Update Sales Receipt") && isAnyRowSelected && (
-            <button
-              type="button"
-              className="btn btn-warning"
-              onClick={() => setShowUpdateSRForm(true)}
-            >
-              Edit
-            </button>
-          )} */}
+            <div className="d-flex gap-2">
+              {hasPermission("Create Sales Receipt") && (
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => setShowCreateSRForm(true)}
+                >
+                  <FaPlus className="me-2" />
+                  Create
+                </button>
+              )}
+              {hasPermission("Reverse Sales Receipt") && isAnyRowSelected && (
+                <button
+                  type="button"
+                  className="btn btn-warning"
+                  onClick={handleReverseSR}
+                >
+                  Reverse
+                </button>
+              )}
+            </div>
           </div>
 
           {invoices.length > 0 && (
@@ -421,10 +432,12 @@ const SalesReceiptList = () => {
             <table className="table table-hover align-middle">
               <thead className="table-light">
                 <tr>
-                  {/* <th>
+                  <th>
                     <input type="checkbox" />
-                  </th> */}
+                  </th>
                   <th className="fw-semibold">Reference Number</th>
+                  <th className="fw-semibold">Receipt Amount</th>
+                  <th className="fw-semibold">Payment Method</th>
                   <th className="fw-semibold">Created By</th>
                   <th className="fw-semibold">Receipt Date</th>
                   <th className="fw-semibold">Status</th>
@@ -434,14 +447,22 @@ const SalesReceiptList = () => {
               <tbody>
                 {paginatedSalesReceipts.map((sr) => (
                   <tr key={sr.salesReceiptId}>
-                    {/* <td>
-                        <input
-                          type="checkbox"
-                          checked={selectedRows.includes(sr.salesReceiptId)}
-                          onChange={() => handleRowSelect(sr.salesReceiptId)}
-                        />
-                      </td> */}
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={selectedRows.includes(sr.salesReceiptId)}
+                        onChange={() => handleRowSelect(sr.salesReceiptId)}
+                      />
+                    </td>
                     <td className="fw-medium">{sr.referenceNumber}</td>
+                    <td className="text-dark fw-semibold">
+                      {formatCurrency(sr.amountCollect)}
+                    </td>
+                    <td>
+                      <Badge bg="success" className="px-2 py-1">
+                        {sr.paymentMode?.mode}
+                      </Badge>
+                    </td>
                     <td>{sr.createdBy}</td>
                     <td>{sr?.receiptDate?.split("T")[0]}</td>
                     <td>
@@ -516,6 +537,14 @@ const SalesReceiptList = () => {
               salesReceipt={SRDetail}
             />
           )}
+          {showReverseSRForm && (
+            <SalesReceiptReverse
+              show={showReverseSRForm}
+              handleClose={handleCloseReverseSRForm}
+              salesReceipt={selectedRowData[0]}
+              handleReverse={handleReverseSR}
+            />
+          )}
         </div>
       </div>
     </div>
@@ -523,16 +552,3 @@ const SalesReceiptList = () => {
 };
 
 export default SalesReceiptList;
-
-
-
-
-
-
-
-
-
-
-
-
-

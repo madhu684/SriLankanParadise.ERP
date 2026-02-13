@@ -59,5 +59,10 @@ namespace SriLankanParadise.ERP.UserManagement.Business_Service
         {
             return await _salesReceiptRepository.GetSalesReceiptsBySessionId(sessionId);
         }
+
+        public async Task ReverseSalesReceipt(int salesReceiptId)
+        {
+            await _salesReceiptRepository.ReverseSalesReceipt(salesReceiptId);
+        }
     }
 }

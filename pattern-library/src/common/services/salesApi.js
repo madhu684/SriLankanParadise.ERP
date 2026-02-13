@@ -811,6 +811,18 @@ export const put_sales_receipt_api = async (
   }
 };
 
+export const reverse_sales_receipt_api = async (salesReceiptId) => {
+  try {
+    const response = await api.post(`/salesReceipt/Reverse/${salesReceiptId}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
 //SalesReceiptSalesInvoice apis
 export const post_sales_receipt_sales_invoice_api = async (formData) => {
   try {

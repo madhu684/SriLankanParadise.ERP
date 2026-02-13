@@ -244,5 +244,29 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpPost("Reverse/{salesReceiptId}")]
+        public async Task<ApiResponseModel> ReseverseSalesReceipt(int salesReceiptId)
+        {
+            try
+            {
+                var existingSalesReceipt = await _salesReceiptService.GetSalesReceiptBySalesReceiptId(salesReceiptId);
+                if (existingSalesReceipt == null)
+                {
+                    _logger.LogWarning(LogMessages.SalesReceiptNotFound);
+                    return AddResponseMessage(Response, LogMessages.SalesReceiptNotFound, null, true, HttpStatusCode.NotFound);
+                }
+
+                await _salesReceiptService.ReverseSalesReceipt(salesReceiptId);
+
+                _logger.LogInformation("Sales receipt reversed successfully.");
+                return AddResponseMessage(Response, "Sales receipt reversed successfully.", null, true, HttpStatusCode.OK);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                return AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+        }
     }
 }
