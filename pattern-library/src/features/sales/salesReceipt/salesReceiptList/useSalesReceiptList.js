@@ -27,6 +27,7 @@ const useSalesReceiptList = () => {
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
+  const [showReverseSRForm, setShowReverseSRForm] = useState(false);
 
   const companyId = useMemo(() => sessionStorage.getItem("companyId"), []);
 
@@ -183,6 +184,16 @@ const useSalesReceiptList = () => {
     setSRDetail("");
   };
 
+  const handleReverseSR = () => {
+    setShowReverseSRForm(true);
+  };
+
+  const handleCloseReverseSRForm = () => {
+    setShowReverseSRForm(false);
+    setSelectedRows([]);
+    setSelectedRowData([]);
+  };
+
   const handleRowSelect = (id) => {
     const isSelected = selectedRows.includes(id);
     const selectedRow = salesReceipts.find((sr) => sr.salesReceiptId === id);
@@ -297,20 +308,10 @@ const useSalesReceiptList = () => {
     searchQuery,
     setSearchQuery,
     isFetchingData: isFetchingReceipts,
+    showReverseSRForm,
+    handleReverseSR,
+    handleCloseReverseSRForm,
   };
 };
 
 export default useSalesReceiptList;
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -308,13 +308,14 @@ const useSalesReceipt = ({ onFormSubmit }) => {
             const salesReceiptSalesInvoiceData = {
               salesReceiptId,
               salesInvoiceId: item.salesInvoiceId,
-              settledAmount: item.payment,
+              //settledAmount: item.payment,
+              settledAmount:
+                item.payment -
+                (item.customerBalance || 0) -
+                (item.excessAmount || 0),
               excessAmount: item.excessAmount,
               outstandingAmount: item.outstandingAmount,
-              amountCollect:
-                item.payment -
-                (item.customerBalance.toFixed(2) || 0) +
-                (item.excessAmount || 0),
+              amountCollect: item.payment - (item.customerBalance || 0),
               customerBalance: item.customerBalance.toFixed(2),
               permissionId: 34,
             };
@@ -670,16 +671,3 @@ const useSalesReceipt = ({ onFormSubmit }) => {
 };
 
 export default useSalesReceipt;
-
-
-
-
-
-
-
-
-
-
-
-
-

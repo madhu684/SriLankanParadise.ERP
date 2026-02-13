@@ -276,5 +276,63 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                 throw;
             }
         }
+
+        public async Task ReverseSalesReceipt(int salesReceiptId)
+        {
+            var strategy = _dbContext.Database.CreateExecutionStrategy();
+
+            await strategy.ExecuteAsync(async () =>
+            {
+                using var transaction = await _dbContext.Database.BeginTransactionAsync();
+                try
+                {
+                    var salesReceipt = await _dbContext.SalesReceipts
+                        .Include(sr => sr.SalesReceiptSalesInvoices)
+                        .FirstOrDefaultAsync(sr => sr.SalesReceiptId == salesReceiptId);
+
+                    if (salesReceipt == null)
+                    {
+                        throw new KeyNotFoundException($"Sales receipt with ID {salesReceiptId} not found.");
+                    }
+
+                    // Process each associated invoice link
+                    foreach (var link in salesReceipt.SalesReceiptSalesInvoices.ToList())
+                    {
+                        var salesInvoice = await _dbContext.SalesInvoices
+                            .FirstOrDefaultAsync(si => si.SalesInvoiceId == link.SalesInvoiceId);
+
+                        if (salesInvoice != null)
+                        {
+                            // If it was fully settled (Status 5), move it back to Approved (Status 2)
+                            // or keep it at Status 2 if it was partially settled.
+                            if (salesInvoice.Status == 5)
+                            {
+                                salesInvoice.Status = 2; // Set back to Approve
+                            }
+
+                            // Add the collected amount back to the invoice's due amount
+                            salesInvoice.AmountDue = (salesInvoice.AmountDue ?? 0) + (link.SettledAmount ?? 0);
+                            
+                            _dbContext.SalesInvoices.Update(salesInvoice);
+                        }
+
+                        // Remove the link between receipt and invoice
+                        _dbContext.SalesReceiptSalesInvoices.Remove(link);
+                    }
+
+                    // Finally, delete the SalesReceipt
+                    _dbContext.SalesReceipts.Remove(salesReceipt);
+
+                    await _dbContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    throw new Exception($"Failed to reverse sales receipt with ID {salesReceiptId}.", ex);
+                }
+            });
+        }
     }
+
 }
