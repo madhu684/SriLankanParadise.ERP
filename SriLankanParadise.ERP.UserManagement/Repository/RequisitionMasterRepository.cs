@@ -2,6 +2,7 @@
 using SriLankanParadise.ERP.UserManagement.Data;
 using SriLankanParadise.ERP.UserManagement.DataModels;
 using SriLankanParadise.ERP.UserManagement.Repository.Contracts;
+using SriLankanParadise.ERP.UserManagement.ERP_Web.Models.ResponseModels;
 
 namespace SriLankanParadise.ERP.UserManagement.Repository
 {
@@ -221,10 +222,73 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     .Include(rm => rm.RequestedFromLocation)
                     .Include(rm => rm.RequestedToLocation)
                     .Include(rm => rm.IssueMasters)
-                    .OrderBy(rm => rm.Status)
+                    .OrderByDescending(rm => rm.RequisitionDate)
                     .ToListAsync();
 
                 return requisitionMasters.Any() ? requisitionMasters : null;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<PagedResult<RequisitionMaster>> GetTrnReportByCompanyId(int companyId, int pageNumber, int pageSize, DateTime? fromDate = null, DateTime? toDate = null, int? warehouseLocationId = null, string? searchText = null, int? createdUserId = null)
+        {
+            try
+            {
+                var query = _dbContext.RequisitionMasters
+                    .AsNoTracking()
+                    .Where(rm => rm.Status != 0 && rm.CompanyId == companyId && rm.RequisitionType != null && rm.RequisitionType.ToLower() == "trn");
+
+                if (fromDate.HasValue)
+                {
+                    var from = fromDate.Value.Date;
+                    query = query.Where(rm => rm.RequisitionDate.HasValue && rm.RequisitionDate.Value.Date >= from);
+                }
+
+                if (toDate.HasValue)
+                {
+                    var to = toDate.Value.Date;
+                    query = query.Where(rm => rm.RequisitionDate.HasValue && rm.RequisitionDate.Value.Date <= to);
+                }
+
+                if (warehouseLocationId.HasValue)
+                {
+                    query = query.Where(rm => rm.RequestedFromLocationId == warehouseLocationId.Value);
+                }
+
+                if (createdUserId.HasValue)
+                {
+                    query = query.Where(rm => rm.RequestedUserId == createdUserId.Value);
+                }
+
+                if (!string.IsNullOrEmpty(searchText))
+                {
+                    var search = searchText.ToLower();
+                    query = query.Where(rm => 
+                        (rm.ReferenceNumber != null && rm.ReferenceNumber.ToLower().Contains(search)) ||
+                        (rm.IssueMasters.Any(im => im.ReferenceNumber != null && im.ReferenceNumber.ToLower().Contains(search)))
+                    );
+                }
+
+                var totalCount = await query.CountAsync();
+                var items = await query
+                    .Include(rm => rm.RequestedFromLocation)
+                    .Include(rm => rm.RequestedToLocation)
+                    .Include(rm => rm.IssueMasters)
+                    .OrderByDescending(rm => rm.RequisitionDate)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                return new PagedResult<RequisitionMaster>
+                {
+                    Items = items,
+                    TotalCount = totalCount,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize
+                };
             }
             catch (Exception)
             {

@@ -41,5 +41,7 @@
         public bool IsIssueMasterCreated { get; set; }
 
         public virtual IEnumerable<RequisitionDetailDto>? RequisitionDetails { get; set; }
+
+        public virtual IEnumerable<IssueMasterDto>? IssueMasters { get; set; }
     }
 }

@@ -10,6 +10,8 @@
 
         public DateTime? ApprovedDate { get; set; }
 
+        public DateTime? AcceptedDate { get; set; }
+
         public int PermissionId { get; set; }
     }
 }

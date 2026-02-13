@@ -33,6 +33,8 @@ public partial class IssueMaster
 
     public string? TokenNo { get; set; }
 
+    public DateTime? AcceptedDate { get; set; }
+
     public virtual ICollection<IssueDetail> IssueDetails { get; set; } = new List<IssueDetail>();
 
     public virtual RequisitionMaster? RequisitionMaster { get; set; } = null!;

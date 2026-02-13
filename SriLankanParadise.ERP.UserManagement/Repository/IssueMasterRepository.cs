@@ -106,6 +106,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                     existIssueMaster.ApprovedBy = issueMaster.ApprovedBy;
                     existIssueMaster.ApprovedUserId = issueMaster.ApprovedUserId;
                     existIssueMaster.ApprovedDate = issueMaster.ApprovedDate;
+                    existIssueMaster.AcceptedDate = issueMaster.AcceptedDate;
 
                     /*_dbContext.Entry(existRequisitionMaster).CurrentValues.SetValues(requisitionMaster);*/
                     await _dbContext.SaveChangesAsync();

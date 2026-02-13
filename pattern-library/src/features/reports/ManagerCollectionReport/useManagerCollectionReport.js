@@ -187,7 +187,7 @@ const useManagerCollectionReport = () => {
         { header: "Bill No", accessor: (item) => item.billNo, width: 30 },
         { header: "Invoice Ref", accessor: (item) => item.invoiceReference || "-", width: 15 },
         { header: "Patient Name", accessor: (item) => item.patientName, width: 25 },
-        { header: "Token No", accessor: (item) => item.tokenNumber, width: 15 },
+        { header: "Token No", accessor: (item) => String(item.tokenNumber ?? ""), width: 15 },
         { header: "Amount", accessor: (item) => formatCurrency(item.amount), width: 15 },
         { header: "Short", accessor: (item) => item.shortAmount > 0 ? formatCurrency(item.shortAmount) : "-", width: 15 },
         { header: "Excess", accessor: (item) => item.excessAmount > 0 ? formatCurrency(item.excessAmount) : "-", width: 15 },

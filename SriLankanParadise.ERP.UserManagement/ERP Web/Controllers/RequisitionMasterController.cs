@@ -256,5 +256,54 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
             }
             return Response;
         }
+
+        [HttpGet("GetTrnReport/{companyId}")]
+        public async Task<ApiResponseModel> GetTrnReport(
+            int companyId,
+            [FromQuery] DateTime? fromDate = null,
+            [FromQuery] DateTime? toDate = null,
+            [FromQuery] int? warehouseLocationId = null,
+            [FromQuery] string? searchText = null,
+            [FromQuery] int? createdUserId = null,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 25)
+        {
+            try
+            {
+                var result = await _requisitionMasterService.GetTrnReportByCompanyId(companyId, pageNumber, pageSize, fromDate, toDate, warehouseLocationId, searchText, createdUserId);
+
+                if (result.Items.Any())
+                {
+                    var requisitionMasterDtos = _mapper.Map<IEnumerable<RequisitionMasterDto>>(result.Items);
+
+                    var responseData = new
+                    {
+                        Data = requisitionMasterDtos,
+                        Pagination = new
+                        {
+                            result.TotalCount,
+                            result.PageNumber,
+                            result.PageSize,
+                            result.TotalPages,
+                            result.HasPreviousPage,
+                            result.HasNextPage
+                        }
+                    };
+
+                    AddResponseMessage(Response, LogMessages.RequisitionMastersRetrieved, responseData, true, HttpStatusCode.OK);
+                }
+                else
+                {
+                    _logger.LogWarning(LogMessages.RequisitionMastersNotFound);
+                    AddResponseMessage(Response, LogMessages.RequisitionMastersNotFound, null, true, HttpStatusCode.NotFound);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessages.InternalServerError);
+                AddResponseMessage(Response, ex.Message, null, false, HttpStatusCode.InternalServerError);
+            }
+            return Response;
+        }
     }
 }
