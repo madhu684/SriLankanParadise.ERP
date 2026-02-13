@@ -56,7 +56,7 @@ const GrnList = () => {
   //Filter MRNs based on search query
   const filteredGRNs = Grns
     ? Grns.filter((grn) =>
-        grn.receivedBy.toLowerCase().includes(searchQuery.toLowerCase())
+        grn.receivedBy.toLowerCase().includes(searchQuery.toLowerCase()),
       )
     : [];
 
@@ -175,7 +175,7 @@ const GrnList = () => {
               <th>
                 <input type="checkbox" />
               </th>
-              <th>Id</th>
+              <th>Grn reference</th>
               <th>Received By</th>
               <th>Received Date</th>
               <th>Warehouse Location</th>
@@ -193,14 +193,14 @@ const GrnList = () => {
                     onChange={() => handleRowSelect(Grn.grnMasterId)}
                   />
                 </td>
-                <td>{Grn.grnMasterId}</td>
+                <td>{Grn.grnReferenceNo || "-"}</td>
                 <td>{Grn.receivedBy}</td>
                 <td>{Grn?.receivedDate?.split("T")[0]}</td>
                 <td>{Grn?.warehouseLocation?.locationName || "-"}</td>
                 <td>
                   <span
                     className={`badge rounded-pill ${getStatusBadgeClass(
-                      Grn.status
+                      Grn.status,
                     )}`}
                   >
                     {getStatusLabel(Grn.status)}

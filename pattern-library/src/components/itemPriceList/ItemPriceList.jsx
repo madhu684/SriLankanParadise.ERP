@@ -418,7 +418,7 @@ const ItemPriceList = ({ handleClose }) => {
                           className="text-center"
                           style={{ width: "200px" }}
                         >
-                          Cost Price
+                          Price before VAT
                         </th>
                         <th
                           scope="col"

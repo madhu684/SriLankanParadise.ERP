@@ -63,24 +63,36 @@ const GrnApproval = ({
             {/* Header Section */}
             <div className="mb-4 p-3 bg-light rounded-3 border">
               <div className="d-flex justify-content-between align-items-center">
-                <div>
-                  {/* <h5 className="mb-1 text-dark fw-bold">
-                    GRN #{grn.grnMasterId}
-                  </h5>
-                  <small className="text-dark">
-                    Reference: {grn?.referenceNo || "N/A"}
-                  </small> */}
-                  <h5 className="mb-1 text-dark fw-bold">Cust Deck No: </h5>
-                  <small className="text-dark fw-semibold">
-                    {grn?.custDekNo || "N/A"}
-                  </small>
+                <div className="d-flex gap-4">
+                  <div>
+                    <div
+                      className="text-muted small fw-bold text-uppercase mb-1"
+                      style={{ letterSpacing: "0.5px" }}
+                    >
+                      Cust Deck No
+                    </div>
+                    <div className="text-dark fw-bold h5 mb-0">
+                      {grn?.custDekNo || "N/A"}
+                    </div>
+                  </div>
+                  <div className="border-start ps-4">
+                    <div
+                      className="text-muted small fw-bold text-uppercase mb-1"
+                      style={{ letterSpacing: "0.5px" }}
+                    >
+                      GRN Reference
+                    </div>
+                    <div className="text-dark fw-bold h5 mb-0">
+                      {grn?.grnReferenceNo || "N/A"}
+                    </div>
+                  </div>
                 </div>
                 <div className="text-end">
                   <div className="mb-2">
                     <span className="text-muted me-2">Overall Status:</span>
                     <span
                       className={`badge ${getStatusBadgeClass(
-                        grn.status
+                        grn.status,
                       )} fs-6`}
                     >
                       {getStatusLabel(grn.status)}
@@ -90,11 +102,11 @@ const GrnApproval = ({
                     <span className="text-muted me-2">Receiving Status:</span>
                     <span
                       className={`badge ${getStatusBadgeClass(
-                        parseInt(`${1}${grn.status.toString().charAt(0)}`, 10)
+                        parseInt(`${1}${grn.status.toString().charAt(0)}`, 10),
                       )} fs-6`}
                     >
                       {getStatusLabel(
-                        parseInt(`${1}${grn.status.toString().charAt(0)}`, 10)
+                        parseInt(`${1}${grn.status.toString().charAt(0)}`, 10),
                       )}
                     </span>
                   </div>
@@ -288,7 +300,7 @@ const GrnApproval = ({
                                     onChange={(e) =>
                                       handleCostPriceChange(
                                         e.target.value,
-                                        index
+                                        index,
                                       )
                                     }
                                     step="0.01"
@@ -312,7 +324,7 @@ const GrnApproval = ({
                                     onChange={(e) =>
                                       handleSellingPriceChange(
                                         e.target.value,
-                                        index
+                                        index,
                                       )
                                     }
                                     step="0.01"

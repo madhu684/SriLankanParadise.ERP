@@ -9,7 +9,7 @@ const ItemPriceListViewModal = memo(({ itemPriceList, show, handleClose }) => {
   const totalValue =
     itemPriceList.itemPriceDetails?.reduce(
       (sum, item) => sum + (parseFloat(item.price) || 0),
-      0
+      0,
     ) || 0;
 
   return (
@@ -56,7 +56,7 @@ const ItemPriceListViewModal = memo(({ itemPriceList, show, handleClose }) => {
                     <small className="text-muted d-block">Effective Date</small>
                     <span className="fw-semibold">
                       {moment(itemPriceList.effectiveDate).format(
-                        "MMMM Do, YYYY"
+                        "MMMM Do, YYYY",
                       )}
                     </span>
                   </div>
@@ -80,7 +80,7 @@ const ItemPriceListViewModal = memo(({ itemPriceList, show, handleClose }) => {
                     <small className="text-muted d-block">Created Date</small>
                     <span className="fw-semibold">
                       {moment(itemPriceList.createdDate).format(
-                        "MMMM Do, YYYY [at] h:mm A"
+                        "MMMM Do, YYYY [at] h:mm A",
                       )}
                     </span>
                   </div>
@@ -173,7 +173,7 @@ const ItemPriceListViewModal = memo(({ itemPriceList, show, handleClose }) => {
                       <th className="ps-4" style={{ width: "60px" }}></th>
                       <th>Item Name</th>
                       <th className="text-end pe-4" style={{ width: "200px" }}>
-                        Price
+                        Price before VAT
                       </th>
                       <th className="text-end pe-4" style={{ width: "200px" }}>
                         VAT Added Price
@@ -199,7 +199,7 @@ const ItemPriceListViewModal = memo(({ itemPriceList, show, handleClose }) => {
                               {
                                 minimumFractionDigits: 2,
                                 maximumFractionDigits: 2,
-                              }
+                              },
                             )}
                           </span>
                         </td>
@@ -211,7 +211,7 @@ const ItemPriceListViewModal = memo(({ itemPriceList, show, handleClose }) => {
                               {
                                 minimumFractionDigits: 2,
                                 maximumFractionDigits: 2,
-                              }
+                              },
                             )}
                           </span>
                         </td>

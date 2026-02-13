@@ -3,6 +3,7 @@ import { useReactToPrint } from "react-to-print";
 import { FaPrint, FaWindowClose } from "react-icons/fa";
 import moment from "moment";
 import "moment-timezone";
+import logo from "../../../assets/images/ADL_logo.jpeg";
 
 const GrnPrintPreview = ({
   grn,
@@ -73,17 +74,17 @@ const GrnPrintPreview = ({
 
   const totalReceived = grn.grnDetails.reduce(
     (sum, item) => sum + (item.receivedQuantity || 0),
-    0
+    0,
   );
 
   const totalRejected = grn.grnDetails.reduce(
     (sum, item) => sum + (item.rejectedQuantity || 0),
-    0
+    0,
   );
 
   const totalFree = grn.grnDetails.reduce(
     (sum, item) => sum + (item.freeQuantity || 0),
-    0
+    0,
   );
 
   const sellableQuantity = totalReceived + totalFree - totalRejected;
@@ -192,21 +193,17 @@ const GrnPrintPreview = ({
                   gap: "10px",
                 }}
               >
-                <div style={{ width: "60px", flexShrink: 0 }}>
-                  {/* Logo placeholder */}
-                  <div
+                <div style={{ width: "120px", flexShrink: 0 }}>
+                  <img
+                    src={logo}
+                    alt="ADL Logo"
                     style={{
-                      width: "50px",
-                      height: "50px",
-                      border: "1px solid black",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "8px",
+                      width: "100%",
+                      height: "auto",
+                      maxWidth: "110px",
+                      display: "block",
                     }}
-                  >
-                    LOGO
-                  </div>
+                  />
                 </div>
                 <div style={{ flex: 1 }}>
                   <h1
@@ -272,7 +269,7 @@ const GrnPrintPreview = ({
                   </p>
                 </div>
                 <div
-                  style={{ width: "80px", flexShrink: 0, textAlign: "right" }}
+                  style={{ width: "120px", flexShrink: 0, textAlign: "right" }}
                 >
                   <div
                     style={{
@@ -283,9 +280,9 @@ const GrnPrintPreview = ({
                   >
                     {grn?.custDekNo || "N/A"}
                   </div>
-                  {/* <div style={{ fontSize: "10px", marginTop: "75px" }}>
-                    <span style={{ fontWeight: "bold" }}>Customer Copy</span>
-                  </div> */}
+                  <div style={{ fontSize: "12px", fontWeight: "bold", color: "black", marginTop: "2px" }}>
+                    {grn?.grnReferenceNo || ""}
+                  </div>
                 </div>
               </div>
 

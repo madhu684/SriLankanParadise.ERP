@@ -208,6 +208,7 @@ namespace SriLankanParadise.ERP.UserManagement.ERP_Web.Controllers
 
                 var updatedGrnMaster = _mapper.Map<GrnMaster>(grnMasterRequest);
                 updatedGrnMaster.GrnMasterId = grnMasterId; // Ensure the ID is not changed
+                updatedGrnMaster.GrnReferenceNo = existingGrnMaster.GrnReferenceNo; // Preserve the existing GrnReferenceNo
                 
 
                 await _grnMasterService.UpdateGrnMaster(existingGrnMaster.GrnMasterId, updatedGrnMaster);
