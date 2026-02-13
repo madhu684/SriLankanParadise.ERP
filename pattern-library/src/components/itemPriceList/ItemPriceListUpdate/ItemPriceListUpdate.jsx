@@ -59,7 +59,7 @@ const ItemSearchDropdown = memo(
         </ul>
       </div>
     );
-  }
+  },
 );
 
 ItemSearchDropdown.displayName = "ItemSearchDropdown";
@@ -71,14 +71,14 @@ const ItemRow = memo(
       (e) => {
         onItemChange(index, "costPrice", e.target.value);
       },
-      [index, onItemChange]
+      [index, onItemChange],
     );
 
     const handleVATAddedPriceChange = useCallback(
       (e) => {
         onItemChange(index, "vatAddedPrice", e.target.value);
       },
-      [index, onItemChange]
+      [index, onItemChange],
     );
 
     const handleRemove = useCallback(() => {
@@ -139,7 +139,7 @@ const ItemRow = memo(
         </td>
       </tr>
     );
-  }
+  },
 );
 
 ItemRow.displayName = "ItemRow";
@@ -169,27 +169,27 @@ const ItemPriceListUpdate = ({ itemPriceList, handleClose }) => {
   // Memoize event handlers
   const handleListNameChange = useCallback(
     (e) => handleInputChange("listName", e.target.value),
-    [handleInputChange]
+    [handleInputChange],
   );
 
   const handleStatusChange = useCallback(
     (e) => handleInputChange("status", e.target.value),
-    [handleInputChange]
+    [handleInputChange],
   );
 
   const handleEffectiveDateChange = useCallback(
     (e) => handleInputChange("effectiveDate", e.target.value),
-    [handleInputChange]
+    [handleInputChange],
   );
 
   const handleRemarkChange = useCallback(
     (e) => handleInputChange("remark", e.target.value),
-    [handleInputChange]
+    [handleInputChange],
   );
 
   const handleSearchChange = useCallback(
     (e) => setSearchTerm(e.target.value),
-    [setSearchTerm]
+    [setSearchTerm],
   );
 
   const handleClearSearch = useCallback(() => {
@@ -395,7 +395,7 @@ const ItemPriceListUpdate = ({ itemPriceList, handleClose }) => {
                           className="text-center"
                           style={{ width: "200px" }}
                         >
-                          Cost Price
+                          Price before VAT
                         </th>
                         <th
                           scope="col"

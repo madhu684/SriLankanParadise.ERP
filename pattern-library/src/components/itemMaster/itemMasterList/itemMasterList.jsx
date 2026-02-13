@@ -171,7 +171,7 @@ const ItemMasterList = () => {
               <th>
                 <input type="checkbox" />
               </th>
-              <th>Item Master Id</th>
+              <th>Item Code</th>
               <th>Item Name</th>
               <th>Item Type</th>
               <th>Status</th>
@@ -193,7 +193,7 @@ const ItemMasterList = () => {
                       onChange={() => handleRowSelect(im.itemMasterId)}
                     />
                   </td>
-                  <td>{im.itemMasterId}</td>
+                  <td>{im.itemCode}</td>
                   <td>{im.itemName}</td>
                   <td>{im.itemType?.name}</td>
                   <td>

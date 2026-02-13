@@ -255,13 +255,15 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                                   customer.customerName
                                     .toLowerCase()
                                     .includes(
-                                      customerSearchTerm.toLowerCase()
+                                      customerSearchTerm.toLowerCase(),
                                     ) ||
-                                  customer.phone
-                                    .replace(/\s/g, "")
-                                    .includes(
-                                      customerSearchTerm.replace(/\s/g, "")
-                                    )
+                                  customer.customerCode
+                                    .toLowerCase()
+                                    .includes(customerSearchTerm.toLowerCase()),
+                                // .replace(/\s/g, "")
+                                // .includes(
+                                //   customerSearchTerm.replace(/\s/g, ""),
+                                // ),
                               )
                               .map((customer) => (
                                 <li key={customer.customerId}>
@@ -278,7 +280,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                                         {customer?.customerName}
                                       </div>
                                       <small className="text-muted">
-                                        {customer?.phone}
+                                        {customer?.customerCode}
                                       </small>
                                     </div>
                                   </button>
@@ -289,11 +291,13 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                                 customer.customerName
                                   .toLowerCase()
                                   .includes(customerSearchTerm.toLowerCase()) ||
-                                customer.phone
-                                  .replace(/\s/g, "")
-                                  .includes(
-                                    customerSearchTerm.replace(/\s/g, "")
-                                  )
+                                customer.customerCode
+                                  .toLowerCase()
+                                  .includes(customerSearchTerm.toLowerCase()),
+                              // .replace(/\s/g, "")
+                              // .includes(
+                              //   customerSearchTerm.replace(/\s/g, ""),
+                              // ),
                             ).length === 0 && (
                               <>
                                 <li className="dropdown-item text-center text-muted">
@@ -358,7 +362,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                               </small>
                               <span>
                                 {formatCurrency(
-                                  formData.selectedCustomer.creditLimit
+                                  formData.selectedCustomer.creditLimit,
                                 )}
                               </span>
                             </div>
@@ -390,7 +394,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                               </small>
                               <span>
                                 {formatCurrency(
-                                  formData.selectedCustomer.outstandingAmount
+                                  formData.selectedCustomer.outstandingAmount,
                                 )}
                               </span>
                             </div>
@@ -441,7 +445,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                     onChange={(e) =>
                       handleInputChange(
                         "storeLocation",
-                        parseInt(e.target.value)
+                        parseInt(e.target.value),
                       )
                     }
                   >
@@ -573,18 +577,18 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                                   salesPerson.firstName
                                     .toLowerCase()
                                     .includes(
-                                      salesPersonSearchTerm.toLowerCase()
+                                      salesPersonSearchTerm.toLowerCase(),
                                     ) ||
                                   salesPerson.lastName
                                     .toLowerCase()
                                     .includes(
-                                      salesPersonSearchTerm.toLowerCase()
+                                      salesPersonSearchTerm.toLowerCase(),
                                     ) ||
                                   salesPerson.contactNo
                                     .replace(/\s/g, "")
                                     .includes(
-                                      salesPersonSearchTerm.replace(/\s/g, "")
-                                    )
+                                      salesPersonSearchTerm.replace(/\s/g, ""),
+                                    ),
                               )
                               .map((salesPerson) => (
                                 <li key={salesPerson.salesPersonId}>
@@ -613,18 +617,18 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                                 salesPerson.firstName
                                   .toLowerCase()
                                   .includes(
-                                    salesPersonSearchTerm.toLowerCase()
+                                    salesPersonSearchTerm.toLowerCase(),
                                   ) ||
                                 salesPerson.lastName
                                   .toLowerCase()
                                   .includes(
-                                    salesPersonSearchTerm.toLowerCase()
+                                    salesPersonSearchTerm.toLowerCase(),
                                   ) ||
                                 salesPerson.contactNo
                                   .replace(/\s/g, "")
                                   .includes(
-                                    salesPersonSearchTerm.replace(/\s/g, "")
-                                  )
+                                    salesPersonSearchTerm.replace(/\s/g, ""),
+                                  ),
                             ).length === 0 && (
                               <li className="dropdown-item text-center py-3">
                                 <i className="bi bi-emoji-frown fs-3 text-muted d-block mb-2"></i>
@@ -771,7 +775,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                             if (company.batchStockType === "FIFO") {
                               return !formData.itemDetails.some(
                                 (detail) =>
-                                  detail.itemMasterId === item.itemMasterId
+                                  detail.itemMasterId === item.itemMasterId,
                               );
                             }
                             return true;
@@ -786,7 +790,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                               if (company.batchStockType === "FIFO") {
                                 return !formData.itemDetails.some(
                                   (detail) =>
-                                    detail.itemMasterId === item.itemMasterId
+                                    detail.itemMasterId === item.itemMasterId,
                                 );
                               }
                               return true;
@@ -873,7 +877,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                               handleItemDetailsChange(
                                 index,
                                 "quantity",
-                                e.target.value
+                                e.target.value,
                               )
                             }
                           />
@@ -902,7 +906,7 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                                     if (charge.isPercentage) {
                                       newValue = Math.min(
                                         100,
-                                        Math.max(0, newValue)
+                                        Math.max(0, newValue),
                                       );
                                     } else {
                                       newValue = Math.max(0, newValue);
@@ -912,12 +916,12 @@ const SalesOrder = ({ handleClose, handleUpdated }) => {
                                   handleItemDetailsChange(
                                     index,
                                     `chargesAndDeductions_${chargeIndex}_value`,
-                                    newValue
+                                    newValue,
                                   );
                                 }}
                               />
                             </td>
-                          )
+                          ),
                         )}
                         <td className="text-end fw-semibold">
                           {formatTotals(item.totalPrice.toFixed(2))}
