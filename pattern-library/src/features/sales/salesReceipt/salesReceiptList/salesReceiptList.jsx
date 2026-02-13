@@ -436,7 +436,7 @@ const SalesReceiptList = () => {
                     <input type="checkbox" />
                   </th>
                   <th className="fw-semibold">Reference Number</th>
-                  <th className="fw-semibold">Receipt Amount</th>
+                  <th className="fw-semibold">Amount Collected</th>
                   <th className="fw-semibold">Payment Method</th>
                   <th className="fw-semibold">Created By</th>
                   <th className="fw-semibold">Receipt Date</th>

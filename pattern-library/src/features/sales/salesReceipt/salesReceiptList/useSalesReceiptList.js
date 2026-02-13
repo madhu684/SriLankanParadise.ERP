@@ -190,6 +190,8 @@ const useSalesReceiptList = () => {
 
   const handleCloseReverseSRForm = () => {
     setShowReverseSRForm(false);
+    setSelectedRows([]);
+    setSelectedRowData([]);
   };
 
   const handleRowSelect = (id) => {

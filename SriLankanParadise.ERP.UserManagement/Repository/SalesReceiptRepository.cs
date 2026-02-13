@@ -311,7 +311,7 @@ namespace SriLankanParadise.ERP.UserManagement.Repository
                             }
 
                             // Add the collected amount back to the invoice's due amount
-                            salesInvoice.AmountDue = (salesInvoice.AmountDue ?? 0) + (link.AmountCollect ?? 0);
+                            salesInvoice.AmountDue = (salesInvoice.AmountDue ?? 0) + (link.SettledAmount ?? 0);
                             
                             _dbContext.SalesInvoices.Update(salesInvoice);
                         }
